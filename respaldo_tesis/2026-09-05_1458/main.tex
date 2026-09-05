@@ -1,0 +1,84 @@
+%% --------------------------------------------------------------------
+%% Template UTEC Tesis
+%% --------------------------------------------------------------------
+\documentclass[a4paper,12pt,oneside]{tesisutec}
+
+\selectlanguage{spanish}
+
+%% Paquetes
+\usepackage[utf8]{inputenc}
+\usepackage[square, numbers, comma, sort&compress]{natbib}
+\usepackage[spanish]{babel}
+\usepackage{float}
+\usepackage[spanish,onelanguage,ruled,vlined]{algorithm2e}
+\usepackage{verbatim}
+\usepackage{hyperref}
+\usepackage{notoccite}
+\usepackage{graphicx}
+\usepackage{setspace}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{makecell} % para saltos dentro de celdas
+\graphicspath{{images/}}
+
+\makeatletter
+\def\algbackskip{\hskip-\ALG@thistlm}
+\makeatother
+
+\hypersetup{urlcolor=blue, colorlinks=true}
+
+\begin{document}
+
+\frontmatter
+
+\department{Departamento Académico de Ingeniería}
+\degree{Bachiller en Ingeniería}
+\major{Ciencia de la Computación}
+
+\title{Optimización del tráfico urbano en Lima con semáforos inteligentes mediante Aprendizaje por Refuerzo (RL) y simulación en SUMO}
+
+\author{Fabian Martín Alvarado Vargas \orcid{0000-0000-0000-0000} \\ Neftalí Calixto Rojas \orcid{0000-0000-0000-0000}}
+\supervisor{José Antonio Fiestas Iquira \orcid{0000-0000-0000-0000}}
+
+\date{2025}
+
+\maketitle
+
+\setstretch{1.5}
+
+\input{encabezados/dedicatoria}
+\input{encabezados/agradecimientos}
+
+\tableofcontents
+\newpage
+\listoftables
+\newpage
+\listoffigures
+
+\addtocontents{toc}{\vspace{1.5em}}
+
+%% ============================================================================
+\mainmatter
+\pagestyle{fancy}
+
+\input{secciones/resumen}
+\input{secciones/abstract}
+\input{secciones/introduccion}
+\input{secciones/capitulo1}
+\input{secciones/capitulo2}
+\input{secciones/capitulo3}
+\input{secciones/capitulo4}
+\input{secciones/capitulo5}
+\input{secciones/conclusiones}
+\input{secciones/recomendaciones}
+
+%% ============================================================================
+\renewcommand{\bibname}{\hfill\Large\bf{REFERENCIAS BIBLIOGRÁFICAS}\hfill}
+
+\bibliographystyle{IEEEtran}
+\bibliography{referencias}
+
+\input{secciones/anexos}
+
+\end{document}

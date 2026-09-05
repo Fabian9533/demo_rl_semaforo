@@ -1,0 +1,24 @@
+<connections>
+    <!-- Carril 0 (derecho): seguir de frente y girar a la derecha.
+         Carril 1 (interior): exclusivo de giro a la izquierda. -->
+
+    <!-- Desde el norte (va hacia el sur): izquierda = C_E, frente = C_S, derecha = C_W -->
+    <connection from="N_C" to="C_E" fromLane="1" toLane="1"/>
+    <connection from="N_C" to="C_S" fromLane="0" toLane="0"/>
+    <connection from="N_C" to="C_W" fromLane="0" toLane="0"/>
+
+    <!-- Desde el sur (va hacia el norte): izquierda = C_W, frente = C_N, derecha = C_E -->
+    <connection from="S_C" to="C_W" fromLane="1" toLane="1"/>
+    <connection from="S_C" to="C_N" fromLane="0" toLane="0"/>
+    <connection from="S_C" to="C_E" fromLane="0" toLane="0"/>
+
+    <!-- Desde el este (va hacia el oeste): izquierda = C_S, frente = C_W, derecha = C_N -->
+    <connection from="E_C" to="C_S" fromLane="1" toLane="1"/>
+    <connection from="E_C" to="C_W" fromLane="0" toLane="0"/>
+    <connection from="E_C" to="C_N" fromLane="0" toLane="0"/>
+
+    <!-- Desde el oeste (va hacia el este): izquierda = C_N, frente = C_E, derecha = C_S -->
+    <connection from="W_C" to="C_N" fromLane="1" toLane="1"/>
+    <connection from="W_C" to="C_E" fromLane="0" toLane="0"/>
+    <connection from="W_C" to="C_S" fromLane="0" toLane="0"/>
+</connections>

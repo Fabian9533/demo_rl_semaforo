@@ -1,0 +1,27 @@
+<nodes>
+    <!-- Prueba 4: avenida E-O con una rotonda y tres cruces semaforizados.
+         La rotonda no lleva semaforo: funciona por ceda el paso (prioridad del anillo). -->
+
+    <!-- Cruces semaforizados -->
+    <node id="C1" x="0" y="0" type="traffic_light" tl="semaforo_C1"/>
+    <node id="C2" x="300" y="0" type="traffic_light" tl="semaforo_C2"/>
+    <node id="C3" x="600" y="0" type="traffic_light" tl="semaforo_C3"/>
+
+    <!-- Anillo de la rotonda (4 nodos, radio 20 m) -->
+    <node id="RW" x="-320" y="0" type="priority"/>
+    <node id="RE" x="-280" y="0" type="priority"/>
+    <node id="RN" x="-300" y="20" type="priority"/>
+    <node id="RS" x="-300" y="-20" type="priority"/>
+
+    <!-- Extremos -->
+    <node id="W"  x="-700" y="0" type="priority"/>
+    <node id="E"  x="1000" y="0" type="priority"/>
+    <node id="NR" x="-300" y="300" type="priority"/>
+    <node id="SR" x="-300" y="-300" type="priority"/>
+    <node id="N1" x="0" y="300" type="priority"/>
+    <node id="S1" x="0" y="-300" type="priority"/>
+    <node id="N2" x="300" y="300" type="priority"/>
+    <node id="S2" x="300" y="-300" type="priority"/>
+    <node id="N3" x="600" y="300" type="priority"/>
+    <node id="S3" x="600" y="-300" type="priority"/>
+</nodes>

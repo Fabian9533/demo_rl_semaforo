@@ -1,0 +1,84 @@
+\chapter{ESTADO DEL ARTE Y REVISIÓN CRÍTICA DE LA LITERATURA}
+
+\section{Panorama general}
+El control adaptativo de semáforos con Aprendizaje por Refuerzo (RL) se ha consolidado como una alternativa a la semaforización fija y actuada, al permitir políticas que se adaptan en tiempo real a la variación de flujos. La literatura reciente estudia tanto agentes únicos por intersección (single-agent) como enfoques multiagente (un agente por intersección) y evalúa su impacto en métricas como retraso promedio, colas, throughput y emisiones. En esta sección se sintetizan tres trabajos directamente relevantes a nuestro proyecto (Uniandes 2023, Trinity 2022, UAQ 2024) y se discuten sus aportes, limitaciones y la pertinencia para Lima Metropolitana.
+
+\section{Estado del arte: trabajos estrechamente relacionados}
+
+\subsection*{Universidad de los Andes (2023): \textit{Semáforos inteligentes por medio de aprendizaje por refuerzo} \citep{Chavez2023}}
+\textbf{Objetivo y configuración.} Estudiar el desempeño de algoritmos RL (Q-learning, SARSA, DQN y PPO) para reducir tiempos de espera frente a un control de tiempos fijos en un escenario simulado. \\
+\textbf{Métodos.} Implementación de algoritmos tabulares (Q-learning, SARSA) y de Deep RL (DQN, PPO) con política $\epsilon$-greedy en tabulares y objetivos recortados en PPO; comparación contra baseline de tiempos fijos. \\
+\textbf{Métricas.} Eficiencia relativa frente a tiempos fijos (reducción del tiempo de espera), número de vehículos en sistema, estabilidad de la política. \\
+\textbf{Resultados.} Reporta eficiencias de \textbf{35.79\% (Q-learning), 51.63\% (SARSA), 63.40\% (PPO) y 63.49\% (DQN)} frente a control fijo. DQN y PPO muestran mejor adaptación y menor tiempo de espera, con DQN muy ligeramente superior en el caso analizado. \\
+\textbf{Limitaciones.} Demanda y geometría sintetizadas; no integra datos reales de conteo/OD ni perturbaciones estocásticas complejas; sin análisis estadístico robusto (p.\,ej., ICs o pruebas de significancia). \\
+\textbf{Lecciones para esta tesis.} (i) Incluir \textit{deep baselines} (DQN/PPO) junto a tabulares; (ii) reportar mejoras con métricas comparables; (iii) añadir pruebas de significancia y sensibilidad.
+
+\subsection*{Trinity College Dublin (2022): \textit{Reinforcement Learning for Traffic Light Optimization} \citep{Chakrabarti2022}}
+\textbf{Objetivo y configuración.} Comparar agentes fijos/aleatorios con \textbf{DQN}, \textbf{A2C} y \textbf{PPO} en casos single-agent, multi-agent y un caso más realista. \\
+\textbf{Métodos.} SUMO+TraCI, definición de estados (colas/velocidades/ocupación), espacios de acción (fases/tiempos) y recompensas (tiempos de espera acumulados/negativos). \\
+\textbf{Métricas.} \textbf{Tiempo de espera acumulado} por intersección vs. pasos de simulación; comparación entre agentes y escenarios. \\
+\textbf{Resultados.} \textbf{PPO} es consistentemente el mejor, seguido de \textbf{A2C}, agentes fijos/aleatorios; \textbf{DQN} queda por detrás en sus pruebas. \\
+\textbf{Limitaciones.} Resultados centrados en comparativa algorítmica; no se usan datos reales de OD, ni se reportan pruebas de significancia. \\
+\textbf{Lecciones para esta tesis.} (i) PPO y A2C son fuertes candidatos para entornos urbanos; (ii) conviene incorporar escenarios multiagente; (iii) sumar análisis estadístico y casos con datos reales para mayor validez externa.
+
+\subsection*{UAQ (2024): \textit{Predicción de tráfico vehicular aplicada a la optimización semafórica en un microsimulador} \citep{UAQ2024}}
+\textbf{Objetivo y configuración.} Integrar \textbf{predicción de demanda} (AR, Filtros de Kalman, RNN) con \textbf{microsimulación} para \textbf{optimizar ciclos semafóricos} en un corredor real. \\
+\textbf{Datos.} Históricos de \textbf{7 intersecciones} (ago–sep 2022), con escenarios de 1 hora, 1 día, 1 semana y 1 mes. \\
+\textbf{Métricas.} Errores de predicción (RMSE, MAE, MAPE, $R^2$) y, tras aplicar los ciclos en el simulador, tiempo de recorrido y colas. \\
+\textbf{Resultados.} \textbf{RNN y Filtros de Kalman} alcanzan \textbf{$R^2\approx 0.95$} en horizontes corto/medio; al aplicar los ciclos óptimos, se obtiene \textbf{hasta 36.34\% de reducción del tiempo de viaje}. \\
+\textbf{Limitaciones.} Optimización semafórica basada en pronóstico (no en RL); generalización a otras franjas/variabilidad no evaluada; requiere calidad de datos. \\
+\textbf{Lecciones para esta tesis.} (i) Incorporar \textbf{datos reales (OD, aforos)} y \textbf{predicción de demanda} como \textit{módulo upstream} que alimente al agente RL; (ii) evaluar impacto sobre \textbf{tiempos de viaje} además del retraso.
+
+\section{Revisión crítica y vacíos identificados}
+\textbf{Modelado de la realidad.} Uniandes y Trinity validan con escenarios simulados; UAQ sí usa datos reales, pero sin RL. Nuestra tesis puede \textit{combinar} ambas fortalezas: \textbf{RL + datos reales (OD/aforos) + SUMO}. \\
+\textbf{Comparación algorítmica.} Trinity muestra ventajas de PPO/A2C; Uniandes añade DQN con buen rendimiento. Probaremos \textbf{PPO, A2C y DQN} (y tabulares como línea base) en \textit{escenario limeño}. \\
+\textbf{Predicción de demanda.} UAQ evidencia el valor de pronósticos robustos (RNN/Kalman). Propondremos un \textbf{módulo opcional de demanda} para alimentar la simulación y evaluar \textit{RL con y sin pronóstico}. \\
+\textbf{Rigor experimental.} Faltan análisis de significancia y sensibilidad. Nuestra evaluación incluirá \textbf{intervalos de confianza}, pruebas (p.\,ej., Mann–Whitney) y \textbf{ablation studies} (estado/acción/recompensa). \\
+\textbf{Transferencia a Lima.} Escogeremos una intersección/corredor representativo de Lima, con escenarios \textit{punta/valle}, e integraremos \textbf{multiagente} (un agente por intersección) y \textbf{restricciones operativas} (tiempos mínimos de verde/ámbar/rojo, coordinación en arterias).
+
+\section{Síntesis comparativa}
+\begin{table}[H]
+\centering
+\footnotesize
+\setlength{\tabcolsep}{6pt}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{\textwidth}{@{} l c c X X @{}}
+\toprule
+\textbf{Trabajo} & \textbf{Datos} & \textbf{Simulador} & \textbf{Algoritmos} & \textbf{Resultados clave} \\
+\midrule
+\makecell[l]{Uniandes (2023)\\ \citep{Chavez2023}}
+  & Sintéticos
+  & SUMO
+  & Q-learning, SARSA, DQN, PPO
+  & Eficiencias vs. fijo: 35.79\%, 51.63\%, 63.40\%, 63.49\% \\
+\makecell[l]{Trinity (2022)\\ \citep{Chakrabarti2022}}
+  & Sintéticos
+  & SUMO
+  & DQN, A2C, PPO
+  & PPO $>$ A2C $>$ (fijo/aleatorio) $>$ DQN en tiempo de espera \\
+\makecell[l]{UAQ (2024)\\ \citep{UAQ2024}}
+  & \textbf{Reales} (7 inters.)
+  & SUMO
+  & AR, Kalman, RNN + optimización de ciclos
+  & $R^2\approx 0.95$ (corto/medio); \textbf{-36.34\%} en tiempo de viaje \\
+\bottomrule
+\end{tabularx}
+\caption{Comparación de trabajos relacionados con control/optimización semafórica.}
+\label{tab:relacionados}
+\end{table}
+
+
+\section{Implicancias para el diseño de esta tesis}
+
+A partir del estado del arte, nuestra tesis implementará: (i) un entorno \textbf{SUMO+TraCI} con \textbf{agentes multiagente} (un TSL por intersección), (ii) \textbf{PPO, A2C y DQN} como algoritmos principales (más Q-learning/SARSA como líneas base), y (iii) evaluación rigurosa (delay, colas, \textit{throughput}, emisiones) con pruebas estadísticas y análisis de sensibilidad.
+
+\noindent\textbf{Aporte específico (U4: Coordinación distribuida).} Se incorpora un módulo de \textbf{coordinación distribuida entre semáforos} para pasar de optimizaciones locales a \textbf{optimización de corredor}: 
+\begin{itemize}
+    \item \textit{Estado extendido}: cada agente observa su entorno local (colas por carril, fase, tiempo en fase) y un \textbf{resumen de vecinos} (fase vecina, tiempo restante, estimación de \emph{outflow} hacia su enlace compartido).
+    \item \textit{Mensajería ligera}: canal de comunicación simulado (latencia/pérdida configurables) para intercambiar mensajes agent-to-agent (\emph{fase}, \emph{outflow esperado}, \emph{colas en salidas}).
+    \item \textit{Recompensa con coordinación}: término explícito de \textbf{spillback} para evitar que una cola bloquee a la intersección vecina; opcionalmente mezcla con una señal global (\(R_{global}\)).
+    \item \textit{Algoritmos}: \textbf{IPPO} (PPO independiente con pesos compartidos) como base; extensión a \textbf{MAPPO} (crítico centralizado) si el tiempo lo permite.
+    \item \textit{Evaluación a nivel corredor}: tiempo de viaje extremo a extremo, \textit{throughput} total, longitud de cola máxima y tasa de \textit{spillback}, además de métricas locales.
+\end{itemize}
+
+Este U4 añade el tópico de \textbf{Sistemas Distribuidos} (protocolos de intercambio, latencia, tolerancia a fallos) al marco de RL, incrementa el esfuerzo computacional (entrenamiento multiagente con estado ampliado) y permite demostrar beneficios de \textbf{coordinación} frente a agentes aislados, alineado con la literatura reciente en control multiagente.

@@ -1,0 +1,107 @@
+DEMO: semaforos adaptativos con Q-learning sobre SUMO (TraCI)
+=============================================================
+
+Tres escenarios sinteticos, del mas simple al mas complejo:
+
+  cruce      Prueba 1: cruce N-S / E-O, 1 carril por sentido, 2 fases verdes.
+  cruce2     Prueba 2: mismo cruce con 2 carriles por sentido, carril exclusivo
+             de giro a la izquierda y fases de giro protegido (4 fases verdes).
+  corredor   Prueba 3: dos cruces sobre una avenida E-O separados 300 m, un
+             agente Q-learning independiente por cruce (antesala del modulo U4).
+  red        Prueba 4: rotonda (sin semaforo, cede el paso) + tres cruces
+             semaforizados sobre una avenida de 2 carriles por sentido muy
+             cargada, transversales ligeras de 1 carril. Tres agentes
+             independientes.
+
+En los tres la demanda cambia a mitad de la hora simulada (0-1800 s punta en un
+sentido, 1800-3600 s punta en el sentido contrario), para que un tiempo fijo no
+pueda ser optimo en ambos periodos a la vez.
+
+Archivos por escenario <esc> = cruce | cruce2 | corredor | red
+  <esc>.nod.xml / <esc>.edg.xml   nodos y vias (cruce2 ademas tiene <esc>.con.xml
+                                  para el carril exclusivo de giro a la izquierda;
+                                  red.edg.xml declara la rotonda)
+  <esc>.net.xml                   red SUMO generada (regenerar con build_net.bat)
+  <esc>.rou.xml                   demanda por periodos
+  <esc>.sumocfg                   configuracion del escenario
+  corredor.add.xml / red.add.xml  programas fijos tuneados (verdes y offsets)
+  vista*.xml                      camara para sumo-gui
+
+Scripts
+  rl_semaforo.py                  agente unico (cruce y cruce2), modos baseline/train/demo
+  rl_corredor.py                  varios agentes independientes (--escenario corredor|red)
+  graficar.py                     curva de aprendizaje: python graficar.py <esc>
+  build_net.bat                   regenera las cuatro redes
+
+Salidas por escenario: q_table_<esc>.json, resultados_<esc>.csv,
+tripinfo_<esc>_<modo>.xml, curva_aprendizaje_<esc>.png
+
+Requisitos (Windows)
+  1. SUMO 1.25 instalado (SUMO_HOME definido; verificar con: echo %SUMO_HOME%)
+  2. Python 3 y:   pip install traci sumolib matplotlib
+
+Pasos (ejemplo con cruce2; para corredor usar rl_corredor.py sin --escenario)
+  1. Linea base (tiempo fijo):     python rl_semaforo.py baseline --escenario cruce2
+  2. Entrenar (sin GUI):           python rl_semaforo.py train --escenario cruce2 --episodios 40
+  3. Agente entrenado en sumo-gui: python rl_semaforo.py demo --escenario cruce2 --gui
+  4. Curva de aprendizaje:         python graficar.py cruce2
+
+Baselines: en los tres escenarios el tiempo fijo NO es un baseline debil; se
+tuneo por barrido antes de comparar.
+  cruce      verde 25 s (mejor entre 15 y 42 s)
+  cruce2     verde 20 s + izquierda protegida 6 s (mejor de 14 combinaciones
+             verde 15-35 s x izquierda 6-12 s)
+  corredor   verde 25 s en ambos cruces + offset 25 s en el segundo (mejor verde
+             de 15-35 s, y mejor offset de un barrido 0-42 s: onda verde O->E)
+  red        verde 20 s en los tres cruces + offsets C2=23 s, C3=0 (23 s es el
+             tiempo de viaje entre cruces y con ciclo de 46 s el tercero repite
+             la fase del primero: onda verde O->E de tres cruces)
+
+Resultados (semilla 42, 1 episodio = 1 hora simulada, decision cada 5 s, verde
+minimo 10 s -- 5 s en fases de giro protegido --, verde maximo 60 s):
+
+  cruce      (40 episodios)
+             tiempo fijo: espera  9.3 s/veh, timeLoss 22.8 s/veh, cola 5.2
+             Q-learning:  espera  6.4 s/veh, timeLoss 20.3 s/veh, cola 3.7   (-31% espera)
+             (la corrida original documentaba 9.4 -> 5.9, -38%; el numero de arriba
+              es el reproducible con el codigo actual y SUMO 1.25, semilla 42;
+              la q_table de aquella corrida quedo en q_table_cruce_original.json)
+
+  cruce2     (120 episodios, decaimiento de epsilon 0.96)
+             tiempo fijo: espera 16.0 s/veh, timeLoss 27.9 s/veh, cola 7.7
+             Q-learning:  espera 18.0 s/veh, timeLoss 31.5 s/veh, cola 8.8   (+13% espera: PEOR)
+             (semillas 43 y 44 dan 17.8 y 17.1: el resultado es consistente, no mala suerte)
+
+  corredor   (40 episodios, 2 agentes independientes)
+             tiempo fijo: espera 14.0 s/veh, timeLoss 31.4 s/veh, cola 7.2
+             Q-learning:  espera 10.3 s/veh, timeLoss 25.8 s/veh, cola 5.4   (-27% espera)
+             (el baseline ya incluye el offset tuneado de 25 s; contra offset 0
+              la mejora seria -54%. Los agentes RL ganan sin comunicarse porque
+              cada uno reacciona a la cola que le llega del vecino: ese es el
+              punto de partida para medir cuanto agrega la coordinacion de U4)
+
+  red        (60 episodios, decaimiento de epsilon 0.95, 3 agentes independientes)
+             tiempo fijo: espera  7.4 s/veh, timeLoss 22.2 s/veh, cola 4.0
+             Q-learning:  espera  8.3 s/veh, timeLoss 25.5 s/veh, cola 4.6   (+13% espera: PEOR)
+             (semillas 43 y 44 dan 8.4 y 8.0: estable, no es mala suerte. Contra
+              el fijo SIN coordinar del mismo verde -offsets 0: 20.2 s- los
+              agentes ganan -59%; pierden solo contra la onda verde tuneada.
+              Con 3 cruces consecutivos la coordinacion anticipada vale mas que
+              la reaccion local: es la evidencia empirica que motiva U4)
+
+Notas de la prueba 2 (por que el Q-learning tabular NO gana en cruce2):
+  - Con verde minimo de 10 s en TODAS las fases el agente no bajaba de ~25 s de
+    espera (ciclo minimo 52 s, no podia despachar rapido una fase de giro vacia);
+    por eso las fases de giro protegido usan verde minimo de 5 s, comparable al
+    programa fijo que usa giros de 6 s.
+  - Con 4 fases el espacio de estados se duplica (4^4 colas x 4 fases = 1024) y
+    la politica greedy pura cae en estados poco visitados: con 60 episodios el
+    demo daba 33 s; con 120 episodios y exploracion mas lenta baja a 18 s, pero
+    sigue sin alcanzar al tiempo fijo tuneado (16 s). Durante el entrenamiento
+    (epsilon residual 0.05) si lo iguala (~14.8 s).
+  - Subir gamma a 0.95 para alargar el horizonte empeoro el demo y lo volvio
+    inestable entre semillas (30-80 s): sobreestimacion tipica del max de
+    Q-learning tabular con ruido. Se quedo gamma = 0.9.
+  - Conclusion util para la tesis: el metodo tabular toca techo al crecer el
+    numero de fases; es el argumento empirico para DQN/PPO en U2 (coincide con
+    Uniandes 2023, donde Q-learning fue el peor de los cuatro algoritmos).

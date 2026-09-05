@@ -1,0 +1,20 @@
+<edges>
+    <!-- Avenida E-O que atraviesa los dos cruces; el tramo C1-C2 mide 300 m,
+         asi que una cola larga en un cruce puede bloquear al vecino (spillback) -->
+    <edge id="W_C1"  from="W"  to="C1" numLanes="1" speed="13.89"/>
+    <edge id="C1_W"  from="C1" to="W"  numLanes="1" speed="13.89"/>
+    <edge id="C1_C2" from="C1" to="C2" numLanes="1" speed="13.89"/>
+    <edge id="C2_C1" from="C2" to="C1" numLanes="1" speed="13.89"/>
+    <edge id="C2_E"  from="C2" to="E"  numLanes="1" speed="13.89"/>
+    <edge id="E_C2"  from="E"  to="C2" numLanes="1" speed="13.89"/>
+
+    <!-- Calles transversales N-S de cada cruce -->
+    <edge id="N1_C1" from="N1" to="C1" numLanes="1" speed="13.89"/>
+    <edge id="C1_N1" from="C1" to="N1" numLanes="1" speed="13.89"/>
+    <edge id="S1_C1" from="S1" to="C1" numLanes="1" speed="13.89"/>
+    <edge id="C1_S1" from="C1" to="S1" numLanes="1" speed="13.89"/>
+    <edge id="N2_C2" from="N2" to="C2" numLanes="1" speed="13.89"/>
+    <edge id="C2_N2" from="C2" to="N2" numLanes="1" speed="13.89"/>
+    <edge id="S2_C2" from="S2" to="C2" numLanes="1" speed="13.89"/>
+    <edge id="C2_S2" from="C2" to="S2" numLanes="1" speed="13.89"/>
+</edges>

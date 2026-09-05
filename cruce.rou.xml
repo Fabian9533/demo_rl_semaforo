@@ -1,0 +1,23 @@
+<routes>
+    <vType id="auto" accel="2.6" decel="4.5" sigma="0.5" length="5" minGap="2.5" maxSpeed="13.89"/>
+
+    <!-- Periodo 1 (0-1800 s): hora punta en la avenida Norte-Sur, transversal Este-Oeste ligera -->
+    <flow id="p1_N_S" type="auto" from="N_C" to="C_S" begin="0" end="1800" vehsPerHour="650"/>
+    <flow id="p1_S_N" type="auto" from="S_C" to="C_N" begin="0" end="1800" vehsPerHour="650"/>
+    <flow id="p1_N_W" type="auto" from="N_C" to="C_W" begin="0" end="1800" vehsPerHour="80"/>
+    <flow id="p1_S_E" type="auto" from="S_C" to="C_E" begin="0" end="1800" vehsPerHour="80"/>
+    <flow id="p1_E_W" type="auto" from="E_C" to="C_W" begin="0" end="1800" vehsPerHour="150"/>
+    <flow id="p1_W_E" type="auto" from="W_C" to="C_E" begin="0" end="1800" vehsPerHour="150"/>
+    <flow id="p1_E_N" type="auto" from="E_C" to="C_N" begin="0" end="1800" vehsPerHour="40"/>
+    <flow id="p1_W_S" type="auto" from="W_C" to="C_S" begin="0" end="1800" vehsPerHour="40"/>
+
+    <!-- Periodo 2 (1800-3600 s): la demanda se invierte, hora punta Este-Oeste -->
+    <flow id="p2_N_S" type="auto" from="N_C" to="C_S" begin="1800" end="3600" vehsPerHour="150"/>
+    <flow id="p2_S_N" type="auto" from="S_C" to="C_N" begin="1800" end="3600" vehsPerHour="150"/>
+    <flow id="p2_N_W" type="auto" from="N_C" to="C_W" begin="1800" end="3600" vehsPerHour="40"/>
+    <flow id="p2_S_E" type="auto" from="S_C" to="C_E" begin="1800" end="3600" vehsPerHour="40"/>
+    <flow id="p2_E_W" type="auto" from="E_C" to="C_W" begin="1800" end="3600" vehsPerHour="650"/>
+    <flow id="p2_W_E" type="auto" from="W_C" to="C_E" begin="1800" end="3600" vehsPerHour="650"/>
+    <flow id="p2_E_N" type="auto" from="E_C" to="C_N" begin="1800" end="3600" vehsPerHour="80"/>
+    <flow id="p2_W_S" type="auto" from="W_C" to="C_S" begin="1800" end="3600" vehsPerHour="80"/>
+</routes>

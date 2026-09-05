@@ -1,0 +1,11 @@
+<nodes>
+    <!-- Prueba 3: dos cruces semaforizados sobre una avenida E-O, separados 300 m -->
+    <node id="C1" x="0" y="0" type="traffic_light" tl="semaforo_C1"/>
+    <node id="C2" x="300" y="0" type="traffic_light" tl="semaforo_C2"/>
+    <node id="W"  x="-400" y="0" type="priority"/>
+    <node id="E"  x="700" y="0" type="priority"/>
+    <node id="N1" x="0" y="400" type="priority"/>
+    <node id="S1" x="0" y="-400" type="priority"/>
+    <node id="N2" x="300" y="400" type="priority"/>
+    <node id="S2" x="300" y="-400" type="priority"/>
+</nodes>

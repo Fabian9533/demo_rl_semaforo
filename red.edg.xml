@@ -1,0 +1,42 @@
+<edges>
+    <!-- Avenida principal E-O: 2 carriles por sentido, 50 km/h -->
+    <edge id="W_RW"  from="W"  to="RW" numLanes="2" speed="13.89"/>
+    <edge id="RW_W"  from="RW" to="W"  numLanes="2" speed="13.89"/>
+    <edge id="RE_C1" from="RE" to="C1" numLanes="2" speed="13.89"/>
+    <edge id="C1_RE" from="C1" to="RE" numLanes="2" speed="13.89"/>
+    <edge id="C1_C2" from="C1" to="C2" numLanes="2" speed="13.89"/>
+    <edge id="C2_C1" from="C2" to="C1" numLanes="2" speed="13.89"/>
+    <edge id="C2_C3" from="C2" to="C3" numLanes="2" speed="13.89"/>
+    <edge id="C3_C2" from="C3" to="C2" numLanes="2" speed="13.89"/>
+    <edge id="C3_E"  from="C3" to="E"  numLanes="2" speed="13.89"/>
+    <edge id="E_C3"  from="E"  to="C3" numLanes="2" speed="13.89"/>
+
+    <!-- Anillo de la rotonda: un carril, sentido antihorario, 30 km/h -->
+    <edge id="RE_RN" from="RE" to="RN" numLanes="1" speed="8.33"/>
+    <edge id="RN_RW" from="RN" to="RW" numLanes="1" speed="8.33"/>
+    <edge id="RW_RS" from="RW" to="RS" numLanes="1" speed="8.33"/>
+    <edge id="RS_RE" from="RS" to="RE" numLanes="1" speed="8.33"/>
+
+    <!-- Ramales norte y sur de la rotonda -->
+    <edge id="NR_RN" from="NR" to="RN" numLanes="1" speed="13.89"/>
+    <edge id="RN_NR" from="RN" to="NR" numLanes="1" speed="13.89"/>
+    <edge id="SR_RS" from="SR" to="RS" numLanes="1" speed="13.89"/>
+    <edge id="RS_SR" from="RS" to="SR" numLanes="1" speed="13.89"/>
+
+    <!-- Calles transversales N-S de los tres cruces: 1 carril por sentido -->
+    <edge id="N1_C1" from="N1" to="C1" numLanes="1" speed="13.89"/>
+    <edge id="C1_N1" from="C1" to="N1" numLanes="1" speed="13.89"/>
+    <edge id="S1_C1" from="S1" to="C1" numLanes="1" speed="13.89"/>
+    <edge id="C1_S1" from="C1" to="S1" numLanes="1" speed="13.89"/>
+    <edge id="N2_C2" from="N2" to="C2" numLanes="1" speed="13.89"/>
+    <edge id="C2_N2" from="C2" to="N2" numLanes="1" speed="13.89"/>
+    <edge id="S2_C2" from="S2" to="C2" numLanes="1" speed="13.89"/>
+    <edge id="C2_S2" from="C2" to="S2" numLanes="1" speed="13.89"/>
+    <edge id="N3_C3" from="N3" to="C3" numLanes="1" speed="13.89"/>
+    <edge id="C3_N3" from="C3" to="N3" numLanes="1" speed="13.89"/>
+    <edge id="S3_C3" from="S3" to="C3" numLanes="1" speed="13.89"/>
+    <edge id="C3_S3" from="C3" to="S3" numLanes="1" speed="13.89"/>
+
+    <!-- Declaracion explicita de la rotonda: el anillo tiene prioridad y las entradas ceden -->
+    <roundabout edges="RE_RN RN_RW RW_RS RS_RE"/>
+</edges>

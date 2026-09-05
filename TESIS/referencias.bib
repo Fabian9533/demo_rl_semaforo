@@ -1,0 +1,162 @@
+@mastersthesis{Chakrabarti2022,
+  author       = {Sriom Chakrabarti},
+  title        = {Reinforcement Learning for Traffic Light Optimization},
+  school       = {Trinity College Dublin, School of Computer Science and Statistics},
+  address      = {Dublin, Ireland},
+  year         = {2022},
+  type         = {Master's dissertation}
+}
+
+@misc{Chavez2023,
+  author       = {Ch{\'a}vez Mass, Jos{\'e} David},
+  title        = {Sem{\'a}foros inteligentes por medio de aprendizaje por refuerzo},
+  howpublished = {Trabajo de grado, Universidad de los Andes},
+  address      = {Bogot{\'a}, Colombia},
+  year         = {2023},
+  note         = {Repositorio Uniandes}
+}
+
+@mastersthesis{UAQ2024,
+  author       = {Carrasco Morales, Julio C{\'e}sar},
+  title        = {Predicci{\'o}n de tr{\'a}fico vehicular aplicada a la optimizaci{\'o}n semaf{\'o}rica en un microsimulador},
+  school       = {Universidad Aut{\'o}noma de Quer{\'e}taro},
+  address      = {Quer{\'e}taro, M{\'e}xico},
+  year         = {2024},
+  type         = {Tesis de Maestr{\'\i}a}
+}
+
+@book{SuttonBarto2018,
+  author    = {Richard S. Sutton and Andrew G. Barto},
+  title     = {Reinforcement Learning: An Introduction (2nd ed.)},
+  year      = {2018},
+  publisher = {MIT Press},
+  url       = {http://incompleteideas.net/book/the-book-2nd.html},
+  note      = {Capítulos 1–6 cubren definiciones, Q-learning y SARSA}
+}
+
+@article{Mnih2015_DQN,
+  author  = {Volodymyr Mnih and Koray Kavukcuoglu and David Silver and others},
+  title   = {Human-level control through deep reinforcement learning},
+  journal = {Nature},
+  year    = {2015},
+  volume  = {518},
+  number  = {7540},
+  pages   = {529--533},
+  doi     = {10.1038/nature14236},
+  url     = {https://www.nature.com/articles/nature14236}
+}
+
+@article{Schulman2017_PPO,
+  author  = {John Schulman and Filip Wolski and Prafulla Dhariwal and Alec Radford and Oleg Klimov},
+  title   = {Proximal Policy Optimization Algorithms},
+  journal = {arXiv preprint arXiv:1707.06347},
+  year    = {2017},
+  url     = {https://arxiv.org/abs/1707.06347}
+}
+
+@inproceedings{Yu2021_MAPPO,
+  author    = {Chao Yu and Akash Velu and Eugene Vinitsky and Yu Wang and Alexandre Bayen and Yi Wu},
+  title     = {The Surprising Effectiveness of PPO in Cooperative Multi-Agent Games},
+  booktitle = {NeurIPS 2021 Deep RL Workshop},
+  year      = {2021},
+  url       = {https://arxiv.org/abs/2103.01955},
+  note      = {Presenta MAPPO y compara con IPPO como baseline}
+}
+
+@misc{SUMO_Emissions,
+  key          = {SUMOEmissionsDoc},
+  author       = {{SUMO Project}},
+  title        = {Emissions — SUMO Documentation},
+  howpublished = {\url{https://sumo.dlr.de/docs/Tools/Emissions.html}},
+  year         = {2024},
+  note         = {Modelos HBEFA y PHEMlight; herramientas de cálculo}
+}
+
+@misc{TraCI_Docs,
+  key          = {TraCIDocs},
+  author       = {{SUMO Project}},
+  title        = {TraCI — Traffic Control Interface (Python) — SUMO Documentation},
+  howpublished = {\url{https://sumo.dlr.de/docs/TraCI.html}},
+  year         = {2024},
+  note         = {Interfaz cliente–servidor para controlar SUMO en tiempo de simulación}
+}
+
+@misc{TraCI_Whitepaper,
+  author       = {Pablo {\'A}. L{\'o}pez and Michael Behrisch and others},
+  title        = {Microscopic Traffic Simulation using SUMO},
+  year         = {2018},
+  howpublished = {\url{https://elib.dlr.de/127994/1/simulative.pdf}},
+  note         = {Descripci{\'o}n general de SUMO y su ecosistema, incl. TraCI}
+}
+
+@misc{SUMO_Netconvert_OSM,
+  key          = {SUMONetconvertOSM},
+  author       = {{SUMO Project}},
+  title        = {Importing Networks from OpenStreetMap — SUMO Documentation},
+  howpublished = {\url{https://sumo.dlr.de/docs/Networks/Import/OpenStreetMap.html}},
+  year         = {2024},
+  note         = {Uso de \texttt{netconvert} para pasar OSM a \texttt{.net.xml}}
+}
+
+@misc{OSM_About,
+  key          = {OpenStreetMapAbout},
+  author       = {{OpenStreetMap Foundation}},
+  title        = {OpenStreetMap Wiki: About OpenStreetMap},
+  howpublished = {\url{https://wiki.openstreetmap.org/wiki/About_OpenStreetMap}},
+  year         = {2024},
+  note         = {Información general sobre OSM}
+}
+
+@misc{GoogleDirectionsTraffic,
+  key          = {GoogleDirectionsTraffic},
+  author       = {{Google Maps Platform}},
+  title        = {Directions API — Google Maps Platform (duration\_in\_traffic)},
+  howpublished = {\url{https://developers.google.com/maps/documentation/directions/get-directions?hl=en\#traffic-model}},
+  year         = {2024},
+  note         = {Entrega tiempos de viaje considerando tráfico}
+}
+
+@misc{AzureTrafficFlow,
+  key          = {AzureTrafficFlow},
+  author       = {{Microsoft Azure Maps}},
+  title        = {Azure Maps REST APIs — Traffic Flow},
+  howpublished = {\url{https://learn.microsoft.com/azure/azure-maps/traffic-flow}},
+  year         = {2024},
+  note         = {API de flujo de tráfico para Azure Maps}
+}
+
+@misc{SB3_Docs,
+  key          = {StableBaselines3Docs},
+  author       = {{Stable-Baselines3 Developers}},
+  title        = {Stable-Baselines3 Documentation},
+  howpublished = {\url{https://stable-baselines3.readthedocs.io/}},
+  year         = {2024},
+  note         = {Implementaciones de PPO, DQN, A2C en PyTorch}
+}
+
+@misc{FHWA_Timing_Manual_Chapter3,
+  key          = {FHWATimingManual},
+  author       = {{U.S. Department of Transportation}},
+  title        = {Traffic Signal Timing Manual — Chapter 3 (FHWA)},
+  howpublished = {\url{https://ops.fhwa.dot.gov/publications/fhwahop08024/chapter3.htm}},
+  year         = {2021},
+  note         = {Definición de \emph{control delay} y su uso como Métrica de Efectividad}
+}
+
+@misc{FHWA_Toolbox_Definitions,
+  key          = {FHWA_ToolsDefinitions},
+  author       = {{U.S. Department of Transportation}},
+  title        = {Definition, Interpretation, and Calculation of Traffic Analysis Tools (FHWA)},
+  howpublished = {\url{https://ops.fhwa.dot.gov/publications/fhwahop08054/execsum.htm}},
+  year         = {2021},
+  note         = {Cómo calcular delay, colas y paradas en evaluaciones}
+}
+
+@book{HCM2000_or_2010,
+  key       = {HCM2010},
+  title     = {Highway Capacity Manual (HCM)},
+  publisher = {Transportation Research Board},
+  year      = {2010},
+  url       = {https://www.jpautoceste.ba/wp-content/uploads/2022/05/Highway-Capacity-Manual-2010-PDFDrive-.pdf},
+  note      = {Metodología de LOS y control delay en intersecciones}
+}

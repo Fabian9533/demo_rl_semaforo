@@ -1,0 +1,56 @@
+\chapter{MARCO TEÓRICO}
+
+El presente capítulo desarrolla los conceptos fundamentales que sustentan la arquitectura del proyecto y explican por qué cada módulo propuesto aporta a la reducción del retraso promedio por vehículo en intersecciones urbanas. A diferencia del diagrama metodológico del capítulo siguiente (centrado en el flujo operativo), aquí el foco es \textit{arquitectural}: qué módulos lo componen, qué principios teóricos utiliza cada uno y qué resultados espera producir.
+
+En particular, se definen los elementos teóricos que habilitan: (i) la construcción del entorno de simulación en SUMO \citep{SUMO_Netconvert_OSM,OSM_About}, (ii) el control semafórico adaptativo mediante Aprendizaje por Refuerzo (RL) con algoritmos tabulares y de \textit{Deep RL} \citep{SuttonBarto2018,Mnih2015_DQN,Schulman2017_PPO}, (iii) la instrumentación de métricas de movilidad urbana \citep{FHWA_Timing_Manual_Chapter3,FHWA_Toolbox_Definitions,HCM2000_or_2010} y (iv) la coordinación distribuida multiagente entre semáforos para optimizar a nivel de corredor \citep{Yu2021_MAPPO}.
+
+\section{Arquitectura teórica del sistema (visión por módulos)}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{Diagrama} % images/Diagrama.png (Overleaf distingue mayusculas)
+    \caption{Diagrama de diseño del proyecto: U1 (preprocesamiento), U2 (RL),
+    U3 (simulación/medición en SUMO) y U4 (coordinación distribuida).}
+    \label{fig:diseno}
+\end{figure}
+
+\textbf{U1. Preprocesamiento y generación del entorno SUMO.} Se encarga de transformar una intersección o pequeño corredor urbano en una red SUMO utilizable: conversión de cartografía (OSM $\rightarrow$ \texttt{.net.xml}), definición de flujos y rutas (\texttt{.rou.xml}), y configuración base de semáforos (\texttt{.add.xml}). Teóricamente, se apoya en la \textit{microsimulación} vehicular y en la representación de grafos viales donde nodos son intersecciones y aristas son tramos con uno o más carriles y restricciones de giro \citep{SUMO_Netconvert_OSM,OSM_About}.
+
+\textbf{U2. Control semafórico con Aprendizaje por Refuerzo (RL).} Modela cada semáforo como un agente que observa el estado del entorno (colas, fase actual, tiempos de espera), selecciona una acción (mantener, conmutar, extender fase) y recibe una recompensa que guía el aprendizaje. Se consideran algoritmos tabulares (Q-learning, SARSA) y de \textit{Deep RL} (DQN, PPO). Los elementos teóricos clave son: espacio de estados, espacio de acciones, función de recompensa, política, episodio e interacción agente–entorno \citep{SuttonBarto2018,Mnih2015_DQN,Schulman2017_PPO}.
+
+\textbf{U3. Simulación y medición en SUMO (TraCI).} SUMO provee la dinámica del tráfico a nivel de vehículo; mediante TraCI se extraen variables relevantes (velocidades, tiempos de espera, colas) y se aplican las acciones decididas por los agentes. Teóricamente, este módulo sostiene la \textit{retroalimentación} RL: estados y recompensas se computan a partir de la simulación paso a paso; las métricas de evaluación (delay, longitud de colas, \textit{throughput}, paradas, emisiones) se definen aquí con base en la literatura de ingeniería de transporte \citep{TraCI_Docs,TraCI_Whitepaper,SUMO_Emissions,FHWA_Timing_Manual_Chapter3,FHWA_Toolbox_Definitions,HCM2000_or_2010}.
+
+\textbf{U4. Coordinación distribuida entre semáforos (multiagente).} Extiende el RL local hacia la cooperación entre intersecciones vecinas mediante una capa ligera de mensajería (fase actual, \textit{outflow} esperado, colas en salidas), un \textit{estado extendido} (información propia + resumen de vecinos) y una recompensa con término de penalización por \textit{spillback}. En términos teóricos, se apoya en \textit{RL multiagente} y \textit{sistemas distribuidos} (comunicación asíncrona, latencias, tolerancia a fallos), con variantes como IPPO/MAPPO para el aprendizaje coordinado \citep{Yu2021_MAPPO}.
+
+\section{Definiciones y conceptos fundamentales}
+
+\subsection*{SUMO (Simulation of Urban MObility)}
+Microsimulador de código abierto que modela el movimiento de vehículos a nivel individual sobre una red vial dirigida. Permite definir redes, rutas, tipos de vehículo y control semafórico, y calcular métricas de desempeño (tiempo de viaje, colas, \textit{throughput}, emisiones) \citep{TraCI_Whitepaper,SUMO_Emissions}.
+
+\subsection*{TraCI (Traffic Control Interface)}
+Interfaz cliente–servidor que conecta SUMO con programas externos (p.~ej., Python), habilitando control en tiempo de simulación: lectura de observaciones (colas por carril, fase activa, tiempos de espera) y aplicación de acciones (cambios de fase, duraciones) \citep{TraCI_Docs,TraCI_Whitepaper}.
+
+\subsection*{Aprendizaje por Refuerzo (RL)}
+Paradigma de aprendizaje donde un agente interactúa con un entorno para maximizar recompensa acumulada. Elementos: \textit{estado} ($s$), \textit{acción} ($a$), \textit{recompensa} ($r$), \textit{política} ($\pi$) y \textit{episodio}. En control semafórico, el objetivo es minimizar retrasos y colas penalizando paradas y \textit{spillback} \citep{SuttonBarto2018}.
+
+\subsection*{Q-learning y SARSA (RL tabular)}
+Métodos que aproximan el valor de acción $Q(s,a)$ en tablas discretas. Q-learning es \textit{off-policy}; SARSA es \textit{on-policy}. Se recomiendan como líneas base por su sencillez e interpretabilidad en espacios de estado discretizados \citep{SuttonBarto2018}.
+
+\subsection*{DQN y PPO (Deep RL)}
+DQN aproxima $Q(s,a)$ con redes neuronales profundas (\textit{value-based}); PPO optimiza directamente la política con restricciones de probabilidad (\textit{policy-based}). Son adecuados para espacios de estado continuos o de mayor dimensionalidad \citep{Mnih2015_DQN,Schulman2017_PPO,SB3_Docs}.
+
+\subsection*{RL multiagente: IPPO / MAPPO}
+En IPPO cada agente entrena su política de forma independiente (posibles pesos compartidos); MAPPO introduce un crítico centralizado para estabilidad en entornos cooperativos. Aplicable a corredores donde varias intersecciones deben coordinar \citep{Yu2021_MAPPO}.
+
+\subsection*{Métricas de movilidad}
+\textbf{Delay/tiempo de espera}: diferencia entre tiempo real y tiempo libre de congestión. \textbf{Longitud de cola}: número de vehículos detenidos/ralentizados por carril. \textbf{\textit{Throughput}}: vehículos/hora que atraviesan una sección. \textbf{Paradas/vehículo}: número de detenciones. \textbf{Emisiones}: estimadas por modelo de SUMO a partir de aceleraciones/velocidades \citep{FHWA_Timing_Manual_Chapter3,FHWA_Toolbox_Definitions,SUMO_Emissions,HCM2000_or_2010}.
+
+\subsection*{\textit{Spillback} y ondas verdes}
+\textit{Spillback}: cola que rebasa la intersección y bloquea enlaces adyacentes; debe penalizarse en la recompensa para evitar colapsos. \textit{Ondas verdes}: alineación temporal de fases para favorecer flujos dominantes a lo largo de un corredor \citep{FHWA_Timing_Manual_Chapter3,HCM2000_or_2010}.
+
+\subsection*{Reproducibilidad y validez}
+Semillas aleatorias, scripts de ejecución y reporte de IC95\% en métricas clave refuerzan la robustez de resultados y permiten comparación entre configuraciones (con/sin coordinación, distintos algoritmos). En la práctica, se recomienda documentar configuración y versiones de librerías (p.~ej., \texttt{stable-baselines3}) \citep{SB3_Docs}.
+
+\section{Relación con objetivos y resultados esperados}
+
+La arquitectura teórica se alinea con los objetivos específicos: (U1) producir una red y rutas SUMO reproducibles; (U2) diseñar y entrenar agentes RL (tabulares y \textit{Deep RL}); (U3) medir con rigor las métricas de movilidad; (U4) evaluar coordinación distribuida para beneficios a nivel de corredor (tiempo extremo a extremo, tasa de \textit{spillback}). Los resultados esperados incluyen reducciones de delay y colas frente a control fijo/actuado y mejoras adicionales cuando se activa la coordinación multiagente \citep{FHWA_Timing_Manual_Chapter3,HCM2000_or_2010,Yu2021_MAPPO}.

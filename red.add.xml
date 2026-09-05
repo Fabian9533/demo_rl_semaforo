@@ -1,0 +1,24 @@
+<additional>
+    <!-- Programa fijo tuneado de la red: verde 20 s + ambar 3 s en los tres cruces.
+         Offsets C2=23, C3=0 (mejor combinacion del barrido): 23 s es el tiempo de
+         viaje entre cruces y con ciclo de 46 s el tercer cruce repite la fase del
+         primero, formando la onda verde O->E del periodo punta. -->
+    <tlLogic id="semaforo_C1" type="static" programID="fijo" offset="0">
+        <phase duration="20" state="rrrGGGgrrrGGGg"/>
+        <phase duration="3"  state="rrryyyyrrryyyy"/>
+        <phase duration="20" state="GGgrrrrGGgrrrr"/>
+        <phase duration="3"  state="yyyrrrryyyrrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C2" type="static" programID="fijo" offset="23">
+        <phase duration="20" state="rrrGGGgrrrGGGg"/>
+        <phase duration="3"  state="rrryyyyrrryyyy"/>
+        <phase duration="20" state="GGgrrrrGGgrrrr"/>
+        <phase duration="3"  state="yyyrrrryyyrrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C3" type="static" programID="fijo" offset="0">
+        <phase duration="20" state="rrrGGGgrrrGGGg"/>
+        <phase duration="3"  state="rrryyyyrrryyyy"/>
+        <phase duration="20" state="GGgrrrrGGgrrrr"/>
+        <phase duration="3"  state="yyyrrrryyyrrrr"/>
+    </tlLogic>
+</additional>
