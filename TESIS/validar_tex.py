@@ -43,7 +43,7 @@ avisos = []
 # comentario, y un \begin{verbatim} dentro de un comentario no abre nada.
 LITERALES = (
     r"\\begin\{(verbatim|lstlisting|comment)\}[\s\S]*?\\end\{\1\}"   # entornos literales
-    r"|\\verb\*?(.)(?:(?!\2)[^\n])*\2"                                # \verb|...| y \verb*|...|
+    r"|\\verb\*?(?![A-Za-z])(.)(?:(?!\2)[^\n])*\2"                    # \verb|...| y \verb*|...| (no \verbatiminput)
     r"|\\(?:url|href|path)\{[^}\n]*\}"                                # \url{...} admite % dentro
     r"|\\[\\%{}]"                                                     # \\  \%  \{  \}  (se conservan)
 )
@@ -280,6 +280,13 @@ def main():
             else:
                 errores.append(f"{nombre}:{linea_de(t, m.start())}: imagen no encontrada '{ruta}' "
                                f"(se busco en images/)")
+
+    for a, t in textos.items():
+        nombre = os.path.relpath(a, RAIZ)
+        for m in re.finditer(r"\\(?:verbatiminput|lstinputlisting)(?:\[[^\]]*\])?\{([^}]+)\}", t):
+            if not os.path.isfile(os.path.join(RAIZ, m.group(1).strip())):
+                errores.append(f"{nombre}:{linea_de(t, m.start())}: archivo de codigo no encontrado "
+                               f"'{m.group(1).strip()}'")
 
     incluidos_norm = {os.path.normcase(os.path.abspath(a)) for a in archivos}
     for f in sorted(glob.glob(os.path.join(RAIZ, "secciones", "*.tex"))):

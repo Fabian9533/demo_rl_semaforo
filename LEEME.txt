@@ -1,7 +1,7 @@
 DEMO: semaforos adaptativos con Q-learning sobre SUMO (TraCI)
 =============================================================
 
-Tres escenarios sinteticos, del mas simple al mas complejo:
+Cuatro escenarios sinteticos, del mas simple al mas complejo:
 
   cruce      Prueba 1: cruce N-S / E-O, 1 carril por sentido, 2 fases verdes.
   cruce2     Prueba 2: mismo cruce con 2 carriles por sentido, carril exclusivo
@@ -13,9 +13,11 @@ Tres escenarios sinteticos, del mas simple al mas complejo:
              cargada, transversales ligeras de 1 carril. Tres agentes
              independientes.
 
-En los tres la demanda cambia a mitad de la hora simulada (0-1800 s punta en un
+En los cuatro la demanda cambia a mitad de la hora simulada (0-1800 s punta en un
 sentido, 1800-3600 s punta en el sentido contrario), para que un tiempo fijo no
-pueda ser optimo en ambos periodos a la vez.
+pueda ser optimo en ambos periodos a la vez. Los flujos usan vehsPerHour, que
+inserta vehiculos equiespaciados: la semilla de SUMO solo cambia el comportamiento
+de los conductores (speedFactor y sigma), no cuantos vehiculos llegan ni cuando.
 
 Archivos por escenario <esc> = cruce | cruce2 | corredor | red
   <esc>.nod.xml / <esc>.edg.xml   nodos y vias (cruce2 ademas tiene <esc>.con.xml
@@ -25,83 +27,117 @@ Archivos por escenario <esc> = cruce | cruce2 | corredor | red
   <esc>.rou.xml                   demanda por periodos
   <esc>.sumocfg                   configuracion del escenario
   corredor.add.xml / red.add.xml  programas fijos tuneados (verdes y offsets)
+  <esc>_actuado.add.xml           programa actuado de referencia (lo genera comun.py
+                                  con las fases del fijo y verde min/max del agente)
   vista*.xml                      camara para sumo-gui
 
 Scripts
-  rl_semaforo.py                  agente unico (cruce y cruce2), modos baseline/train/demo
-  rl_corredor.py                  varios agentes independientes (--escenario corredor|red)
-  graficar.py                     curva de aprendizaje: python graficar.py <esc>
-  build_net.bat                   regenera las cuatro redes
+  rl_semaforo.py    agente unico (cruce y cruce2): modos baseline | actuado | train | demo
+  rl_corredor.py    varios agentes independientes (--escenario corredor | red), mismos modos
+  comun.py          metricas del tripinfo (retraso, espera, paradas, throughput, CO2, NOx),
+                    programa actuado, CSV de resultados, series por minuto
+  evaluar.py        evaluacion final: fijo, actuado y RL con las mismas semillas,
+                    media, IC95 %, Wilcoxon, Mann-Whitney, delta de Cliff
+  barrer_fijo.py    barrido del programa fijo (verde y offsets) por retraso
+  graficar.py       cinco figuras por escenario (fig_<esc>_*.png)
+  tablas_tex.py     tablas LaTeX del capitulo de resultados desde los CSV
+  build_net.bat     regenera las cuatro redes
+  TESIS/validar_tex.py  revisa los .tex de la tesis sin compilar
 
-Salidas por escenario: q_table_<esc>.json, resultados_<esc>.csv,
-tripinfo_<esc>_<modo>.xml, curva_aprendizaje_<esc>.png
+Salidas por escenario
+  resultados_<esc>.csv          una fila por episodio de entrenamiento y por corrida de
+                                referencia (fijo, actuado, demo), con semilla, epsilon,
+                                retraso, espera, colas, recompensa por decision, cambios de
+                                fase, paradas, throughput, CO2, NOx, tamano de la Q-table y
+                                la evaluacion greedy cada 5 episodios
+  resultados_<esc>_v1.csv       historial con el formato anterior (sin semilla ni U3)
+  q_table_<esc>.json            politica entrenada
+  evaluacion_<esc>.csv          una fila por (control, semilla) de la evaluacion final
+  evaluacion_<esc>_resumen.csv  estadistica por control y metrica
+  vehiculos_<esc>_<control>.csv una fila por vehiculo (semilla 1001), para distribuciones
+  serie_<esc>_<control>_s<semilla>.csv  vehiculos detenidos por aproximacion cada 60 s
+  barrido_<esc>.csv             resultado del barrido del programa fijo
+  fig_<esc>_curva|comparacion|serie|ecdf|qtable.png
+  tripinfo_<esc>_<modo>.xml     ultima corrida de cada modo (se sobreescribe)
 
 Requisitos (Windows)
   1. SUMO 1.25 instalado (SUMO_HOME definido; verificar con: echo %SUMO_HOME%)
-  2. Python 3 y:   pip install traci sumolib matplotlib
+  2. Python 3 y:   pip install traci sumolib numpy scipy matplotlib
 
-Pasos (ejemplo con cruce2; para corredor usar rl_corredor.py sin --escenario)
-  1. Linea base (tiempo fijo):     python rl_semaforo.py baseline --escenario cruce2
-  2. Entrenar (sin GUI):           python rl_semaforo.py train --escenario cruce2 --episodios 40
-  3. Agente entrenado en sumo-gui: python rl_semaforo.py demo --escenario cruce2 --gui
-  4. Curva de aprendizaje:         python graficar.py cruce2
+Protocolo (plan de pruebas de la tesis, capitulo III)
+  1. Referencias:      python rl_semaforo.py baseline --escenario <esc>
+                       python rl_semaforo.py actuado  --escenario <esc>
+  2. Entrenar:         python rl_semaforo.py train --escenario <esc> --episodios 40 --desde-cero
+                       (cruce2: --episodios 120 --eps-decay 0.96; red: --episodios 100 --eps-decay 0.95;
+                        para corredor y red usar rl_corredor.py)
+  3. Evaluar:          python evaluar.py --escenario <esc>        (semillas 1001-1010, tres controles)
+  4. Figuras y tablas: python graficar.py <esc>  y  python tablas_tex.py
+  5. Copiar fig_<esc>_*.png a TESIS/images/ y los scripts a TESIS/codigo/ si cambiaron.
 
-Baselines: en los tres escenarios el tiempo fijo NO es un baseline debil; se
-tuneo por barrido antes de comparar.
-  cruce      verde 25 s (mejor entre 15 y 42 s)
-  cruce2     verde 20 s + izquierda protegida 6 s (mejor de 14 combinaciones
-             verde 15-35 s x izquierda 6-12 s)
-  corredor   verde 25 s en ambos cruces + offset 25 s en el segundo (mejor verde
-             de 15-35 s, y mejor offset de un barrido 0-42 s: onda verde O->E)
-  red        verde 20 s en los tres cruces + offsets C2=23 s, C3=0 (23 s es el
-             tiempo de viaje entre cruces y con ciclo de 46 s el tercero repite
-             la fase del primero: onda verde O->E de tres cruces)
+  Semillas: el entrenamiento usa 42 + numero de episodio; la evaluacion usa 1001-1010,
+  fuera de ese rango y las mismas para fijo, actuado y RL. El entrenamiento es
+  determinista: repetirlo desde cero reproduce el CSV digito a digito.
+  Metrica primaria: retraso por vehiculo (timeLoss). La espera detenida (waitingTime)
+  es lo que optimiza la recompensa, pero no es el retraso.
 
-Resultados (semilla 42, 1 episodio = 1 hora simulada, decision cada 5 s, verde
-minimo 10 s -- 5 s en fases de giro protegido --, verde maximo 60 s):
+Baselines: el tiempo fijo NO es un baseline debil. Se tuneo por barrido y el
+barrido por retraso (barrer_fijo.py, semillas 1001-1003) confirma los valores:
+  cruce      verde 25 s (el barrido da el optimo entre 24 y 25 s)
+  cruce2     verde 20 s + izquierda protegida 6 s (optimo entre 20 y 21 s con 6 s)
+  corredor   verde 25 s en ambos cruces + offset 25 s en el segundo (mejor del barrido)
+  red        verde 20 s en los tres cruces + offsets C2=23 s, C3=0 (onda verde de
+             tres cruces; 23 s es el tiempo de viaje entre cruces, ciclo 46 s)
+El actuado nativo de SUMO usa las mismas fases con minDur/maxDur = 10/60 s (5 s en
+giros), iguales a los limites del agente.
 
-  cruce      (40 episodios)
-             tiempo fijo: espera  9.3 s/veh, timeLoss 22.8 s/veh, cola 5.2
-             Q-learning:  espera  6.4 s/veh, timeLoss 20.3 s/veh, cola 3.7   (-31% espera)
-             (la corrida original documentaba 9.4 -> 5.9, -38%; el numero de arriba
-              es el reproducible con el codigo actual y SUMO 1.25, semilla 42;
-              la q_table de aquella corrida quedo en q_table_cruce_original.json)
+Resultados (politica congelada, 10 semillas 1001-1010; retraso = timeLoss s/veh,
+media; delta con IC95 % bootstrap y p de Wilcoxon pareado; ver evaluacion_<esc>_resumen.csv)
 
-  cruce2     (120 episodios, decaimiento de epsilon 0.96)
-             tiempo fijo: espera 16.0 s/veh, timeLoss 27.9 s/veh, cola 7.7
-             Q-learning:  espera 18.0 s/veh, timeLoss 31.5 s/veh, cola 8.8   (+13% espera: PEOR)
-             (semillas 43 y 44 dan 17.8 y 17.1: el resultado es consistente, no mala suerte)
+  Escenario  Fijo   Actuado  RL     RL vs fijo                     Actuado vs fijo
+  cruce      23.2   15.5     21.7   -6.4 %  [-9.3, -2.7]   p=0.014   -33 %
+  cruce2     27.5   23.2     32.2   +16.7 % [+9.9, +25.4]  p=0.002   -16 %
+  corredor   31.9   20.9     33.9   +6.3 %  [+1.3, +11.0]  p=0.037   -34 %
+  red        22.2   21.4     25.1   +13.1 % [+12.0, +14.1] p=0.002   -4 %
 
-  corredor   (40 episodios, 2 agentes independientes)
-             tiempo fijo: espera 14.0 s/veh, timeLoss 31.4 s/veh, cola 7.2
-             Q-learning:  espera 10.3 s/veh, timeLoss 25.8 s/veh, cola 5.4   (-27% espera)
-             (el baseline ya incluye el offset tuneado de 25 s; contra offset 0
-              la mejora seria -54%. Los agentes RL ganan sin comunicarse porque
-              cada uno reacciona a la cola que le llega del vecino: ese es el
-              punto de partida para medir cuanto agrega la coordinacion de U4)
+  Secundarias del RL vs fijo (cruce / cruce2 / corredor / red): espera -26 / +18 / -13 / +4 %;
+  paradas +27 / +23 / +49 / +74 %; CO2 -1.5 / +4 / +1 / +5 %; cambios de fase +77 / +22 /
+  +74 / +56 %. Throughput: no discrimina (demanda subsaturada; 2-3 % de los vehiculos
+  llegan despues de los 3600 s con cualquier control).
+  Metas de la tesis cumplidas por el RL: retraso -25 % en ninguno; colas -20 % solo en
+  cruce y solo en la media (IC hasta -19 %); CO2 -5 % en ninguno. El actuado cumple
+  retraso -25 % en cruce y corredor.
+  Historial: una corrida previa de corredor y red (05.09, CSV *_v2) con el reloj de
+  decision desfasado (verde minimo efectivo 12 s) dio corredor -19 % y red +23 %; al
+  corregir el reloj a 10 s el corredor paso a +6 % y red a +13 %. Esas evaluaciones
+  quedaron sobreescritas; lo citable es lo de arriba.
 
-  red        (60 episodios, decaimiento de epsilon 0.95, 3 agentes independientes)
-             tiempo fijo: espera  7.4 s/veh, timeLoss 22.2 s/veh, cola 4.0
-             Q-learning:  espera  8.3 s/veh, timeLoss 25.5 s/veh, cola 4.6   (+13% espera: PEOR)
-             (semillas 43 y 44 dan 8.4 y 8.0: estable, no es mala suerte. Contra
-              el fijo SIN coordinar del mismo verde -offsets 0: 20.2 s- los
-              agentes ganan -59%; pierden solo contra la onda verde tuneada.
-              Con 3 cruces consecutivos la coordinacion anticipada vale mas que
-              la reaccion local: es la evidencia empirica que motiva U4)
-
-Notas de la prueba 2 (por que el Q-learning tabular NO gana en cruce2):
-  - Con verde minimo de 10 s en TODAS las fases el agente no bajaba de ~25 s de
-    espera (ciclo minimo 52 s, no podia despachar rapido una fase de giro vacia);
-    por eso las fases de giro protegido usan verde minimo de 5 s, comparable al
-    programa fijo que usa giros de 6 s.
-  - Con 4 fases el espacio de estados se duplica (4^4 colas x 4 fases = 1024) y
-    la politica greedy pura cae en estados poco visitados: con 60 episodios el
-    demo daba 33 s; con 120 episodios y exploracion mas lenta baja a 18 s, pero
-    sigue sin alcanzar al tiempo fijo tuneado (16 s). Durante el entrenamiento
-    (epsilon residual 0.05) si lo iguala (~14.8 s).
-  - Subir gamma a 0.95 para alargar el horizonte empeoro el demo y lo volvio
-    inestable entre semillas (30-80 s): sobreestimacion tipica del max de
-    Q-learning tabular con ruido. Se quedo gamma = 0.9.
-  - Conclusion util para la tesis: el metodo tabular toca techo al crecer el
-    numero de fases; es el argumento empirico para DQN/PPO en U2 (coincide con
-    Uniandes 2023, donde Q-learning fue el peor de los cuatro algoritmos).
+Lecciones
+  - El agente mejora mas la espera detenida que el retraso porque eso es lo que
+    penaliza la recompensa; cambia de fase mucho mas que el fijo (cruce: 233 vs 131
+    por hora) y por eso suben las paradas en los cuatro escenarios. Alinear la
+    recompensa con el retraso (penalizar el cambio de fase o incluir timeLoss) es
+    el siguiente paso en U2.
+  - corredor: con verde minimo efectivo de 12 s (reloj desfasado) los dos agentes
+    ganaban al fijo coordinado; con 10 s cambian de fase 463 veces por hora y
+    pierden. La politica tabular multiagente es fragil y sensible al verde minimo;
+    una sola corrida de entrenamiento no la caracteriza.
+  - cruce2: el Q-learning tabular toca techo con 4 fases (1024 estados, visita 390);
+    la politica greedy cae en estados poco visitados. Mas episodios no lo arreglan
+    (evaluacion intermedia estancada). Es el argumento empirico para DQN/PPO.
+    No insistir con gamma 0.95 (inestable) ni con desempate "mantener fase".
+  - red: agentes independientes pierden contra la onda verde tuneada de tres cruces;
+    la evaluacion intermedia se estanca en 25-26 s desde el episodio 15. Contra el
+    mismo fijo SIN desfases (41.6 s de retraso en barrido_red.csv) ganarian por mucho:
+    pierden solo contra la coordinacion. La coordinacion anticipada vale mas que la
+    reaccion local: evidencia para U4.
+  - Reentrenar desde cero reprodujo byte a byte las Q-tables de cruce, cruce2 y
+    corredor (git no las marca como modificadas); solo cambio la de red porque paso
+    de 60 a 100 episodios.
+  - El actuado de SUMO gana al agente en los cuatro escenarios: es la referencia
+    contra la que hay que medir cualquier RL, no solo el tiempo fijo.
+  - Activar el dispositivo de emisiones no cambia la secuencia aleatoria de SUMO:
+    los numeros historicos de semilla 42 (9.30 s de espera en cruce) se reproducen.
+  - El RNG de Python se siembra en TODOS los modos (el desempate usa random). La
+    evaluacion greedy intercalada copia la Q-table y restaura el RNG, asi que no
+    altera el entrenamiento. La corrida original de cruce (9.4 -> 5.9, -38 %) no era
+    reproducible; su q_table quedo en q_table_cruce_original.json.

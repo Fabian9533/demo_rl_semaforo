@@ -1,0 +1,25 @@
+% Generado por tablas_tex.py a partir de los CSV del proyecto. No editar a mano.
+\begin{table}[H]
+\setstretch{1}
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{lrrrrrr}
+\toprule
+Métrica & Tiempo fijo & Actuado & Q-learning & \makecell{$\Delta$ RL vs fijo\\{}[IC95\,\%]} & $p$ & \makecell{$\Delta$ actuado\\vs fijo} \\
+\midrule
+Retraso (s/veh) & 27.54 $\pm$ 0.14 & 23.21 $\pm$ 0.15 & 32.15 $\pm$ 2.63 & +16.7\,\% [9.9, 25.4] & 0.00195 & $-$15.7\,\% \\
+Espera detenida (s/veh) & 15.63 $\pm$ 0.12 & 11.69 $\pm$ 0.14 & 18.51 $\pm$ 1.77 & +18.4\,\% [10.2, 28.7] & 0.00195 & $-$25.2\,\% \\
+Cola promedio (veh) & 7.49 $\pm$ 0.07 & 5.75 $\pm$ 0.06 & 9.21 $\pm$ 0.91 & +23.0\,\% [14.3, 34.0] & 0.00195 & $-$23.3\,\% \\
+Cola máxima (veh) & 22.50 $\pm$ 0.51 & 17.90 $\pm$ 0.63 & 29.90 $\pm$ 4.31 & +32.9\,\% [19.1, 50.9] & 0.00195 & $-$20.4\,\% \\
+Paradas por vehículo & 0.88 $\pm$ 0.01 & 0.84 $\pm$ 0.01 & 1.08 $\pm$ 0.08 & +23.5\,\% [17.5, 31.2] & 0.00195 & $-$4.1\,\% \\
+Throughput (veh) & 1840.60 $\pm$ 0.69 & 1844.40 $\pm$ 0.91 & 1842.50 $\pm$ 0.84 & +0.1\,\% [0.0, 0.2] & 0.0156 & +0.2\,\% \\
+CO$_2$ (g/veh) & 199.80 $\pm$ 0.26 & 192.91 $\pm$ 0.27 & 207.88 $\pm$ 4.29 & +4.0\,\% [2.5, 6.0] & 0.00195 & $-$3.4\,\% \\
+NO$_x$ (mg/veh) & 69.32 $\pm$ 0.09 & 66.64 $\pm$ 0.11 & 72.19 $\pm$ 1.58 & +4.1\,\% [2.5, 6.2] & 0.00195 & $-$3.9\,\% \\
+Recompensa por decisión & $-$8.13 $\pm$ 0.07 & $-$6.00 $\pm$ 0.07 & $-$10.04 $\pm$ 1.02 & +23.6\,\% [14.5, 35.1] & 0.00195 & $-$26.2\,\% \\
+Cambios de fase & 230.80 $\pm$ 0.74 & 288.30 $\pm$ 2.34 & 280.80 $\pm$ 2.07 & +21.7\,\% [20.9, 22.4] & 0.00195 & +24.9\,\% \\
+\bottomrule
+\end{tabular}
+\caption[Escenario cruce2: evaluación con política congelada]{Escenario cruce2: evaluación con política congelada sobre 10 semillas (1001 a 1010), las mismas para los tres controles. Media $\pm$ IC95\,\%; el cambio porcentual lleva su intervalo bootstrap pareado y $p$ es el de la prueba de Wilcoxon pareada frente al fijo.}
+\label{tab:cruce2-evaluacion}
+\end{table}

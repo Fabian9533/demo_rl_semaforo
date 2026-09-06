@@ -54,56 +54,86 @@ segundo); la lista de divergencias está en el skill `escribir-tesis`, sección 
 - Q-learning: α=0.1, γ=0.9, ε-greedy con decaimiento 0.9 hasta 0.05 (cruce2
   necesitó decaimiento 0.96 y 120 episodios; hay flags --eps-decay y --gamma).
 - Episodio = 1 hora simulada (con margen hasta 6000 pasos para vaciar la red).
+- Reloj de decisión: cada agente decide a los 5, 10, 15... s de su verde (la
+  primera vez a los 5 s de entrar el verde), en ámbar no decide; así el verde
+  mínimo real es 10 s y el máximo 60 s también en rl_corredor.py (antes del
+  05.09 el reloj global lo dejaba en 12/62 s). La recompensa que se reporta en el
+  CSV se mide cada 5 s de reloj fijo en los cuatro modos; la que ve el agente
+  para aprender sigue su propio reloj.
+- Evaluación intermedia (política congelada) cada 5 episodios con semilla 999,
+  sobre una copia de la Q-table y restaurando el RNG; evaluación final con
+  semillas 1001–1010.
 
 ## Comandos
 
 ```
-python rl_semaforo.py baseline [--escenario cruce|cruce2] [--gui]
-python rl_semaforo.py train    [--escenario cruce|cruce2] --episodios 40
-python rl_semaforo.py demo     [--escenario cruce|cruce2] --gui
-python rl_corredor.py baseline|train|demo [--escenario corredor|red] [--gui]
-python graficar.py [cruce|cruce2|corredor|red]           # curva_aprendizaje_<esc>.png
+python rl_semaforo.py baseline|actuado|train|demo [--escenario cruce|cruce2] [--gui]
+python rl_semaforo.py train --escenario cruce --episodios 40 --desde-cero   # eval greedy cada 5 ep
+python rl_corredor.py baseline|actuado|train|demo [--escenario corredor|red] [--gui]
+python evaluar.py --escenario <esc>        # fijo, actuado y RL con semillas 1001-1010 + estadistica
+python barrer_fijo.py <esc>                # barrido del programa fijo por retraso
+python graficar.py <esc>                   # fig_<esc>_curva|comparacion|serie|ecdf|qtable.png
+python tablas_tex.py                       # tablas LaTeX en TESIS/secciones/tablas/
 ```
+Episodios y decaimiento por escenario: cruce 40 (0.9), cruce2 120 (0.96),
+corredor 40 (0.9), red 100 (0.95). `comun.py` tiene lo compartido (métricas del
+tripinfo, programa actuado, CSV, series).
 
-Salidas por escenario: `q_table_<esc>.json`, `resultados_<esc>.csv`,
-`tripinfo_<esc>_<modo>.xml`, `curva_aprendizaje_<esc>.png`.
+Salidas por escenario: `q_table_<esc>.json`, `resultados_<esc>.csv` (por episodio,
+con semilla, U3 y eval greedy; el formato viejo quedó en `resultados_<esc>_v1.csv`),
+`evaluacion_<esc>.csv` y `_resumen.csv`, `vehiculos_<esc>_<control>.csv`,
+`serie_<esc>_<control>_s<semilla>.csv`, `barrido_<esc>.csv`, `fig_<esc>_*.png`,
+`tripinfo_<esc>_<modo>.xml`. Las figuras se copian a `TESIS/images/` y los scripts
+a `TESIS/codigo/` (los incluye el anexo) cada vez que cambian.
 
-## Resultados validados (semilla 42; detalles y notas en LEEME.txt)
+## Resultados validados (protocolo del plan de pruebas, 05.09.2026)
 
-| Escenario | Tiempo fijo (tuneado) | Q-learning (demo greedy) | Δ espera |
-|---|---|---|---|
-| cruce (40 ep) | 9.3 s/veh | 6.4 s/veh | −31 % |
-| cruce2 (120 ep, eps-decay 0.96) | 16.0 s/veh | 18.0 s/veh | +13 % (peor) |
-| corredor (40 ep, 2 agentes) | 14.0 s/veh | 10.3 s/veh | −27 % |
-| red (60 ep, eps-decay 0.95, 3 agentes) | 7.4 s/veh (onda verde) | 8.3 s/veh | +13 % (peor) |
+Política congelada, 10 semillas de evaluación 1001–1010 comunes a los tres
+controles; retraso = timeLoss por vehículo; Δ con IC95 % bootstrap pareado y p de
+Wilcoxon. Fuente: `evaluacion_<esc>_resumen.csv` (se regenera con `evaluar.py`).
 
-Advertencia (verificado el 04.09.2026 con 5 y 10 semillas): estos Δ son de espera
-detenida (waitingTime) y de una sola semilla. En timeLoss, que es el "retraso" de
-las metas, cruce no mejora (23.0 vs 23.0 s/veh), el agente sube las paradas por
-vehículo +36 % y el actuado nativo de SUMO con las mismas restricciones gana al
-Q-learning por ~50 %. No citar el −31 % como retraso. Los números de esta
-advertencia se midieron en corridas fuera del proyecto (scratchpad de la sesión
-del 04.09.2026) y todavía no se regeneran con ningún script del proyecto: son
-provisionales hasta que exista la evaluación por semillas del plan de pruebas
-(skill escribir-tesis, sección 6), y no van al documento antes de eso.
+| Escenario | Fijo tuneado | Actuado SUMO | Q-learning | RL vs fijo | Actuado vs fijo |
+|---|---|---|---|---|---|
+| cruce (40 ep) | 23.2 s | 15.5 s | 21.7 s | −6.4 % [−9.3, −2.7], p=0.014 | −33 % |
+| cruce2 (120 ep, decay 0.96) | 27.5 s | 23.2 s | 32.2 s | +16.7 % [+9.9, +25.4], p=0.002 | −16 % |
+| corredor (40 ep, 2 agentes) | 31.9 s | 20.9 s | 33.9 s | +6.3 % [+1.3, +11.0], p=0.037 | −34 % |
+| red (100 ep, decay 0.95, 3 agentes) | 22.2 s | 21.4 s | 25.1 s | +13.1 % [+12.0, +14.1], p=0.002 | −4 % |
+
+Secundarias del RL vs fijo (cruce / cruce2 / corredor / red): espera −26 / +18 /
+−13 / +4 %; paradas +27 / +23 / +49 / +74 %; CO2 −1.5 / +4 / +1 / +5 %.
+Throughput no discrimina (demanda subsaturada). Metas cumplidas por el RL:
+retraso −25 % en ninguno; colas −20 % solo en cruce y solo en la media; CO2 −5 %
+en ninguno. Los números viejos de una semilla (−31 % de espera en cruce, etc.)
+quedaron en `resultados_<esc>_v1.csv`; los de la corrida con el reloj de decisión
+desfasado (corredor −19 %, red +23 %) en `resultados_<esc>_v2.csv`. Ninguno se cita.
 
 Reglas y lecciones que salieron de estas corridas:
-- Los baselines NO son débiles a propósito: verde barrido por escenario, y en el
-  corredor también el offset entre semáforos (0→25 s bajó la espera de 22.4 a
-  14.0). Tunear igual antes de comparar cualquier escenario nuevo.
-- cruce2 es el hallazgo: el Q-learning tabular toca techo con 4 fases (1024
-  estados; la política greedy cae en estados poco visitados). Es el argumento
-  empírico para DQN/PPO en U2. No insistir con: γ=0.95 (sobreestimación,
-  inestable entre semillas), desempate "mantener fase" (retiene 60 s y es peor),
-  ni más episodios sin cambiar la representación.
-- red es el otro hallazgo: agentes independientes ganan −59 % contra un fijo sin
-  coordinar, pero pierden +13 % contra la onda verde tuneada de 3 cruces — la
-  coordinación anticipada vale más que la reacción local cuando hay varios
-  semáforos consecutivos. Es la evidencia empírica que motiva U4.
-- El RNG se siembra en TODOS los modos (el desempate de acciones usa random);
-  los demos son deterministas por semilla. La corrida original de cruce
-  (9.4→5.9, −38 %) no era reproducible con el código actual; su q_table quedó
-  respaldada en q_table_cruce_original.json.
+- Los baselines NO son débiles: verde y offsets barridos por escenario, y el
+  barrido por retraso (`barrer_fijo.py`, `barrido_<esc>.csv`) confirmó los
+  valores actuales. Tunear igual antes de comparar cualquier escenario nuevo, y
+  comparar siempre también contra el actuado, que gana al RL en los cuatro casos.
+- El agente mejora la espera detenida mucho más que el retraso porque eso es lo
+  que penaliza la recompensa; cambia de fase ~77 % más que el fijo y sube las
+  paradas. Alinear la recompensa con el retraso (penalizar cambios de fase o
+  incluir timeLoss) es un cambio de formulación pendiente, que exige actualizar
+  código y capitulo4.tex a la vez.
+- cruce2 es el hallazgo del techo tabular: 1024 estados, el agente visita 390 y la
+  política greedy cae en estados poco visitados; la evaluación intermedia se
+  estanca, más episodios no ayudan. Argumento empírico para DQN/PPO. No insistir
+  con γ=0.95 (inestable) ni con desempate "mantener fase".
+- red es el hallazgo de coordinación: tres agentes independientes pierden +13 %
+  contra la onda verde tuneada (y ganarían por mucho al mismo fijo sin desfases,
+  41.6 s) y la evaluación intermedia se estanca en 24–25 s desde el episodio 5.
+  Evidencia empírica que motiva U4.
+- corredor es el hallazgo de fragilidad: con verde mínimo efectivo de 12 s los
+  dos agentes ganaban −19 %; con el reloj corregido a 10 s cambian de fase 463
+  veces por hora y pierden +6 %. La política tabular multiagente es sensible al
+  verde mínimo y una sola corrida de entrenamiento no la caracteriza.
+- El RNG de Python se siembra en TODOS los modos (el desempate usa random). La
+  evaluación greedy intercalada copia la Q-table y restaura el RNG: el
+  entrenamiento reproduce el CSV dígito a dígito. Activar el dispositivo de
+  emisiones tampoco cambia la secuencia aleatoria de SUMO. La corrida original de
+  cruce (9.4→5.9) no era reproducible; su q_table quedó en q_table_cruce_original.json.
 
 ## Tesis: regla de trabajo
 
@@ -125,13 +155,14 @@ corrida de una semilla es provisional y se queda en el CSV. Métrica primaria:
 timeLoss por vehículo (el "retraso" de las metas); espera detenida, colas,
 paradas, throughput y CO2 son secundarias.
 
-Antes de editar `TESIS/`: confirmar que la copia local está al día con Overleaf,
-respaldar `main.tex`, `referencias.bib` y `secciones/` en
-`respaldo_tesis/<fecha_hora>/`, y que ninguna otra sesión esté editando. Al
-terminar: diff contra el respaldo y lista de archivos a resubir. Resumen,
-abstract, metas y objetivos, capítulo 1 y los captions del autor solo se cambian
-de contenido con confirmación previa; `tesisutec.cls` y los paquetes de
-`main.tex` no se tocan.
+Sincronización con Overleaf: `TESIS/` es una copia de lo que hay en Overleaf.
+Se edita aquí y Fabian resube los archivos cambiados; si alguien edita en
+Overleaf directamente, descarga a `TESIS/` antes de la siguiente sesión. Antes
+de editar `TESIS/`: `git status` limpio (o commit de lo pendiente) y ninguna otra
+sesión editando. Al terminar: `git diff -- TESIS/` en el reporte y la lista de
+archivos a resubir. Resumen, abstract, metas y objetivos, capítulo 1 y los
+captions del autor solo se cambian de contenido con confirmación previa;
+`tesisutec.cls` y los paquetes de `main.tex` no se tocan.
 
 ## Convenciones (importan para el documento de tesis)
 
@@ -150,25 +181,23 @@ de contenido con confirmación previa; `tesisutec.cls` y los paquetes de
 
 Windows 10, SUMO 1.25 (SUMO_HOME definido, binarios en PATH), Python 3.14 con
 traci, sumolib, matplotlib, numpy, scipy, pypdf (sin pandas). Sin GPU asumida.
-No hay repositorio git. Sin LaTeX local: la tesis se compila en Overleaf y los
-.tex se revisan con `python TESIS/validar_tex.py`.
+Repositorio git local (rama `main`, desde el 05.09.2026); los commits los hace
+Fabian salvo que pida lo contrario. `respaldo_tesis/` fue el respaldo manual
+previo al git y se puede borrar cuando Overleaf compile bien. Sin LaTeX local: la
+tesis se compila en Overleaf y los .tex se revisan con
+`python TESIS/validar_tex.py`.
 
 ## Pendientes conocidos de la tesis
 
 - Traer el cruce real de Lima (OSM limpio) a este pipeline y repetir las pruebas.
 - SARSA, DQN y PPO (stable-baselines3) para la comparación algorítmica del cap. I.
-- Métricas U3 faltantes: throughput, paradas/veh, emisiones (CO2, NOx).
-- Análisis estadístico: varias semillas, IC95 %, Mann–Whitney.
 - U4 real: estado extendido con vecinos, mensajería y penalización por spillback
   (rl_corredor.py usa agentes independientes, todavía sin comunicación).
-- Alinear `capitulo4.tex` (U2) con el código: decisión cada 5 s, traci.start y
-  close por episodio, estado con índice de fase, schedule de ε, verde mín/máx,
-  definición de episodio y por qué 40 (lista completa en el skill escribir-tesis).
-- Escribir el plan de pruebas (capitulo4.tex) y los resultados (capitulo5.tex,
-  hoy vacío) con evaluación por semillas, IC95 % y actuado como tercer brazo;
-  agregar el script de evaluación por semillas y las columnas de semilla,
-  paradas, throughput y CO2 al CSV.
-- Re-barrer los baselines fijos por timeLoss (se tunearon por espera detenida).
+- Alinear la recompensa con la métrica primaria (penalizar cambios de fase o
+  incluir timeLoss): cambio de formulación, actualizar código y capitulo4.tex.
+- Varias semillas base de entrenamiento por escenario (hoy una sola corrida).
+- Conclusiones y recomendaciones de la tesis siguen vacías; el capítulo IV
+  (capitulo5.tex) ya tiene resultados de los cuatro casos.
 - Decidir el ámbar: el documento fija 4 s como mínimo y los escenarios usan 3 s.
 - Unificar la lista de algoritmos en el documento (capítulo 1 dice PPO, A2C y
   DQN; el resto Q-learning, SARSA, DQN y PPO; capítulo 4 menciona DDPG).

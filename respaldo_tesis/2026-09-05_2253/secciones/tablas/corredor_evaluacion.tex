@@ -1,0 +1,25 @@
+% Generado por tablas_tex.py a partir de los CSV del proyecto. No editar a mano.
+\begin{table}[H]
+\setstretch{1}
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{lrrrrrr}
+\toprule
+Métrica & Tiempo fijo & Actuado & Q-learning & \makecell{$\Delta$ RL vs fijo\\{}[IC95\,\%]} & $p$ & \makecell{$\Delta$ actuado\\vs fijo} \\
+\midrule
+Retraso (s/veh) & 31.86 $\pm$ 1.52 & 20.91 $\pm$ 0.25 & 33.86 $\pm$ 1.66 & +6.3\,\% [1.3, 11.0] & 0.0371 & $-$34.4\,\% \\
+Espera detenida (s/veh) & 14.18 $\pm$ 0.91 & 5.90 $\pm$ 0.14 & 12.27 $\pm$ 0.50 & $-$13.5\,\% [$-$18.1, $-$9.3] & 0.00195 & $-$58.4\,\% \\
+Cola promedio (veh) & 7.27 $\pm$ 0.43 & 3.32 $\pm$ 0.07 & 6.38 $\pm$ 0.23 & $-$12.2\,\% [$-$16.4, $-$8.4] & 0.00195 & $-$54.4\,\% \\
+Cola máxima (veh) & 24.10 $\pm$ 2.06 & 16.70 $\pm$ 1.01 & 22.40 $\pm$ 1.66 & $-$7.1\,\% [$-$14.8, 1.3] & 0.23 & $-$30.7\,\% \\
+Paradas por vehículo & 1.03 $\pm$ 0.04 & 0.83 $\pm$ 0.02 & 1.54 $\pm$ 0.08 & +49.3\,\% [43.0, 55.9] & 0.00195 & $-$19.8\,\% \\
+Throughput (veh) & 1754.90 $\pm$ 3.81 & 1766.50 $\pm$ 1.27 & 1757.50 $\pm$ 3.85 & +0.1\,\% [$-$0.1, 0.4] & 0.367 & +0.7\,\% \\
+CO$_2$ (g/veh) & 241.13 $\pm$ 2.41 & 221.59 $\pm$ 0.59 & 244.32 $\pm$ 2.70 & +1.3\,\% [0.3, 2.2] & 0.0371 & $-$8.1\,\% \\
+NO$_x$ (mg/veh) & 83.16 $\pm$ 0.85 & 75.94 $\pm$ 0.18 & 83.81 $\pm$ 0.92 & +0.8\,\% [$-$0.2, 1.7] & 0.186 & $-$8.7\,\% \\
+Recompensa por decisión & $-$3.83 $\pm$ 0.24 & $-$1.58 $\pm$ 0.04 & $-$3.22 $\pm$ 0.12 & $-$15.8\,\% [$-$20.1, $-$11.9] & 0.00195 & $-$58.8\,\% \\
+Cambios de fase & 266.20 $\pm$ 1.34 & 459.30 $\pm$ 4.17 & 462.70 $\pm$ 3.04 & +73.8\,\% [72.4, 75.2] & 0.00195 & +72.5\,\% \\
+\bottomrule
+\end{tabular}
+\caption[Escenario corredor: evaluación con política congelada]{Escenario corredor: evaluación con política congelada sobre 10 semillas (1001 a 1010), las mismas para los tres controles. Media $\pm$ IC95\,\%; el cambio porcentual lleva su intervalo bootstrap pareado y $p$ es el de la prueba de Wilcoxon pareada frente al fijo.}
+\label{tab:corredor-evaluacion}
+\end{table}

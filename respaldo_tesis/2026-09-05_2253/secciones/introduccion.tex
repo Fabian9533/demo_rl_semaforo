@@ -1,0 +1,96 @@
+\customchapter{INTRODUCCIÓN} 
+
+\introsection{Presentación del tema de investigación}
+
+La congestión vehicular en Lima Metropolitana afecta de manera crítica la movilidad urbana, el tiempo de viaje y la calidad del aire. Este trabajo propone \textbf{optimizar el control semafórico} de una intersección (o pequeño corredor) de alto tráfico en Lima mediante \textbf{Aprendizaje por Refuerzo (RL)} y validación en el simulador \textbf{SUMO}. Se adopta un enfoque \textit{multiagente} (un agente por intersección) y una evaluación rigurosa frente a esquemas tradicionales (fijo y actuado). El estudio se centra en el desarrollo de un \textit{pipeline} reproducible de datos \textrightarrow\ preprocesamiento \textrightarrow\ SUMO \textrightarrow\ RL \textrightarrow\ evaluación. 
+
+\introsection{Descripción de la situación problemática}
+
+En intersecciones y corredores urbanos de alto flujo se originan colas extensas, tiempos de espera elevados y variabilidad temporal significativa (picos laborales/escolares, eventos, incidentes). Los controladores semafóricos de \textit{tiempo fijo} y varios esquemas \textit{actuados} no capturan adecuadamente esta dinámica, lo que limita su efectividad. La consecuencia es un aumento del \textit{delay} por vehículo, mayor número de paradas, menor \textit{throughput} y un incremento de emisiones contaminantes locales.
+
+\introsection{Formulación del problema}
+
+\textbf{Problema central:} Crear un modelo que reduzca el \textbf{retraso promedio por vehículo} en un punto de alto tráfico en Lima Metropolitana mediante semaforización adaptativa basada en \textbf{RL}, y validarlo en \textbf{SUMO}.
+
+\textbf{Metas cuantificables:}
+\begin{itemize}
+    \item Reducción del retraso promedio por vehículo en \textbf{25–40\%} respecto a control fijo.
+    \item Disminución de la longitud promedio de colas en \textbf{$\geq$20\%}.
+    \item Incremento del \textit{throughput} en \textbf{$\geq$10\%}.
+    \item Reducción de emisiones (CO\textsubscript{2}) en \textbf{$\geq$5\%} (estimación SUMO).
+\end{itemize}
+
+\introsection{Objetivos de investigación}
+
+\textbf{Objetivo general:} Diseñar y evaluar un \textbf{modelo de control de semáforos} basado en \textbf{RL}, con \textbf{coordinación distribuida} entre intersecciones, validado en \textbf{SUMO} para reducir tiempos de espera y colas en Lima Metropolitana.
+
+\textbf{Objetivos específicos:}
+\begin{itemize}
+    \item (U1) Recopilar y preprocesar datos de tráfico y convertirlos a formato SUMO (\texttt{.net.xml}, \texttt{.rou.xml}).
+    \item (U2) Diseñar estados, acciones y recompensas para agentes de RL que controlen fases semafóricas; implementar y comparar \textbf{Q-learning, SARSA, DQN y PPO}.
+    \item (U3) Validar en SUMO con métricas: \textit{delay}, colas, \textit{throughput}, paradas y emisiones.
+    \item \textbf{(U4) Implementar \textit{coordinación distribuida} entre semáforos:} añadir una \textbf{capa de mensajería} entre agentes vecinos (fase actual, colas/salidas previstas), un \textbf{estado extendido} que incorpore información de vecinos y una \textbf{recompensa con penalización por \textit{spillback}}. Evaluar variantes multiagente (IPPO/MAPPO) y su impacto a nivel de \textit{corredor}.
+    \item Proponer buenas prácticas para reproducibilidad (scripts, semillas, análisis estadístico con IC95\%).
+\end{itemize}
+
+
+\introsection{Justificación}
+
+\textbf{Social y económica:} reducción de tiempos de viaje y variabilidad, mayor productividad y menor gasto de combustible. \textbf{Ambiental:} menor número de paradas y de tiempos de ralentí, con potencial disminución de CO\textsubscript{2} y NOx. \textbf{Académica y tecnológica:} aplicación de técnicas de \textbf{RL multiagente} sobre un caso realista de Lima, con comparación sistemática frente a semaforización fija/actuada y un \textit{pipeline} abierto y reproducible.
+
+\introsection{Alcance y limitaciones / restricciones}
+
+\textbf{Alcance:}
+\begin{itemize}
+    \item Modelado de un tramo representativo de intersecciones en Lima Metropolitana.
+    \item Entrenamiento de agentes RL (multiagente, un agente por intersección) en SUMO con escenarios de hora punta y valle.
+    \item Comparación con semaforización fija y actuada.
+\end{itemize}
+
+\textbf{No incluido en esta fase:}
+\begin{itemize}
+    \item Implementación en hardware real de semáforos.
+    \item Cobertura completa de toda la red vial de Lima.
+\end{itemize}
+
+\introsection{Áreas de investigación y herramientas}
+
+\begin{itemize}
+    \item \textbf{Ingeniería de transporte:} SUMO, OpenStreetMap, métricas de tráfico.
+    \item \textbf{Inteligencia Artificial:} Python, \texttt{stable-baselines3} (PPO, DQN), PyTorch.
+    \item \textbf{Procesamiento de datos:} Python (\texttt{pandas}, \texttt{numpy}), SUMO tools (\texttt{netconvert}, \texttt{duarouter}).
+    \item \textbf{Modelado y simulación:} SUMO + TraCI; Docker (opcional).
+    \item \textbf{Estadística y visualización:} \texttt{scipy}, \texttt{matplotlib}; pruebas de comparación.
+\end{itemize}
+
+\introsection{Métricas de evaluación}
+
+\begin{itemize}
+    \item Tiempo promedio de viaje y de espera por vehículo.
+    \item Longitud de colas (promedio y máxima) por intersección.
+    \item \textit{Throughput} (vehículos/hora).
+    \item Número de paradas por vehículo.
+    \item Emisiones estimadas (CO\textsubscript{2}, NOx, consumo de combustible) según SUMO.
+    \item Recompensa acumulada y curvas de convergencia de los algoritmos RL.
+\end{itemize}
+
+\introsection{Arquitectura modular propuesta (visión general)}
+
+Se adopta una arquitectura con cuatro unidades: 
+\textbf{U1} Preprocesamiento (datos \textrightarrow\ SUMO), 
+\textbf{U2} RL (entorno Gym + agentes y entrenamiento), 
+\textbf{U3} SUMO (simulación y medición) y 
+\textbf{U4} \textbf{Coordinación distribuida}.
+
+\textbf{Flujo:} U1 alimenta a U3 (red y rutas); U3 expone estados y métricas vía TraCI; U2 decide acciones (fases) que se aplican en U3. En U4, cada agente intercambia \textit{mensajes} con sus intersecciones vecinas (p.\,ej., \emph{fase actual, tiempo restante, outflow estimado hacia el vecino, colas en salidas}) y \textbf{amplía su estado} con un \emph{resumen de vecinos} para coordinar \textit{ondas verdes} y evitar \textit{spillback}.
+
+
+\introsection{Plan de trabajo (breve)}
+
+\begin{enumerate}
+    \item Recolección y preprocesamiento de datos (2–4 semanas).
+    \item Modelado en SUMO y escenario base (2–3 semanas).
+    \item Implementación del entorno Gym + TraCI y agentes RL (3–6 semanas).
+    \item Entrenamiento y experimentos comparativos (4–8 semanas).
+    \item Análisis estadístico, redacción de resultados y recomendaciones (3–4 semanas).
+\end{enumerate}

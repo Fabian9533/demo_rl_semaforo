@@ -1,0 +1,10 @@
+\customchapter{RESUMEN}
+
+En Lima Metropolitana existen puntos críticos de congestión vehicular, especialmente en intersecciones y corredores urbanos de alto tráfico. Esta investigación propone \textbf{reducir el retraso promedio por vehículo} mediante \textbf{semaforización adaptativa} con \textbf{Aprendizaje por Refuerzo (RL)} y validación en \textbf{SUMO}.
+
+La solución consiste en un \textit{pipeline} reproducible con cuatro unidades: (U1) datos y preprocesamiento; (U2) agentes de \textbf{RL} (un agente por intersección); (U3) simulación y medición en SUMO; y (U4) \textbf{coordinación distribuida entre semáforos}. En U4, cada agente comparte mensajes ligeros con sus \textit{vecinos} (fase actual, colas previstas, salida esperada) para \textbf{coordinar ondas verdes} y \textbf{evitar spillback}. Se implementarán y compararán \textbf{Q-learning, SARSA, DQN y PPO}; y, para coordinación, enfoques multiagente (IPPO/MAPPO) con \textbf{estado extendido} y \textbf{recompensa con término de coordinación}.
+
+Las métricas de salida incluyen: \textit{delay} y tiempo de viaje, colas (promedio/máxima), \textit{throughput} (veh/h), paradas/vehículo, emisiones (CO\textsubscript{2}, NOx) y recompensa acumulada. Como metas indicativas en simulación: \textbf{25–40\% de reducción del retraso} frente a control fijo y \textbf{$\geq$20\% de reducción de colas}, con mejoras adicionales al activar U4.
+
+\noindent \textbf{Palabras clave:}\\
+\noindent semáforos inteligentes; aprendizaje por refuerzo; coordinación distribuida; SUMO; Lima Metropolitana; control de tráfico

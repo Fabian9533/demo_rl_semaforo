@@ -1,0 +1,21 @@
+% Generado por tablas_tex.py a partir de los CSV del proyecto. No editar a mano.
+\begin{table}[H]
+\setstretch{1}
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{lrrrrrrrrr}
+\toprule
+ & \multicolumn{3}{c}{Retraso (s/veh)} & \multicolumn{2}{c}{RL vs fijo} & Actuado & \multicolumn{3}{c}{RL vs fijo, secundarias} \\
+\cmidrule(lr){2-4}\cmidrule(lr){5-6}\cmidrule(lr){7-7}\cmidrule(lr){8-10}
+Escenario & Fijo & Actuado & RL & $\Delta$ [IC95\,\%] & $p$ & $\Delta$ vs fijo & Espera & Paradas & CO$_2$ \\
+\midrule
+cruce & 23.19 & 15.46 & 21.72 & $-$6.4\,\% [$-$9.3, $-$2.7] & 0.0137 & $-$33.4\,\% & $-$25.9\,\% & +27.4\,\% & $-$1.5\,\% \\
+cruce2 & 27.54 & 23.21 & 32.15 & +16.7\,\% [9.9, 25.4] & 0.00195 & $-$15.7\,\% & +18.4\,\% & +23.5\,\% & +4.0\,\% \\
+corredor & 31.86 & 20.91 & 33.86 & +6.3\,\% [1.3, 11.0] & 0.0371 & $-$34.4\,\% & $-$13.5\,\% & +49.3\,\% & +1.3\,\% \\
+red & 22.22 & 21.42 & 25.12 & +13.1\,\% [12.0, 14.1] & 0.00195 & $-$3.6\,\% & +3.6\,\% & +74.1\,\% & +5.3\,\% \\
+\bottomrule
+\end{tabular}
+\caption[Resumen por escenario]{Resumen por escenario: retraso promedio por vehículo con política congelada, 10 semillas de evaluación comunes a los tres controles. La meta de la tesis es $-25\,\%$ de retraso frente al fijo.}
+\label{tab:resumen-escenarios}
+\end{table}

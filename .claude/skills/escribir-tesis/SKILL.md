@@ -16,13 +16,14 @@ El usuario compila en Overleaf; en esta maquina no hay LaTeX.
 
 ## 0. Antes de editar (salvaguardas)
 
-- Copia maestra. Confirmar con el usuario que `TESIS/` esta al dia con Overleaf
-  antes del primer cambio. Al terminar, listar los archivos exactos que debe
-  resubir. Una sola sesion edita `TESIS/` a la vez.
-- Respaldo. Antes del primer cambio de la sesion copiar `main.tex`,
-  `referencias.bib` y `secciones/` a `respaldo_tesis/<AAAA-MM-DD_HHMM>/` (fuera de
-  `TESIS/`, para que no suba a Overleaf). En el reporte final, `diff -u` por
-  archivo contra ese respaldo.
+- Sincronizacion. `TESIS/` es una copia de lo que hay en Overleaf: se edita aqui y
+  el usuario resube los archivos cambiados. Si el usuario edito en Overleaf,
+  debe descargar a `TESIS/` antes de la sesion; preguntarlo si hay duda. Al
+  terminar, listar los archivos exactos que debe resubir. Una sola sesion edita
+  `TESIS/` a la vez.
+- Respaldo. El proyecto tiene git: antes del primer cambio, `git status` debe
+  estar limpio (si no, pedir un commit o hacerlo si el usuario lo pide). En el
+  reporte final, `git diff -- TESIS/`. No hacer commits sin que el usuario lo pida.
 - Zonas protegidas. Su contenido solo se cambia con confirmacion previa, mostrando
   el texto propuesto: `resumen.tex`, `abstract.tex`, metas y objetivos de
   `introduccion.tex`, `capitulo1.tex`, captions de figuras del autor. Las
@@ -128,9 +129,17 @@ Que va donde:
 - Tablas: `\begin{table}[H]`, `\centering`, booktabs (`\toprule`, `\midrule`,
   `\bottomrule`), `\caption{}` despues del tabular y `\label{tab:nombre}` despues
   del caption (un label antes del caption toma el numero de la seccion). Unidades
-  en la cabecera (s/veh, veh). Tablas anchas: `\small` o tabularx. Tablas de mas
-  de una pagina: `longtable` no esta cargado; hay que pedir al usuario agregar
-  `\usepackage{longtable}` a main.tex y usar ese entorno sin `table`.
+  en la cabecera (s/veh, veh). El ancho de texto es 15 cm (A4, margenes de 3 cm,
+  Computer Modern 12 pt): una tabla de mas de 7 columnas numericas necesita
+  `\scriptsize` y `\setlength{\tabcolsep}{3pt}`; cabeceras largas en dos lineas
+  con `\makecell{...\\...}` (makecell esta cargado); columnas `p{}` deben sumar a
+  lo sumo 12.4 cm. `main.tex` pone `\setstretch{1.5}` y eso estira tambien las
+  filas de los tabulares: dentro de cada flotante poner `\setstretch{1}` justo
+  despues de `\begin{table}[H]`, y no pasar de unas 40 filas por tabla (un float
+  `[H]` no se parte entre paginas). Numeros negativos con `$-$`, no con guion.
+  Caption largo en el flotante y corto para el indice: `\caption[corto]{largo}`.
+  Tablas de mas de una pagina: `longtable` no esta cargado; partir en bloques
+  (asi lo hace `tablas_tex.py`) o pedir al usuario que agregue el paquete.
 - Figuras: `\begin{figure}[H]`, `\centering`, `\includegraphics[width=...]{nombre}`
   (graphicspath es `images/`, no repetirlo en las secciones; el nombre debe
   coincidir EXACTO en mayusculas con el archivo porque Overleaf es Linux), caption
@@ -161,15 +170,22 @@ Que va donde:
   ultimo token: apellidos compuestos como `{Apellido1 Apellido2, Nombre}` e
   instituciones entre doble llave `{{SUMO Project}}`; si no, salen "J. D. C. Mass"
   y "S. Project".
-- Ecuaciones: `\[ \]` o `equation` con `\label{eq:}`. La formula de la
-  recompensa esta en capitulo4 U2 pero incompleta (sin pesos ni definicion TraCI
-  de cada termino): completarla ahi, ponerle `\label{eq:recompensa}` y referirse
-  a ella desde capitulo5.
-- Codigo: `verbatim` para fragmentos cortos (asi esta el resto del documento);
-  scripts completos van a anexos con fecha y version de SUMO. El pseudocodigo
-  actual de capitulo4 U2 (traci.load por episodio, paso de 1 s, sin verde minimo)
-  se sustituye por el bucle real de `correr_episodio` recortado a 25-30 lineas
-  con las mismas variables del script.
+- Ecuaciones: `equation` con `\label{eq:}` y `Ecuación~\ref{}`. La clase no
+  redefine `\theequation`, asi que capitulo4.tex lleva al inicio
+  `\renewcommand{\theequation}{\arabic{chapter}.\arabic{equation}}` para que
+  salga 3.1 y no III.1; no repetirlo en otros archivos. La recompensa
+  implementada esta en capitulo4 U2 con `\label{eq:recompensa}`.
+- Codigo: `verbatim` para fragmentos cortos; los scripts completos van al Anexo B
+  con `\verbatiminput{codigo/<script>.py}` en `\scriptsize` y dentro de
+  `\begin{spacing}{1}` (setspace). `\verbatiminput` no parte lineas: en
+  scriptsize caben 116 caracteres, asi que las lineas de los scripts deben quedar
+  por debajo de 110 (`awk 'length > 110' *.py`). Los archivos de `TESIS/codigo/`
+  son copias: volver a copiarlos cada vez que cambie un script. No incluir
+  scripts con simbolos fuera de Latin-1 (graficar.py lleva ε y Δ en textos).
+- Semillas en el texto: entrenamiento 42 + episodio; evaluacion intermedia con
+  semilla 999 (fuera del entrenamiento y de la evaluacion final); evaluacion
+  final 1001 a 1010. Si `tablas_tex.py` o `graficar.py` cambian una constante,
+  revisar las frases del capitulo que la citan.
 - Capitulos sin numero: `\customchapter{TITULO}`. Secciones de la introduccion:
   `\introsection{Titulo}`.
 - Redaccion: mismo tono del documento (impersonal: "se propone", "se observa"),

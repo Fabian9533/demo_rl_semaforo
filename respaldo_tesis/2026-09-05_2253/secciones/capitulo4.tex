@@ -1,0 +1,810 @@
+\graphicspath{{images/}}
+\renewcommand{\theequation}{\arabic{chapter}.\arabic{equation}}
+
+\chapter{Marco metodológico}
+
+Este capítulo presenta de forma concisa los pasos técnicos y los
+requisitos necesarios para levantar un entorno de simulación de
+tráfico con SUMO y preparar el escenario que servirá de base para
+entrenar un agente de aprendizaje por refuerzo.  El objetivo es que
+cualquier lector pueda instalar SUMO, importar una intersección real
+mediante datos de OpenStreetMap (OSM), generar la red y las rutas
+vehiculares, y ejecutar la simulación desde la línea de comandos.  Se
+incluye además una descripción breve de las funciones de las unidades
+U1 (preprocesamiento) y U2 (entrenamiento) y los requisitos de
+hardware mínimos recomendados.
+
+\section{Alcance y unidades}
+
+\noindent\textbf{U1: Preprocesamiento.} Comprende todas las tareas
+relacionadas con la construcción del escenario.  Esto incluye la
+instalación y configuración de SUMO, la descarga y conversión de un
+recorte de OSM en una red SUMO, la generación de rutas básicas de
+vehículos y la creación de archivos de configuración reproducibles
+(\texttt{.net.xml} para la red, \texttt{.rou.xml} para la demanda y
+\texttt{.sumocfg} para el escenario).  El resultado de U1 es un
+escenario listo para simular.
+
+\noindent\textbf{U2: Entrenamiento.} Toma como entrada el escenario de
+U1 y ejecuta SUMO a través de la interfaz TraCI para que un agente de
+aprendizaje por refuerzo observe el estado del tráfico y modifique
+las fases de los semáforos.  En U2 no se modifican la red ni las
+rutas: el enfoque se centra en el algoritmo de control.
+
+\section{Requisitos de hardware}
+
+Para ejecutar U1 y U2 se recomiendan los recursos de la
+Tabla~\ref{tab:hw}.  U1 puede ejecutarse en un equipo doméstico
+modesto, mientras que U2 se beneficia de una GPU si se entrenan
+modelos complejos.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{p{3.5cm}p{5cm}p{5cm}}
+\hline
+ & \textbf{Mínimo (U1)} & \textbf{Recomendado (U1+U2)} \\
+\hline
+CPU & 4 hilos reales & 8--12 hilos \\
+RAM & 8~GB & 16--32~GB \\
+GPU & no requerida & $\geq$6~GB VRAM \\
+Almacenamiento & 10~GB SSD & 20--50~GB SSD \\
+Sistema operativo & Windows 10/11 o Ubuntu 20.04+ & Windows 10/11 o Ubuntu 20.04+ \\
+\hline
+\end{tabular}
+\caption{Recursos recomendados para construir y ejecutar el escenario.}
+\label{tab:hw}
+\end{table}
+
+\section{Instalación y configuración de SUMO}
+
+\begin{enumerate}
+  \item \textbf{Descargar e instalar SUMO.} Obtenga la versión estable
+    de SUMO desde el sitio oficial y siga las instrucciones de
+    instalación para su sistema operativo.  SUMO incluye varios
+    ejecutables de consola, como \emph{sumo} (simulación),
+    \emph{sumo-gui} (versión con interfaz gráfica) y
+    \emph{netconvert} (importación de redes).
+    Instale también Python~3, necesario para ejecutar los
+    scripts auxiliares.
+
+  \item \textbf{Configurar el entorno.} Defina la variable de
+    entorno \verb|SUMO_HOME| apuntando al directorio donde se instaló
+    SUMO y añada la carpeta \verb|bin| al \verb|PATH| del sistema.
+    Esto permite invocar los programas de SUMO desde cualquier
+    terminal.
+
+  \item \textbf{Verificar la instalación.} Abra una terminal y ejecute
+    los siguientes comandos.  Deben devolver la versión instalada de
+    SUMO para confirmar que el entorno está listo:
+
+    \begin{verbatim}
+sumo -V
+sumo-gui -V
+    \end{verbatim}
+\end{enumerate}
+
+%----------------------------------------------------------------------
+\section{Limpieza y configuración del escenario OSM $\rightarrow$ SUMO}
+
+Tras importar la red desde OSM, es necesario revisar y ajustar el
+escenario para que represente fielmente la intersección de estudio y
+resulte adecuado para el entrenamiento del agente de control. Este
+proceso consiste en eliminar elementos irrelevantes, corregir
+inconsistencias topológicas y configurar adecuadamente los semáforos y
+la demanda. A continuación se describe un procedimiento general:
+
+\subsection*{Eliminación y simplificación de la red}
+
+\begin{enumerate}
+  \item \textbf{Abrir la red en un editor.} Utilice \verb|sumo-gui| o
+    \texttt{netedit}, las herramientas de SUMO destinadas a la
+    inspección y edición de redes. Desde la interfaz gráfica se puede
+    seleccionar manualmente cada calle, carril e intersección para
+    examinar su geometría y atributos.
+
+  \item \textbf{Eliminar calles irrelevantes.} Desactive o borre los
+    segmentos de vía que no formen parte del cruce objeto de estudio.
+    En \texttt{netedit} esto puede realizarse en modo ``Edge''
+    seleccionando los elementos y pulsando la tecla Suprimir. También
+    se pueden modificar jerarquías de carreteras para mantener
+    únicamente arterias principales y desechar caminos secundarios.
+
+  \item \textbf{Ajustar sentidos de circulación.} Verifique que las
+    direcciones de cada carril coinciden con la realidad (por ejemplo,
+    si un carril debería ser unidireccional). En \texttt{netedit}
+    es posible invertir la dirección de un carril o fusionar dos
+    carriles paralelos empleando la herramienta de edición de lanes.
+
+  \item \textbf{Simplificar nodos complejos.} Algunas importaciones
+    desde OSM generan nodos excesivamente subdivididos. Estos pueden
+    fusionarse mediante la opción de simplificación de intersecciones
+    en \texttt{netconvert} o mediante edición manual. Una red más
+    simple facilita el entrenamiento y reduce tiempos de simulación.
+\end{enumerate}
+
+Tras completar estos pasos, la red se limpia y simplifica. La
+Figura~\ref{fig:netedit-before-after} muestra un ejemplo antes y
+después de la limpieza realizada en \texttt{netedit} para el cruce
+estudiado. Se observa cómo se eliminan calles secundarias y se ajusta
+la orientación de los carriles.
+
+\begin{figure}[H]
+  \centering
+  \subfigure[Vista inicial en \texttt{netedit} con la intersección
+    importada; hay calles secundarias y direcciones de carril
+    incorrectas.]{\includegraphics[width=0.48\textwidth]{NETEDIT.PNG}}
+  \hfill
+  \subfigure[Misma intersección tras la limpieza: calles irrelevantes
+    eliminadas y sentidos de los carriles corregidos.]{\includegraphics[width=0.48\textwidth]{conexiones.PNG}}
+  \caption{Antes y después de la limpieza de la red en \texttt{netedit}.}
+  \label{fig:netedit-before-after}
+\end{figure}
+
+\subsection*{Configuración de semáforos y demanda}
+
+\begin{enumerate}
+  \item \textbf{Revisar semáforos importados.} Si al generar el
+    escenario se activó la opción ``Traffic lights'', los semáforos
+    aparecerán como nodos \verb|<tlLogic>| en el archivo
+    \texttt{.net.xml}. Utilice \emph{sumo-gui} o \texttt{netedit}
+    para inspeccionar las fases (colores) y tiempos asignados
+    automáticamente. Ajuste los valores para que respeten las
+    normativas locales: por ejemplo, establezca un mínimo de cuatro
+    segundos de luz ámbar y defina duraciones de luz verde
+    proporcionales al flujo de cada aproximación.
+
+  \item \textbf{Crear o modificar programas de semáforos.} Para
+    controlar manualmente los semáforos se puede definir un archivo
+    adicional \texttt{.add.xml}. Un ejemplo sencillo de un programa
+    estático para una intersección de dos fases es:
+
+\begin{verbatim}
+<additional>
+  <tlLogic id="tl_cruce" type="static" programID="base" offset="0">
+    <!-- Fase 0: verde en NS, rojo en EW -->
+    <phase duration="30" state="GrGr"/>
+    <!-- Fase 1: ámbar en todas las aproximaciones -->
+    <phase duration="4"  state="yryr"/>
+    <!-- Fase 2: verde en EW, rojo en NS -->
+    <phase duration="30" state="rGrG"/>
+    <!-- Fase 3: ámbar en todas las aproximaciones -->
+    <phase duration="4"  state="ryry"/>
+  </tlLogic>
+</additional>
+\end{verbatim}
+
+    Este archivo debe referenciarse en el fichero \texttt{.sumocfg}
+    dentro del apartado \verb|<additional-files>| para que SUMO lo
+    cargue junto con la red y las rutas. Si se decide mantener los
+    semáforos generados automáticamente, conviene al menos fijar sus
+    tiempos mínimos y comprobar que las fases son coherentes.
+
+  \item \textbf{Configurar la demanda.} La generación de rutas con
+    \verb|randomTrips.py| produce una distribución uniforme de viajes
+    sobre la red. Para configurar tasas de llegada realistas
+    conviene ajustar el parámetro \verb|-p| (periodo medio entre
+    vehículos) y usar distintas semillas con \verb|--seed| para
+    reproducibilidad. Si se dispone de datos de tráfico, se pueden
+    definir flujos en un archivo \texttt{.rou.xml} indicando el
+    intervalo de tiempo, la tasa de arribo y el tipo de vehículo. Un
+    ejemplo básico de flujo es:
+
+\begin{verbatim}
+<routes>
+  <vType id="car" accel="2.6" decel="4.5" length="5" maxSpeed="13.9"/>
+  <flow id="f1" begin="0" end="900" vehsPerHour="600" type="car"
+        from="edgeWest" to="edgeEast"/>
+</routes>
+\end{verbatim}
+
+    Estas definiciones permiten controlar la intensidad y dirección del
+    tráfico, así como simular distintos tipos de vehículos (coches,
+    autobuses, motocicletas, etc.). Tras ajustar la demanda, use
+    \texttt{duarouter} para convertir los flujos en rutas específicas
+    si fuera necesario.
+
+  \item \textbf{Actualizar los archivos de configuración.} Una vez
+    depurada la red y configurados los semáforos y la demanda,
+    asegúrese de que el archivo de configuración \texttt{.sumocfg}
+    referencia correctamente todos los ficheros relevantes:
+    \texttt{.net.xml}, \texttt{.rou.xml} y, en su caso,
+    \texttt{.add.xml}. Ejecute una simulación breve para verificar
+    que el escenario se carga sin mensajes de error.
+\end{enumerate}
+
+\subsection*{Herramientas útiles}
+
+Para tareas de limpieza y configuración puede emplear las siguientes
+herramientas que acompañan a SUMO:
+
+\begin{itemize}
+  \item \textbf{netedit:} editor gráfico que permite crear, modificar
+    y depurar redes, así como editar semáforos, conexiones y
+    restricciones de circulación. Resulta idóneo para eliminar
+    segmentos irrelevantes y ajustar sentidos de vía.
+  \item \textbf{sumo-gui:} interfaz gráfica de simulación que permite
+    visualizar el comportamiento de los vehículos y los semáforos en
+    tiempo real. Es útil para validar la red depurada y detectar
+    cuellos de botella o comportamientos anómalos.
+  \item \textbf{duarouter:} herramienta para convertir definiciones de
+    flujos (\verb|<flow>|) en rutas concretas, realizando el cálculo
+    del recorrido óptimo entre origen y destino. Es necesaria cuando
+    se trabaja con demanda no uniforme basada en datos observados.
+\end{itemize}
+
+\section{Importación de un cruce desde OSM}
+
+Una vez instalado SUMO, el siguiente paso consiste en importar la
+intersección o corredor de interés.  Existen dos alternativas.
+
+\subsection{Asistente OSM (\emph{osmWebWizard})}
+
+\begin{enumerate}
+  \item Ejecute el script \verb|osmWebWizard.py| desde la carpeta de
+    herramientas de SUMO.  El script abre un navegador donde se puede
+    navegar sobre el mapa de OSM, seleccionar la zona deseada y
+    generar el escenario automáticamente.  El uso básico es:
+    \begin{verbatim}
+python tools/osmWebWizard.py
+    \end{verbatim}
+
+  \item Seleccione ``Lima, Peru'' en el buscador y ajuste el
+    \emph{bounding box} sobre la intersección de interés.  Active la
+    opción “Traffic lights” si desea que se importen los semáforos y
+    pulse “Generate Scenario”.  El asistente creará la red
+    \texttt{.net.xml}, una demanda aleatoria y un fichero
+    \texttt{.sumocfg}; además iniciará \emph{sumo-gui} con el
+    escenario resultante.  Los archivos se guardan en un
+    subdirectorio con marca temporal.
+
+  \item Revise la red en \emph{sumo-gui} y, si detecta calles
+    desconectadas o giros imposibles, ajuste el recorte y repita la
+    generación hasta obtener una red consistente.
+\end{enumerate}
+
+Para ilustrar este proceso, la Figura~\ref{fig:import-osm-sumo} muestra
+la selección del área en OSM y la red generada en SUMO. A la
+izquierda se observa el recuadro delimitado sobre el mapa en el asistente
+\emph{osmWebWizard}, y a la derecha la red importada tal como aparece en
+\emph{sumo-gui}.
+
+\begin{figure}[H]
+  \centering
+  \subfigure[Selección del \textit{bounding box} en OSM mediante el
+    asistente \emph{osmWebWizard}.]{\includegraphics[width=0.48\textwidth]{OSM.PNG}}
+  \hfill
+  \subfigure[Red del cruce generada automáticamente en \emph{sumo-gui}.]{\includegraphics[width=0.48\textwidth]{SUMO.PNG}}
+  \caption{Importación de un cruce desde OSM a SUMO.}
+  \label{fig:import-osm-sumo}
+\end{figure}
+
+\section{Generación y ejecución del escenario}
+
+\subsection{Generar rutas de vehículos}
+
+Con la red validada, se requieren rutas de vehículos para simular el
+tráfico:
+
+\begin{enumerate}
+  \item Para un escenario preliminar se puede recurrir a
+    \verb|randomTrips.py|.  Este script selecciona aleatoriamente
+    arcos de la red como origen y destino, distribuyendo los vehículos
+    entre un tiempo de inicio \verb|-b| y uno de fin \verb|-e|.
+    Se controla la intensidad del flujo con la opción \verb|-p| y se
+    garantiza reproducibilidad fijando una semilla con \verb|--seed|.
+    Un ejemplo básico que genera viajes durante 15 minutos con un
+    vehículo por segundo es:
+
+    \begin{verbatim}
+python tools/randomTrips.py -n lima.net.xml -b 0 -e 900 -p 1.0 \
+    --route-file rutas.rou.xml
+    \end{verbatim}
+
+  \item Si se dispone de datos observados (aforos o tiempos de viaje),
+    se pueden definir flujos origen–destino y enrutar con
+    \verb|duarouter|.  Este proceso requiere calibrar tasas de arribo
+    y cae fuera del alcance de este procedimiento básico.
+\end{enumerate}
+
+\subsection{Crear el archivo de configuración}
+
+Agrupe los archivos de red (\texttt{.net.xml}), rutas
+(\texttt{.rou.xml}) y, si procede, el programa de semáforos
+(\texttt{.add.xml}) en un único archivo de configuración
+\texttt{.sumocfg}.  Este fichero referencia todos los elementos de
+entrada y define los intervalos de simulación.
+
+\subsection{Ejecución de SUMO}
+
+\begin{enumerate}
+  \item Para simular de forma interactiva, ejecute SUMO con
+    interfaz gráfica:
+    \begin{verbatim}
+sumo-gui -c escenario.sumocfg
+    \end{verbatim}
+
+  \item Para simulaciones por lotes sin interfaz gráfica, utilice el
+    ejecutable \verb|sumo|:
+    \begin{verbatim}
+sumo -c escenario.sumocfg
+    \end{verbatim}
+    Los ejecutables de SUMO son aplicaciones de consola; las opciones
+    \verb|--net| y \verb|--route-files| permiten especificar
+    directamente los archivos de red y rutas si no se usa un
+    \texttt{.sumocfg}.
+\end{enumerate}
+
+\section{Escenarios sintéticos de prueba}
+\label{sec:escenarios}
+
+Mientras se completa la importación del cruce real de Lima, los
+módulos U2 y U3 se desarrollaron y validaron sobre cuatro escenarios
+sintéticos, construidos con \texttt{netconvert} a partir de archivos de
+nodos y vías escritos a mano, del más simple al más complejo
+(Tabla~\ref{tab:escenarios}). Todos comparten el mismo tipo de
+vehículo (turismo de 5~m, aceleración 2.6~m/s$^2$, velocidad máxima
+50~km/h, imperfección del conductor $\sigma = 0.5$) y el mismo patrón
+de demanda: una hora dividida en dos periodos de 30 minutos con la
+punta invertida, de modo que un programa de tiempo fijo no pueda ser
+óptimo en ambos a la vez. Los flujos se definen con
+\verb|<flow ... vehsPerHour>| por movimiento y periodo, lo que produce
+llegadas equiespaciadas; el ámbar es de 3~s en todos los casos (valor
+por defecto de \texttt{netconvert}).
+
+\begin{table}[H]
+\centering
+\small
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{p{1.3cm}p{3.4cm}p{1.4cm}p{3.4cm}p{1.2cm}p{2.1cm}}
+\toprule
+Escenario & Geometría & Fases verdes & Demanda del periodo punta (veh/h) & Vehículos en la hora & Programa fijo de referencia \\
+\midrule
+cruce & cruce N--S / E--O, 1 carril por sentido & 2 & eje principal 650 por sentido; transversal 150; giros 40 a 80 & 1844 & verde 25~s, ciclo 56~s \\
+cruce2 & 2 carriles por sentido más carril exclusivo de giro a la izquierda & 4 (2 principales y 2 de giro protegido) & recto 420 por sentido; giro izquierdo 160; transversal 200 & 1884 & verde 20~s, giro 6~s, ciclo 64~s \\
+corredor & dos cruces separados 300~m sobre una avenida E--O, 1 carril por sentido & 2 por cruce & avenida 600 en el sentido punta y 250 en el contrario; transversales 180 & 1810 & verde 25~s; desfase de 25~s en el segundo cruce (onda verde) \\
+red & rotonda sin semáforo más tres cruces separados 300~m sobre una avenida de 2 carriles por sentido & 2 por cruce & avenida 650 y 250; transversales 150; rotonda 80 a 150 & 2152 & verde 20~s; desfases 0, 23 y 0~s; ciclo 46~s \\
+\bottomrule
+\end{tabular}
+\caption{Escenarios sintéticos de prueba. La demanda del segundo periodo es la del primero con la punta invertida.}
+\label{tab:escenarios}
+\end{table}
+
+El programa fijo de cada escenario no es un baseline débil. El verde y,
+en los corredores, el desfase entre semáforos se ajustaron primero por
+barrido de la espera detenida y después se comprobaron con un barrido
+por retraso promedio sobre las semillas 1001 a 1003
+(\texttt{barrer\_fijo.py}, Anexo~B), cuya malla incluye la
+configuración usada: en cruce2, corredor y red esta resultó ser la de
+menor retraso de la malla, y en cruce queda 0.2~s por encima del verde
+de 24~s, dentro de la variación entre semillas. En red el desfase de
+23~s coincide con el tiempo de viaje entre cruces. Como segunda referencia se usa el control actuado
+nativo de SUMO, con las mismas fases y los mismos límites de verde
+mínimo y máximo que el agente (Sección~\ref{sec:plan}).
+
+\section{Diagrama de flujo del módulo U1}
+
+La Figura~\ref{fig:flow-u1} resume el procedimiento completo del módulo U1,
+desde la selección del cruce en Lima hasta la obtención del escenario SUMO
+listo para ser utilizado en el entrenamiento del agente de RL (U2).
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{U1.png}
+    \caption{Diagrama de flujo del módulo U1: preprocesamiento y generación del
+    escenario SUMO.}
+    \label{fig:flow-u1}
+\end{figure}
+
+\section{Resumen de las unidades}
+
+\begin{description}
+  \item[U1:] Instalar y configurar SUMO; importar la intersección
+    mediante el asistente OSM o descarga manual; limpiar y validar
+    la red; generar la demanda vehicular y el archivo de configuración
+    \texttt{.sumocfg}.  El resultado es un escenario reproducible.
+  \item[U2:] Ejecutar el escenario con TraCI y entrenar un agente de
+    aprendizaje por refuerzo que ajuste las fases semafóricas.  U2
+    depende exclusivamente de los archivos generados en U1 y no
+    modifica la red ni las rutas.
+  \item[U3:] Medir el desempeño de cada control con las mismas salidas
+    de SUMO (viajes por vehículo, colas por TraCI, emisiones) y
+    compararlo con el protocolo del plan de pruebas
+    (Secciones~\ref{sec:u3} y~\ref{sec:plan}).
+  \item[U4:] Coordinar los agentes de semáforos vecinos. Pendiente: en
+    los escenarios de varios cruces los agentes son, por ahora,
+    independientes.
+\end{description}
+
+%----------------------------------------------------------------------
+\section{Desarrollo del módulo U2: Aprendizaje por Refuerzo para el control de semáforos}
+
+El segundo módulo de la metodología aborda el diseño e
+implementación de un controlador inteligente que modifique las fases
+de los semáforos en función del estado del tráfico. Para ello se
+recurre a técnicas de \emph{Aprendizaje por Refuerzo} (\emph{Reinforcement
+Learning}, RL), en las que un agente aprende a tomar decisiones
+mediante la interacción con un entorno simulado. Este apartado
+describe la formulación del problema, la interfaz con SUMO y los
+algoritmos de RL más habituales para el control de intersecciones.
+
+\subsection*{Formulación del problema}
+
+En RL se define un \emph{entorno} compuesto por un conjunto de
+\emph{estados}, un conjunto de \emph{acciones} y una función de
+\emph{recompensa}. La formulación implementada en esta tesis para un
+cruce con cuatro aproximaciones es la siguiente:
+
+\begin{itemize}
+  \item \textbf{Estado:} el número de vehículos detenidos en cada
+    aproximación, leído con \verb|edge.getLastStepHaltingNumber| y
+    discretizado en cuatro niveles (0; 1 a 3; 4 a 8; más de 8), más el
+    índice de la fase verde activa. El estado es $s = (c_N, c_S, c_E,
+    c_O, f)$ con $c_i \in \{0,1,2,3\}$. Con dos fases verdes el espacio
+    tiene $4^4 \times 2 = 512$ estados y con cuatro fases, $1024$. Esta
+    discretización es la que hace viable una tabla Q y, a la vez, la
+    que limita al método tabular cuando crece el número de fases, como
+    se muestra en el Capítulo~\ref{cap:resultados}.
+
+  \item \textbf{Acción:} dos acciones. $a = 0$ mantiene la fase verde
+    actual y $a = 1$ pasa a la siguiente fase verde del programa,
+    insertando automáticamente el ámbar del programa (3~s). El agente
+    no elige una fase arbitraria ni una duración: decide únicamente
+    cuándo termina el verde en curso.
+
+  \item \textbf{Recompensa:} negativa y proporcional a la congestión en
+    el instante de la decisión,
+    \begin{equation}
+      r = -\Bigl(w_1 \sum_i c_i + w_2 \sum_i e_i\Bigr), \qquad
+      w_1 = 1.0,\; w_2 = 0.01,
+      \label{eq:recompensa}
+    \end{equation}
+    donde $c_i$ es el número de vehículos detenidos en la aproximación
+    $i$ (sin discretizar) y $e_i$ es la suma de los tiempos de espera de
+    los vehículos que en ese momento están en la aproximación $i$
+    (\verb|edge.getWaitingTime|). Con estos pesos domina el término de
+    colas; el de espera desempata entre estados con la misma cola. La
+    recompensa mide el nivel de congestión, no su incremento entre
+    decisiones.
+
+  \item \textbf{Restricciones operativas:} el verde dura al menos 10~s
+    antes de que el agente pueda cambiarlo (5~s en las fases de giro
+    protegido, identificadas por tener a lo más dos movimientos en
+    verde) y como máximo 60~s, tras los cuales el cambio se fuerza. El
+    agente decide cada 5~s.
+\end{itemize}
+
+Con estos elementos se modela el control del semáforo como un
+\emph{problema de decisión de Markov} (MDP). El agente observa el
+estado, aplica una acción, avanza la simulación y recibe una
+recompensa; a partir de la secuencia de experiencias va aprendiendo
+una política de control. En los escenarios con varios cruces se
+instancia un agente por semáforo, cada uno con su propia tabla Q, su
+estado local y su recompensa local; los agentes no intercambian
+información (eso es lo que añade el módulo U4).
+
+\subsection*{Interfaz con SUMO y ciclo de entrenamiento}
+
+Para implementar el bucle de RL se emplea la interfaz TraCI,
+proporcionada por SUMO, que permite controlar la simulación desde
+Python. El ciclo implementado consta de los siguientes pasos:
+
+\begin{enumerate}
+  \item \textbf{Inicio del episodio:} se lanza SUMO con
+    \verb|traci.start| sobre el escenario de U1, con una semilla
+    explícita (\verb|--seed|) y la salida por vehículo \texttt{tripinfo}
+    activada. Se lee el programa del semáforo para identificar sus
+    fases verdes y el ámbar que sigue a cada una, y se fija la primera
+    fase verde con duración indefinida: a partir de ahí el agente
+    decide cuándo cambia.
+  \item \textbf{Decisión cada 5~s:} se lee el estado (colas
+    discretizadas y fase activa) y se elige la acción con una política
+    $\varepsilon$-greedy: con probabilidad $\varepsilon$ una acción al
+    azar y, si no, la de mayor valor Q, desempatando al azar cuando
+    ambas valen lo mismo. Si la acción es cambiar y el verde lleva al
+    menos el mínimo, se activa el ámbar con \verb|trafficlight.setPhase|
+    y \verb|setPhaseDuration|, se avanza la simulación esos segundos y
+    se entra al siguiente verde. Luego se avanzan 5~s con
+    \verb|simulationStep|.
+  \item \textbf{Recompensa y actualización:} con el estado resultante
+    se calcula la recompensa de la ecuación~\ref{eq:recompensa} y, en
+    entrenamiento, se actualiza $Q(s,a)$ con la regla de Q-learning
+    ($\alpha = 0.1$, $\gamma = 0.9$).
+  \item \textbf{Fin del episodio:} cuando no quedan vehículos por
+    insertar ni circulando (\verb|simulation.getMinExpectedNumber|
+    igual a cero) o al llegar a 6000 pasos, se cierra SUMO con
+    \verb|traci.close|, se leen del \texttt{tripinfo} las métricas del
+    episodio (Sección~\ref{sec:u3}) y se guarda la tabla Q en disco.
+\end{enumerate}
+
+\noindent\textbf{Qué es un episodio y qué cambia entre episodios.}
+Un episodio es una simulación completa de una hora de tráfico (0 a
+3600~s de demanda, más el tiempo necesario para que salgan los últimos
+vehículos) sobre la misma red y la misma demanda. Dentro de la hora el
+agente toma del orden de 600 a 800 decisiones por semáforo y actualiza
+su tabla Q en cada una. Entre un episodio y el siguiente cambian
+exactamente tres cosas:
+
+\begin{itemize}
+  \item la probabilidad de exploración $\varepsilon$, que arranca en 1.0
+    y se multiplica por 0.9 al terminar cada episodio hasta un piso de
+    0.05 (lo alcanza en el episodio 30; con los decaimientos más lentos
+    usados en los escenarios grandes, 0.96 y 0.95, lo alcanza en los
+    episodios 75 y 60);
+  \item la semilla de SUMO, que vale la semilla base más el número de
+    episodio;
+  \item la tabla Q, que el agente hereda del episodio anterior.
+\end{itemize}
+
+La demanda es idéntica en todos los episodios: los flujos se definen
+con \verb|vehsPerHour|, que inserta los vehículos equiespaciados, de
+modo que la semilla solo altera el comportamiento de los conductores
+(su factor de velocidad individual y la imperfección $\sigma$ del modelo
+de seguimiento), no cuántos vehículos llegan ni cuándo. No se ajustan
+$\alpha$, $\gamma$ ni los pesos de la recompensa entre episodios.
+
+El número de episodios se fija por el schedule de $\varepsilon$: los
+necesarios para que llegue al piso, más al menos diez de consolidación
+en los que el agente casi solo explota lo aprendido. Con decaimiento
+0.9 son 40 episodios; con 0.96, 120; con 0.95, 100. Para comprobar que
+ese criterio basta se registran por episodio el número de estados
+distintos visitados y el mayor cambio de un valor Q, y cada cinco
+episodios se evalúa la política congelada ($\varepsilon = 0$) sobre una
+copia de la tabla Q, con una semilla fija ajena al entrenamiento y sin
+alterar el generador aleatorio del entrenamiento. Las métricas de los
+episodios de entrenamiento describen el proceso de aprendizaje, con
+exploración y con la tabla Q cambiando dentro de la hora; el resultado
+del agente se mide aparte, con la política congelada y varias semillas,
+según el plan de pruebas de la Sección~\ref{sec:plan}.
+
+El núcleo del ciclo, simplificado a partir de la función
+\texttt{correr\_episodio} de \texttt{rl\_semaforo.py} (Anexo~B), es el
+siguiente:
+
+\begin{verbatim}
+traci.start(["sumo", "-c", CFG, "--seed", str(seed),
+             "--tripinfo-output", tripinfo])
+verdes, ambar, dur_ambar, verde_min = fases_verdes()  # fases del programa
+verde, t_verde, pasos = 0, 0, 0
+poner_fase(verdes[verde], 100000)     # el agente decide cuando cambiar
+s = estado(verde)
+while traci.simulation.getMinExpectedNumber() > 0 and pasos < 6000:
+    if modo == "train" and random.random() < eps:
+        a = random.randint(0, 1)      # exploracion
+    else:
+        a = mejor_accion(Q, s)        # explotacion (desempate al azar)
+    cambiar = (a == 1 and t_verde >= verde_min[verdes[verde]]) \
+              or t_verde >= VERDE_MAX
+    if cambiar:
+        f = verdes[verde]
+        poner_fase(ambar[f], dur_ambar[f])
+        avanzar(dur_ambar[f])         # ambar de 3 s
+        verde = (verde + 1) % len(verdes)
+        poner_fase(verdes[verde], 100000)
+        t_verde = 0
+    avanzar(PASO_CONTROL)             # 5 s de simulacion
+    t_verde += PASO_CONTROL
+    r = recompensa()                  # -(w1 * colas + w2 * esperas)
+    s2 = estado(verde)
+    if modo == "train":
+        q = q_vals(Q, s)
+        q[a] += ALPHA * (r + GAMMA * max(q_vals(Q, s2)) - q[a])
+    s = s2
+traci.close()
+\end{verbatim}
+
+El mismo bucle sirve para los controles de referencia (tiempo fijo y
+actuado): en esos modos el semáforo corre su propio programa y el
+código solo mide, con la misma recompensa y las mismas métricas. El
+script completo, con los modos \texttt{baseline}, \texttt{actuado},
+\texttt{train} y \texttt{demo}, se incluye en los Anexos. El
+entrenamiento puede adaptarse a algoritmos más avanzados sustituyendo
+la tabla Q por una red neuronal (DQN) o por una política parametrizada
+(PPO); el bucle de interacción con SUMO no cambia.
+
+\subsection*{Algoritmos recomendados}
+
+Diversas técnicas de RL han sido aplicadas al control de
+semáforos. Los algoritmos tabulares, como \emph{Q-learning} o
+\emph{SARSA}, son adecuados para intersecciones sencillas con un
+número limitado de estados. Para escenarios de mayor complejidad se
+emplean métodos de \emph{Deep Reinforcement Learning} como \emph{Deep
+Q-Network} (DQN), \emph{Proximal Policy Optimization} (PPO) o
+\emph{Deep Deterministic Policy Gradients} (DDPG), que utilizan redes
+neuronales para aproximar la política y la función de valor. Estos
+algoritmos suelen implementarse con bibliotecas de aprendizaje
+automático (TensorFlow o PyTorch) y pueden integrarse con SUMO a
+través de entornos compatibles con Gym. La elección del algoritmo
+dependerá del tamaño del estado, la necesidad de cooperación entre
+intersecciones y los recursos computacionales disponibles.
+
+\subsection*{Actualización de los valores Q y ejemplo de pseudocódigo}
+
+En el caso de algoritmos tabulares, como Q-learning, la política del agente se
+representa mediante una \emph{tabla Q} en la que cada entrada $Q(s,a)$
+almacena la expectativa de recompensa acumulada si se aplica la acción $a$ en
+el estado $s$ y se sigue la mejor política a partir de entonces.
+El proceso de aprendizaje consiste en actualizar iterativamente estos valores
+con información obtenida de las simulaciones.  La regla de actualización de
+Q-learning se basa en el aprendizaje por diferencias temporales y se expresa
+de la siguiente manera:
+
+\[
+  Q(s,a) \leftarrow Q(s,a) + \alpha \bigl[r + \gamma\,\max_{a'} Q(s',a') - Q(s,a)\bigr],
+\]
+donde $\alpha$ es la tasa de aprendizaje, $\gamma$ el factor de descuento,
+$r$ la recompensa inmediata obtenida al ejecutar la acción $a$ en el estado $s$,
+$s'$ el estado siguiente y $a'$ las posibles acciones en $s'$.  Esta
+ecuación desplaza el valor Q actual en dirección del retorno observado
+($r + \gamma \max_{a'} Q(s',a')$).
+
+Para algoritmos \emph{on--policy}, como SARSA, la actualización se realiza con la
+siguiente fórmula:
+
+\[
+  Q(s,a) \leftarrow Q(s,a) + \alpha\bigl[r + \gamma\,Q(s',a') - Q(s,a)\bigr],
+\]
+
+donde $a'$ es la acción efectivamente seleccionada en el estado siguiente $s'$
+y $\alpha,\gamma$ tienen el mismo significado que en Q-learning.  Al emplear
+el valor $Q(s',a')$ asociado a la política vigente en vez del máximo de todas
+las acciones, SARSA mantiene la coherencia entre exploración y actualización
+y suele conducir a comportamientos más conservadores.
+
+\subsection*{Diagrama de flujo del módulo U2}
+
+La Figura~\ref{fig:flow-u2} sintetiza el ciclo de entrenamiento del módulo U2.
+A partir del escenario generado en U1, el agente de RL interactúa con SUMO a
+través de TraCI, observa el estado del tráfico, selecciona acciones sobre el
+semáforo, actualiza sus valores $Q(s,a)$ (o los parámetros de la red neuronal)
+y registra métricas de desempeño por episodio.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.70\textwidth]{U2.png}
+    \caption{Diagrama de flujo del módulo U2: entrenamiento del agente de
+    Aprendizaje por Refuerzo para el control semafórico.}
+    \label{fig:flow-u2}
+\end{figure}
+
+%----------------------------------------------------------------------
+\section{Módulo U3: medición del desempeño}
+\label{sec:u3}
+
+Todas las métricas se calculan con las mismas salidas de SUMO para los
+tres controles comparados (tiempo fijo, actuado y agente RL), de modo
+que la comparación no dependa de cómo decide cada uno.
+
+\begin{itemize}
+  \item \textbf{Por vehículo}, del archivo \texttt{tripinfo} que SUMO
+    escribe al terminar cada viaje: el retraso (\texttt{timeLoss}), la
+    espera detenida (\texttt{waitingTime}), el número de paradas
+    (\texttt{waitingCount}, veces que la velocidad bajó de 0.1~m/s) y
+    el instante de llegada. El \textit{throughput} se define como el
+    número de vehículos que completan su viaje antes de los 3600~s. Con
+    el dispositivo de emisiones activado
+    (\verb|--device.emissions.probability 1|) cada viaje incluye además
+    sus emisiones acumuladas; se reportan CO$_2$ en gramos y NO$_x$ en
+    miligramos por vehículo, con la clase de emisión por defecto de SUMO
+    (HBEFA3, turismo a gasolina Euro~4) \citep{SUMO_Emissions}. Activar
+    el dispositivo no altera la dinámica ni la secuencia aleatoria de la
+    simulación: las métricas con y sin él coinciden.
+  \item \textbf{Por segundo}, vía TraCI: el número de vehículos
+    detenidos en las aproximaciones del cruce, del que salen la cola
+    promedio y la cola máxima del episodio, y una serie por minuto para
+    observar la respuesta de cada control al cambio de demanda.
+  \item \textbf{Por decisión}: la recompensa de la
+    ecuación~\ref{eq:recompensa} se evalúa cada 5~s también bajo los
+    controles de referencia, para comparar lo que el agente optimiza
+    con lo que consiguen el fijo y el actuado. Se reporta por decisión y
+    no acumulada, porque el agente no muestrea durante los ámbares y
+    acumula menos decisiones por hora. Se cuentan además los cambios de
+    fase (entradas a una fase verde) de cada control.
+\end{itemize}
+
+Dos precisiones importan para leer los resultados. El retraso de SUMO
+incluye tiempo perdido que no depende del semáforo (arranque desde
+velocidad cero, giros a menor velocidad, vacilaciones del conductor),
+así que un cambio porcentual sobre \texttt{timeLoss} subestima el
+efecto sobre el retraso atribuible al control. Y la espera detenida es
+la señal que optimiza la recompensa, pero no es el retraso: un control
+que fragmenta las colas en paradas más cortas puede bajar la espera y
+subir las paradas sin mover el retraso. Por eso el retraso es la
+métrica primaria y la espera, las colas, las paradas, el
+\textit{throughput} y las emisiones son secundarias.
+
+%----------------------------------------------------------------------
+\section{Plan de pruebas}
+\label{sec:plan}
+
+\subsection*{Casos, factores y controles}
+
+Cada caso de prueba es un escenario de la Tabla~\ref{tab:escenarios}
+sobre el que se comparan tres controles con la misma demanda y las
+mismas semillas (Tabla~\ref{tab:plan}):
+
+\begin{itemize}
+  \item \textbf{Tiempo fijo tuneado:} el programa estático de
+    \texttt{netconvert}, con el verde (y el desfase entre cruces)
+    ajustado por barrido y comprobado por retraso promedio sobre varias
+    semillas (Sección~\ref{sec:escenarios}).
+  \item \textbf{Actuado:} el programa \verb|type="actuated"| nativo de
+    SUMO con las mismas fases del fijo y con verde mínimo y máximo
+    iguales a los del agente (10~s, 5~s en giros protegidos, 60~s); SUMO
+    crea automáticamente los detectores. Cada cruce actúa por su cuenta.
+  \item \textbf{Q-learning:} el agente de la Sección anterior con la
+    política congelada ($\varepsilon = 0$) al terminar el entrenamiento.
+\end{itemize}
+
+Los factores variados son el escenario (cuatro niveles) y el control
+(tres niveles). Se mantienen constantes la demanda (un nivel por
+escenario, con la punta invertida a mitad de hora), el modelo de
+llegadas (equiespaciadas) y la formulación e hiperparámetros del
+agente. Quedan previstos y no ejecutados en esta fase: la demanda
+escalada (0.8 y 1.2 veces la nominal), las llegadas aleatorias
+(\verb|period="exp(...)"|), los algoritmos SARSA, DQN y PPO, la
+coordinación del módulo U4 y el cruce real de Lima.
+
+\begin{table}[H]
+\centering
+\footnotesize
+\begin{tabular}{llcccl}
+\toprule
+Caso & Escenario & Agentes & \makecell{Episodios\\(decaimiento de $\varepsilon$)} & \makecell{Semillas de\\entrenamiento} & \makecell{Semillas de\\evaluación} \\
+\midrule
+P1 & cruce    & 1 & 40 (0.90)  & 43 a 82  & 1001 a 1010 \\
+P2 & cruce2   & 1 & 120 (0.96) & 43 a 162 & 1001 a 1010 \\
+P3 & corredor & 2 & 40 (0.90)  & 43 a 82  & 1001 a 1010 \\
+P4 & red      & 3 & 100 (0.95) & 43 a 142 & 1001 a 1010 \\
+P5 & cruce real de Lima & pendiente & -- & -- & -- \\
+\bottomrule
+\end{tabular}
+\caption{Casos de prueba. En todos se comparan tiempo fijo tuneado, actuado y Q-learning; la métrica primaria es el retraso por vehículo y la meta, una reducción del 25\,\% frente al fijo.}
+\label{tab:plan}
+\end{table}
+
+\subsection*{Réplicas y análisis estadístico}
+
+El entrenamiento es una corrida por caso con semilla base 42 (el
+episodio $k$ usa la semilla $42 + k$). Es determinista: repetir el
+entrenamiento reproduce la misma tabla Q y las mismas métricas por
+episodio. La evaluación se hace con la política congelada sobre diez
+semillas (1001 a 1010) que no se usaron en el entrenamiento, las mismas
+para los tres controles. La unidad experimental es la corrida de
+evaluación y no el episodio de entrenamiento: dentro de un episodio la
+tabla Q cambia y los episodios sucesivos no son independientes.
+
+Por métrica y control se reportan la media, la desviación estándar y
+el intervalo de confianza al 95\,\% (t de Student). Para cada control
+frente al fijo se reportan el cambio porcentual de la media con su
+intervalo al 95\,\% por \textit{bootstrap} pareado por semilla, la
+prueba de Wilcoxon de rangos con signo (pareada por semilla), la prueba
+de Mann--Whitney exacta y el delta de Cliff como tamaño de efecto. Se
+declara una mejora cuando el intervalo del cambio excluye el cero y la
+prueba pareada da $p < 0.05$, y se contrasta con las metas de la
+Introducción.
+
+\subsection*{Alcance de la medición}
+
+Con la demanda actual todos los vehículos completan su viaje bajo los
+tres controles y solo los que salen al final de la hora (entre 2 y
+3\,\%) llegan después de los 3600~s, así que el \textit{throughput} no
+discrimina entre controles y la meta de $+10\,\%$ no es evaluable en
+estos escenarios; requiere un caso con demanda por encima de la
+capacidad.
+Las llegadas equiespaciadas hacen que la variabilidad entre semillas
+provenga solo del comportamiento de los conductores, por lo que los
+intervalos de confianza son estrechos; con llegadas aleatorias los
+controles de referencia empeoran y los resultados no son comparables
+con los de este plan, de modo que ese nivel se trata como un caso
+aparte.
+
+\subsection*{Reproducibilidad}
+
+Cada corrida deja su fila en \texttt{resultados\_<escenario>.csv}
+(entrenamiento y referencias) o en \texttt{evaluacion\_<escenario>.csv}
+(evaluación por semilla), con la semilla y la configuración usadas; las
+tablas Q entrenadas se guardan como JSON y las figuras se regeneran con
+\texttt{graficar.py}. Entorno: SUMO 1.25.0 y Python 3.14 con
+\texttt{traci}, \texttt{sumolib}, \texttt{numpy}, \texttt{scipy} y
+\texttt{matplotlib}, sobre Windows 10 sin GPU; un episodio de una hora
+simulada tarda unos pocos segundos y un entrenamiento completo, unos
+minutos.

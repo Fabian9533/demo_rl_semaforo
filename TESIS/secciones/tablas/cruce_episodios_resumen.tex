@@ -1,0 +1,32 @@
+% Generado por tablas_tex.py a partir de los CSV del proyecto. No editar a mano.
+\begin{table}[H]
+\setstretch{1}
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{rrrrrrrrrrrr}
+\toprule
+\multicolumn{4}{c}{Entradas del episodio} & \multicolumn{6}{c}{Salidas del episodio (entrenamiento, $\varepsilon>0$)} & \multicolumn{2}{c}{Política congelada} \\
+\cmidrule(lr){1-4}\cmidrule(lr){5-10}\cmidrule(lr){11-12}
+Ep. & $\varepsilon$ & Semilla & Q ini. & Retraso & Espera & Cola & $r$/dec. & Cambios & Paradas & Retraso & Espera \\
+ &  &  & (estados) & (s/veh) & (s/veh) & (veh) &  & de fase & (/veh) & (s/veh) & (s/veh) \\
+\midrule
+fijo & 0 & 42 & -- & 22.83 & 9.30 & 5.16 & $-$5.58 & 131 & 0.67 & -- & -- \\
+\midrule
+1 & 1.000 & 43 & 0 & 80.14 & 30.84 & 14.82 & $-$15.98 & 227 & 3.16 & -- & -- \\
+2 & 0.900 & 44 & 81 & 51.59 & 21.21 & 10.90 & $-$11.64 & 219 & 2.16 & -- & -- \\
+3 & 0.810 & 45 & 104 & 36.22 & 15.46 & 7.97 & $-$8.51 & 215 & 1.43 & -- & -- \\
+5 & 0.656 & 47 & 119 & 31.21 & 12.33 & 6.62 & $-$7.00 & 222 & 1.27 & 22.15 & 7.26 \\
+10 & 0.387 & 52 & 123 & 27.00 & 9.95 & 5.45 & $-$5.72 & 222 & 1.09 & 21.43 & 7.43 \\
+15 & 0.229 & 57 & 124 & 22.18 & 7.45 & 4.23 & $-$4.41 & 227 & 0.89 & 20.13 & 6.28 \\
+20 & 0.135 & 62 & 126 & 22.10 & 7.59 & 4.31 & $-$4.48 & 229 & 0.88 & 39.18 & 12.66 \\
+25 & 0.080 & 67 & 127 & 19.42 & 6.24 & 3.62 & $-$3.75 & 213 & 0.72 & 20.50 & 6.56 \\
+30 & 0.050 & 72 & 129 & 17.80 & 5.31 & 3.16 & $-$3.30 & 215 & 0.64 & 19.62 & 6.18 \\
+35 & 0.050 & 77 & 130 & 19.66 & 6.23 & 3.62 & $-$3.76 & 219 & 0.74 & 20.02 & 6.36 \\
+40 & 0.050 & 82 & 130 & 21.65 & 7.13 & 4.07 & $-$4.23 & 223 & 0.84 & 21.39 & 7.05 \\
+\bottomrule
+\end{tabular}
+\caption[Escenario cruce: episodios de entrenamiento]{Escenario cruce: parámetros de entrada y métricas de salida por episodio. 40 episodios de entrenamiento con semilla base 42; la fila fijo es el tiempo fijo con la misma semilla base. La política congelada se evalúa cada 5 episodios con una semilla fija ajena al entrenamiento y a la evaluación final. Se muestran episodios escogidos; la tabla completa está en el Anexo~A.}
+\label{tab:cruce-episodios-resumen}
+\end{table}
+

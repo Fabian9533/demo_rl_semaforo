@@ -1,0 +1,10 @@
+<additional>
+    <!-- Programa actuado de referencia: fases del programa fijo, verde minimo y maximo
+         iguales a los del agente (10 s, 5 s en giros, 60 s). -->
+    <tlLogic id="semaforo_C" type="actuated" programID="actuado" offset="0">
+        <phase duration="25" minDur="10" maxDur="60" state="GGgrrrGGgrrr"/>
+        <phase duration="3" state="yyyrrryyyrrr"/>
+        <phase duration="25" minDur="10" maxDur="60" state="rrrGGgrrrGGg"/>
+        <phase duration="3" state="rrryyyrrryyy"/>
+    </tlLogic>
+</additional>

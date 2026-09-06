@@ -1,7 +1,64 @@
-\chapter*{\center \Large RECOMENDACIONES} 
-\addcontentsline{toc}{section}{\bfseries RECOMENDACIONES} 
-\markboth{RECOMENDACIONES}{RECOMENDACIONES} 
+\chapter*{\center \Large RECOMENDACIONES}
+\addcontentsline{toc}{section}{\bfseries RECOMENDACIONES}
+\markboth{RECOMENDACIONES}{RECOMENDACIONES}
 
-Lorem ipsum dolor sit amet, mei no laboramus gloriatur, no timeam euripidis qui, eu eos aperiam patrioque accommodare. Mei probo accommodare an, ex case minim salutatus sit. Ad doming impetus mei, placerat verterem has no. His assum quaeque et, ea aliquid dissentiet eum. Copiosae evertitur cum te, sea clita disputationi ea.
+Las recomendaciones que siguen se desprenden directamente de los
+resultados obtenidos y ordenan el trabajo restante.
 
-Libris ridens malorum cu vis. Per vitae eirmod cotidieque cu. Cum unum mucius alterum eu, nam enim regione appellantur id. Cum putant dignissim te, est dolore essent definiebas ei. Facilisi convenire vix in, dictas delenit et per. Pro tota affert argumentum cu.
+\noindent\textbf{Alinear la función de recompensa con la métrica
+objetivo.} Antes de cambiar de algoritmo conviene corregir la
+formulación, porque el problema detectado es de diseño y no de
+capacidad del método. Dos vías, no excluyentes: incorporar el retraso
+al término de la recompensa, o penalizar explícitamente el cambio de
+fase para desincentivar la conmutación excesiva que hoy multiplica las
+paradas. Cualquiera de las dos exige volver a entrenar y evaluar los
+cuatro escenarios con el mismo protocolo, de modo que el efecto del
+cambio sea medible.
+
+\noindent\textbf{Implementar los algoritmos de aproximación de
+funciones.} DQN y PPO, con \texttt{stable-baselines3}, son el paso
+natural una vez identificado el techo de la representación tabular. El
+escenario con giros protegidos debe ser el caso de prueba principal,
+porque es donde el método tabular falla de forma más clara y donde la
+generalización entre estados parecidos debería notarse. Conviene además
+implementar SARSA, cuyo costo es marginal partiendo del código
+existente, para separar el efecto de la representación del efecto de la
+política de actualización.
+
+\noindent\textbf{Incorporar el control actuado como línea base
+permanente.} Toda comparación futura debe incluirlo, con las mismas
+restricciones de verde que el agente. Un resultado que solo supere al
+control de tiempo fijo no demuestra utilidad práctica, porque el
+actuado está disponible de fábrica y no requiere entrenamiento.
+
+\noindent\textbf{Medir la variabilidad entre entrenamientos.} Los
+resultados actuales provienen de una sola corrida de entrenamiento por
+escenario. Repetir el entrenamiento con al menos tres semillas base
+distintas y reportar la dispersión entre las políticas resultantes
+permitiría distinguir las diferencias reales entre algoritmos del ruido
+propio del proceso de aprendizaje.
+
+\noindent\textbf{Implementar el módulo de coordinación distribuida
+(U4).} El orden sugerido es incremental: primero extender el estado con
+un resumen del vecino (fase activa y cola en el enlace compartido),
+después añadir el término de penalización por \textit{spillback} a la
+recompensa, y por último sustituir el algoritmo por IPPO. Medir cada
+incremento por separado permite atribuir la mejora a su causa. El
+escenario de tres intersecciones con onda verde es el caso de prueba
+natural, por ser donde los agentes independientes pierden.
+
+\noindent\textbf{Trasladar el \textit{pipeline} al cruce real de
+Lima.} La importación desde OpenStreetMap y su limpieza están descritas
+en el Capítulo~III y no se han ejecutado. Conviene hacerlo cuando la
+formulación de la recompensa esté estabilizada, para no arrastrar al
+caso real un diseño que todavía se está corrigiendo. Un caso con
+demanda superior a la capacidad permitiría además evaluar la meta de
+\textit{throughput}, que en los escenarios actuales no discrimina entre
+controles.
+
+\noindent\textbf{Evaluar con llegadas aleatorias.} Los escenarios
+actuales insertan los vehículos de forma equiespaciada, de modo que la
+única variabilidad entre semillas es el comportamiento de los
+conductores. Repetir la evaluación con llegadas de Poisson daría una
+medida más realista de la robustez de cada control, a costa de rehacer
+el ajuste de los programas de referencia.

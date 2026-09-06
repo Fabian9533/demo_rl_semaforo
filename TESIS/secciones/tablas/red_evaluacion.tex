@@ -1,0 +1,25 @@
+% Generado por tablas_tex.py a partir de los CSV del proyecto. No editar a mano.
+\begin{table}[H]
+\setstretch{1}
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{lrrrrrr}
+\toprule
+Métrica & Tiempo fijo & Actuado & Q-learning & \makecell{$\Delta$ RL vs fijo\\{}[IC95\,\%]} & $p$ & \makecell{$\Delta$ actuado\\vs fijo} \\
+\midrule
+Retraso (s/veh) & 22.22 $\pm$ 0.14 & 21.42 $\pm$ 0.23 & 25.12 $\pm$ 0.31 & +13.1\,\% [12.0, 14.1] & 0.00195 & $-$3.6\,\% \\
+Espera detenida (s/veh) & 7.44 $\pm$ 0.13 & 5.45 $\pm$ 0.19 & 7.71 $\pm$ 0.15 & +3.6\,\% [1.4, 5.9] & 0.0273 & $-$26.8\,\% \\
+Cola promedio (veh) & 4.05 $\pm$ 0.04 & 2.93 $\pm$ 0.08 & 4.26 $\pm$ 0.11 & +5.1\,\% [2.9, 7.5] & 0.00586 & $-$27.8\,\% \\
+Cola máxima (veh) & 17.20 $\pm$ 1.16 & 15.70 $\pm$ 1.22 & 18.20 $\pm$ 0.94 & +5.8\,\% [0.5, 12.9] & 0.125 & $-$8.7\,\% \\
+Paradas por vehículo & 0.62 $\pm$ 0.01 & 0.80 $\pm$ 0.01 & 1.07 $\pm$ 0.02 & +74.1\,\% [71.6, 76.7] & 0.00195 & +30.3\,\% \\
+Throughput (veh) & 2093.90 $\pm$ 1.14 & 2093.00 $\pm$ 1.65 & 2090.80 $\pm$ 1.81 & $-$0.1\,\% [$-$0.2, $-$0.1] & 0.0117 & $-$0.0\,\% \\
+CO$_2$ (g/veh) & 251.77 $\pm$ 0.32 & 256.56 $\pm$ 0.57 & 265.09 $\pm$ 0.73 & +5.3\,\% [5.1, 5.5] & 0.00195 & +1.9\,\% \\
+NO$_x$ (mg/veh) & 86.87 $\pm$ 0.11 & 87.93 $\pm$ 0.18 & 90.81 $\pm$ 0.21 & +4.5\,\% [4.4, 4.7] & 0.00195 & +1.2\,\% \\
+Recompensa por decisión & $-$1.44 $\pm$ 0.02 & $-$1.01 $\pm$ 0.03 & $-$1.47 $\pm$ 0.04 & +2.0\,\% [$-$0.2, 4.5] & 0.16 & $-$30.2\,\% \\
+Cambios de fase & 489.90 $\pm$ 1.04 & 784.00 $\pm$ 4.12 & 763.30 $\pm$ 3.04 & +55.8\,\% [55.4, 56.3] & 0.00195 & +60.0\,\% \\
+\bottomrule
+\end{tabular}
+\caption[Escenario red: evaluación con política congelada]{Escenario red: evaluación con política congelada sobre 10 semillas (1001 a 1010), las mismas para los tres controles. Media $\pm$ IC95\,\%; el cambio porcentual lleva su intervalo bootstrap pareado y $p$ es el de la prueba de Wilcoxon pareada frente al fijo.}
+\label{tab:red-evaluacion}
+\end{table}

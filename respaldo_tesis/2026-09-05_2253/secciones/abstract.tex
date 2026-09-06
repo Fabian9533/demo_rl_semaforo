@@ -1,0 +1,14 @@
+\customchapter{ABSTRACT} 
+
+\begin{center}
+\large \vspace{-1.5cm} \textbf{Optimización del tráfico urbano en Lima mediante semáforos inteligentes con Aprendizaje por Refuerzo (RL) y simulación en SUMO}
+\end{center}
+
+Lima Metropolitana presenta congestión severa en intersecciones y corredores de alto flujo, lo que incrementa los tiempos de viaje, las emisiones y reduce la movilidad. Esta tesis busca \textbf{reducir el retraso promedio por vehículo} mediante \textbf{control semafórico adaptativo} basado en \textbf{Aprendizaje por Refuerzo (RL)}, validado en el simulador \textbf{SUMO}.
+
+Se propone un \textit{pipeline} reproducible con cuatro unidades: (U1) preprocesamiento de datos y generación de red/rutas en SUMO; (U2) \textbf{RL} (entorno Gym+TraCI); (U3) simulación y medición en SUMO; y (U4) \textbf{coordinación distribuida entre semáforos}, donde cada intersección es un agente que \textit{se comunica} con sus vecinas para crear \textit{ondas verdes} y evitar \textit{spillback}. En U2 se implementarán y compararán \textbf{Q-learning, SARSA, DQN y PPO}; en U4 se evaluarán variantes multiagente (IPPO/MAPPO) con \textbf{estado extendido} (información de vecinos) y \textbf{recompensa con penalización por spillback}.
+
+Las métricas incluyen: retraso y tiempo de viaje, longitud de colas, \textit{throughput} (veh/h), número de paradas, emisiones estimadas (CO\textsubscript{2}, NOx) y recompensa acumulada. Metas indicativas en simulación: \textbf{25–40\% menos retraso} y \textbf{$\geq$20\% menos colas} frente a control fijo, y \textbf{mejoras adicionales} cuando se activa U4.
+
+\noindent \textbf{Palabras clave:}\\
+\noindent semáforos inteligentes; aprendizaje por refuerzo; control multiagente; coordinación distribuida; SUMO; movilidad urbana

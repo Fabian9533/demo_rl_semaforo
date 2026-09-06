@@ -1,2 +1,73 @@
-\customchapter{CONCLUSIONES} 
+\customchapter{CONCLUSIONES}
 
+Esta fase del trabajo implementó y evaluó las unidades U1 a U3 de la
+arquitectura propuesta: la construcción del entorno de simulación, un
+agente de control semafórico basado en Q-learning tabular y la
+instrumentación de las métricas de desempeño, sobre cuatro escenarios
+sintéticos de complejidad creciente y con un protocolo de evaluación
+que compara tres controles sobre las mismas diez semillas. De los
+resultados del Capítulo~\ref{cap:resultados} se desprenden las
+siguientes conclusiones.
+
+\noindent\textbf{1. El agente tabular no alcanza las metas planteadas y
+solo mejora al control de tiempo fijo en el escenario más simple.} Con
+la política congelada y diez semillas de evaluación, el retraso
+promedio por vehículo baja un 6.4\,\% en el cruce de dos fases y sube
+entre un 6 y un 17\,\% en los otros tres escenarios. La meta declarada
+de una reducción del 25 al 40\,\% no se cumple en ningún caso. La
+reducción de colas del 20\,\% se alcanza únicamente en el cruce simple
+y en la media, con un intervalo de confianza que no excluye ese umbral.
+
+\noindent\textbf{2. La función de recompensa no está alineada con la
+métrica que la tesis declara como primaria.} La recompensa penaliza
+vehículos detenidos y su tiempo de espera, y el agente la mejora de
+forma consistente; pero la meta se formula sobre el retraso, que
+incluye además frenadas y aceleraciones. La consecuencia es medible: en
+el cruce simple la espera detenida baja un 26\,\% mientras el retraso
+solo baja un 6\,\%, y en el corredor la espera baja un 13\,\% mientras
+el retraso sube un 6\,\%. El agente aprende a cortar el verde con
+frecuencia, hasta un 77\,\% más de cambios de fase que el control fijo,
+lo que fragmenta las colas pero aumenta las paradas por vehículo en los
+cuatro escenarios. Optimizar una señal correlacionada con el objetivo
+no equivale a optimizar el objetivo.
+
+\noindent\textbf{3. La representación tabular tiene un techo
+identificable al crecer el número de fases.} En el cruce de dos fases el
+agente visita 130 de 512 estados posibles y converge; en el cruce con
+giros protegidos, donde el espacio se duplica a 1024 estados, visita
+390 y su política congelada resulta peor que el control fijo, con una
+dispersión entre semillas casi veinte veces mayor. Aumentar el número
+de episodios no corrige el problema, porque la causa no es falta de
+entrenamiento sino la fracción del espacio de estados que queda sin
+visitar. Este resultado es el argumento empírico para pasar a métodos
+con aproximación de funciones, como DQN y PPO.
+
+\noindent\textbf{4. Los agentes sin comunicación no reproducen el
+beneficio de la coordinación.} En la red de tres intersecciones, tres
+agentes independientes quedan un 13\,\% por detrás de un programa fijo
+con onda verde, aunque superan ampliamente al mismo programa sin
+desfases, que da 41.6 s de retraso frente a 25.1 s del agente. La
+diferencia no está en la capacidad de reaccionar a la cola local, sino
+en la anticipación que aporta coordinar las fases de intersecciones
+sucesivas. Es la evidencia empírica que justifica el módulo U4.
+
+\noindent\textbf{5. El control actuado es una referencia más exigente
+que el control de tiempo fijo y la literatura revisada lo omite.} Con
+las mismas fases y los mismos límites de verde que el agente, el
+control actuado nativo del simulador reduce el retraso entre un 4 y un
+34\,\% frente al tiempo fijo y supera al agente tabular en los cuatro
+escenarios. Ninguno de los tres trabajos analizados en el estado del
+arte lo emplea como línea base. Cualquier
+resultado de control semafórico por aprendizaje por refuerzo que aspire
+a ser relevante en la práctica debe medirse también contra él.
+
+\noindent\textbf{6. El protocolo experimental resultó determinante para
+la validez de las conclusiones.} Separar las semillas de entrenamiento
+de las de evaluación, congelar la política antes de medir, usar las
+mismas semillas en todos los controles y reportar intervalos de
+confianza con pruebas pareadas cambió el signo de varias conclusiones
+respecto de lo que sugerían las corridas con una sola semilla. Un caso
+lo ilustra con claridad: en el corredor, dos entrenamientos que solo
+diferían en el instante en que el agente toma sus decisiones dieron
+resultados de signo opuesto, lo que muestra que una única corrida de
+entrenamiento no caracteriza a la política aprendida.
