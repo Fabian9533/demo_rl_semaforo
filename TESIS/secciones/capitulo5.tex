@@ -103,7 +103,7 @@ con menos paradas que el fijo.
 \begin{figure}[H]
   \centering
   \includegraphics[width=\textwidth]{fig_cruce_comparacion.png}
-  \caption{Escenario cruce: cada punto gris es una semilla de evaluación y las líneas unen la misma semilla bajo los tres controles; el marcador grande es la media con su IC95\,\%. La línea horizontal marca la meta de la tesis respecto al fijo.}
+  \caption{Escenario cruce: cada punto gris es una semilla de evaluación y las líneas unen la misma semilla bajo cada control; el marcador grande es la media con su IC95\,\%. La línea horizontal marca la meta de la tesis respecto al fijo.}
   \label{fig:cruce-comparacion}
 \end{figure}
 
@@ -254,7 +254,7 @@ entrenamiento: con 100 episodios y decaimiento 0.95 la evaluación
 intermedia se mantiene entre 23.8 y 25.5~s de retraso desde la primera
 evaluación (episodio~5) y no muestra tendencia a bajar. Tampoco es que
 los agentes sean malos en términos absolutos: el mismo programa fijo sin
-desfases entre cruces da $36.4 \pm 0.3$~s de retraso sobre las mismas
+desfases entre cruces da $36.4 \pm 0.2$~s de retraso sobre las mismas
 diez semillas, muy por encima de los 25.1~s del agente;
 lo que los agentes no consiguen es reproducir la progresión de la onda
 verde. Cada agente reacciona a su cola local y rompe esa progresión; el
@@ -362,10 +362,15 @@ frente a Q-learning y $+2.2$\,\% frente al actuado (intervalo $+0.8$ a
 $+3.5$\,\%, $p = 0.02$): empata con la onda verde y queda a dos puntos
 del actuado. Cada política de \emph{vecinos} es mejor que cada una de
 \emph{local}, así que la ventaja de la mensajería tiene signo estable en
-tres de tres. El control de no daño \emph{spill} (una semilla base),
-cuyo término de \textit{spillback} nunca supera la bisagra con esta
-demanda, da $21.68 \pm 0.13$~s, dentro del rango de las políticas de
-\emph{vecinos}. Frente al fijo de 20/20 de la primera ronda de ajuste,
+tres de tres. El control de no daño \emph{spill} (una semilla base) da
+$21.68 \pm 0.13$~s, dentro del rango de las políticas de
+\emph{vecinos}. Su término de \textit{spillback} nunca supera la
+bisagra con esta demanda, y la comprobación es más fuerte que la
+coincidencia de las medias: los doce tensores de la política resultan
+idénticos bit a bit a los de \emph{vecinos} con la misma semilla base,
+de modo que el término no llegó a alterar ningún gradiente del
+entrenamiento. El control confirma que no hay daño, pero por eso mismo
+no constituye una corrida independiente en este escenario. Frente al fijo de 20/20 de la primera ronda de ajuste,
 que daba 22.2~s, estas mismas políticas quedaban un $1.5$\,\% por debajo
 con significancia; el reparto tuneado absorbió esa diferencia.
 
@@ -646,7 +651,7 @@ El plan de pruebas fijó siete niveles de éxito antes de entrenar
     colas y CO$_2$ se cumplen en cruce; en corredor ya no ($-6$ y
     $-2$\,\% frente al fijo tuneado); la de CO$_2$ se cumple también en
     corredor\_alta ($-11$ a $-12$\,\% en las siete políticas), donde
-    la de colas no ($-1$ a $-7$\,\%); la de \textit{throughput} no la
+    la de colas no ($-0.6$ a $-7$\,\%); la de \textit{throughput} no la
     alcanza ningún control.
   \item \textbf{Robustez:} con latencia de 5~s y pérdida del 30\,\%, la
     política de \emph{vecinos} pierde 0.8~s en red (dentro del límite de

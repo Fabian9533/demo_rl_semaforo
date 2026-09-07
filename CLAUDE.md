@@ -172,8 +172,10 @@ en todos la progresión se deshace (le1 baja a 0.54–0.85): el agente no descue
 mensajes viejos porque nunca los vio en entrenamiento. spill nominal (base 42) =
 control de no daño OK (red 21.68, corredor 20.21). corredor_alta: ver LEEME/tesis.
 
-Secundarias del RL vs fijo (cruce / cruce2 / corredor / red): espera −26 / +18 /
-−13 / +4 %; paradas +27 / +23 / +49 / +74 %; CO2 −1.5 / +4 / +1 / +5 %.
+Secundarias del RL vs fijo (cruce / cruce2 / corredor / red), contra los fijos
+VIGENTES (corredor y red retuneados): espera −26 / +18 / +76 / +4 %; paradas
++27 / +23 / +94 / +76 %; CO2 −1.5 / +4 / +11 / +6 %; cambios de fase
++77 / +22 / +13 / +56 %.
 Throughput no discrimina (demanda subsaturada). Metas cumplidas por el RL:
 retraso −25 % en ninguno; colas −20 % solo en cruce y solo en la media; CO2 −5 %
 en ninguno. Los números viejos de una semilla (−31 % de espera en cruce, etc.)
@@ -306,6 +308,82 @@ tmp_barrido_asim`; los simétricos viejos en `barrido_<esc>_simetrico_1001-1003.
   casos, P4, P4-U4, canal imperfecto, N1/N3/N6, lectura conjunta), resumen,
   abstract, capitulo2, conclusiones 1/2/4/5/7/8, LEEME.
 
+## DIAGNOSTICO DE ETAPA 07.09.2026: brechas verificadas antes de cerrar la tesis
+
+Auditoria con 7 agentes (inventario de objetivos + completitud + ejecucion +
+pendientes + coherencia, y dos analistas). Lo que sigue esta VERIFICADO abriendo
+archivos, no es sospecha.
+
+### A. Agujeros de evidencia en lo que el documento YA afirma (baratos y urgentes)
+
+1. BASELINE EN EL BORDE DE LA MALLA. En `barrido_corredor.csv` el optimo es
+   avenida 20 s y la malla barrida fue {20,25,30,35}: el ganador es el valor MAS
+   BAJO. En `barrido_corredor_alta.csv` el optimo es 25 s con malla {25,30,35,40}:
+   igual. Nunca se probaron verdes de avenida menores. red esta bien (gana 25 con
+   malla {15,20,25,30}, interior). Es el MISMO error que se corrigio el 06.09.
+   Accion: ampliar `malla` en barrer_fijo.py hacia abajo (corredor 12/15/18,
+   corredor_alta 15/20) y re-barrer con 2001-2003. Si el optimo se mueve, hay que
+   reinstalar el .add.xml, reevaluar con 1001-1010 y rehacer los deltas y el texto.
+2. U2 NO TIENE CRITERIO DE PARADA NI SELECCION DE MODELO. Se reporta la Q-table
+   del ULTIMO episodio. Evaluacion intermedia (semilla 999) ultima vs mejor:
+   cruce ep40=21.4 / ep30=19.6; cruce2 ep120=179.0 / ep95=25.3; corredor
+   ep40=30.1 / ep20=23.9; red ep100=24.8 / ep80=23.8; corredor_alta ep40=178.3 /
+   ep5=155.5. El +60 % del corredor y el +17 % de cruce2 pueden ser artefacto del
+   punto de corte. La semilla 999 es independiente de 1001-1010, asi que
+   seleccionar el checkpoint por ella es seleccion de modelo legitima.
+   Accion: guardar la Q-table en cada evaluacion intermedia, elegir por 999,
+   reevaluar con 1001-1010 y declarar el criterio en capitulo4.
+3. LA META SOLO SE CUMPLE CON UNA SEMILLA BASE. El -35 % de IPPO local en cruce
+   sale de politica_cruce_local_s42.pt (60 ep, prueba de humo) y el propio plan
+   dice "ningun resultado se cita con una sola semilla base". Esta en resumen,
+   abstract, N6 y conclusion 7. Accion: entrenar bases 2042 y 4042 en cruce.
+4. PRERREGISTRO NO DEMOSTRABLE. `git show 9fc0f8a:...capitulo4.tex` (06.09 00:07)
+   NO contiene los niveles N; aparecen en 6e31e26 (06.09 19:08), despues de las
+   politicas (10:59) y de evaluacion_corredor.csv (18:29) y evaluacion_red.csv
+   (18:48). El documento dice "fijo siete niveles de exito antes de entrenar".
+   Accion: suavizar la redaccion o separar lo que si tiene respaldo con fecha
+   (los hiperparametros de la prueba de humo, en humo/).
+5. TABLAS HUERFANAS: corredor_alta_evaluacion, corredor_alta_episodios_resumen,
+   corredor_alta_s1, cruce_fragilidad, cruce_s1 se generan y NO tienen \input.
+   Los numeros de corredor_alta (153.9/123.0/211.1) se citan en resumen, abstract
+   y conclusion 1 sin tabla de respaldo. Accion: 10 minutos.
+6. cruce2 es el unico fijo NO rebarrido en asimetrico, y su barrido uso 1001-1003,
+   que son semillas de EVALUACION. Ya declarado en capitulo4 el 07.09.
+7. spill en red = vecinos_s42 bit a bit (12 tensores y 10 filas identicos). Ya
+   corregido en capitulo5 el 07.09.
+8. PRECISION: `comun.archivo_actuado` lee el programa "0" del .net.xml y escribe
+   offset=0, no el .add.xml tuneado. La estructura de fases coincide; las
+   duraciones base y el desfase no. El texto dice "las mismas fases del programa
+   fijo": conviene precisar "la misma estructura de fases de la red".
+
+### B. Objetivos declarados que hoy NO se entregan (decidir con el asesor)
+
+- Cruce real de Lima: no existe (.osm, red importada, aforos). Afecta al titulo,
+  al objetivo general ("en Lima Metropolitana") y a la mitad de U1 ("Recopilar y
+  preprocesar datos"), que introduccion.tex declara ejecutado.
+- SARSA y DQN: cero lineas de codigo. El objetivo especifico U2 dice
+  "implementar y comparar Q-learning, SARSA, DQN y PPO".
+- MAPPO: cero lineas. U4 dice "variantes multiagente (IPPO/MAPPO)".
+Para los tres: o se ejecutan o se corrige el alcance. Es decision de Fabian y el
+asesor, no del codigo.
+
+### C. Lo que le falta al documento como tesis (no como experimento)
+
+- NO HAY HIPOTESIS ni pregunta de investigacion (grep sobre TESIS/*.tex: cero).
+  Se aplican Wilcoxon, Mann-Whitney y Cliff sin enunciar que se contrasta.
+- capitulo2.tex tiene CERO ecuaciones y el aporte central es IPPO: falta el MDP,
+  el Dec-POMDP, el objetivo recortado de PPO y GAE.
+- Estado del arte: 17 entradas en referencias.bib, 3 trabajos relacionados y
+  NINGUNO de RL multiagente para semaforos (faltan CoLight, PressLight, MPLight,
+  RESCO/Ault&Sharon, sumo-rl). El capitulo IV no cita ni una referencia.
+- Diagrama.png y U1.png dibujan Azure/Google Maps/OD/SARSA/DQN/MAPPO y el flujo
+  OSM->netedit, que no es lo construido.
+
+### Orden recomendado
+A1 y A2 primero (pueden cambiar numeros); luego A3, A5, A4, A6; despues la
+decision de alcance (B); en paralelo C, que es el grueso de escritura que queda.
+NO hacer antes de defender: llegadas aleatorias (rehace todos los numeros).
+
 ## Pendientes conocidos de la tesis
 
 - Traer el cruce real de Lima (OSM limpio) a este pipeline y repetir las pruebas.
@@ -321,8 +399,6 @@ tmp_barrido_asim`; los simétricos viejos en `barrido_<esc>_simetrico_1001-1003.
   colas detenidas. Queda pendiente reentrenar Q-learning con la recompensa de
   retraso para aislar el efecto del algoritmo del de la recompensa.
 - Varias semillas base de entrenamiento por escenario: U4 usa 3; U2 sigue con una.
-- Conclusiones y recomendaciones de la tesis siguen vacías; el capítulo IV
-  (capitulo5.tex) ya tiene resultados de los cuatro casos.
 - Decidir el ámbar: el documento fija 4 s como mínimo y los escenarios usan 3 s.
 - Unificar la lista de algoritmos en el documento (capítulo 1 dice PPO, A2C y
   DQN; el resto Q-learning, SARSA, DQN y PPO; capítulo 4 menciona DDPG).

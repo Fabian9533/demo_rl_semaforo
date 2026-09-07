@@ -26,9 +26,12 @@ y en la media, con un intervalo de confianza que no excluye ese umbral.
 
 \noindent\textbf{2. La función de recompensa no está alineada con la
 métrica que la tesis declara como primaria.} La recompensa penaliza
-vehículos detenidos y su tiempo de espera, y el agente la mejora de
-forma consistente; pero la meta se formula sobre el retraso, que
-incluye además frenadas y aceleraciones. La consecuencia es medible: en
+vehículos detenidos y su tiempo de espera, y el agente solo consigue
+mejorarla en el escenario más simple: un 26\,\% frente al fijo en el
+cruce de dos fases, mientras la empeora en los otros cuatro. Y aun
+donde la mejora, la ganancia no se traslada a la meta, que se formula
+sobre el retraso e incluye además frenadas y aceleraciones. La
+consecuencia es medible: en
 el cruce simple la espera detenida baja un 26\,\% mientras el retraso
 solo baja un 6\,\%, y en la red la espera sube un 4\,\% mientras el
 retraso sube un 15\,\%. El agente aprende a cortar el verde con
@@ -104,8 +107,9 @@ decisión, porque el conteo de vehículos detenidos no ve las colas que
 avanzan a paso lento y llevaba al optimizador a cambiar de fase sin
 parar, y recortar el gradiente por red. Con la misma señal, PPO no
 necesita el 77\,\% de cambios de fase adicionales del tabular: con
-demanda nominal cambia entre un 16 y un 40\,\% más que el fijo, con
-demanda doble un tercio menos, y deja de multiplicar las paradas por
+demanda nominal cambia de fase entre un 10\,\% menos que el fijo en el
+corredor y un 19\,\% más en la red, y con demanda doble un tercio
+menos, y deja de multiplicar las paradas por
 vehículo: las reduce frente al fijo en el cruce, en el corredor y en
 el corredor con demanda doble, y en la red las aumenta mucho menos
 que el tabular.

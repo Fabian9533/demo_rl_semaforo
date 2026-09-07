@@ -439,7 +439,16 @@ transversal por desfase) sobre las semillas 2001 a 2003, ajenas a las
 de evaluación, con el verde transversal acotado por abajo al mínimo de
 10~s que respeta el agente. En cruce el 25/25 original resultó el mejor
 de las 36 combinaciones, porque la punta cambia de eje a mitad de hora
-y ningún reparto fijo favorece a los dos periodos. En corredor, en
+y ningún reparto fijo favorece a los dos periodos. La segunda ronda
+cubrió cruce, corredor, red y corredor\_alta; el programa fijo de
+cruce2 sigue siendo el de la primera, ajustado con un solo verde común
+y sobre las semillas 1001 a 1003, que forman parte de las de
+evaluación. Los dos defectos empujan en sentidos opuestos —un reparto
+sin ajustar debilita al fijo y unas semillas compartidas lo favorecen—
+y ninguno es de un tamaño capaz de invertir el margen de $+17$\,\% con
+que el agente tabular pierde en ese escenario, pero conviene declararlo:
+es la única referencia del documento que no pasó por la segunda ronda.
+En corredor, en
 cambio, el programa de 20~s para la avenida, 10~s para las
 transversales y desfase de 15~s (ciclo de 36~s) da 21.2~s de retraso
 sobre las semillas de evaluación, frente a los 31.9~s del 25/25 con
@@ -1179,7 +1188,7 @@ P4-U4 & red      & 3 & 200 (IPPO) & \makecell{43--242,\\2043--2242,\\4043--4242}
 P6 & corredor\_alta & 2 & \makecell{40 (0.90) y\\200 (IPPO)} & \makecell{43--82 (Q-learning);\\43--242, 2043--2242,\\4043--4242 (IPPO)} & 1001 a 1010 \\
 \bottomrule
 \end{tabular}
-\caption{Casos de prueba. En todos se comparan tiempo fijo tuneado, actuado y Q-learning; en P3-U4, P4-U4 y P6 se añaden las variantes IPPO del módulo U4, con tres semillas base por variante salvo \emph{local} en P6, que se entrenó con una. La métrica primaria es el retraso por vehículo y la meta, una reducción del 25\,\% frente al fijo.}
+\caption{Casos de prueba. En todos se comparan tiempo fijo tuneado, actuado y Q-learning; en P3-U4, P4-U4 y P6 se añaden las variantes IPPO del módulo U4, con tres semillas base por variante salvo \emph{spill} en P3-U4 y P4-U4 y \emph{local} en P6, entrenados con una sola base. La métrica primaria es el retraso por vehículo y la meta, una reducción del 25\,\% frente al fijo.}
 \label{tab:plan}
 \end{table}
 
@@ -1247,7 +1256,9 @@ se entrene nada sobre una medición o un algoritmo sin verificar:
 \end{enumerate}
 
 El criterio de éxito está prefijado por niveles y el Capítulo~\ref{cap:resultados}
-reporta el nivel alcanzado: (N1)~estabilidad, las tres políticas de una
+reporta el nivel alcanzado. El primero, (N0)~medición, es la compuerta
+de la etapa~1: regresión, determinismo y prueba de humo. Por encima de
+ella: (N1)~estabilidad, las tres políticas de una
 variante tienen el mismo signo frente al fijo y su rango es menor que
 el intervalo de confianza de una sola; (N2)~algoritmo, \emph{local}
 tiene menos retraso que Q-learning, con intervalo del cambio que
