@@ -1,0 +1,47 @@
+fijo     semilla 1001: timeLoss= 22.30  espera=  7.41  paradas=0.62  CO2=252.0 g
+fijo     semilla 1002: timeLoss= 22.13  espera=  7.25  paradas=0.60  CO2=251.6 g
+fijo     semilla 1003: timeLoss= 22.51  espera=  7.69  paradas=0.63  CO2=252.4 g
+fijo     semilla 1004: timeLoss= 22.38  espera=  7.77  paradas=0.62  CO2=252.0 g
+fijo     semilla 1005: timeLoss= 21.81  espera=  7.17  paradas=0.61  CO2=250.9 g
+fijo     semilla 1006: timeLoss= 22.08  espera=  7.44  paradas=0.61  CO2=251.3 g
+fijo     semilla 1007: timeLoss= 22.25  espera=  7.43  paradas=0.62  CO2=252.2 g
+fijo     semilla 1008: timeLoss= 22.20  espera=  7.44  paradas=0.61  CO2=251.6 g
+fijo     semilla 1009: timeLoss= 22.33  espera=  7.35  paradas=0.62  CO2=252.0 g
+fijo     semilla 1010: timeLoss= 22.21  espera=  7.42  paradas=0.61  CO2=251.7 g
+actuado  semilla 1001: timeLoss= 21.10  espera=  5.10  paradas=0.80  CO2=256.0 g
+actuado  semilla 1002: timeLoss= 21.21  espera=  5.29  paradas=0.79  CO2=256.4 g
+actuado  semilla 1003: timeLoss= 21.62  espera=  5.79  paradas=0.82  CO2=256.5 g
+actuado  semilla 1004: timeLoss= 21.41  espera=  5.63  paradas=0.79  CO2=256.2 g
+actuado  semilla 1005: timeLoss= 21.98  espera=  5.76  paradas=0.84  CO2=258.0 g
+actuado  semilla 1006: timeLoss= 21.11  espera=  5.34  paradas=0.78  CO2=255.5 g
+actuado  semilla 1007: timeLoss= 21.32  espera=  5.33  paradas=0.80  CO2=256.6 g
+actuado  semilla 1008: timeLoss= 21.93  espera=  5.77  paradas=0.84  CO2=257.8 g
+actuado  semilla 1009: timeLoss= 21.42  espera=  5.24  paradas=0.79  CO2=256.7 g
+actuado  semilla 1010: timeLoss= 21.12  espera=  5.21  paradas=0.79  CO2=255.9 g
+rl       semilla 1001: timeLoss= 25.56  espera=  7.91  paradas=1.10  CO2=266.1 g
+rl       semilla 1002: timeLoss= 25.54  espera=  7.79  paradas=1.09  CO2=266.1 g
+rl       semilla 1003: timeLoss= 25.02  espera=  7.63  paradas=1.08  CO2=265.1 g
+rl       semilla 1004: timeLoss= 24.88  espera=  7.73  paradas=1.05  CO2=264.3 g
+rl       semilla 1005: timeLoss= 24.57  espera=  7.53  paradas=1.03  CO2=263.6 g
+rl       semilla 1006: timeLoss= 24.63  espera=  7.40  paradas=1.04  CO2=264.2 g
+rl       semilla 1007: timeLoss= 25.75  espera=  8.15  paradas=1.11  CO2=266.6 g
+rl       semilla 1008: timeLoss= 24.91  espera=  7.60  paradas=1.07  CO2=264.7 g
+rl       semilla 1009: timeLoss= 25.54  espera=  7.77  paradas=1.09  CO2=265.9 g
+rl       semilla 1010: timeLoss= 24.81  espera=  7.55  paradas=1.06  CO2=264.3 g
+
+Resumen (red, 10 semillas 1001-1010):
+metrica                          fijo          actuado               rl   delta rl vs fijo   p Wilcoxon
+timeloss_prom           22.22 ± 0.14    21.42 ± 0.23    25.12 ± 0.31     13.1 %     [12.0, 14.1]   0.00195
+espera_prom              7.44 ± 0.13     5.45 ± 0.19     7.71 ± 0.15      3.6 %       [1.4, 5.9]   0.0273
+cola_prom                4.05 ± 0.04     2.93 ± 0.08     4.26 ± 0.11      5.1 %       [2.9, 7.5]   0.00586
+cola_max                17.20 ± 1.16    15.70 ± 1.22    18.20 ± 0.94      5.8 %      [0.5, 12.9]   0.125
+paradas_prom             0.62 ± 0.01     0.80 ± 0.01     1.07 ± 0.02     74.1 %     [71.6, 76.7]   0.00195
+throughput            2093.90 ± 1.14  2093.00 ± 1.65  2090.80 ± 1.81     -0.1 %     [-0.2, -0.1]   0.0117
+co2_prom               251.77 ± 0.32   256.56 ± 0.57   265.09 ± 0.73      5.3 %       [5.1, 5.5]   0.00195
+nox_prom                86.87 ± 0.11    87.93 ± 0.18    90.81 ± 0.21      4.5 %       [4.4, 4.7]   0.00195
+recompensa_decision     -1.44 ± 0.02    -1.01 ± 0.03    -1.47 ± 0.04      2.0 %      [-0.2, 4.5]   0.16
+cambios_fase           489.90 ± 1.04   784.00 ± 4.12   763.30 ± 3.04     55.8 %     [55.4, 56.3]   0.00195
+viaje_corredor_prom    159.81 ± 0.46   160.66 ± 0.39   166.52 ± 0.96      4.2 %       [3.9, 4.5]   0.00195
+retraso_corredor_prom    27.89 ± 0.29    28.75 ± 0.36    34.59 ± 0.80     24.1 %     [22.5, 25.8]   0.00195
+spillback_tasa           0.00 ± 0.00     0.00 ± 0.00     0.00 ± 0.00          %                    
+cola_max_enlace          2.80 ± 0.30     4.40 ± 0.37     4.80 ± 0.30     71.4 %     [53.3, 92.3]   0.00195

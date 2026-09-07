@@ -168,7 +168,7 @@ def correr_episodio(modo, Q, eps, gui, delay, seed, gamma=GAMMA, tripinfo=None, 
     cola_max = 0
     r_total = 0.0        # recompensa que ve el agente (para aprender)
     decisiones = 0
-    r_reporte = 0.0      # recompensa medida cada 5 s de reloj fijo, igual en los cuatro modos (para comparar)
+    r_reporte = 0.0      # recompensa medida cada 5 s de reloj fijo, igual en los cuatro modos
     n_reporte = 0
     cambios = 0
     dq_max = 0.0

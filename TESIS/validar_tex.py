@@ -12,6 +12,12 @@ Comprueba, en main.tex y en todos los archivos que incluye:
   - cada \input / \include existe; los archivos son UTF-8
   - caracteres que pdflatex no acepta en texto (>=, ~, ->, letras griegas...): van
     en modo matematico o como comando
+  - espacio fino antes de \% dentro de math ($25\,\%$): babel-spanish rompe con
+    "Incompatible glue units"; el signo va fuera del math ($25$\,\%)
+  - caracteres ASCII con significado propio usados como texto: _ # ^ fuera de modo
+    matematico y & fuera de una tabla (el guion bajo de corredor_alta en los captions
+    rompio la compilacion en Overleaf el 06.09.2026: abre modo matematico y arrastra
+    el resto del caption, y ademas revienta al releer la lista de tablas del .lot)
   - entorno subfigure (la clase carga el paquete antiguo subfigure, que solo define
     el comando \subfigure) y paquetes incompatibles con la clase en main.tex
   - table/figure sin \caption, o con \label antes de \caption (referencia mal numerada)
@@ -172,6 +178,113 @@ def revisar_caracteres(nombre, texto):
                            f"\\textrightarrow, etc.")
 
 
+MATH_ENTORNOS = ("equation", "align", "gather", "multline", "eqnarray", "displaymath", "math",
+                 "array", "cases", "split", "aligned", "alignat", "flalign", "gathered",
+                 "pmatrix", "bmatrix", "vmatrix", "Vmatrix", "smallmatrix", "matrix")
+TABLA_ENTORNOS = ("tabular", "tabularx", "tabulary", "longtable", "array", "matrix", "pmatrix",
+                  "bmatrix", "vmatrix", "Vmatrix", "smallmatrix", "align", "alignat", "flalign",
+                  "eqnarray", "cases", "split", "aligned", "gathered")
+# argumentos que LaTeX no tipografia: son claves o nombres de archivo y el guion bajo es legal
+ARG_NO_TEXTO = ("label", "ref", "eqref", "pageref", "autoref", "nameref", "vref", "Cref", "cref",
+                "cite", "citep", "citet", "citealp", "citealt", "input", "include", "includegraphics",
+                "bibliography", "bibliographystyle", "url", "href", "path", "verbatiminput",
+                "lstinputlisting", "graphicspath", "bibitem", "usepackage", "documentclass")
+
+
+def _borrar(texto, patron, flags=0):
+    """Sustituye por espacios lo que empareje, conservando posiciones y saltos de linea."""
+    return re.sub(patron, lambda m: re.sub(r"[^\n]", " ", m.group(0)), texto, flags=flags)
+
+
+def sin_matematicas(texto, quitar_tablas=False):
+    """Texto con las zonas donde _ ^ & son legales sustituidas por espacios."""
+    t = _borrar(texto, r"\\[\\$_#&%^~{}]")                       # \_ \& \$ \\ ... ya escapados
+    envs = MATH_ENTORNOS + (TABLA_ENTORNOS if quitar_tablas else ())
+    for env in sorted(set(envs)):
+        t = _borrar(t, r"\\begin\{" + env + r"\*?\}[\s\S]*?\\end\{" + env + r"\*?\}")
+    t = _borrar(t, r"\$\$[\s\S]*?\$\$")
+    t = _borrar(t, r"\$[^$]*?\$")                                # $...$ puede abarcar varias lineas
+    t = _borrar(t, r"\\\[[\s\S]*?\\\]")
+    t = _borrar(t, r"\\\([\s\S]*?\\\)")
+    for cmd in ARG_NO_TEXTO:
+        t = _borrar(t, r"\\" + cmd + r"\*?(?![A-Za-z])(\[[^\]]*\])?\{[^{}]*\}")
+    return t
+
+
+def revisar_especiales(nombre, texto):
+    """Caracteres ASCII con significado propio en LaTeX usados como texto.
+
+    Es el fallo que rompio la compilacion en Overleaf el 06.09.2026: los captions de
+    las tablas de corredor_alta llevaban el guion bajo crudo, que abre modo matematico
+    y arrastra el resto del caption (y de paso rompe la lista de tablas, que se relee
+    desde el .lot antes que el propio capitulo).
+    """
+    t = sin_matematicas(texto)
+    for simbolo, arreglo in (("_", "\\_"), ("#", "\\#"), ("^", "\\^{}")):
+        for m in re.finditer(r"(?<!\\)" + re.escape(simbolo), t):
+            errores.append(f"{nombre}:{linea_de(t, m.start())}: '{simbolo}' sin escapar en texto "
+                           f"(escribir {arreglo}); LaTeX lo lee como subindice/superindice y falla "
+                           f"con 'Missing $ inserted'")
+    # & fuera de tabular: 'Misplaced alignment tab character &'
+    t = sin_matematicas(texto, quitar_tablas=True)
+    for m in re.finditer(r"(?<!\\)&", t):
+        errores.append(f"{nombre}:{linea_de(t, m.start())}: '&' fuera de una tabla "
+                       f"(escribir \\&); LaTeX falla con 'Misplaced alignment tab character'")
+
+
+def zonas_matematicas(texto):
+    """Lista de booleanos por posicion: True si esa posicion queda dentro de math."""
+    dentro = [False] * len(texto)
+    i = 0
+    inline = display = False
+    while i < len(texto):
+        c = texto[i]
+        if c == "\\":
+            if texto[i:i + 2] == "\\[":
+                display = True
+                i += 2
+                continue
+            if texto[i:i + 2] == "\\]":
+                display = False
+                i += 2
+                continue
+            if i + 1 < len(texto):
+                dentro[i] = dentro[i + 1] = inline or display
+            i += 2
+            continue
+        if c == "$":
+            if texto[i:i + 2] == "$$":
+                display = not display
+                i += 2
+                continue
+            inline = not inline
+            i += 1
+            continue
+        dentro[i] = inline or display
+        i += 1
+    for env in ("equation", "align", "gather", "multline", "eqnarray", "displaymath"):
+        for m in re.finditer(r"\\begin\{" + env + r"\*?\}[\s\S]*?\\end\{" + env + r"\*?\}", texto):
+            for k in range(m.start(), m.end()):
+                dentro[k] = True
+    return dentro
+
+
+def revisar_porcentaje_en_math(nombre, texto):
+    """Espacio fino antes de \\% dentro de modo matematico: rompe con babel-spanish.
+
+    babel-spanish redefine \\% para anteponer el espacio fino de la norma tipografica
+    ("25 %"), y antes de ponerlo mira \\lastskip. Dentro de $...$ el \\, es un \\mskip en
+    unidades mu y compararlo con 0pt da "! Incompatible glue units", que ademas deja el
+    espacio mal (TeX asume 1mu=1pt). Se escribe $25$\\,\\%, con el % fuera del math.
+    """
+    dentro = zonas_matematicas(texto)
+    for m in re.finditer(r"\\[,;:! ]\s*\\%", texto):
+        if dentro[m.start()]:
+            errores.append(f"{nombre}:{linea_de(texto, m.start())}: espacio fino antes de \\% "
+                           f"dentro de modo matematico (escribir $25$\\,\\% y no $25\\,\\%$); "
+                           f"babel-spanish falla con 'Incompatible glue units'")
+
+
 def revisar_avisos_texto(nombre, crudo):
     """Sobre el texto con comentarios: % sin escapar tras un numero, TODO/PROVISIONAL, \\paragraph."""
     t = quitar_literales(crudo)
@@ -222,6 +335,8 @@ def main():
         revisar_llaves_y_entornos(nombre, t)
         revisar_flotantes(nombre, t)
         revisar_caracteres(nombre, t)
+        revisar_especiales(nombre, t)
+        revisar_porcentaje_en_math(nombre, t)
         revisar_avisos_texto(nombre, crudos[a])
 
     # paquetes incompatibles con la clase (subfigure viejo + comandos \cref/\sref propios)

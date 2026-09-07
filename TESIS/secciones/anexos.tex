@@ -6,9 +6,10 @@
 
 Las tablas siguientes listan, para cada escenario, los parámetros de
 entrada y las métricas de salida de todos los episodios de
-entrenamiento. Se generan directamente desde
-\texttt{resultados\_<escenario>.csv} con el script
-\texttt{tablas\_tex.py}, de modo que cada número es reproducible con
+entrenamiento. Se generan con el script \texttt{tablas\_tex.py}
+directamente desde los archivos de resultados por episodio
+(\texttt{resultados\_}\allowbreak\texttt{<escenario>.csv}), de modo que
+cada número es reproducible con
 los comandos del plan de pruebas. Q ini.\ es el número de estados
 distintos que la tabla Q ya conocía al empezar el episodio; $r$/dec.\ es
 la recompensa media por decisión, medida cada 5~s con el mismo reloj en
@@ -18,6 +19,24 @@ todos los controles.
 \input{secciones/tablas/cruce2_episodios}
 \input{secciones/tablas/corredor_episodios}
 \input{secciones/tablas/red_episodios}
+\input{secciones/tablas/corredor_alta_episodios}
+
+Los entrenamientos del módulo U4 se registran en un archivo por
+corrida, nombrado según el escenario, la variante y la semilla base:
+\begin{center}
+\texttt{resultados\_<escenario>\_ippo\_<variante>\_s<base>.csv}
+\end{center}
+Las tablas siguientes muestran los cinco primeros episodios y uno de
+cada diez de cada entrenamiento (variante y semilla base), con la
+recompensa de U2 a reloj fijo, la recompensa que vio el agente, la
+entropía de la política sobre las decisiones libres, la divergencia
+entre la política vieja y la nueva en cada actualización y la
+evaluación intermedia con la semilla 999.
+
+\input{secciones/tablas/cruce_ippo_episodios}
+\input{secciones/tablas/red_ippo_episodios}
+\input{secciones/tablas/corredor_ippo_episodios}
+\input{secciones/tablas/corredor_alta_ippo_episodios}
 
 \section*{Anexo B. Código fuente}
 
@@ -31,21 +50,24 @@ proyecto.
 \begin{spacing}{1}
 
 \subsection*{rl\_semaforo.py: agente único (escenarios cruce y cruce2)}
-{\scriptsize \verbatiminput{codigo/rl_semaforo.py}}
+{\fontsize{7}{8.4}\selectfont \verbatiminput{codigo/rl_semaforo.py}}
 
 \subsection*{rl\_corredor.py: un agente independiente por semáforo (corredor y red)}
-{\scriptsize \verbatiminput{codigo/rl_corredor.py}}
+{\fontsize{7}{8.4}\selectfont \verbatiminput{codigo/rl_corredor.py}}
+
+\subsection*{rl\_ippo.py: módulo U4, IPPO con mensajería entre vecinos}
+{\fontsize{7}{8.4}\selectfont \verbatiminput{codigo/rl_ippo.py}}
 
 \subsection*{comun.py: métricas del tripinfo, programa actuado y CSV}
-{\scriptsize \verbatiminput{codigo/comun.py}}
+{\fontsize{7}{8.4}\selectfont \verbatiminput{codigo/comun.py}}
 
 \subsection*{evaluar.py: evaluación por semillas y estadística}
-{\scriptsize \verbatiminput{codigo/evaluar.py}}
+{\fontsize{7}{8.4}\selectfont \verbatiminput{codigo/evaluar.py}}
 
 \subsection*{barrer\_fijo.py: barrido del programa de tiempo fijo}
-{\scriptsize \verbatiminput{codigo/barrer_fijo.py}}
+{\fontsize{7}{8.4}\selectfont \verbatiminput{codigo/barrer_fijo.py}}
 
 \subsection*{tablas\_tex.py: tablas del capítulo de resultados}
-{\scriptsize \verbatiminput{codigo/tablas_tex.py}}
+{\fontsize{7}{8.4}\selectfont \verbatiminput{codigo/tablas_tex.py}}
 
 \end{spacing}

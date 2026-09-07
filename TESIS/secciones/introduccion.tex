@@ -2,7 +2,7 @@
 
 \introsection{Presentación del tema de investigación}
 
-La congestión vehicular en Lima Metropolitana afecta de manera crítica la movilidad urbana, el tiempo de viaje y la calidad del aire. Este trabajo propone \textbf{optimizar el control semafórico} de una intersección o pequeño corredor de alto tráfico mediante \textbf{Aprendizaje por Refuerzo (RL)} y validación en el simulador \textbf{SUMO}, con un agente por intersección y una evaluación rigurosa frente a los esquemas tradicionales de tiempo fijo y actuado. El estudio se centra en el desarrollo de un \textit{pipeline} reproducible de datos \textrightarrow\ preprocesamiento \textrightarrow\ SUMO \textrightarrow\ RL \textrightarrow\ evaluación. La fase que reporta este documento valida ese \textit{pipeline} sobre cuatro escenarios sintéticos; la transferencia a un cruce real de Lima y la coordinación entre semáforos vecinos quedan como trabajo siguiente.
+La congestión vehicular en Lima Metropolitana afecta de manera crítica la movilidad urbana, el tiempo de viaje y la calidad del aire. Este trabajo propone \textbf{optimizar el control semafórico} de una intersección o pequeño corredor de alto tráfico mediante \textbf{Aprendizaje por Refuerzo (RL)} y validación en el simulador \textbf{SUMO}, con un agente por intersección y una evaluación rigurosa frente a los esquemas tradicionales de tiempo fijo y actuado. El estudio se centra en el desarrollo de un \textit{pipeline} reproducible de datos \textrightarrow\ preprocesamiento \textrightarrow\ SUMO \textrightarrow\ RL \textrightarrow\ evaluación. La fase que reporta este documento valida ese \textit{pipeline} sobre cinco escenarios sintéticos, con control por agente aislado y con coordinación entre semáforos vecinos; la transferencia a un cruce real de Lima queda como trabajo siguiente.
 
 \introsection{Descripción de la situación problemática}
 
@@ -16,11 +16,11 @@ En intersecciones y corredores urbanos de alto flujo se originan colas extensas,
 \begin{itemize}
     \item Reducción del retraso promedio por vehículo (\texttt{timeLoss} de SUMO) en \textbf{25–40\%}. Es la meta principal y se mide con la métrica primaria de la tesis.
     \item Disminución de la longitud promedio de colas en \textbf{$\geq$20\%}.
-    \item Incremento del \textit{throughput} en \textbf{$\geq$10\%}. Solo es evaluable en escenarios cuya demanda supere la capacidad de la intersección; en los escenarios de esta fase la demanda se sirve por completo y la meta no discrimina entre controles.
+    \item Incremento del \textit{throughput} en \textbf{$\geq$10\%}. Solo es evaluable en escenarios cuya demanda supere la capacidad de la intersección: en los cuatro escenarios de demanda nominal la demanda se sirve por completo y la meta no discrimina entre controles; en el corredor con demanda doble sí discrimina, pero ningún control se acerca al 10\% porque todos sirven el máximo que admite el carril.
     \item Reducción de emisiones (CO\textsubscript{2}) en \textbf{$\geq$5\%} (estimación SUMO).
 \end{itemize}
 
-Estas metas son el objetivo del trabajo completo, no el resultado alcanzado en esta fase. El Capítulo~\ref{cap:resultados} reporta en qué medida las cumple el algoritmo implementado.
+Estas metas son el objetivo del trabajo completo, no el resultado alcanzado en esta fase. El Capítulo~\ref{cap:resultados} reporta en qué medida las cumple cada uno de los dos algoritmos implementados.
 
 \introsection{Objetivos de investigación}
 
@@ -35,7 +35,7 @@ Estas metas son el objetivo del trabajo completo, no el resultado alcanzado en e
     \item Proponer buenas prácticas para reproducibilidad: semillas separadas para entrenamiento y evaluación, evaluación con la política congelada, intervalos de confianza al 95\% y pruebas de significancia pareadas.
 \end{itemize}
 
-\noindent De estos objetivos, esta fase ejecuta U1, U2 (con Q-learning tabular) y U3; U4 queda formulado y sin implementar, y de U2 restan SARSA, DQN y PPO.
+\noindent De estos objetivos, esta fase ejecuta los cuatro: U1, U2 (con Q-learning tabular), U3 y U4 (con IPPO, mensajería entre vecinos y penalización por \textit{spillback}). De U2 restan SARSA y DQN; PPO se implementó dentro de U4. Del propio U4 queda pendiente la variante con crítico centralizado (MAPPO).
 
 \introsection{Justificación}
 
@@ -45,8 +45,8 @@ Estas metas son el objetivo del trabajo completo, no el resultado alcanzado en e
 
 \textbf{Alcance de esta fase:}
 \begin{itemize}
-    \item Cuatro escenarios sintéticos construidos con \texttt{netconvert} (un cruce de dos fases, un cruce con giros protegidos, un corredor de dos cruces y una red de tres cruces con rotonda), cada uno con una hora de demanda y la punta invertida a la mitad, de modo que ningún programa fijo pueda ser óptimo en los dos periodos.
-    \item Entrenamiento de agentes de Q-learning tabular, uno por intersección y sin comunicación entre ellos, sobre SUMO mediante TraCI.
+    \item Cinco escenarios sintéticos construidos con \texttt{netconvert} (un cruce de dos fases, un cruce con giros protegidos, un corredor de dos cruces, una red de tres cruces con rotonda y el mismo corredor con el doble de demanda como caso de estrés), cada uno con una hora de demanda y la punta invertida a la mitad, de modo que ningún programa fijo pueda ser óptimo en los dos periodos.
+    \item Entrenamiento de agentes de Q-learning tabular, uno por intersección y sin comunicación entre ellos, y de agentes IPPO con mensajería entre semáforos vecinos, sobre SUMO mediante TraCI.
     \item Comparación con semaforización de tiempo fijo tuneada por barrido y con el control actuado nativo de SUMO, bajo las mismas restricciones de verde mínimo y máximo.
 \end{itemize}
 
@@ -56,15 +56,15 @@ Estas metas son el objetivo del trabajo completo, no el resultado alcanzado en e
     \item Cobertura completa de toda la red vial de Lima.
     \item El cruce real de Lima importado de OpenStreetMap: los escenarios evaluados son sintéticos.
     \item Datos observados de tráfico (aforos, matrices origen--destino): la demanda se define por flujos declarados.
-    \item Los algoritmos SARSA, DQN y PPO, y con ellos la comparación algorítmica completa.
-    \item El módulo U4 de coordinación distribuida: mensajería, estado extendido y penalización por \textit{spillback}.
+    \item Los algoritmos SARSA y DQN, y con ellos la comparación algorítmica completa.
+    \item La variante de U4 con crítico centralizado (MAPPO) y el entrenamiento con un canal de mensajes imperfecto: las políticas de coordinación se entrenaron con mensajes instantáneos, aunque sí se evaluaron con latencia y pérdida.
 \end{itemize}
 
 \introsection{Áreas de investigación y herramientas}
 
 \begin{itemize}
     \item \textbf{Ingeniería de transporte:} SUMO 1.25 con \texttt{netconvert} y \texttt{netedit}, OpenStreetMap, métricas de tráfico.
-    \item \textbf{Inteligencia Artificial:} Python 3.14; el agente tabular se implementa con la biblioteca estándar. Para los algoritmos de \textit{Deep RL} previstos (DQN, PPO) se evaluará \texttt{stable-baselines3} sobre PyTorch.
+    \item \textbf{Inteligencia Artificial:} Python 3.14. El agente tabular usa la biblioteca estándar; IPPO se implementa en PyTorch puro sobre CPU, sin Gym ni bibliotecas de RL de terceros. Para DQN, pendiente, se evaluará \texttt{stable-baselines3}.
     \item \textbf{Procesamiento de datos:} Python (\texttt{csv}, \texttt{numpy}) y las salidas por vehículo de SUMO.
     \item \textbf{Modelado y simulación:} SUMO + TraCI.
     \item \textbf{Estadística y visualización:} \texttt{scipy} (intervalos de confianza, Wilcoxon, Mann--Whitney) y \texttt{matplotlib}.
@@ -90,12 +90,12 @@ Se adopta una arquitectura con cuatro unidades:
 \textbf{U3} SUMO (simulación y medición) y
 \textbf{U4} \textbf{Coordinación distribuida}.
 
-\textbf{Flujo:} U1 alimenta a U3 (red y rutas); U3 expone estados y métricas vía TraCI; U2 decide acciones (fases) que se aplican en U3. En U4 está previsto que cada agente intercambie \textit{mensajes} con sus intersecciones vecinas (p.\,ej., \emph{fase actual, tiempo restante, outflow estimado hacia el vecino, colas en salidas}) y \textbf{amplíe su estado} con un \emph{resumen de vecinos} para coordinar \textit{ondas verdes} y evitar \textit{spillback}. En la fase reportada aquí, los agentes de los escenarios con varios semáforos operan de forma independiente y no intercambian información.
+\textbf{Flujo:} U1 alimenta a U3 (red y rutas); U3 expone estados y métricas vía TraCI; U2 decide acciones (fases) que se aplican en U3. En U4 cada agente intercambia \textit{mensajes} con sus intersecciones vecinas (\emph{fase actual, tiempo en esa fase, vehículos que descargan hacia el vecino, colas en la aproximación y en el enlace compartido}) y \textbf{amplía su estado} con un \emph{resumen de vecinos} para coordinar \textit{ondas verdes} y evitar \textit{spillback}. Los agentes tabulares de U2 siguen operando de forma independiente en los escenarios de varios semáforos, y esa diferencia es lo que permite medir el aporte de la coordinación.
 
 \introsection{Estado de avance}
 
 \begin{enumerate}
-    \item \textbf{Completado:} construcción de los cuatro escenarios sintéticos y su demanda (U1); formulación e implementación del agente de Q-learning tabular (U2); instrumentación de las métricas y de los dos controles de referencia (U3); protocolo de evaluación con semillas separadas, intervalos de confianza y pruebas de significancia, aplicado a los cuatro escenarios.
-    \item \textbf{En curso:} análisis de los resultados obtenidos y ajuste de la formulación de la recompensa, que hoy penaliza colas y espera detenida pero no el retraso ni el número de cambios de fase.
-    \item \textbf{Pendiente:} importación y limpieza del cruce real de Lima; implementación de SARSA, DQN y PPO para la comparación algorítmica; módulo U4 de coordinación distribuida y su evaluación a nivel de corredor.
+    \item \textbf{Completado:} construcción de los cinco escenarios sintéticos y su demanda (U1); formulación e implementación del agente de Q-learning tabular (U2); instrumentación de las métricas y de los dos controles de referencia (U3); módulo de coordinación distribuida con IPPO, mensajería entre vecinos y penalización por \textit{spillback}, en variantes incrementales y con tres semillas base por variante (U4); protocolo de evaluación con semillas separadas, intervalos de confianza y pruebas de significancia, aplicado a todos los escenarios y controles.
+    \item \textbf{En curso:} análisis conjunto de los resultados. La recompensa de U2 penaliza colas y espera detenida pero no el retraso; la de U4 ya usa el retraso por segundo, de modo que la comparación entre ambos módulos mezcla el efecto del algoritmo con el de la señal y conviene separarlos.
+    \item \textbf{Pendiente:} importación y limpieza del cruce real de Lima; implementación de SARSA y DQN para completar la comparación algorítmica; entrenamiento de las políticas de coordinación con un canal de mensajes imperfecto y variante con crítico centralizado (MAPPO).
 \end{enumerate}

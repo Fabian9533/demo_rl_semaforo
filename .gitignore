@@ -5,13 +5,16 @@ __pycache__/
 # Configuracion local de Claude Code (permisos por maquina)
 .claude/settings.local.json
 
-# Temporales de LaTeX (la tesis se compila en Overleaf)
+# Temporales de LaTeX (la tesis se compila en Overleaf y en local con TESIS/compilar.py)
 *.aux
 *.log
 *.out
 *.toc
+*.lot
+*.lof
 *.bbl
 *.blg
 *.synctex.gz
 *.fdb_latexmk
 *.fls
+TESIS/main.pdf

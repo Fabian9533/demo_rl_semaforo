@@ -1,0 +1,19 @@
+<additional>
+    <!-- Programa fijo tuneado de corredor_alta (demanda de corredor x 2.0): barrido
+         verde de avenida {25,30,35,40} x verde transversal {10,15,20,25} x desfase
+         {0,10,20,25,30} con las semillas 2001-2003 (barrer_fijo.py corredor_alta).
+         Mejor: avenida 25 s, transversal 15 s, desfase 25 s en semaforo_C2
+         (retraso 152.1 s frente a 171 s del programa nominal 25/25). -->
+    <tlLogic id="semaforo_C1" type="static" programID="fijo" offset="0">
+        <phase duration="15" state="GGgrrrGGgrrr"/>
+        <phase duration="3"  state="yyyrrryyyrrr"/>
+        <phase duration="25" state="rrrGGgrrrGGg"/>
+        <phase duration="3"  state="rrryyyrrryyy"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C2" type="static" programID="fijo" offset="25">
+        <phase duration="15" state="GGgrrrGGgrrr"/>
+        <phase duration="3"  state="yyyrrryyyrrr"/>
+        <phase duration="25" state="rrrGGgrrrGGg"/>
+        <phase duration="3"  state="rrryyyrrryyy"/>
+    </tlLogic>
+</additional>

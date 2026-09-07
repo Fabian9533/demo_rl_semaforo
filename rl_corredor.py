@@ -65,6 +65,8 @@ ESCENARIOS = {
         "flujos_corredor": ["p1_W_E", "p1_E_W", "p2_W_E", "p2_E_W"],
     },
 }
+# corredor_alta: el mismo corredor con toda la demanda escalada (escenario de estres para U4)
+ESCENARIOS["corredor_alta"] = {**ESCENARIOS["corredor"], "cfg": "corredor_alta.sumocfg"}
 
 # Se definen en main() segun --escenario
 ESCENARIO = "corredor"
@@ -74,7 +76,6 @@ ENLACES = ESCENARIOS["corredor"]["enlaces"]
 FLUJOS_CORREDOR = ESCENARIOS["corredor"]["flujos_corredor"]
 Q_FILE = "q_table_corredor.json"
 RESULTADOS = "resultados_corredor.csv"
-UMBRAL_SPILLBACK = 0.9   # hay spillback cuando la cola detenida ocupa al menos esta fraccion del enlace
 
 # ---------------- Parametros ----------------
 PASO_CONTROL = 5      # segundos entre decisiones de cada agente
@@ -181,18 +182,17 @@ def correr_episodio(modo, Q, eps, gui, delay, seed, tripinfo=None, serie=None):
 
     aprox = todas_las_aprox()
     net_file, _ = comun.leer_cfg(CFG)
-    capacidad = {e: comun.capacidad_enlace(net_file, e) for e in ENLACES}
+    medidor = comun.MedidorEnlaces(net_file, ENLACES)   # spillback y colas por carril en los enlaces
+    filas_fases = []
     pasos = 0
     cola_acum = 0.0
     cola_max = 0
     r_total = 0.0        # recompensa que ven los agentes (para aprender)
     decisiones = 0
-    r_reporte = 0.0      # recompensa medida cada 5 s de reloj fijo, igual en los cuatro modos (para comparar)
+    r_reporte = 0.0      # recompensa medida cada 5 s de reloj fijo, igual en los cuatro modos
     n_reporte = 0
     cambios = 0
     dq_max = 0.0
-    pasos_spillback = 0  # pasos en que algun enlace entre cruces esta lleno de vehiculos detenidos
-    cola_max_enlace = 0
     filas_serie = []
 
     while traci.simulation.getMinExpectedNumber() > 0 and pasos < 6000:
@@ -239,18 +239,20 @@ def correr_episodio(modo, Q, eps, gui, delay, seed, tripinfo=None, serie=None):
         colas = [traci.edge.getLastStepHaltingNumber(e) for e in aprox]
         cola_acum += sum(colas)
         cola_max = max(cola_max, sum(colas))
-        detenidos_enlace = {e: traci.edge.getLastStepHaltingNumber(e) for e in ENLACES}
-        cola_max_enlace = max(cola_max_enlace, max(detenidos_enlace.values()))
-        if any(detenidos_enlace[e] >= UMBRAL_SPILLBACK * capacidad[e] for e in ENLACES):
-            pasos_spillback += 1
+        medidor.paso(pasos)
         if serie is not None and pasos % PASO_SERIE == 0:
             filas_serie.append([pasos] + colas)
 
+        fases_ahora = []
         for tls, ag in agentes.items():
             fase = traci.trafficlight.getPhase(tls)
+            fases_ahora.append(fase)
             if fase != ag["fase_previa"] and fase in ag["verdes"]:   # entro un verde nuevo
                 cambios += 1
             ag["fase_previa"] = fase
+        if serie is not None and pasos <= comun.FIN_HORA:
+            filas_fases.append([pasos] + fases_ahora)
+        for tls, ag in agentes.items():
             if not controla:
                 continue
             if ag["ambar_restante"] > 0:
@@ -266,6 +268,7 @@ def correr_episodio(modo, Q, eps, gui, delay, seed, tripinfo=None, serie=None):
     traci.close()
     if serie is not None:
         comun.guardar_serie(serie, ["t"] + aprox, filas_serie)
+        comun.guardar_fases(serie.replace("serie_", "fases_", 1), list(SEMAFOROS), filas_fases)
     res = comun.leer_tripinfo(tripinfo, FLUJOS_CORREDOR)
     res.update({
         "cola_prom": round(cola_acum / max(1, pasos), 2),   # detenidos en todas las aproximaciones
@@ -275,9 +278,8 @@ def correr_episodio(modo, Q, eps, gui, delay, seed, tripinfo=None, serie=None):
         "decisiones": decisiones if controla else n_reporte,
         "cambios_fase": cambios,                             # sumados sobre todos los semaforos
         "dq_max": round(dq_max, 4),
-        "spillback_tasa": round(pasos_spillback / max(1, pasos), 4),  # fraccion de la hora con un enlace lleno
-        "cola_max_enlace": cola_max_enlace,                   # mayor cola detenida en un enlace entre cruces
     })
+    res.update(medidor.resumen())                             # spillback y colas por carril en los enlaces
     return res
 
 

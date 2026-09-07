@@ -4,20 +4,21 @@
 \centering
 \scriptsize
 \setlength{\tabcolsep}{3pt}
+\setlength{\tabcolsep}{2pt}
 \begin{tabular}{lrrrrrr}
 \toprule
 Métrica & Tiempo fijo & Actuado & Q-learning & \makecell{$\Delta$ RL vs fijo\\{}[IC95\,\%]} & $p$ & \makecell{$\Delta$ actuado\\vs fijo} \\
 \midrule
-Retraso (s/veh) & 23.19 $\pm$ 0.25 & 15.46 $\pm$ 0.18 & 21.72 $\pm$ 1.00 & $-$6.4\,\% [$-$9.3, $-$2.7] & 0.0137 & $-$33.4\,\% \\
-Espera detenida (s/veh) & 9.63 $\pm$ 0.20 & 3.79 $\pm$ 0.05 & 7.14 $\pm$ 0.49 & $-$25.9\,\% [$-$29.9, $-$21.1] & 0.00195 & $-$60.7\,\% \\
-Cola promedio (veh) & 5.31 $\pm$ 0.10 & 2.40 $\pm$ 0.03 & 4.07 $\pm$ 0.23 & $-$23.5\,\% [$-$26.8, $-$19.3] & 0.00195 & $-$54.8\,\% \\
-Cola máxima (veh) & 18.00 $\pm$ 0.67 & 11.50 $\pm$ 0.77 & 18.40 $\pm$ 0.69 & +2.2\,\% [$-$0.5, 5.1] & 0.312 & $-$36.1\,\% \\
-Paradas por vehículo & 0.68 $\pm$ 0.01 & 0.49 $\pm$ 0.01 & 0.87 $\pm$ 0.05 & +27.4\,\% [21.5, 34.1] & 0.00195 & $-$27.8\,\% \\
-Throughput (veh) & 1802.00 $\pm$ 1.26 & 1807.50 $\pm$ 0.84 & 1802.70 $\pm$ 3.00 & +0.0\,\% [$-$0.1, 0.2] & 0.766 & +0.3\,\% \\
-CO$_2$ (g/veh) & 196.11 $\pm$ 0.55 & 180.54 $\pm$ 0.47 & 193.13 $\pm$ 1.84 & $-$1.5\,\% [$-$2.2, $-$0.8] & 0.00977 & $-$7.9\,\% \\
-NO$_x$ (mg/veh) & 67.34 $\pm$ 0.19 & 61.72 $\pm$ 0.13 & 65.97 $\pm$ 0.64 & $-$2.0\,\% [$-$2.7, $-$1.3] & 0.00391 & $-$8.3\,\% \\
-Recompensa por decisión & $-$5.74 $\pm$ 0.12 & $-$2.48 $\pm$ 0.03 & $-$4.23 $\pm$ 0.26 & $-$26.4\,\% [$-$29.8, $-$22.2] & 0.00195 & $-$56.8\,\% \\
-Cambios de fase & 131.40 $\pm$ 0.37 & 203.00 $\pm$ 2.02 & 232.70 $\pm$ 3.66 & +77.1\,\% [74.4, 79.2] & 0.00195 & +54.5\,\% \\
+Retraso (s/veh) & 23.19 $\pm$ 0.25 & 15.46 $\pm$ 0.18 & 21.72 $\pm$ 1.00 & \makecell{$-$6.4\,\%\\{}[$-$9.3, $-$2.7]} & 0.0137 & $-$33.4\,\% \\
+Espera detenida (s/veh) & 9.63 $\pm$ 0.20 & 3.79 $\pm$ 0.05 & 7.14 $\pm$ 0.49 & \makecell{$-$25.9\,\%\\{}[$-$29.9, $-$21.1]} & 0.00195 & $-$60.7\,\% \\
+Cola promedio (veh) & 5.31 $\pm$ 0.10 & 2.40 $\pm$ 0.03 & 4.07 $\pm$ 0.23 & \makecell{$-$23.5\,\%\\{}[$-$26.8, $-$19.3]} & 0.00195 & $-$54.8\,\% \\
+Cola máxima (veh) & 18.00 $\pm$ 0.67 & 11.50 $\pm$ 0.77 & 18.40 $\pm$ 0.69 & \makecell{+2.2\,\%\\{}[$-$0.5, 5.1]} & 0.312 & $-$36.1\,\% \\
+Paradas por vehículo & 0.68 $\pm$ 0.01 & 0.49 $\pm$ 0.01 & 0.87 $\pm$ 0.05 & \makecell{+27.4\,\%\\{}[21.5, 34.1]} & 0.00195 & $-$27.8\,\% \\
+Throughput (veh) & 1802.00 $\pm$ 1.26 & 1807.50 $\pm$ 0.84 & 1802.70 $\pm$ 3.00 & \makecell{+0.0\,\%\\{}[$-$0.1, 0.2]} & 0.766 & +0.3\,\% \\
+CO$_2$ (g/veh) & 196.11 $\pm$ 0.55 & 180.54 $\pm$ 0.47 & 193.13 $\pm$ 1.84 & \makecell{$-$1.5\,\%\\{}[$-$2.2, $-$0.8]} & 0.00977 & $-$7.9\,\% \\
+NO$_x$ (mg/veh) & 67.34 $\pm$ 0.19 & 61.72 $\pm$ 0.13 & 65.97 $\pm$ 0.64 & \makecell{$-$2.0\,\%\\{}[$-$2.7, $-$1.3]} & 0.00391 & $-$8.3\,\% \\
+Recompensa por decisión & $-$5.74 $\pm$ 0.12 & $-$2.48 $\pm$ 0.03 & $-$4.23 $\pm$ 0.26 & \makecell{$-$26.4\,\%\\{}[$-$29.8, $-$22.2]} & 0.00195 & $-$56.8\,\% \\
+Cambios de fase & 131.40 $\pm$ 0.37 & 203.00 $\pm$ 2.02 & 232.70 $\pm$ 3.66 & \makecell{+77.1\,\%\\{}[74.4, 79.2]} & 0.00195 & +54.5\,\% \\
 \bottomrule
 \end{tabular}
 \caption[Escenario cruce: evaluación con política congelada]{Escenario cruce: evaluación con política congelada sobre 10 semillas (1001 a 1010), las mismas para los tres controles. Media $\pm$ IC95\,\%; el cambio porcentual lleva su intervalo bootstrap pareado y $p$ es el de la prueba de Wilcoxon pareada frente al fijo.}

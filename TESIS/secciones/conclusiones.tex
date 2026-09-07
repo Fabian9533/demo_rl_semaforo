@@ -1,19 +1,25 @@
 \customchapter{CONCLUSIONES}
 
-Esta fase del trabajo implementó y evaluó las unidades U1 a U3 de la
+Esta fase del trabajo implementó y evaluó las cuatro unidades de la
 arquitectura propuesta: la construcción del entorno de simulación, un
-agente de control semafórico basado en Q-learning tabular y la
-instrumentación de las métricas de desempeño, sobre cuatro escenarios
-sintéticos de complejidad creciente y con un protocolo de evaluación
-que compara tres controles sobre las mismas diez semillas. De los
-resultados del Capítulo~\ref{cap:resultados} se desprenden las
-siguientes conclusiones.
+agente de control semafórico basado en Q-learning tabular, la
+instrumentación de las métricas de desempeño y la coordinación
+distribuida entre semáforos con IPPO y mensajería entre vecinos, sobre
+cinco escenarios sintéticos de complejidad creciente y con un
+protocolo de evaluación que compara todos los controles sobre las
+mismas diez semillas. De los resultados del
+Capítulo~\ref{cap:resultados} se desprenden las siguientes
+conclusiones.
 
 \noindent\textbf{1. El agente tabular no alcanza las metas planteadas y
 solo mejora al control de tiempo fijo en el escenario más simple.} Con
 la política congelada y diez semillas de evaluación, el retraso
 promedio por vehículo baja un 6.4\,\% en el cruce de dos fases y sube
-entre un 6 y un 17\,\% en los otros tres escenarios. La meta declarada
+un 15\,\% en la red, un 17\,\% en el cruce con giros protegidos y un
+60\,\% en el corredor, los dos últimos frente a fijos con el reparto de
+verde tuneado;
+con la demanda doble el agente se degrada hasta un 37\,\% por encima del        
+fijo y deja vehículos sin terminar. La meta declarada
 de una reducción del 25 al 40\,\% no se cumple en ningún caso. La
 reducción de colas del 20\,\% se alcanza únicamente en el cruce simple
 y en la media, con un intervalo de confianza que no excluye ese umbral.
@@ -24,12 +30,16 @@ vehículos detenidos y su tiempo de espera, y el agente la mejora de
 forma consistente; pero la meta se formula sobre el retraso, que
 incluye además frenadas y aceleraciones. La consecuencia es medible: en
 el cruce simple la espera detenida baja un 26\,\% mientras el retraso
-solo baja un 6\,\%, y en el corredor la espera baja un 13\,\% mientras
-el retraso sube un 6\,\%. El agente aprende a cortar el verde con
+solo baja un 6\,\%, y en la red la espera sube un 4\,\% mientras el
+retraso sube un 15\,\%. El agente aprende a cortar el verde con
 frecuencia, hasta un 77\,\% más de cambios de fase que el control fijo,
 lo que fragmenta las colas pero aumenta las paradas por vehículo en los
-cuatro escenarios. Optimizar una señal correlacionada con el objetivo
-no equivale a optimizar el objetivo.
+cinco escenarios. Optimizar una señal correlacionada con el objetivo
+no equivale a optimizar el objetivo. El módulo U4 confirma el
+diagnóstico por la vía contraria: con la misma estructura de recompensa
+pero midiendo el retraso por segundo en lugar de los vehículos
+detenidos, el agente deja de fragmentar las colas y las paradas por
+vehículo bajan en tres de los cuatro escenarios donde se probó.
 
 \noindent\textbf{3. La representación tabular tiene un techo
 identificable al crecer el número de fases.} En el cruce de dos fases el
@@ -44,9 +54,9 @@ con aproximación de funciones, como DQN y PPO.
 
 \noindent\textbf{4. Los agentes sin comunicación no reproducen el
 beneficio de la coordinación.} En la red de tres intersecciones, tres
-agentes independientes quedan un 13\,\% por detrás de un programa fijo
+agentes independientes quedan un 15\,\% por detrás de un programa fijo
 con onda verde, aunque superan ampliamente al mismo programa sin
-desfases, que da 41.6 s de retraso frente a 25.1 s del agente. La
+desfases, que da 36.4 s de retraso frente a 25.1 s del agente. La
 diferencia no está en la capacidad de reaccionar a la cola local, sino
 en la anticipación que aporta coordinar las fases de intersecciones
 sucesivas. Es la evidencia empírica que justifica el módulo U4.
@@ -54,9 +64,10 @@ sucesivas. Es la evidencia empírica que justifica el módulo U4.
 \noindent\textbf{5. El control actuado es una referencia más exigente
 que el control de tiempo fijo y la literatura revisada lo omite.} Con
 las mismas fases y los mismos límites de verde que el agente, el
-control actuado nativo del simulador reduce el retraso entre un 4 y un
-34\,\% frente al tiempo fijo y supera al agente tabular en los cuatro
-escenarios. Ninguno de los tres trabajos analizados en el estado del
+control actuado nativo del simulador reduce el retraso entre un 2 y un
+33\,\% frente al tiempo fijo en cuatro escenarios, empata con el fijo
+de reparto tuneado del corredor y supera al agente tabular en los
+cinco. Ninguno de los tres trabajos analizados en el estado del
 arte lo emplea como línea base. Cualquier
 resultado de control semafórico por aprendizaje por refuerzo que aspire
 a ser relevante en la práctica debe medirse también contra él.
@@ -69,5 +80,59 @@ confianza con pruebas pareadas cambió el signo de varias conclusiones
 respecto de lo que sugerían las corridas con una sola semilla. Un caso
 lo ilustra con claridad: en el corredor, dos entrenamientos que solo
 diferían en el instante en que el agente toma sus decisiones dieron
-resultados de signo opuesto, lo que muestra que una única corrida de
-entrenamiento no caracteriza a la política aprendida.
+25.8 y 33.9~s de retraso, una diferencia veinte veces mayor que el
+intervalo de confianza de cualquiera de los dos, lo que muestra que una
+única corrida de entrenamiento no caracteriza a la política aprendida.
+El mismo rigor obligó a rehacer una referencia: una revisión
+adversarial del documento mostró que el barrido del programa fijo
+nunca había variado el reparto de verde entre avenida y transversales,
+y con ese reparto tuneado el fijo del corredor pasó de 31.9 a 21.2~s.
+La fuerza de la referencia decide el tamaño de toda mejora reportada.
+
+\noindent\textbf{7. Con aproximación de funciones y una recompensa
+alineada con el retraso, el agente cumple la meta en el cruce y alcanza
+al actuado.} La variante \emph{local} de IPPO, que solo cambia el
+estado, la recompensa y el algoritmo del módulo U2, reduce el retraso
+un 35\,\% frente al fijo en el cruce aislado, donde además supera al
+control actuado; en el corredor iguala al fijo de reparto tuneado y
+queda a 1.7\,\% del actuado, donde el tabular perdía un 60\,\%; y
+queda a 2\,\% de la onda verde tuneada en la red, donde el tabular
+perdía un 15\,\%. Dos decisiones fueron determinantes
+y ambas salieron de la prueba de humo del plan de pruebas: medir la
+recompensa como retraso por segundo acumulado sobre el intervalo de
+decisión, porque el conteo de vehículos detenidos no ve las colas que
+avanzan a paso lento y llevaba al optimizador a cambiar de fase sin
+parar, y recortar el gradiente por red. Con la misma señal, PPO no
+necesita el 77\,\% de cambios de fase adicionales del tabular: con
+demanda nominal cambia entre un 16 y un 40\,\% más que el fijo, con
+demanda doble un tercio menos, y deja de multiplicar las paradas por
+vehículo: las reduce frente al fijo en el cruce, en el corredor y en
+el corredor con demanda doble, y en la red las aumenta mucho menos
+que el tabular.
+
+\noindent\textbf{8. La mensajería entre vecinos aporta coordinación
+medible y es el primer control aprendido que supera al actuado en un
+corredor.} Con la información del vecino, las tres políticas entrenadas
+con semillas base distintas igualan a la onda verde tuneada en la red
+(las tres dentro de $\pm 0.5$\,\%) y superan al actuado en el corredor
+($-5.1$\,\%; $-6$\,\% frente al fijo con reparto tuneado, que frente
+al fijo simétrico original habría sido $-38$\,\%), con signo estable en
+tres de tres frente a la variante sin mensajes. La mejora es de
+progresión: el retraso de los vehículos que recorren la avenida en el
+sentido punta baja entre un 4 y un 17\,\% frente al fijo y la fracción
+que se detiene a lo sumo una vez alcanza 0.95 o más, la misma de una
+onda verde bien tuneada, mientras el actuado, que decide cruce por
+cruce, la reduce a 0.72. El agente reconstruye
+una onda verde sin que nadie la programe, aunque paga por ella en las
+transversales y por eso, en la red, sigue dos puntos por detrás del
+actuado en el retraso global. Con la demanda doble, donde el actuado
+llena el enlace entre cruces y provoca \textit{spillback} el 2\,\% del
+tiempo, las siete políticas IPPO igualan su retraso sin llegar a
+bloquear el enlace (entre 0 y 3 segundos de \textit{spillback} en la
+hora, frente a 79 del actuado) y sirven un 2 a 3\,\% más de vehículos;
+el término explícito
+de penalización por \textit{spillback} no añade nada a lo que ya
+consigue la mensajería. La coordinación aprendida depende del canal:
+con mensajes con latencia o pérdida el retraso global se mantiene cerca
+del actuado, pero la progresión se deshace, porque el agente nunca vio
+un mensaje viejo durante el entrenamiento.

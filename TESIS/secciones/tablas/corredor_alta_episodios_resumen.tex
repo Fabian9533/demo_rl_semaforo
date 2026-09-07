@@ -1,0 +1,32 @@
+% Generado por tablas_tex.py a partir de los CSV del proyecto. No editar a mano.
+\begin{table}[H]
+\setstretch{1}
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{rrrrrrrrrrrr}
+\toprule
+\multicolumn{4}{c}{Entradas del episodio} & \multicolumn{6}{c}{Salidas del episodio (entrenamiento, $\varepsilon>0$)} & \multicolumn{2}{c}{Política congelada} \\
+\cmidrule(lr){1-4}\cmidrule(lr){5-10}\cmidrule(lr){11-12}
+Ep. & $\varepsilon$ & Semilla & Q ini. & Retraso & Espera & Cola & $r$/dec. & Cambios & Paradas & Retraso & Espera \\
+ &  &  & (estados) & (s/veh) & (s/veh) & (veh) &  & de fase & (/veh) & (s/veh) & (s/veh) \\
+\midrule
+fijo & 0 & 42 & -- & 157.82 & 64.97 & 46.13 & $-$24.76 & 448 & 6.48 & -- & -- \\
+\midrule
+1 & 1.000 & 43 & 0 & 212.01 & 86.56 & 51.37 & $-$28.02 & 660 & 8.34 & -- & -- \\
+2 & 0.900 & 44 & 274 & 207.79 & 80.75 & 48.63 & $-$26.39 & 680 & 8.28 & -- & -- \\
+3 & 0.810 & 45 & 364 & 191.94 & 67.82 & 41.38 & $-$22.16 & 678 & 7.86 & -- & -- \\
+5 & 0.656 & 47 & 448 & 182.31 & 65.17 & 39.75 & $-$21.37 & 665 & 7.54 & 155.54 & 60.41 \\
+10 & 0.387 & 52 & 538 & 176.44 & 58.67 & 36.16 & $-$19.30 & 671 & 7.21 & 169.61 & 63.92 \\
+15 & 0.229 & 57 & 585 & 167.37 & 51.47 & 32.18 & $-$17.13 & 656 & 6.73 & 173.82 & 54.56 \\
+20 & 0.135 & 62 & 642 & 167.83 & 54.47 & 34.49 & $-$18.46 & 619 & 6.73 & 156.02 & 60.51 \\
+25 & 0.080 & 67 & 672 & 177.39 & 56.11 & 35.64 & $-$19.06 & 622 & 7.17 & 175.29 & 61.76 \\
+30 & 0.050 & 72 & 689 & 176.79 & 58.94 & 38.01 & $-$20.48 & 612 & 6.92 & 191.77 & 78.64 \\
+35 & 0.050 & 77 & 707 & 170.01 & 55.64 & 35.87 & $-$19.26 & 635 & 6.84 & 170.79 & 68.51 \\
+40 & 0.050 & 82 & 715 & 184.34 & 57.17 & 36.79 & $-$19.78 & 638 & 7.34 & 178.29 & 57.24 \\
+\bottomrule
+\end{tabular}
+\caption[Escenario corredor\_alta: episodios de entrenamiento]{Escenario corredor\_alta: parámetros de entrada y métricas de salida por episodio. 40 episodios de entrenamiento con semilla base 42; la fila fijo es el tiempo fijo con la misma semilla base. La política congelada se evalúa cada 5 episodios con una semilla fija ajena al entrenamiento y a la evaluación final. Se muestran episodios escogidos; la tabla completa está en el Anexo~A.}
+\label{tab:corredor_alta-episodios-resumen}
+\end{table}
+

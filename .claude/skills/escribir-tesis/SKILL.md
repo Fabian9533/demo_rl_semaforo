@@ -285,6 +285,32 @@ antes y despues (`sed -n`) para comprobar que fluye.
 - Throughput no es medible en los escenarios actuales (demanda subsaturada); se
   dice en el plan de pruebas en vez de reportar una columna que siempre da lo mismo.
 
+Decisiones de U4 (06.09.2026), escritas en capitulo4.tex `sec:u4` y en el plan de
+pruebas (`Plan de pruebas del modulo U4`):
+- IPPO con pesos compartidos, torch puro; observacion de 31 (`tab:obs-u4`);
+  hiperparametros en `tab:hiper-ippo`; recompensa `eq:recompensa-u4` (retraso por
+  segundo acumulado sobre el intervalo, NO la de U2). La subseccion "Lo que enseno
+  la prueba de humo" registra los tres cambios respecto de la propuesta inicial
+  (recorte por red, retraso en vez de cola detenida, lr 1e-3 / minilote 64 / 10
+  epocas) con sus numeros; no borrarla ni suavizarla.
+- Variantes local, vecinos, spill, cambio; 3 semillas base (42, 2042, 4042); la
+  politica que se cita es la mediana por eval-999 (`comun.politicas_ippo`), las
+  otras dos van a `tab:<esc>-fragilidad`. Nunca elegir con 1001-1010.
+- Escenario de estres corredor_alta (demanda x2.0, elegido con el actuado sobre
+  2001-2003; fila en `tab:escenarios` y caso P6 en `tab:plan`). Fijos nuevos se
+  tunean con 2001-2003; los cuatro nominales se tunearon con 1001-1003 y el
+  documento lo declara.
+- Criterio de exito por niveles N1-N6 prerregistrado en el plan; capitulo5 reporta
+  el nivel alcanzado, no solo si "funciono".
+- Metricas de corredor y spillback definidas en U3 (`Metricas de corredor y
+  spillback`): spillback por carril con umbral 34 de 38 plazas, ventana 0-3600.
+- Tablas generadas: `<esc>_u4.tex` (medias + deltas vs fijo/actuado/QL),
+  `<esc>_fragilidad.tex`, `<esc>_s1.tex`, `<esc>_ippo_episodios.tex` (anexo),
+  `resumen_u4.tex`; figuras `fig_<esc>_curva_ippo|fases|spillback.png`.
+- Zonas protegidas que U4 obliga a tocar (mostrar el texto y pedir confirmacion):
+  introduccion (estado de avance: U4 ya no es "previsto"), resumen, abstract y
+  capitulo1 (parrafo de U4).
+
 ## 7. Procedimiento resumido
 
 1. Salvaguardas de la seccion 0 (copia al dia, respaldo).

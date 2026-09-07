@@ -1,0 +1,19 @@
+% Generado por tablas_tex.py a partir de los CSV del proyecto. No editar a mano.
+\begin{table}[H]
+\setstretch{1}
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{lrrrrr}
+\toprule
+Canal & Retraso (s/veh) & \makecell{Diferencia vs\\perfecto (s)} & \makecell{Paso con\\$\le 1$ parada} & \makecell{Retraso de paso\\punta (s)} & Cambios \\
+\midrule
+canal perfecto & 21.89 $\pm$ 0.28 & -- & 0.985 & 23.6 & 569.5 \\
+latencia 5~s & 21.19 $\pm$ 0.26 & $-$0.70 $\pm$ 0.26 & 0.795 & 27.7 & 791.7 \\
+latencia 5~s, pérdida 30\,\% & 22.70 $\pm$ 0.23 & +0.81 $\pm$ 0.31 & 0.705 & 29.7 & 753.6 \\
+latencia 10~s & 24.04 $\pm$ 0.12 & +2.16 $\pm$ 0.27 & 0.542 & 32.7 & 734.4 \\
+\bottomrule
+\end{tabular}
+\caption[Escenario red: IPPO vecinos con canal imperfecto]{Escenario red: la política mediana de IPPO vecinos evaluada con latencia y pérdida de mensajes, sin reentrenar, sobre las mismas semillas. La diferencia frente al canal perfecto es la media pareada por semilla $\pm$ IC95\,\%.}
+\label{tab:red-s1}
+\end{table}

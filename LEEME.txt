@@ -97,10 +97,11 @@ media; delta con IC95 % bootstrap y p de Wilcoxon pareado; ver evaluacion_<esc>_
   cruce      23.2   15.5     21.7   -6.4 %  [-9.3, -2.7]   p=0.014   -33 %
   cruce2     27.5   23.2     32.2   +16.7 % [+9.9, +25.4]  p=0.002   -16 %
   corredor   31.9   20.9     33.9   +6.3 %  [+1.3, +11.0]  p=0.037   -34 %
-  red        22.2   21.4     25.1   +13.1 % [+12.0, +14.1] p=0.002   -4 %
+  red        21.8   21.4     25.1   +15.3 % [+13.9, +16.8] p=0.002   -1.7 %
+  (corredor y red con los fijos retuneados del 06.09; ver REFERENCIA FIJA REHECHA)
 
   Secundarias del RL vs fijo (cruce / cruce2 / corredor / red): espera -26 / +18 / -13 / +4 %;
-  paradas +27 / +23 / +49 / +74 %; CO2 -1.5 / +4 / +1 / +5 %; cambios de fase +77 / +22 /
+  paradas +27 / +23 / +49 / +76 %; CO2 -1.5 / +4 / +1 / +6 %; cambios de fase +77 / +22 /
   +74 / +56 %. Throughput: no discrimina (demanda subsaturada; 2-3 % de los vehiculos
   llegan despues de los 3600 s con cualquier control).
   Metas de la tesis cumplidas por el RL: retraso -25 % en ninguno; colas -20 % solo en
@@ -108,7 +109,8 @@ media; delta con IC95 % bootstrap y p de Wilcoxon pareado; ver evaluacion_<esc>_
   retraso -25 % en cruce y corredor.
   Historial: una corrida previa de corredor y red (05.09, CSV *_v2) con el reloj de
   decision desfasado (verde minimo efectivo 12 s) dio corredor -19 % y red +23 %; al
-  corregir el reloj a 10 s el corredor paso a +6 % y red a +13 %. Esas evaluaciones
+  corregir el reloj a 10 s el corredor paso a +6 % y red a +13 % (frente a los fijos
+  simetricos de entonces; frente a los retuneados, +60 % y +15 %). Esas evaluaciones
   quedaron sobreescritas; lo citable es lo de arriba.
 
 Lecciones
@@ -127,7 +129,8 @@ Lecciones
     No insistir con gamma 0.95 (inestable) ni con desempate "mantener fase".
   - red: agentes independientes pierden contra la onda verde tuneada de tres cruces;
     la evaluacion intermedia se estanca en 25-26 s desde el episodio 15. Contra el
-    mismo fijo SIN desfases (41.6 s de retraso en barrido_red.csv) ganarian por mucho:
+    mismo fijo SIN desfases (36.4 s con el 25/15 sobre 1001-1010, en
+    barrido_red_sin_desfases_1001-1010.csv; 41.6 s con el 20/20 viejo) ganarian por mucho:
     pierden solo contra la coordinacion. La coordinacion anticipada vale mas que la
     reaccion local: evidencia para U4.
   - Reentrenar desde cero reprodujo byte a byte las Q-tables de cruce, cruce2 y
@@ -141,3 +144,102 @@ Lecciones
     evaluacion greedy intercalada copia la Q-table y restaura el RNG, asi que no
     altera el entrenamiento. La corrida original de cruce (9.4 -> 5.9, -38 %) no era
     reproducible; su q_table quedo en q_table_cruce_original.json.
+
+Modulo U4: coordinacion distribuida con IPPO (rl_ippo.py, 06.09.2026)
+=====================================================================
+Un actor y un critico compartidos por todos los semaforos (31-64-64, tanh), torch en
+CPU. Observacion: 15 locales (colas y vehiculos en movimiento por aproximacion sobre
+la capacidad, fase, t_verde/60, puede_cambiar, id) + 2 ranuras de vecino (oeste,
+este) con lo que manda el vecino cada 5 s (fase, tiempo en fase, outflow, cola que
+descarga hacia mi, cola en el enlace que yo alimento, edad del mensaje). Mismas
+acciones, verde min/max (mascara) y reloj de decision que U2.
+
+Variantes: local (ranuras a cero), vecinos, spill (penaliza la cola sobre la mitad
+del enlace hacia el vecino, w3 = 2), cambio (w4 = 2 por cambio, opcional).
+Recompensa del agente: suma por segundo sobre el intervalo de decision, dividida
+entre 5, de -(retraso + 0.01 esperas), con retraso = sum_a n_a (1 - v_media/v_max)
+(timeLoss por segundo). NO es la de U2: el conteo de detenidos hacia que PPO
+colapsara a cambiar cada 10 s (las colas reptan y no cuentan). La de U2 se sigue
+reportando a reloj fijo (recompensa_decision) para comparar con las cuatro pruebas.
+
+Hiperparametros congelados tras la prueba de humo en cruce (registros en humo/):
+gamma 0.95, lambda 0.95, clip 0.2, 10 epocas, minilote 64, lr 1e-3 lineal a 0,
+entropia 0.01, valor 0.5, recorte de gradiente 0.5 por red, escala 0.02, 200
+episodios, eval argmax cada 10 con semilla 999, bases 42 / 2042 / 4042. La
+politica que representa a cada variante es la de la base con eval-999 final
+mediana; las tres van a la tabla de fragilidad.
+
+Comandos:
+  python rl_ippo.py train --escenario red --variante vecinos --seed 2042
+  python rl_ippo.py demo  --escenario red --politica politica_red_vecinos_s42.pt --gui
+  python evaluar.py --escenario red --ippo politica_red_local_s42.pt,politica_red_vecinos_s42.pt
+  python evaluar.py --escenario red --brazos "" --ippo politica_red_vecinos_s42.pt --latencia 5 --perdida 0.3
+  python barrer_fijo.py corredor_alta --semillas 2001-2003
+Salidas: resultados_<esc>_ippo_<variante>_s<base>.csv, politica_<esc>_<variante>_s<base>.pt
++ .json (metadatos), brazos ippo_* en evaluacion_<esc>.csv (deltas tambien vs actuado y
+vs rl), fases_<esc>_<brazo>_s<semilla>.csv (fase por segundo), tablas <esc>_u4 /
+fragilidad / s1 / ippo_episodios.tex y figuras fig_<esc>_curva_ippo | fases | spillback.
+
+corredor_alta: corredor con toda la demanda x 2.0 (1200 veh/h en el sentido punta).
+Elegido con el actuado sobre las semillas 2001-2003: menor f de {1.3, 1.5, 2.0} con
+cola por carril >= 34 de 38 plazas en al menos 2 de 3 semillas (1.3: 0/3; 1.5: 1/3;
+2.0: 3/3). El fijo se retunea con verde de avenida x verde transversal x offset.
+
+Prueba de humo (cruce, local, 60 episodios; compuerta: retraso < fijo 23.2 s):
+  1. recorte de gradiente global -> politica colapsa a cambiar cada 10 s (131 s).
+     El gradiente del critico era ~130 veces el del actor. Recorte por red.
+  2. recompensa de U2 (detenidos) -> sigue derivando a cambiar: bajo esa politica
+     el retraso es 9.6 veces la cola detenida (4.4 bajo el fijo). Retraso por segundo.
+  3. lr 3e-4 / minilote 256 / 8 epocas -> no sale de un programa de verdes largos
+     (36.4 s, KL < 0.001 por actualizacion). lr 1e-3 / 64 / 10 -> 14.8 s en 60
+     episodios (actuado 15.5). gamma 0.9 solo: 19.9 s.
+
+Resultados U4 (06.09.2026; politica mediana de 3 bases; 10 semillas 1001-1010; retraso s/veh):
+  escenario   fijo   actuado  QL     IPPO local          IPPO vecinos        vecinos vs fijo            vecinos vs actuado
+  cruce(humo) 23.19  15.46    21.72  15.05 (-35 %)       --                  (local -35 % [-36,-34])    (local -2.6 %)
+  red         22.22  21.42    25.12  22.17 (-0.2 %, ns)  21.89 (-1.5 %)      [-2.3, -0.7] p=0.010       +2.2 % [0.8, 3.5]
+  corredor    31.86  20.91    33.86  21.27 (-33 %)       19.84 (-38 %)       [-39.7, -35.8] p=0.002     -5.1 % [-6.4, -3.9]
+  Bases: red local 22.09/22.17/24.20 (inestable), red vecinos 21.68/21.74/21.89, corredor local
+  20.64/21.27/21.18, corredor vecinos 19.84/19.90/20.37. Progresion (fraccion de paso con <= 1
+  parada): vecinos 0.985 red / 0.95 corredor; fijo 0.98 / 0.60; actuado 0.72 / 0.73; QL 0.53 / 0.32.
+  Canal imperfecto sobre la mediana de vecinos (sin reentrenar): red L5 21.19, L5p30 22.70, L10 24.04;
+  corredor L5 21.27, L5p30 22.04, L10 22.38; en todos la progresion cae (le1 0.54-0.85) y suben los
+  cambios: el agente no descuenta mensajes viejos porque nunca los vio en entrenamiento.
+  spill en demanda nominal (base 42, control de no dano): red 21.68, corredor 20.21.
+  corredor_alta (demanda x2): fijo 153.9, actuado 123.0 (spillback 2.2 % de la hora, cola 38/38 en
+  el enlace, throughput 2852), QL 211 (colapsa), IPPO local 122.0, vecinos 121.3 (bases
+  120.9/121.3/119.3), spill 122.8 (120.4/118.5/122.8): -20 a -23 % vs fijo, igual al actuado en
+  retraso (IC incluye 0), +2-3 % de throughput (2914-2938, igual al fijo 2923), spillback 0-3 s,
+  cola maxima de enlace 31-33 (umbral 34). El termino spill no reduce la cola frente a vecinos
+  (N4 no se cumple): la mensajeria ya evita el bloqueo. La meta +10 % de throughput no la
+  alcanza nadie (capacidad del carril).
+
+Nota del 06.09.2026 (tarde): cinco CSV de IPPO del corredor (local s42/s2042, vecinos
+s42/s2042/s4042) tenian 4 filas gemelas al principio: dos copias del script de cola
+lanzaron el mismo entrenamiento a la vez, la copia sobrante murio en el episodio 4 y sus
+filas quedaron en el archivo. Como el entrenamiento es determinista, esas 4 filas eran
+identicas a las 4 primeras de la corrida buena salvo el cronometro; se quitaron y el
+original quedo en humo/duplicados/. tablas_tex.py filtra ademas cualquier reinicio con
+desde_ultimo_reinicio() por si vuelve a pasar.
+Compilacion local: python TESIS/compilar.py (MiKTeX). El 06.09 compila en 27 s, 184 paginas,
+sin errores ni citas sin resolver; solo quedan dos cajas > 20 pt en capitulo1.tex l.17.
+
+REFERENCIA FIJA REHECHA (06.09.2026, noche). Una revision adversarial del documento mostro
+que barrer_fijo.py solo barria UN verde comun para avenida y transversales. Se anadio el
+reparto asimetrico (avenida x transversal x desfase; transversal >= 10 s = verde minimo del
+agente) con las semillas 2001-2003:
+  cruce (36 combinaciones N-S x E-O): el 25/25 desplegado es el mejor. Sin cambios.
+  corredor (143): mejor 20/10/desfase 15 = 20.5 s en tuneo, 21.15 +- 0.41 s en 1001-1010,
+    frente a 31.86 del 25/25/25 anterior (guardado en corredor_fijo_simetrico_25_25_off25.add.xml).
+    Con el fijo nuevo: actuado -1.1 % (empate), Q-learning +60 %, IPPO local +0.6 % (n.s.),
+    IPPO vecinos -6.2 % [-8.0, -4.6] p=0.002 (era -38 % contra el fijo viejo), spill -4.4 %.
+    La meta -25 % NO se cumple en el corredor; "supera al actuado -5.1 %" no cambia.
+  red (321): mejor 25/15 con los mismos desfases 0/23/0 = 21.51 s en tuneo (el 20/20 daba
+    22.18), 21.78 +- 0.22 s en 1001-1010 frente a 22.22 del anterior (guardado en
+    red_fijo_simetrico_20_20_off23.add.xml). Con el fijo nuevo: actuado -1.7 %, Q-learning
+    +15.3 %, IPPO local +1.8 % (p=0.02), IPPO vecinos +0.5 % n.s. (bases -0.5/-0.2/+0.5 %:
+    empata, antes -1.5 % significativo), spill -0.5 % n.s. La lectura "IPPO vecinos supera a
+    la onda verde en red" pasa a "la iguala".
+Los barridos simetricos originales (1001-1003) quedaron en barrido_<esc>_simetrico_1001-1003.csv.
+Leccion: barrer siempre el reparto de verde de la referencia, y hacer que alguien intente
+batirla antes de comparar nada con ella.

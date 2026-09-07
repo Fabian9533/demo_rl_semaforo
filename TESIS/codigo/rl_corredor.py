@@ -41,7 +41,9 @@ except ImportError:
 import comun
 
 # ---------------- Escenarios ----------------
-# Cada escenario define su configuracion y, por semaforo, los edges que llegan al cruce.
+# Cada escenario define su configuracion, por semaforo los edges que llegan al cruce,
+# los enlaces compartidos entre cruces (donde puede haber spillback) y los flows que
+# recorren toda la avenida (para el tiempo de viaje extremo a extremo).
 ESCENARIOS = {
     "corredor": {
         "cfg": "corredor.sumocfg",
@@ -49,6 +51,8 @@ ESCENARIOS = {
             "semaforo_C1": ["W_C1", "C2_C1", "N1_C1", "S1_C1"],
             "semaforo_C2": ["C1_C2", "E_C2", "N2_C2", "S2_C2"],
         },
+        "enlaces": ["C1_C2", "C2_C1"],
+        "flujos_corredor": ["p1_W_E", "p1_E_W", "p2_W_E", "p2_E_W"],
     },
     "red": {
         "cfg": "red.sumocfg",
@@ -57,13 +61,19 @@ ESCENARIOS = {
             "semaforo_C2": ["C1_C2", "C3_C2", "N2_C2", "S2_C2"],
             "semaforo_C3": ["C2_C3", "E_C3", "N3_C3", "S3_C3"],
         },
+        "enlaces": ["C1_C2", "C2_C1", "C2_C3", "C3_C2"],
+        "flujos_corredor": ["p1_W_E", "p1_E_W", "p2_W_E", "p2_E_W"],
     },
 }
+# corredor_alta: el mismo corredor con toda la demanda escalada (escenario de estres para U4)
+ESCENARIOS["corredor_alta"] = {**ESCENARIOS["corredor"], "cfg": "corredor_alta.sumocfg"}
 
 # Se definen en main() segun --escenario
 ESCENARIO = "corredor"
 CFG = ESCENARIOS["corredor"]["cfg"]
 SEMAFOROS = ESCENARIOS["corredor"]["semaforos"]
+ENLACES = ESCENARIOS["corredor"]["enlaces"]
+FLUJOS_CORREDOR = ESCENARIOS["corredor"]["flujos_corredor"]
 Q_FILE = "q_table_corredor.json"
 RESULTADOS = "resultados_corredor.csv"
 
@@ -171,12 +181,15 @@ def correr_episodio(modo, Q, eps, gui, delay, seed, tripinfo=None, serie=None):
         agentes[tls]["fase_previa"] = traci.trafficlight.getPhase(tls)
 
     aprox = todas_las_aprox()
+    net_file, _ = comun.leer_cfg(CFG)
+    medidor = comun.MedidorEnlaces(net_file, ENLACES)   # spillback y colas por carril en los enlaces
+    filas_fases = []
     pasos = 0
     cola_acum = 0.0
     cola_max = 0
     r_total = 0.0        # recompensa que ven los agentes (para aprender)
     decisiones = 0
-    r_reporte = 0.0      # recompensa medida cada 5 s de reloj fijo, igual en los cuatro modos (para comparar)
+    r_reporte = 0.0      # recompensa medida cada 5 s de reloj fijo, igual en los cuatro modos
     n_reporte = 0
     cambios = 0
     dq_max = 0.0
@@ -226,14 +239,20 @@ def correr_episodio(modo, Q, eps, gui, delay, seed, tripinfo=None, serie=None):
         colas = [traci.edge.getLastStepHaltingNumber(e) for e in aprox]
         cola_acum += sum(colas)
         cola_max = max(cola_max, sum(colas))
+        medidor.paso(pasos)
         if serie is not None and pasos % PASO_SERIE == 0:
             filas_serie.append([pasos] + colas)
 
+        fases_ahora = []
         for tls, ag in agentes.items():
             fase = traci.trafficlight.getPhase(tls)
+            fases_ahora.append(fase)
             if fase != ag["fase_previa"] and fase in ag["verdes"]:   # entro un verde nuevo
                 cambios += 1
             ag["fase_previa"] = fase
+        if serie is not None and pasos <= comun.FIN_HORA:
+            filas_fases.append([pasos] + fases_ahora)
+        for tls, ag in agentes.items():
             if not controla:
                 continue
             if ag["ambar_restante"] > 0:
@@ -249,7 +268,8 @@ def correr_episodio(modo, Q, eps, gui, delay, seed, tripinfo=None, serie=None):
     traci.close()
     if serie is not None:
         comun.guardar_serie(serie, ["t"] + aprox, filas_serie)
-    res = comun.leer_tripinfo(tripinfo)
+        comun.guardar_fases(serie.replace("serie_", "fases_", 1), list(SEMAFOROS), filas_fases)
+    res = comun.leer_tripinfo(tripinfo, FLUJOS_CORREDOR)
     res.update({
         "cola_prom": round(cola_acum / max(1, pasos), 2),   # detenidos en todas las aproximaciones
         "cola_max": cola_max,
@@ -259,6 +279,7 @@ def correr_episodio(modo, Q, eps, gui, delay, seed, tripinfo=None, serie=None):
         "cambios_fase": cambios,                             # sumados sobre todos los semaforos
         "dq_max": round(dq_max, 4),
     })
+    res.update(medidor.resumen())                             # spillback y colas por carril en los enlaces
     return res
 
 
@@ -278,7 +299,7 @@ def evaluar_greedy(Q, seed):
 
 # ---------------- Main ----------------
 def main():
-    global ESCENARIO, CFG, SEMAFOROS, Q_FILE, RESULTADOS
+    global ESCENARIO, CFG, SEMAFOROS, ENLACES, FLUJOS_CORREDOR, Q_FILE, RESULTADOS
     ap = argparse.ArgumentParser()
     ap.add_argument("modo", choices=["baseline", "actuado", "train", "demo"])
     ap.add_argument("--escenario", choices=sorted(ESCENARIOS), default="corredor")
@@ -301,6 +322,8 @@ def main():
     ESCENARIO = args.escenario
     CFG = ESCENARIOS[ESCENARIO]["cfg"]
     SEMAFOROS = ESCENARIOS[ESCENARIO]["semaforos"]
+    ENLACES = ESCENARIOS[ESCENARIO]["enlaces"]
+    FLUJOS_CORREDOR = ESCENARIOS[ESCENARIO]["flujos_corredor"]
     Q_FILE = f"q_table_{ESCENARIO}.json"
     RESULTADOS = f"resultados_{ESCENARIO}.csv"
 

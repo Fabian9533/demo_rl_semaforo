@@ -1,0 +1,24 @@
+% Generado por tablas_tex.py a partir de los CSV del proyecto. No editar a mano.
+\begin{table}[H]
+\setstretch{1}
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{llrrrr}
+\toprule
+Variante & Semilla base & \makecell{Eval. intermedia\\final (s/veh)} & \makecell{Retraso, semillas\\de evaluación (s/veh)} & $\Delta$ vs fijo [IC95\,\%] & $p$ \\
+\midrule
+IPPO local & 42 & 23.54 & 24.20 $\pm$ 0.37 & +11.1\,\% [9.2, 13.1] & 0.00195 \\
+IPPO local & 2042 (mediana) & 22.26 & 22.17 $\pm$ 0.23 & +1.8\,\% [0.7, 2.9] & 0.0195 \\
+IPPO local & 4042 & 21.76 & 22.09 $\pm$ 0.20 & +1.4\,\% [0.3, 2.2] & 0.0449 \\
+ & rango entre bases & & 2.11 & & \\
+IPPO vecinos & 42 & 21.94 & 21.68 $\pm$ 0.13 & $-$0.5\,\% [$-$1.7, 0.6] & 0.846 \\
+IPPO vecinos & 2042 & 21.52 & 21.74 $\pm$ 0.20 & $-$0.2\,\% [$-$1.1, 0.8] & 0.82 \\
+IPPO vecinos & 4042 (mediana) & 21.66 & 21.89 $\pm$ 0.28 & +0.5\,\% [$-$0.3, 1.3] & 0.414 \\
+ & rango entre bases & & 0.20 & & \\
+IPPO spill & 42 (mediana) & 21.94 & 21.68 $\pm$ 0.13 & $-$0.5\,\% [$-$1.7, 0.6] & 0.846 \\
+\bottomrule
+\end{tabular}
+\caption[Escenario red: fragilidad del entrenamiento IPPO]{Escenario red: las tres políticas de cada variante IPPO. La evaluación intermedia final usa la semilla 999; la media, las semillas de evaluación. El rango entre bases se compara con el IC95\,\% de una sola política.}
+\label{tab:red-fragilidad}
+\end{table}

@@ -1,0 +1,30 @@
+% Generado por tablas_tex.py a partir de los CSV del proyecto. No editar a mano.
+\begin{table}[H]
+\setstretch{1}
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\setlength{\tabcolsep}{2pt}
+\begin{tabular}{lrrrrrr}
+\toprule
+Métrica & Tiempo fijo & Actuado & Q-learning & \makecell{$\Delta$ RL vs fijo\\{}[IC95\,\%]} & $p$ & \makecell{$\Delta$ actuado\\vs fijo} \\
+\midrule
+Retraso (s/veh) & 153.88 $\pm$ 2.15 & 122.97 $\pm$ 3.69 & 211.12 $\pm$ 22.60 & \makecell{+37.2\,\%\\{}[25.8, 50.1]} & 0.00195 & $-$20.1\,\% \\
+Espera detenida (s/veh) & 62.59 $\pm$ 1.24 & 74.82 $\pm$ 3.23 & 88.28 $\pm$ 25.04 & \makecell{+41.0\,\%\\{}[9.6, 75.9]} & 0.16 & +19.5\,\% \\
+Cola promedio (veh) & 44.54 $\pm$ 0.77 & 49.57 $\pm$ 2.09 & 55.17 $\pm$ 15.08 & \makecell{+23.9\,\%\\{}[$-$2.6, 53.2]} & 0.492 & +11.3\,\% \\
+Cola máxima (veh) & 105.90 $\pm$ 4.03 & 151.70 $\pm$ 10.51 & 158.40 $\pm$ 23.43 & \makecell{+49.6\,\%\\{}[29.8, 70.2]} & 0.00391 & +43.2\,\% \\
+Paradas por vehículo & 6.29 $\pm$ 0.09 & 2.87 $\pm$ 0.07 & 7.30 $\pm$ 0.27 & \makecell{+16.0\,\%\\{}[12.7, 19.1]} & 0.00195 & $-$54.4\,\% \\
+Throughput (veh) & 2923.10 $\pm$ 7.16 & 2851.70 $\pm$ 15.53 & 2667.30 $\pm$ 76.91 & \makecell{$-$8.8\,\%\\{}[$-$11.1, $-$6.8]} & 0.00195 & $-$2.4\,\% \\
+CO$_2$ (g/veh) & 432.43 $\pm$ 3.17 & 387.27 $\pm$ 5.68 & 507.07 $\pm$ 35.23 & \makecell{+17.3\,\%\\{}[11.0, 24.4]} & 0.00195 & $-$10.4\,\% \\
+NO$_x$ (mg/veh) & 151.39 $\pm$ 1.24 & 137.48 $\pm$ 2.25 & 179.09 $\pm$ 14.30 & \makecell{+18.3\,\%\\{}[11.0, 26.6]} & 0.00195 & $-$9.2\,\% \\
+Recompensa por decisión & $-$23.89 $\pm$ 0.43 & $-$30.60 $\pm$ 1.61 & $-$31.80 $\pm$ 9.77 & \makecell{+33.1\,\%\\{}[1.2, 68.6]} & 0.432 & +28.1\,\% \\
+Cambios de fase & 446.80 $\pm$ 1.65 & 261.40 $\pm$ 3.43 & 590.80 $\pm$ 51.34 & \makecell{+32.2\,\%\\{}[22.3, 41.0]} & 0.00195 & $-$41.5\,\% \\
+Viaje extremo a extremo (s) & 265.67 $\pm$ 3.17 & 257.63 $\pm$ 2.05 & 320.79 $\pm$ 18.46 & \makecell{+20.7\,\%\\{}[15.0, 25.8]} & 0.00195 & $-$3.0\,\% \\
+Retraso extremo a extremo (s) & 182.75 $\pm$ 3.19 & 174.72 $\pm$ 2.01 & 238.14 $\pm$ 18.69 & \makecell{+30.3\,\%\\{}[21.9, 37.6]} & 0.00195 & $-$4.4\,\% \\
+Tasa de \textit{spillback} & 0.00 $\pm$ 0.00 & 0.02 $\pm$ 0.01 & 0.00 $\pm$ 0.00 & -- & -- & -- \\
+Cola máxima en un enlace (veh) & 23.80 $\pm$ 0.66 & 38.00 $\pm$ 0.00 & 33.70 $\pm$ 2.63 & \makecell{+41.6\,\%\\{}[32.1, 49.6]} & 0.00195 & +59.7\,\% \\
+\bottomrule
+\end{tabular}
+\caption[Escenario corredor\_alta: evaluación con política congelada]{Escenario corredor\_alta: evaluación con política congelada sobre 10 semillas (1001 a 1010), las mismas para los tres controles. Media $\pm$ IC95\,\%; el cambio porcentual lleva su intervalo bootstrap pareado y $p$ es el de la prueba de Wilcoxon pareada frente al fijo.}
+\label{tab:corredor_alta-evaluacion}
+\end{table}

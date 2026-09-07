@@ -1,17 +1,20 @@
 <additional>
-    <!-- Programa fijo tuneado del corredor: verde 25 s + ambar 3 s en ambos cruces.
-         El offset de 25 s en semaforo_C2 fue el mejor de un barrido 0-42 s (crea la
-         onda verde O->E del periodo punta; el tramo C1-C2 se recorre en ~22 s). -->
+    <!-- Programa fijo tuneado del corredor (06.09.2026, barrido asimetrico con las semillas
+         2001-2003): avenida 20 s, transversales 10 s (el verde minimo del agente), ambar 3 s,
+         ciclo 36 s, desfase 15 s en semaforo_C2. Retraso 20.5 s sobre esas semillas.
+         El programa anterior (25/25 con desfase 25, un solo verde comun barrido con las
+         semillas 1001-1003) daba 30.7 s y quedo en corredor_fijo_simetrico_25_25_off25.add.xml;
+         la revision adversarial del 06.09 mostro que el reparto de verde nunca se habia barrido. -->
     <tlLogic id="semaforo_C1" type="static" programID="fijo" offset="0">
-        <phase duration="25" state="GGgrrrGGgrrr"/>
+        <phase duration="10" state="GGgrrrGGgrrr"/>
         <phase duration="3"  state="yyyrrryyyrrr"/>
-        <phase duration="25" state="rrrGGgrrrGGg"/>
+        <phase duration="20" state="rrrGGgrrrGGg"/>
         <phase duration="3"  state="rrryyyrrryyy"/>
     </tlLogic>
-    <tlLogic id="semaforo_C2" type="static" programID="fijo" offset="25">
-        <phase duration="25" state="GGgrrrGGgrrr"/>
+    <tlLogic id="semaforo_C2" type="static" programID="fijo" offset="15">
+        <phase duration="10" state="GGgrrrGGgrrr"/>
         <phase duration="3"  state="yyyrrryyyrrr"/>
-        <phase duration="25" state="rrrGGgrrrGGg"/>
+        <phase duration="20" state="rrrGGgrrrGGg"/>
         <phase duration="3"  state="rrryyyrrryyy"/>
     </tlLogic>
 </additional>

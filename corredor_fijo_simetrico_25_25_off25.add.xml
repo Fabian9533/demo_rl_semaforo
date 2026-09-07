@@ -1,0 +1,17 @@
+<additional>
+    <!-- Programa fijo tuneado del corredor: verde 25 s + ambar 3 s en ambos cruces.
+         El offset de 25 s en semaforo_C2 fue el mejor de un barrido 0-42 s (crea la
+         onda verde O->E del periodo punta; el tramo C1-C2 se recorre en ~22 s). -->
+    <tlLogic id="semaforo_C1" type="static" programID="fijo" offset="0">
+        <phase duration="25" state="GGgrrrGGgrrr"/>
+        <phase duration="3"  state="yyyrrryyyrrr"/>
+        <phase duration="25" state="rrrGGgrrrGGg"/>
+        <phase duration="3"  state="rrryyyrrryyy"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C2" type="static" programID="fijo" offset="25">
+        <phase duration="25" state="GGgrrrGGgrrr"/>
+        <phase duration="3"  state="yyyrrryyyrrr"/>
+        <phase duration="25" state="rrrGGgrrrGGg"/>
+        <phase duration="3"  state="rrryyyrrryyy"/>
+    </tlLogic>
+</additional>

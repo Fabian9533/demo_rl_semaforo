@@ -1,0 +1,21 @@
+<additional>
+    
+    <tlLogic id="semaforo_C1" type="static" programID="fijo" offset="0">
+        <phase duration="15" state="rrrGGGgrrrGGGg" />
+        <phase duration="3" state="rrryyyyrrryyyy" />
+        <phase duration="15" state="GGgrrrrGGgrrrr" />
+        <phase duration="3" state="yyyrrrryyyrrrr" />
+    </tlLogic>
+    <tlLogic id="semaforo_C2" type="static" programID="fijo" offset="20">
+        <phase duration="15" state="rrrGGGgrrrGGGg" />
+        <phase duration="3" state="rrryyyyrrryyyy" />
+        <phase duration="15" state="GGgrrrrGGgrrrr" />
+        <phase duration="3" state="yyyrrrryyyrrrr" />
+    </tlLogic>
+    <tlLogic id="semaforo_C3" type="static" programID="fijo" offset="20">
+        <phase duration="15" state="rrrGGGgrrrGGGg" />
+        <phase duration="3" state="rrryyyyrrryyyy" />
+        <phase duration="15" state="GGgrrrrGGgrrrr" />
+        <phase duration="3" state="yyyrrrryyyrrrr" />
+    </tlLogic>
+</additional>

@@ -1,0 +1,24 @@
+% Generado por tablas_tex.py a partir de los CSV del proyecto. No editar a mano.
+\begin{table}[H]
+\setstretch{1}
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{llrrrr}
+\toprule
+Variante & Semilla base & \makecell{Eval. intermedia\\final (s/veh)} & \makecell{Retraso, semillas\\de evaluación (s/veh)} & $\Delta$ vs fijo [IC95\,\%] & $p$ \\
+\midrule
+IPPO local & 42 & 20.50 & 20.64 $\pm$ 0.26 & $-$2.4\,\% [$-$3.5, $-$1.2] & 0.00977 \\
+IPPO local & 2042 (mediana) & 20.83 & 21.27 $\pm$ 0.33 & +0.6\,\% [$-$1.1, 2.2] & 0.576 \\
+IPPO local & 4042 & 21.71 & 21.18 $\pm$ 0.29 & +0.1\,\% [$-$1.5, 1.7] & 0.922 \\
+ & rango entre bases & & 0.64 & & \\
+IPPO vecinos & 42 (mediana) & 20.23 & 19.84 $\pm$ 0.36 & $-$6.2\,\% [$-$8.0, $-$4.6] & 0.00195 \\
+IPPO vecinos & 2042 & 19.79 & 19.90 $\pm$ 0.38 & $-$5.9\,\% [$-$7.2, $-$4.7] & 0.00195 \\
+IPPO vecinos & 4042 & 20.70 & 20.37 $\pm$ 0.40 & $-$3.7\,\% [$-$5.5, $-$1.8] & 0.00977 \\
+ & rango entre bases & & 0.54 & & \\
+IPPO spill & 42 (mediana) & 20.83 & 20.21 $\pm$ 0.28 & $-$4.4\,\% [$-$5.7, $-$3.1] & 0.00195 \\
+\bottomrule
+\end{tabular}
+\caption[Escenario corredor: fragilidad del entrenamiento IPPO]{Escenario corredor: las tres políticas de cada variante IPPO. La evaluación intermedia final usa la semilla 999; la media, las semillas de evaluación. El rango entre bases se compara con el IC95\,\% de una sola política.}
+\label{tab:corredor-fragilidad}
+\end{table}

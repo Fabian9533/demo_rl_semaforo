@@ -1,24 +1,25 @@
 <additional>
-    <!-- Programa fijo tuneado de la red: verde 20 s + ambar 3 s en los tres cruces.
-         Offsets C2=23, C3=0 (mejor combinacion del barrido): 23 s es el tiempo de
-         viaje entre cruces y con ciclo de 46 s el tercer cruce repite la fase del
-         primero, formando la onda verde O->E del periodo punta. -->
+    <!-- Programa fijo tuneado de red (06.09.2026, barrido asimetrico con las semillas 2001-2003):
+         avenida 25 s, transversales 15 s, ambar 3 s, ciclo 46 s, desfases 0/23/0 (23 s = tiempo
+         de viaje entre cruces; el tercero repite la fase del primero). 21.5 s de retraso en tuneo.
+         El programa anterior (20/20 con los mismos desfases, un solo verde comun barrido con
+         1001-1003) daba 22.2 s y quedo en red_fijo_simetrico_20_20_off23.add.xml. -->
     <tlLogic id="semaforo_C1" type="static" programID="fijo" offset="0">
-        <phase duration="20" state="rrrGGGgrrrGGGg"/>
-        <phase duration="3"  state="rrryyyyrrryyyy"/>
-        <phase duration="20" state="GGgrrrrGGgrrrr"/>
-        <phase duration="3"  state="yyyrrrryyyrrrr"/>
+        <phase duration="25" state="rrrGGGgrrrGGGg" />
+        <phase duration="3" state="rrryyyyrrryyyy" />
+        <phase duration="15" state="GGgrrrrGGgrrrr" />
+        <phase duration="3" state="yyyrrrryyyrrrr" />
     </tlLogic>
     <tlLogic id="semaforo_C2" type="static" programID="fijo" offset="23">
-        <phase duration="20" state="rrrGGGgrrrGGGg"/>
-        <phase duration="3"  state="rrryyyyrrryyyy"/>
-        <phase duration="20" state="GGgrrrrGGgrrrr"/>
-        <phase duration="3"  state="yyyrrrryyyrrrr"/>
+        <phase duration="25" state="rrrGGGgrrrGGGg" />
+        <phase duration="3" state="rrryyyyrrryyyy" />
+        <phase duration="15" state="GGgrrrrGGgrrrr" />
+        <phase duration="3" state="yyyrrrryyyrrrr" />
     </tlLogic>
     <tlLogic id="semaforo_C3" type="static" programID="fijo" offset="0">
-        <phase duration="20" state="rrrGGGgrrrGGGg"/>
-        <phase duration="3"  state="rrryyyyrrryyyy"/>
-        <phase duration="20" state="GGgrrrrGGgrrrr"/>
-        <phase duration="3"  state="yyyrrrryyyrrrr"/>
+        <phase duration="25" state="rrrGGGgrrrGGGg" />
+        <phase duration="3" state="rrryyyyrrryyyy" />
+        <phase duration="15" state="GGgrrrrGGgrrrr" />
+        <phase duration="3" state="yyyrrrryyyrrrr" />
     </tlLogic>
 </additional>
