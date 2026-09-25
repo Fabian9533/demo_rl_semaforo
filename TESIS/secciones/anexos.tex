@@ -38,6 +38,102 @@ evaluación intermedia con la semilla 999.
 \input{secciones/tablas/corredor_ippo_episodios}
 \input{secciones/tablas/corredor_alta_ippo_episodios}
 
+\subsection*{Plan de pruebas v2: tablas completas}
+
+El plan de pruebas v2 aplica el mismo protocolo a cada caso y a cada
+modelo: tres semillas base de entrenamiento (42, 2042 y 4042), 200
+episodios, validación cada 10 episodios con las semillas 999 y 1999,
+política publicada en el checkpoint de menor validación y evaluación
+final con las semillas 1001 a 1030, las mismas para todos los brazos.
+Las tablas de esta subsección las escribe \texttt{veredicto.py} a
+partir de los archivos de \texttt{plan2/} y corresponden a los
+resultados cerrados el 25 de setiembre de 2026 a las 03:55. El
+Capítulo~\ref{cap:resultados} presenta la matriz de veredicto y los
+modelos principales; aquí quedan las tablas de bases de todos los
+modelos y las de veredicto de los modelos que el capítulo no incluye.
+% fuente: plan2/veredicto.csv y plan2/veredicto.md (copia congelada: plan2/veredicto_congelado_0355.*)
+
+Las tablas de bases listan las tres políticas entrenadas de cada modelo
+y caso. La publicada es la mediana de las tres por la validación; el
+rango entre bases indica cuánto cambia el resultado con la semilla de
+entrenamiento, y se compara con el IC95\,\% de una sola política.
+
+% fuente: plan2/veredicto.csv, plan2/evaluacion_<esc>_resumen.csv y los meta de cada politica
+% (q_table_<tag>.meta.json, politica_<esc>_<var>_s<base>.json); se regeneran con
+% "python veredicto.py" desde demo_rl/.
+\input{secciones/tablas/veredicto_bases}
+
+SARSA se entrenó con la misma recompensa de retraso que Q-learning y
+falla en los cinco casos: su retraso queda entre 6.6 y 40.0\,\% por
+encima del fijo (Tabla~\ref{tab:veredicto-sarsa}). La ablación
+\texttt{ql\_colas} usa el mismo Q-learning con la recompensa de colas
+de la fase exploratoria, de modo que la comparación con Q-learning
+aísla el efecto de la recompensa. En P1, P3 y P4 la ablación falla
+con un retraso
+entre 9.6 y 10.6\,\% mayor que el del fijo, del mismo orden que el de
+Q-learning con la recompensa de retraso en esos casos (entre 9.2 y
+12.4\,\%; en P4 el veredicto de Q-learning es provisional). En P2 su
+política publicada no convergió y el veredicto provisional es falla
+($+$6.8\,\%), mientras que Q-learning con la recompensa de retraso
+mejora al fijo en 8.8\,\%. En P5 no se corrió
+(Tabla~\ref{tab:veredicto-ql-colas}). Cambiar la recompensa no saca a
+Q-learning de la falla en P1, P3 y P4: el techo de los agentes
+tabulares no se explica por la recompensa.
+% fuente: plan2/veredicto.csv, filas sarsa (delta_fijo 14.0, 6.6, 11.2, 10.4, 40.0), ql_colas
+% (10.6, 6.8 no convergio, 9.6, 9.8; P5 sin datos) y ql (9.2, -8.8, 12.4, 9.9 no convergio)
+\input{secciones/tablas/veredicto_sarsa}
+\input{secciones/tablas/veredicto_ql_colas}
+
+DQN usa la misma observación que IPPO vecinos y la misma recompensa.
+Mejora al fijo en P1, P3 y P4, con reducciones del retraso de 3.5, 1.8
+y 3.4\,\%, y funciona en P2 ($-$19.4\,\%). En P5 su política publicada
+no convergió; el veredicto provisional es falla, con un retraso
+11.1\,\% mayor que el del fijo y 8.8\,\% menor que el del actuado
+(Tabla~\ref{tab:veredicto-dqn}). MAPPO, el actor de IPPO vecinos con
+un crítico centralizado, funciona en P1 y P2 ($-$7.1 y $-$21.6\,\%) y
+empata con el fijo en P5 ($-$0.3\,\%, $p = 0.0896$). En P3 y P4 su
+política publicada no convergió; los veredictos provisionales son
+funciona ($-$7.8\,\%) y mejora ($-$2.0\,\%)
+(Tabla~\ref{tab:veredicto-mappo}).
+% fuente: plan2/veredicto.csv, filas dqn y mappo (delta_fijo, delta_act, p_fijo, convergio,
+% convergen y veredicto)
+\input{secciones/tablas/veredicto_dqn}
+\input{secciones/tablas/veredicto_mappo}
+
+Las dos tablas siguientes dan el veredicto de IPPO sin mensajes (local)
+y de IPPO con el término de \textit{spillback} (spill). IPPO local
+empata con el fijo en P1, funciona en P2 ($-$22.8\,\%) y falla en P3,
+P4 y P5, con un retraso 2.3, 2.9 y 25.9\,\% mayor que el del fijo.
+% fuente: plan2/veredicto.csv, filas ippo_local (delta_fijo -0.5, -22.8, 2.3, 2.9, 25.9)
+En red,
+red\_alta y malla3 la fila de IPPO spill repite la de IPPO vecinos. En
+esas tres redes la cola máxima de un carril de enlace durante el
+entrenamiento de IPPO vecinos fue de 9, 12 y 8 vehículos, lejos del
+umbral del término, que es la mitad de las plazas del carril (19 en red
+y red\_alta, 18 en malla3). El término nunca se activa y la política de
+spill es idéntica bit a bit a la de vecinos; por eso no se entrenó
+aparte con las tres bases en esas celdas. La igualdad se comprobó
+también de forma directa. Dos entrenamientos completos de spill en red
+(bases 42 y 2042, 200 episodios) y cuatro parciales (red con la base
+4042 y red\_alta con las tres bases) coinciden con los de vecinos
+episodio a episodio en retraso, espera, cambios de fase, divergencia
+KL, pérdida, validación y recompensa de retraso, con cero activaciones
+del término. Las dos políticas completas de red dan en la evaluación,
+semilla a semilla, el mismo retraso que las de vecinos con la misma base
+(20.03 y 21.70~s/veh); son las dos filas de P3 en la tabla de bases de
+IPPO spill. En corredor y corredor\_alta el término sí se activa y spill
+se entrenó con sus tres bases.
+% fuente: columna cola_max_enlace de plan2/resultados_<esc>_ippo_vecinos_s<base>.csv (maximo
+% sobre las tres bases: red 9, red_alta 12, malla3 8); plazas del meta
+% politica_<esc>_vecinos_s<base>.json (38 por carril en red y red_alta, 37 en malla3; umbral
+% plazas // 2); regla en veredicto.spill_inactivo. Igualdad: plan2/resultados_<esc>_ippo_spill_s<base>.csv
+% frente a plan2/resultados_<esc>_ippo_vecinos_s<base>.csv (columnas timeloss_prom, espera_prom,
+% cambios_fase, kl_aprox, perdida_politica, perdida_valor, val, ret_retraso; spill_activaciones = 0)
+% y plan2/evaluacion_red.csv (brazos ippo_spill_s42|s2042 frente a ippo_vecinos_s42|s2042, 30 de 30
+% semillas iguales).
+\input{secciones/tablas/veredicto_ippo_local}
+\input{secciones/tablas/veredicto_ippo_spill}
+
 \section*{Anexo B. Código fuente}
 
 Scripts del prototipo tal como se ejecutaron para producir los
@@ -45,14 +141,21 @@ resultados del Capítulo~\ref{cap:resultados} (SUMO 1.25.0, Python 3.14).
 El código, sus comentarios y sus salidas están en español y sin tildes
 en los identificadores. Se omite \texttt{graficar.py}, que solo dibuja
 las figuras a partir de los mismos archivos; está en el repositorio del
-proyecto.
+proyecto. Del plan de pruebas v2 se incluyen los scripts de
+entrenamiento, evaluación y veredicto. Se omiten
+\texttt{plan2/generar\_trabajos.py}, que escribe la lista de comandos de
+cada caso y modelo, y \texttt{plan2/cola.py}, que los ejecuta en
+paralelo respetando sus dependencias. Ninguno de los dos calcula un
+resultado, y cada uno tiene una línea de más de 110 caracteres, el
+límite que se fija para los listados de este anexo. También están en
+el repositorio.
 
 \begin{spacing}{1}
 
 \subsection*{rl\_semaforo.py: agente único (escenarios cruce y cruce2)}
 {\fontsize{7}{8.4}\selectfont \verbatiminput{codigo/rl_semaforo.py}}
 
-\subsection*{rl\_corredor.py: un agente independiente por semáforo (corredor y red)}
+\subsection*{rl\_corredor.py: un agente tabular independiente por semáforo (Q-learning y SARSA)}
 {\fontsize{7}{8.4}\selectfont \verbatiminput{codigo/rl_corredor.py}}
 
 \subsection*{rl\_ippo.py: módulo U4, IPPO con mensajería entre vecinos}
@@ -61,11 +164,26 @@ proyecto.
 \subsection*{comun.py: métricas del tripinfo, programa actuado y CSV}
 {\fontsize{7}{8.4}\selectfont \verbatiminput{codigo/comun.py}}
 
-\subsection*{evaluar.py: evaluación por semillas y estadística}
+\subsection*{evaluar.py: evaluación por semillas con la política congelada}
 {\fontsize{7}{8.4}\selectfont \verbatiminput{codigo/evaluar.py}}
 
 \subsection*{barrer\_fijo.py: barrido del programa de tiempo fijo}
 {\fontsize{7}{8.4}\selectfont \verbatiminput{codigo/barrer_fijo.py}}
+
+\subsection*{escenarios\_plan2.py: escenarios nuevos del plan v2 (red\_alta y malla3)}
+{\fontsize{7}{8.4}\selectfont \verbatiminput{codigo/escenarios_plan2.py}}
+
+\subsection*{rl\_dqn.py: Double DQN con pesos compartidos}
+{\fontsize{7}{8.4}\selectfont \verbatiminput{codigo/rl_dqn.py}}
+
+\subsection*{rl\_mappo.py: MAPPO, actor de IPPO con crítico centralizado}
+{\fontsize{7}{8.4}\selectfont \verbatiminput{codigo/rl_mappo.py}}
+
+\subsection*{consolidar.py: estadística pareada por semilla}
+{\fontsize{7}{8.4}\selectfont \verbatiminput{codigo/consolidar.py}}
+
+\subsection*{veredicto.py: regla de veredicto del plan v2}
+{\fontsize{7}{8.4}\selectfont \verbatiminput{codigo/veredicto.py}}
 
 \subsection*{tablas\_tex.py: tablas del capítulo de resultados}
 {\fontsize{7}{8.4}\selectfont \verbatiminput{codigo/tablas_tex.py}}

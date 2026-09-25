@@ -1,0 +1,12 @@
+evaluar.py (modo v2 --brazo/--politica/--salida + modo antiguo intacto) y consolidar.py (nuevo), 24.09.2026.
+Probado en copia privada con OMP_NUM_THREADS=1:
+(a) corredor --brazo fijo y actuado, semillas 1001-1002: las 21 metricas identicas digito a digito a evaluacion_corredor.csv.
+(b) red --politica politica_red_vecinos_s42.pt, 1001-1002: 21 metricas identicas a evaluacion_red.csv (ippo_vecinos_s42)
+    usando el red.add.xml con que se generaron esas filas (red_fijo_simetrico_20_20_off23); con el red.add.xml actual
+    cambios_fase sale -1, igual que el evaluar.py original: es del archivo de escenario, no del codigo.
+    Tambien probado con el rl_ippo.py nuevo (18:06): identico y con ret_* llenos.
+(c) corredor --politica q_table_corredor.json (sin meta, brazo rl), 1001: identica a la fila rl.
+(d) consolidar.py: emparejamiento por semilla verificado a mano (datos reales y sinteticos con semillas
+    faltantes y desordenadas; n_par, delta, IC bootstrap y p de Wilcoxon coinciden exactos); ignora parciales de otro escenario.
+Modo antiguo: salida byte a byte igual al evaluar.py original (corredor, semilla 1001).
+No cubierto: tabular con meta, rl_dqn y rl_mappo (aun no existen); lo prueba el integrador (evaluar.ok).

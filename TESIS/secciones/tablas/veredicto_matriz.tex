@@ -1,0 +1,24 @@
+% Generado por veredicto.py a partir de plan2/. No editar a mano.
+\begin{table}[H]
+\setstretch{1}
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{lccccc}
+\toprule
+Modelo & \makecell{P1\\corredor} & \makecell{P2\\corredor\_alta} & \makecell{P3\\red} & \makecell{P4\\red\_alta} & \makecell{P5\\malla3} \\
+\midrule
+Actuado & EMPATA & FUNCIONA & MEJORA & EMPATA & FALLA \\
+Q-learning & FALLA & MEJORA & FALLA & PENDIENTE & FALLA \\
+SARSA & FALLA & FALLA & FALLA & FALLA & FALLA \\
+Q-learning (colas) & FALLA & PENDIENTE & FALLA & FALLA & PENDIENTE \\
+DQN & MEJORA & FUNCIONA & MEJORA & MEJORA & PENDIENTE \\
+IPPO local & EMPATA & FUNCIONA & FALLA & FALLA & FALLA \\
+IPPO vecinos & FUNCIONA & FUNCIONA & FUNCIONA & MEJORA & EMPATA \\
+IPPO spill & FUNCIONA & FUNCIONA & = vecinos & = vecinos & = vecinos \\
+MAPPO & FUNCIONA & FUNCIONA & PENDIENTE & PENDIENTE & EMPATA \\
+\bottomrule
+\end{tabular}
+\caption[Veredicto por caso y modelo]{Veredicto de cada modelo en cada caso del plan de pruebas (regla de la sección de métodos): retraso de la política publicada frente al fijo tuneado y al actuado, semillas de evaluación 1001 a 1030. PENDIENTE: faltan datos o la política no convergió. El actuado se juzga frente al fijo.}
+\label{tab:veredicto-matriz}
+\end{table}

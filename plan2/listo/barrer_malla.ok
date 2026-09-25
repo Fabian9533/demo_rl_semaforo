@@ -1,0 +1,7 @@
+barrer_fijo.py malla3 probado en copia privada con los malla3.* reales, 24.09.2026:
+3 configs (avenida 22 x transversal 15 x esquemas cero/ajedrez/onda_eo) --procesos 3 --instalar.
+Fase de avenida detectada del .net.xml = 0 en los 9 semaforos (coincide con malla3.add.xml).
+Desfases: ajedrez 0/21/0/21/0/21/0/21/0, onda_eo 0/22/0 por fila (ciclo 43). ajedrez = 21.58 s
+(21.65/21.51/21.59 por semilla, igual que el registro de escenarios). El malla3.add.xml instalado
+carga en sumo -c malla3.sumocfg y reproduce 21.58 s. Prueba previa con el prototipo del 18.09:
+36 configs con extension de ejes en 5.5 min con 3 procesos (unos 9 s por corrida de sumo).

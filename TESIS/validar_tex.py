@@ -21,6 +21,9 @@ Comprueba, en main.tex y en todos los archivos que incluye:
   - entorno subfigure (la clase carga el paquete antiguo subfigure, que solo define
     el comando \subfigure) y paquetes incompatibles con la clase en main.tex
   - table/figure sin \caption, o con \label antes de \caption (referencia mal numerada)
+  - texto en la misma linea despues de \end{verbatim}, p. ej. \end{verbatim}} (plan v2,
+    24.09.2026): pdflatex descarta esa llave sin detenerse y el grupo \footnotesize
+    que cerraba sigue abierto hasta el final del documento
   AVISOS
   - secciones/ fuera de main.tex o vacias; \paragraph{} (entra al indice);
     % sin escapar tras un numero (corta la linea); comentarios TODO/PROVISIONAL;
@@ -49,7 +52,7 @@ avisos = []
 # comentario, y un \begin{verbatim} dentro de un comentario no abre nada.
 LITERALES = (
     r"\\begin\{(verbatim|lstlisting|comment)\}[\s\S]*?\\end\{\1\}"   # entornos literales
-    r"|\\verb\*?(?![A-Za-z])(.)(?:(?!\2)[^\n])*\2"                    # \verb|...| y \verb*|...| (no \verbatiminput)
+    r"|\\verb\*?(?![A-Za-z])(.)(?:(?!\2)[^\n])*\2"                    # \verb|...|, no \verbatiminput
     r"|\\(?:url|href|path)\{[^}\n]*\}"                                # \url{...} admite % dentro
     r"|\\[\\%{}]"                                                     # \\  \%  \{  \}  (se conservan)
 )
@@ -285,6 +288,27 @@ def revisar_porcentaje_en_math(nombre, texto):
                            f"babel-spanish falla con 'Incompatible glue units'")
 
 
+def revisar_fin_verbatim(nombre, crudo):
+    """Texto en la misma linea despues de \\end{verbatim}: LaTeX lo descarta.
+
+    Sobre el texto crudo (quitar_comentarios borra el verbatim entero). El caso real
+    (plan v2, 24.09.2026) fue {\\footnotesize\\begin{verbatim} ... \\end{verbatim}}: la llave
+    de cierre se pierde ('Characters dropped after'), el grupo queda abierto y desde el
+    capitulo IV todo el cuerpo salio a 10 pt sin que pdflatex se detuviera.
+    """
+    for i, linea in enumerate(crudo.splitlines(), 1):
+        if linea.lstrip().startswith("%"):
+            continue
+        m = re.search(r"\\end\{verbatim\*?\}(.*)$", linea)
+        if not m:
+            continue
+        resto = m.group(1).split("%", 1)[0].strip()
+        if resto:
+            errores.append(f"{nombre}:{i}: '{resto}' en la misma linea que \\end{{verbatim}}; LaTeX lo "
+                           f"descarta (una llave de cierre perdida deja abierto el grupo y cambia el "
+                           f"tamano de letra del resto). Pasarlo a la linea siguiente")
+
+
 def revisar_avisos_texto(nombre, crudo):
     """Sobre el texto con comentarios: % sin escapar tras un numero, TODO/PROVISIONAL, \\paragraph."""
     t = quitar_literales(crudo)
@@ -338,6 +362,7 @@ def main():
         revisar_especiales(nombre, t)
         revisar_porcentaje_en_math(nombre, t)
         revisar_avisos_texto(nombre, crudos[a])
+        revisar_fin_verbatim(nombre, crudos[a])
 
     # paquetes incompatibles con la clase (subfigure viejo + comandos \cref/\sref propios)
     if MAIN in textos or os.path.normpath(MAIN) in textos:

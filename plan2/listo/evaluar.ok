@@ -1,0 +1,8 @@
+integrador 24.09 ~18:35. Circuito completo en copia privada (scratchpad/integrador/plan2, preparar.py corredor red red_alta):
+- train corredor ql s42/2042/4042, sarsa s42, ql_colas s42 (4 ep, --eval-cada 2) e ippo vecinos s42: CSV, checkpoints, q_table_<tag>.json/.meta.json y politica_corredor_vecinos_s42.pt con los nombres de generar_trabajos.py.
+- evaluar.py fijo/actuado/5 q_tables/ippo en 1001-1003, 4 procesos a la vez en la misma carpeta: sin choques; repetido en serie = byte a byte. fijo 1001 21.05 y actuado 20.80 (como 06.09). evaluar en 999/1999 reproduce val_999/val_1999 del train (ippo y ql_colas; dqn y mappo tambien).
+- consolidar.py corredor (8 brazos, n_par 3) y veredicto.py --plan2/--tesis privados: csv, md y 11 .tex.
+- ret_* de rl_corredor y rl_ippo cruzados sobre la misma simulacion (corredor y red): identicos.
+- Politicas aprendidas independientes del <esc>.add.xml del barrido (corredor: metricas identicas).
+- comun.iniciar_sumo reintenta bien si SUMO no puede abrir el tripinfo.
+No se cambio ningun archivo de codigo.

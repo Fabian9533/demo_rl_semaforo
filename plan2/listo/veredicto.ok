@@ -1,0 +1,9 @@
+veredicto.py listo (24.09.2026).
+(a) python veredicto.py --probar: pasa (reglas FUNCIONA/MEJORA/FALLA/EMPATA en cada rama, PENDIENTE por faltas y
+    por no convergencia, convergencia plateau/estabilidad, mediana de bases, IC, demanda, celda completa).
+(b) plan2 falso (5 celdas, 8 modelos, metas con val_serie, una base faltante, una base sin evaluar, una serie
+    sin converger, un meta sin val_serie leido del CSV, actuado ausente en malla3): genera veredicto.csv,
+    veredicto.md, veredicto_matriz.tex, veredicto_<modelo>.tex (9) y veredicto_bases.tex. Con plan2 vacio
+    tambien corre (todo PENDIENTE).
+(c) copia de TESIS con las tablas incluidas al final de capitulo5.tex: compilar.py --rapido sin errores y sin
+    cajas desbordadas en las tablas de veredicto.

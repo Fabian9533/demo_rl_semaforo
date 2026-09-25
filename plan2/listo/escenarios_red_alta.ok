@@ -1,0 +1,9 @@
+escenarios: red_alta (P4) listo 24.09.2026.
+Factor f = 1.2 sobre red.rou.xml (780 veh/h en la punta). Criterio de corredor_alta con el actuado y
+semillas 2001-2003: los enlaces solo llegan a >= 34/38 con f = 2.5, pero los ramales de la rotonda
+(NR_RN, SR_RS) se llenan desde f = 1.3 (2/3 semillas) -> mayor f que no satura la rotonda = 1.2.
+Tabla por factor y semilla en la cabecera de red_alta.rou.xml.
+Probado en copia privada: rl_corredor baseline y actuado --escenario red_alta --seed 2001 corren
+(fijo 25.89 s, actuado 26.95 s, 0 sin terminar, cola_max_enlace 2/5); el actuado reproduce la
+calibracion digito a digito; ESCENARIOS_RC["red_alta"] == rl_corredor.ESCENARIOS["red"] salvo cfg,
+VECINOS["red_alta"] == rl_ippo.VECINOS["red"]; preparar.py red_alta copia los 4 archivos.

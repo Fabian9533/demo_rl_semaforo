@@ -1,19 +1,532 @@
 \chapter{RESULTADOS}
 \label{cap:resultados}
 
-Este capítulo reporta los resultados de los casos de prueba P1 a P4 del
-plan de pruebas (Sección~\ref{sec:plan}) sobre los escenarios sintéticos
-de la Tabla~\ref{tab:escenarios} y, en la
-Sección~\ref{sec:resultados-u4}, los del módulo U4 (casos P3-U4, P4-U4
-y P6, más la prueba de humo en el cruce). Para cada caso se presentan
-las entradas y salidas por episodio de entrenamiento, la evaluación
-final con la política congelada sobre diez semillas comunes a todos los
-controles, y las figuras que resumen el aprendizaje y la comparación. Todas las tablas
-y figuras se generan con los scripts del proyecto a partir de los
-archivos de resultados (\texttt{tablas\_tex.py} y \texttt{graficar.py});
-las tablas completas por episodio están en el Anexo~A.
+Este capítulo reporta primero los resultados del plan de pruebas por
+casos de la Sección~\ref{sec:plan2}, que son los resultados principales
+de la tesis: los casos P1 a P5, con los mismos modelos, el mismo
+protocolo y las mismas métricas de salida en cada uno
+(Sección~\ref{sec:resultados-plan2}). Las secciones siguientes
+conservan los resultados de la fase exploratoria anterior, con su propio
+protocolo y su propia numeración de casos (E1 a E4, E3-U4, E4-U4 y
+E6). Todas las tablas y
+figuras se generan con los scripts del proyecto a partir de los
+archivos de resultados: \texttt{veredicto.py} para el plan de pruebas y
+\texttt{tablas\_tex.py} y \texttt{graficar.py} para la fase
+exploratoria. Las tablas completas están en el Anexo~A.
 
-\section{Resumen de los cuatro casos}
+\section{Resultados del plan de pruebas por casos}
+\label{sec:resultados-plan2}
+
+Esta sección reporta los casos P1 a P5 del plan de pruebas
+(Tabla~\ref{tab:plan2-casos}). P1 es el corredor de dos semáforos, con
+un carril por sentido en la avenida y 1810~veh/h; P2 es el mismo
+corredor con la demanda doble, 3620~veh/h. P3 es la red de tres
+semáforos y una rotonda sin semáforo, con dos carriles por sentido y
+2150~veh/h; P4 es la misma red con 2580~veh/h, 1.2 veces la demanda de
+P3 (el motivo del factor se explica en la lectura de P4). P5 es la
+malla de nueve semáforos, tres por tres, con dos carriles por sentido en
+los dos ejes y 4350~veh/h.
+% fuente: plan2/veredicto.csv (columnas semaforos, carriles, demanda_veh_h);
+% factor 1.2 de P4: cabecera de plan2/red_alta.rou.xml
+
+En cada caso se aplicó el protocolo común de la
+Sección~\ref{sec:plan2}. El tiempo fijo se volvió a tunear por barrido
+en ese caso, con las semillas 2001 a 2003, y el actuado de SUMO usa sus
+mismas fases. Cada aprendiz se entrenó 200 episodios con tres semillas
+base (42, 2042 y 4042). Q-learning, SARSA, DQN, las tres variantes de
+IPPO y MAPPO usan la misma recompensa de retraso; la recompensa de colas
+de la fase exploratoria solo se conserva en la ablación
+\texttt{ql\_colas}, que es Q-learning con esa recompensa. De cada
+entrenamiento se publica el \textit{checkpoint} con menor
+validación sobre las semillas 999 y 1999, y de las tres bases, la
+mediana por ese valor. La evaluación final corre todas las bases de
+todos los modelos con la política congelada sobre las semillas 1001 a
+1030, las mismas treinta para todos, y el veredicto sale de la regla
+prefijada.
+% fuente: plan2/ESPEC.md (secciones 2 y 3); columnas algoritmo y recompensa de
+% plan2/resultados_<esc>_<alg>_s<base>.csv
+
+Los resultados de esta sección se congelaron el 25.09.2026 a las 3:55.
+Para esa hora los ocho aprendices tenían sus tres bases entrenadas y
+evaluadas en los cinco casos, con dos salvedades. La ablación
+\texttt{ql\_colas} no se corrió en P5. IPPO spill tiene bases propias
+evaluadas solo en P1 y P2: en P3, P4 y P5 su término de
+\textit{spillback} nunca se activa y su política es idéntica a la de
+IPPO vecinos, por lo que su fila se reporta como \emph{igual a vecinos}
+(se explica en la lectura por modelo). En cinco
+celdas la política publicada no cumple el criterio de convergencia y el
+veredicto queda pendiente, con uno provisional: Q-learning en P4,
+\texttt{ql\_colas} en P2, DQN en P5 y MAPPO en P3 y P4.
+% fuente: plan2/veredicto.csv y plan2/veredicto.md (columnas bases, convergio y veredicto),
+% copia congelada en plan2/veredicto_congelado_0355.csv y .md
+
+\subsection*{Matriz de veredicto}
+
+La Tabla~\ref{tab:veredicto-matriz} resume el veredicto de cada modelo
+en cada caso.
+
+% fuente: plan2/veredicto.csv; se regenera con "python veredicto.py" desde demo_rl/
+\input{secciones/tablas/veredicto_matriz}
+
+IPPO vecinos es el único aprendiz con veredicto firme en los cinco
+casos que no falla en ninguno. Funciona en P1, P2 y P3, mejora en P4,
+donde la ganancia queda por debajo del umbral del 5\,\%, y empata en
+P5 con el fijo coordinado en ajedrez de la malla. Además supera al actuado en los cinco
+casos. IPPO spill, que en P3 a P5 es la misma política, funciona en los
+dos corredores. MAPPO, con el mismo actor y un crítico centralizado,
+funciona en P1 y P2 y empata en P5; en P3 y P4 su política no convergió
+y los provisionales son FUNCIONA y MEJORA. DQN, con la misma observación
+que IPPO vecinos, funciona en P2 y mejora en P1, P3 y P4; en P5 no
+convergió y el provisional es FALLA. IPPO local solo funciona en P2, el
+caso saturado: empata en P1 y falla en P3, P4 y P5.
+
+Los tres aprendices tabulares no funcionan en ningún caso. SARSA falla
+en los cinco. Q-learning falla en P1, P3 y P5, mejora al fijo en P2 sin
+alcanzar al actuado y no convergió en P4. La ablación \texttt{ql\_colas}
+falla en P1, P3 y P4 y no convergió en P2. El actuado, que no aprende,
+funciona en P2, empata en P1 y P4, apenas mejora en P3 y falla en P5,
+donde queda un $21.8$\,\% por encima del fijo coordinado. Ningún modelo
+alcanza la meta de la tesis de $-25$\,\% de retraso; el más cercano es
+IPPO vecinos en P2, con $-23.3$\,\%.
+% fuente: plan2/veredicto.csv (veredicto, delta_fijo, delta_act, p_act)
+
+\subsection*{Lectura por caso}
+
+\noindent\textbf{P1, corredor.} El barrido, ampliado hacia verdes más
+cortos, vuelve a elegir el programa de la fase exploratoria: 20~s de
+verde para la avenida, 10~s para la transversal y 15~s de desfase. El
+verde de la avenida queda ahora en el interior de la malla barrida (12
+a 30~s), igual que el desfase (0 a 40~s); el de la transversal queda en
+el piso de 10~s, que el protocolo acepta. La referencia de la fase
+exploratoria ya era la mejor. Con ese programa el fijo da
+$21.30 \pm 0.26$~s de retraso y el actuado $21.07 \pm 0.15$~s, un empate
+($-1.1$\,\%, intervalo $-2.1$ a $+0.1$\,\%, $p = 0.057$). Los tres
+tabulares fallan: Q-learning con $23.26 \pm 0.15$~s ($+9.2$\,\%,
+intervalo $+7.8$ a $+10.5$\,\%), \texttt{ql\_colas} con
+$23.56 \pm 0.33$~s ($+10.6$\,\%) y SARSA con $24.27 \pm 0.30$~s
+($+14.0$\,\%), todos con $p < 0.001$. IPPO local empata con el fijo
+($21.19 \pm 0.14$~s, $-0.5$\,\%, intervalo $-1.7$ a $+0.5$\,\%,
+$p = 0.71$). DQN mejora, pero por debajo del umbral: $20.56 \pm 0.16$~s,
+$-3.5$\,\% frente al fijo (intervalo $-4.8$ a $-2.2$\,\%) y $-2.4$\,\%
+frente al actuado. IPPO vecinos funciona: $19.84 \pm 0.17$~s,
+$-6.8$\,\% frente al fijo (intervalo $-8.0$ a $-5.8$\,\%) y $-5.8$\,\%
+frente al actuado (intervalo $-6.7$ a $-4.9$\,\%), ambos con
+$p < 0.001$; sus tres bases convergen. MAPPO también funciona y da el
+menor retraso del caso, $19.79 \pm 0.18$~s ($-7.1$\,\% frente al fijo,
+intervalo $-8.4$ a $-5.8$\,\%; $-6.1$\,\% frente al actuado), a
+0.06~s de IPPO vecinos. IPPO spill funciona con $20.19 \pm 0.15$~s y
+$-5.2$\,\% frente al fijo. Su término de \textit{spillback} solo actúa
+en los tres o cuatro primeros episodios de cada base, cuando la
+exploración llena el enlace entre los dos cruces.
+% fuente: plan2/barrido_corredor.csv (149 configuraciones, verde 12-30 s, desfase 0-40 s,
+% ganador 20/10 desfase 15); plan2/evaluacion_corredor_resumen.csv (timeloss_prom);
+% plan2/veredicto.csv (delta_fijo, delta_act, convergen);
+% episodios con ret_spill distinto de ret_retraso: plan2/resultados_corredor_ippo_spill_s*.csv
+% (episodios 1-4 en s42 y s2042, 1-3 en s4042)
+
+\noindent\textbf{P2, corredor con demanda doble.} El barrido vuelve a
+elegir el fijo de la fase exploratoria (25~s para la avenida, 15~s para
+la transversal y 25~s de desfase), ahora en el interior de la malla
+barrida. Ese programa deja $154.70 \pm 1.06$~s de
+retraso: la demanda supera la capacidad del carril. Aquí casi cualquier
+control que reaccione a las colas gana al fijo. El actuado funciona
+($124.14 \pm 2.48$~s, $-19.8$\,\%, intervalo $-21.3$ a $-18.2$\,\%),
+pero sirve 2850 viajes en la hora frente a 2922 del fijo ($-2.4$\,\%) y
+pasa 87~s de la hora en \textit{spillback}. Las tres variantes IPPO
+funcionan y además superan al actuado. IPPO vecinos da
+$118.66 \pm 0.67$~s, $-23.3$\,\% frente al fijo (intervalo $-23.9$ a
+$-22.7$\,\%) y $-4.4$\,\% frente al actuado (intervalo $-6.3$ a
+$-2.6$\,\%), con 2926 viajes, casi los mismos que el fijo ($+0.2$\,\%,
+$p = 0.12$), y 1.8~s de
+\textit{spillback}. IPPO local ($119.43$~s, $-22.8$\,\%) y spill
+($119.62$~s, $-22.7$\,\%) quedan a menos de un segundo de él. MAPPO
+funciona ($121.24 \pm 1.34$~s, $-21.6$\,\%), a 2.6~s de IPPO vecinos,
+pero su ventaja frente al actuado ($-2.3$\,\%, intervalo $-4.5$ a
+$-0.1$\,\%) no es significativa en la prueba de Wilcoxon
+($p = 0.07$). DQN funciona frente al fijo
+($124.66 \pm 1.10$~s, $-19.4$\,\%) pero empata con el actuado
+($+0.4$\,\%, $p = 0.44$), con 2879 viajes ($-1.4$\,\%) y 3.6~s de
+\textit{spillback}. Q-learning mejora al fijo ($141.14 \pm 1.80$~s,
+$-8.8$\,\%, intervalo $-9.9$ a $-7.5$\,\%) pero pierde un $13.7$\,\%
+contra el actuado, y sus tres bases van de 141.1 a 151.8~s. SARSA falla
+($164.91 \pm 4.41$~s, $+6.6$\,\%, intervalo $+3.7$ a $+9.4$\,\%), con
+sus tres bases entre 141.2 y 164.9~s. La ablación \texttt{ql\_colas} da
+$165.25 \pm 5.02$~s ($+6.8$\,\%), pero ninguna de sus tres bases
+converge: la validación de la publicada pasa de 159.1~s en el
+episodio 50 a 188.4~s en el 200, y el veredicto queda pendiente con
+FALLA como provisional.
+% fuente: plan2/barrido_corredor_alta.csv (ganador 25/15 desfase 25);
+% plan2/evaluacion_corredor_alta_resumen.csv (timeloss_prom, throughput, spillback_seg);
+% plan2/veredicto.csv (convergen); val_serie de plan2/q_table_corredor_alta_ql_colas_s4042.meta.json
+
+\noindent\textbf{P3, red de tres semáforos.} El barrido vuelve a elegir
+la onda verde de la fase exploratoria: 25~s para la avenida, 15~s para
+la transversal y desfases de 0, 23 y 0~s, también en el interior de la
+malla barrida. El fijo da
+$21.72 \pm 0.10$~s y el actuado apenas lo mejora ($21.48 \pm 0.12$~s,
+$-1.1$\,\%, intervalo $-1.7$ a $-0.5$\,\%, $p = 0.003$). Los aprendices
+sin mensajes fallan: Q-learning con $24.41 \pm 0.24$~s
+($+12.4$\,\%, intervalo $+11.5$ a $+13.6$\,\%), SARSA con
+$24.15 \pm 0.11$~s ($+11.2$\,\%), \texttt{ql\_colas} con
+$23.81 \pm 0.14$~s ($+9.6$\,\%) e IPPO local con
+$22.21 \pm 0.16$~s ($+2.3$\,\%, intervalo $+1.5$ a $+3.0$\,\%). DQN
+mejora apenas ($21.32 \pm 0.10$~s, $-1.8$\,\%, intervalo $-2.4$ a
+$-1.3$\,\%). IPPO
+vecinos funciona: $19.81 \pm 0.11$~s, $-8.8$\,\% frente al fijo
+(intervalo $-9.3$ a $-8.2$\,\%) y $-7.8$\,\% frente al actuado
+(intervalo $-8.4$ a $-7.2$\,\%), ambos con $p < 0.001$, y baja la
+espera detenida de 7.40 a 4.41~s. Es también el caso de mayor
+dispersión entre bases: las otras dos políticas de vecinos dan 20.03~s
+($-7.8$\,\%) y 21.70~s, esta última un empate con el fijo ($-0.1$\,\%,
+$p = 0.73$). La política publicada es el \textit{checkpoint} del
+episodio 40, con 19.69~s en la validación; la misma base termina el
+entrenamiento con 21.46~s. Las tres bases cumplen el criterio de
+convergencia, que mira el último tercio de la serie. MAPPO da
+$20.01 \pm 0.21$~s ($-7.8$\,\% frente al fijo y $-6.8$\,\% frente al
+actuado), pero su política publicada no convergió: en el último tercio
+la validación todavía baja, con una meseta de $-6.1$\,\%, y el
+veredicto queda pendiente con FUNCIONA como provisional.
+% fuente: plan2/barrido_red.csv (ganador 25/15 desfases 0/23/0);
+% plan2/evaluacion_red_resumen.csv (timeloss_prom, espera_prom); plan2/veredicto.csv (plateau);
+% ep_elegido, val_elegido y val_serie de plan2/politica_red_vecinos_s4042.json
+
+\noindent\textbf{P4, red con demanda alta.} La demanda de P4 es 1.2
+veces la de P3 y no el doble previsto. Con el criterio usado para
+corredor\_alta el factor habría sido 2.5, pero la rotonda sin semáforo se
+satura antes que los cruces. Sus dos ramales de entrada, de un carril y
+36 plazas, se llenan desde un factor de 1.3, y a partir de ahí cada
+vehículo de esos ramales pierde entre 400 y 700~s que ningún semáforo
+puede evitar. Con el factor 1.2 la cola máxima en los ramales es de 11 a
+27 vehículos y la espera máxima para entrar a la red, de 4~s. El
+barrido elige 30~s para la avenida, 10~s para la transversal (el piso)
+y desfases de 0, 20 y 0~s, y el fijo da $30.05 \pm 0.98$~s. El actuado empata con
+él ($30.04 \pm 0.90$~s, $-0.1$\,\%, $p = 0.87$). IPPO local falla
+($30.91 \pm 1.02$~s, $+2.9$\,\%, intervalo $+1.4$ a $+4.4$\,\%), igual
+que SARSA ($33.19 \pm 1.02$~s, $+10.4$\,\%) y \texttt{ql\_colas}
+($33.00 \pm 0.91$~s, $+9.8$\,\%). IPPO
+vecinos mejora, pero por debajo del umbral: $28.97 \pm 0.92$~s,
+$-3.6$\,\% frente al fijo (intervalo $-5.0$ a $-2.3$\,\%) y lo mismo
+frente al actuado (intervalo $-4.8$ a $-2.4$\,\%), ambos con
+$p < 0.001$. Sus otras dos bases dan $-4.6$ y $-1.9$\,\%, y convergen
+las tres. DQN queda prácticamente igual que IPPO vecinos:
+$29.04 \pm 1.02$~s,
+$-3.4$\,\% frente al fijo y $-3.3$\,\% frente al actuado, con sus tres
+bases entre $-3.4$ y $-3.6$\,\%, el resultado más regular entre bases
+del caso. MAPPO da $29.45 \pm 0.88$~s ($-2.0$\,\%), con sus otras dos
+bases en $-5.8$ y $-4.3$\,\%, pero solo una de las tres converge y la
+publicada no lo hace; su veredicto queda pendiente con MEJORA como
+provisional. Q-learning queda en $33.03 \pm 0.99$~s ($+9.9$\,\%), pero su
+política publicada no convergió: la serie de validación del último
+tercio salta de 32.6 a 47.1~s en el episodio 150 y la meseta resulta de
+$-23.8$\,\%, fuera del límite de $\pm 5$\,\%. El veredicto queda
+pendiente, con FALLA como provisional.
+% fuente: cabecera de plan2/red_alta.rou.xml (tabla por factor, actuado, semillas 2001-2003);
+% plan2/barrido_red_alta.csv (ganador 30/10 desfases 0/20/0);
+% plan2/evaluacion_red_alta_resumen.csv (bases de ippo_vecinos, dqn y mappo); plan2/veredicto.csv
+% (plateau, convergen); val_serie de plan2/q_table_red_alta_ql_s4042.meta.json
+
+\noindent\textbf{P5, malla de nueve semáforos.} La malla se construyó
+para este plan corrigiendo el prototipo del 18.09, que tenía
+intercambiados los estados de las fases este--oeste y norte--sur: su
+programa de 22/15~s daba en realidad 22~s a la transversal. Con las
+semillas 2001 a 2003, el mismo programa con las fases correctas da
+21.6~s de retraso y el del prototipo, 26.0~s. El barrido de P5
+(60 configuraciones) elige 25~s para la avenida y 15~s para la
+transversal, con desfases en ajedrez de 0 y 23~s alternados, y el fijo
+da $20.84 \pm 0.05$~s en la evaluación. La coordinación pesa: sin
+desfases, el mejor programa del barrido da 29.0~s. Todo control sin
+mensajes entre semáforos pierde contra ese fijo coordinado. El actuado queda
+en $25.37 \pm 0.10$~s ($+21.8$\,\%, intervalo $+21.3$ a $+22.3$\,\%),
+IPPO local en $26.23 \pm 0.23$~s ($+25.9$\,\%), SARSA en
+$29.18 \pm 0.09$~s ($+40.0$\,\%) y Q-learning en $29.69 \pm 0.09$~s
+($+42.5$\,\%), todos con $p < 0.001$; los tres aprendices quedan además
+por detrás del actuado. DQN, que sí recibe los mensajes, da
+$23.15 \pm 0.09$~s: $+11.1$\,\% frente al fijo y $-8.8$\,\% frente al
+actuado, pero su política no convergió (meseta de $-5.5$\,\%) y el
+veredicto queda pendiente con FALLA como provisional. IPPO vecinos
+empata con el fijo: $21.21 \pm 0.35$~s, $+1.8$\,\%. Su intervalo
+bootstrap ($+0.4$ a $+3.4$\,\%) no incluye el cero, pero la prueba de
+Wilcoxon no es significativa ($p = 0.52$) y la regla exige las dos
+condiciones. La diferencia se concentra en pocas semillas: en 24 de las
+30 queda entre $-1.5$ y $+1.2$\,\%, y en las otras seis sube a entre
+$+4.3$ y $+11.8$\,\%. MAPPO también empata ($20.78 \pm 0.05$~s,
+$-0.3$\,\%, intervalo $-0.6$ a $0.0$\,\%, $p = 0.09$), con sus tres
+bases entre $-0.3$ y $+0.5$\,\%. Frente al actuado, IPPO vecinos reduce
+el retraso un $16.4$\,\% y MAPPO un $18.1$\,\%, y los dos bajan la
+espera detenida del fijo de 7.45 a 4.97 y 4.49~s. La ablación
+\texttt{ql\_colas} no se corrió en P5.
+% fuente: cabecera de malla3.add.xml (programa inicial, prototipo del 18.09, 21.6 contra 26.0 s);
+% plan2/barrido_malla3.csv (ganador 25/15 ajedrez 20.81 s; mejor esquema cero 29.01 s);
+% plan2/evaluacion_malla3_resumen.csv (timeloss_prom, espera_prom); plan2/veredicto.csv (plateau);
+% diferencia por semilla: timeloss_prom de ippo_vecinos_s2042 y fijo en plan2/evaluacion_malla3.csv
+
+\subsection*{Lectura por modelo}
+
+Las Tablas~\ref{tab:veredicto-actuado}, \ref{tab:veredicto-ql}
+y~\ref{tab:veredicto-ippo-vecinos} dan el veredicto por caso del
+actuado, de Q-learning y de IPPO vecinos, con todas las columnas de la
+regla. Las de SARSA (Tabla~\ref{tab:veredicto-sarsa}), \texttt{ql\_colas}
+(Tabla~\ref{tab:veredicto-ql-colas}), DQN
+(Tabla~\ref{tab:veredicto-dqn}), MAPPO
+(Tabla~\ref{tab:veredicto-mappo}), IPPO local e IPPO spill, y las
+tablas con las tres bases de cada modelo, están en el Anexo~A.
+
+% fuente: plan2/veredicto.csv; se regeneran con "python veredicto.py" desde demo_rl/
+\input{secciones/tablas/veredicto_actuado}
+\input{secciones/tablas/veredicto_ql}
+\input{secciones/tablas/veredicto_ippo_vecinos}
+
+\noindent\textbf{Tabular frente a aproximación de funciones.} En este
+plan Q-learning, SARSA e IPPO local se entrenan con la misma
+recompensa, sin mensajes y con un agente por semáforo. Difieren en el
+algoritmo y en la representación del estado: la tabla ve colas
+discretizadas en cuatro niveles y la fase activa; la red de IPPO, una
+observación continua con vehículos detenidos y en movimiento y el
+tiempo en verde. IPPO local tiene menos retraso que Q-learning en los
+cinco casos: 21.19 contra 23.26~s en P1, 119.43 contra 141.14~s en P2,
+22.21 contra 24.41~s en P3, 30.91 contra 33.03~s en P4, donde la
+política de Q-learning no convergió, y 26.23 contra 29.69~s en P5.
+SARSA no cambia el cuadro: falla en los cinco casos, con más retraso
+que Q-learning en P1, P2 y P4 y algo menos en P3 y P5 (24.15 contra
+24.41~s y 29.18 contra 29.69~s). Sus bases convergen con más
+regularidad que las de Q-learning (las tres en P1, P3 y P5), pero
+convergen a políticas peores que el fijo. Los tres tabulares pierden
+contra el actuado en las catorce celdas con datos, entre un $9.9$ y un
+$33.1$\,\%. El techo es el del método tabular con esta representación
+del estado, y no depende de que la actualización sea
+\textit{off-policy} (Q-learning) u \textit{on-policy} (SARSA).
+% fuente: plan2/veredicto.csv (retraso, delta_act y convergen de ql, sarsa, ql_colas e ippo_local)
+
+\noindent\textbf{Efecto de la recompensa.} Q-learning y \texttt{ql\_colas}
+son el mismo algoritmo con el mismo estado y solo cambian la
+recompensa: retraso por segundo en el primero y colas detenidas en el
+segundo. En P1, P3 y P4 el retraso de los dos difiere en 0.6~s o menos:
+23.26 contra 23.56~s, 24.41 contra 23.81~s y 33.03 contra 33.00~s. Solo
+en P2 la recompensa de retraso da claramente menos retraso, 141.14
+contra 165.25~s, y allí la política de \texttt{ql\_colas} no convergió.
+La columna $\Delta$ recompensa muestra por qué cambiar la recompensa no
+basta. Con la de colas, el agente mejora su propia recompensa frente al
+fijo en P3 ($+3.0$\,\%) y en P4 ($+6.4$\,\%) mientras su retraso sube
+casi un 10\,\%: aprende lo que la recompensa le pide, y eso no es el
+retraso. Con la de retraso, Q-learning empeora su propia recompensa
+frente al fijo en P1, P3, P4 y P5 (entre $-11.2$ y $-34.1$\,\%) y solo
+la mejora en P2 ($+6.5$\,\%): la tabla no alcanza a representar una
+política que la optimice. En la fase exploratoria la ventaja de IPPO
+sobre Q-learning mezclaba recompensa, estado y algoritmo; con la misma
+recompensa la ventaja se mantiene, así que la explican el estado y el
+algoritmo.
+% fuente: plan2/veredicto.csv (retraso, delta_recompensa y convergio de ql y ql_colas; la
+% recompensa propia es ret_retraso para ql y ret_colas para ql_colas)
+
+\noindent\textbf{Con y sin mensajes.} IPPO vecinos tiene menos retraso
+que IPPO local en los cinco casos: 19.84 contra 21.19~s en P1, 118.66
+contra 119.43~s en P2, 19.81 contra 22.21~s en P3, 28.97 contra
+30.91~s en P4 y 21.21 contra 26.23~s en P5. Donde hay varios semáforos
+y el tráfico no está saturado, los mensajes cambian el veredicto: de
+empate a funciona en P1, de falla a funciona o mejora en P3 y P4, y de
+falla a empate en P5. En la malla la separación es completa: los
+cuatro controles sin mensajes pierden contra el fijo en ajedrez entre un
+$21.8$ y un $42.5$\,\%, y los dos que usan la política de IPPO con
+mensajes (IPPO vecinos y MAPPO) empatan con ella. DQN, también con
+mensajes, queda en medio ($+11.1$\,\%, provisional). En P2, con la avenida
+saturada, las tres variantes IPPO quedan a menos de un segundo entre sí:
+la ganancia frente al fijo viene de gestionar las colas, no de
+coordinar.
+% fuente: plan2/veredicto.csv (retraso y delta_fijo de actuado, ql, sarsa, ippo_local,
+% ippo_vecinos y mappo)
+
+El término de \textit{spillback} de IPPO spill no añade nada medible
+donde actúa: en P1 da 20.19 contra 19.84~s de vecinos, y en P2 119.62
+contra 118.66~s, con más tiempo de \textit{spillback} que vecinos (11.3
+contra 1.8~s). En P3, P4 y P5 no llega a actuar. La cola máxima de un
+carril de enlace durante los entrenamientos de IPPO vecinos fue de 9
+vehículos en P3, 12 en P4 y 8 en P5, por debajo de la mitad de las
+plazas del carril (19 de 38; 18 de 37 en P5), que es donde empieza la
+penalización. Sin activaciones, la recompensa de spill es igual a la de
+vecinos y el entrenamiento, con la misma semilla, es el mismo. Se
+comprobó directamente: dos entrenamientos completos de spill en P3
+(bases 42 y 2042, 200 episodios) y cuatro parciales (P3 con la base
+4042 y P4 con las tres) coinciden con los de vecinos episodio a
+episodio en retraso, espera, cambios de fase, divergencia KL, pérdidas
+de política y de valor, validación y retorno de retraso, con cero
+activaciones del término. Las dos políticas completas de spill en P3,
+evaluadas con las semillas 1001 a 1030, dan el mismo retraso que las de
+vecinos con su base (21.70 y 20.03~s). Por eso la fila de spill en esas
+celdas repite la de vecinos. Una precisión sobre el contenido del mensaje: la
+componente que el código llama \texttt{cola\_mi\_salida}
+(componente 22 de la Tabla~\ref{tab:obs-u4}) mide la cola del enlace
+que entra desde el vecino, no la del enlace que sale hacia él. Viene así
+de la implementación del 06.09 y la usan todas las políticas IPPO,
+DQN y MAPPO de la tesis, en el entrenamiento y en la evaluación; en
+malla3 las dos magnitudes son numéricamente simétricas.
+% fuente: plan2/evaluacion_corredor_resumen.csv y plan2/evaluacion_corredor_alta_resumen.csv
+% (timeloss_prom, spillback_seg); maximo de cola_max_enlace en
+% plan2/resultados_<esc>_ippo_vecinos_s*.csv (red 9, red_alta 12, malla3 8); plazas por carril de
+% enlace: 38, 37 en malla3 (comun.plazas_carril); comparacion fila a fila de
+% plan2/resultados_{red,red_alta}_ippo_spill_s<base>.csv contra ..._ippo_vecinos_s<base>.csv
+% (columnas timeloss_prom, espera_prom, cambios_fase, kl_aprox, perdida_politica, perdida_valor,
+% val_999, val_1999, val, ret_retraso: 0 diferencias; spill_activaciones: 0);
+% plan2/evaluacion_red_resumen.csv (ippo_spill_s2042 = ippo_vecinos_s2042 = 21.696 s;
+% ippo_spill_s42 = ippo_vecinos_s42 = 20.027 s); DQN y MAPPO usan rl_ippo.correr_episodio; nombre de la
+% componente: rl_ippo.nombres_features y rl_ippo.observar
+
+\noindent\textbf{Valor frente a política.} DQN e IPPO vecinos reciben la
+misma observación, con mensajes, y la misma recompensa, y los dos
+comparten pesos entre semáforos; DQN aprende una función de valor e
+IPPO, la política. IPPO vecinos tiene menos retraso en los cinco casos:
+19.84 contra 20.56~s en P1, 118.66 contra 124.66~s en P2, 19.81 contra
+21.32~s en P3, 28.97 contra 29.04~s en P4 y 21.21 contra 23.15~s en P5.
+En P1 y P3 eso baja a DQN un nivel en el veredicto (de funciona a
+mejora); en P4 la diferencia es de 0.07~s. A favor de DQN está la
+regularidad: sus tres bases convergen en P1, P2 y P3, y en P4 dan
+prácticamente el mismo resultado. En contra, el costo: su episodio
+cuesta más que el de IPPO vecinos en los cinco casos, 8.4 contra 5.9~s
+en el corredor y 30.6 contra 25.0~s en la malla.
+% fuente: plan2/veredicto.csv (retraso, veredicto y convergen de dqn e ippo_vecinos); mediana de la
+% columna segundos de plan2/resultados_<esc>_<alg>_s<base>.csv (600 episodios por celda)
+
+\noindent\textbf{Crítico local frente a centralizado.} MAPPO usa el
+actor de IPPO vecinos y cambia el crítico por uno que ve toda la red.
+En retraso los dos quedan cerca: 19.79 contra 19.84~s en P1, 121.24
+contra 118.66~s en P2, 20.01 contra 19.81~s en P3, 29.45 contra
+28.97~s en P4 y 20.78 contra 21.21~s en P5. Donde los dos tienen
+veredicto firme, es el mismo (funciona en P1 y P2, empata en P5). En P3
+y P4 la política publicada de MAPPO no convergió porque su validación
+seguía bajando en el último tercio (mesetas de $-6.1$ y $-6.7$\,\%), y
+en P4 sus otras dos bases, $-5.8$ y $-4.3$\,\%, quedan por delante de
+la publicada. Con 200 episodios, el crítico centralizado no cambia lo
+que aprende el actor. Un caso lo muestra de forma extrema: en P3, la
+base 2042 de MAPPO da exactamente el mismo retraso que la política
+publicada de IPPO vecinos en las treinta semillas de evaluación, y la
+misma secuencia de fases en la semilla 1001; los dos entrenamientos
+llegan por caminos distintos a la misma política determinista, con
+19.69~s en la validación.
+% fuente: plan2/veredicto.csv (retraso, plateau, convergen de mappo e ippo_vecinos);
+% plan2/evaluacion_red_alta_resumen.csv (mappo_s4042 -5.77 %, mappo_s42 -4.32 %);
+% timeloss_prom por semilla de mappo_s2042 e ippo_vecinos_s4042 en plan2/evaluacion_red.csv (30 de
+% 30 iguales); plan2/fases_red_mappo_s2042_s1001.csv identico a
+% plan2/fases_red_ippo_vecinos_s4042_s1001.csv; val_elegido de plan2/politica_red_mappo_s2042.json
+
+\subsection*{Alcance del proyecto}
+
+\noindent\textbf{Qué funciona, dónde y cuánto.} Con el mismo método en
+cada caso, IPPO con mensajes entre vecinos, con o sin el término de
+\textit{spillback}, es el único control, aprendido o no, que mejora a
+la vez al fijo tuneado y al actuado en los cuatro casos con los
+semáforos en fila (P1 a P4). Frente al fijo
+reduce el retraso un $6.8$\,\% en el corredor (P1), un $23.3$\,\% en el
+corredor saturado (P2), un $8.8$\,\% en la red de tres semáforos con
+rotonda (P3) y un $3.6$\,\% en esa red con demanda alta (P4). En la
+malla de nueve semáforos (P5) empata con el fijo tuneado en ajedrez
+($+1.8$\,\%, $p = 0.52$). Frente al actuado gana en los cinco casos,
+entre un $3.6$ y un $16.4$\,\%. MAPPO obtiene el mismo veredicto donde
+lo tiene firme (P1, P2 y P5), y DQN, con la misma información, tiene
+más retraso que IPPO vecinos en los cinco casos. El alcance demostrado
+es el de dos y tres semáforos en fila, con uno o dos carriles, con
+demanda nominal o alta y con un elemento no controlado, la rotonda. En
+una malla de tres por tres el método iguala a un fijo coordinado bien
+tuneado y supera con holgura al control actuado, pero no mejora ese
+fijo. La meta de la tesis, $-25$\,\%, no se alcanza en
+ningún caso; se acerca solo donde el fijo está saturado.
+% fuente: plan2/veredicto.csv (ippo_vecinos: delta_fijo, p_fijo, delta_act y p_act; veredicto de
+% mappo y dqn)
+
+\noindent\textbf{Qué lo limita.} Primero, la rotonda de P4 impide subir
+la demanda de la red más allá de 1.2 veces la nominal: desde 1.3 sus
+ramales se llenan y el retraso que agregan no depende de ningún
+semáforo. P4 es, por eso, un caso de demanda alta moderada y no de
+estrés. Segundo, en las dos redes y en la malla el término de
+\textit{spillback} no se activa (P3, P4 y P5), así que la pregunta de si penalizar el
+\textit{spillback} ayuda solo tiene respuesta en los corredores, y allí
+no añade nada medible. Tercero, en la malla la referencia ya es muy
+buena: el fijo con desfases en ajedrez baja el retraso de 29.0 a 20.8~s frente
+al mejor programa sin desfases, y todo control sin mensajes queda por
+detrás de ella. Cuarto, el costo de la malla. Un episodio de P5 cuesta
+unos 25~s con IPPO y 31~s con DQN, contra 5 a 8~s en el corredor, 9 a
+12~s en las dos redes y 13 a 16~s en el corredor saturado. Un
+entrenamiento de 200 episodios con sus validaciones dura de 21 a
+32~min en P1, de 35 a 46~min en P3 y P4, de 50 a 63~min en P2 y de 1.6
+a 1.9~h en P5. Quinto,
+el techo del tabular: con la misma recompensa que IPPO y con 200
+episodios, Q-learning y SARSA fallan o pierden contra el actuado en
+todos los casos, y la ablación \texttt{ql\_colas} muestra que la
+recompensa no lo explica. Todos los tiempos se midieron en un AMD Ryzen
+7 3700X de 8 núcleos y 16 hilos, con 16~GB de memoria y sin usar GPU,
+con varios entrenamientos de un hilo en paralelo.
+% fuente: plan2/barrido_malla3.csv (ajedrez 20.81 s, mejor esquema cero 29.01 s); mediana de la
+% columna segundos de plan2/resultados_<esc>_<alg>_s<base>.csv sobre las tres bases (corredor
+% 5.1-8.4, red 9.0-11.1, red_alta 9.9-12.0, corredor_alta 12.8-16.4, malla3 23.6-25.0 y dqn 30.6);
+% duracion de cada trabajo: "tiempos" en plan2/cola/estado.json (train_corredor_* 1268-1895 s,
+% train_red_* 2088-2601 s, train_red_alta_* 2274-2730 s, train_corredor_alta_* 3010-3788 s,
+% train_malla3_* 5704-6917 s); maquina: equipo del autor (AMD Ryzen 7 3700X, 8 nucleos, 16 hilos,
+% 16 GB, sin GPU), dato registrado el 24.09.2026
+
+\noindent\textbf{Qué es alcanzable para P6 y P7.} Las cifras de este
+párrafo son extrapolaciones de los tiempos medidos, no mediciones. P6
+usa la misma malla que P5 con más demanda. En el corredor, doblar la
+demanda multiplicó el costo del episodio de IPPO vecinos por 2.4 (de
+5.9 a 14.0~s); con el mismo factor, un episodio de P6 costaría unos
+59~s y un entrenamiento de 200 episodios con sus validaciones, unas
+3.8~h. Con los entrenamientos en paralelo, como en P5, P6 cabe en una
+noche. A diferencia de P4, la malla
+no tiene elementos sin semáforo que se saturen antes: el límite de la
+demanda lo fijarán los propios cruces, que es lo que se quiere probar.
+P7 (red de cuatro por cuatro, 16 semáforos, tres carriles por sentido y
+giro protegido) exige más que tiempo de cómputo. Hay que construir la
+red, barrer un fijo de 16 semáforos y extender la observación y la
+máscara de IPPO a cuatro fases verdes, porque hoy codifican dos
+(Tabla~\ref{tab:obs-u4}). En costo, escalar el episodio de P5 por el
+número de semáforos da unos 44~s antes de contar el tercer carril, unas
+2.5~h por entrenamiento sin las validaciones: alcanzable para IPPO en
+una noche. Para el tabular no se espera que lo sea. Con cuatro fases el
+espacio de estados de cada agente se duplica, y en la fase exploratoria
+(caso E2, cruce con giros protegidos) eso ya bastó para que la política
+congelada quedara por detrás del fijo; en el plan de pruebas los
+tabulares ya fallan con dos fases.
+% fuente: extrapolacion a partir de la mediana de segundos por episodio (plan2/resultados_*.csv):
+% IPPO vecinos corredor 5.9 s, corredor_alta 13.95 s (factor 2.36); malla3 25.0 s x 2.36 = 59 s (P6);
+% trabajo de IPPO vecinos en malla3 5780-5880 s (plan2/cola/estado.json) x 2.36 = 3.8 h;
+% 25.0 s x 16/9 = 44 s (P7; x 200 = 2.5 h). Fases en la observacion:
+% rl_ippo.nombres_features (fase_0, fase_1). Estados tabulares: 512 con dos fases, 1024 con cuatro
+% (seccion de la fase exploratoria, caso E2)
+
+\noindent\textbf{Qué no se puede afirmar todavía.} Que el método mejore
+una red sin eje principal: en P5 iguala al fijo coordinado en ajedrez,
+pero no lo supera. Tampoco que los aprendices conserven durante el entrenamiento
+la mejor política que encuentran. En P3, dos de las tres bases de IPPO
+vecinos alcanzan 19.69~s de validación en los episodios 40 y 50 y
+terminan el entrenamiento en 21.46 y 22.15~s, cerca del fijo, y la
+tercera empata con él. En P5 la política publicada de IPPO vecinos es la
+del episodio 50 y la de MAPPO, la del episodio 10, y esas dos bases
+terminan el entrenamiento con 21.43 y 22.03~s de validación, por encima
+de los 20.78~s de su mejor punto. Lo que se sostiene es que el entrenamiento encuentra
+esa política y que la validación la recupera, no que el entrenamiento
+la conserve. Las cinco celdas que no convergieron (Q-learning en P4,
+\texttt{ql\_colas} en P2, DQN en P5 y MAPPO en P3 y P4) tienen un
+veredicto provisional; no está medido si con más episodios cambiaría.
+La ablación \texttt{ql\_colas} no se corrió en P5. Por último, no está
+medido si los resultados se mantienen con llegadas aleatorias, con un
+canal de mensajes imperfecto (medido solo en la fase exploratoria) o en
+el cruce real de Lima, y tres bases por modelo detectan la fragilidad
+entre entrenamientos pero no alcanzan para caracterizarla.
+% fuente: val_serie de plan2/politica_red_vecinos_s4042.json, plan2/politica_red_vecinos_s42.json,
+% plan2/politica_malla3_vecinos_s2042.json (ep_elegido 50, val_elegido 20.775, final 21.425) y
+% plan2/politica_malla3_mappo_s2042.json (ep_elegido 10, val_elegido 20.775, final 22.025);
+% plan2/evaluacion_red_resumen.csv (ippo_vecinos_s2042: -0.1 %, p = 0.73); plan2/veredicto.csv
+
+\section{Fase exploratoria: resumen de los cuatro casos}
+
+Esta sección y las siguientes reportan la fase exploratoria anterior al
+plan de pruebas por casos. Su protocolo era distinto: diez semillas de
+evaluación (1001 a 1010); Q-learning con la recompensa de colas, una
+sola semilla base y entre 40 y 120 episodios; IPPO con tres semillas
+base de 200 episodios; y, en los dos, la política del último episodio
+como política publicada. Sus casos se numeran con la letra E para no
+confundirlos con los del plan vigente: E1 (cruce), E2 (cruce2), E3
+(corredor) y E4 (red) para el agente tabular; E3-U4 y E4-U4 para IPPO
+en corredor y red; y E6 para corredor\_alta. Los resultados que la tesis
+sostiene son los de la Sección~\ref{sec:resultados-plan2}; los de esta
+fase quedan como registro de las decisiones que llevaron al plan.
 
 La Tabla~\ref{tab:resumen-escenarios} reúne la métrica primaria de los
 cuatro casos. El agente Q-learning reduce el retraso frente al tiempo
@@ -43,7 +556,7 @@ vehículo.
 Y su desempeño se degrada cuando crece el espacio de estados o cuando
 hay varios semáforos consecutivos.
 
-\section{Caso P1: cruce de dos fases}
+\section{Caso E1: cruce de dos fases}
 
 La Tabla~\ref{tab:cruce-episodios-resumen} muestra los parámetros de
 entrada y las métricas de salida de episodios escogidos del
@@ -132,7 +645,7 @@ percentil 90 baja de 36.5 a 32.5~s.
   \label{fig:cruce-ecdf}
 \end{figure}
 
-\section{Caso P2: cruce con giros protegidos}
+\section{Caso E2: cruce con giros protegidos}
 
 Con cuatro fases verdes el espacio de estados crece a 1024 y el agente
 necesitó un decaimiento más lento de $\varepsilon$ (0.96) y 120
@@ -185,7 +698,7 @@ la Figura~\ref{fig:cruce2-curva}.
   \label{fig:cruce2-comparacion}
 \end{figure}
 
-\section{Caso P3: corredor de dos cruces}
+\section{Caso E3: corredor de dos cruces}
 
 En el corredor cada cruce tiene su propio agente, con estado y recompensa
 locales y sin comunicación entre ellos. El tiempo fijo de referencia
@@ -212,11 +725,13 @@ mismo caso, en la que un desfase del reloj de decisión dejaba el verde
 mínimo efectivo en 12~s en vez de 10, había producido una política de
 25.8~s en la evaluación final; con la restricción corregida el agente
 cambia de fase con más frecuencia y la política resultante da 33.9~s.
-Que dos entrenamientos casi idénticos difieran en 8~s, veinte veces el
-intervalo de confianza de cualquiera de los dos, muestra la fragilidad
+Que dos entrenamientos casi idénticos difieran en 8~s, unas cinco veces
+la semiamplitud del intervalo de confianza de la política actual
+(1.7~s), muestra la fragilidad
 de la política tabular con dos agentes y su sensibilidad al verde
 mínimo. El actuado, que tampoco coordina, empata con el fijo tuneado
 ($-1.1$\,\%, intervalo $-2.5$ a $+0.5$\,\%).
+% fuente: evaluacion_corredor_resumen.csv de demo_rl (brazo rl, timeloss_prom: media 33.856, ic95 1.661)
 
 \input{secciones/tablas/corredor_episodios_resumen}
 
@@ -236,7 +751,7 @@ mínimo. El actuado, que tampoco coordina, empata con el fijo tuneado
   \label{fig:corredor-comparacion}
 \end{figure}
 
-\section{Caso P4: red de tres cruces con onda verde}
+\section{Caso E4: red de tres cruces con onda verde}
 
 En la red, el tiempo fijo de referencia reparte 25~s a la avenida y
 15~s a las transversales y coordina los tres cruces con desfases de 0,
@@ -284,8 +799,8 @@ consecutivos, la coordinación anticipada vale más que la reacción local.
 \section{Módulo U4: coordinación con IPPO}
 \label{sec:resultados-u4}
 
-Los resultados de esta sección siguen el plan de pruebas del módulo U4
-(Sección~\ref{sec:plan}): los mismos controles de referencia y las
+Los resultados de esta sección siguen el protocolo de la fase
+exploratoria (Sección~\ref{sec:plan}, al final): los mismos controles de referencia y las
 mismas diez semillas de evaluación, más las variantes IPPO de la
 Sección~\ref{sec:u4}, cada una representada por la política mediana de
 sus tres semillas base. La Tabla~\ref{tab:resumen-u4} adelanta la
@@ -332,7 +847,7 @@ algoritmo.
   \label{fig:cruce-curva-ippo}
 \end{figure}
 
-\subsection*{Caso P4-U4: red de tres cruces con onda verde}
+\subsection*{Caso E4-U4: red de tres cruces con onda verde}
 
 La red es el caso donde los agentes tabulares perdían un $15$\,\%
 frente a la onda verde. Las seis políticas IPPO (dos variantes por tres
@@ -408,7 +923,7 @@ $7.53$~s) y por eso conserva la ventaja en el retraso global.
 
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.95\textwidth]{fig_red_fases.png}
+  \includegraphics[width=0.90\textwidth]{fig_red_fases.png}
   \caption{Escenario red: verde de la avenida en cada semáforo durante cinco minutos del periodo punta, con la misma semilla, bajo el fijo con onda verde, el actuado, Q-learning e IPPO.}
   \label{fig:red-fases}
 \end{figure}
@@ -436,7 +951,7 @@ natural y queda en las recomendaciones.
 
 \input{secciones/tablas/red_s1}
 
-\subsection*{Caso P3-U4: corredor de dos cruces}
+\subsection*{Caso E3-U4: corredor de dos cruces}
 
 En el corredor el agente tabular pierde un $60$\,\% frente al fijo de
 reparto tuneado, que da $21.2 \pm 0.4$~s, y el actuado empata con él.
@@ -530,7 +1045,7 @@ durante el entrenamiento.
 
 \input{secciones/tablas/corredor_s1}
 
-\subsection*{Caso P6: corredor con demanda doble}
+\subsection*{Caso E6: corredor con demanda doble}
 
 Con la demanda de corredor multiplicada por dos (3620 vehículos en la
 hora, 1200~veh/h en el sentido punta de la avenida) ningún control
@@ -595,8 +1110,8 @@ coordinación de fases.
 
 \subsection*{Nivel alcanzado según el criterio prefijado}
 
-El plan de pruebas fijó siete niveles de éxito antes de entrenar
-(Sección~\ref{sec:plan}). Se alcanzan los siguientes:
+El plan de la fase exploratoria fijó siete niveles de éxito antes de
+entrenar (Sección~\ref{sec:plan}, al final). Se alcanzan los siguientes:
 
 \begin{itemize}
   \item \textbf{N0, medición:} regresión, determinismo y prueba de humo
@@ -734,8 +1249,8 @@ no variaba el reparto de verde; el episodio muestra que la magnitud de
 cualquier mejora reportada depende de lo bien tuneada que esté la
 referencia, y que conviene someterla a un intento de refutación antes
 de publicarla. La comparación entre IPPO y Q-learning es de paquete
-completo (estado, recompensa y algoritmo cambian a la vez); aislar el
-efecto de la recompensa exigiría reentrenar el agente tabular con el
-retraso por segundo, lo que queda pendiente. SARSA y DQN, las llegadas
-aleatorias y el cruce real de Lima son los siguientes casos del plan de
-pruebas.
+completo (estado, recompensa y algoritmo cambian a la vez). El plan de
+pruebas por casos aisló el efecto de la recompensa reentrenando el
+agente tabular con el retraso por segundo, y agregó SARSA y DQN
+(Sección~\ref{sec:resultados-plan2}). Las llegadas aleatorias y el
+cruce real de Lima siguen pendientes.

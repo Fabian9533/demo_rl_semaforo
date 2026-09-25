@@ -1,0 +1,268 @@
+% Generado por veredicto.py a partir de plan2/. No editar a mano.
+\begin{table}[H]
+\setstretch{1}
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{lllrlrrr}
+\toprule
+Caso & Escenario & \makecell{Semilla\\base} & \makecell{Validación\\elegida\\(s/veh)} & \makecell{Conver-\\gió} & \makecell{Retraso\\evaluación\\(s/veh)} & \makecell{$\Delta$ vs fijo\\{}[IC95\,\%]} & $p$ \\
+\midrule
+P1 & corredor & \makecell[l]{42\\{}(publicada)} & \makecell[r]{23.21\\{}(ep 80)} & sí & \makecell[r]{23.26\\{}$\pm$ 0.15} & \makecell[r]{+9.2\,\%\\{}[7.8,\,10.5]} & $<$\,0.001 \\
+P1 & corredor & 2042 & \makecell[r]{22.93\\{}(ep 190)} & no & \makecell[r]{22.84\\{}$\pm$ 0.16} & \makecell[r]{+7.3\,\%\\{}[5.9,\,8.5]} & $<$\,0.001 \\
+P1 & corredor & 4042 & \makecell[r]{23.71\\{}(ep 200)} & no & \makecell[r]{23.93\\{}$\pm$ 0.16} & \makecell[r]{+12.4\,\%\\{}[11.0,\,13.6]} & $<$\,0.001 \\
+ & & \makecell[l]{rango entre\\{}bases} & & & 1.09 & & \\
+P2 & corredor\_alta & 42 & \makecell[r]{151.66\\{}(ep 150)} & no & \makecell[r]{151.39\\{}$\pm$ 2.52} & \makecell[r]{$-$2.1\,\%\\{}[$-$3.6,\,$-$0.7]} & 0.00711 \\
+P2 & corredor\_alta & 2042 & \makecell[r]{141.17\\{}(ep 150)} & no & \makecell[r]{151.79\\{}$\pm$ 6.67} & \makecell[r]{$-$1.9\,\%\\{}[$-$5.7,\,2.2]} & 0.289 \\
+P2 & corredor\_alta & \makecell[l]{4042\\{}(publicada)} & \makecell[r]{142.25\\{}(ep 150)} & sí & \makecell[r]{141.14\\{}$\pm$ 1.80} & \makecell[r]{$-$8.8\,\%\\{}[$-$9.9,\,$-$7.5]} & $<$\,0.001 \\
+ & & \makecell[l]{rango entre\\{}bases} & & & 10.65 & & \\
+P3 & red & \makecell[l]{42\\{}(publicada)} & \makecell[r]{24.14\\{}(ep 140)} & sí & \makecell[r]{24.41\\{}$\pm$ 0.24} & \makecell[r]{+12.4\,\%\\{}[11.5,\,13.6]} & $<$\,0.001 \\
+P3 & red & 2042 & \makecell[r]{23.93\\{}(ep 160)} & no & \makecell[r]{24.28\\{}$\pm$ 0.12} & \makecell[r]{+11.8\,\%\\{}[11.2,\,12.4]} & $<$\,0.001 \\
+P3 & red & 4042 & \makecell[r]{24.17\\{}(ep 190)} & sí & \makecell[r]{24.47\\{}$\pm$ 0.22} & \makecell[r]{+12.7\,\%\\{}[11.8,\,13.6]} & $<$\,0.001 \\
+ & & \makecell[l]{rango entre\\{}bases} & & & 0.19 & & \\
+P4 & red\_alta & 42 & \makecell[r]{32.55\\{}(ep 110)} & sí & \makecell[r]{33.43\\{}$\pm$ 1.05} & \makecell[r]{+11.2\,\%\\{}[9.7,\,12.9]} & $<$\,0.001 \\
+P4 & red\_alta & 2042 & \makecell[r]{32.03\\{}(ep 170)} & sí & \makecell[r]{35.22\\{}$\pm$ 4.22} & \makecell[r]{+17.2\,\%\\{}[9.3,\,32.0]} & $<$\,0.001 \\
+P4 & red\_alta & \makecell[l]{4042\\{}(publicada)} & \makecell[r]{32.19\\{}(ep 200)} & no & \makecell[r]{33.03\\{}$\pm$ 0.99} & \makecell[r]{+9.9\,\%\\{}[8.0,\,11.9]} & $<$\,0.001 \\
+ & & \makecell[l]{rango entre\\{}bases} & & & 2.20 & & \\
+P5 & malla3 & 42 & \makecell[r]{28.90\\{}(ep 170)} & sí & \makecell[r]{29.30\\{}$\pm$ 0.51} & \makecell[r]{+40.6\,\%\\{}[38.8,\,43.1]} & $<$\,0.001 \\
+P5 & malla3 & 2042 & \makecell[r]{29.56\\{}(ep 130)} & sí & \makecell[r]{29.52\\{}$\pm$ 0.10} & \makecell[r]{+41.7\,\%\\{}[41.1,\,42.2]} & $<$\,0.001 \\
+P5 & malla3 & \makecell[l]{4042\\{}(publicada)} & \makecell[r]{29.35\\{}(ep 130)} & sí & \makecell[r]{29.69\\{}$\pm$ 0.09} & \makecell[r]{+42.5\,\%\\{}[42.0,\,43.0]} & $<$\,0.001 \\
+ & & \makecell[l]{rango entre\\{}bases} & & & 0.39 & & \\
+\bottomrule
+\end{tabular}
+\caption[Bases de Q-learning]{Q-learning: las tres políticas entrenadas (semillas base) de cada caso. La validación elegida es la media de las semillas 999 y 1999 del checkpoint publicado; el retraso y el $\Delta$ frente al fijo, sobre las semillas 1001 a 1030. La base publicada es la mediana por validación. El rango entre bases se compara con el IC95\,\% de una sola política.}
+\label{tab:veredicto-bases-ql}
+\end{table}
+
+\begin{table}[H]
+\setstretch{1}
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{lllrlrrr}
+\toprule
+Caso & Escenario & \makecell{Semilla\\base} & \makecell{Validación\\elegida\\(s/veh)} & \makecell{Conver-\\gió} & \makecell{Retraso\\evaluación\\(s/veh)} & \makecell{$\Delta$ vs fijo\\{}[IC95\,\%]} & $p$ \\
+\midrule
+P1 & corredor & \makecell[l]{42\\{}(publicada)} & \makecell[r]{23.11\\{}(ep 190)} & sí & \makecell[r]{24.27\\{}$\pm$ 0.30} & \makecell[r]{+14.0\,\%\\{}[12.1,\,15.9]} & $<$\,0.001 \\
+P1 & corredor & 2042 & \makecell[r]{23.55\\{}(ep 60)} & sí & \makecell[r]{23.41\\{}$\pm$ 0.13} & \makecell[r]{+9.9\,\%\\{}[8.5,\,11.3]} & $<$\,0.001 \\
+P1 & corredor & 4042 & \makecell[r]{23.07\\{}(ep 140)} & sí & \makecell[r]{22.87\\{}$\pm$ 0.16} & \makecell[r]{+7.4\,\%\\{}[6.0,\,8.7]} & $<$\,0.001 \\
+ & & \makecell[l]{rango entre\\{}bases} & & & 1.40 & & \\
+P2 & corredor\_alta & \makecell[l]{42\\{}(publicada)} & \makecell[r]{154.19\\{}(ep 60)} & sí & \makecell[r]{164.91\\{}$\pm$ 4.41} & \makecell[r]{+6.6\,\%\\{}[3.7,\,9.4]} & $<$\,0.001 \\
+P2 & corredor\_alta & 2042 & \makecell[r]{144.25\\{}(ep 180)} & no & \makecell[r]{141.19\\{}$\pm$ 2.14} & \makecell[r]{$-$8.7\,\%\\{}[$-$10.1,\,$-$7.4]} & $<$\,0.001 \\
+P2 & corredor\_alta & 4042 & \makecell[r]{157.44\\{}(ep 120)} & no & \makecell[r]{153.45\\{}$\pm$ 3.28} & \makecell[r]{$-$0.8\,\%\\{}[$-$2.8,\,1.2]} & 0.529 \\
+ & & \makecell[l]{rango entre\\{}bases} & & & 23.72 & & \\
+P3 & red & 42 & \makecell[r]{23.89\\{}(ep 60)} & sí & \makecell[r]{24.45\\{}$\pm$ 0.17} & \makecell[r]{+12.6\,\%\\{}[12.0,\,13.2]} & $<$\,0.001 \\
+P3 & red & \makecell[l]{2042\\{}(publicada)} & \makecell[r]{24.06\\{}(ep 170)} & sí & \makecell[r]{24.15\\{}$\pm$ 0.11} & \makecell[r]{+11.2\,\%\\{}[10.6,\,11.8]} & $<$\,0.001 \\
+P3 & red & 4042 & \makecell[r]{24.09\\{}(ep 60)} & sí & \makecell[r]{25.30\\{}$\pm$ 2.12} & \makecell[r]{+16.5\,\%\\{}[11.2,\,26.5]} & $<$\,0.001 \\
+ & & \makecell[l]{rango entre\\{}bases} & & & 1.15 & & \\
+P4 & red\_alta & \makecell[l]{42\\{}(publicada)} & \makecell[r]{32.20\\{}(ep 130)} & sí & \makecell[r]{33.19\\{}$\pm$ 1.02} & \makecell[r]{+10.4\,\%\\{}[8.5,\,12.4]} & $<$\,0.001 \\
+P4 & red\_alta & 2042 & \makecell[r]{32.63\\{}(ep 110)} & sí & \makecell[r]{32.93\\{}$\pm$ 0.89} & \makecell[r]{+9.6\,\%\\{}[8.0,\,11.3]} & $<$\,0.001 \\
+P4 & red\_alta & 4042 & \makecell[r]{32.15\\{}(ep 190)} & no & \makecell[r]{34.58\\{}$\pm$ 2.48} & \makecell[r]{+15.1\,\%\\{}[9.0,\,23.5]} & $<$\,0.001 \\
+ & & \makecell[l]{rango entre\\{}bases} & & & 1.65 & & \\
+P5 & malla3 & \makecell[l]{42\\{}(publicada)} & \makecell[r]{29.07\\{}(ep 130)} & sí & \makecell[r]{29.18\\{}$\pm$ 0.09} & \makecell[r]{+40.0\,\%\\{}[39.5,\,40.6]} & $<$\,0.001 \\
+P5 & malla3 & 2042 & \makecell[r]{29.26\\{}(ep 140)} & sí & \makecell[r]{29.15\\{}$\pm$ 0.08} & \makecell[r]{+39.9\,\%\\{}[39.4,\,40.4]} & $<$\,0.001 \\
+P5 & malla3 & 4042 & \makecell[r]{28.67\\{}(ep 180)} & sí & \makecell[r]{28.93\\{}$\pm$ 0.09} & \makecell[r]{+38.9\,\%\\{}[38.3,\,39.4]} & $<$\,0.001 \\
+ & & \makecell[l]{rango entre\\{}bases} & & & 0.25 & & \\
+\bottomrule
+\end{tabular}
+\caption[Bases de SARSA]{SARSA: las tres políticas entrenadas (semillas base) de cada caso. La validación elegida es la media de las semillas 999 y 1999 del checkpoint publicado; el retraso y el $\Delta$ frente al fijo, sobre las semillas 1001 a 1030. La base publicada es la mediana por validación. El rango entre bases se compara con el IC95\,\% de una sola política.}
+\label{tab:veredicto-bases-sarsa}
+\end{table}
+
+\begin{table}[H]
+\setstretch{1}
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{lllrlrrr}
+\toprule
+Caso & Escenario & \makecell{Semilla\\base} & \makecell{Validación\\elegida\\(s/veh)} & \makecell{Conver-\\gió} & \makecell{Retraso\\evaluación\\(s/veh)} & \makecell{$\Delta$ vs fijo\\{}[IC95\,\%]} & $p$ \\
+\midrule
+P1 & corredor & 42 & \makecell[r]{23.04\\{}(ep 150)} & no & \makecell[r]{24.16\\{}$\pm$ 0.29} & \makecell[r]{+13.5\,\%\\{}[11.6,\,15.2]} & $<$\,0.001 \\
+P1 & corredor & 2042 & \makecell[r]{23.40\\{}(ep 150)} & no & \makecell[r]{25.17\\{}$\pm$ 0.45} & \makecell[r]{+18.2\,\%\\{}[15.9,\,20.5]} & $<$\,0.001 \\
+P1 & corredor & \makecell[l]{4042\\{}(publicada)} & \makecell[r]{23.14\\{}(ep 190)} & sí & \makecell[r]{23.56\\{}$\pm$ 0.33} & \makecell[r]{+10.6\,\%\\{}[8.9,\,12.4]} & $<$\,0.001 \\
+ & & \makecell[l]{rango entre\\{}bases} & & & 1.61 & & \\
+P2 & corredor\_alta & 42 & \makecell[r]{164.95\\{}(ep 200)} & no & \makecell[r]{168.61\\{}$\pm$ 2.66} & \makecell[r]{+9.0\,\%\\{}[7.2,\,10.8]} & $<$\,0.001 \\
+P2 & corredor\_alta & 2042 & \makecell[r]{157.60\\{}(ep 110)} & no & \makecell[r]{163.08\\{}$\pm$ 2.55} & \makecell[r]{+5.4\,\%\\{}[3.9,\,7.0]} & $<$\,0.001 \\
+P2 & corredor\_alta & \makecell[l]{4042\\{}(publicada)} & \makecell[r]{159.12\\{}(ep 50)} & no & \makecell[r]{165.25\\{}$\pm$ 5.02} & \makecell[r]{+6.8\,\%\\{}[3.8,\,9.8]} & $<$\,0.001 \\
+ & & \makecell[l]{rango entre\\{}bases} & & & 5.53 & & \\
+P3 & red & \makecell[l]{42\\{}(publicada)} & \makecell[r]{23.31\\{}(ep 170)} & sí & \makecell[r]{23.81\\{}$\pm$ 0.14} & \makecell[r]{+9.6\,\%\\{}[8.9,\,10.4]} & $<$\,0.001 \\
+P3 & red & 2042 & \makecell[r]{21.58\\{}(ep 70)} & sí & \makecell[r]{22.66\\{}$\pm$ 0.30} & \makecell[r]{+4.3\,\%\\{}[2.9,\,5.7]} & $<$\,0.001 \\
+P3 & red & 4042 & \makecell[r]{23.77\\{}(ep 60)} & sí & \makecell[r]{23.97\\{}$\pm$ 0.15} & \makecell[r]{+10.3\,\%\\{}[9.6,\,11.1]} & $<$\,0.001 \\
+ & & \makecell[l]{rango entre\\{}bases} & & & 1.31 & & \\
+P4 & red\_alta & 42 & \makecell[r]{32.45\\{}(ep 40)} & sí & \makecell[r]{33.19\\{}$\pm$ 1.12} & \makecell[r]{+10.4\,\%\\{}[8.7,\,12.1]} & $<$\,0.001 \\
+P4 & red\_alta & \makecell[l]{2042\\{}(publicada)} & \makecell[r]{31.91\\{}(ep 130)} & sí & \makecell[r]{33.00\\{}$\pm$ 0.91} & \makecell[r]{+9.8\,\%\\{}[8.4,\,11.3]} & $<$\,0.001 \\
+P4 & red\_alta & 4042 & \makecell[r]{30.86\\{}(ep 180)} & sí & \makecell[r]{31.33\\{}$\pm$ 1.00} & \makecell[r]{+4.2\,\%\\{}[2.7,\,5.8]} & $<$\,0.001 \\
+ & & \makecell[l]{rango entre\\{}bases} & & & 1.86 & & \\
+\bottomrule
+\end{tabular}
+\caption[Bases de Q-learning (colas)]{Q-learning (colas): las tres políticas entrenadas (semillas base) de cada caso. La validación elegida es la media de las semillas 999 y 1999 del checkpoint publicado; el retraso y el $\Delta$ frente al fijo, sobre las semillas 1001 a 1030. La base publicada es la mediana por validación. El rango entre bases se compara con el IC95\,\% de una sola política.}
+\label{tab:veredicto-bases-ql-colas}
+\end{table}
+
+\begin{table}[H]
+\setstretch{1}
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{lllrlrrr}
+\toprule
+Caso & Escenario & \makecell{Semilla\\base} & \makecell{Validación\\elegida\\(s/veh)} & \makecell{Conver-\\gió} & \makecell{Retraso\\evaluación\\(s/veh)} & \makecell{$\Delta$ vs fijo\\{}[IC95\,\%]} & $p$ \\
+\midrule
+P1 & corredor & 42 & \makecell[r]{20.54\\{}(ep 120)} & sí & \makecell[r]{20.79\\{}$\pm$ 0.12} & \makecell[r]{$-$2.4\,\%\\{}[$-$3.6,\,$-$1.2]} & 0.00138 \\
+P1 & corredor & 2042 & \makecell[r]{20.13\\{}(ep 190)} & sí & \makecell[r]{20.30\\{}$\pm$ 0.13} & \makecell[r]{$-$4.7\,\%\\{}[$-$5.7,\,$-$3.7]} & $<$\,0.001 \\
+P1 & corredor & \makecell[l]{4042\\{}(publicada)} & \makecell[r]{20.32\\{}(ep 180)} & sí & \makecell[r]{20.56\\{}$\pm$ 0.16} & \makecell[r]{$-$3.5\,\%\\{}[$-$4.8,\,$-$2.2]} & $<$\,0.001 \\
+ & & \makecell[l]{rango entre\\{}bases} & & & 0.49 & & \\
+P2 & corredor\_alta & 42 & \makecell[r]{123.24\\{}(ep 190)} & sí & \makecell[r]{124.91\\{}$\pm$ 1.53} & \makecell[r]{$-$19.3\,\%\\{}[$-$20.2,\,$-$18.3]} & $<$\,0.001 \\
+P2 & corredor\_alta & 2042 & \makecell[r]{121.66\\{}(ep 200)} & sí & \makecell[r]{123.28\\{}$\pm$ 1.38} & \makecell[r]{$-$20.3\,\%\\{}[$-$21.2,\,$-$19.4]} & $<$\,0.001 \\
+P2 & corredor\_alta & \makecell[l]{4042\\{}(publicada)} & \makecell[r]{122.48\\{}(ep 50)} & sí & \makecell[r]{124.66\\{}$\pm$ 1.10} & \makecell[r]{$-$19.4\,\%\\{}[$-$20.3,\,$-$18.5]} & $<$\,0.001 \\
+ & & \makecell[l]{rango entre\\{}bases} & & & 1.63 & & \\
+P3 & red & 42 & \makecell[r]{21.12\\{}(ep 100)} & sí & \makecell[r]{21.49\\{}$\pm$ 0.10} & \makecell[r]{$-$1.0\,\%\\{}[$-$1.6,\,$-$0.5]} & 0.0021 \\
+P3 & red & 2042 & \makecell[r]{20.86\\{}(ep 190)} & sí & \makecell[r]{21.08\\{}$\pm$ 0.13} & \makecell[r]{$-$2.9\,\%\\{}[$-$3.5,\,$-$2.3]} & $<$\,0.001 \\
+P3 & red & \makecell[l]{4042\\{}(publicada)} & \makecell[r]{20.91\\{}(ep 200)} & sí & \makecell[r]{21.32\\{}$\pm$ 0.10} & \makecell[r]{$-$1.8\,\%\\{}[$-$2.4,\,$-$1.3]} & $<$\,0.001 \\
+ & & \makecell[l]{rango entre\\{}bases} & & & 0.41 & & \\
+P4 & red\_alta & 42 & \makecell[r]{28.18\\{}(ep 80)} & sí & \makecell[r]{29.00\\{}$\pm$ 1.02} & \makecell[r]{$-$3.5\,\%\\{}[$-$4.9,\,$-$2.0]} & $<$\,0.001 \\
+P4 & red\_alta & 2042 & \makecell[r]{28.78\\{}(ep 170)} & no & \makecell[r]{28.96\\{}$\pm$ 1.06} & \makecell[r]{$-$3.6\,\%\\{}[$-$4.6,\,$-$2.6]} & $<$\,0.001 \\
+P4 & red\_alta & \makecell[l]{4042\\{}(publicada)} & \makecell[r]{28.43\\{}(ep 200)} & sí & \makecell[r]{29.04\\{}$\pm$ 1.02} & \makecell[r]{$-$3.4\,\%\\{}[$-$4.7,\,$-$2.1]} & $<$\,0.001 \\
+ & & \makecell[l]{rango entre\\{}bases} & & & 0.08 & & \\
+P5 & malla3 & 42 & \makecell[r]{23.20\\{}(ep 170)} & sí & \makecell[r]{22.95\\{}$\pm$ 0.11} & \makecell[r]{+10.1\,\%\\{}[9.7,\,10.7]} & $<$\,0.001 \\
+P5 & malla3 & 2042 & \makecell[r]{22.89\\{}(ep 160)} & sí & \makecell[r]{22.57\\{}$\pm$ 0.13} & \makecell[r]{+8.3\,\%\\{}[7.7,\,8.9]} & $<$\,0.001 \\
+P5 & malla3 & \makecell[l]{4042\\{}(publicada)} & \makecell[r]{23.04\\{}(ep 190)} & no & \makecell[r]{23.15\\{}$\pm$ 0.09} & \makecell[r]{+11.1\,\%\\{}[10.7,\,11.4]} & $<$\,0.001 \\
+ & & \makecell[l]{rango entre\\{}bases} & & & 0.58 & & \\
+\bottomrule
+\end{tabular}
+\caption[Bases de DQN]{DQN: las tres políticas entrenadas (semillas base) de cada caso. La validación elegida es la media de las semillas 999 y 1999 del checkpoint publicado; el retraso y el $\Delta$ frente al fijo, sobre las semillas 1001 a 1030. La base publicada es la mediana por validación. El rango entre bases se compara con el IC95\,\% de una sola política.}
+\label{tab:veredicto-bases-dqn}
+\end{table}
+
+\begin{table}[H]
+\setstretch{1}
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{lllrlrrr}
+\toprule
+Caso & Escenario & \makecell{Semilla\\base} & \makecell{Validación\\elegida\\(s/veh)} & \makecell{Conver-\\gió} & \makecell{Retraso\\evaluación\\(s/veh)} & \makecell{$\Delta$ vs fijo\\{}[IC95\,\%]} & $p$ \\
+\midrule
+P1 & corredor & 42 & \makecell[r]{20.15\\{}(ep 170)} & sí & \makecell[r]{20.89\\{}$\pm$ 0.17} & \makecell[r]{$-$1.9\,\%\\{}[$-$3.2,\,$-$0.7]} & 0.0148 \\
+P1 & corredor & \makecell[l]{2042\\{}(publicada)} & \makecell[r]{20.68\\{}(ep 190)} & sí & \makecell[r]{21.19\\{}$\pm$ 0.14} & \makecell[r]{$-$0.5\,\%\\{}[$-$1.7,\,0.5]} & 0.711 \\
+P1 & corredor & 4042 & \makecell[r]{21.00\\{}(ep 160)} & sí & \makecell[r]{21.21\\{}$\pm$ 0.15} & \makecell[r]{$-$0.4\,\%\\{}[$-$1.7,\,0.9]} & 0.773 \\
+ & & \makecell[l]{rango entre\\{}bases} & & & 0.33 & & \\
+P2 & corredor\_alta & \makecell[l]{42\\{}(publicada)} & \makecell[r]{116.70\\{}(ep 150)} & sí & \makecell[r]{119.43\\{}$\pm$ 0.80} & \makecell[r]{$-$22.8\,\%\\{}[$-$23.3,\,$-$22.2]} & $<$\,0.001 \\
+P2 & corredor\_alta & 2042 & \makecell[r]{119.58\\{}(ep 150)} & sí & \makecell[r]{121.96\\{}$\pm$ 1.63} & \makecell[r]{$-$21.2\,\%\\{}[$-$22.3,\,$-$19.9]} & $<$\,0.001 \\
+P2 & corredor\_alta & 4042 & \makecell[r]{115.15\\{}(ep 190)} & no & \makecell[r]{119.27\\{}$\pm$ 1.21} & \makecell[r]{$-$22.9\,\%\\{}[$-$23.7,\,$-$22.1]} & $<$\,0.001 \\
+ & & \makecell[l]{rango entre\\{}bases} & & & 2.69 & & \\
+P3 & red & 42 & \makecell[r]{23.34\\{}(ep 170)} & sí & \makecell[r]{23.50\\{}$\pm$ 0.14} & \makecell[r]{+8.2\,\%\\{}[7.4,\,8.9]} & $<$\,0.001 \\
+P3 & red & \makecell[l]{2042\\{}(publicada)} & \makecell[r]{22.01\\{}(ep 200)} & sí & \makecell[r]{22.21\\{}$\pm$ 0.16} & \makecell[r]{+2.3\,\%\\{}[1.5,\,3.0]} & $<$\,0.001 \\
+P3 & red & 4042 & \makecell[r]{21.66\\{}(ep 200)} & sí & \makecell[r]{22.09\\{}$\pm$ 0.14} & \makecell[r]{+1.7\,\%\\{}[1.1,\,2.4]} & $<$\,0.001 \\
+ & & \makecell[l]{rango entre\\{}bases} & & & 1.40 & & \\
+P4 & red\_alta & 42 & \makecell[r]{31.25\\{}(ep 140)} & sí & \makecell[r]{31.68\\{}$\pm$ 0.93} & \makecell[r]{+5.4\,\%\\{}[3.9,\,7.0]} & $<$\,0.001 \\
+P4 & red\_alta & \makecell[l]{2042\\{}(publicada)} & \makecell[r]{31.16\\{}(ep 180)} & sí & \makecell[r]{30.91\\{}$\pm$ 1.02} & \makecell[r]{+2.9\,\%\\{}[1.4,\,4.4]} & 0.00124 \\
+P4 & red\_alta & 4042 & \makecell[r]{29.34\\{}(ep 100)} & sí & \makecell[r]{30.48\\{}$\pm$ 0.96} & \makecell[r]{+1.4\,\%\\{}[0.3,\,2.5]} & 0.00873 \\
+ & & \makecell[l]{rango entre\\{}bases} & & & 1.20 & & \\
+P5 & malla3 & 42 & \makecell[r]{25.16\\{}(ep 200)} & no & \makecell[r]{25.20\\{}$\pm$ 0.23} & \makecell[r]{+20.9\,\%\\{}[19.9,\,22.0]} & $<$\,0.001 \\
+P5 & malla3 & 2042 & \makecell[r]{26.70\\{}(ep 90)} & sí & \makecell[r]{27.16\\{}$\pm$ 0.23} & \makecell[r]{+30.4\,\%\\{}[29.3,\,31.5]} & $<$\,0.001 \\
+P5 & malla3 & \makecell[l]{4042\\{}(publicada)} & \makecell[r]{25.74\\{}(ep 200)} & sí & \makecell[r]{26.23\\{}$\pm$ 0.23} & \makecell[r]{+25.9\,\%\\{}[24.8,\,27.0]} & $<$\,0.001 \\
+ & & \makecell[l]{rango entre\\{}bases} & & & 1.97 & & \\
+\bottomrule
+\end{tabular}
+\caption[Bases de IPPO local]{IPPO local: las tres políticas entrenadas (semillas base) de cada caso. La validación elegida es la media de las semillas 999 y 1999 del checkpoint publicado; el retraso y el $\Delta$ frente al fijo, sobre las semillas 1001 a 1030. La base publicada es la mediana por validación. El rango entre bases se compara con el IC95\,\% de una sola política.}
+\label{tab:veredicto-bases-ippo-local}
+\end{table}
+
+\begin{table}[H]
+\setstretch{1}
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{lllrlrrr}
+\toprule
+Caso & Escenario & \makecell{Semilla\\base} & \makecell{Validación\\elegida\\(s/veh)} & \makecell{Conver-\\gió} & \makecell{Retraso\\evaluación\\(s/veh)} & \makecell{$\Delta$ vs fijo\\{}[IC95\,\%]} & $p$ \\
+\midrule
+P1 & corredor & 42 & \makecell[r]{19.54\\{}(ep 110)} & sí & \makecell[r]{20.07\\{}$\pm$ 0.16} & \makecell[r]{$-$5.7\,\%\\{}[$-$6.9,\,$-$4.6]} & $<$\,0.001 \\
+P1 & corredor & 2042 & \makecell[r]{19.71\\{}(ep 100)} & sí & \makecell[r]{20.06\\{}$\pm$ 0.21} & \makecell[r]{$-$5.8\,\%\\{}[$-$7.1,\,$-$4.5]} & $<$\,0.001 \\
+P1 & corredor & \makecell[l]{4042\\{}(publicada)} & \makecell[r]{19.55\\{}(ep 190)} & sí & \makecell[r]{19.84\\{}$\pm$ 0.17} & \makecell[r]{$-$6.8\,\%\\{}[$-$8.0,\,$-$5.8]} & $<$\,0.001 \\
+ & & \makecell[l]{rango entre\\{}bases} & & & 0.23 & & \\
+P2 & corredor\_alta & 42 & \makecell[r]{116.50\\{}(ep 180)} & no & \makecell[r]{117.73\\{}$\pm$ 0.68} & \makecell[r]{$-$23.9\,\%\\{}[$-$24.6,\,$-$23.2]} & $<$\,0.001 \\
+P2 & corredor\_alta & \makecell[l]{2042\\{}(publicada)} & \makecell[r]{116.52\\{}(ep 120)} & sí & \makecell[r]{118.66\\{}$\pm$ 0.67} & \makecell[r]{$-$23.3\,\%\\{}[$-$23.9,\,$-$22.7]} & $<$\,0.001 \\
+P2 & corredor\_alta & 4042 & \makecell[r]{117.88\\{}(ep 160)} & sí & \makecell[r]{119.02\\{}$\pm$ 0.80} & \makecell[r]{$-$23.1\,\%\\{}[$-$23.8,\,$-$22.3]} & $<$\,0.001 \\
+ & & \makecell[l]{rango entre\\{}bases} & & & 1.28 & & \\
+P3 & red & 42 & \makecell[r]{19.69\\{}(ep 50)} & sí & \makecell[r]{20.03\\{}$\pm$ 0.21} & \makecell[r]{$-$7.8\,\%\\{}[$-$8.7,\,$-$6.8]} & $<$\,0.001 \\
+P3 & red & 2042 & \makecell[r]{21.22\\{}(ep 30)} & sí & \makecell[r]{21.70\\{}$\pm$ 0.12} & \makecell[r]{$-$0.1\,\%\\{}[$-$0.7,\,0.5]} & 0.734 \\
+P3 & red & \makecell[l]{4042\\{}(publicada)} & \makecell[r]{19.69\\{}(ep 40)} & sí & \makecell[r]{19.81\\{}$\pm$ 0.11} & \makecell[r]{$-$8.8\,\%\\{}[$-$9.3,\,$-$8.2]} & $<$\,0.001 \\
+ & & \makecell[l]{rango entre\\{}bases} & & & 1.88 & & \\
+P4 & red\_alta & \makecell[l]{42\\{}(publicada)} & \makecell[r]{28.09\\{}(ep 200)} & sí & \makecell[r]{28.97\\{}$\pm$ 0.92} & \makecell[r]{$-$3.6\,\%\\{}[$-$5.0,\,$-$2.3]} & $<$\,0.001 \\
+P4 & red\_alta & 2042 & \makecell[r]{27.36\\{}(ep 30)} & sí & \makecell[r]{29.47\\{}$\pm$ 1.10} & \makecell[r]{$-$1.9\,\%\\{}[$-$3.8,\,$-$0.1]} & 0.0804 \\
+P4 & red\_alta & 4042 & \makecell[r]{28.23\\{}(ep 140)} & sí & \makecell[r]{28.67\\{}$\pm$ 0.98} & \makecell[r]{$-$4.6\,\%\\{}[$-$5.9,\,$-$3.3]} & $<$\,0.001 \\
+ & & \makecell[l]{rango entre\\{}bases} & & & 0.80 & & \\
+P5 & malla3 & 42 & \makecell[r]{20.77\\{}(ep 200)} & sí & \makecell[r]{21.07\\{}$\pm$ 0.29} & \makecell[r]{+1.1\,\%\\{}[$-$0.1,\,2.6]} & 0.737 \\
+P5 & malla3 & \makecell[l]{2042\\{}(publicada)} & \makecell[r]{20.77\\{}(ep 50)} & sí & \makecell[r]{21.21\\{}$\pm$ 0.35} & \makecell[r]{+1.8\,\%\\{}[0.4,\,3.4]} & 0.523 \\
+P5 & malla3 & 4042 & \makecell[r]{20.77\\{}(ep 200)} & sí & \makecell[r]{20.82\\{}$\pm$ 0.07} & \makecell[r]{$-$0.1\,\%\\{}[$-$0.5,\,0.3]} & 0.417 \\
+ & & \makecell[l]{rango entre\\{}bases} & & & 0.39 & & \\
+\bottomrule
+\end{tabular}
+\caption[Bases de IPPO vecinos]{IPPO vecinos: las tres políticas entrenadas (semillas base) de cada caso. La validación elegida es la media de las semillas 999 y 1999 del checkpoint publicado; el retraso y el $\Delta$ frente al fijo, sobre las semillas 1001 a 1030. La base publicada es la mediana por validación. El rango entre bases se compara con el IC95\,\% de una sola política.}
+\label{tab:veredicto-bases-ippo-vecinos}
+\end{table}
+
+\begin{table}[H]
+\setstretch{1}
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{lllrlrrr}
+\toprule
+Caso & Escenario & \makecell{Semilla\\base} & \makecell{Validación\\elegida\\(s/veh)} & \makecell{Conver-\\gió} & \makecell{Retraso\\evaluación\\(s/veh)} & \makecell{$\Delta$ vs fijo\\{}[IC95\,\%]} & $p$ \\
+\midrule
+P1 & corredor & 42 & \makecell[r]{19.53\\{}(ep 150)} & sí & \makecell[r]{19.92\\{}$\pm$ 0.18} & \makecell[r]{$-$6.5\,\%\\{}[$-$7.6,\,$-$5.3]} & $<$\,0.001 \\
+P1 & corredor & \makecell[l]{2042\\{}(publicada)} & \makecell[r]{19.50\\{}(ep 140)} & sí & \makecell[r]{20.19\\{}$\pm$ 0.15} & \makecell[r]{$-$5.2\,\%\\{}[$-$6.2,\,$-$4.2]} & $<$\,0.001 \\
+P1 & corredor & 4042 & \makecell[r]{19.38\\{}(ep 90)} & sí & \makecell[r]{19.86\\{}$\pm$ 0.17} & \makecell[r]{$-$6.8\,\%\\{}[$-$7.9,\,$-$5.7]} & $<$\,0.001 \\
+ & & \makecell[l]{rango entre\\{}bases} & & & 0.34 & & \\
+P2 & corredor\_alta & 42 & \makecell[r]{118.38\\{}(ep 180)} & sí & \makecell[r]{120.28\\{}$\pm$ 0.68} & \makecell[r]{$-$22.2\,\%\\{}[$-$22.8,\,$-$21.7]} & $<$\,0.001 \\
+P2 & corredor\_alta & 2042 & \makecell[r]{116.70\\{}(ep 180)} & no & \makecell[r]{118.77\\{}$\pm$ 1.15} & \makecell[r]{$-$23.2\,\%\\{}[$-$24.1,\,$-$22.3]} & $<$\,0.001 \\
+P2 & corredor\_alta & \makecell[l]{4042\\{}(publicada)} & \makecell[r]{117.45\\{}(ep 140)} & sí & \makecell[r]{119.62\\{}$\pm$ 1.23} & \makecell[r]{$-$22.7\,\%\\{}[$-$23.4,\,$-$21.9]} & $<$\,0.001 \\
+ & & \makecell[l]{rango entre\\{}bases} & & & 1.51 & & \\
+P3 & red & 42 & \makecell[r]{19.69\\{}(ep 50)} & sí & \makecell[r]{20.03\\{}$\pm$ 0.21} & \makecell[r]{$-$7.8\,\%\\{}[$-$8.7,\,$-$6.8]} & $<$\,0.001 \\
+P3 & red & 2042 & \makecell[r]{21.22\\{}(ep 30)} & sí & \makecell[r]{21.70\\{}$\pm$ 0.12} & \makecell[r]{$-$0.1\,\%\\{}[$-$0.7,\,0.5]} & 0.734 \\
+ & & \makecell[l]{rango entre\\{}bases} & & & 1.67 & & \\
+\bottomrule
+\end{tabular}
+\caption[Bases de IPPO spill]{IPPO spill: las tres políticas entrenadas (semillas base) de cada caso. La validación elegida es la media de las semillas 999 y 1999 del checkpoint publicado; el retraso y el $\Delta$ frente al fijo, sobre las semillas 1001 a 1030. La base publicada es la mediana por validación. El rango entre bases se compara con el IC95\,\% de una sola política.}
+\label{tab:veredicto-bases-ippo-spill}
+\end{table}
+
+\begin{table}[H]
+\setstretch{1}
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{lllrlrrr}
+\toprule
+Caso & Escenario & \makecell{Semilla\\base} & \makecell{Validación\\elegida\\(s/veh)} & \makecell{Conver-\\gió} & \makecell{Retraso\\evaluación\\(s/veh)} & \makecell{$\Delta$ vs fijo\\{}[IC95\,\%]} & $p$ \\
+\midrule
+P1 & corredor & \makecell[l]{42\\{}(publicada)} & \makecell[r]{19.51\\{}(ep 170)} & sí & \makecell[r]{19.79\\{}$\pm$ 0.18} & \makecell[r]{$-$7.1\,\%\\{}[$-$8.4,\,$-$5.8]} & $<$\,0.001 \\
+P1 & corredor & 2042 & \makecell[r]{19.73\\{}(ep 100)} & sí & \makecell[r]{20.18\\{}$\pm$ 0.26} & \makecell[r]{$-$5.2\,\%\\{}[$-$6.7,\,$-$3.9]} & $<$\,0.001 \\
+P1 & corredor & 4042 & \makecell[r]{19.27\\{}(ep 190)} & sí & \makecell[r]{20.09\\{}$\pm$ 0.19} & \makecell[r]{$-$5.7\,\%\\{}[$-$6.9,\,$-$4.5]} & $<$\,0.001 \\
+ & & \makecell[l]{rango entre\\{}bases} & & & 0.39 & & \\
+P2 & corredor\_alta & \makecell[l]{42\\{}(publicada)} & \makecell[r]{117.61\\{}(ep 160)} & sí & \makecell[r]{121.24\\{}$\pm$ 1.34} & \makecell[r]{$-$21.6\,\%\\{}[$-$22.6,\,$-$20.7]} & $<$\,0.001 \\
+P2 & corredor\_alta & 2042 & \makecell[r]{119.37\\{}(ep 100)} & sí & \makecell[r]{120.59\\{}$\pm$ 1.20} & \makecell[r]{$-$22.1\,\%\\{}[$-$23.0,\,$-$21.1]} & $<$\,0.001 \\
+P2 & corredor\_alta & 4042 & \makecell[r]{117.09\\{}(ep 200)} & sí & \makecell[r]{120.40\\{}$\pm$ 0.99} & \makecell[r]{$-$22.2\,\%\\{}[$-$23.0,\,$-$21.4]} & $<$\,0.001 \\
+ & & \makecell[l]{rango entre\\{}bases} & & & 0.84 & & \\
+P3 & red & 42 & \makecell[r]{21.20\\{}(ep 10)} & sí & \makecell[r]{21.62\\{}$\pm$ 0.09} & \makecell[r]{$-$0.5\,\%\\{}[$-$1.0,\,0.1]} & 0.0919 \\
+P3 & red & 2042 & \makecell[r]{19.69\\{}(ep 90)} & sí & \makecell[r]{19.81\\{}$\pm$ 0.11} & \makecell[r]{$-$8.8\,\%\\{}[$-$9.3,\,$-$8.2]} & $<$\,0.001 \\
+P3 & red & \makecell[l]{4042\\{}(publicada)} & \makecell[r]{19.69\\{}(ep 120)} & no & \makecell[r]{20.01\\{}$\pm$ 0.21} & \makecell[r]{$-$7.8\,\%\\{}[$-$8.8,\,$-$6.8]} & $<$\,0.001 \\
+ & & \makecell[l]{rango entre\\{}bases} & & & 1.81 & & \\
+P4 & red\_alta & 42 & \makecell[r]{27.70\\{}(ep 200)} & no & \makecell[r]{28.75\\{}$\pm$ 0.84} & \makecell[r]{$-$4.3\,\%\\{}[$-$6.0,\,$-$2.7]} & $<$\,0.001 \\
+P4 & red\_alta & \makecell[l]{2042\\{}(publicada)} & \makecell[r]{28.04\\{}(ep 180)} & no & \makecell[r]{29.45\\{}$\pm$ 0.88} & \makecell[r]{$-$2.0\,\%\\{}[$-$3.1,\,$-$0.9]} & 0.00225 \\
+P4 & red\_alta & 4042 & \makecell[r]{28.60\\{}(ep 110)} & sí & \makecell[r]{28.32\\{}$\pm$ 0.95} & \makecell[r]{$-$5.8\,\%\\{}[$-$7.3,\,$-$4.2]} & $<$\,0.001 \\
+ & & \makecell[l]{rango entre\\{}bases} & & & 1.13 & & \\
+P5 & malla3 & 42 & \makecell[r]{20.77\\{}(ep 80)} & no & \makecell[r]{20.94\\{}$\pm$ 0.20} & \makecell[r]{+0.5\,\%\\{}[$-$0.3,\,1.5]} & 0.417 \\
+P5 & malla3 & \makecell[l]{2042\\{}(publicada)} & \makecell[r]{20.77\\{}(ep 10)} & sí & \makecell[r]{20.78\\{}$\pm$ 0.05} & \makecell[r]{$-$0.3\,\%\\{}[$-$0.6,\,0.0]} & 0.0896 \\
+P5 & malla3 & 4042 & \makecell[r]{20.77\\{}(ep 110)} & sí & \makecell[r]{20.87\\{}$\pm$ 0.13} & \makecell[r]{+0.1\,\%\\{}[$-$0.4,\,0.8]} & 0.496 \\
+ & & \makecell[l]{rango entre\\{}bases} & & & 0.16 & & \\
+\bottomrule
+\end{tabular}
+\caption[Bases de MAPPO]{MAPPO: las tres políticas entrenadas (semillas base) de cada caso. La validación elegida es la media de las semillas 999 y 1999 del checkpoint publicado; el retraso y el $\Delta$ frente al fijo, sobre las semillas 1001 a 1030. La base publicada es la mediana por validación. El rango entre bases se compara con el IC95\,\% de una sola política.}
+\label{tab:veredicto-bases-mappo}
+\end{table}
+

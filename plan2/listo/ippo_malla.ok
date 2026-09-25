@@ -1,0 +1,9 @@
+malla (compuerta P5) 24.09.2026, copia privada con los .py y malla3.* instalados (md5 iguales a demo_rl):
+rl_ippo.py train --escenario malla3 --variante local|vecinos|spill --seed 42 --episodios 2 --eval-cada 1:
+exit 0, dim_obs 53 (n_id 9, lados oeste/este/norte/sur), 2 checkpoints .pt/.json por tag, publicada =
+checkpoint de menor val (md5), meta completo, ret_*/val_* llenos. semaforo_C22 (demo con decidir,
+semilla 1001): las 4 ranuras presente=1 en 729/729 decisiones y mensaje no nulo en 728/729; fase_av = 0
+en los 9 semaforos. rl_corredor.py train malla3 qlearning retraso 2 ep --eval-cada 1: OK (9 agentes).
+evaluar.py con politica_malla3_spill_s42.pt y q_table_malla3_ql_s42.json (semilla 1001): OK, 0 sin terminar.
+Sin cambios de codigo. En solitario (maquina cargada): IPPO 31-34 s/episodio, Q-learning 33-37 s/episodio.
+Nota: spill = vecinos digito a digito en 2 ep (el termino de spill no se activo; cola_max_enlace 6-7).

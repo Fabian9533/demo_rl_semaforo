@@ -2,73 +2,166 @@
 \addcontentsline{toc}{section}{\bfseries RECOMENDACIONES}
 \markboth{RECOMENDACIONES}{RECOMENDACIONES}
 
-Las recomendaciones que siguen se desprenden directamente de los
-resultados obtenidos y ordenan el trabajo restante.
+Las recomendaciones que siguen se desprenden de los resultados del plan
+de pruebas (Sección~\ref{sec:plan2}) y de la fase exploratoria que lo
+precedió. Las primeras son metodológicas: valen para cualquier
+continuación del trabajo, con estos escenarios o con otros. Las
+segundas ordenan el trabajo siguiente.
 
-\noindent\textbf{Separar el efecto de la recompensa del efecto del
-algoritmo.} El módulo U4 cambió a la vez el estado, la recompensa (el
-retraso por segundo en lugar de la cola detenida) y el algoritmo, y la
-comparación con Q-learning es por eso de paquete completo. Reentrenar
-el agente tabular con la recompensa de retraso, con el mismo protocolo,
-diría cuánto de la mejora se debe a la señal y cuánto a la aproximación
-de funciones; es un experimento barato con el código existente. La
-variante \emph{cambio}, que penaliza cada cambio de fase, quedó
-formulada y sin correr y puede evaluarse con la misma infraestructura.
+\subsection*{Recomendaciones metodológicas}
 
-\noindent\textbf{Completar la comparación algorítmica.} PPO quedó
-implementado en U4 sobre PyTorch; DQN y SARSA siguen pendientes. El
-escenario con giros protegidos debe ser el caso de prueba principal
-para DQN, porque es donde el método tabular falla de forma más clara,
-y la variante \emph{local} de U4, que corre en un solo semáforo, es la
-referencia directa con la que compararlo. SARSA tiene costo marginal
-partiendo del código existente y separa el efecto de la representación
-del efecto de la política de actualización.
+\noindent\textbf{Barrer siempre la referencia fija en reparto, ciclo y
+desfase, y ampliar la malla hasta un óptimo interior.} El primer
+barrido de esta tesis variaba un único verde común para todas las
+aproximaciones y dio por tuneado un programa que, en el corredor, era
+10~s peor que el mejor reparto asimétrico; contra él, la mejora de IPPO
+parecía de un $38$\,\% y era de un $6$\,\%. En el plan de pruebas el
+barrido se amplió en cada caso hasta que el óptimo quedó en el interior
+de la malla, con el verde mínimo de 10~s como única frontera aceptada.
+Esa ampliación confirmó los programas anteriores del corredor (20~s de
+verde de avenida, 10~s de transversal y 15~s de desfase), del corredor
+con demanda doble y de la red, y fijó los de la red con demanda alta y
+la malla. Conviene repetirla en todo escenario nuevo, con semillas
+distintas de las de evaluación, antes de comparar nada con el fijo.
+% fuente: plan2/barrido_<esc>.csv (fila de menor timeloss_prom y ejes barridos)
 
-\noindent\textbf{Barrer siempre el reparto de verde de la referencia
-fija, no solo el ciclo y el desfase.} El primer barrido de esta tesis
-variaba un único verde común para todas las aproximaciones y dio por
-tuneado un programa que, en el corredor, era 10~s peor que el mejor
-reparto asimétrico; contra él, la mejora de IPPO parecía de un
-$38$\,\% y era de un $6$\,\%. Toda referencia fija debe barrerse en
-reparto, ciclo y desfase, con semillas distintas de las de evaluación,
-y conviene que una revisión independiente intente batirla antes de
-comparar nada con ella.
+\noindent\textbf{Mantener las dos referencias, fija y actuada.} Un
+resultado que solo supere al tiempo fijo no demuestra utilidad
+práctica, porque el actuado está disponible de fábrica y no requiere
+entrenamiento. El plan de pruebas mostró además que ninguna de las dos
+basta sola: el actuado supera al fijo con demanda doble en el corredor
+($-19.8$\,\%) y pierde contra él en la malla ($+21.8$\,\%). Ambas deben
+tener las mismas fases y los mismos límites de verde que el agente.
+% fuente: plan2/veredicto.csv (actuado)
 
-\noindent\textbf{Incorporar el control actuado como línea base
-permanente.} Toda comparación futura debe incluirlo, con las mismas
-restricciones de verde que el agente. Un resultado que solo supere al
-control de tiempo fijo no demuestra utilidad práctica, porque el
-actuado está disponible de fábrica y no requiere entrenamiento.
+\noindent\textbf{Juzgar la convergencia alrededor de la política
+publicada, no solo al final de la serie.} El criterio de convergencia
+del plan mira el último tercio de la serie de validación, pero la
+política publicada puede estar antes. En la red, las dos bases de IPPO
+\emph{vecinos} que funcionan publicaron los episodios 40 y 50 de 200,
+cada uno un mínimo aislado de su serie (19.69~s frente a 21.29~s o más
+en el resto de las validaciones), y la tabla las marca como
+convergidas porque el último tercio es plano en un valor peor. Se
+recomienda reportar, junto al veredicto, la distancia entre la
+validación elegida y la mediana de la serie, y exigir que el mínimo se
+repita en dos validaciones seguidas o usar más semillas de validación.
+Para la única comparación que la tesis quiera afirmar como principal
+(\emph{vecinos} frente a \emph{local}) convienen cinco semillas base en
+vez de tres: en la red, una de las tres bases de \emph{vecinos} empata
+con el fijo mientras las otras dos lo superan en más del 7\,\%. La
+convergencia es además lo que deja abiertas cinco de las seis celdas
+pendientes del plan: Q-learning en P4, Q-learning con la recompensa de
+colas en P2, DQN en P5 y MAPPO en P3 y P4. Antes de dar por definitivo
+su veredicto provisional conviene prolongar esos entrenamientos o sumar
+bases, sin cambiar el resto del método.
+% fuente: plan2/politica_red_vecinos_s*.json (val_serie, ep_elegido); plan2/veredicto.csv
+% (convergio, convergen, veredicto); plan2/evaluacion_red_resumen.csv (ippo_vecinos_s2042, _s42, _s4042)
 
-\noindent\textbf{Medir la variabilidad entre entrenamientos también
-en U2.} El módulo U4 entrenó tres políticas por variante y mostró que
-la dispersión entre semillas base puede ser diez veces el intervalo de
-confianza de una política (la variante \emph{local} en red); el agente
-tabular sigue con una sola corrida por escenario. Con tres políticas
-tampoco se puede afirmar una diferencia entre variantes con $p < 0.10$:
-para el único par que la tesis quiera afirmar como conclusión principal
-(\emph{vecinos} frente a \emph{local}) convienen cinco semillas base.
+\noindent\textbf{Comprobar la semántica de la observación y de las fases
+con pruebas automáticas.} Dos errores de esta clase aparecieron durante
+el plan. El prototipo de la malla del 18.09.2026 tenía cruzadas las
+fases este--oeste y norte--sur; la malla evaluada se construyó
+corregida, y el barrido detecta ahora la fase de la avenida a partir de
+la red. En la observación de IPPO, la ranura llamada
+\texttt{cola\_mi\_salida} mide en realidad la cola del enlace que entra
+desde el vecino; viene de la versión del 06.09.2026 y en la malla, que
+es simétrica, da el mismo valor. Cambiar esa definición cambiaría todas
+las políticas entrenadas, así que en esta tesis se documenta y no se
+corrige; antes de cualquier entrenamiento nuevo conviene renombrarla o
+corregirla y agregar una prueba que compare cada ranura con una lectura
+directa de TraCI.
 
-\noindent\textbf{Entrenar la coordinación con un canal imperfecto.}
-Las políticas de U4 se entrenaron con mensajes instantáneos y, al
-evaluarlas con latencia o pérdida, usan el mensaje viejo como si fuera
-actual: el retraso global apenas cambia pero la progresión se deshace.
-La edad del mensaje ya está en la observación; basta entrenar con
-latencia y pérdida aleatorias por episodio para que el agente aprenda a
-descontarla. Es el paso previo a cualquier despliegue sobre una red de
-comunicación real. Después de eso, el crítico centralizado de MAPPO y
-una versión de estrés de la red de tres cruces son las extensiones
-naturales del módulo.
+\noindent\textbf{Calibrar la demanda de estrés mirando todos los
+cuellos de botella, no solo los semáforos.} El criterio heredado del
+corredor con demanda doble buscaba el factor que llena el enlace entre
+cruces. En la red, ese factor habría sido 2.5, pero la rotonda sin
+semáforo se satura mucho antes: desde 1.3 veces la demanda nominal sus
+ramales de un carril se llenan y cada vehículo que entra por ellos
+pierde entre 400 y 700~s que ningún semáforo puede evitar. El caso P4
+usa por eso 1.2 veces la demanda nominal. Todo escenario de estrés debe
+comprobar antes que la congestión que se mide la pueden resolver los
+controles que se comparan.
+% fuente: tabla por factor en la cabecera de plan2/red_alta.rou.xml
 
-\noindent\textbf{Trasladar el \textit{pipeline} al cruce real de
-Lima.} La importación desde OpenStreetMap y su limpieza están descritas
-en el Capítulo~III y no se han ejecutado. Conviene hacerlo cuando la
-formulación de la recompensa esté estabilizada, para no arrastrar al
-caso real un diseño que todavía se está corrigiendo. El escenario con
-demanda doble mostró que, muy por encima de la capacidad, ningún
-control mueve el \textit{throughput} porque todos sirven el máximo que
-admite el carril; para que esa meta discrimine, la demanda del caso
-real debe fijarse cerca de la capacidad, no muy por encima.
+\subsection*{Trabajo siguiente}
+
+\noindent\textbf{Cerrar las celdas pendientes y ajustar DQN y MAPPO por
+caso.} Al congelar los resultados, P1 a P5 tenían los ocho aprendices
+evaluados salvo la ablación con la recompensa de colas en P5, que no se
+corrió; es la única celda sin datos. Las otras cinco pendientes son de
+convergencia (recomendación anterior). DQN y MAPPO usan los
+hiperparámetros fijados en su prueba de humo en el cruce aislado. Un
+ajuste corto por caso, con las semillas de validación y no con las de
+evaluación, diría si la distancia de DQN a \emph{vecinos} (de 0.7 a
+6.0~s en cuatro de los cinco casos) es del algoritmo o de los
+hiperparámetros, y si MAPPO converge con más regularidad en las redes.
+La variante \emph{cambio}, que penaliza cada cambio de fase, quedó
+formulada y sin correr.
+% fuente: plan2/veredicto.csv (ql_colas P5 sin datos; convergio); plan2/evaluacion_<esc>_resumen.csv
+% (timeloss_prom de dqn_s4042 e ippo_vecinos publicada)
+
+\noindent\textbf{Priorizar P6 sobre P7.} En la malla de nueve cruces
+con demanda nominal ningún modelo supera al fijo coordinado en ajedrez; los
+que reciben mensajes lo igualan (conclusión~5). En el corredor, en
+cambio, la ganancia grande apareció cuando la demanda superó la
+capacidad y el fijo dejó de bastar (P2). P6, la misma malla con
+demanda alta, es el caso que puede decir si la coordinación aprendida
+supera a un fijo coordinado en una malla; P7 agrega tamaño y fases
+antes de haber contestado esa pregunta.
+
+\noindent\textbf{Presupuestar P6 y P7 con el costo medido.} Los tiempos
+se midieron en un AMD Ryzen 7 3700X de 8 núcleos y 16 hilos con 16~GB
+de memoria, sin GPU, con un hilo por entrenamiento y varios
+entrenamientos a la vez. La mediana del tiempo de reloj por episodio,
+según el modelo, fue de 5.1 a 8.5~s en P1, de 12.7 a 16.6~s en P2, de
+8.9 a 11.1~s en P3, de 9.8 a 12.1~s en P4 y de 23.5 a 30.7~s en P5;
+DQN es el más caro en P1, P3 y P5. Un entrenamiento de 200
+episodios, con sus validaciones, tardó entre 21 y 63 minutos por
+semilla base en P1 a P4 y entre 95 y 115 minutos en P5. Si la demanda
+alta encarece el episodio de la malla como en el corredor, donde
+duplicarla lo multiplicó por 2.3, un entrenamiento de P6 tardaría entre
+3.6 y 4.4~h por semilla base, del orden de 11 a 13~h de hilo por
+modelo con tres bases. P7 (dieciséis cruces con tres carriles y giro
+protegido) no se ha construido y su costo no se ha medido; al pasar de
+tres a nueve semáforos el episodio se encareció 2.7 veces, y con cuatro
+fases el tabular choca además con el techo de estados del cruce con
+giros protegidos. Estas cifras de P6 y P7 son estimaciones a partir de
+los tiempos medidos, no mediciones.
+% fuente: columna segundos de plan2/resultados_<esc>_<alg>_s<base>.csv (mediana por corrida; se
+% excluyen las corridas de confirmacion de ippo_spill en curso); duracion por trabajo: "tiempos" en
+% plan2/cola/estado.json (train_* de P1-P4: 1268 a 3788 s; train_malla3_*: 5704 a 6917 s);
+% P6 = 2.3 x duracion de P5 (estimacion)
+
+\noindent\textbf{Probar el término de \textit{spillback} donde puede
+actuar.} En las dos redes y en la malla el término nunca se activa, y
+en el corredor con demanda doble no mejora a \emph{vecinos}.
+Queda sin probar el rango intermedio: una demanda media en el corredor
+(entre 1.3 y 1.5 veces la nominal, donde la calibración encontró el
+enlace lleno en cero y en una de tres semillas) o un umbral más bajo
+que la mitad de las plazas en la red. Solo ahí se puede saber si el
+término aporta algo que la mensajería no aporte.
+
+\noindent\textbf{Entrenar la coordinación con un canal imperfecto.} Las
+políticas de U4 se entrenaron con mensajes instantáneos y, al
+evaluarlas con latencia o pérdida en la fase exploratoria, usaban el
+mensaje viejo como si fuera actual: el retraso global apenas cambiaba
+pero la progresión se deshacía. La edad del mensaje ya está en la
+observación; basta entrenar con latencia y pérdida aleatorias por
+episodio para que el agente aprenda a descontarla, y evaluar con el
+protocolo del plan. Es el paso previo a cualquier despliegue sobre una
+red de comunicación real.
+
+\noindent\textbf{Llevar el protocolo al cruce real de Lima.} La
+importación desde OpenStreetMap del cruce de la Av.\ Paseo de la
+República con la Av.\ 28 de Julio se hizo el 01.12.2025 con
+\texttt{osmWebWizard}, pero la red no se ha limpiado en
+\texttt{netedit}, su demanda es la aleatoria del asistente y no ha
+pasado por este protocolo. Conviene completarla con el mismo método de
+los casos P1 a P5: barrido del fijo, actuado con las mismas fases,
+tres semillas base y evaluación sobre las mismas semillas. La demanda
+del caso real debe fijarse cerca de la capacidad y no muy por encima,
+porque con demanda muy superior ningún control mueve el
+\textit{throughput}: todos sirven el máximo que admite el carril.
 
 \noindent\textbf{Evaluar con llegadas aleatorias.} Los escenarios
 actuales insertan los vehículos de forma equiespaciada, de modo que la

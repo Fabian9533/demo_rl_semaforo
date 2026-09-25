@@ -1,0 +1,20 @@
+% Generado por veredicto.py a partir de plan2/. No editar a mano.
+\begin{table}[H]
+\setstretch{1}
+\centering
+\scriptsize
+\setlength{\tabcolsep}{1.5pt}
+\begin{tabular}{llcrrrrrrcl}
+\toprule
+Caso & Escenario & Sem. & Carr. & \makecell{Dem.\\(veh/h)} & \makecell{Retraso\\(s/veh)} & \makecell{$\Delta$\\retraso\\vs fijo} & \makecell{$\Delta$\\retraso\\vs actuado} & \makecell{$\Delta$\\recompensa} & Conv. & Veredicto \\
+\midrule
+P1 & corredor & 2 & 1 & 1810 & \makecell[r]{19.84\\{}$\pm$ 0.17} & \makecell[r]{$-$6.8\,\%\\{}[$-$8.0,\,$-$5.8]\\$p$ $<$\,0.001} & \makecell[r]{$-$5.8\,\%\\{}[$-$6.7,\,$-$4.9]\\$p$ $<$\,0.001} & \makecell[r]{+7.0\,\%\\{}[5.9,\,8.3]\\$p$ $<$\,0.001} & \makecell[c]{sí\\{}(3/3)} & FUNCIONA \\
+P2 & corredor\_alta & 2 & 1 & 3620 & \makecell[r]{118.66\\{}$\pm$ 0.67} & \makecell[r]{$-$23.3\,\%\\{}[$-$23.9,\,$-$22.7]\\$p$ $<$\,0.001} & \makecell[r]{$-$4.4\,\%\\{}[$-$6.3,\,$-$2.6]\\$p$ $<$\,0.001} & \makecell[r]{+19.9\,\%\\{}[19.1,\,20.7]\\$p$ $<$\,0.001} & \makecell[c]{sí\\{}(2/3)} & FUNCIONA \\
+P3 & red & \makecell[c]{3\\{}+ rot.} & 2 & 2150 & \makecell[r]{19.81\\{}$\pm$ 0.11} & \makecell[r]{$-$8.8\,\%\\{}[$-$9.3,\,$-$8.2]\\$p$ $<$\,0.001} & \makecell[r]{$-$7.8\,\%\\{}[$-$8.4,\,$-$7.2]\\$p$ $<$\,0.001} & \makecell[r]{+15.6\,\%\\{}[15.2,\,16.0]\\$p$ $<$\,0.001} & \makecell[c]{sí\\{}(3/3)} & FUNCIONA \\
+P4 & red\_alta & \makecell[c]{3\\{}+ rot.} & 2 & 2580 & \makecell[r]{28.97\\{}$\pm$ 0.92} & \makecell[r]{$-$3.6\,\%\\{}[$-$5.0,\,$-$2.3]\\$p$ $<$\,0.001} & \makecell[r]{$-$3.6\,\%\\{}[$-$4.8,\,$-$2.4]\\$p$ $<$\,0.001} & \makecell[r]{+9.2\,\%\\{}[8.5,\,9.9]\\$p$ $<$\,0.001} & \makecell[c]{sí\\{}(3/3)} & MEJORA \\
+P5 & malla3 & 9 & 2 & 4350 & \makecell[r]{21.21\\{}$\pm$ 0.35} & \makecell[r]{+1.8\,\%\\{}[0.4,\,3.4]\\$p$ = 0.523} & \makecell[r]{$-$16.4\,\%\\{}[$-$17.6,\,$-$15.0]\\$p$ $<$\,0.001} & \makecell[r]{+7.3\,\%\\{}[5.3,\,9.0]\\$p$ $<$\,0.001} & \makecell[c]{sí\\{}(3/3)} & EMPATA \\
+\bottomrule
+\end{tabular}
+\caption[Veredicto de IPPO vecinos]{IPPO vecinos: veredicto por caso. Sem.: semáforos (rot.: más una rotonda); Carr.: carriles por sentido de la avenida; Dem.: demanda total. Retraso: media $\pm$ IC95\,\% sobre las semillas de evaluación 1001 a 1030; $\Delta$ con IC95\,\% bootstrap pareado y $p$ de Wilcoxon pareado. Política publicada = mediana de las tres semillas base por la validación (semillas 999 y 1999). $\Delta$ recompensa: cambio de la recompensa propia del modelo (ret\_retraso) frente a la del fijo, positivo = mejor. Conv.: si convergió la política publicada; entre paréntesis, cuántas de las tres bases convergen.}
+\label{tab:veredicto-ippo-vecinos}
+\end{table}

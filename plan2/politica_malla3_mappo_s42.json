@@ -1,0 +1,459 @@
+{
+ "escenario": "malla3",
+ "variante": "vecinos",
+ "algoritmo": "mappo",
+ "recompensa": "retraso",
+ "base": 42,
+ "episodios": 200,
+ "dim_obs": 53,
+ "n_id": 9,
+ "lados": [
+  "oeste",
+  "este",
+  "norte",
+  "sur"
+ ],
+ "ocultas": 64,
+ "hiper": {
+  "gamma": 0.95,
+  "lam": 0.95,
+  "clip": 0.2,
+  "epocas": 10,
+  "minibatch": 64,
+  "lr": 0.001,
+  "ent": 0.01,
+  "valor": 0.5,
+  "grad": 0.5
+ },
+ "w1": 1.0,
+ "w2": 0.01,
+ "w3": 2.0,
+ "w4": 2.0,
+ "escala_r": 0.02,
+ "fase_av": {
+  "semaforo_C11": 0,
+  "semaforo_C12": 0,
+  "semaforo_C13": 0,
+  "semaforo_C21": 0,
+  "semaforo_C22": 0,
+  "semaforo_C23": 0,
+  "semaforo_C31": 0,
+  "semaforo_C32": 0,
+  "semaforo_C33": 0
+ },
+ "vecinos": {
+  "semaforo_C11": {
+   "oeste": null,
+   "este": [
+    "semaforo_C12",
+    "C12_C11",
+    "C11_C12"
+   ],
+   "norte": null,
+   "sur": [
+    "semaforo_C21",
+    "C21_C11",
+    "C11_C21"
+   ]
+  },
+  "semaforo_C12": {
+   "oeste": [
+    "semaforo_C11",
+    "C11_C12",
+    "C12_C11"
+   ],
+   "este": [
+    "semaforo_C13",
+    "C13_C12",
+    "C12_C13"
+   ],
+   "norte": null,
+   "sur": [
+    "semaforo_C22",
+    "C22_C12",
+    "C12_C22"
+   ]
+  },
+  "semaforo_C13": {
+   "oeste": [
+    "semaforo_C12",
+    "C12_C13",
+    "C13_C12"
+   ],
+   "este": null,
+   "norte": null,
+   "sur": [
+    "semaforo_C23",
+    "C23_C13",
+    "C13_C23"
+   ]
+  },
+  "semaforo_C21": {
+   "oeste": null,
+   "este": [
+    "semaforo_C22",
+    "C22_C21",
+    "C21_C22"
+   ],
+   "norte": [
+    "semaforo_C11",
+    "C11_C21",
+    "C21_C11"
+   ],
+   "sur": [
+    "semaforo_C31",
+    "C31_C21",
+    "C21_C31"
+   ]
+  },
+  "semaforo_C22": {
+   "oeste": [
+    "semaforo_C21",
+    "C21_C22",
+    "C22_C21"
+   ],
+   "este": [
+    "semaforo_C23",
+    "C23_C22",
+    "C22_C23"
+   ],
+   "norte": [
+    "semaforo_C12",
+    "C12_C22",
+    "C22_C12"
+   ],
+   "sur": [
+    "semaforo_C32",
+    "C32_C22",
+    "C22_C32"
+   ]
+  },
+  "semaforo_C23": {
+   "oeste": [
+    "semaforo_C22",
+    "C22_C23",
+    "C23_C22"
+   ],
+   "este": null,
+   "norte": [
+    "semaforo_C13",
+    "C13_C23",
+    "C23_C13"
+   ],
+   "sur": [
+    "semaforo_C33",
+    "C33_C23",
+    "C23_C33"
+   ]
+  },
+  "semaforo_C31": {
+   "oeste": null,
+   "este": [
+    "semaforo_C32",
+    "C32_C31",
+    "C31_C32"
+   ],
+   "norte": [
+    "semaforo_C21",
+    "C21_C31",
+    "C31_C21"
+   ],
+   "sur": null
+  },
+  "semaforo_C32": {
+   "oeste": [
+    "semaforo_C31",
+    "C31_C32",
+    "C32_C31"
+   ],
+   "este": [
+    "semaforo_C33",
+    "C33_C32",
+    "C32_C33"
+   ],
+   "norte": [
+    "semaforo_C22",
+    "C22_C32",
+    "C32_C22"
+   ],
+   "sur": null
+  },
+  "semaforo_C33": {
+   "oeste": [
+    "semaforo_C32",
+    "C32_C33",
+    "C33_C32"
+   ],
+   "este": null,
+   "norte": [
+    "semaforo_C23",
+    "C23_C33",
+    "C33_C23"
+   ],
+   "sur": null
+  }
+ },
+ "cap": {
+  "W1_C11": 102,
+  "C12_C11": 74,
+  "N1_C11": 102,
+  "C21_C11": 74,
+  "C11_C12": 74,
+  "C13_C12": 74,
+  "N2_C12": 102,
+  "C22_C12": 74,
+  "C12_C13": 74,
+  "E1_C13": 102,
+  "N3_C13": 102,
+  "C23_C13": 74,
+  "W2_C21": 102,
+  "C22_C21": 74,
+  "C11_C21": 74,
+  "C31_C21": 74,
+  "C21_C22": 74,
+  "C23_C22": 74,
+  "C12_C22": 74,
+  "C32_C22": 74,
+  "C22_C23": 74,
+  "E2_C23": 102,
+  "C13_C23": 74,
+  "C33_C23": 74,
+  "W3_C31": 102,
+  "C32_C31": 74,
+  "C21_C31": 74,
+  "S1_C31": 102,
+  "C31_C32": 74,
+  "C33_C32": 74,
+  "C22_C32": 74,
+  "S2_C32": 102,
+  "C32_C33": 74,
+  "E3_C33": 102,
+  "C23_C33": 74,
+  "S3_C33": 102
+ },
+ "plazas": {
+  "C11_C12": 37,
+  "C11_C21": 37,
+  "C12_C11": 37,
+  "C12_C13": 37,
+  "C12_C22": 37,
+  "C13_C12": 37,
+  "C13_C23": 37,
+  "C21_C11": 37,
+  "C21_C22": 37,
+  "C21_C31": 37,
+  "C22_C12": 37,
+  "C22_C21": 37,
+  "C22_C23": 37,
+  "C22_C32": 37,
+  "C23_C13": 37,
+  "C23_C22": 37,
+  "C23_C33": 37,
+  "C31_C21": 37,
+  "C31_C32": 37,
+  "C32_C22": 37,
+  "C32_C31": 37,
+  "C32_C33": 37,
+  "C33_C23": 37,
+  "C33_C32": 37
+ },
+ "umbral_spillback": 0.9,
+ "latencia_entrenamiento": 0,
+ "perdida_entrenamiento": 0.0,
+ "val_seeds": [
+  999,
+  1999
+ ],
+ "eval_seed": 999,
+ "torch": "2.14.0+cpu",
+ "python": "3.14.6",
+ "sumo": "1.25.0",
+ "git": "590b182",
+ "features": [
+  "cola_o",
+  "cola_e",
+  "cola_n",
+  "cola_s",
+  "movil_o",
+  "movil_e",
+  "movil_n",
+  "movil_s",
+  "fase_0",
+  "fase_1",
+  "t_verde",
+  "puede_cambiar",
+  "id_C11",
+  "id_C12",
+  "id_C13",
+  "id_C21",
+  "id_C22",
+  "id_C23",
+  "id_C31",
+  "id_C32",
+  "id_C33",
+  "oeste_presente",
+  "oeste_verde_hacia_mi",
+  "oeste_ambar",
+  "oeste_t_fase",
+  "oeste_outflow",
+  "oeste_cola_alimentadora",
+  "oeste_cola_mi_salida",
+  "oeste_edad",
+  "este_presente",
+  "este_verde_hacia_mi",
+  "este_ambar",
+  "este_t_fase",
+  "este_outflow",
+  "este_cola_alimentadora",
+  "este_cola_mi_salida",
+  "este_edad",
+  "norte_presente",
+  "norte_verde_hacia_mi",
+  "norte_ambar",
+  "norte_t_fase",
+  "norte_outflow",
+  "norte_cola_alimentadora",
+  "norte_cola_mi_salida",
+  "norte_edad",
+  "sur_presente",
+  "sur_verde_hacia_mi",
+  "sur_ambar",
+  "sur_t_fase",
+  "sur_outflow",
+  "sur_cola_alimentadora",
+  "sur_cola_mi_salida",
+  "sur_edad"
+ ],
+ "critico_central": {
+  "entrada": 486,
+  "ocultas": 64,
+  "parametros": 35393,
+  "archivo": "critico_malla3_mappo_s42.pt"
+ },
+ "critico_local": "sin entrenar, no se usa (solo cuenta el actor)",
+ "ep_elegido": 80,
+ "val_elegido": 20.775,
+ "val_serie": [
+  [
+   10,
+   20.79,
+   20.76,
+   20.775
+  ],
+  [
+   20,
+   21.59,
+   23.55,
+   22.57
+  ],
+  [
+   30,
+   20.79,
+   20.76,
+   20.775
+  ],
+  [
+   40,
+   23.52,
+   24.25,
+   23.885
+  ],
+  [
+   50,
+   23.47,
+   21.59,
+   22.53
+  ],
+  [
+   60,
+   24.57,
+   23.02,
+   23.795
+  ],
+  [
+   70,
+   21.29,
+   20.76,
+   21.025
+  ],
+  [
+   80,
+   20.79,
+   20.76,
+   20.775
+  ],
+  [
+   90,
+   22.39,
+   22.69,
+   22.54
+  ],
+  [
+   100,
+   21.98,
+   22.35,
+   22.165
+  ],
+  [
+   110,
+   21.81,
+   21.79,
+   21.8
+  ],
+  [
+   120,
+   22.38,
+   22.7,
+   22.54
+  ],
+  [
+   130,
+   23.21,
+   23.7,
+   23.455
+  ],
+  [
+   140,
+   22.71,
+   23.37,
+   23.04
+  ],
+  [
+   150,
+   22.47,
+   22.09,
+   22.28
+  ],
+  [
+   160,
+   22.45,
+   22.53,
+   22.49
+  ],
+  [
+   170,
+   22.39,
+   22.34,
+   22.365
+  ],
+  [
+   180,
+   21.89,
+   22.06,
+   21.975
+  ],
+  [
+   190,
+   21.77,
+   21.71,
+   21.74
+  ],
+  [
+   200,
+   22.04,
+   21.6,
+   21.82
+  ]
+ ],
+ "eval_999_final": 22.04
+}

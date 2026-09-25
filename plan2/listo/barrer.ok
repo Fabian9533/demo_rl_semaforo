@@ -1,0 +1,9 @@
+barrer_fijo.py (plan v2) probado en copia privada, 24.09.2026:
+(a) corredor avenida 20 / transversal 10 / desfases 0-35, semillas 2001-2003, --procesos 4: las 8 filas
+    identicas digito a digito a barrido_corredor.csv del 06.09 (desplegado 0/15 = 20.5 s).
+    Barrido con extension (15x10 -> avenida 10..25 x transversal 10,15): 35 filas comunes con el
+    barrido del 06.09, 0 distintas; la extension de ejes funciona y se detiene con ganador interior.
+(b) red 3 configs --procesos 3 --instalar: 3 filas identicas a barrido_red.csv del 06.09; el red.add.xml
+    instalado carga en sumo -c red.sumocfg y reproduce 30.56 s (media 2001-2003). corredor_alta (2 configs)
+    identico al 06.09; red_alta (2 configs, --instalar) corre y el .add.xml instalado carga en sumo.
+Fase de avenida detectada del .net.xml: corredor 2, red 0 (igual a la verificada a mano).

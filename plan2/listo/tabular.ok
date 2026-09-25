@@ -1,0 +1,11 @@
+tabular: rl_corredor.py plan v2 listo 24.09.2026 (probado en copia privada).
+(a) Regresion: HEAD vs nuevo, train corredor seed 42, 3 ep, --eps-decay 0.9 --desde-cero (nuevo con
+    qlearning/colas/--eval-cada 0 y con --eval-cada 1): todas las columnas comunes identicas digito
+    a digito (timeloss, espera, recompensa_decision, cambios_fase, estados_q, epsilon, ...); la
+    validacion no toca el RNG; val_999 del ep 3 = eval_timeloss viejo (30.28).
+(b) baseline y actuado corredor s1001: timeloss 21.05 y 20.8 = evaluacion_corredor.csv.
+(c) sarsa y qlearning retraso, 3 ep, --eval-cada 1, corredor y red: CSV, 3 checkpoints, q_table
+    publicada (menor val) y meta; ret_* y val_* sin vacios. Tambien sarsa colas en corredor_alta
+    corriendo como la cola (python ../rl_corredor.py desde plan2/), demo --qtable y la llamada de
+    evaluar.py (correr_episodio demo con tripinfo y serie); rl_ippo importa bien.
+(d) red_alta: 1 episodio de train OK. malla3: bandera aun no existia (no probado).

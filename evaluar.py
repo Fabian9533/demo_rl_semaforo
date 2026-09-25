@@ -1,7 +1,31 @@
 """
 evaluar.py - Evaluacion final de un escenario con politica congelada y varias semillas.
 
-Uso:
+Modo del plan de pruebas v2 (un brazo por llamada, escribe un CSV parcial; ver plan2/ESPEC.md):
+  python ../evaluar.py --escenario E --brazo fijo --semillas 1001-1030 --salida parciales/eval_E_fijo.csv
+  (igual con --brazo actuado y --salida parciales/eval_E_actuado.csv)
+  python ../evaluar.py --escenario E --politica q_table_<tag>.json --semillas 1001-1030 --salida ...
+  python ../evaluar.py --escenario E --politica politica_<esc>_<var>_s<base>.pt --semillas ... --salida ...
+
+  El tipo de politica se decide por la extension y el meta:
+    .json  Q-tables (rl_corredor, o rl_semaforo en cruce/cruce2) con epsilon 0. Si existe
+           q_table_<tag>.meta.json el brazo es <alg>_s<base> (alg = ql, sarsa, ql_colas...
+           segun meta["algoritmo"] y meta["recompensa"]); sin meta es una Q-table vieja del
+           06.09 y el brazo se llama "rl", como en las evaluaciones anteriores.
+    .pt    se lee el meta <archivo>.json: "algoritmo" ausente o "ippo" -> rl_ippo con su
+           variante (brazo ippo_<variante>_s<base>); "dqn" -> rl_dqn (dqn_s<base>);
+           "mappo" -> rl_mappo (mappo_s<base>). rl_dqn y rl_mappo se importan solo si hacen falta.
+  Filas de salida: brazo, modelo, base, semilla, las METRICAS de siempre, los tres retornos
+  medidos cada segundo (ret_retraso, ret_colas, ret_spill; vacios si el modulo del control aun
+  no los devuelve) y vehiculos, recompensa y decisiones. El CSV se escribe en <salida>.tmp y se
+  renombra al terminar, asi consolidar.py nunca lee un parcial a medias. Por defecto --semillas
+  es 1001-1030 y --salida es parciales/eval_<esc>_<brazo>.csv.
+  El tripinfo de cada corrida es unico (tripinfo_eval_<esc>_<brazo>_<pid>.xml, para que varias
+  evaluaciones puedan correr en paralelo en la misma carpeta): el de la primera semilla se conserva
+  y da vehiculos_<esc>_<brazo>.csv; los de las demas semillas se borran tras leerlos. De la primera
+  semilla tambien quedan serie_<esc>_<brazo>_s<semilla>.csv y fases_<esc>_<brazo>_s<semilla>.csv.
+
+Modo antiguo (06.09.2026, se conserva sin cambios; escribe evaluacion_<esc>.csv y el resumen):
   python evaluar.py --escenario cruce [--semillas 1001-1010] [--brazos baseline,actuado,demo]
   python evaluar.py --escenario red --ippo politica_red_local_s42.pt,politica_red_vecinos_s42.pt
   python evaluar.py --escenario red --brazos "" --ippo politica_red_vecinos_s42.pt --latencia 5 --perdida 0.3
@@ -17,11 +41,18 @@ y las politicas IPPO de U4 (--ippo, una o varias). Escribe:
                                 el delta frente al actuado y frente al Q-learning
   vehiculos_<esc>_<brazo>.csv   una fila por vehiculo de la primera semilla (distribuciones)
   serie_<esc>_<brazo>_s<semilla>.csv y fases_<esc>_<brazo>_s<semilla>.csv, primera semilla
+En el modo antiguo --semillas vale 1001-1010 por defecto, como antes.
+
+Cambios del plan v2 (24.09.2026): modo --brazo/--politica/--salida con CSV parcial por brazo
+(la estadistica pasa a consolidar.py), carga por tipo de politica y meta, nombres de brazo
+<alg>_s<base>, columnas modelo/base/ret_*, tripinfo unico por proceso, escenarios del plan v2
+(los de rl_corredor.ESCENARIOS, que incluye escenarios_plan2).
 """
 import os
 import csv
 import copy
 import json
+import time
 import random
 import argparse
 import statistics
@@ -30,6 +61,7 @@ import numpy as np
 from scipy import stats
 
 import comun
+import rl_corredor
 
 METRICAS = ["timeloss_prom", "espera_prom", "cola_prom", "cola_max", "paradas_prom",
             "throughput", "co2_prom", "nox_prom", "recompensa_decision", "cambios_fase",
@@ -40,7 +72,14 @@ METRICAS = ["timeloss_prom", "espera_prom", "cola_prom", "cola_max", "paradas_pr
             "spillback_tasa", "spillback_seg", "spillback_eventos", "cola_max_enlace", "veh_max_enlace"]
 NOMBRE_BRAZO = {"baseline": "fijo", "actuado": "actuado", "demo": "rl"}
 ORDEN_BRAZOS = ["fijo", "actuado", "rl"]
-ESCENARIOS = ["cruce", "cruce2", "corredor", "red", "corredor_alta"]
+ESCENARIOS = ["cruce", "cruce2"] + list(rl_corredor.ESCENARIOS)
+
+# Plan v2: columnas del CSV parcial
+ID_V2 = ["brazo", "modelo", "base", "semilla"]
+METRICAS_V2 = METRICAS + ["ret_retraso", "ret_colas", "ret_spill", "vehiculos", "recompensa", "decisiones"]
+MODO_REFERENCIA = {"fijo": "baseline", "actuado": "actuado"}
+# meta["algoritmo"] de rl_corredor -> etiqueta del modelo (ESPEC seccion 2)
+ALG_TABULAR = {"qlearning": "ql", "q-learning": "ql", "ql": "ql", "sarsa": "sarsa"}
 
 
 def rango(texto):
@@ -50,7 +89,7 @@ def rango(texto):
     return [int(x) for x in texto.split(",")]
 
 
-def preparar(escenario):
+def configurar(escenario):
     """Carga el modulo que corresponde y fija sus variables globales para el escenario."""
     if escenario in ("cruce", "cruce2"):
         import rl_semaforo as mod
@@ -59,12 +98,18 @@ def preparar(escenario):
         mod.TLS = mod.ESCENARIOS[escenario]["tls"]
         mod.APROX = mod.ESCENARIOS[escenario]["aprox"]
     else:
-        import rl_corredor as mod
+        mod = rl_corredor
         mod.ESCENARIO = escenario
         mod.CFG = mod.ESCENARIOS[escenario]["cfg"]
         mod.SEMAFOROS = mod.ESCENARIOS[escenario]["semaforos"]
         mod.ENLACES = mod.ESCENARIOS[escenario]["enlaces"]
         mod.FLUJOS_CORREDOR = mod.ESCENARIOS[escenario]["flujos_corredor"]
+    return mod
+
+
+def preparar(escenario):
+    """Modo antiguo: modulo del escenario y la Q-table q_table_<esc>.json si existe."""
+    mod = configurar(escenario)
     Q = None
     if os.path.exists(f"q_table_{escenario}.json"):
         with open(f"q_table_{escenario}.json") as f:
@@ -119,18 +164,161 @@ def guardar_vehiculos(esc, nombre, tripinfo):
         w.writerows(vehiculos)
 
 
+# ---------------- Plan v2: un brazo por llamada ----------------
+def leer_json(ruta):
+    with open(ruta, encoding="utf-8") as f:
+        return json.load(f)
+
+
+def brazo_referencia(esc, brazo):
+    """fijo o actuado: (brazo, modelo, base, correr)."""
+    mod = configurar(esc)
+
+    def correr(semilla, tripinfo, serie):
+        return mod.correr_episodio(MODO_REFERENCIA[brazo], {}, 0.0, False, 0, semilla,
+                                   tripinfo=tripinfo, serie=serie)
+    return brazo, brazo, "", correr
+
+
+def brazo_tabular(esc, ruta):
+    """Q-tables de rl_corredor (o rl_semaforo) jugadas con epsilon 0, como el brazo rl de antes."""
+    Q = leer_json(ruta)
+    ruta_meta = ruta[:-len(".json")] + ".meta.json"
+    if os.path.exists(ruta_meta):
+        meta = leer_json(ruta_meta)
+        modelo = ALG_TABULAR.get(meta.get("algoritmo", "qlearning"), meta.get("algoritmo"))
+        if meta.get("recompensa", "retraso") != "retraso":
+            modelo += "_" + meta["recompensa"]
+        base = meta["base"]
+        brazo = f"{modelo}_s{base}"
+        if meta.get("escenario", esc) != esc:
+            print(f"AVISO: {ruta} se entreno en {meta['escenario']} y se evalua en {esc}")
+    else:
+        brazo = modelo = "rl"      # Q-table vieja (06.09), sin meta
+        base = ""
+    mod = configurar(esc)
+
+    def correr(semilla, tripinfo, serie):
+        # copia por corrida: en demo setdefault agrega estados nuevos a la Q-table
+        return mod.correr_episodio("demo", copy.deepcopy(Q), 0.0, False, 0, semilla,
+                                   tripinfo=tripinfo, serie=serie)
+    return brazo, modelo, base, correr
+
+
+def brazo_profundo(esc, ruta, latencia, perdida):
+    """Politicas de torch (.pt) de rl_ippo, rl_dqn o rl_mappo segun meta["algoritmo"]."""
+    import rl_ippo
+    meta = leer_json(ruta[:-len(".pt")] + ".json")
+    alg = meta.get("algoritmo", "ippo")
+    rl_ippo.preparar(esc)       # geometria del escenario (la usan tambien rl_dqn y rl_mappo)
+    canal = {"latencia": latencia, "perdida": perdida} if latencia or perdida else {}
+    if alg == "ippo":
+        politica, meta = rl_ippo.Politica.cargar(ruta)
+        modelo = "ippo_" + meta["variante"]
+
+        def correr(semilla, tripinfo, serie):
+            return rl_ippo.correr_episodio("demo", politica, False, 0, semilla, tripinfo=tripinfo,
+                                           serie=serie, latencia=latencia, perdida=perdida,
+                                           variante=meta["variante"])
+    elif alg in ("dqn", "mappo"):
+        import importlib
+        mod = importlib.import_module("rl_" + alg)
+        if hasattr(mod, "preparar"):
+            mod.preparar(esc)
+        modelo = alg
+        if hasattr(mod, "cargar"):
+            politica, meta = mod.cargar(ruta)
+
+            def correr(semilla, tripinfo, serie):
+                return mod.correr_episodio("demo", politica, False, 0, semilla, tripinfo=tripinfo,
+                                           serie=serie, **canal)
+        else:
+            # MAPPO guardado como Politica de rl_ippo: se juega su actor con la variante del meta
+            politica, meta = rl_ippo.Politica.cargar(ruta)
+            variante = meta.get("variante", "vecinos")
+
+            def correr(semilla, tripinfo, serie):
+                return rl_ippo.correr_episodio("demo", politica, False, 0, semilla, tripinfo=tripinfo,
+                                               serie=serie, latencia=latencia, perdida=perdida,
+                                               variante=variante)
+    else:
+        raise SystemExit(f"{ruta}: algoritmo desconocido en el meta: {alg}")
+    if meta.get("escenario", esc) != esc:
+        print(f"AVISO: {ruta} se entreno en {meta['escenario']} y se evalua en {esc}")
+    base = meta.get("base", "")
+    brazo = f"{modelo}_s{base}" if base != "" else modelo
+    if latencia or perdida:
+        brazo += f"_L{latencia}p{int(round(perdida * 100))}"
+    return brazo, modelo, base, correr
+
+
+def main_v2(args):
+    esc = args.escenario
+    semillas = rango(args.semillas or "1001-1030")
+    if args.brazo:
+        brazo, modelo, base, correr = brazo_referencia(esc, args.brazo)
+    elif args.politica.endswith(".json"):
+        brazo, modelo, base, correr = brazo_tabular(esc, args.politica)
+    elif args.politica.endswith(".pt"):
+        brazo, modelo, base, correr = brazo_profundo(esc, args.politica, args.latencia, args.perdida)
+    else:
+        raise SystemExit(f"--politica debe ser .json (tabular) o .pt: {args.politica}")
+    salida = args.salida or os.path.join("parciales", f"eval_{esc}_{brazo}.csv")
+    if os.path.dirname(salida):
+        os.makedirs(os.path.dirname(salida), exist_ok=True)
+    print(f"Evaluando {brazo} (modelo {modelo}) en {esc}, {len(semillas)} semillas "
+          f"{semillas[0]}-{semillas[-1]} -> {salida}", flush=True)
+
+    tripinfo_primera = f"tripinfo_eval_{esc}_{brazo}_{os.getpid()}.xml"
+    temporal = salida + ".tmp"
+    with open(temporal, "w", newline="") as f:
+        w = csv.DictWriter(f, fieldnames=ID_V2 + METRICAS_V2, extrasaction="ignore")
+        w.writeheader()
+        for i, semilla in enumerate(semillas):
+            random.seed(semilla)      # el desempate de acciones de las Q-tables usa random
+            primera = i == 0
+            tripinfo = tripinfo_primera if primera else tripinfo_primera.replace(".xml", f"_s{semilla}.xml")
+            serie = f"serie_{esc}_{brazo}_s{semilla}.csv" if primera else None
+            t0 = time.time()
+            res = correr(semilla, tripinfo, serie)
+            if primera:
+                guardar_vehiculos(esc, brazo, tripinfo)
+            elif os.path.exists(tripinfo):
+                os.remove(tripinfo)
+            w.writerow({"brazo": brazo, "modelo": modelo, "base": base, "semilla": semilla,
+                        **{m: res.get(m, "") for m in METRICAS_V2}})
+            f.flush()
+            print(f"{brazo:18s} semilla {semilla}: timeLoss={res['timeloss_prom']:6.2f}  "
+                  f"espera={res['espera_prom']:6.2f}  ret_retraso={res.get('ret_retraso', '')}  "
+                  f"{time.time() - t0:.1f}s", flush=True)
+    os.replace(temporal, salida)
+    print(f"Escrito {salida}")
+
+
+# ---------------- Modo antiguo (06.09.2026) ----------------
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--escenario", choices=ESCENARIOS, default="cruce")
-    ap.add_argument("--semillas", default="1001-1010")
+    ap.add_argument("--semillas", default=None,
+                    help="p. ej. 1001-1030 o 1001,1005 (por defecto 1001-1030; 1001-1010 en el modo antiguo)")
+    ap.add_argument("--brazo", choices=["fijo", "actuado"], default=None, help="plan v2: brazo de referencia")
+    ap.add_argument("--politica", default=None, help="plan v2: q_table_<tag>.json o politica_*.pt")
+    ap.add_argument("--salida", default=None, help="plan v2: CSV parcial (parciales/eval_<esc>_<brazo>.csv)")
     ap.add_argument("--brazos", default="baseline,actuado,demo",
-                    help="controles de rl_semaforo/rl_corredor a correr (vacio para ninguno)")
-    ap.add_argument("--ippo", default="", help="politicas IPPO (.pt) separadas por coma")
+                    help="modo antiguo: controles de rl_semaforo/rl_corredor a correr (vacio para ninguno)")
+    ap.add_argument("--ippo", default="", help="modo antiguo: politicas IPPO (.pt) separadas por coma")
     ap.add_argument("--latencia", type=int, default=0, help="latencia del canal para los brazos IPPO")
     ap.add_argument("--perdida", type=float, default=0.0, help="perdida de mensajes para los brazos IPPO")
     args = ap.parse_args()
+    if args.brazo and args.politica:
+        ap.error("--brazo y --politica son excluyentes")
+    if args.brazo or args.politica:
+        if args.ippo:
+            ap.error("--ippo es del modo antiguo; en el plan v2 use --politica")
+        main_v2(args)
+        return
     esc = args.escenario
-    semillas = rango(args.semillas)
+    semillas = rango(args.semillas or "1001-1010")
     brazos = [b for b in args.brazos.split(",") if b]
     politicas = [p for p in args.ippo.split(",") if p]
     mod, Q = preparar(esc)

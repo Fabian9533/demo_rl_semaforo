@@ -1,0 +1,20 @@
+% Generado por veredicto.py a partir de plan2/. No editar a mano.
+\begin{table}[H]
+\setstretch{1}
+\centering
+\scriptsize
+\setlength{\tabcolsep}{1.5pt}
+\begin{tabular}{llcrrrrrrcl}
+\toprule
+Caso & Escenario & Sem. & Carr. & \makecell{Dem.\\(veh/h)} & \makecell{Retraso\\(s/veh)} & \makecell{$\Delta$\\retraso\\vs fijo} & \makecell{$\Delta$\\retraso\\vs actuado} & \makecell{$\Delta$\\recompensa} & Conv. & Veredicto \\
+\midrule
+P1 & corredor & 2 & 1 & 1810 & \makecell[r]{23.26\\{}$\pm$ 0.15} & \makecell[r]{+9.2\,\%\\{}[7.8,\,10.5]\\$p$ $<$\,0.001} & \makecell[r]{+10.4\,\%\\{}[9.4,\,11.3]\\$p$ $<$\,0.001} & \makecell[r]{$-$11.6\,\%\\{}[$-$13.0,\,$-$10.0]\\$p$ $<$\,0.001} & \makecell[c]{sí\\{}(1/3)} & FALLA \\
+P2 & corredor\_alta & 2 & 1 & 3620 & \makecell[r]{141.14\\{}$\pm$ 1.80} & \makecell[r]{$-$8.8\,\%\\{}[$-$9.9,\,$-$7.5]\\$p$ $<$\,0.001} & \makecell[r]{+13.7\,\%\\{}[11.5,\,15.9]\\$p$ $<$\,0.001} & \makecell[r]{+6.5\,\%\\{}[5.0,\,7.8]\\$p$ $<$\,0.001} & \makecell[c]{sí\\{}(1/3)} & MEJORA \\
+P3 & red & \makecell[c]{3\\{}+ rot.} & 2 & 2150 & \makecell[r]{24.41\\{}$\pm$ 0.24} & \makecell[r]{+12.4\,\%\\{}[11.5,\,13.6]\\$p$ $<$\,0.001} & \makecell[r]{+13.6\,\%\\{}[12.5,\,14.9]\\$p$ $<$\,0.001} & \makecell[r]{$-$11.9\,\%\\{}[$-$13.3,\,$-$10.9]\\$p$ $<$\,0.001} & \makecell[c]{sí\\{}(2/3)} & FALLA \\
+P4 & red\_alta & \makecell[c]{3\\{}+ rot.} & 2 & 2580 & \makecell[r]{33.03\\{}$\pm$ 0.99} & \makecell[r]{+9.9\,\%\\{}[8.0,\,11.9]\\$p$ $<$\,0.001} & \makecell[r]{+10.0\,\%\\{}[8.3,\,11.7]\\$p$ $<$\,0.001} & \makecell[r]{$-$11.2\,\%\\{}[$-$12.1,\,$-$10.4]\\$p$ $<$\,0.001} & \makecell[c]{no\\{}(2/3)} & \makecell[l]{PENDIENTE\\{}(no convergió;\\{}provisional:\\{}FALLA)} \\
+P5 & malla3 & 9 & 2 & 4350 & \makecell[r]{29.69\\{}$\pm$ 0.09} & \makecell[r]{+42.5\,\%\\{}[42.0,\,43.0]\\$p$ $<$\,0.001} & \makecell[r]{+17.0\,\%\\{}[16.4,\,17.6]\\$p$ $<$\,0.001} & \makecell[r]{$-$34.1\,\%\\{}[$-$34.6,\,$-$33.6]\\$p$ $<$\,0.001} & \makecell[c]{sí\\{}(3/3)} & FALLA \\
+\bottomrule
+\end{tabular}
+\caption[Veredicto de Q-learning]{Q-learning: veredicto por caso. Sem.: semáforos (rot.: más una rotonda); Carr.: carriles por sentido de la avenida; Dem.: demanda total. Retraso: media $\pm$ IC95\,\% sobre las semillas de evaluación 1001 a 1030; $\Delta$ con IC95\,\% bootstrap pareado y $p$ de Wilcoxon pareado. Política publicada = mediana de las tres semillas base por la validación (semillas 999 y 1999). $\Delta$ recompensa: cambio de la recompensa propia del modelo (ret\_retraso) frente a la del fijo, positivo = mejor. Conv.: si convergió la política publicada; entre paréntesis, cuántas de las tres bases convergen.}
+\label{tab:veredicto-ql}
+\end{table}

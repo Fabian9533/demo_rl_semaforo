@@ -1,0 +1,263 @@
+{
+ "escenario": "red",
+ "variante": "vecinos",
+ "algoritmo": "mappo",
+ "recompensa": "retraso",
+ "base": 2042,
+ "episodios": 200,
+ "dim_obs": 31,
+ "n_id": 3,
+ "lados": [
+  "oeste",
+  "este"
+ ],
+ "ocultas": 64,
+ "hiper": {
+  "gamma": 0.95,
+  "lam": 0.95,
+  "clip": 0.2,
+  "epocas": 10,
+  "minibatch": 64,
+  "lr": 0.001,
+  "ent": 0.01,
+  "valor": 0.5,
+  "grad": 0.5
+ },
+ "w1": 1.0,
+ "w2": 0.01,
+ "w3": 2.0,
+ "w4": 2.0,
+ "escala_r": 0.02,
+ "fase_av": {
+  "semaforo_C1": 0,
+  "semaforo_C2": 0,
+  "semaforo_C3": 0
+ },
+ "vecinos": {
+  "semaforo_C1": {
+   "oeste": null,
+   "este": [
+    "semaforo_C2",
+    "C2_C1",
+    "C1_C2"
+   ]
+  },
+  "semaforo_C2": {
+   "oeste": [
+    "semaforo_C1",
+    "C1_C2",
+    "C2_C1"
+   ],
+   "este": [
+    "semaforo_C3",
+    "C3_C2",
+    "C2_C3"
+   ]
+  },
+  "semaforo_C3": {
+   "oeste": [
+    "semaforo_C2",
+    "C2_C3",
+    "C3_C2"
+   ],
+   "este": null
+  }
+ },
+ "cap": {
+  "RE_C1": 72,
+  "C2_C1": 76,
+  "N1_C1": 38,
+  "S1_C1": 38,
+  "C1_C2": 76,
+  "C3_C2": 76,
+  "N2_C2": 38,
+  "S2_C2": 38,
+  "C2_C3": 76,
+  "E_C3": 104,
+  "N3_C3": 38,
+  "S3_C3": 38
+ },
+ "plazas": {
+  "C1_C2": 38,
+  "C2_C1": 38,
+  "C2_C3": 38,
+  "C3_C2": 38
+ },
+ "umbral_spillback": 0.9,
+ "latencia_entrenamiento": 0,
+ "perdida_entrenamiento": 0.0,
+ "val_seeds": [
+  999,
+  1999
+ ],
+ "eval_seed": 999,
+ "torch": "2.14.0+cpu",
+ "python": "3.14.6",
+ "sumo": "1.25.0",
+ "git": "590b182",
+ "features": [
+  "cola_o",
+  "cola_e",
+  "cola_n",
+  "cola_s",
+  "movil_o",
+  "movil_e",
+  "movil_n",
+  "movil_s",
+  "fase_0",
+  "fase_1",
+  "t_verde",
+  "puede_cambiar",
+  "id_C1",
+  "id_C2",
+  "id_C3",
+  "oeste_presente",
+  "oeste_verde_hacia_mi",
+  "oeste_ambar",
+  "oeste_t_fase",
+  "oeste_outflow",
+  "oeste_cola_alimentadora",
+  "oeste_cola_mi_salida",
+  "oeste_edad",
+  "este_presente",
+  "este_verde_hacia_mi",
+  "este_ambar",
+  "este_t_fase",
+  "este_outflow",
+  "este_cola_alimentadora",
+  "este_cola_mi_salida",
+  "este_edad"
+ ],
+ "critico_central": {
+  "entrada": 96,
+  "ocultas": 64,
+  "parametros": 10433,
+  "archivo": "critico_red_mappo_s2042.pt"
+ },
+ "critico_local": "sin entrenar, no se usa (solo cuenta el actor)",
+ "ep_elegido": 90,
+ "val_elegido": 19.69,
+ "val_serie": [
+  [
+   10,
+   21.22,
+   21.36,
+   21.29
+  ],
+  [
+   20,
+   21.75,
+   21.79,
+   21.77
+  ],
+  [
+   30,
+   21.63,
+   21.36,
+   21.495
+  ],
+  [
+   40,
+   21.92,
+   21.79,
+   21.855
+  ],
+  [
+   50,
+   21.51,
+   22.05,
+   21.78
+  ],
+  [
+   60,
+   19.49,
+   19.89,
+   19.69
+  ],
+  [
+   70,
+   21.28,
+   21.12,
+   21.2
+  ],
+  [
+   80,
+   21.31,
+   21.48,
+   21.395
+  ],
+  [
+   90,
+   19.49,
+   19.89,
+   19.69
+  ],
+  [
+   100,
+   19.49,
+   20.95,
+   20.22
+  ],
+  [
+   110,
+   21.1,
+   21.99,
+   21.545
+  ],
+  [
+   120,
+   21.53,
+   21.49,
+   21.51
+  ],
+  [
+   130,
+   21.63,
+   21.56,
+   21.595
+  ],
+  [
+   140,
+   21.92,
+   21.97,
+   21.945
+  ],
+  [
+   150,
+   21.7,
+   21.32,
+   21.51
+  ],
+  [
+   160,
+   21.96,
+   21.73,
+   21.845
+  ],
+  [
+   170,
+   21.67,
+   21.7,
+   21.685
+  ],
+  [
+   180,
+   21.77,
+   21.71,
+   21.74
+  ],
+  [
+   190,
+   21.92,
+   21.96,
+   21.94
+  ],
+  [
+   200,
+   21.86,
+   21.87,
+   21.865
+  ]
+ ],
+ "eval_999_final": 21.86
+}

@@ -1,0 +1,19 @@
+<additional>
+    <!-- Programa fijo del plan v2 para corredor_alta, instalado por barrer_fijo.py. Malla barrida: verde
+         de avenida (E-O) 15/20/25/30/35 s x verde transversal (N-S) 10/15/20/25 s x desfase del segundo
+         cruce en 0, 10, 20, 25 y 30 s; 100 configuraciones con las semillas 2001-2003. Ganador: avenida
+         25 s, transversal 15 s, ciclo 46 s, desfases 0/25; retraso 152.13 s (sd 4.73) sobre esas
+         semillas. -->
+    <tlLogic id="semaforo_C1" type="static" programID="fijo" offset="0">
+        <phase duration="15" state="GGgrrrGGgrrr"/>
+        <phase duration="3" state="yyyrrryyyrrr"/>
+        <phase duration="25" state="rrrGGgrrrGGg"/>
+        <phase duration="3" state="rrryyyrrryyy"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C2" type="static" programID="fijo" offset="25">
+        <phase duration="15" state="GGgrrrGGgrrr"/>
+        <phase duration="3" state="yyyrrryyyrrr"/>
+        <phase duration="25" state="rrrGGgrrrGGg"/>
+        <phase duration="3" state="rrryyyrrryyy"/>
+    </tlLogic>
+</additional>

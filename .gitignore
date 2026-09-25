@@ -18,3 +18,9 @@ __pycache__/
 *.fdb_latexmk
 *.fls
 TESIS/main.pdf
+
+# Plan de pruebas v2 (25.09.2026): salidas pesadas que se regeneran con la cola
+plan2/tripinfo_*.xml
+plan2/checkpoints/
+plan2/tmp_barrido_*/
+plan2/cola/estado.json.tmp

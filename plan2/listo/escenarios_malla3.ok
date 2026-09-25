@@ -1,0 +1,10 @@
+escenarios: malla3 (P5) listo 24.09.2026.
+Malla 3x3 (C11..C33, fila 1 al norte), 300 m entre cruces, brazos de 400 m, 2 carriles por sentido,
+13.89 m/s, netconvert --no-turnarounds --tls.green.time 20 (linea en build_net.bat; reproducible).
+Cada tlLogic del .net.xml: 2 verdes (N-S fase 0, E-O fase 2) y 2 ambar de 3 s. Demanda 1.0x = 4350 veh/h
+por periodo, 48 flows; los de punta a punta de la fila 2 se llaman p1_W_E, p1_E_W, p2_W_E, p2_E_W.
+malla3.add.xml: fijo ajedrez E-O 22 / N-S 15, programID "fijo", FASE 0 = E-O (el prototipo tenia E-O
+y N-S cruzados; corregido). Registro: ESCENARIOS_RC, VECINOS (4 lados, simetria comprobada), LADOS.
+Probado en copia privada con rl_corredor (semillas 2001-2003): fijo 21.65/21.51/21.59 s, actuado
+25.51/25.13/25.43 s, 0 sin terminar, 4350 vehiculos, cola_max_enlace 2-4 (plazas 37); 31-40 s de reloj
+por episodio con la maquina cargada; train de 1 episodio con 9 agentes Q-learning corre.

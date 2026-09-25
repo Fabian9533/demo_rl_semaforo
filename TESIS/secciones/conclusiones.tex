@@ -1,98 +1,324 @@
 \customchapter{CONCLUSIONES}
 
-Esta fase del trabajo implementó y evaluó las cuatro unidades de la
-arquitectura propuesta: la construcción del entorno de simulación, un
-agente de control semafórico basado en Q-learning tabular, la
-instrumentación de las métricas de desempeño y la coordinación
-distribuida entre semáforos con IPPO y mensajería entre vecinos, sobre
-cinco escenarios sintéticos de complejidad creciente y con un
-protocolo de evaluación que compara todos los controles sobre las
-mismas diez semillas. De los resultados del
-Capítulo~\ref{cap:resultados} se desprenden las siguientes
-conclusiones.
+Esta fase del trabajo implementó las cuatro unidades de la arquitectura
+propuesta y las evaluó con el plan de pruebas de la
+Sección~\ref{sec:plan2}, aprobado por el asesor el 23.09.2026. El plan
+aplica el mismo método a cada caso: los mismos modelos, la misma
+recompensa de retraso para todos los aprendices salvo la ablación con
+la recompensa de colas, 200 episodios con tres semillas base, la
+política publicada elegida por validación con semillas propias, el
+programa fijo tuneado en cada caso y una evaluación final sobre las
+mismas treinta semillas para todos los controles, con las mismas
+métricas de salida. Un veredicto prefijado (FUNCIONA, MEJORA, EMPATA,
+FALLA o PENDIENTE) resume cada celda
+(Tabla~\ref{tab:veredicto-matriz}). De los siete casos del plan
+quedaron desarrollados cinco, P1 a P5, con el tiempo fijo, el actuado y
+ocho aprendices: Q-learning y SARSA tabulares, Q-learning con la
+recompensa de colas, DQN, las tres variantes de IPPO y MAPPO. La
+ablación con la recompensa de colas no se corrió en P5. Seis de las
+cuarenta celdas de aprendices quedan PENDIENTE: cinco porque la
+política publicada no convergió y una por falta de datos. De esos
+veredictos se desprenden las seis primeras conclusiones.
+% fuente: plan2/veredicto.csv y plan2/veredicto.md (veredicto.py; resultados congelados el
+% 25.09.2026 a las 03:55, copia en plan2/veredicto_congelado_0355.csv y .md)
+% celdas sin veredicto firme: ql P4, ql_colas P2, dqn P5, mappo P3 y P4 (no convergio); ql_colas P5 (sin datos)
 
-\noindent\textbf{1. El agente tabular no alcanza las metas planteadas y
-solo mejora al control de tiempo fijo en el escenario más simple.} Con
-la política congelada y diez semillas de evaluación, el retraso
-promedio por vehículo baja un 6.4\,\% en el cruce de dos fases y sube
-un 15\,\% en la red, un 17\,\% en el cruce con giros protegidos y un
-60\,\% en el corredor, los dos últimos frente a fijos con el reparto de
-verde tuneado;
-con la demanda doble el agente se degrada hasta un 37\,\% por encima del        
-fijo y deja vehículos sin terminar. La meta declarada
-de una reducción del 25 al 40\,\% no se cumple en ningún caso. La
-reducción de colas del 20\,\% se alcanza únicamente en el cruce simple
-y en la media, con un intervalo de confianza que no excluye ese umbral.
+\noindent\textbf{1. IPPO con mensajería entre vecinos es el único modelo
+con veredicto firme en los cinco casos que no falla en ninguno, y
+supera al actuado en todos.} Frente al fijo tuneado de cada caso, la
+variante \emph{vecinos} reduce el retraso por vehículo un 6.8\,\% en el
+corredor (P1), un 23.3\,\% en el corredor con demanda doble (P2) y un
+8.8\,\% en la red de tres cruces (P3), con intervalos al 95\,\% enteros
+por debajo de cero; en los tres el veredicto es FUNCIONA. En la red con
+demanda alta (P4) la reducción es del 3.6\,\%, significativa pero por
+debajo del umbral del 5\,\%, y el veredicto es MEJORA. En la malla de
+nueve cruces (P5) empata con el fijo coordinado en ajedrez: 21.21~s frente a
+20.84~s, un $+1.8$\,\% con un intervalo \textit{bootstrap} de $+0.4$ a
+$+3.4$\,\% pero sin significancia en la prueba pareada ($p = 0.52$). En
+los cinco casos el retraso queda por debajo del actuado: entre un 3.6 y
+un 7.8\,\% en P1 a P4 y un 16.4\,\% en P5, siempre con $p < 0.001$. IPPO
+\emph{spill}, que en P3, P4 y P5 es la misma política
+(conclusión~2), comparte esos veredictos. Las tres bases convergen en
+P1, P3, P4 y P5, y dos de tres en P2. El resultado de P3 es, sin
+embargo, frágil: las dos bases que lo alcanzan publicaron un
+\textit{checkpoint} aislado (episodios 40 y 50 de 200, con 19.69~s de
+validación frente a 21.29~s o más en las otras diecinueve validaciones
+de cada serie), y la tercera base queda igual al fijo ($-0.1$\,\%). La
+evaluación con semillas ajenas confirma que esa política existe, pero
+el entrenamiento no se queda en ella.
+% fuente: plan2/veredicto.csv (ippo_vecinos, P1-P5: delta_fijo, ic_fijo, p_fijo, delta_act,
+% p_act, convergen); plan2/evaluacion_malla3_resumen.csv (fijo 20.8387, ippo_vecinos_s2042 21.212);
+% plan2/evaluacion_red_resumen.csv (ippo_vecinos_s2042); plan2/politica_red_vecinos_s42.json y
+% _s4042.json (val_serie, ep_elegido)
 
-\noindent\textbf{2. La función de recompensa no está alineada con la
-métrica que la tesis declara como primaria.} La recompensa penaliza
-vehículos detenidos y su tiempo de espera, y el agente solo consigue
-mejorarla en el escenario más simple: un 26\,\% frente al fijo en el
-cruce de dos fases, mientras la empeora en los otros cuatro. Y aun
-donde la mejora, la ganancia no se traslada a la meta, que se formula
-sobre el retraso e incluye además frenadas y aceleraciones. La
-consecuencia es medible: en
-el cruce simple la espera detenida baja un 26\,\% mientras el retraso
-solo baja un 6\,\%, y en la red la espera sube un 4\,\% mientras el
-retraso sube un 15\,\%. El agente aprende a cortar el verde con
-frecuencia, hasta un 77\,\% más de cambios de fase que el control fijo,
-lo que fragmenta las colas pero aumenta las paradas por vehículo en los
-cinco escenarios. Optimizar una señal correlacionada con el objetivo
-no equivale a optimizar el objetivo. El módulo U4 confirma el
-diagnóstico por la vía contraria: con la misma estructura de recompensa
-pero midiendo el retraso por segundo en lugar de los vehículos
-detenidos, el agente deja de fragmentar las colas y las paradas por
-vehículo bajan en tres de los cuatro escenarios donde se probó.
+\noindent\textbf{2. Lo que separa funcionar de fallar es la información
+del vecino; el término de \textit{spillback} no añade nada.} La variante
+\emph{local}, con el mismo algoritmo, la misma recompensa y los mismos
+hiperparámetros pero sin mensajes, empata con el fijo en P1
+($-0.5$\,\%) y falla en P3, P4 y P5 ($+2.3$, $+2.9$ y $+25.9$\,\%).
+Solo funciona en P2 ($-22.8$\,\%), donde también funciona el actuado
+($-19.8$\,\%): cuando la demanda del corredor supera la capacidad de un
+carril, reaccionar a la cola local basta para ganar cerca de un
+20\,\%, y con demanda nominal el fijo tuneado ya coordina una onda
+verde que solo iguala o supera un agente que ve al vecino. En cada uno
+de los cinco casos, la peor de las tres bases de \emph{vecinos} tiene
+menos retraso que la mejor de las tres bases de \emph{local}. La
+variante \emph{spill} no mejora a \emph{vecinos}. En P1 y P2 el término
+se activa y la variante queda en $-5.2$ y $-22.7$\,\%, frente a $-6.8$
+y $-23.3$\,\% de \emph{vecinos}; en P2 su política publicada deja
+incluso más segundos de \textit{spillback} en la hora (11.3 frente a
+1.8, medias de treinta semillas). En P3, P4 y P5 el término nunca se
+activa: la cola máxima de un carril de enlace durante los
+entrenamientos fue de 9, 12 y 8 vehículos, y la penalización empieza
+en la mitad de las plazas (19 de 38; 18 de 37 en la malla). Se
+comprobó además de forma directa: dos entrenamientos completos de
+\emph{spill} en P3 (bases 42 y 2042, 200 episodios) y cuatro parciales
+(P3 con la base 4042 y P4 con las tres bases) coinciden con
+\emph{vecinos} episodio a episodio en retraso, espera, cambios de fase,
+divergencia KL, pérdida, validación y retorno de retraso, con cero
+activaciones del término. Por eso la tabla reporta esas celdas como
+iguales a \emph{vecinos}.
+% fuente: plan2/veredicto.csv (ippo_local, ippo_spill); timeloss_prom por base en
+% plan2/evaluacion_<esc>_resumen.csv (ippo_vecinos_s*, ippo_local_s*);
+% plan2/evaluacion_corredor_alta_resumen.csv (spillback_seg); maximo de cola_max_enlace en
+% plan2/resultados_<esc>_ippo_vecinos_s*.csv (red 9, red_alta 12, malla3 8); plazas: comun.plazas_carril;
+% identidad: plan2/resultados_<esc>_ippo_spill_s<base>.csv frente a _ippo_vecinos_s<base>.csv
+% (ret_spill = ret_retraso en todas las filas)
 
-\noindent\textbf{3. La representación tabular tiene un techo
-identificable al crecer el número de fases.} En el cruce de dos fases el
-agente visita 130 de 512 estados posibles y converge; en el cruce con
-giros protegidos, donde el espacio se duplica a 1024 estados, visita
-390 y su política congelada resulta peor que el control fijo, con una
-dispersión entre semillas casi veinte veces mayor. Aumentar el número
-de episodios no corrige el problema, porque la causa no es falta de
-entrenamiento sino la fracción del espacio de estados que queda sin
+\noindent\textbf{3. Con la misma observación y la misma recompensa, el
+crítico centralizado no añade nada, y aprender el valor coordina peor
+que aprender la política.} MAPPO usa el actor de \emph{vecinos} con un
+crítico que ve a todos los semáforos. Funciona en P1 ($-7.1$\,\%) y P2
+($-21.6$\,\%) y empata con el fijo en P5 ($-0.3$\,\%); en P3 y P4
+su política publicada no convergió (provisionales FUNCIONA y MEJORA,
+con $-7.8$ y $-2.0$\,\%). Su retraso queda a menos de medio segundo del
+de \emph{vecinos} en P1, P3, P4 y P5, y 2.6~s por encima en P2: el
+crítico centralizado no mejora el retraso y converge con menos
+regularidad en las redes. DQN, con la misma observación con mensajes,
+mejora al fijo en P1, P3 y P4 ($-3.5$, $-1.8$ y $-3.4$\,\%), funciona
+en P2 ($-19.4$\,\%) pero empata ahí con el actuado ($+0.4$\,\%,
+$p = 0.44$), y en P5 no convergió (provisional FALLA, $+11.1$\,\%
+frente al fijo aunque $-8.8$\,\% frente al actuado). Los mensajes
+también le sirven, porque en P3, P4 y P5 queda por delante de
+\emph{local}, pero queda por detrás de \emph{vecinos} en los cinco
+casos: por 0.07~s en P4 y por entre 0.7 y 6.0~s en los demás. Con la
+misma información, IPPO y MAPPO quedan por delante de DQN. DQN y MAPPO usan los hiperparámetros fijados antes de su prueba
+de humo en el cruce aislado, sin ajuste por caso.
+% fuente: plan2/veredicto.csv (mappo, dqn, ippo_vecinos: retraso, delta_fijo, delta_act, p_act,
+% convergio, convergen); plan2/evaluacion_<esc>_resumen.csv (timeloss_prom de dqn_s4042,
+% mappo_s<base publicada>, ippo_vecinos e ippo_local publicadas)
+
+\noindent\textbf{4. Con la misma recompensa y el mismo protocolo que
+IPPO, los aprendices tabulares no superan al tiempo fijo tuneado con
+demanda nominal, y la recompensa no es la causa.} Q-learning falla en
+P1 ($+9.2$\,\%, intervalo de $+7.8$ a $+10.5$\,\%), en P3
+($+12.4$\,\%) y en P5 ($+42.5$\,\%), y en P4 el resultado provisional
+también es FALLA ($+9.9$\,\%, sin converger). Solo en P2 baja el
+retraso del fijo ($-8.8$\,\%, MEJORA), y aun ahí queda un 13.7\,\% por
+detrás del actuado. SARSA falla en los cinco casos ($+14.0$, $+6.6$,
+$+11.2$, $+10.4$ y $+40.0$\,\%), P2 incluido: pasar de un método fuera
+de política a uno dentro de política no mueve el techo. Los dos
+empeoran incluso su propia recompensa frente al fijo, entre un 10.6 y
+un 34.1\,\%, salvo Q-learning en P2. La ablación con la recompensa de
+colas aísla el efecto de la señal con el mismo algoritmo. Con ella, Q-learning falla en P1, P3 y
+P4 ($+10.6$, $+9.6$ y $+9.8$\,\%) y en P2 no convergió. Con demanda
+nominal o moderada el cambio de recompensa mueve el resultado menos de
+tres puntos y en los dos sentidos: $+9.2$ frente a $+10.6$\,\% en P1,
+$+12.4$ frente a $+9.6$\,\% en P3 y $+9.9$ frente a $+9.8$\,\% en P4.
+Solo en P2 la recompensa de retraso cambia el signo ($-8.8$ frente a
+$+6.8$\,\% provisional). Esto responde a la pregunta que dejó abierta
+la fase exploratoria: el 60\,\% de pérdida en el corredor se midió con
+la recompensa de colas, 40 episodios, una sola semilla base y la
+política del último episodio; con la misma recompensa y el protocolo
+del plan la pérdida es del 10.6\,\%, y con la de retraso, del 9.2\,\%.
+Casi toda la corrección viene del protocolo. El límite está en el
+aprendiz tabular, algoritmo y representación discretizada, no en la
+señal: IPPO \emph{local}, sin mensajes y con la misma recompensa, tiene
+menos retraso que Q-learning en los cinco casos.
+% fuente: plan2/veredicto.csv (ql, sarsa, ql_colas: delta_fijo, ic_fijo, delta_act,
+% delta_recompensa, convergio); plan2/evaluacion_<esc>_resumen.csv (timeloss_prom de ql e ippo_local
+% publicadas); fase exploratoria: evaluacion_corredor_resumen.csv de demo_rl (brazo rl, +60.1)
+
+\noindent\textbf{5. El margen de mejora lo fijan la referencia y la
+red, no solo la demanda.} El programa fijo se volvió a tunear en cada
+caso con una malla ampliada hasta que el óptimo quedara en su interior.
+En P1, P2 y P3 el barrido confirmó los programas de la fase anterior;
+en el corredor el óptimo sigue en 20~s de verde para la avenida y 10~s
+para la transversal con 15~s de desfase, ahora en el interior de la
+malla. Contra esos fijos, el actuado empata en P1 y P4, mejora un
+1.1\,\% en P3, funciona solo en P2 ($-19.8$\,\%) y falla en P5
+($+21.8$\,\%). En la malla de nueve cruces pesa sobre todo la
+coordinación: el fijo con desfases alternos de 23~s deja 20.8~s de
+retraso, y el mejor programa sin desfases del barrido, 29.0~s. Ahí todos los
+controles sin mensajes pierden contra ese fijo coordinado entre un 21 y un
+43\,\%: el actuado un 21.8\,\%, IPPO \emph{local} un 25.9\,\%, SARSA un
+40.0\,\% y Q-learning un 42.5\,\%. Solo los que reciben mensajes evitan
+perder: \emph{vecinos} y MAPPO empatan, y DQN, sin converger, queda un
+11.1\,\% por encima. Ningún modelo supera a un fijo coordinado bien
+tuneado en una malla regular; lo alcanzable es igualarlo. Un control que
+decide cruce por cruce sin información del vecino solo supera a un fijo coordinado cuando la demanda
+excede la capacidad. En P4 el límite lo pone la rotonda sin semáforo:
+sus ramales de un carril se llenan con 1.3 veces la demanda nominal en
+dos de tres semillas, y desde 1.4 en las tres; cada vehículo que entra
+por ellos pierde entre 400 y 700~s que ningún semáforo puede evitar.
+Por eso P4 usa 1.2 veces la demanda nominal y es un caso de demanda
+moderada, no de estrés; ahí el margen de todos los controles es
+pequeño (actuado $-0.1$\,\%, \emph{vecinos} $-3.6$\,\%, DQN
+$-3.4$\,\%).
+% fuente: plan2/barrido_<esc>.csv (fila de menor timeloss_prom; malla3: ajedrez 20.81 s, mejor
+% esquema cero 29.01 s); plan2/veredicto.csv (actuado, ql, sarsa, ippo_local, ippo_vecinos, mappo,
+% dqn en P5 y P4); plan2/evaluacion_malla3_resumen.csv; tabla por factor en la cabecera de
+% plan2/red_alta.rou.xml
+
+\noindent\textbf{6. Alcance del proyecto: la coordinación aprendida
+funciona en corredores y redes arteriales pequeñas e iguala al fijo
+coordinado en una malla, pero no alcanza las metas cuantitativas.} De los
+siete casos del plan, cinco (P1 a P5) quedaron desarrollados con el
+mismo método y las mismas métricas de salida para el fijo, el actuado y
+los ocho aprendices, uno más que el mínimo de cuatro acordado con el
+asesor; P6 y P7 quedan como trabajo siguiente. Dentro de ese alcance,
+IPPO con mensajería reduce el retraso entre un 3.6 y un 8.8\,\% frente
+al fijo tuneado con demanda nominal o moderada en el corredor y la red,
+un 23.3\,\% con demanda doble, e iguala al fijo coordinado de la malla; y
+es mejor que el actuado en los cinco casos, entre un 3.6 y un
+16.4\,\%. La meta principal, una reducción del 25 al 40\,\%, no se
+cumple en ningún caso; el más cercano es P2, con un intervalo que llega
+a $-23.9$\,\%. La meta de colas ($\geq 20$\,\%) se cumple en P3
+($-41.3$\,\%) y en P5 ($-29.0$\,\%); la de CO$_2$ ($\geq 5$\,\%),
+solo en P2 ($-12.3$\,\%), mientras en P3 y P5 las emisiones suben un
+1.9 y un 5.2\,\%; y la de \textit{throughput} ($+10$\,\%) en ninguno,
+con cambios entre $-0.1$ y $+0.2$\,\%. La afirmación que el trabajo
+puede sostener es, por tanto, que en corredores y redes de dos o tres
+semáforos sintéticos una coordinación aprendida con mensajes entre
+vecinos supera a las dos referencias clásicas por un margen medible, y
+que en una malla de nueve cruces iguala a un fijo coordinado y supera
+con amplitud al actuado; no que reduzca el retraso en la magnitud que
+fijan las metas. Pesa más la información que el algoritmo: con los
+mensajes, IPPO y MAPPO quedan a la par y DQN detrás; sin ellos,
+ningún aprendiz supera al fijo con demanda nominal. Si el método se
+sostiene con demanda alta en la malla (P6), en redes mayores (P7) y en
+el cruce real de Lima, cuya importación desde OpenStreetMap no ha
+pasado por este protocolo, queda abierto.
+% fuente: plan2/veredicto.csv; plan2/evaluacion_<esc>_resumen.csv (ippo_vecinos publicada:
+% timeloss_prom, cola_prom, co2_prom, throughput; delta_pct e ic95 frente al fijo)
+
+Las conclusiones 7 a 14 corresponden a la fase exploratoria que precedió
+al plan de pruebas (Sección~\ref{sec:plan2}, fase exploratoria previa).
+En ella los casos tenían otra numeración, la evaluación usaba diez
+semillas (1001 a 1010), el Q-learning se entrenaba con la recompensa de
+colas y se publicaba la política del último episodio. Se conservan
+como registro de lo que motivó el plan. Donde el plan las corrige, el
+texto lo indica.
+
+\noindent\textbf{7. El agente tabular con la recompensa de colas no
+alcanza las metas planteadas y solo mejora al control de tiempo fijo en
+el escenario más simple.} Con la política congelada y diez semillas de
+evaluación, el retraso promedio por vehículo baja un 6.4\,\% en el
+cruce de dos fases y sube un 17\,\% en el cruce con giros protegidos,
+un 15\,\% en la red y un 60\,\% en el corredor, estos dos últimos
+frente a fijos con el reparto de verde tuneado; con la demanda doble el
+agente se degrada hasta un 37\,\% por encima del fijo y deja
+vehículos sin terminar. La meta
+declarada de una reducción del 25 al 40\,\% no se cumple en ningún
+caso. La reducción de colas del 20\,\% se alcanza únicamente en el
+cruce simple y en la media, con un intervalo de confianza que no
+excluye ese umbral. El plan de pruebas corrige la magnitud, no el
+signo: con la recompensa de retraso y el protocolo común el agente
+pierde un 9.2\,\% en el corredor y un 12.4\,\% en la red, y con demanda
+doble mejora al fijo un 8.8\,\% sin dejar vehículos sin terminar
+(conclusión~4).
+% fuente: evaluacion_<esc>_resumen.csv de demo_rl (brazo rl); plan2/veredicto.csv (ql)
+
+\noindent\textbf{8. La función de recompensa de colas no está alineada
+con la métrica que la tesis declara como primaria.} La recompensa
+penaliza vehículos detenidos y su tiempo de espera, y el agente solo
+consigue mejorarla en el escenario más simple: un 26\,\% frente al fijo
+en el cruce de dos fases, mientras la empeora en los otros cuatro. Y
+aun donde la mejora, la ganancia no se traslada a la meta, que se
+formula sobre el retraso e incluye además frenadas y aceleraciones. La
+consecuencia es medible: en el cruce simple la espera detenida baja un
+26\,\% mientras el retraso solo baja un 6\,\%, y en la red la espera
+sube un 4\,\% mientras el retraso sube un 15\,\%. El agente aprende a
+cortar el verde con frecuencia, hasta un 77\,\% más de cambios de fase
+que el control fijo, lo que fragmenta las colas pero aumenta las
+paradas por vehículo en los cinco escenarios. Optimizar una señal
+correlacionada con el objetivo no equivale a optimizar el objetivo. El
+módulo U4 confirmó el diagnóstico por la vía contraria: con la misma
+estructura de recompensa pero midiendo el retraso por segundo en lugar
+de los vehículos detenidos, el agente deja de fragmentar las colas y
+las paradas por vehículo bajan en tres de los cuatro escenarios donde
+se probó. Por eso el plan de pruebas entrena a todos los aprendices con
+la recompensa de retraso y deja la de colas como ablación. La ablación
+confirma el diagnóstico: con la recompensa de colas el Q-learning
+mejora su propia señal frente al fijo en la red y en la red con demanda
+alta ($+3.0$ y $+6.4$\,\%) mientras su retraso sube cerca de un 10\,\%
+(conclusión~4).
+% fuente: plan2/veredicto.csv (ql_colas, P3 y P4: delta_recompensa y delta_fijo)
+
+\noindent\textbf{9. La representación tabular tiene un techo
+identificable al crecer el número de fases.} En el cruce de dos fases
+el agente visita 130 de 512 estados posibles y converge; en el cruce
+con giros protegidos, donde el espacio se duplica a 1024 estados,
+visita 390 y su política congelada resulta peor que el control fijo,
+con una dispersión entre semillas casi veinte veces mayor. Aumentar el
+número de episodios no corrige el problema, porque la causa no es falta
+de entrenamiento sino la fracción del espacio de estados que queda sin
 visitar. Este resultado es el argumento empírico para pasar a métodos
-con aproximación de funciones, como DQN y PPO.
+con aproximación de funciones, y el plan de pruebas lo refuerza: con
+200 episodios, tres semillas base y la misma recompensa que IPPO, el
+tabular sigue por detrás del fijo en todos los casos con demanda
+nominal, y SARSA, con la misma representación, falla en los cinco
+(conclusión~4).
 
-\noindent\textbf{4. Los agentes sin comunicación no reproducen el
+\noindent\textbf{10. Los agentes sin comunicación no reproducen el
 beneficio de la coordinación.} En la red de tres intersecciones, tres
-agentes independientes quedan un 15\,\% por detrás de un programa fijo
-con onda verde, aunque superan ampliamente al mismo programa sin
-desfases, que da 36.4 s de retraso frente a 25.1 s del agente. La
-diferencia no está en la capacidad de reaccionar a la cola local, sino
-en la anticipación que aporta coordinar las fases de intersecciones
-sucesivas. Es la evidencia empírica que justifica el módulo U4.
+agentes tabulares independientes quedan un 15\,\% por detrás de un
+programa fijo con onda verde, aunque superan ampliamente al mismo
+programa sin desfases, que da 36.4~s de retraso frente a 25.1~s del
+agente. La diferencia no está en la capacidad de reaccionar a la cola
+local, sino en la anticipación que aporta coordinar las fases de
+intersecciones sucesivas. Es la evidencia empírica que justificó el
+módulo U4, y el plan de pruebas la extiende a IPPO: sin mensajes,
+también falla en las dos redes y en la malla (conclusión~2).
 
-\noindent\textbf{5. El control actuado es una referencia más exigente
-que el control de tiempo fijo y la literatura revisada lo omite.} Con
-las mismas fases y los mismos límites de verde que el agente, el
-control actuado nativo del simulador reduce el retraso entre un 2 y un
-33\,\% frente al tiempo fijo en cuatro escenarios, empata con el fijo
-de reparto tuneado del corredor y supera al agente tabular en los
-cinco. Ninguno de los tres trabajos analizados en el estado del
-arte lo emplea como línea base. Cualquier
-resultado de control semafórico por aprendizaje por refuerzo que aspire
-a ser relevante en la práctica debe medirse también contra él.
+\noindent\textbf{11. El control actuado es una referencia exigente que
+la literatura revisada omite, pero no siempre más exigente que un fijo
+coordinado.} Con las mismas fases y los mismos límites de verde que el
+agente, el control actuado nativo del simulador reduce el retraso entre
+un 2 y un 33\,\% frente al tiempo fijo en cuatro escenarios de la fase
+exploratoria, empata con el fijo de reparto tuneado del corredor y
+supera al agente tabular en los cinco. Ninguno de los tres trabajos
+analizados en el estado del arte lo emplea como línea base. El plan de
+pruebas matiza la primera parte: frente a fijos tuneados en cada caso,
+el actuado solo gana con claridad en el corredor con demanda doble y
+pierde un 21.8\,\% en la malla de nueve cruces (conclusión~5). Un
+resultado de control semafórico por aprendizaje por refuerzo que
+aspire a ser relevante en la práctica debe medirse contra las dos
+referencias.
 
-\noindent\textbf{6. El protocolo experimental resultó determinante para
-la validez de las conclusiones.} Separar las semillas de entrenamiento
-de las de evaluación, congelar la política antes de medir, usar las
-mismas semillas en todos los controles y reportar intervalos de
-confianza con pruebas pareadas cambió el signo de varias conclusiones
-respecto de lo que sugerían las corridas con una sola semilla. Un caso
-lo ilustra con claridad: en el corredor, dos entrenamientos que solo
-diferían en el instante en que el agente toma sus decisiones dieron
-25.8 y 33.9~s de retraso, una diferencia veinte veces mayor que el
-intervalo de confianza de cualquiera de los dos, lo que muestra que una
-única corrida de entrenamiento no caracteriza a la política aprendida.
-El mismo rigor obligó a rehacer una referencia: una revisión
-adversarial del documento mostró que el barrido del programa fijo
-nunca había variado el reparto de verde entre avenida y transversales,
-y con ese reparto tuneado el fijo del corredor pasó de 31.9 a 21.2~s.
-La fuerza de la referencia decide el tamaño de toda mejora reportada.
+\noindent\textbf{12. El protocolo experimental resultó determinante
+para la validez de las conclusiones.} Separar las semillas de
+entrenamiento de las de evaluación, congelar la política antes de
+medir, usar las mismas semillas en todos los controles y reportar
+intervalos de confianza con pruebas pareadas cambió el signo de varias
+conclusiones respecto de lo que sugerían las corridas con una sola
+semilla. Un caso lo ilustra con claridad: en el corredor, dos
+entrenamientos que solo diferían en el instante en que el agente toma
+sus decisiones dieron 25.8 y 33.9~s de retraso, una diferencia de unas
+cinco veces la semiamplitud del intervalo de confianza de la segunda
+(1.7~s), lo que muestra que una única corrida de entrenamiento no
+caracteriza a la política aprendida. El mismo rigor obligó a rehacer
+una referencia: una revisión adversarial del documento mostró que el
+barrido del programa fijo nunca había variado el reparto de verde entre
+avenida y transversales, y con ese reparto tuneado el fijo del corredor
+pasó de 31.9 a 21.2~s. La fuerza de la referencia decide el tamaño de
+toda mejora reportada. El plan de pruebas agregó una lección más: la
+política del último episodio no es la mejor, y elegir el
+\textit{checkpoint} por validación cambió el veredicto de IPPO en la red
+(conclusiones~1 y~14).
+% fuente: evaluacion_corredor_resumen.csv de demo_rl (brazo rl: media 33.856, ic95 1.661)
 
-\noindent\textbf{7. Con aproximación de funciones y una recompensa
+\noindent\textbf{13. Con aproximación de funciones y una recompensa
 alineada con el retraso, el agente cumple la meta en el cruce y alcanza
 al actuado.} La variante \emph{local} de IPPO, que solo cambia el
 estado, la recompensa y el algoritmo del módulo U2, reduce el retraso
@@ -100,43 +326,47 @@ un 35\,\% frente al fijo en el cruce aislado, donde además supera al
 control actuado; en el corredor iguala al fijo de reparto tuneado y
 queda a 1.7\,\% del actuado, donde el tabular perdía un 60\,\%; y
 queda a 2\,\% de la onda verde tuneada en la red, donde el tabular
-perdía un 15\,\%. Dos decisiones fueron determinantes
-y ambas salieron de la prueba de humo del plan de pruebas: medir la
-recompensa como retraso por segundo acumulado sobre el intervalo de
-decisión, porque el conteo de vehículos detenidos no ve las colas que
-avanzan a paso lento y llevaba al optimizador a cambiar de fase sin
-parar, y recortar el gradiente por red. Con la misma señal, PPO no
-necesita el 77\,\% de cambios de fase adicionales del tabular: con
-demanda nominal cambia de fase entre un 10\,\% menos que el fijo en el
-corredor y un 19\,\% más en la red, y con demanda doble un tercio
-menos, y deja de multiplicar las paradas por
-vehículo: las reduce frente al fijo en el cruce, en el corredor y en
-el corredor con demanda doble, y en la red las aumenta mucho menos
-que el tabular.
+perdía un 15\,\%. El plan de pruebas confirma los dos últimos
+resultados con treinta semillas (empate en P1 y $+2.3$\,\% en P3). Dos
+decisiones fueron determinantes y ambas salieron de la prueba de humo:
+medir la recompensa como retraso por segundo acumulado sobre el
+intervalo de decisión, porque el conteo de vehículos detenidos no ve
+las colas que avanzan a paso lento y llevaba al optimizador a cambiar
+de fase sin parar, y recortar el gradiente por red. Con la misma señal,
+PPO no necesita el 77\,\% de cambios de fase adicionales del tabular:
+con demanda nominal cambia de fase entre un 10\,\% menos que el fijo en
+el corredor y un 19\,\% más en la red, y con demanda doble un tercio
+menos, y deja de multiplicar las paradas por vehículo: las reduce
+frente al fijo en el cruce, en el corredor y en el corredor con demanda
+doble, y en la red las aumenta mucho menos que el tabular.
+% fuente: plan2/veredicto.csv (ippo_local, P1 y P3)
 
-\noindent\textbf{8. La mensajería entre vecinos aporta coordinación
+\noindent\textbf{14. La mensajería entre vecinos aporta coordinación
 medible y es el primer control aprendido que supera al actuado en un
-corredor.} Con la información del vecino, las tres políticas entrenadas
-con semillas base distintas igualan a la onda verde tuneada en la red
-(las tres dentro de $\pm 0.5$\,\%) y superan al actuado en el corredor
-($-5.1$\,\%; $-6$\,\% frente al fijo con reparto tuneado, que frente
-al fijo simétrico original habría sido $-38$\,\%), con signo estable en
+corredor.} En la fase exploratoria, con la política del último
+episodio, la variante \emph{vecinos} supera al actuado en el corredor
+($-5.1$\,\%; $-6$\,\% frente al fijo con reparto tuneado, que frente al
+fijo simétrico original habría sido $-38$\,\%), con signo estable en
 tres de tres frente a la variante sin mensajes. La mejora es de
 progresión: el retraso de los vehículos que recorren la avenida en el
 sentido punta baja entre un 4 y un 17\,\% frente al fijo y la fracción
 que se detiene a lo sumo una vez alcanza 0.95 o más, la misma de una
 onda verde bien tuneada, mientras el actuado, que decide cruce por
-cruce, la reduce a 0.72. El agente reconstruye
-una onda verde sin que nadie la programe, aunque paga por ella en las
-transversales y por eso, en la red, sigue dos puntos por detrás del
-actuado en el retraso global. Con la demanda doble, donde el actuado
-llena el enlace entre cruces y provoca \textit{spillback} el 2\,\% del
-tiempo, las siete políticas IPPO igualan su retraso sin llegar a
-bloquear el enlace (entre 0 y 3 segundos de \textit{spillback} en la
-hora, frente a 79 del actuado) y sirven un 2 a 3\,\% más de vehículos;
-el término explícito
-de penalización por \textit{spillback} no añade nada a lo que ya
-consigue la mensajería. La coordinación aprendida depende del canal:
-con mensajes con latencia o pérdida el retraso global se mantiene cerca
-del actuado, pero la progresión se deshace, porque el agente nunca vio
-un mensaje viejo durante el entrenamiento.
+cruce, la reduce a 0.72. El agente reconstruye una onda verde sin que
+nadie la programe. En la red, esas políticas del último episodio solo
+igualaban a la onda verde tuneada y quedaban dos puntos por detrás del
+actuado; con la política elegida por validación, el plan de pruebas
+las pone un 8.8\,\% por debajo del fijo y un 7.8\,\% por debajo del
+actuado, con la fragilidad que describe la conclusión~1. Con la demanda
+doble, donde el actuado llena el enlace entre cruces, las políticas
+IPPO casi no lo bloquean (entre 0 y 3~s de \textit{spillback} en la
+hora en la fase exploratoria, frente a 79~s del actuado) y sirven un 2
+a 3\,\% más de vehículos que él; el plan de pruebas muestra además que
+su retraso queda por debajo del actuado, entre un 3.6 y un 4.4\,\%, y
+no a la par. La coordinación aprendida depende del canal: con mensajes
+con latencia o pérdida el retraso global se mantiene cerca del actuado,
+pero la progresión se deshace, porque el agente nunca vio un mensaje
+viejo durante el entrenamiento. Esta prueba de canal es de la fase
+exploratoria; el plan de pruebas no la repitió.
+% fuente: plan2/veredicto.csv (ippo_vecinos y ippo_spill, P2 y P3);
+% plan2/evaluacion_corredor_alta_resumen.csv (throughput delta_pct_act de las publicadas)

@@ -1,0 +1,4 @@
+modo,episodio,semilla,epsilon,vehiculos,espera_prom,timeloss_prom,cola_prom,cola_max,recompensa,recompensa_decision,decisiones,cambios_fase,paradas_prom,throughput,co2_prom,nox_prom,estados_q,dq_max,eval_timeloss,eval_espera
+baseline,0,1001,0,4350,7.41,20.76,9.34,30,-7148.1,-1.053,6786,1476,0.689,4211,278.9,97.4,,0.0,,
+baseline,0,1006,0,4350,7.35,20.68,9.27,28,-7074.9,-1.044,6777,1471,0.68,4211,278.7,97.3,,0.0,,
+actuado,0,1006,0,4350,7.8,25.42,9.9,30,-7319.9,-1.086,6741,2313,1.279,4198,299.7,103.6,,0.0,,

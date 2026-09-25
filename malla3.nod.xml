@@ -1,0 +1,28 @@
+<nodes>
+    <!-- Prueba P5 (plan v2, 24.09.2026): malla de 3x3 cruces semaforizados. Nodo C<fila><columna>
+         (fila 1 al norte, columna 1 al oeste), semaforo semaforo_C<fila><columna>, 300 m entre
+         cruces y brazos de entrada de 400 m (W<fila>, E<fila>, N<columna>, S<columna>). -->
+    <node id="C11" x="0" y="600" type="traffic_light" tl="semaforo_C11"/>
+    <node id="C12" x="300" y="600" type="traffic_light" tl="semaforo_C12"/>
+    <node id="C13" x="600" y="600" type="traffic_light" tl="semaforo_C13"/>
+    <node id="C21" x="0" y="300" type="traffic_light" tl="semaforo_C21"/>
+    <node id="C22" x="300" y="300" type="traffic_light" tl="semaforo_C22"/>
+    <node id="C23" x="600" y="300" type="traffic_light" tl="semaforo_C23"/>
+    <node id="C31" x="0" y="0" type="traffic_light" tl="semaforo_C31"/>
+    <node id="C32" x="300" y="0" type="traffic_light" tl="semaforo_C32"/>
+    <node id="C33" x="600" y="0" type="traffic_light" tl="semaforo_C33"/>
+
+    <!-- Extremos de los brazos -->
+    <node id="W1" x="-400" y="600" type="priority"/>
+    <node id="E1" x="1000" y="600" type="priority"/>
+    <node id="W2" x="-400" y="300" type="priority"/>
+    <node id="E2" x="1000" y="300" type="priority"/>
+    <node id="W3" x="-400" y="0" type="priority"/>
+    <node id="E3" x="1000" y="0" type="priority"/>
+    <node id="N1" x="0" y="1000" type="priority"/>
+    <node id="S1" x="0" y="-400" type="priority"/>
+    <node id="N2" x="300" y="1000" type="priority"/>
+    <node id="S2" x="300" y="-400" type="priority"/>
+    <node id="N3" x="600" y="1000" type="priority"/>
+    <node id="S3" x="600" y="-400" type="priority"/>
+</nodes>

@@ -1,0 +1,9 @@
+ippo (rl_ippo.py plan v2) - compuertas pasadas 24.09:
+(a) regresion vs HEAD: corredor vecinos y red spill, 3 ep, --eval-cada 0: las 38 columnas comunes
+    (salvo segundos) identicas digito a digito; con --eval-cada 1 filas de entrenamiento identicas y
+    eval_timeloss/eval_espera iguales al codigo viejo. Repetida con rl_corredor.py/comun.py actuales: OK.
+(b) politicas viejas, semilla 1001: red vecinos s42 timeloss 21.53, corredor local s42 20.64 (= CSV).
+(c) corredor vecinos 2 ep --eval-cada 1: 2 checkpoints, publicada = checkpoint de menor val, meta
+    completo, ret_* llenos.
+(d) red_alta vecinos y spill, 1 ep: OK (13 s/ep).
+Ganchos decidir/transicion/con_estado: demo con decidir = demo IPPO; train con ganchos = sin ganchos.

@@ -288,3 +288,28 @@ def brazo_ippo(variante, politicas, brazos_csv):
     if con_base in brazos_csv:
         return con_base
     return f"ippo_{variante}" if f"ippo_{variante}" in brazos_csv else None
+
+
+# ---------------- Arranque robusto de SUMO (plan v2) ----------------
+def iniciar_sumo(cmd, intentos=5, espera=3.0):
+    """traci.start con reintentos. En Windows otro proceso (el antivirus) puede tener tomado un
+    instante el archivo de salida recien escrito y SUMO sale con 'Could not build output file';
+    una noche de cien entrenamientos lo encuentra seguro (24.09.2026). Se descarta la conexion
+    fallida y se repite el mismo comando: no cambia ningun numero de la simulacion."""
+    import time
+    import traci
+    from traci import connection as conexiones
+    for k in range(intentos):
+        try:
+            return traci.start(cmd)
+        except Exception:
+            if k == intentos - 1:
+                raise
+            for etiqueta in ("default", ""):
+                con = conexiones._connections.pop(etiqueta, None)
+                if con is not None and getattr(con, "_process", None) is not None:
+                    try:
+                        con._process.kill()
+                    except Exception:
+                        pass
+            time.sleep(espera)

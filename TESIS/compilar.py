@@ -11,6 +11,16 @@ Uso:
   python compilar.py --rapido     una sola pasada, para revisar un cambio de texto
   python compilar.py --limpiar    borra los auxiliares y sale
 
+Cuenta como error (codigo de salida 1), ademas de citas y referencias sin resolver:
+  - los errores de TeX, tanto '! mensaje' como la forma de -file-line-error
+    'archivo.tex:NN: mensaje' (la unica que escribe este script, que pasa esa opcion);
+  - 'Characters dropped after' y 'occurred inside a group': una llave de cierre
+    pegada a \end{verbatim}} se pierde y el resto del documento sale en otro tamano;
+  - Overfull \vbox de mas de 10 pt (contenido que se sale de la pagina por abajo).
+Cambio del plan v2 (24.09.2026): antes solo se buscaban lineas '! ', que con
+-file-line-error no aparecen, y el script decia "ERRORES: ninguno" sobre un log con seis
+errores de TeX y ocho llaves perdidas.
+
 La primera compilacion tras instalar MiKTeX descarga bastantes paquetes
 (babel-spanish, algorithm2e, IEEEtran, subfigure, tocloft, vmargin...) y puede
 tardar varios minutos; las siguientes son rapidas.
@@ -27,6 +37,8 @@ TRABAJO = "main"
 AUXILIARES = (".aux", ".log", ".out", ".toc", ".lot", ".lof", ".bbl", ".blg",
               ".synctex.gz", ".fdb_latexmk", ".fls")
 UMBRAL_HBOX = 50.0        # pt: por debajo de esto el desborde no se ve en el papel
+UMBRAL_VBOX = 10.0        # pt: una pagina que se pasa mas de esto invade el pie
+PATRON_ERROR = re.compile(r"^[^\s:][^:]*\.(?:tex|cls|sty|bbl|aux|toc|lot|lof):\d+: ")
 
 
 def hay(programa):
@@ -67,13 +79,28 @@ def resumir():
         print("No se genero main.log")
         return 1
 
-    # Errores de TeX: empiezan por '! ' y siguen hasta la linea 'l.<numero>'
+    # Errores de TeX. pdflatex corre con -file-line-error, que los escribe como
+    # 'secciones/capitulo4.tex:100: Missing } inserted.'; sin esa opcion empiezan por '! '.
+    # En los dos casos el sitio exacto es la linea 'l.<numero>' que viene poco despues.
     errores = []
     lineas = log.split("\n")
     for i, l in enumerate(lineas):
-        if l.startswith("! "):
+        if l.startswith("! ") or PATRON_ERROR.match(l):
             sitio = next((x for x in lineas[i:i + 12] if x.startswith("l.")), "")
             errores.append((l.strip(), sitio.strip()[:110]))
+
+    # Fallos que no detienen pdflatex pero estropean el PDF. 'Characters dropped after'
+    # es la llave pegada a \end{verbatim}}: LaTeX la descarta, el grupo \footnotesize
+    # queda abierto y todo lo que sigue sale en letra chica (el cuerpo paso a 10 pt en
+    # septiembre sin ningun error visible). 'occurred inside a group' es su sintoma al final.
+    for i, l in enumerate(lineas):
+        if "Characters dropped after" in l or "occurred inside a group" in l:
+            detalle = [x.strip() for x in lineas[i + 1:i + 5] if x.startswith("### ")]
+            errores.append((l.strip(), "; ".join(detalle)[:110]))
+    for m in re.finditer(r"Overfull \\vbox \(([\d.]+)pt too high\)[^\n]*", log):
+        if float(m.group(1)) > UMBRAL_VBOX:
+            pagina = re.search(r"\[(\d+)", log[m.end():])      # la pagina que se despacha despues
+            errores.append((m.group(0)[:110], f"pagina {pagina.group(1)}" if pagina else ""))
 
     citas = sorted({m.group(1) for m in re.finditer(
         r"Citation `([^']+)' on page \d+ undefined", log)})
@@ -94,7 +121,7 @@ def resumir():
     print("=" * 66)
     if errores:
         print(f"ERRORES ({len(errores)}):")
-        for e, sitio in errores[:15]:
+        for e, sitio in errores[:25]:
             print(f"  {e}")
             if sitio:
                 print(f"     en {sitio}")

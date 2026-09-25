@@ -243,3 +243,102 @@ agente) con las semillas 2001-2003:
 Los barridos simetricos originales (1001-1003) quedaron en barrido_<esc>_simetrico_1001-1003.csv.
 Leccion: barrer siempre el reparto de verde de la referencia, y hacer que alguien intente
 batirla antes de comparar nada con ella.
+
+PLAN DE PRUEBAS V2 (24.09.2026)
+===============================
+Pedido del asesor (23.09): de los 7 casos desarrollar al menos 4 para la reunion del
+25.09 (8:00), con el mismo metodo y las mismas metricas de salida en cada configuracion,
+y subirlo a la plantilla. Contrato completo: plan2/ESPEC.md. En la tesis: metodo en
+capitulo4.tex (sec:plan2), resultados en capitulo5.tex, tablas completas en anexos.tex
+(Anexo A, "Plan de pruebas v2: tablas completas") y scripts en el Anexo B.
+
+Casos: P1 corredor, P2 corredor_alta (x2.0), P3 red, P4 red_alta (x1.2), P5 malla3 (3x3
+cruces, 2 carriles por sentido). P6 (malla alta) y P7 (red 4x4) quedan para la fase
+siguiente. Modelos: fijo (barrido en cada celda, semillas 2001-2003), actuado, ql, sarsa,
+ql_colas (ablacion), ippo_local, ippo_vecinos, ippo_spill, dqn (rl_dqn.py), mappo
+(rl_mappo.py). Escenarios nuevos en escenarios_plan2.py.
+
+Donde vive: todo en plan2/ (directorio de trabajo de todas las corridas; lo del 06.09 en
+demo_rl/ no se toca). tag = <esc>_<alg>_s<base>: resultados_<tag>.csv, checkpoints/,
+q_table_<tag>.json o politica_<esc>_<var>_s<base>.pt, parciales/eval_<esc>_<brazo>.csv,
+evaluacion_<esc>.csv y _resumen.csv, barrido_<esc>.csv, <esc>.add.xml, veredicto.csv/.md.
+
+Como se corre:
+  cd plan2
+  python generar_trabajos.py          escribe cola/trabajos.jsonl (prioridad 0 = antes)
+  python cola.py --cpus 11            corre la cola; logs en cola/logs/, estado en
+                                      cola/estado.json; control: cola/pausa, cola/fin,
+                                      cola/reintentar.txt
+  python ../consolidar.py --escenario red     parciales -> evaluacion_red.csv y _resumen.csv
+  cd .. ; python veredicto.py         plan2/veredicto.csv|md y TESIS/secciones/tablas/veredicto_*.tex
+
+Protocolo: bases 42/2042/4042, 200 episodios, validacion cada 10 con la politica congelada
+en 999 y 1999, politica publicada = checkpoint de menor validacion, base publicada = mediana
+de las tres por esa validacion (nunca con 1001-1030). Evaluacion final 1001-1030 para todos
+los brazos; delta con bootstrap pareado por semilla y Wilcoxon pareado.
+
+Regla de veredicto (delta % del retraso frente al fijo, con IC95 y p; igual frente al actuado):
+  FUNCIONA   IC95 entero < 0, p < 0.05, delta <= -5 % y no pierde de forma significativa
+             contra el actuado
+  MEJORA     IC95 entero < 0 y p < 0.05, pero delta > -5 % o pierde contra el actuado
+  FALLA      IC95 entero > 0 y p < 0.05
+  EMPATA     el resto
+  PENDIENTE  celda incompleta o base publicada sin converger (se da el veredicto provisional)
+
+Hallazgos de la noche:
+  1. red_alta usa 1.2 veces la demanda de red, no 2.0: con f >= 1.3 la rotonda sin semaforo
+     se satura antes que los semaforos (ramales de un carril llenos, 400-700 s perdidos por
+     vehiculo que ningun semaforo puede evitar). Tabla por factor en la cabecera de
+     red_alta.rou.xml.
+  2. En red, red_alta y malla3 el termino de spillback de IPPO spill nunca se activa: la cola
+     maxima de enlace (maximo de las tres bases de ippo_vecinos) es red 9, red_alta 12 y
+     malla3 8, frente a un umbral de plazas // 2 = 19 (red, red_alta) y 18 (malla3)
+     (cola_max_enlace de resultados_<esc>_ippo_vecinos_s*.csv). La politica de spill es
+     identica bit a bit a la de vecinos y no se entreno aparte; se reporta "= vecinos".
+     Verificado: spill en red bases 42 y 2042 (200 episodios) y parciales en red 4042 y
+     red_alta 42/2042/4042 son identicas a vecinos episodio a episodio (timeloss, espera,
+     cambios de fase, kl, perdidas, val, ret_retraso) con spill_activaciones = 0; las dos
+     completas dan el mismo retraso que vecinos en las 30 semillas (evaluacion_red.csv).
+     En corredor y corredor_alta si se activa.
+  3. Con la malla de verdes ampliada hacia abajo, el fijo del corredor sigue en 20/10 con
+     desfase 15, ahora con optimo interior: la referencia ya era la mejor. corredor_alta
+     (25/15/25) y red (25/15/0-23-0) tambien conservan el programa que ya tenian. Nuevos:
+     red_alta 30/10/0-20-0 (el 25/15 queda a 0.05 s, empate practico) y malla3 25/15 en
+     ajedrez. Fuente: plan2/barrido_<esc>.csv.
+  4. El prototipo de malla del 18.09 tenia las fases EO y NS cruzadas; malla3 se construyo
+     corregida (fase 0 = EO, fase 2 = NS en malla3.add.xml).
+  5. En la observacion de IPPO la ranura "cola_mi_salida" mide en realidad la cola del
+     enlace que entra desde el vecino (heredado del 06.09; numericamente simetrico en
+     malla3). El nombre del codigo no se cambio; la tesis ya lo describe con lo que mide
+     (fila 22 de tab:obs-u4 y capitulo5).
+  6. Q-learning, SARSA, DQN, IPPO y MAPPO usan la MISMA recompensa de retraso (la de U4). La
+     de colas de la fase anterior queda solo como ablacion ql_colas.
+  7. Maquina real: AMD Ryzen 7 3700X, 8 nucleos y 16 hilos, 16 GB, sin usar GPU. Tiempo por
+     episodio (mediana de la columna segundos de plan2/resultados_*.csv por escenario y
+     modelo, con hasta 11 procesos a la vez): corredor 5-8 s, corredor_alta 13-16 s, red
+     9-11 s, red_alta 10-12 s, malla3 24-25 s (DQN 31 s). 200 episodios: 17 a 57 min fuera
+     de malla3, 82 a 85 min en malla3 (DQN unos 102).
+
+Estado final (W2): resultados congelados el 25.09 a las 03:55 (plan2/veredicto.csv y
+veredicto.md; copias veredicto_congelado_0355.*). Matriz (p. = pendiente: no convergio,
+entre parentesis el provisional):
+  caso actuado  ql        sarsa ql_colas  dqn       ippo_local ippo_vec spill    mappo
+  P1   EMPATA   FALLA     FALLA FALLA     MEJORA    EMPATA     FUNCIONA FUNCIONA FUNCIONA
+  P2   FUNCIONA MEJORA    FALLA p.(FALLA) FUNCIONA  FUNCIONA   FUNCIONA FUNCIONA FUNCIONA
+  P3   MEJORA   FALLA     FALLA FALLA     MEJORA    FALLA      FUNCIONA =vecinos p.(FUNCIONA)
+  P4   EMPATA   p.(FALLA) FALLA FALLA     MEJORA    FALLA      MEJORA   =vecinos p.(MEJORA)
+  P5   FALLA    FALLA     FALLA sin datos p.(FALLA) FALLA      EMPATA   =vecinos EMPATA
+Lectura: IPPO vecinos funciona en P1-P3, mejora en P4, empata con la onda verde en P5 y
+supera al actuado en los cinco casos (P5: -16.4 %). SARSA falla en P1-P5 como Q-learning
+(techo tabular con la misma recompensa); ql_colas (mismo QL, recompensa de colas) falla en
+P1, P3 y P4 con deltas del mismo orden que ql: el techo no es la recompensa. En P5 todo
+control sin mensajes pierde contra la onda verde: actuado +21.8 %, IPPO local +25.9 %,
+SARSA +40.0 %, QL +42.5 %. En la tesis: capitulo5 (matriz y modelos principales) y
+anexos.tex, Anexo A (bases y tablas de sarsa, ql_colas, dqn, mappo, ippo_local, ippo_spill).
+
+Pendiente al cierre de W2 (25.09, 04:00): la cola sigue con confirmaciones de IPPO spill
+(red 4042, red_alta, malla3); NO correr consolidar.py ni veredicto.py antes de la reunion
+(cambiarian los archivos congelados). Sin veredicto firme: QL P4, ql_colas P2, DQN P5,
+MAPPO P3 y P4; ql_colas P5 no se corrio. P6 y P7 sin empezar. plan2/generar_trabajos.py y
+plan2/cola.py tienen una linea de mas de 110 caracteres y no van al anexo; tablas_tex.py
+(ya en el anexo) tiene dos de 111. TESIS/codigo/ al dia a las 04:00.

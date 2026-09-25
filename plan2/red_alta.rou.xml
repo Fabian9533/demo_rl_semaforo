@@ -1,0 +1,55 @@
+<routes>
+    <!-- red_alta (plan v2, P4, 24.09.2026): la demanda de red.rou.xml con cada vehsPerHour x 1.2
+         (780 veh/h en el sentido punta de la avenida).
+         Criterio (el de corredor_alta, CLAUDE.md U4): control actuado, semillas 2001-2003, menor f de
+         {1.5, 2.0, 2.5, 3.0} con cola detenida maxima >= 90 % de las plazas de un carril de un enlace
+         entre semaforos (34 de 38) en al menos 2 de 3 semillas, sin mas del 10 % de vehiculos sin
+         terminar a los 6000 pasos. Ese f seria 2.5, pero la rotonda (sin semaforo) se satura antes:
+         sus dos ramales de un carril (NR_RN, SR_RS; 36 plazas, 90 % = 32) ceden el paso a un anillo
+         cada vez mas cargado y se llenan desde f = 1.3. Regla del plan v2: si la rotonda se satura
+         antes que los semaforos, se toma el mayor f que no la sature -> f = 1.2.
+         Resultado por factor (semillas 2001/2002/2003; enlace = cola_max_enlace de MedidorEnlaces;
+         ramal = cola maxima por carril en NR_RN o SR_RS; timeLoss en s/veh; sin terminar = 0 en todos):
+           f    enlace (>=34)   ramal (>=32)   timeLoss                 espera max. para entrar
+           1.0  4/4/4    0/3    3/3/4    0/3   21.6 / 21.0 / 21.7         3 s
+           1.1  4/5/5    0/3    7/6/9    0/3   23.1 / 22.6 / 23.6         4 s
+           1.2  5/5/5    0/3    11/17/27 0/3   27.0 / 28.4 / 33.2         4 s   <- elegido
+           1.3  6/6/5    0/3    27/32/36 2/3   36.4 / 36.4 / 40.2       199 s
+           1.4  6/6/6    0/3    36/36/36 3/3   53.2 / 52.9 / 52.9       455 s
+           1.5  8/6/6    0/3    36/36/36 3/3   56.5 / 56.4 / 57.8       758 s
+           2.0  12/14/15 0/3    36/36/36 3/3   74.2 / 77.7 / 78.6      1707 s
+           2.5  37/36/37 3/3    36/36/36 3/3  103.6 / 100.1 / 106.0    2471 s
+           3.0  38/38/38 3/3    36/36/36 3/3  126.7 / 129.0 / 134.1    3201 s
+         Con f >= 1.3 los vehiculos de los ramales pierden 400-700 s cada uno sin que ningun semaforo
+         pueda evitarlo, y ese retraso domina la media de la red. -->
+    <vType id="auto" accel="2.6" decel="4.5" sigma="0.5" length="5" minGap="2.5" maxSpeed="13.89"/>
+
+    <!-- Demanda muy asimetrica: la avenida carga mucho mas que las transversales.
+         Periodo 1 (0-1800 s): hora punta de oeste a este -->
+    <flow id="p1_W_E"   type="auto" from="W_RW"  to="C3_E"  begin="0" end="1800" vehsPerHour="780"/>
+    <flow id="p1_E_W"   type="auto" from="E_C3"  to="RW_W"  begin="0" end="1800" vehsPerHour="300"/>
+    <flow id="p1_SR_E"  type="auto" from="SR_RS" to="C3_E"  begin="0" end="1800" vehsPerHour="180"/>
+    <flow id="p1_W_NR"  type="auto" from="W_RW"  to="RN_NR" begin="0" end="1800" vehsPerHour="96"/>
+    <flow id="p1_N1_S1" type="auto" from="N1_C1" to="C1_S1" begin="0" end="1800" vehsPerHour="180"/>
+    <flow id="p1_S1_N1" type="auto" from="S1_C1" to="C1_N1" begin="0" end="1800" vehsPerHour="180"/>
+    <flow id="p1_N2_S2" type="auto" from="N2_C2" to="C2_S2" begin="0" end="1800" vehsPerHour="180"/>
+    <flow id="p1_S2_N2" type="auto" from="S2_C2" to="C2_N2" begin="0" end="1800" vehsPerHour="180"/>
+    <flow id="p1_N3_S3" type="auto" from="N3_C3" to="C3_S3" begin="0" end="1800" vehsPerHour="180"/>
+    <flow id="p1_S3_N3" type="auto" from="S3_C3" to="C3_N3" begin="0" end="1800" vehsPerHour="180"/>
+    <flow id="p1_S1_E"  type="auto" from="S1_C1" to="C3_E"  begin="0" end="1800" vehsPerHour="72"/>
+    <flow id="p1_N3_W"  type="auto" from="N3_C3" to="RW_W"  begin="0" end="1800" vehsPerHour="72"/>
+
+    <!-- Periodo 2 (1800-3600 s): la punta se invierte, de este a oeste -->
+    <flow id="p2_W_E"   type="auto" from="W_RW"  to="C3_E"  begin="1800" end="3600" vehsPerHour="300"/>
+    <flow id="p2_E_W"   type="auto" from="E_C3"  to="RW_W"  begin="1800" end="3600" vehsPerHour="780"/>
+    <flow id="p2_NR_W"  type="auto" from="NR_RN" to="RW_W"  begin="1800" end="3600" vehsPerHour="180"/>
+    <flow id="p2_E_SR"  type="auto" from="E_C3"  to="RS_SR" begin="1800" end="3600" vehsPerHour="96"/>
+    <flow id="p2_N1_S1" type="auto" from="N1_C1" to="C1_S1" begin="1800" end="3600" vehsPerHour="180"/>
+    <flow id="p2_S1_N1" type="auto" from="S1_C1" to="C1_N1" begin="1800" end="3600" vehsPerHour="180"/>
+    <flow id="p2_N2_S2" type="auto" from="N2_C2" to="C2_S2" begin="1800" end="3600" vehsPerHour="180"/>
+    <flow id="p2_S2_N2" type="auto" from="S2_C2" to="C2_N2" begin="1800" end="3600" vehsPerHour="180"/>
+    <flow id="p2_N3_S3" type="auto" from="N3_C3" to="C3_S3" begin="1800" end="3600" vehsPerHour="180"/>
+    <flow id="p2_S3_N3" type="auto" from="S3_C3" to="C3_N3" begin="1800" end="3600" vehsPerHour="180"/>
+    <flow id="p2_N1_W"  type="auto" from="N1_C1" to="RW_W"  begin="1800" end="3600" vehsPerHour="72"/>
+    <flow id="p2_S3_E"  type="auto" from="S3_C3" to="C3_E"  begin="1800" end="3600" vehsPerHour="72"/>
+</routes>

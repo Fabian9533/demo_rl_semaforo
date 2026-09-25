@@ -1,0 +1,12 @@
+mappo (rl_mappo.py nuevo, plan v2) - compuertas pasadas 24.09, copia privada, OMP_NUM_THREADS=1:
+(a) train corredor y red, 3 ep, --eval-cada 1: CSV sin vacios (algoritmo=mappo, recompensa_tipo=retraso,
+    ret_* y val_* llenos), checkpoints actor .pt/.json + critico central por validacion, publicada =
+    checkpoint de menor val (pesos iguales), meta completo. Ep 1 identico digito a digito a
+    rl_ippo vecinos s42 ep 1 (mismo actor inicial y mismas acciones); --eval-cada 0 vs 1: filas de
+    entrenamiento y pesos finales identicos (la validacion no toca el RNG).
+(b) demo s1001 de la publicada via rl_ippo.correr_episodio(variante=vecinos) = via rl_mappo:
+    corredor 59.24/59.24, red 22.88/22.88 (las 32 metricas iguales).
+(c) humo corredor 40 ep --eval-cada 10: val 21.145, 19.575, 20.935, 21.65 (publicada ep 20, -7.4 %
+    frente a la primera; ep 1 valia ~88). Cruce 30 ep: val 36.30 -> 14.86, igual que IPPO humo5.
+(d) evaluar.py --politica politica_{red,corredor}_mappo_s42.pt --semillas 1001: 22.88 y 59.24.
+Extra: red_alta 1 ep (15 s/ep) y malla3 1 ep (dim_obs 53, critico 486 entradas, 34 s/ep) corren.

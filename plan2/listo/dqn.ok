@@ -1,0 +1,13 @@
+dqn: rl_dqn.py (Double DQN, pesos compartidos, observacion/mascara/reloj/recompensa de ippo_vecinos) listo 24.09.2026.
+Probado en copia privada con OMP_NUM_THREADS=1:
+(humo) cruce base 42, 60 ep, --eval-cada 10 --val-seeds 999: val 15.91/15.08/15.10/16.52/15.01/15.07,
+    mejor 15.01 (ep 50) < fijo 23.19 -> HIPER por defecto congelados (lr 5e-4, objetivo 1000), sin reintento.
+    CSV en humo/dqn_humo_cruce.csv; demo de la publicada en 999 = 15.01.
+(det) corredor 3 ep con --eval-cada 0 y con --eval-cada 1: todas las columnas de entrenamiento identicas
+    digito a digito y red final identica tensor a tensor (la validacion no toca el RNG).
+(corredor/red) --eval-cada 1: checkpoints por episodio, publicada = menor val, meta completo, ret_* llenos;
+    demo de la publicada de corredor en 999 = val_999 (105.76).
+(evaluar) evaluar.py --escenario red --politica politica_red_dqn_s42.pt --semillas 1001 --salida x.csv:
+    rama dqn OK sin cambios (19.76 = demo por CLI), serie/fases/vehiculos escritos.
+(cola) python ../rl_dqn.py train --escenario red_alta --seed 42 --episodios 1 desde carpeta tipo plan2: OK.
+Tiempos por episodio de entrenamiento: cruce 5.5-7.6 s, corredor 7-13 s, red 11-14 s, red_alta 15 s.

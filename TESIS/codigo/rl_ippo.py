@@ -23,16 +23,58 @@ version por segundo del timeLoss, metrica primaria) y el agente recibe la suma p
 sobre su intervalo de decision dividida entre 5 (retraso-segundos), no el nivel en el
 instante siguiente. La formula de U2 se sigue reportando a reloj fijo de 5 s para comparar.
 
-Mensajeria: cada 5 s de reloj global cada semaforo publica a cada vecino su fase (avenida,
-transversal o ambar), el tiempo en esa fase, el outflow que le va a enviar, la cola que
-tiene esperando hacia el y la cola que ve en la salida del vecino. El receptor lo lee en
-su propia decision; --latencia y --perdida simulan un canal imperfecto (solo evaluacion).
+Mensajeria: cada 5 s de reloj global cada semaforo publica a cada vecino el eje de su verde
+(EO, NS o ambar), el tiempo en esa fase, el outflow que le va a enviar, la cola que tiene
+esperando hacia el y la cola que ve en la salida del vecino. El receptor lo lee en su propia
+decision; --latencia y --perdida simulan un canal imperfecto (solo evaluacion).
+
+Cambios del plan de pruebas v2 (24.09.2026, plan2/ESPEC.md):
+  - Escenarios nuevos desde escenarios_plan2.py (VECINOS y LADOS): red_alta y malla3.
+  - N lados por semaforo (oeste, este y, en malla3, norte y sur). Observacion de dimension
+    12 + n_id + 8 * lados, con n_id = max(3, semaforos). Con dos lados el layout es el de
+    siempre (31; id en 12..14; ranuras en 15 y 23) y las politicas del 06.09 cargan igual.
+    El mensaje dice el eje del verde; "verde hacia mi" es verde EO para un vecino al oeste o
+    al este y verde NS para uno al norte o al sur.
+  - Validacion con la politica congelada (argmax) en --val-seeds (999 y 1999) cada
+    --eval-cada episodios y en el ultimo, sin tocar el RNG del entrenamiento. Checkpoint en
+    cada validacion (checkpoints/<tag>_ep<NNN>.pt/.json) y politica publicada = checkpoint de
+    menor val (empate: el mas tardio), con ep_elegido, val_elegido y val_serie en el meta.
+  - ret_retraso, ret_colas y ret_spill medidos cada segundo en todos los modos.
+  - El CSV de entrenamiento se reescribe desde cero; tripinfo unico por corrida.
+  - Ganchos para decisores externos (rl_dqn.py, rl_mappo.py), sin cambiar los numeros de IPPO.
+
+Interfaz para decisores externos (correr_episodio):
+  correr_episodio(modo, politica, gui, delay, seed, tripinfo=None, serie=None, latencia=0,
+                  perdida=0.0, variante="vecinos", buffer=None, decidir=None,
+                  transicion=None, con_estado=False) -> dict de metricas
+  decidir(deciden, obs, mascara, modo, info) -> (acciones, extras)
+      deciden: lista de tls que deciden en este segundo (orden de C["indice"]);
+      obs: np.float32 (k, C["dim_obs"]); mascara: np.float32 (k, 2) [mantener, cambiar];
+      modo: "train" o "demo"; info: {"t": segundo, "seed": semilla SUMO, "variante": ...,
+      "estado": estado global (np.float32, len(C["indice"]) * C["dim_obs"]) si con_estado,
+      si no None}. Devuelve k acciones enteras (0 mantener, 1 cambiar; deben ser legales
+      segun la mascara) y k extras (cualquier objeto o None) que vuelven en la transicion.
+      Si decidir es None decide `politica` (IPPO). No combinar decidir con buffer.
+  transicion(tls, obs, accion, recompensa, obs_sig, mascara_sig, info) -> None
+      Una llamada por decision cerrada de cada agente: recompensa = suma de r_paso (con los
+      terminos de la variante) desde esa decision / 5 * ESCALA_R; obs_sig y mascara_sig son
+      las de su siguiente decision (o las del cierre del episodio). info = {"extra": extra de
+      decidir para esa decision, "ultima": True en la ultima transicion del agente,
+      "vaciada": True si la red se vacio (terminal; si no, se trunco en 6000 s), "t": segundo
+      de obs_sig, "estado_sig": estado global en ese instante si con_estado, si no None}.
+  El estado global es la concatenacion de observar() de todos los semaforos en el orden de
+  C["indice"]. Funciones reutilizables: preparar, observar, mascara, Politica, validar,
+  limpiar_checkpoints, ruta_checkpoint, elegir_checkpoint, sembrar, hash_git.
 """
 import os
+import re
+import csv
 import sys
+import glob
 import json
 import time
 import random
+import shutil
 import argparse
 import subprocess
 
@@ -55,10 +97,11 @@ except ImportError:
 
 import comun
 import rl_corredor as rc
+import escenarios_plan2
 
 # ---------------- Escenarios ----------------
-# Vecinos de cada semaforo: por lado (oeste, este) el vecino, el enlace que llega desde el
-# vecino (j -> i, es aproximacion propia) y el enlace que sale hacia el (i -> j).
+# Vecinos de cada semaforo: por lado (oeste, este y en malla3 norte, sur) el vecino, el enlace
+# que llega desde el vecino (j -> i, es aproximacion propia) y el enlace que sale hacia el (i -> j).
 VECINOS = {
     "corredor": {
         "semaforo_C1": {"oeste": None, "este": ("semaforo_C2", "C2_C1", "C1_C2")},
@@ -73,12 +116,18 @@ VECINOS = {
     "cruce": {"semaforo_C": {"oeste": None, "este": None}},
 }
 VECINOS["corredor_alta"] = VECINOS["corredor"]
+VECINOS.update(escenarios_plan2.VECINOS)
 
-ESCENARIOS = {esc: {**rc.ESCENARIOS[esc], "vecinos": VECINOS[esc]}
-              for esc in ("corredor", "red", "corredor_alta")}
+# rl_corredor tambien importa escenarios_plan2; se suman aqui por si acaso
+_FUENTES = {**escenarios_plan2.ESCENARIOS_RC, **rc.ESCENARIOS}
+ESCENARIOS = {esc: {**e, "vecinos": VECINOS[esc]} for esc, e in _FUENTES.items() if esc in VECINOS}
 ESCENARIOS["cruce"] = {"cfg": "cruce.sumocfg", "semaforos": {"semaforo_C": ["W_C", "E_C", "N_C", "S_C"]},
                        "enlaces": [], "flujos_corredor": None, "vecinos": VECINOS["cruce"]}
 # Orden de las aproximaciones en SEMAFOROS: [avenida oeste, avenida este, norte, sur]
+LADOS = {esc: tuple(escenarios_plan2.LADOS.get(esc, ("oeste", "este"))) for esc in ESCENARIOS}
+OPUESTO = {"oeste": "este", "este": "oeste", "norte": "sur", "sur": "norte"}
+IDX_LADO = {"oeste": 0, "este": 1, "norte": 2, "sur": 3}     # indice de la aproximacion de ese lado
+EJE = {"oeste": "EO", "este": "EO", "norte": "NS", "sur": "NS"}
 
 # ---------------- Parametros ----------------
 PASO_CONTROL, VERDE_MAX = rc.PASO_CONTROL, rc.VERDE_MAX
@@ -86,8 +135,8 @@ W1, W2 = rc.W1, rc.W2          # recompensa base, identica a U2
 W3 = 2.0                       # spill: vehiculos-equivalentes por vehiculo detenido sobre la bisagra
 W4 = 2.0                       # cambio: costo de cada cambio de fase
 ESCALA_R = 0.02                # lo que ve PPO es r / 50 (valores de -5 a -10 con politicas buenas)
-N_ID = 3                       # posiciones fijas del id del semaforo (C1, C2, C3)
-DIM_OBS = 15 + 2 * 8           # bloque local + dos ranuras de vecinos
+N_ID = 3                       # minimo de posiciones del id del semaforo (C1, C2, C3)
+DIM_OBS = 15 + 2 * 8           # dos lados: bloque local + dos ranuras de vecinos (C["dim_obs"] manda)
 OCULTAS = 64
 # Fijados en la prueba de humo (cruce, 06.09): con lr 3e-4, minilote 256 y 8 epocas la politica
 # no salia de un programa fijo en 60 episodios (KL < 0.001 por actualizacion); con lr 1e-3,
@@ -95,6 +144,7 @@ OCULTAS = 64
 HIPER = {"gamma": 0.95, "lam": 0.95, "clip": 0.2, "epocas": 10, "minibatch": 64,
          "lr": 1e-3, "ent": 0.01, "valor": 0.5, "grad": 0.5}
 EDAD_MAX = 30                  # edad de mensaje que satura la observacion (s)
+RECOMPENSA = {"local": "retraso", "vecinos": "retraso", "spill": "spill", "cambio": "cambio"}
 CAMPOS_IPPO = ["variante", "base", "episodio", "semilla", "lr", "segundos", "vehiculos",
                "espera_prom", "timeloss_prom", "cola_prom", "cola_max",
                "recompensa", "recompensa_decision", "recompensa_total_decision",
@@ -105,18 +155,23 @@ CAMPOS_IPPO = ["variante", "base", "episodio", "semilla", "lr", "segundos", "veh
                "retraso_corredor_punta", "paradas_corredor", "paradas_corredor_le1",
                "spill_activaciones", "spill_suma",
                "perdida_politica", "perdida_valor", "entropia_libre", "kl_aprox", "clipfrac",
-               "eval_timeloss", "eval_espera"]
+               "eval_timeloss", "eval_espera",
+               "ret_retraso", "ret_colas", "ret_spill", "val_999", "val_1999", "val",
+               "algoritmo", "recompensa_tipo"]
 
 # Se rellena con preparar(escenario)
 C = {}
 
 
 def preparar(escenario):
-    """Fija el escenario y calcula la geometria (plazas por aproximacion y por carril)."""
+    """Fija el escenario y calcula la geometria (plazas por aproximacion y por carril) y el
+    tamano de la observacion (C["lados"], C["n_id"], C["dim_obs"])."""
     e = ESCENARIOS[escenario]
     net_file, _ = comun.leer_cfg(e["cfg"])
     net = sumolib.net.readNet(net_file)
     aprox = [a for lista in e["semaforos"].values() for a in lista]
+    lados = LADOS.get(escenario, ("oeste", "este"))
+    n_id = max(N_ID, len(e["semaforos"]))
     C.clear()
     C.update({
         "escenario": escenario, "cfg": e["cfg"], "net": net_file,
@@ -127,14 +182,25 @@ def preparar(escenario):
         "vmax": {a: net.getEdge(a).getSpeed() for a in aprox},
         "plazas": {l: comun.plazas_carril(net, l) for l in e["enlaces"]},
         "fase_av": {},          # se calcula con TraCI en el primer episodio
+        "lados": lados, "n_id": n_id, "dim_obs": 12 + n_id + 8 * len(lados),
     })
-    assert len(e["semaforos"]) <= N_ID
     return C
 
 
+def nombres_features():
+    """Nombre de cada posicion de la observacion (va al meta de la politica)."""
+    ids = [f"id_{t.replace('semaforo_', '')}" for t in C["semaforos"]]
+    ids += [f"id_libre{k}" for k in range(len(ids), C["n_id"])]
+    return (["cola_o", "cola_e", "cola_n", "cola_s", "movil_o", "movil_e", "movil_n", "movil_s",
+             "fase_0", "fase_1", "t_verde", "puede_cambiar"] + ids
+            + [f"{lado}_{f}" for lado in C["lados"]
+               for f in ("presente", "verde_hacia_mi", "ambar", "t_fase", "outflow",
+                         "cola_alimentadora", "cola_mi_salida", "edad")])
+
+
 def fase_avenida(tls, aprox, verdes):
-    """Indice (dentro de verdes) de la fase verde que sirve a la avenida: la que pone en
-    verde los links cuyo carril de entrada pertenece a las aproximaciones 0 o 1."""
+    """Indice (dentro de verdes) de la fase verde que sirve a la avenida (eje EO): la que pone
+    en verde los links cuyo carril de entrada pertenece a las aproximaciones 0 o 1."""
     activo = traci.trafficlight.getProgram(tls)
     logicas = traci.trafficlight.getAllProgramLogics(tls)
     logica = next((l for l in logicas if l.programID == activo), logicas[0])
@@ -249,23 +315,25 @@ class Canal:
 
 
 def alimentadora(j, lado_de_i):
-    """Aproximacion del vecino j que descarga sobre el enlace hacia i: la de la avenida por el
-    lado contrario a i (si i esta al este de j, la aproximacion oeste de j, y viceversa)."""
-    return C["semaforos"][j][0] if lado_de_i == "este" else C["semaforos"][j][1]
+    """Aproximacion del vecino j que descarga sobre el enlace hacia i (i esta al lado_de_i de
+    j): la del lado opuesto. Si i esta al este de j, la aproximacion oeste de j; si esta al
+    norte, la aproximacion sur."""
+    return C["semaforos"][j][IDX_LADO[OPUESTO[lado_de_i]]]
 
 
 def mensaje(j, ag_j, lect, medidor, lado_de_i, enlace_i_a_j, t):
-    """Lo que j le envia a su vecino i (i esta al lado_de_i de j)."""
+    """Lo que j le envia a su vecino i (i esta al lado_de_i de j). fase = eje del verde de j
+    (EO si es su fase de avenida, NS si no) o ambar; outflow solo si ese verde va hacia i."""
     if ag_j["ambar_restante"] > 0:
         fase = "ambar"
     elif ag_j["verde"] == C["fase_av"][j]:
-        fase = "avenida"
+        fase = "EO"
     else:
-        fase = "transversal"
+        fase = "NS"
     alim = alimentadora(j, lado_de_i)
     total = leer(lect, alim, VEH)
     return {"fase": fase, "t_fase": 0 if fase == "ambar" else ag_j["t_verde"],
-            "outflow": total if fase == "avenida" else 0,
+            "outflow": total if fase == EJE[lado_de_i] else 0,
             "cola_alimentadora": leer(lect, alim, HALT),
             "cola_salida": medidor.max_halting(enlace_i_a_j), "t": t}
 
@@ -276,7 +344,8 @@ def minimo_verde(ag):
 
 
 def observar(tls, ag, lect, canal, t, con_vecinos):
-    obs = np.zeros(DIM_OBS, dtype=np.float32)
+    """Bloque local (0..11), id del semaforo (12..12+n_id-1) y una ranura de 8 por lado."""
+    obs = np.zeros(C["dim_obs"], dtype=np.float32)
     aprox = C["semaforos"][tls]
     for k, a in enumerate(aprox):
         h, v = leer(lect, a, HALT), leer(lect, a, VEH)
@@ -288,20 +357,20 @@ def observar(tls, ag, lect, canal, t, con_vecinos):
     obs[12 + C["indice"][tls]] = 1.0
     if not con_vecinos:
         return obs
-    for r, lado in enumerate(("oeste", "este")):
-        vec = C["vecinos"][tls][lado]
+    for r, lado in enumerate(C["lados"]):
+        vec = C["vecinos"][tls].get(lado)
         if vec is None:
             continue
         j, enlace_j_a_i, enlace_i_a_j = vec
-        base = 15 + 8 * r
+        base = 12 + C["n_id"] + 8 * r
         obs[base] = 1.0
         msg, edad = canal.leer(j, tls, t)
         if msg is None:
             obs[base + 7] = 1.0
             continue
-        lado_de_i = "oeste" if lado == "este" else "este"   # i visto desde j
+        lado_de_i = OPUESTO[lado]                           # i visto desde j
         cap_alim = C["cap"][alimentadora(j, lado_de_i)]
-        obs[base + 1] = 1.0 if msg["fase"] == "avenida" else 0.0
+        obs[base + 1] = 1.0 if msg["fase"] == EJE[lado] else 0.0     # verde de j hacia mi
         obs[base + 2] = 1.0 if msg["fase"] == "ambar" else 0.0
         obs[base + 3] = min(1.0, msg["t_fase"] / VERDE_MAX)
         obs[base + 4] = min(1.0, msg["outflow"] / cap_alim)
@@ -349,8 +418,8 @@ def termino_spill(tls, medidor):
     """Vehiculos detenidos por encima de la mitad de las plazas en el carril mas cargado de
     cada enlace que sale de tls hacia un vecino (lectura directa, no del mensaje)."""
     total = 0.0
-    for lado in ("oeste", "este"):
-        vec = C["vecinos"][tls][lado]
+    for lado in C["lados"]:
+        vec = C["vecinos"][tls].get(lado)
         if vec is None:
             continue
         enlace = vec[2]
@@ -358,12 +427,20 @@ def termino_spill(tls, medidor):
     return total
 
 
+def exceso_enlaces(medidor):
+    """Suma sobre todos los enlaces de max(0, max_halting - plazas // 2) (para ret_spill)."""
+    return sum(max(0, medidor.max_halting(e) - C["plazas"][e] // 2) for e in C["enlaces"])
+
+
 # ---------------- Episodio ----------------
 def correr_episodio(modo, politica, gui, delay, seed, tripinfo=None, serie=None,
-                    latencia=0, perdida=0.0, variante="vecinos", buffer=None):
+                    latencia=0, perdida=0.0, variante="vecinos", buffer=None,
+                    decidir=None, transicion=None, con_estado=False):
     """Una hora simulada con los agentes IPPO. modo train (muestrea acciones y llena buffer)
     o demo (argmax). Devuelve las mismas metricas que rl_corredor.correr_episodio mas las
-    de U4. El reloj de decision es el de rl_corredor.py."""
+    de U4 y los retornos ret_*. El reloj de decision es el de rl_corredor.py. decidir,
+    transicion y con_estado son la interfaz para decisores externos (docstring del modulo)."""
+    assert decidir is None or buffer is None, "buffer es solo para la politica IPPO"
     esc = C["escenario"]
     con_vecinos = variante != "local"
     binario = sumolib.checkBinary("sumo-gui" if gui else "sumo")
@@ -376,7 +453,7 @@ def correr_episodio(modo, politica, gui, delay, seed, tripinfo=None, serie=None,
         cmd += ["--start", "--quit-on-end", "--delay", str(delay)]
         if os.path.exists(f"vista_{esc}.xml"):
             cmd += ["--gui-settings-file", f"vista_{esc}.xml"]
-    traci.start(cmd)
+    comun.iniciar_sumo(cmd)
     suscribir()
     medidor = comun.MedidorEnlaces(C["net"], C["enlaces"])
     canal = Canal(latencia, perdida, seed)
@@ -391,7 +468,7 @@ def correr_episodio(modo, politica, gui, delay, seed, tripinfo=None, serie=None,
         agentes[tls] = {"verdes": verdes, "ambar": ambar, "dur_ambar": dur_ambar,
                         "verde_min": verde_min, "verde": 0, "t_verde": 0, "ambar_restante": 0,
                         "pendiente": None, "cambio": 0.0, "fase_previa": None,
-                        "r_acum": 0.0, "s_acum": 0.0}
+                        "r_acum": 0.0, "s_acum": 0.0, "ultima": None}
         traci.trafficlight.setPhase(tls, verdes[0])
         traci.trafficlight.setPhaseDuration(tls, 100000)
     fases = fases_actuales()
@@ -408,6 +485,7 @@ def correr_episodio(modo, politica, gui, delay, seed, tripinfo=None, serie=None,
     cola_max = 0
     r_reporte, n_reporte = 0.0, 0      # recompensa base a reloj fijo de 5 s (comparable con U2)
     r_agente, n_agente = 0.0, 0        # lo que ven los agentes (con terminos), sin escalar
+    ret_retraso, ret_colas, exceso = 0.0, 0.0, 0.0     # retornos por segundo (ESPEC seccion 5)
     decisiones_libres = 0
     spill_activaciones, spill_suma = 0, 0.0
     cambios = 0
@@ -434,9 +512,10 @@ def correr_episodio(modo, politica, gui, delay, seed, tripinfo=None, serie=None,
         return r
 
     def cerrar_pendiente(tls, ag):
+        """Cierra la decision pendiente del agente; devuelve su recompensa sin escalar o None."""
         nonlocal r_agente, n_agente
         if ag["pendiente"] is None:
-            return
+            return None
         r = recompensa_agente(tls, ag)
         r_agente += r
         n_agente += 1
@@ -444,6 +523,13 @@ def correr_episodio(modo, politica, gui, delay, seed, tripinfo=None, serie=None,
         if buffer is not None:
             buffer[tls]["recompensa"].append(r * ESCALA_R)
         ag["pendiente"] = None
+        return r
+
+    def estado_global(ya_vistas):
+        """Concatenacion de observar() de todos los semaforos (orden de C["indice"])."""
+        return np.concatenate([ya_vistas[t] if t in ya_vistas
+                               else observar(t, agentes[t], lect, canal, pasos, con_vecinos)
+                               for t in orden])
 
     while traci.simulation.getMinExpectedNumber() > 0 and pasos < 6000:
         if pasos > 0 and pasos % PASO_CONTROL == 0:
@@ -468,20 +554,32 @@ def correr_episodio(modo, politica, gui, delay, seed, tripinfo=None, serie=None,
                 continue
             deciden.append(tls)
         if deciden:
-            for tls in deciden:
-                cerrar_pendiente(tls, agentes[tls])
+            r_cerradas = {tls: cerrar_pendiente(tls, agentes[tls]) for tls in deciden}
             obs = np.stack([observar(tls, agentes[tls], lect, canal, pasos, con_vecinos) for tls in deciden])
             masc = np.array([mascara(agentes[tls]) for tls in deciden], dtype=np.float32)
-            with torch.no_grad():
-                logits, valores = politica(torch.from_numpy(obs))
-                logits = Politica.enmascarar(logits, torch.from_numpy(masc))
-                if modo == "train":
-                    dist = torch.distributions.Categorical(logits=logits)
-                    acciones = dist.sample()
-                    logp = dist.log_prob(acciones)
-                else:
-                    acciones = logits.argmax(dim=1)
-                    logp = torch.zeros(len(deciden))
+            estado = estado_global({t: obs[k] for k, t in enumerate(deciden)}) if con_estado else None
+            if transicion is not None:
+                for k, tls in enumerate(deciden):
+                    ult = agentes[tls]["ultima"]
+                    if ult is not None and r_cerradas[tls] is not None:
+                        transicion(tls, ult[0], ult[1], r_cerradas[tls] * ESCALA_R, obs[k], masc[k],
+                                   {"extra": ult[2], "ultima": False, "vaciada": False, "t": pasos,
+                                    "estado_sig": estado})
+            if decidir is None:
+                with torch.no_grad():
+                    logits, valores = politica(torch.from_numpy(obs))
+                    logits = Politica.enmascarar(logits, torch.from_numpy(masc))
+                    if modo == "train":
+                        dist = torch.distributions.Categorical(logits=logits)
+                        acciones = dist.sample()
+                        logp = dist.log_prob(acciones)
+                    else:
+                        acciones = logits.argmax(dim=1)
+                        logp = torch.zeros(len(deciden))
+                extras = [None] * len(deciden)
+            else:
+                acciones, extras = decidir(deciden, obs, masc, modo,
+                                           {"t": pasos, "seed": seed, "variante": variante, "estado": estado})
             for k, tls in enumerate(deciden):
                 ag = agentes[tls]
                 a = int(acciones[k])
@@ -494,6 +592,8 @@ def correr_episodio(modo, politica, gui, delay, seed, tripinfo=None, serie=None,
                     b["accion"].append(a)
                     b["logp"].append(float(logp[k]))
                     b["valor"].append(float(valores[k]))
+                if transicion is not None:
+                    ag["ultima"] = (obs[k], a, extras[k])
                 ag["pendiente"] = True
                 if a == 1:                                  # la mascara garantiza que es legal
                     f_actual = ag["verdes"][ag["verde"]]
@@ -510,10 +610,14 @@ def correr_episodio(modo, politica, gui, delay, seed, tripinfo=None, serie=None,
         cola_max = max(cola_max, sum(colas))
         medidor.paso(pasos)
         for tls, ag in agentes.items():
+            r_paso = recompensa_paso(tls, lect)
+            ret_retraso += r_paso
+            ret_colas += recompensa_base(tls, lect)
             if ag["pendiente"] is not None:
-                ag["r_acum"] += recompensa_paso(tls, lect)
+                ag["r_acum"] += r_paso
                 if variante == "spill":
                     ag["s_acum"] += termino_spill(tls, medidor)
+        exceso += exceso_enlaces(medidor)
         if serie is not None and pasos % rc.PASO_SERIE == 0:
             filas_serie.append([pasos] + colas)
         fases = fases_actuales()
@@ -534,10 +638,11 @@ def correr_episodio(modo, politica, gui, delay, seed, tripinfo=None, serie=None,
                 ag["t_verde"] += 1
 
     vaciada = traci.simulation.getMinExpectedNumber() == 0
+    estado_fin = estado_global({}) if (transicion is not None and con_estado) else None
     # transiciones pendientes: recompensa con el estado de cierre y valor final segun vaciado
     for tls in orden:
         ag = agentes[tls]
-        cerrar_pendiente(tls, ag)
+        r = cerrar_pendiente(tls, ag)
         if buffer is not None:
             if vaciada:
                 buffer[tls]["v_final"] = 0.0
@@ -545,6 +650,13 @@ def correr_episodio(modo, politica, gui, delay, seed, tripinfo=None, serie=None,
                 with torch.no_grad():
                     o = torch.from_numpy(observar(tls, ag, lect, canal, pasos, con_vecinos)).unsqueeze(0)
                     buffer[tls]["v_final"] = float(politica(o)[1][0])
+        if transicion is not None and ag["ultima"] is not None and r is not None:
+            ult = ag["ultima"]
+            transicion(tls, ult[0], ult[1], r * ESCALA_R,
+                       observar(tls, ag, lect, canal, pasos, con_vecinos),
+                       np.array(mascara(ag), dtype=np.float32),
+                       {"extra": ult[2], "ultima": True, "vaciada": vaciada, "t": pasos,
+                        "estado_sig": estado_fin})
     traci.close()
 
     if serie is not None:
@@ -562,6 +674,9 @@ def correr_episodio(modo, politica, gui, delay, seed, tripinfo=None, serie=None,
         "cambios_fase": cambios,
         "spill_activaciones": spill_activaciones,
         "spill_suma": round(spill_suma, 1),
+        "ret_retraso": round(ret_retraso, 2),
+        "ret_colas": round(ret_colas, 2),
+        "ret_spill": round(ret_retraso - W3 * exceso, 2),
     })
     res.update(medidor.resumen())
     return res
@@ -634,12 +749,43 @@ def actualizar(politica, opt, lote, hiper, rng):
     return {k: round(float(np.mean(v)), 4) for k, v in diag.items()}
 
 
-def evaluar_argmax(politica, seed, variante, tripinfo):
-    """Politica congelada (argmax) con una semilla fija; no consume el RNG del entrenamiento."""
-    estado_torch = torch.get_rng_state()
-    res = correr_episodio("demo", politica, False, 0, seed, tripinfo=tripinfo, variante=variante)
-    torch.set_rng_state(estado_torch)
-    return res["timeloss_prom"], res["espera_prom"]
+# ---------------- Validacion, checkpoints y publicacion ----------------
+def validar(politica, semillas, variante, tripinfo, decidir=None):
+    """Politica congelada (argmax, modo demo) en cada semilla de validacion. Guarda y restaura
+    el RNG de random, numpy y torch: el entrenamiento da el mismo CSV con o sin validacion.
+    Devuelve {"val_<s>": timeLoss medio, ..., "val": media, "eval_timeloss": el de la primera
+    semilla, "eval_espera": su espera}."""
+    estados = (random.getstate(), np.random.get_state(), torch.get_rng_state())
+    fila = {}
+    for k, s in enumerate(semillas):
+        res = correr_episodio("demo", politica, False, 0, s, tripinfo=tripinfo, variante=variante,
+                              decidir=decidir)
+        fila[f"val_{s}"] = res["timeloss_prom"]
+        if k == 0:
+            fila["eval_timeloss"], fila["eval_espera"] = res["timeloss_prom"], res["espera_prom"]
+    fila["val"] = round(float(np.mean([fila[f"val_{s}"] for s in semillas])), 3)
+    random.setstate(estados[0])
+    np.random.set_state(estados[1])
+    torch.set_rng_state(estados[2])
+    return fila
+
+
+def ruta_checkpoint(tag, ep, ext=".pt"):
+    return os.path.join("checkpoints", f"{tag}_ep{ep:03d}{ext}")
+
+
+def limpiar_checkpoints(tag):
+    """Borra los checkpoints de una corrida anterior con el mismo tag (y crea la carpeta)."""
+    os.makedirs("checkpoints", exist_ok=True)
+    patron = re.compile(re.escape(tag) + r"_ep\d{3}\.(pt|json)$")
+    for ruta in glob.glob(os.path.join("checkpoints", f"{tag}_ep*")):
+        if patron.match(os.path.basename(ruta)):
+            os.remove(ruta)
+
+
+def elegir_checkpoint(val_serie):
+    """val_serie = [[ep, val_s1, val_s2, val], ...]: la fila de menor val (empate: la mas tardia)."""
+    return min(reversed(val_serie), key=lambda f: f[-1])
 
 
 def sembrar(base):
@@ -659,6 +805,20 @@ def hash_git():
         return ""
 
 
+def meta_base(args, val_seeds):
+    """Meta comun de checkpoints y politica publicada."""
+    return {"escenario": C["escenario"], "variante": args.variante, "algoritmo": "ippo",
+            "recompensa": RECOMPENSA[args.variante], "base": args.seed, "episodios": args.episodios,
+            "dim_obs": C["dim_obs"], "n_id": C["n_id"], "lados": list(C["lados"]),
+            "ocultas": OCULTAS, "hiper": HIPER, "w1": W1, "w2": W2, "w3": W3, "w4": W4,
+            "escala_r": ESCALA_R, "fase_av": C["fase_av"], "vecinos": C["vecinos"], "cap": C["cap"],
+            "plazas": C["plazas"], "umbral_spillback": comun.UMBRAL_SPILLBACK,
+            "latencia_entrenamiento": 0, "perdida_entrenamiento": 0.0,
+            "val_seeds": val_seeds, "eval_seed": val_seeds[0] if val_seeds else None,
+            "torch": torch.__version__, "python": sys.version.split()[0], "sumo": "1.25.0",
+            "git": hash_git(), "features": nombres_features()}
+
+
 # ---------------- Main ----------------
 def main():
     ap = argparse.ArgumentParser()
@@ -667,8 +827,8 @@ def main():
     ap.add_argument("--variante", choices=["local", "vecinos", "spill", "cambio"], default="vecinos")
     ap.add_argument("--episodios", type=int, default=200)
     ap.add_argument("--seed", type=int, default=42, help="semilla base (entrenamiento: base + episodio)")
-    ap.add_argument("--eval-cada", type=int, default=10)
-    ap.add_argument("--eval-seed", type=int, default=999)
+    ap.add_argument("--eval-cada", type=int, default=10, help="validar cada N episodios (0 = nunca)")
+    ap.add_argument("--val-seeds", default="999,1999", help="semillas de validacion separadas por coma")
     ap.add_argument("--latencia", type=int, default=0, help="segundos de retardo del canal (demo)")
     ap.add_argument("--perdida", type=float, default=0.0, help="probabilidad de perder un mensaje (demo)")
     ap.add_argument("--csv", default=None,
@@ -689,6 +849,8 @@ def main():
 
     if args.modo == "demo":
         politica, meta = Politica.cargar(args.politica)
+        assert meta["dim_obs"] == C["dim_obs"], \
+            f"la politica espera {meta['dim_obs']} entradas y {esc} da {C['dim_obs']}"
         variante = meta["variante"]
         serie = f"serie_{esc}_ippo_{variante}_s{args.seed}.csv" if args.serie else None
         res = correr_episodio("demo", politica, args.gui, args.delay, args.seed, serie=serie,
@@ -696,14 +858,19 @@ def main():
         print(f"IPPO {variante} ({esc}):", res)
         return
 
-    politica = Politica()
+    val_seeds = [int(s) for s in args.val_seeds.split(",") if s.strip()]
+    politica = Politica(C["dim_obs"])
     opt = torch.optim.Adam(politica.parameters(), lr=HIPER["lr"], eps=1e-5)
     etiqueta = f"{esc}_ippo_{args.variante}_s{args.seed}"
+    limpiar_checkpoints(etiqueta)
     ruta_csv = args.csv or f"resultados_{etiqueta}.csv"
-    salida, escritor = comun.abrir_csv(ruta_csv, CAMPOS_IPPO)
+    salida = open(ruta_csv, "w", newline="")          # se reescribe: la cola puede reintentar
+    escritor = csv.DictWriter(salida, fieldnames=CAMPOS_IPPO, extrasaction="ignore")
+    escritor.writeheader()
     print(f"IPPO {args.variante} en {esc}: {args.episodios} episodios, semilla base {args.seed}, "
-          f"{sum(p.numel() for p in politica.parameters())} parametros")
-    eval_final = None
+          f"dim_obs {C['dim_obs']}, {sum(p.numel() for p in politica.parameters())} parametros")
+    meta = meta_base(args, val_seeds)
+    val_serie = []
     for ep in range(1, args.episodios + 1):
         lr = HIPER["lr"] * (1 - (ep - 1) / args.episodios)
         for g in opt.param_groups:
@@ -711,38 +878,40 @@ def main():
         buffer = {}
         t0 = time.time()
         res = correr_episodio("train", politica, args.gui, args.delay, args.seed + ep,
-                              tripinfo=f"tripinfo_{etiqueta}.xml", variante=args.variante, buffer=buffer)
+                              tripinfo=f"tripinfo_{etiqueta}_train.xml", variante=args.variante,
+                              buffer=buffer)
         lote = gae(buffer, HIPER["gamma"], HIPER["lam"])
         diag = actualizar(politica, opt, lote, HIPER, rng)
         fila = {"variante": args.variante, "base": args.seed, "episodio": ep, "semilla": args.seed + ep,
-                "lr": f"{lr:.2e}", "segundos": round(time.time() - t0, 1), **res, **diag}
-        if args.eval_cada and (ep % args.eval_cada == 0 or ep == args.episodios):
-            fila["eval_timeloss"], fila["eval_espera"] = evaluar_argmax(
-                politica, args.eval_seed, args.variante, f"tripinfo_{etiqueta}_eval.xml")
-            eval_final = fila["eval_timeloss"]
+                "lr": f"{lr:.2e}", "segundos": round(time.time() - t0, 1), **res, **diag,
+                "algoritmo": "ippo", "recompensa_tipo": RECOMPENSA[args.variante]}
+        if val_seeds and args.eval_cada and (ep % args.eval_cada == 0 or ep == args.episodios):
+            fila.update(validar(politica, val_seeds, args.variante, f"tripinfo_{etiqueta}_val.xml"))
+            val_serie.append([ep] + [fila[f"val_{s}"] for s in val_seeds] + [fila["val"]])
+            politica.guardar(ruta_checkpoint(etiqueta, ep),
+                             {**meta, "ep_checkpoint": ep, "val_checkpoint": fila["val"],
+                              **{f"val_{s}": fila[f"val_{s}"] for s in val_seeds}})
         escritor.writerow(fila)
         salida.flush()
         print(f"Ep {ep:3d}  timeLoss={res['timeloss_prom']:6.2f}  espera={res['espera_prom']:5.2f}  "
               f"r/dec={res['recompensa_decision']:6.2f}  cambios={res['cambios_fase']:4d}  "
               f"kl={diag['kl_aprox']:.4f} ent={diag['entropia_libre']:.3f}  {fila['segundos']}s"
-              + (f"  eval={fila['eval_timeloss']:.2f}" if "eval_timeloss" in fila else ""), flush=True)
+              + (f"  val={fila['val']:.2f}" if "val" in fila else ""), flush=True)
     salida.close()
 
-    meta = {"escenario": esc, "variante": args.variante, "base": args.seed, "episodios": args.episodios,
-            "dim_obs": DIM_OBS, "ocultas": OCULTAS, "hiper": HIPER, "w1": W1, "w2": W2, "w3": W3, "w4": W4,
-            "escala_r": ESCALA_R, "fase_av": C["fase_av"], "vecinos": C["vecinos"], "cap": C["cap"],
-            "plazas": C["plazas"], "umbral_spillback": comun.UMBRAL_SPILLBACK,
-            "latencia_entrenamiento": 0, "perdida_entrenamiento": 0.0, "eval_seed": args.eval_seed,
-            "eval_999_final": eval_final, "torch": torch.__version__, "python": sys.version.split()[0],
-            "sumo": "1.25.0", "git": hash_git(),
-            "features": ["cola_o", "cola_e", "cola_n", "cola_s", "movil_o", "movil_e", "movil_n", "movil_s",
-                         "fase_0", "fase_1", "t_verde", "puede_cambiar", "id_C1", "id_C2", "id_C3"]
-                        + [f"{lado}_{f}" for lado in ("oeste", "este")
-                           for f in ("presente", "verde_hacia_mi", "ambar", "t_fase", "outflow",
-                                     "cola_alimentadora", "cola_mi_salida", "edad")]}
-    ruta = f"politica_{etiqueta}.pt".replace("_ippo", "")
-    politica.guardar(ruta, meta)
-    print(f"Politica guardada en {ruta} (eval final {eval_final})")
+    ruta = f"politica_{esc}_{args.variante}_s{args.seed}.pt"
+    if val_serie:
+        elegida = elegir_checkpoint(val_serie)
+        meta.update({"ep_elegido": elegida[0], "val_elegido": elegida[-1], "val_serie": val_serie,
+                     "eval_999_final": val_serie[-1][1]})
+        shutil.copyfile(ruta_checkpoint(etiqueta, elegida[0]), ruta)
+        with open(ruta.replace(".pt", ".json"), "w", encoding="utf-8") as f:
+            json.dump(meta, f, indent=1, ensure_ascii=False)
+    else:
+        meta.update({"ep_elegido": args.episodios, "val_elegido": None, "val_serie": [],
+                     "eval_999_final": None})
+        politica.guardar(ruta, meta)
+    print(f"Politica guardada en {ruta} (episodio {meta['ep_elegido']}, val {meta['val_elegido']})")
 
 
 if __name__ == "__main__":
