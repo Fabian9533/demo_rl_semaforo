@@ -90,6 +90,40 @@ alcanza la meta de la tesis de $-25$\,\% de retraso; el más cercano es
 IPPO vecinos en P2, con $-23.3$\,\%.
 % fuente: plan2/veredicto.csv (veredicto, delta_fijo, delta_act, p_act)
 
+\subsection*{Curvas de aprendizaje y convergencia}
+
+La Figura~\ref{fig:plan2-convergencia} muestra, para cada caso, la
+serie de validación de la política publicada de los cuatro aprendices
+principales: el retraso medio en las semillas 999 y 1999, medido cada
+10 episodios, frente al fijo tuneado de la celda medido en esas mismas
+dos semillas. Q-learning queda por encima del fijo durante todo el
+entrenamiento en P1, P3, P4 y P5; solo en P2 su mejor
+\textit{checkpoint} baja del fijo (142.3 frente a 149.4~s), y en P4 su
+serie salta a 47.1~s en el episodio 150, que es por qué no converge.
+IPPO vecinos, MAPPO y DQN descienden en los primeros episodios hasta el
+nivel del fijo o por debajo de él y luego oscilan en una banda estrecha.
+La figura también muestra por qué la selección por validación cambia
+los resultados: en P3 el \textit{checkpoint} publicado de IPPO vecinos
+es el del episodio 40, con 19.69~s frente a 21.58~s del fijo, mientras
+la misma base termina el entrenamiento en 21.46~s, prácticamente sobre
+el fijo; en P5 los \textit{checkpoints} publicados de IPPO vecinos y de
+MAPPO son los de los episodios 50 y 10, y ambas series terminan por
+encima del fijo (21.43 y 22.03 frente a 20.86~s). Con la política del
+último episodio, como en la fase exploratoria, esas celdas se habrían
+evaluado con una política peor que la mejor que el entrenamiento llegó
+a producir.
+% fuente: val_serie, ep_elegido y val_elegido de los metas de las politicas publicadas
+% (plan2/politica_<esc>_{vecinos,mappo,dqn}_s<base>.json, plan2/q_table_<esc>_ql_s<base>.meta.json);
+% base publicada y convergencia de plan2/veredicto_congelado_0355.csv; fijo en 999 y 1999 de
+% plan2/fijo_validacion.json. Figura generada con plan2/grafico_convergencia.py.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{fig_plan2_convergencia.png}
+\caption[Curvas de aprendizaje del plan de pruebas v2]{Curvas de aprendizaje de la política publicada (base mediana por validación) de IPPO vecinos, MAPPO, DQN y Q-learning en cada caso. Cada punto es el retraso medio (s/veh) en las semillas de validación 999 y 1999, medido cada 10 episodios de entrenamiento; el punto grande con borde negro es el \textit{checkpoint} publicado, que es el que se evalúa con las semillas 1001 a 1030. La línea gris discontinua es el fijo tuneado de la celda en las mismas dos semillas, y la banda sombreada, el último tercio del entrenamiento, donde se mide la convergencia; ``no conv.'' marca las políticas que no la cumplen. Cada panel tiene su propia escala vertical.}
+\label{fig:plan2-convergencia}
+\end{figure}
+
 \subsection*{Lectura por caso}
 
 \noindent\textbf{P1, corredor.} El barrido, ampliado hacia verdes más
