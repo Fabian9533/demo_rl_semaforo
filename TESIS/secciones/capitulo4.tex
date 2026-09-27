@@ -245,29 +245,39 @@ ajenas a las de evaluación, y con un criterio prefijado: el menor $f$
 de una lista de candidatos con el que la cola detenida de algún carril
 de un enlace entre semáforos alcanza el umbral de \textit{spillback}
 (34 de 38 plazas, Sección~\ref{sec:u3}) en al menos dos de las tres
-semillas.
+semillas. En P4 ese criterio se completó con una regla para la
+rotonda, que se describe más abajo y es la que fija el factor.
 
 Con la demanda nominal de corredor y red ninguna cola detenida llega a
-ocupar el enlace entre cruces: en corredor, bajo el programa fijo que
-se usaba en la fase exploratoria, la cola llega en promedio a 16 y como
-máximo a 20 de las 38 plazas del enlace. Así el término de
-\textit{spillback} no se activaría y el \textit{throughput} no
-discrimina entre controles. P2 conserva la red y el patrón de corredor
-y escala todos sus flujos. Los candidatos fueron $\{1.3, 1.5, 2.0\}$:
-con 1.3 el umbral no se alcanza en ninguna semilla (máximos de 26, 28 y
-31), con 1.5 en una (30, 32 y 35) y con 2.0 en las tres (38 en todas,
-con \textit{spillback} durante 53 a 104~s de la hora). Queda $f = 2$:
-3620 vehículos en la hora y 1200~veh/h en el sentido punta de la
-avenida, por encima de la capacidad de un carril con la mitad del
-ciclo en verde.
-% TODO(reestructura): identificar el programa fijo de corredor al que se refieren las cifras 16 y 20 plazas y 80 a 94 vehiculos sin terminar (el de la fase exploratoria, 25/25 con desfase de 25 s segun el Anexo C) y el archivo que las respalda; con el fijo del plan (plan2/evaluacion_corredor.csv) la cola maxima del enlace es menor.
+ocupar el enlace entre cruces: en corredor, con el fijo tuneado de P1,
+la cola detenida máxima por carril del enlace es en promedio de 7.9 de
+sus 38 plazas en la evaluación final, y como máximo de 10. Así el
+término de \textit{spillback} no se activaría y el \textit{throughput}
+no discrimina entre controles.
+% fuente: plan2/evaluacion_corredor_resumen.csv (fijo, cola_max_enlace: media 7.8667) y
+% plan2/evaluacion_corredor.csv (maximo 10 sobre las 30 semillas)
+% el original decia "en promedio 16 y como maximo 20 de las 38 plazas del enlace en corredor bajo el fijo";
+% esas cifras coinciden con cola_max del fijo (suma de detenidos en todas las aproximaciones, no cola
+% del enlace: media 16.13 y maximo 20 en plan2/evaluacion_corredor.csv), por eso se reemplazaron
 
-Bajo esa demanda, el mismo programa fijo de corredor deja entre 80 y
-94 vehículos sin terminar a los 6000 pasos y el actuado los termina
-todos; por eso en P2 interesan también los vehículos no terminados y
-el \textit{throughput}. El programa fijo de P2 no es el de corredor:
+P2 conserva la red y el patrón de corredor y escala todos sus flujos.
+Los candidatos fueron $\{1.3, 1.5, 2.0\}$: con 1.3 el umbral no se
+alcanza en ninguna semilla (máximos de 26, 28 y 31), con 1.5 en una
+(30, 32 y 35) y con 2.0 en las tres (38 en todas, con
+\textit{spillback} durante 53 a 104~s de la hora). Queda $f = 2$: 3620
+vehículos en la hora y 1200~veh/h en el sentido punta de la avenida,
+por encima de la capacidad de un carril con la mitad del ciclo en
+verde.
+
+Bajo esa demanda, el programa fijo de corredor deja entre 80 y 94
+vehículos sin terminar a los 6000 pasos y el actuado los termina
+todos; por eso en P2 se registran también los vehículos no terminados
+y el \textit{throughput}. El programa fijo de P2 no es el de corredor:
 se vuelve a tunear para esta demanda con el barrido de la
-Sección~\ref{sec:referencias-fijas}.
+Sección~\ref{sec:referencias-fijas}, y con él tampoco queda ningún
+vehículo sin terminar en la evaluación final.
+% fuente: plan2/evaluacion_corredor_alta_resumen.csv (fijo y actuado: no_terminados media 0.0)
+% TODO(reestructura): identificar el programa fijo de corredor al que se refieren los 80 a 94 vehiculos sin terminar (el de la primera ronda, 25/25 con desfase de 25 s segun el Anexo C, o el 20/10/15) y el archivo que respalda esa cifra.
 
 La demanda de P4 es la de red con cada flujo multiplicado por
 $f = 1.2$: 2580 vehículos en la hora y 780~veh/h en el sentido punta
@@ -322,13 +332,16 @@ $f$ & \makecell{Cola máx. en\\enlaces (veh)} & \makecell{Cola máx. en\\ramales
 con el control actuado. Cada terna da el valor en las semillas 2001, 2002 y 2003. Enlaces:
 máximo por carril de la cola detenida en los enlaces entre semáforos (38 plazas; umbral de
 \textit{spillback} 34), que llega al umbral por primera vez con $f = 2.5$. Ramales:
-lo mismo en los dos ramales de un carril de la rotonda (36 plazas; 90\,\% = 32). Ningún
-vehículo quedó sin terminar con ningún factor. Se elige $f = 1.2$.}
+lo mismo en los dos ramales de un carril de la rotonda (36 plazas; 90\,\% = 32). Espera máx.
+para entrar: espera máxima para entrar a la red. Ningún vehículo quedó sin terminar con ningún
+factor. Se elige $f = 1.2$.}
 \label{tab:red-alta-factor}
 \end{table}
 % fuente: cabecera de red_alta.rou.xml (igual en plan2/red_alta.rou.xml); enlaces = cola_max_enlace
 % de MedidorEnlaces; ramal = cola maxima por carril en NR_RN o SR_RS
-% TODO(reestructura): definir la columna "Espera max. para entrar" en el caption; la cabecera de plan2/red_alta.rou.xml solo trae el nombre y ningun script la calcula; si no se encuentra la definicion, quitar la columna.
+% espera max. para entrar: cabecera de plan2/red_alta.rou.xml; definicion tomada de 7bd8685:capitulo5.tex
+% (lectura de P4: "la espera maxima para entrar a la red, de 4 s")
+% TODO(reestructura): la columna trae un solo valor por factor y no una terna; confirmar si es el maximo sobre las tres semillas (ningun script la calcula).
 
 
 %----------------------------------------------------------------------
@@ -338,15 +351,17 @@ vehículo quedó sin terminar con ningún factor. Se elige $f = 1.2$.}
 Cada caso tiene dos controles de referencia: el fijo tuneado, que sale
 de un barrido hecho antes de entrenar, y el actuado, que se genera a
 partir de las fases de la red. La regla del barrido y el papel
-de cada referencia en el veredicto se definen en la
-Sección~\ref{sec:protocolo}; aquí se describe cómo se ejecutaron.
+de cada referencia en el veredicto se definen en las
+Secciones~\ref{sec:protocolo} y~\ref{sec:veredicto}; aquí se describe
+cómo se ejecutaron.
 
 \subsection{Barrido del programa fijo}
 
 El barrido lo hace \texttt{barrer\_fijo.py} (Anexo~B) en los cinco
 casos, con las semillas de tuneo 2001 a 2003 y el retraso medio como
-criterio; cada configuración es una corrida de SUMO sin TraCI con el
-programa fijo reescrito. En los escenarios de dos y tres cruces se
+criterio; cada configuración se corre con SUMO sin TraCI, una vez por
+semilla, con el programa fijo reescrito, y se compara la media de las
+tres corridas. En los escenarios de dos y tres cruces se
 barren el verde de la avenida, el verde transversal y el desfase del
 segundo cruce; en red y red\_alta el desfase del tercero toma tres
 valores (cero, el del segundo o el doble). En malla3, con nueve
@@ -410,7 +425,8 @@ El actuado lo genera la función \texttt{archivo\_actuado} de
 \texttt{<esc>\_actuado.add.xml} con un programa actuado nativo de SUMO
 por semáforo (\verb|type="actuated"|). Toma las fases del programa
 estático que \texttt{netconvert} escribe en la red, que tienen los
-mismos verdes y ámbares que el fijo, y da a cada verde un mínimo de
+mismos estados de verde y ámbar que el fijo (en malla3, en otro
+orden), y da a cada verde un mínimo de
 10~s y un máximo de 60~s, los mismos límites que respeta el agente.
 Del fijo tuneado no hereda las duraciones ni los desfases: el actuado
 tiene desfase cero en todos los cruces, y SUMO crea sus detectores. El
@@ -458,8 +474,10 @@ El ciclo de \texttt{rl\_corredor.py} consta de los siguientes pasos:
   \item \textbf{Decisión cada 5~s de verde:} el agente lee su estado
     (colas discretizadas y fase activa). Si tiene una decisión abierta,
     la cierra con la recompensa acumulada desde entonces dividida
-    entre 5 y actualiza $Q$ con la regla de Q-learning o de SARSA.
-    Luego elige la acción con la política $\varepsilon$-greedy. Si la
+    entre 5 y actualiza $Q$. Con Q-learning el objetivo usa el máximo
+    del estado nuevo y la acción se elige después, con la política
+    $\varepsilon$-greedy; con SARSA la acción siguiente se elige antes
+    con esa política y el objetivo usa su valor. Si la
     acción es cambiar y el verde lleva al menos el mínimo, o si el
     verde llegó al máximo, se activa el ámbar con
     \verb|trafficlight.setPhase| y \verb|setPhaseDuration|; al terminar
@@ -503,12 +521,8 @@ recompensa.
 % fuente: rl_corredor.entrenar (eps por episodio, semilla base + ep); rl_ippo.main (lr lineal por
 % episodio); rl_dqn.main (epsilon_de por episodio; AgenteDQN y su memoria se crean una vez)
 
-La demanda es idéntica en todos los episodios: los flujos se definen
-con \verb|vehsPerHour|, que inserta los vehículos equiespaciados, de
-modo que la semilla solo altera el comportamiento de los conductores
-(su factor de velocidad individual y la imperfección $\sigma$ del
-modelo de seguimiento), no cuántos vehículos llegan ni cuándo. Las
-métricas de los episodios de entrenamiento describen el proceso de
+La demanda es idéntica en todos los episodios, porque las llegadas son
+equiespaciadas (Sección~\ref{sec:construccion}). Las métricas de los episodios de entrenamiento describen el proceso de
 aprendizaje, con exploración y con la tabla $Q$ cambiando dentro de la
 hora; el resultado del agente se mide aparte, con la política
 congelada y las semillas de evaluación (Sección~\ref{sec:protocolo}).
@@ -528,7 +542,7 @@ while traci.simulation.getMinExpectedNumber() > 0 and pasos < 6000:
         if g.ambar_restante > 0 or g.t_verde % 5 != 0:
             continue                  # en ambar no decide; si no, cada 5 s
         if g.t_verde == 0 and pasos > 0:
-            continue                  # la primera, a los 5 s del verde
+            continue                  # la primera, a los 5 s (salvo paso 0)
         s2 = estado(tls, g.verde)     # (b_O, b_E, b_N, b_S, phi)
         a2 = None
         if g.s is not None:           # cierra la decision anterior
@@ -569,7 +583,8 @@ verde mínimo se respete por igual en todos ellos, y no decide mientras
 su semáforo está en ámbar. Los agentes tabulares no intercambian
 información: la única forma en que un cruce percibe a su vecino es a
 través de las colas que le llegan. La primera decisión de cada verde,
-a los 5~s, está siempre forzada a mantener por el verde mínimo, que en
+a los 5~s (en el primer verde del episodio, ya en el paso 0), está
+siempre forzada a mantener por el verde mínimo, que en
 P1 a P5 es de 10~s en todas las fases. Como muestra el pseudocódigo, el
 tabular guarda la acción que eligió aunque la restricción impida
 ejecutarla; IPPO, DQN y MAPPO usan en cambio una máscara
@@ -596,11 +611,14 @@ Q-learning y SARSA están en \texttt{rl\_corredor.py} (opción
 \verb|--algoritmo qlearning| o \verb|sarsa|). Cada semáforo tiene su
 propia tabla $Q$, que asocia cada estado visitado a los valores de sus
 dos acciones; los valores de un estado nuevo empiezan en cero. La
-acción de mayor valor se elige con desempate al azar, y el generador
-aleatorio se siembra con la semilla base en todos los modos, también
-al evaluar, de modo que una corrida se repite igual.
+acción de mayor valor se elige con desempate al azar. El generador
+aleatorio se siembra con la semilla base al entrenar y con la semilla
+de cada episodio al validar o evaluar, de modo que una corrida se
+repite igual.
 \end{sloppypar}
-% fuente: rl_corredor.py (q_vals: setdefault [0.0, 0.0]; mejor_accion; random.seed(args.seed) en main)
+% fuente: rl_corredor.py (q_vals: setdefault [0.0, 0.0]; mejor_accion; random.seed(args.seed) en main;
+% evaluar_greedy: random.seed(seed) con 999 y 1999 y restaura el estado); evaluar.py (random.seed(semilla)
+% para cada semilla de evaluacion)
 
 Los dos usan la misma discretización del estado, las mismas acciones
 y restricciones, la misma recompensa y los mismos hiperparámetros.
@@ -693,9 +711,9 @@ representa siguen el protocolo de la Sección~\ref{sec:protocolo}.
 
 \subsection{MAPPO}
 
-MAPPO usa el actor de \emph{vecinos} (la misma red, la misma
-observación, la misma máscara y la misma recompensa) y cambia solo el
-crítico, que pasa a ser centralizado. Durante el entrenamiento el
+MAPPO comparte con IPPO \emph{vecinos} la red del actor, la
+observación, la máscara y la recompensa, y cambia solo el crítico, que
+pasa a ser centralizado; entrena su propia política. Durante el entrenamiento el
 crítico estima el valor a partir del estado global, que es la
 concatenación de las observaciones de todos los semáforos en el
 instante de la decisión, más un indicador de cuál de ellos decide. Con
@@ -707,7 +725,7 @@ tangente hiperbólica.
 En ejecución solo se usa el actor y cada semáforo decide con su propia
 observación, igual que en IPPO: el entrenamiento es centralizado y la
 ejecución, descentralizada. MAPPO conserva los hiperparámetros de IPPO,
-con un solo optimizador Adam para actor y crítico, y con la misma
+con un solo optimizador Adam para actor y crítico, como IPPO, y con la misma
 semilla base el actor arranca con los mismos pesos que el de
 \emph{vecinos}. Como DQN, \texttt{rl\_mappo.py} se conecta al episodio
 de \texttt{rl\_ippo.py} como decisor externo.
@@ -727,11 +745,11 @@ aprendices del plan de pruebas.
 \toprule
  & Q-learning y SARSA & DQN & IPPO & MAPPO \\
 \midrule
-Representación & tabla $Q$ por semáforo, valores iniciales en cero & red $Q$ compartida, $d$--64--64--2, ReLU & actor $d$--64--64--2 y crítico $d$--64--64--1, tanh, compartidos & actor de IPPO; crítico central $(n d + n)$--64--64--1 \\
+Representación & tabla $Q$ por semáforo, valores iniciales en cero & red $Q$ compartida, $d$--64--64--2, ReLU & actor $d$--64--64--2 y crítico $d$--64--64--1, tanh, compartidos & actor como el de IPPO; crítico central $(n d + n)$--64--64--1 \\
 Observación & colas en 4 niveles y fase verde & la de \emph{vecinos} & \emph{local} o \emph{vecinos} & la de \emph{vecinos} \\
 Escala de la recompensa & 1 & 0.02 & 0.02 & 0.02 \\
 Descuento $\gamma$ & 0.9 & 0.95 & 0.95 & 0.95 \\
-Tasa de aprendizaje & $\alpha = 0.1$ & $5\times10^{-4}$, Adam & $10^{-3}$, Adam, decae linealmente por episodio & $10^{-3}$, un solo Adam para actor y crítico, decae linealmente \\
+Tasa de aprendizaje & $\alpha = 0.1$ & $5\times10^{-4}$, Adam & $10^{-3}$, un solo Adam para actor y crítico, decae linealmente por episodio & igual que IPPO \\
 Exploración & $\varepsilon$ de 1.0 a 0.01, factor 0.9716 por episodio & $\varepsilon$ lineal de 1.0 a 0.05 en 100 episodios & política estocástica & política estocástica \\
 Pérdida & -- & Huber, objetivo de Double DQN & objetivo recortado de PPO ($\epsilon_{\text{clip}} = 0.2$); valor con coeficiente 0.5; entropía 0.01 & igual que IPPO \\
 Actualización & en cada decisión & una por transición desde 1000; minilote 64 & una por episodio: 10 épocas, minilote 64, GAE $\lambda = 0.95$ & igual que IPPO \\
@@ -753,10 +771,10 @@ El descuento de 0.95 de las redes da un horizonte de unas 20
 decisiones (100~s), que cubre el viaje entre cruces. La tasa de
 aprendizaje, el minilote y las épocas de IPPO se fijaron en la prueba
 de humo (Sección~\ref{sec:humo}); la propuesta inicial usaba
-$3\times10^{-4}$, 256 y 8. La pérdida del valor es cuadrática y sin
-recorte, la escala de la recompensa es constante, sin normalización
-adaptativa, y el recorte de gradiente se aplica por separado al actor
-y al crítico.
+$3\times10^{-4}$, 256 y 8. En IPPO y MAPPO la pérdida del valor es
+cuadrática y sin recorte, la escala de la recompensa es constante, sin
+normalización adaptativa, y el recorte de gradiente se aplica por
+separado al actor y al crítico.
 
 \subsection{Nota sobre la componente \texttt{cola\_mi\_salida}}
 
@@ -784,7 +802,7 @@ al agente a través del término de \textit{spillback} de la variante
 Una prueba de humo es una corrida corta en el cruce de un semáforo
 (el escenario cruce de la fase exploratoria, que no es un caso del
 plan) para fijar o comprobar los hiperparámetros de un aprendiz antes
-de gastar cómputo en los casos. La de IPPO obligó a cambiar tres
+de entrenarlo en los casos del plan. La de IPPO obligó a cambiar tres
 decisiones de diseño; las de DQN y MAPPO se pasaron sin cambios.
 
 \subsection{IPPO: lo que enseñó la prueba de humo}
@@ -837,14 +855,20 @@ que aquí se deja registrada:
 
 Las corridas que fallaron usaron la semilla base 42 y las tres de
 ajuste de hiperparámetros, las bases 43 a 45. Los tres ajustes quedaron
-congelados antes de entrenar en corredor y red. Con ellos, la corrida
-formal de la prueba de humo (semilla base 42, 60 episodios) supera la
-compuerta con margen: la política congelada, evaluada con las diez
-semillas de evaluación de la fase exploratoria (1001 a 1010), da
-$15.05 \pm 0.21$~s de retraso, un $-35$\,\% frente al fijo, al nivel
-del actuado ($15.46$~s) y muy por debajo del Q-learning ($21.72$~s). El
-detalle está en el Anexo~C. Los registros de las corridas fallidas
-están en la carpeta \texttt{humo/} del proyecto.
+congelados antes de entrenar en corredor y red. Los registros de las
+corridas fallidas están en la carpeta \texttt{humo/} del proyecto.
+
+Con esos ajustes, la corrida formal de la prueba de humo (semilla base
+42, 60 episodios) supera la compuerta con margen: la política
+congelada, evaluada con las diez semillas de evaluación de la fase
+exploratoria (1001 a 1010), da $15.05 \pm 0.21$~s de retraso, un
+$-35$\,\% frente al fijo, al nivel del actuado ($15.46$~s) y muy por
+debajo del Q-learning ($21.72$~s). Es un resultado de la fase
+exploratoria, en un escenario que no es un caso del plan y con otro
+protocolo (una base, 60 episodios y diez semillas de evaluación,
+frente a tres bases, 200 episodios y treinta semillas en el plan); en
+los casos P1 a P5 ningún modelo alcanza la meta de retraso
+(Capítulo~\ref{cap:resultados}). El detalle está en el Anexo~C.
 
 \subsection{DQN y MAPPO}
 
@@ -885,17 +909,15 @@ guarda el registro de cada uno y su estado, y puede reiniciarse sin
 repetir lo hecho. Cada barrido usa cuatro procesos propios, aunque la
 cola lo cuenta como uno.
 
-Las prioridades ponen primero lo imprescindible, para que lo que
-quedara sin correr fuera lo opcional: la preparación de los
+Las prioridades ponen primero lo imprescindible: la preparación de los
 escenarios, luego los barridos y todas las evaluaciones, después
 Q-learning e IPPO (primero en P1 a P3), SARSA, DQN, MAPPO y la
 ablación \texttt{ql\_colas}, en ese orden, y al final IPPO
 \emph{spill} en red, red\_alta y malla3, que solo repetiría a
-\emph{vecinos} (Sección~\ref{sec:spill-vecinos}). DQN y MAPPO en P5,
-los entrenamientos más largos, se adelantaron durante la noche para
-que terminaran antes del cierre. La ablación \texttt{ql\_colas} no se
-programó en P5. Lo que no termina antes del cierre queda como
-PENDIENTE y no se estima (Sección~\ref{sec:veredicto}).
+\emph{vecinos} (Sección~\ref{sec:spill-vecinos}). La ablación
+\texttt{ql\_colas} no se programó en P5; esa celda, como todo lo que no
+termine antes del cierre, queda como PENDIENTE y no se estima
+(Sección~\ref{sec:veredicto}).
 % fuente: plan2/generar_trabajos.py (funcion prioridad: 0 preparar; 1 barridos y evaluaciones;
 % 2 QL e IPPO en P1-P3; 3 los mismos en P4-P5; 4 SARSA; 5 DQN y MAPPO en P5; 6 MAPPO en P1-P4;
 % 7 ql_colas en P1-P4; 9 ippo_spill en red, red_alta y malla3; DQN y MAPPO en P5 pasaron de 8 a 5
@@ -903,23 +925,25 @@ PENDIENTE y no se estima (Sección~\ref{sec:veredicto}).
 
 \subsection{Cierre de los resultados}
 
-La cola arrancó el 24.09.2026 a las 17:55. Los resultados se
-congelaron el 25.09.2026 a las 03:55, y los veredictos del
-Capítulo~\ref{cap:resultados} usan todo lo terminado hasta esa hora:
-de los 254 trabajos de la lista habían terminado 240 y ninguno quedaba
-fallido. Tres entrenamientos de Q-learning que fallaron en la primera
-media hora se repitieron completos. Faltaban solo los siete
-entrenamientos de \emph{spill} de la última prioridad que no habían
-terminado (red con base 4042, y red\_alta y malla3 con las tres bases)
-y sus evaluaciones; siguieron en la cola después del cierre, solo como
-confirmación, y no entran en las tablas. El veredicto de esa hora se
+Los resultados se congelaron el 25.09.2026 a las 03:55, y los
+veredictos del Capítulo~\ref{cap:resultados} usan todo lo terminado
+hasta esa hora: de los 254 trabajos de la lista habían terminado 240 y
+ninguno quedaba fallido. Faltaban solo siete entrenamientos de
+\emph{spill} de la última prioridad (red con base 4042, y red\_alta y
+malla3 con las tres bases) y sus siete evaluaciones. Los
+entrenamientos terminaron después del cierre, solo como confirmación
+(Sección~\ref{sec:spill-vecinos}); las evaluaciones no llegaron a
+lanzarse. Nada de eso entra en las tablas. El veredicto de esa hora se
 conserva en \texttt{plan2/\allowbreak veredicto\_congelado\_0355.csv} y
 en el \texttt{.md} del mismo nombre.
 % fuente: plan2/cola/cola.out (inicio 17:55); plan2/cola/estado.json (hechos, fallidos vacio, corriendo);
 % plan2/veredicto_congelado_0355.*; plan2/cola/cola.out: FALLO de train_red_ql_s42, train_red_ql_s4042 y
 % train_corredor_ql_s2042 (18:11-18:22), PermissionError en estado.json y reinicio con 11 huerfanos
 % (9 de Q-learning; por eso la cola no registro la duracion de nueve entrenamientos de Q-learning);
-% 240 lineas OK con hora <= 03:55
+% 240 lineas OK con hora <= 03:55; la cola arranco el 24.09.2026 a las 17:55 y los tres entrenamientos
+% de Q-learning fallidos se repitieron completos (texto quitado del cuerpo por ser bitacora);
+% estado.json: 247 hechos, faltan eval_red_ippo_spill_s4042 y eval_{red_alta,malla3}_ippo_spill_s*;
+% cola.out: tras las 03:55 solo OK de train_*_ippo_spill_* (04:03-04:54) y "cola: fin"
 
 \subsection{IPPO \emph{spill} en red, red\_alta y malla3}
 \label{sec:spill-vecinos}
@@ -1008,7 +1032,9 @@ corredor\_alta. Un entrenamiento completo, con sus 20 validaciones de
 dos semillas, tomó entre 21 minutos (SARSA en corredor) y 115 minutos
 (DQN en malla3). IPPO tomó de 23 a 24 minutos en corredor y de 96 a 98
 en malla3; MAPPO, lo mismo o hasta 5 minutos menos que IPPO en el mismo
-caso, y DQN, entre 5 y 19 minutos más.
+caso, y DQN, entre 5 y 19 minutos más. La cola no registró la duración
+de nueve entrenamientos de Q-learning; la suma de sus segundos por
+episodio queda dentro del rango de 21 a 115 minutos.
 
 
 %----------------------------------------------------------------------
