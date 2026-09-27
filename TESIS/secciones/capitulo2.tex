@@ -4,13 +4,13 @@
 \label{cap:teoria}
 
 Este capítulo presenta los conceptos que usa el método del Capítulo~\ref{cap:metodologia}, en el
-orden en que los necesita: el simulador SUMO y la interfaz TraCI, con los que se construyen los
-escenarios (U1) y se miden los controles (U3); el control semafórico, sus dos controles de
-referencia y la coordinación entre cruces; las métricas con que U3 compara los controles; los
-fundamentos del aprendizaje por refuerzo, en los que se apoya la formulación del control (U2);
-los métodos tabulares Q-learning y SARSA (U2); los métodos con redes neuronales, DQN y PPO, que
-U4 usa como algoritmos de aprendizaje; el caso de varios agentes, que es el marco de IPPO, MAPPO y
-la mensajería entre vecinos (U4); y los conceptos de evaluación del plan de pruebas.
+orden en que los necesita. Empieza por el simulador SUMO y la interfaz TraCI, con los que se
+construyen los escenarios (U1) y se miden los controles (U3). Sigue con el control semafórico, sus
+dos controles de referencia, la coordinación entre cruces y las métricas con que U3 compara los
+controles. Luego presenta los fundamentos del aprendizaje por refuerzo, en los que se apoya la
+formulación del control (U2), y los métodos tabulares Q-learning y SARSA. Siguen los métodos con
+redes neuronales, DQN y PPO, y el caso de varios agentes, que es el marco de IPPO, MAPPO y la
+mensajería entre vecinos (U4). Cierra con los conceptos de evaluación del plan de pruebas.
 % TODO(reestructura): falta un diagrama del pipeline real para el inicio del Capitulo III (se elimino Diagrama.png,
 % fig:diseno, que dibujaba Azure, Google Maps, matrices OD y estados inexistentes). Debe mostrar: U1 (nodos y vias ->
 % netconvert -> .net.xml; flujos .rou.xml; fijo por barrer_fijo.py y actuado derivado; OSM de Lima como camino
@@ -84,7 +84,7 @@ el semáforo puede despachar y la cola crece.
 El control de tiempo fijo y el actuado son los dos controles de referencia contra los que se mide
 cualquier mejora. El control de tiempo fijo repite el mismo programa en todos los ciclos, con duraciones independientes del tráfico
 presente. Su calidad depende del ajuste del ciclo, del reparto y, en un corredor, de los desfases
-\citep{FHWA_Timing_Manual_Chapter3,HCM2000_or_2010}. Un programa fijo sin ajustar sobrestima la
+\citep{HCM2000_or_2010}. Un programa fijo sin ajustar sobrestima la
 mejora de cualquier alternativa; por eso el método compara contra un fijo ajustado por barrido en
 cada caso, el fijo tuneado (Capítulo~\ref{cap:metodologia}).
 
@@ -100,9 +100,9 @@ nativa, con una duración mínima (\texttt{minDur}) y una máxima (\texttt{maxDu
 En un corredor, los semáforos se coordinan cuando comparten el ciclo y sus desfases se eligen para
 favorecer el paso de los pelotones. En la onda verde, el desfase entre dos semáforos sucesivos es
 igual al tiempo de viaje entre ellos, de modo que un pelotón que sale en verde del primero
-encuentra verde en los siguientes. Es la forma clásica de coordinar un corredor con control fijo,
-y por eso una referencia exigente para un agente que decide con información local
-\citep{FHWA_Timing_Manual_Chapter3,HCM2000_or_2010}. La progresión se mide con la fracción de
+encuentra verde en los siguientes. Es la forma clásica de coordinar un corredor con control fijo
+\citep{HCM2000_or_2010}; por eso es una referencia exigente para un agente que decide con
+información local. La progresión se mide con la fracción de
 vehículos que cruzan el corredor deteniéndose a lo sumo una vez (Sección~\ref{sec:teoria-metricas}).
 % TODO(reestructura): progresion en los dos sentidos y desfases alternados de medio ciclo ("en ajedrez", fijo de
 % P5 en tab:plan2-fijo): falta una fuente (capitulo de coordinacion del manual de la FHWA o el HCM).
@@ -140,8 +140,9 @@ Cola promedio y máxima & detenidos sumados sobre las aproximaciones semaforizad
 Emisiones & CO$_2$ (g/veh) y NO$_x$ (mg/veh) acumulados en el viaje & dispositivo de emisiones \\
 No terminados & viajes sin llegada al cerrar la simulación & \texttt{tripinfo} \\
 \midrule
-Viaje y retraso de corredor & medias sobre los vehículos que recorren la avenida de extremo a
-  extremo; el retraso, también solo en el sentido de la punta (s/veh) & \texttt{tripinfo} \\
+Viaje, retraso y paradas de corredor & medias sobre los vehículos que recorren la avenida de
+  extremo a extremo, en s/veh (las paradas, por vehículo); el retraso, también solo en el sentido
+  de la punta & \texttt{tripinfo} \\
 Progresión & fracción de esos vehículos que se detiene a lo sumo una vez & \texttt{tripinfo} \\
 Cola máxima del enlace & máximo por carril de detenidos en los enlaces entre semáforos (veh) &
   TraCI \\
@@ -149,8 +150,8 @@ Cola máxima del enlace & máximo por carril de detenidos en los enlaces entre s
   menos un umbral de sus plazas & TraCI \\
 \bottomrule
 \end{tabular}
-\caption[Métricas de desempeño]{Métricas de desempeño. Las del bloque inferior se miden solo en
-los escenarios de varios semáforos. El umbral de \textit{spillback} y el detalle de cada medición
+\caption[Métricas de desempeño]{Métricas de desempeño. Las del bloque inferior se refieren a la
+avenida y a los enlaces entre semáforos. El umbral de \textit{spillback} y el detalle de cada medición
 están en el Capítulo~\ref{cap:metodologia}.}
 \label{tab:metricas}
 \end{table}
@@ -168,12 +169,15 @@ emisiones las estima el modelo de emisiones de SUMO \citep{SUMO_Emissions}. El
 Conviene precisar la analogía con la ingeniería de transporte. El \textit{control delay} del HCM y
 de la FHWA es el tiempo de viaje adicional atribuible al dispositivo de control
 \citep{FHWA_Timing_Manual_Chapter3,HCM2000_or_2010}; el \texttt{timeLoss} de SUMO incluye además
-el tiempo perdido en arranques, giros y variaciones de la conducción. Por eso un cambio porcentual
+tiempo perdido que el semáforo no causa, como el de los giros y las variaciones de la conducción.
+Por eso un cambio porcentual
 medido sobre \texttt{timeLoss} subestima el efecto del control: parte del retraso medido no
 depende de él.
 
-Cada corrida registra además la recompensa y los retornos de los aprendices. Se definen con la
-formulación (Capítulo~\ref{cap:metodologia}) y son un diagnóstico, no entran en el veredicto.
+Cada corrida, con cualquier control, registra además la recompensa de colas y tres retornos por
+segundo, que se definen con la formulación (Capítulo~\ref{cap:metodologia}). Como se miden igual en
+el fijo, el actuado y los aprendices, cada modelo puede compararse con los demás controles en su
+propia recompensa. Son un diagnóstico y no entran en el veredicto.
 
 \section{Aprendizaje por refuerzo}
 \label{sec:rl}
@@ -214,15 +218,15 @@ donde $T$ es el último paso del episodio y $\gamma$ pondera las recompensas fut
 $\gamma = 0$ solo cuenta la inmediata, y cuanto más cerca de 1, más pesan las lejanas
 \citep{SuttonBarto2018}. Con una recompensa constante $r$ y horizonte ilimitado el retorno es
 $r/(1-\gamma)$, de modo que $1/(1-\gamma)$ se lee como el horizonte efectivo, en decisiones, que
-el agente toma en cuenta; el Capítulo~\ref{cap:implementacion} usa esa lectura para fijar
-$\gamma$.
+el agente toma en cuenta; el Capítulo~\ref{cap:implementacion} usa esa lectura para interpretar
+el descuento de las redes.
 
 Un episodio es una corrida completa del entorno, desde el estado inicial hasta un estado terminal.
 En esta tesis es una hora de demanda simulada sobre el mismo escenario, más el tiempo necesario
 para que la red se vacíe; la red vacía es el estado terminal. Si la simulación se corta antes por
 un tope de duración, el episodio queda truncado: el último estado no es terminal y su valor futuro
-no es cero, distinción que usan DQN y PPO en sus objetivos (Secciones~\ref{sec:dqn}
-y~\ref{sec:ppo}). El agente conserva lo aprendido de un episodio al siguiente.
+no es cero, distinción que respetan los objetivos de DQN y PPO de esta tesis
+(Secciones~\ref{sec:dqn} y~\ref{sec:ppo}). El agente conserva lo aprendido de un episodio al siguiente.
 
 \subsection{Política y funciones de valor}
 
@@ -262,11 +266,12 @@ entropía de la política (Sección~\ref{sec:ppo}).
 Mientras entrena, el agente explora y sus parámetros (la tabla de valores o los pesos de la red)
 cambian dentro de cada episodio o entre episodios, así que las métricas de esos episodios
 describen el aprendizaje, no el desempeño del controlador. Para medir este último se
-\textit{congela} la política: se dejan de actualizar los parámetros y el agente actúa de forma
-determinista, con la acción de mayor valor en Q-learning, SARSA y DQN (equivale a
-$\varepsilon = 0$) y con la de mayor probabilidad en IPPO y MAPPO. La política congelada se corre
-igual que los controles de referencia, y solo esos valores son comparables con el fijo y el
-actuado.
+\textit{congela} la política: se dejan de actualizar los parámetros y el agente deja de explorar.
+Elige la acción de mayor valor en Q-learning, SARSA y DQN (equivale a $\varepsilon = 0$) y la de
+mayor probabilidad en IPPO y MAPPO. En los tabulares, un empate entre las dos acciones se resuelve
+al azar, con un generador sembrado para que la corrida se repita igual
+(Capítulo~\ref{cap:implementacion}). La política congelada se corre igual que los controles de
+referencia, y solo esos valores son comparables con el fijo y el actuado.
 
 \section{Métodos tabulares: Q-learning y SARSA}
 \label{sec:tabular}
@@ -338,7 +343,8 @@ componentes que estados hay. Un cambio en $\theta$ modifica a la vez el valor de
 lo que permite generalizar entre estados parecidos. Una red neuronal es una de esas funciones:
 capas de combinaciones lineales seguidas de activaciones no lineales. Sus parámetros se ajustan
 minimizando una pérdida por descenso de gradiente estocástico, un paso pequeño en contra del
-gradiente calculado sobre un minilote de ejemplos \citep{SuttonBarto2018}. Las redes de esta tesis
+gradiente de la pérdida en cada ejemplo \citep{SuttonBarto2018}. DQN y PPO promedian ese gradiente
+sobre un minilote de ejemplos \citep{Mnih2015_DQN,Schulman2017_PPO}. Las redes de esta tesis
 usan el optimizador Adam y recortan la norma del gradiente: si supera un umbral, el gradiente se
 reescala hasta él (Capítulo~\ref{cap:implementacion}). Este recorte es distinto del recorte de la
 razón de probabilidades de PPO (Sección~\ref{sec:ppo}).
@@ -462,7 +468,7 @@ recortar: cuando la razón sale del intervalo en la dirección que lo mejoraría
 crecer y su gradiente se anula, así que no hay incentivo para alejarse más de la política anterior
 \citep{Schulman2017_PPO}.
 
-Cuando actor y crítico se entrenan juntos, el objetivo suma al término recortado el error del
+Si actor y crítico comparten parámetros, el objetivo suma al término recortado el error del
 crítico y un bono de entropía:
 \begin{equation}
   L(\theta) = \hat{\mathbb{E}}_t\Bigl[L^{\text{CLIP}}_t(\theta)
@@ -475,10 +481,11 @@ aproximar, $c_1$ el coeficiente del valor, $S[\pi_\theta](s_t)$ la entropía de 
 acciones en $s_t$ y $c_2$ el coeficiente de entropía; el objetivo se maximiza
 \citep{Schulman2017_PPO}. El bono de entropía favorece distribuciones de acciones menos
 concentradas y asegura una exploración suficiente. En esta tesis actor y crítico son redes
-separadas que se optimizan con esta misma suma (Capítulo~\ref{cap:implementacion}).
+separadas, pero se optimizan juntas con esta suma y un solo optimizador; el error del crítico entra
+como $\tfrac{1}{2}\bigl(V(s_t) - V_t^{\text{targ}}\bigr)^2$ (Capítulo~\ref{cap:implementacion}).
 
 El algoritmo alterna dos etapas: recoge trayectorias con la política vigente
-$\pi_{\theta_{\text{old}}}$ y calcula sus ventajas; luego optimiza el objetivo durante $K$ épocas
+$\pi_{\theta_{\text{old}}}$ y calcula sus ventajas; luego optimiza el objetivo durante varias épocas
 sobre minilotes de ese lote y hace $\theta_{\text{old}} \leftarrow \theta$
 \citep{Schulman2017_PPO}. En esta tesis el lote es un episodio completo de todos los semáforos.
 El tamaño de cada actualización se mide con la divergencia de Kullback--Leibler
@@ -504,7 +511,8 @@ $\pi_\theta(a_i \mid o_i)$, y entre todos maximizan el retorno descontado común
 Lo que ve cada semáforo (sus colas, su fase y, en U4, los mensajes de sus vecinos) es entonces una
 observación local $o_i$, no el estado de toda la red; también lo es la entrada del agente tabular,
 que el Capítulo~\ref{cap:metodologia} llama estado con la terminología del MDP. Además, en esta tesis cada
-agente recibe una recompensa local, calculada sobre sus propias aproximaciones
+agente recibe una recompensa local, calculada sobre sus propias aproximaciones y, en la variante
+\emph{spill}, también sobre los enlaces por los que descarga hacia sus vecinos
 (Ecuación~\ref{eq:recompensa-u4}), y no una recompensa común: el problema no es exactamente el
 Dec-POMDP de recompensa compartida de Yu et al.
 % TODO(reestructura): citar una fuente que formalice el caso con recompensas individuales por agente (juego
@@ -544,8 +552,8 @@ del MAPPO de esta tesis se describe en el Capítulo~\ref{cap:implementacion}.
 
 Otra vía de coordinación es la comunicación explícita: cada agente recibe mensajes de sus vecinos
 y los incorpora a su observación, de modo que la política sigue siendo descentralizada pero ve
-información que su detector propio no puede medir. Es la vía de U4: en IPPO con mensajes, DQN y
-MAPPO la coordinación entra por la observación y, en la variante con penalización de
+información que su detector propio no puede medir. Es la vía de U4: en IPPO vecinos, IPPO spill,
+DQN y MAPPO la coordinación entra por la observación y, en IPPO spill, que penaliza el
 \textit{spillback}, también por la recompensa (Capítulo~\ref{cap:metodologia}).
 % TODO(reestructura): citar una referencia de RL multiagente con comunicacion entre agentes; Yu2021_MAPPO no la
 % trata y no hay otra en referencias.bib.
@@ -573,8 +581,9 @@ El desempeño durante el entrenamiento no tiene por qué mejorar de forma monót
 último episodio no es necesariamente la mejor. Por eso se guardan los parámetros a intervalos
 regulares, se valida cada copia con la política congelada y se elige la de mejor valor de
 validación: una selección de modelo por validación, análoga a la parada temprana. Como el
-resultado depende también de la semilla del propio entrenamiento, cada modelo se entrena con
-varias semillas base, y el rango entre ellas mide la fragilidad del entrenamiento. El
+resultado depende también de la semilla del propio entrenamiento, cada modelo se entrena varias
+veces, cada una con su propia semilla base (Capítulo~\ref{cap:metodologia}), y el rango entre esos
+entrenamientos mide su fragilidad. El
 Capítulo~\ref{cap:metodologia} define la regla que elige la política que representa a cada modelo.
 % TODO(reestructura): citar una fuente de seleccion de modelo por validacion o parada temprana y (opcional) otra
 % de la variabilidad entre semillas de entrenamiento en RL profundo; no estan en referencias.bib.
@@ -601,7 +610,10 @@ diferencias se reparten de forma simétrica alrededor de cero.
 
 Las dos herramientas responden a preguntas distintas. El intervalo se refiere al cambio de la media,
 que pueden mover unas pocas semillas con diferencias grandes; la prueba usa el signo y el rango de
-todas las diferencias. Pueden por tanto discrepar, como ocurre en una celda del Capítulo~\ref{cap:resultados}; la regla
-de veredicto del Capítulo~\ref{cap:metodologia} exige las dos condiciones.
+todas las diferencias. Pueden por tanto discrepar, como ocurre en P5 con IPPO vecinos frente al
+fijo y en P2 con MAPPO frente al actuado (Capítulo~\ref{cap:resultados}); la regla de veredicto del
+Capítulo~\ref{cap:metodologia} exige las dos condiciones.
+% fuente: plan2/veredicto_congelado_0355.csv (P5 ippo_vecinos: ic_fijo [0.4, 3.4], p_fijo 0.523;
+% P2 mappo: ic_act [-4.5, -0.1], p_act 0.0687)
 % TODO(reestructura): citar el bootstrap (Efron y Tibshirani, 1993), la prueba de Wilcoxon (Wilcoxon, 1945) y el
 % intervalo con t de Student; ninguna esta en referencias.bib. Procedimiento: consolidar.py (docstring).

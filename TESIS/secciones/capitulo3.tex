@@ -52,16 +52,17 @@ Unidad & Qué hace & Entradas & Salidas & Programas \\
 \midrule
 U1. Preprocesa\-miento & construye cada escenario: red, demanda, programas de referencia y configuración & archivos de nodos y vías escritos a mano (\texttt{.nod.xml}, \texttt{.edg.xml}); flujos por movimiento y periodo & red (\texttt{.net.xml}), demanda (\texttt{.rou.xml}), programas fijo y actuado (\texttt{.add.xml}), configuración (\texttt{.sumocfg}); aproximaciones, enlaces y vecinos de cada semáforo & \texttt{netconvert} (\texttt{build\_net.bat}), \texttt{barrer\_fijo.py}, \texttt{comun.py}, \texttt{escenarios\_\allowbreak plan2.py} \\
 \midrule
-U2. Entrena\-miento & entrena un agente por semáforo, que decide cada 5~s sobre SUMO a través de TraCI; no modifica la red ni las rutas & escenario de U1; semillas de entrenamiento y de validación & \textit{checkpoints}, política publicada con su archivo de metadatos (Sección~\ref{sec:protocolo}) y registro por episodio & \texttt{rl\_corredor.py} (Q-learning y SARSA), \texttt{rl\_dqn.py} (DQN) \\
+U2. Entrena\-miento & entrena un agente por semáforo, que decide cada 5~s sobre SUMO a través de TraCI; no modifica la red ni las rutas & escenario de U1; semillas de entrenamiento y de validación & \textit{checkpoints}, política publicada con su archivo de metadatos (Sección~\ref{sec:protocolo}) y registro por episodio & \texttt{rl\_corredor.py} (Q-learning y SARSA), \texttt{rl\_ippo.py} (IPPO), \texttt{rl\_dqn.py} (DQN) \\
 \midrule
-U3. Medición & mide todos los controles con las mismas salidas de SUMO, evalúa las políticas congeladas y aplica la regla de veredicto & salida por vehículo (\texttt{tripinfo}) y lecturas de TraCI de cada corrida; políticas publicadas y programas de referencia & métricas por corrida; media, intervalo de confianza, $\Delta$ y $p$ por control; tablas de veredicto & \texttt{comun.py}, \texttt{evaluar.py}, \texttt{consolidar.py}, \texttt{veredicto.py} \\
+U3. Medición & mide todos los controles con las mismas salidas de SUMO, evalúa las políticas congeladas y aplica la regla de veredicto & salida por vehículo (\texttt{tripinfo}) y lecturas de TraCI de cada corrida; políticas publicadas y programas de referencia & métricas por corrida; media e intervalo de confianza por control; cambio porcentual frente al fijo y al actuado con su intervalo y su valor $p$ (Sección~\ref{sec:estadistica}); tablas de veredicto & \texttt{comun.py}, \texttt{evaluar.py}, \texttt{consolidar.py}, \texttt{veredicto.py} \\
 \midrule
-U4. Coordina\-ción distribuida & añade mensajes entre vecinos, observación extendida y término de \textit{spillback}; entrena IPPO (local, vecinos y \textit{spill}) y MAPPO & escenario de U1 con su tabla de vecinos & las mismas que U2 & \texttt{rl\_ippo.py}, \texttt{rl\_mappo.py} \\
+U4. Coordina\-ción distribuida & añade mensajes entre vecinos, observación extendida y término de \textit{spillback} (variantes vecinos y \textit{spill} de IPPO) y el crítico centralizado de MAPPO & escenario de U1 con su tabla de vecinos & las mismas que U2 & \texttt{rl\_ippo.py}, \texttt{rl\_mappo.py} \\
 \bottomrule
 \end{tabular}
 \caption[Unidades del método]{Unidades del método: qué hace cada una, qué recibe, qué entrega y
-con qué programas se implementa. Los programas están en el Anexo~B; DQN y MAPPO corren el
-episodio con \texttt{rl\_ippo.py} y solo deciden y aprenden en su propio programa.}
+con qué programas se implementa. Los programas están en el Anexo~B. IPPO vecinos, DQN y MAPPO
+usan la observación con mensajes de U4; DQN y MAPPO corren el episodio con \texttt{rl\_ippo.py}
+y solo deciden y aprenden en su propio programa.}
 \label{tab:pipeline}
 \end{table}
 % fuente: capitulo4.tex original (7bd8685): Alcance y unidades, Resumen de las unidades, P5 (malla3.nod.xml,
@@ -150,9 +151,10 @@ Markov (MDP), en el sentido de la Sección~\ref{sec:rl}
 \citep{SuttonBarto2018}: el agente observa el estado del tráfico,
 aplica una acción, la simulación avanza y el agente recibe una
 recompensa. Esta sección define esos elementos. La misma formulación
-sirve para todos los aprendices; cambian solo la representación del
-estado (tabular o continua) y, en la variante \emph{spill} y en la
-ablación, la recompensa.
+sirve para todos los aprendices; cambian la representación del estado
+(tabular o continua), la forma de imponer los límites de verde
+(máscara o corrección después de elegir) y, en la variante
+\emph{spill} y en la ablación, la recompensa.
 
 \subsection{Agentes, decisiones y restricciones de verde}
 
@@ -213,17 +215,18 @@ vecinos. Se define en la Sección~\ref{sec:u4}
 
 \subsection{Recompensa}
 
-Todos los aprendices se entrenan con la misma recompensa, la de
-retraso, salvo la ablación \texttt{ql\_colas}, un Q-learning que solo
-cambia la recompensa (Sección~\ref{sec:modelos}). Para un agente $i$,
-con aproximaciones $j \in \mathcal{A}_i$, la recompensa de una decisión
-es
+Todos los aprendices se entrenan con la recompensa de retraso. La
+variante \emph{spill} le suma el término de \textit{spillback}, y la
+ablación \texttt{ql\_colas}, un Q-learning que solo cambia la
+recompensa, usa la de colas (Sección~\ref{sec:modelos}). Para un
+agente $i$, con aproximaciones $j \in \mathcal{J}_i$, la recompensa de
+una decisión es
 \begin{equation}
   \begin{aligned}
   r_i = -\frac{1}{5}\sum_{t \in \mathcal{T}_i} \Bigl[\;
-        & w_1 \sum_{j \in \mathcal{A}_i} n_j(t)\Bigl(1 - \frac{\bar v_j(t)}{v_{\max,j}}\Bigr)
-        + w_2 \sum_{j \in \mathcal{A}_i} e_j(t) \\
-        & + w_3 \sum_{e \in \mathcal{S}_i} \max\bigl(0,\; q_e(t) - \lfloor P_e/2 \rfloor\bigr) \Bigr],
+        & w_1 \sum_{j \in \mathcal{J}_i} n_j(t)\Bigl(1 - \frac{\bar v_j(t)}{v_{\max,j}}\Bigr)
+        + w_2 \sum_{j \in \mathcal{J}_i} e_j(t) \\
+        & + w_3 \sum_{\ell \in \mathcal{L}_i} \max\bigl(0,\; q_\ell(t) - \lfloor K_\ell/2 \rfloor\bigr) \Bigr],
   \end{aligned}
   \label{eq:recompensa-u4}
 \end{equation}
@@ -235,13 +238,15 @@ media, $v_{\max,j}$ la velocidad máxima permitida en la aproximación
 suma de los tiempos de espera de los vehículos que en ese momento están
 en la aproximación (\verb|edge.getWaitingTime|). El cociente
 $\bar v_j / v_{\max,j}$ se acota entre 0 y 1. Los pesos son
-$w_1 = 1$ y $w_2 = 0.01$. El tercer término solo existe en la variante
-\emph{spill} de U4 ($w_3 = 2$; $w_3 = 0$ en los demás aprendices) y se
-explica en la Sección~\ref{sec:u4}: $\mathcal{S}_i$ son los enlaces que
-salen del semáforo $i$ hacia sus vecinos, $q_e(t)$ es el máximo por
-carril de vehículos detenidos en el enlace $e$, $P_e$ sus plazas por
-carril (38; 37 en malla3) y $\lfloor \cdot \rfloor$ la parte entera.
-Los pesos se fijaron de antemano, sin barrido.
+$w_1 = 1$ y $w_2 = 0.01$.
+
+El tercer término solo existe en la variante \emph{spill} de U4
+($w_3 = 2$; $w_3 = 0$ en los demás aprendices) y se explica en la
+Sección~\ref{sec:u4}: $\mathcal{L}_i$ son los enlaces que salen del
+semáforo $i$ hacia sus vecinos, $q_\ell(t)$ es el máximo por carril de
+vehículos detenidos en el enlace $\ell$, $K_\ell$ sus plazas por carril
+(38; 37 en malla3) y $\lfloor \cdot \rfloor$ la parte entera. Los
+pesos se fijaron de antemano, sin barrido.
 % fuente: rl_ippo.py (recompensa_paso, retraso_base con min(1, max(0, v)/vmax), termino_spill con
 % plazas // 2, recompensa_agente con r_acum / PASO_CONTROL); rl_corredor.py (recompensa_paso, copia);
 % vmax = getSpeed del edge (13.89 m/s en los .edg.xml); plan2/ESPEC.md seccion 2
@@ -259,23 +264,23 @@ reciben multiplicada por 0.02 y los tabulares, sin escalar
 
 Frente a la recompensa de colas que se define a continuación, esta
 recompensa cambia dos cosas. Primero, cuenta el retraso en lugar de los
-vehículos detenidos: SUMO cuenta como detenido a un vehículo con
-velocidad menor que 0.1~m/s, así que cuando el verde cambia muy seguido
-las colas reptan en vez de pararse y desaparecen del conteo sin haber
-salido; en la prueba de humo de IPPO ese defecto hizo derivar a la
+vehículos detenidos, porque el conteo de detenidos no ve las colas que
+avanzan a paso lento, como las que se forman cuando el verde cambia muy
+seguido; en la prueba de humo de IPPO ese defecto hizo derivar a la
 política hacia cambiar de fase, y con el retraso la deriva desapareció
 (Sección~\ref{sec:humo}). Segundo, acumula la señal sobre todo el
 intervalo en lugar de leer el nivel en el instante siguiente a la
 decisión, que subestimaba la cola al inicio de un verde y también
 sesgaba hacia cambiar.
-% fuente: capitulo4.tex original (7bd8685), "Lo que enseño la prueba de humo", punto 2;
-% comentario de rl_ippo.py en recompensa_agente ("El nivel en el instante siguiente, como en U2,
+% fuente: capitulo4.tex original (7bd8685), "Lo que enseño la prueba de humo", punto 2 (el detalle
+% de 0.1 m/s y 9.6 frente a 4.4 queda en capitulo4.tex, sec:humo); docstring de rl_ippo.retraso_base
+% ("El conteo de detenidos de U2 no ve a los que avanzan a paso lento"); comentario de rl_ippo.py en recompensa_agente ("El nivel en el instante siguiente, como en U2,
 % subestimaba la cola al inicio de un verde y tambien sesgaba hacia cambiar")
 
 La ablación \texttt{ql\_colas} usa la recompensa original de U2, la de
 colas, evaluada en el instante de la decisión:
 \begin{equation}
-  r_i = -\Bigl(w_1 \sum_{j \in \mathcal{A}_i} h_j + w_2 \sum_{j \in \mathcal{A}_i} e_j\Bigr),
+  r_i = -\Bigl(w_1 \sum_{j \in \mathcal{J}_i} h_j + w_2 \sum_{j \in \mathcal{J}_i} e_j\Bigr),
   \qquad w_1 = 1,\; w_2 = 0.01,
   \label{eq:recompensa}
 \end{equation}
@@ -291,17 +296,21 @@ incremento entre decisiones.
 
 La fase exploratoria (Anexo~C) mostró que agentes tabulares
 independientes, sin comunicación, quedan por detrás de un programa fijo
-coordinado en los escenarios de varios semáforos. U4 añade lo que a esos agentes les
-falta: información de los vecinos. El plan de pruebas mide su aporte
-con IPPO local frente a IPPO vecinos, que solo difieren en los mensajes
-(Sección~\ref{sec:modelos}).
+coordinado en los escenarios de varios semáforos. Frente a esos
+agentes, las variantes de IPPO de esta sección cambian cuatro cosas:
+la representación del estado, los
+mensajes de los vecinos, un término de \textit{spillback} en la
+recompensa y el algoritmo, que pasa de la tabla $Q$ a IPPO. El plan de
+pruebas mide el aporte de los mensajes con IPPO local frente a IPPO
+vecinos, que solo difieren en ellos (Sección~\ref{sec:modelos}).
+% fuente: capitulo4.tex original (7bd8685), apertura de sec:u4 ("El modulo U4 cambia cuatro cosas a la vez")
 
-U4 introduce tres elementos, cada uno ligado a una variante: una
+Los tres primeros cambios se introducen uno por variante: una
 observación continua que incluye lo que el propio detector ve en
 movimiento (variante \emph{local}), los mensajes de los vecinos
-(\emph{vecinos}) y un término de \textit{spillback} en la recompensa
-(\emph{spill}). El aprendizaje usa IPPO \citep{Schulman2017_PPO,Yu2021_MAPPO},
-con una sola red compartida por todos los semáforos
+(\emph{vecinos}) y el término de \textit{spillback} en la recompensa
+(\emph{spill}). IPPO \citep{Schulman2017_PPO,Yu2021_MAPPO} se
+entrena con una sola red compartida por todos los semáforos
 (Secciones~\ref{sec:ppo} y~\ref{sec:marl}).
 
 \subsection{Vecinos y canal de mensajes}
@@ -314,8 +323,11 @@ publica a cada vecino un mensaje con cinco datos que un controlador
 real podría transmitir: la fase en curso (avenida, transversal o
 ámbar), el tiempo que lleva en ella, los vehículos presentes en la
 aproximación que descarga hacia el vecino, la cola detenida en esa
-aproximación y la cola detenida en el enlace que une al emisor con el
-receptor. El receptor conserva el último mensaje recibido y su edad.
+aproximación y la cola detenida en el enlace que va del emisor al
+receptor, que es el enlace por el que llegan al receptor esos
+vehículos. El receptor conserva el último mensaje recibido y su edad.
+% fuente: capitulo4.tex original (7bd8685), "Vecinos y canal de mensajes"; rl_ippo.py (mensaje:
+% cola_salida = max_halting del enlace emisor->receptor)
 
 El canal admite una latencia fija y una probabilidad de pérdida por
 mensaje. Las dos son nulas en el entrenamiento y en todo el plan de
@@ -332,8 +344,8 @@ dos lados, oeste y este, el identificador tiene tres posiciones y el
 vector, 31 componentes (Tabla~\ref{tab:obs-u4}); es la disposición de
 los cuatro escenarios de P1 a P4. En la malla de P5 el bloque local no
 cambia, el identificador tiene nueve posiciones y hay cuatro ranuras
-(oeste, este, norte y sur): 53 componentes. ``Verde hacia mí'' es el
-verde este--oeste para un vecino al oeste o al este y el norte--sur
+(oeste, este, norte y sur): 53 componentes. ``Verde hacia mí''
+(componentes 17 y 20) es el verde este--oeste para un vecino al oeste o al este y el norte--sur
 para uno al norte o al sur. La observación supone exactamente dos
 fases verdes por semáforo, como en todos los casos del plan.
 % fuente: rl_ippo.py (preparar: dim_obs = 12 + n_id + 8 * lados, n_id = max(3, semaforos);
@@ -369,10 +381,10 @@ Local & 1--4 & cola detenida en cada aproximación (O, E, N, S) sobre su capacid
 Identificador & 13--15 & identificador del semáforo (uno de tres) \\
 \midrule
 Vecino oeste & 16 & 1 si existe el vecino \\
-(17--22 a cero si & 17 & 1 si el vecino está en la fase de la avenida (descarga hacia mí) \\
+(17--22 a cero si & 17 & 1 si el vecino está en el verde hacia mí (el de la avenida en esta disposición) \\
 no hay mensaje) & 18 & 1 si el vecino está en ámbar \\
  & 19 & tiempo del vecino en su fase sobre 60~s \\
- & 20 & vehículos en la aproximación del vecino que descarga hacia mí, sobre su capacidad; cero si el vecino no está en la fase de la avenida \\
+ & 20 & vehículos en la aproximación del vecino que descarga hacia mí, sobre su capacidad; cero si el vecino no está en el verde hacia mí \\
  & 21 & cola detenida en esa aproximación sobre su capacidad \\
  & 22 & cola detenida en el enlace que llega desde el vecino (del vecino hacia mí), máximo por carril, sobre sus plazas \\
  & 23 & edad del último mensaje sobre 30~s (1 si nunca llegó) \\
@@ -390,8 +402,8 @@ norte y sur), 53 componentes. La usan IPPO, DQN y MAPPO.}
 \subsection{Variantes}
 
 Las tres variantes de IPPO comparten las acciones, la máscara y la
-recompensa de retraso de la Sección~\ref{sec:formulacion}, y forman
-una escalera. \emph{Local} usa solo el bloque local y el
+recompensa de retraso de la Sección~\ref{sec:formulacion}, y cada una
+añade un elemento a la anterior. \emph{Local} usa solo el bloque local y el
 identificador. \emph{Vecinos} añade los mensajes. \emph{Spill} añade
 además a la recompensa el término de $w_3$ de la
 Ecuación~\ref{eq:recompensa-u4}, que resta la cola que el agente
@@ -432,7 +444,7 @@ DQN & Double DQN con pesos compartidos, observación de IPPO vecinos & retraso &
 IPPO local & IPPO con pesos compartidos, sin mensajes & retraso & P1 a P5 \\
 IPPO vecinos & IPPO con mensajes entre vecinos & retraso & P1 a P5 \\
 IPPO spill & IPPO con mensajes y término de \textit{spillback} & \makecell[l]{retraso +\\\textit{spillback}} & \makecell[l]{P1 y P2; en P3\\a P5 = vecinos} \\
-MAPPO & actor de IPPO vecinos con crítico centralizado & retraso & P1 a P5 \\
+MAPPO & misma arquitectura de actor y observación que IPPO vecinos, con crítico centralizado & retraso & P1 a P5 \\
 \bottomrule
 \end{tabular}
 \caption[Modelos del plan de pruebas]{Modelos que se comparan en cada caso. La recompensa de
@@ -495,8 +507,10 @@ recompensa que IPPO vecinos. Como solo
 cambia el algoritmo, la comparación entre DQN e IPPO vecinos enfrenta
 un método de valor con uno de política.
 
-MAPPO \citep{Yu2021_MAPPO} usa el actor de IPPO vecinos y cambia solo
-el crítico, que pasa a ser centralizado: durante el entrenamiento
+MAPPO \citep{Yu2021_MAPPO} comparte con IPPO vecinos la arquitectura del
+actor, la observación con mensajes, la máscara y la recompensa, y entrena su
+propia política. Cambia solo el crítico, que pasa a ser centralizado:
+durante el entrenamiento
 estima el valor a partir del estado global, formado por las
 observaciones de todos los semáforos. En ejecución cada semáforo decide
 con su propia observación, igual que en IPPO
@@ -515,14 +529,10 @@ Tabla~\ref{tab:plan2-hiper}.
 \section{Medición del desempeño (U3)}
 \label{sec:u3}
 
-Todas las métricas se calculan con las mismas salidas de SUMO para
-todos los controles comparados, de modo que la comparación no dependa
-de cómo decide cada uno. Sus definiciones están en la
-Sección~\ref{sec:teoria-metricas}; esta sección describe de dónde sale
-cada una. La métrica primaria es el retraso por vehículo, porque es la
-magnitud que la tesis se propone reducir y porque la espera detenida no
-es el retraso: un control que fragmenta las colas en paradas más cortas
-puede bajar la espera y subir las paradas sin mover el retraso. La
+Esta sección describe de dónde sale cada métrica de la
+Sección~\ref{sec:teoria-metricas}; todas se calculan con las mismas
+salidas de SUMO para todos los controles. La métrica primaria es el
+retraso por vehículo, la magnitud que la tesis se propone reducir; la
 espera, las colas, las paradas, el \textit{throughput} y las emisiones
 son secundarias.
 
@@ -572,8 +582,8 @@ escalar. El retorno de colas, \texttt{ret\_colas}, es la misma suma
 con la recompensa de la Ecuación~\ref{eq:recompensa} evaluada cada
 segundo, $-\bigl(w_1 \sum_j h_j + w_2 \sum_j e_j\bigr)$. El retorno de
 \textit{spillback}, \texttt{ret\_spill}, es \texttt{ret\_retraso} menos
-$w_3 \sum_t \sum_e \max\bigl(0,\, q_e(t) - \lfloor P_e/2 \rfloor\bigr)$
-sobre todos los enlaces entre semáforos, con $w_3 = 2$. Se calculan
+$w_3 \sum_t \sum_\ell \max\bigl(0,\, q_\ell(t) - \lfloor K_\ell/2 \rfloor\bigr)$
+sobre todos los enlaces $\ell$ entre semáforos, con $w_3 = 2$. Se calculan
 igual para el fijo, el actuado y los aprendices, de modo que cada
 modelo puede compararse con los demás en su propia recompensa y no
 solo en el retraso.
@@ -665,9 +675,27 @@ validación) están en la Sección~\ref{sec:evaluacion}.
 
 Cada aprendiz se entrena durante $N = 200$ episodios
 (Sección~\ref{sec:rl}) con tres semillas base, o simplemente bases:
-42, 2042 y 4042. El episodio $k$ usa la semilla de SUMO base$+k$. La
-Tabla~\ref{tab:plan2-semillas} resume el uso de cada rango de
-semillas.
+42, 2042 y 4042. El episodio $k$ usa la semilla de SUMO base$+k$.
+
+Cada diez episodios, y en el último, se hace una validación: se congela
+la política (acción de mayor valor o de mayor probabilidad, sin
+exploración) y se corre con las semillas 999 y 1999. El valor de
+validación es la media del retraso en las dos. La validación guarda y
+restaura el estado de los generadores aleatorios de Python, NumPy y
+PyTorch, así que el entrenamiento reproduce el mismo registro por
+episodio, dígito a dígito, con o sin ella.
+
+En cada validación se guarda un \textit{checkpoint}: una copia de la
+tabla $Q$ o de los pesos de la red en ese episodio. La política
+publicada de un entrenamiento es el \textit{checkpoint} con menor valor
+de validación (en empate, el más tardío), y no la del último episodio.
+La base publicada de un modelo en un caso es la mediana de sus tres
+bases por ese mismo valor; su política publicada es la que representa
+al modelo en la celda. Ninguna de las dos elecciones usa las semillas
+de evaluación. La Tabla~\ref{tab:plan2-semillas} resume el uso de cada
+rango de semillas.
+% fuente: plan2/ESPEC.md seccion 3 (checkpoint, politica publicada, base publicada);
+% veredicto.py (base_mediana: ordena por (valor, base) y toma la del medio)
 
 \begin{table}[H]
 \setstretch{1}
@@ -689,25 +717,6 @@ Evaluación & 1001 a 1030 & política congelada, todos los controles y todas las
 \caption{Semillas de cada etapa del plan de pruebas. Los cuatro rangos no se solapan.}
 \label{tab:plan2-semillas}
 \end{table}
-
-Cada diez episodios, y en el último, se hace una validación: se congela
-la política (acción de mayor valor o de mayor probabilidad, sin
-exploración) y se corre con las semillas 999 y 1999. El valor de
-validación es la media del retraso en las dos. La validación guarda y
-restaura el estado de los generadores aleatorios de Python, NumPy y
-PyTorch, así que el entrenamiento reproduce el mismo registro por
-episodio, dígito a dígito, con o sin ella.
-
-En cada validación se guarda un \textit{checkpoint}: una copia de la
-tabla $Q$ o de los pesos de la red en ese episodio. La política
-publicada de un entrenamiento es el \textit{checkpoint} con menor valor
-de validación (en empate, el más tardío), y no la del último episodio.
-La base publicada de un modelo en un caso es la mediana de sus tres
-bases por ese mismo valor (en empate, la base menor); su política
-publicada es la que representa al modelo en la celda. Ninguna de las
-dos elecciones usa las semillas de evaluación.
-% fuente: plan2/ESPEC.md seccion 3 (checkpoint, politica publicada, base publicada);
-% veredicto.py (base_mediana: "empate de val: gana la base menor")
 
 El fijo tuneado se obtiene en cada caso con un barrido del verde de la
 avenida, el verde transversal y el desfase entre cruces sobre las
