@@ -3,7 +3,7 @@
 \markboth{RECOMENDACIONES}{RECOMENDACIONES}
 
 Las recomendaciones que siguen se desprenden de los resultados del plan
-de pruebas (Sección~\ref{sec:plan2}) y de la fase exploratoria que lo
+de pruebas (Capítulo~\ref{cap:resultados}) y de la fase exploratoria que lo
 precedió (Anexo~C). Las primeras son metodológicas: valen para
 cualquier continuación del trabajo, con estos escenarios o con otros.
 Las segundas ordenan el trabajo siguiente.
@@ -58,32 +58,36 @@ y norte--sur; la malla evaluada se construyó corregida, y el barrido
 detecta ahora la fase de la avenida a partir de la red. En la
 observación de IPPO, la componente 22 de la Tabla~\ref{tab:obs-u4},
 que el código llama \texttt{cola\_mi\_salida}, mide la cola del enlace
-que entra desde el vecino y no la del que sale hacia él. La usan todas
-las políticas IPPO, DQN y MAPPO de la tesis, y en la malla, que es
-simétrica, las dos magnitudes coinciden. Cambiar esa definición
-cambiaría todas las políticas entrenadas, así que en esta tesis se
-documenta y no se corrige (Capítulo~\ref{cap:implementacion}). Antes de
-cualquier entrenamiento nuevo conviene renombrarla o corregirla y
-agregar una prueba que compare cada componente con una lectura directa
-de TraCI.
-% fuente: rl_ippo.nombres_features y rl_ippo.observar; construccion de malla3 en capitulo4.tex
+que entra desde el vecino y no la del que sale hacia él. La usan las
+políticas de IPPO \emph{vecinos} y \emph{spill}, DQN y MAPPO. Como los
+dos sentidos de cada enlace tienen la misma longitud, su normalización
+por plazas es correcta, pero la componente no mide la cola que se quiso
+medir. Cambiar esa definición cambiaría todas esas políticas
+entrenadas, así que en esta tesis se documenta y no se corrige
+(Sección~\ref{sec:aprendices}). Antes de cualquier entrenamiento nuevo
+conviene renombrarla o corregirla y agregar una prueba que compare cada
+componente con una lectura directa de TraCI.
+% fuente: rl_ippo.nombres_features y rl_ippo.observar (la variante local devuelve la observacion antes
+% de llenar las ranuras de los vecinos); rl_dqn.py y rl_mappo.py (observacion de la variante vecinos);
+% nota de cola_mi_salida y construccion de malla3 en capitulo4.tex
 
 \noindent\textbf{Calibrar la demanda de estrés mirando todos los
 cuellos de botella, no solo los semáforos.} El criterio heredado del
-corredor con demanda doble buscaba el factor que llena el enlace entre
-cruces. En la red ese factor habría sido 2.5, pero la rotonda sin
-semáforo se satura mucho antes y dejó el factor de P4 en 1.2
-(conclusión~1 y Tabla~\ref{tab:red-alta-factor}). Todo escenario de
+corredor con demanda doble buscaba el factor con el que la cola del
+enlace entre cruces alcanza el umbral de \textit{spillback}. En la red
+ese factor habría sido 2.5, pero la rotonda sin semáforo se satura
+mucho antes y dejó el factor de P4 en 1.2 (conclusión~1 y
+Tabla~\ref{tab:red-alta-factor}). Todo escenario de
 estrés debe comprobar antes que la congestión que se mide la pueden
 resolver los controles que se comparan.
 % fuente: tabla por factor en la cabecera de plan2/red_alta.rou.xml
 
 \subsection*{Trabajo siguiente}
 
-\noindent\textbf{Llevar el protocolo al cruce real de Lima.} Es el paso
-que acerca los resultados al problema de la tesis y el que completa U1.
-La importación desde OpenStreetMap del cruce de la Av.\ Paseo de la
-República con la Av.\ 28 de Julio se hizo el 01.12.2025 con
+\noindent\textbf{Llevar el protocolo al cruce real de Lima.} Es la
+transferencia a un caso real que la introducción deja como trabajo
+siguiente. La importación desde OpenStreetMap del cruce de la
+Av.\ Paseo de la República con la Av.\ 28 de Julio se hizo el 01.12.2025 con
 \texttt{osmWebWizard}, pero la red no se ha limpiado en
 \texttt{netedit}, su demanda es la aleatoria del asistente y no ha
 pasado por este protocolo; el procedimiento de importación y limpieza
@@ -92,11 +96,14 @@ casos P1 a P5: barrido del fijo, actuado con las mismas fases, tres
 semillas base y evaluación sobre las mismas semillas. Su demanda
 debería salir de datos de tráfico observados (aforos o matrices
 origen--destino), que esta etapa no usó, y fijarse cerca de la capacidad
-y no muy por encima: con demanda muy superior ningún control puede
-aumentar el \textit{throughput}, solo perderlo, como el actuado en P2,
-que sirve un 2.4\,\% menos vehículos que el fijo.
+y no muy por encima: con demanda muy superior ningún control del plan
+aumentó el \textit{throughput} más de un 0.6\,\% y algunos lo
+redujeron, como el actuado en P2, que sirve un 2.4\,\% menos vehículos
+que el fijo.
 % fuente: importacion OSM cruda del 01.12.2025, guardada fuera del repositorio (carpeta sumo/ del
-% autor); plan2/evaluacion_corredor_alta_resumen.csv (throughput: fijo 2921.5, actuado 2850.4, -2.43 %)
+% autor); plan2/evaluacion_corredor_alta_resumen.csv (throughput frente al fijo de las bases publicadas
+% en P2 segun plan2/veredicto_congelado_0355.csv: fijo 2921.5, actuado 2850.4, -2.43 %; ippo_local_s42
+% +0.58 %, el mayor aumento; ippo_vecinos_s2042 +0.16 %, p = 0.12; dqn_s4042 -1.45 %)
 
 \noindent\textbf{Cerrar las celdas pendientes y ajustar DQN y MAPPO por
 caso.} Al congelar los resultados quedaban seis celdas PENDIENTE. La
@@ -117,10 +124,9 @@ formulada y sin correr.
 % la prueba de humo); rl_mappo.py (los HIPER de rl_ippo sin cambios)
 
 \noindent\textbf{Priorizar P6 sobre P7.} En la malla de nueve cruces
-con demanda nominal ningún modelo supera al fijo coordinado en ajedrez,
-y los que usan la política IPPO con mensajes lo igualan
-(conclusiones~3 y~4). En el corredor, en cambio, la ganancia grande
-apareció cuando la demanda superó la capacidad y el fijo dejó de
+con demanda nominal ningún modelo supera al fijo coordinado en ajedrez;
+IPPO \emph{vecinos} y MAPPO lo igualan (conclusiones~3 y~4). En el
+corredor, en cambio, la ganancia grande apareció cuando la demanda superó la capacidad y el fijo dejó de
 bastar (P2). P6, la misma malla con demanda alta, es el caso que puede
 decir si la coordinación aprendida supera a un fijo coordinado en una
 malla. A diferencia de P4, la malla no tiene elementos sin semáforo que
@@ -129,43 +135,52 @@ cruces, que es lo que se quiere probar. P7 agrega tamaño y fases antes
 de haber contestado esa pregunta.
 
 \noindent\textbf{Presupuestar P6 y P7 con el costo medido.} Las cifras
-de este párrafo son estimaciones a partir de los tiempos medidos
-(Tablas~\ref{tab:hw} y~\ref{tab:plan2-costo}), no mediciones. En el
-corredor, doblar la demanda multiplicó el costo del episodio de IPPO
-\emph{vecinos} por 2.4, de 5.9 a 14.0~s. Con el mismo factor, un
-episodio de P6 costaría unos 59~s y un entrenamiento de IPPO
-\emph{vecinos} de 200 episodios con sus validaciones, unas 3.8~h. P7
-(dieciséis cruces con tres carriles por sentido y giro protegido) no se
-ha construido y exige más que tiempo de cómputo: hay que construir la
-red, barrer un fijo de 16 semáforos y extender la observación y la
-máscara de IPPO a cuatro fases verdes, porque hoy codifican dos
-(Tabla~\ref{tab:obs-u4}). Al pasar de tres a nueve semáforos el
-episodio se encareció 2.7 veces; escalar el de P5 por el número de
-semáforos da para P7 unos 44~s por episodio antes de contar el tercer
-carril, y unas 2.5~h por entrenamiento sin contar las validaciones. Los
-tabulares tienen además un límite propio: con cuatro fases el espacio
-de estados de cada agente se duplica, de 512 a 1024, y en el plan de
-pruebas ya fallan con dos.
+de P6 y P7 son estimaciones hechas a partir de los tiempos medidos
+(Tabla~\ref{tab:plan2-costo} y Sección~\ref{sec:ejecucion}), no
+mediciones. En el corredor, doblar la demanda multiplicó el costo del
+episodio de IPPO \emph{vecinos} por 2.4, de 5.9 a 14.0~s. Con el mismo
+factor, un episodio de P6 costaría unos 59~s y un entrenamiento de IPPO
+\emph{vecinos} de 200 episodios con sus validaciones, unas 3.8~h. Con
+los entrenamientos en paralelo, como en P5, P6 cabría en una noche.
+
+P7 (dieciséis cruces con tres carriles por sentido y giro protegido) no
+se ha construido y exige más que tiempo de cómputo: antes hay que
+construir la red, barrer un fijo de 16 semáforos y extender la
+observación y la máscara de IPPO a cuatro fases verdes, porque hoy
+codifican dos (Tabla~\ref{tab:obs-u4}). En costo, al pasar de tres a
+nueve semáforos el episodio se encareció 2.7 veces, y escalar el de P5
+por el número de semáforos da para P7 unos 44~s por episodio antes de
+contar el tercer carril. Un entrenamiento de IPPO tomaría así unas
+2.5~h sin contar las validaciones, alcanzable en una noche. Para los
+tabulares no se espera que P7 sea viable. Con cuatro fases el espacio
+de estados de cada agente se duplica, de 512 a 1024; en la fase
+exploratoria eso ya bastó para que la política congelada del cruce con
+giros protegidos quedara por detrás del fijo (Anexo~C), y en el plan de
+pruebas los tabulares ya fallan con dos fases.
 % fuente: extrapolacion a partir de la mediana de segundos por episodio (plan2/resultados_*.csv):
 % IPPO vecinos corredor 5.9 s, corredor_alta 13.95 s (factor 2.36); malla3 25.0 s x 2.36 = 59 s (P6);
 % trabajo de IPPO vecinos en malla3 5780-5880 s (plan2/cola/estado.json) x 2.36 = 3.8 h;
 % 25.0 s x 16/9 = 44 s (P7; x 200 = 2.5 h); red 9.3 s frente a malla3 25.0 s (factor 2.7). Fases en
 % la observacion: rl_ippo.nombres_features (fase_0, fase_1). Estados tabulares: 512 con dos fases,
-% 1024 con cuatro
+% 1024 con cuatro. Lecturas de viabilidad (una noche para P6 y para IPPO en P7; tabular no viable):
+% texto original de capitulo5.tex (7bd8685), "Que es alcanzable para P6 y P7"; caso E2 en el Anexo C
 
 \noindent\textbf{Probar el término de \textit{spillback} donde puede
 actuar.} En las dos redes y en la malla el término nunca se activa, y
 en el corredor con demanda doble no mejora a \emph{vecinos}
 (conclusión~4). Queda sin probar el rango intermedio: una demanda media
 en el corredor (entre 1.3 y 1.5 veces la nominal, donde la calibración
-encontró el enlace lleno en cero y en una de tres semillas) o un umbral
-más bajo que la mitad de las plazas en la red. Solo ahí se puede saber
-si el término aporta algo que la mensajería no aporte.
+encontró la cola del enlace en el umbral de \textit{spillback} en cero y
+en una de tres semillas) o un umbral más bajo que la mitad de las
+plazas en la red. Solo ahí se puede saber si el término aporta algo que
+la mensajería no aporte.
+% fuente: calibracion de P2 en capitulo4.tex (umbral de 34 de 38 plazas; con 1.3 ninguna semilla,
+% con 1.5 una: maximos 30, 32 y 35)
 
 \noindent\textbf{Entrenar la coordinación con un canal imperfecto.} Las
-políticas de U4 se entrenaron con mensajes instantáneos. Evaluadas con
-latencia o pérdida en la fase exploratoria, usaban el mensaje viejo
-como si fuera actual: en el corredor el retraso subía entre 1.4 y
+políticas de U4 se entrenaron con mensajes instantáneos. Evaluada con
+latencia o pérdida en la fase exploratoria, la política mediana de
+\emph{vecinos} usaba el mensaje viejo como si fuera actual: en el corredor el retraso subía entre 1.4 y
 2.5~s, lo bastante para dejar de superar al actuado, y en el corredor y
 en la red la progresión se deshacía (Anexo~C). La edad del mensaje ya
 está en la observación; conviene entrenar con latencia y pérdida
