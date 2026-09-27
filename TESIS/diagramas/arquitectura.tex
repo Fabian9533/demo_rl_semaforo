@@ -1,0 +1,143 @@
+% arquitectura.tex - Arquitectura modular del metodo (fig:arquitectura, Cap. III, sec:vision-general).
+% Especificacion: seccion 3.1. Se compila con  python construir.py arquitectura  y queda en
+% ../images/diag_arquitectura.pdf (15 cm de ancho, escala 1).
+\documentclass[10pt,border=0pt]{standalone}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish]{babel}
+\usepackage{tikz}
+\input{estilo_diagramas}
+\begin{document}
+\begin{tikzpicture}[diagrama]
+\unidad{ext}
+\useasboundingbox (0,0) rectangle (15,-13.0);
+
+% ================================================================ camino previsto (OSM)
+% inner ysep 1.5pt: el pie queda en y -0.45, a 1 mm del marco de U1
+\node[proceso, previsto, minimum height=0pt, inner ysep=1.5pt, anchor=north west] (osm) at (0.02,-0.02)
+  {\textbf{Cruce real de Lima (OSM)}: importación cruda del 01.12.2025, no usada en P1--P5 (Anexo~D)};
+
+% ================================================================ U1
+% El titulo se corre a la derecha para dejar pasar la flecha punteada de OSM hacia Red vial.
+\node[titulo=u1] (tU1) at (0.46,-0.62) {U1 · Preprocesamiento};
+\node[semillas, anchor=east] (s_tuneo) at (14.88,-0.87)
+  {tuneo: 2001--2003 (calibración de $f$ y barrido del fijo)};
+% los cuatro con el mismo alto (1.5 cm, el natural del nodo archivo) y el mismo ancho (3.54 cm),
+% separados 0.2 cm. El bisel del nodo archivo suma 2 x 2.2 mm al ancho, asi que tab lleva
+% text width 2.87 cm (su linea mas larga, "enlaces y vecinos" en negrita, mide 2.56 cm).
+\node[proceso=u1, text width=3.2cm, minimum width=3.52cm, minimum height=1.477cm, anchor=north west] (red) at (0.12,-1.16)
+  {\nodo{Red vial}{\texttt{.nod.xml}, \texttt{.edg.xml}\\ \texttt{netconvert} $\to$ \texttt{.net.xml}}};
+\node[proceso=u1, text width=3.2cm, minimum width=3.52cm, minimum height=1.477cm, anchor=north west] (dem) at (3.86,-1.16)
+  {\nodo{Demanda}{\texttt{<flow>} $\to$ \texttt{.rou.xml}\\ escalada en P2 y P4}};
+\node[proceso=u1, text width=3.2cm, minimum width=3.52cm, minimum height=1.477cm, anchor=north west] (ref) at (7.60,-1.16)
+  {\nodo{Programas\\ de referencia}{fijo: \texttt{barrer\_fijo.py}\\ actuado: \texttt{comun.py}}};
+\node[archivo=u1, text width=2.87cm, anchor=north west] (tab) at (11.34,-1.16)
+  {\nodo{Aproximaciones,\\ enlaces y vecinos}{de cada semáforo}};
+
+% ================================================================ U3
+\node[titulo=u3] (tU3) at (0.07,-3.52) {U3 · Simulación y medición};
+\node[entorno, text width=4.6cm, anchor=north west] (sumo) at (0.37,-4.0)
+  {\nodo{SUMO + TraCI}{SUMO 1.25.0; paso de 1 s;\\ 1 h de demanda y vaciado\\ (máx. 6000 pasos)}};
+\node[proceso=u3, text width=4.65cm, anchor=north west] (med) at (0.37,-5.794)
+  {\nodo{Medición por corrida}{\texttt{tripinfo} y TraCI cada segundo\\ (\texttt{comun.py} y \texttt{correr\_episodio})}};
+\node[proceso=u3, text width=4.65cm, anchor=north west] (eva) at (0.37,-7.363)
+  {\nodo{\texttt{evaluar.py}}{cada control, política congelada}};
+% semillas bajo la esquina inferior derecha de evaluar.py, a 0.4 mm de su borde (sin encimarse)
+\node[semillas, anchor=north east] (s_eval) at ($(eva.south east)+(-0.158,-0.04)$) {evaluación: 1001--1030};
+\node[proceso=u3, text width=4.65cm, anchor=north west] (con) at (0.37,-8.90)
+  {\nodo{\texttt{consolidar.py}}{media e IC95\,\%; $\Delta$ frente\\ al fijo y al actuado}};
+\node[proceso=u3, text width=4.65cm, anchor=north west] (ver) at (0.37,-10.371)
+  {\nodo{\texttt{veredicto.py}}{base publicada, convergencia\\ y regla}};
+
+% ================================================================ barra de los aprendices
+% draw=extb, fill=extf (ajuste local, reportado): el mismo gris que los puertos puerto=ext de
+% U1 y U3 (especificacion 1.7); el estilo bus trae black!65 / black!10.
+\node[bus, draw=extb, fill=extf, minimum width=0.4cm, minimum height=6.67cm, anchor=north] (bus) at (7.78,-3.48) {};
+\node[rotate=90, font=\footnotesize, inner sep=0pt] at (bus.center) {aprendices de U2 y U4};
+
+% ================================================================ U2
+% Las marcas van centradas en el borde superior, con el borde derecho 0.5 mm fuera del nodo:
+% centradas en la esquina, D, P se saldria de los 15 cm y T tocaria Redes neuronales.
+% Tabulares y Redes neuronales llevan 2.4 mm de alto de mas para que D, P no toque el titulo
+% "Redes neuronales", que termina a 3.3 mm del borde derecho del nodo.
+\node[titulo=u2] (tU2) at (8.10,-3.52) {U2 · Aprendizaje por refuerzo};
+\node[proceso=u2, text width=3.05cm, minimum height=1.70cm, anchor=north west] (tabu) at (8.14,-4.2)
+  {\nodo{Tabulares}{\texttt{rl\_corredor.py}:\\ Q-learning, SARSA\\ y \texttt{ql\_colas}}};
+\node[proceso=u2, text width=3.05cm, minimum height=1.70cm, anchor=north east] (redes) at (14.85,-4.2)
+  {\nodo{Redes neuronales}{IPPO local:\\ \texttt{rl\_ippo.py}\\ DQN: \texttt{rl\_dqn.py}}};
+\node[marca=u2, anchor=east] at ($(tabu.north east)+(0.05,0)$) {T};
+\node[marca=u2, anchor=east] at ($(redes.north east)+(0.05,0)$) {D, P};
+\node[semillas, anchor=west] (s_ent) at (8.14,-6.20) {entrenamiento: $b + k$};
+\node[semillas, anchor=west] (s_val) at (8.14,-6.68) {validación: 999 y 1999};
+
+% ================================================================ U4
+\node[titulo=u4] (tU4) at (8.10,-7.32) {U4 · Coordinación distribuida};
+\node[nota, anchor=west] (l_i5) at (8.14,-8.18) {\itfnn{5}};
+\node[proceso=u4, anchor=west] (aj) at (10.10,-8.18) {agente $j$};
+% agente i y Variantes con el borde derecho en 14.85, como Redes neuronales; Variantes con el
+% izquierdo en 8.14, como Tabulares
+\node[proceso=u4, anchor=east] (ai) at (14.85,-8.18) {agente $i$};
+\node[proceso=u4, text width=6.4cm, minimum width=6.69cm, anchor=north west] (var) at (8.14,-8.78)
+  {\nodo{Variantes con mensajes}{\texttt{rl\_ippo.py}: vecinos (observación extendida)\\ y \textit{spill} (+ término de \textit{spillback})\\ \texttt{rl\_mappo.py}: MAPPO (+ crítico central)}};
+\node[marca=u4, anchor=east] at ($(var.north east)+(0.05,0)$) {P};
+
+% ================================================================ resultados
+\node[iniciofin=ext, text width=5.9cm] (res) at (11.495,-11.136)
+  {\nodo{Resultados}{Cap.~V y Anexo~A: matriz caso $\times$ modelo;\\ tablas por modelo y por base}};
+
+% ================================================================ fondos de las unidades
+\begin{scope}[on background layer]
+  \node[grupo=u1, fit={(0.02,-0.58) (14.98,-2.76)}] {};
+  \node[grupo=u3, fit={(0.02,-3.48) (5.39,-11.56)}] {};
+  \node[grupo=u2, fit={(8.06,-3.48) (14.98,-6.98)}] {};
+  \node[grupo=u4, fit={(8.06,-7.28) (14.98,-10.36)}] {};
+\end{scope}
+
+% ================================================================ flechas
+% camino previsto, no usado: OSM -> Red vial
+% (x 0.34: la punta cae entera sobre el tramo recto del borde, no sobre la esquina redondeada)
+\draw[no usado] (osm.south -| 0.34,0) -- (red.north -| 0.34,0);
+% I1: colector bajo red, demanda y programas de referencia -> SUMO + TraCI
+\draw[interfaz, -] (red.south) -- (red.south |- 0,-2.9) -- (ref.south |- 0,-2.9) -- (ref.south);
+\draw[interfaz, -] (dem.south) -- (dem.south |- 0,-2.9);
+\draw[interfaz] (4.85,-2.9) -- (sumo.north -| 4.85,0);
+\node[etiqueta sin fondo, anchor=east] at (4.75,-3.19) {\itfn{1}};
+% I2: tabla -> barra de los aprendices, y la misma linea sigue al borde de U3
+\draw[interfaz] (tab.south -| 13.5,0) -- (13.5,-3.18) -- (5.12,-3.18) -- (5.12,-3.48);
+\draw[interfaz] (7.78,-3.18) -- (bus.north);
+\node[etiqueta] at (10.64,-3.18) {\itfn{2}};
+% I3 e I4 entre SUMO + TraCI y la barra
+\draw[interfaz] (sumo.east |- 0,-4.57) -- (bus.west |- 0,-4.57);
+\node[etiqueta sin fondo, anchor=south] at (6.485,-4.53) {\itfnn{3}};
+\draw[interfaz] (bus.west |- 0,-4.92) -- (sumo.east |- 0,-4.92);
+\node[etiqueta sin fondo, anchor=north] at (6.485,-4.96) {\itfn{4}};
+% I6: medicion -> barra
+\draw[interfaz] (med.east) -- (bus.west |- med.east);
+\node[etiqueta sin fondo, anchor=south] at ($(med.east)!0.5!(bus.west |- med.east)+(0,0.04)$) {\itfnn{6}};
+% I7: barra -> evaluar.py; prolongacion de la barra -> veredicto.py (metadatos)
+\draw[interfaz] (bus.west |- eva.east) -- (eva.east);
+\node[etiqueta sin fondo, anchor=south] at ($(eva.east)!0.5!(bus.west |- eva.east)+(0,0.04)$) {\itfnn{7}};
+\draw[interfaz] (bus.south) -- (7.78,-10.636) -- (ver.east |- 0,-10.636);
+\node[etiqueta sin fondo, anchor=south] at (6.55,-10.596) {\itf{7} (metadatos)};
+% I8: veredicto.py -> Resultados
+\draw[interfaz] (ver.east |- res.west) -- (res.west);
+\node[etiqueta sin fondo, anchor=north] at (6.55,-11.176) {\itfn{8}};
+% flujos internos de U3 (sin numero)
+\draw[flujo] (sumo.south -| 1.5,0) -- (med.north -| 1.5,0);
+\draw[flujo] (med.south -| 1.5,0) -- node[etiqueta sin fondo, right=1mm] {una fila por semilla} (eva.north -| 1.5,0);
+\draw[flujo] (eva.south -| 1.5,0) -- (con.north -| 1.5,0);
+\node[etiqueta sin fondo, anchor=north west] at (1.6,-8.52) {parciales por control};
+\draw[flujo] (con.south -| 1.5,0) -- node[etiqueta sin fondo, right=1mm] {resumen} (ver.north -| 1.5,0);
+% una simulacion por semilla: evaluar.py vuelve a SUMO + TraCI por el margen izquierdo
+\draw[repeticion, rounded corners=2pt] (eva.west) -- (eva.west -| 0.14,0) -- (sumo.west -| 0.14,0) -- (sumo.west);
+% I5 entre vecinos (U4) y hacia DQN (U2)
+\draw[interfaz, doble] (aj.east) -- node[etiqueta sin fondo, below=0.5mm] {cada 5 s} (ai.west);
+\draw[interfaz] (ai.north -| 14.45,0) -- (redes.south -| 14.45,0);
+\node[etiqueta sin fondo, anchor=east] at (14.37,-6.44) {\itf{5} (DQN)};
+
+% ================================================================ leyenda
+\draw[black!30, line width=0.4pt] (0,-11.83) -- (15,-11.83);
+\leyenda{(0.1,-12.17)}{proceso, archivo, iniciofin, entorno, semillas}
+\leyenda{(0.1,-12.77)}{flujo, interfaz, repeticion, previsto}
+\end{tikzpicture}
+\end{document}

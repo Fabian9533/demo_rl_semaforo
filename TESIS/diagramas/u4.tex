@@ -1,0 +1,164 @@
+% u4.tex - Flujo de U4 (coordinacion distribuida) dentro de un episodio de rl_ippo.py.
+% Especificacion: seccion 3.5. Naranja (=u2): pasos que U4 reutiliza de U2; violeta: lo que
+% anade U4 (reloj de 5 s, mensaje con su canal, observacion extendida, critico central).
+% Compilar: python construir.py u4  ->  ../images/diag_u4.pdf (15 cm de ancho, escala 1).
+\documentclass[10pt,border=0pt]{standalone}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish]{babel}
+\usepackage{tikz}
+\input{estilo_diagramas}
+\begin{document}
+\begin{tikzpicture}[diagrama]
+\unidad{u4}
+\useasboundingbox (0,0) rectangle (15,-19.75);
+
+% ---------------------------------------------------------------- columnas (cm)
+\def\xs{5.955}   % eje de la espina: nodos de 3.49 a 8.42
+\def\xl{8.66}    % borde izquierdo de la columna derecha (criticos, trayectorias)
+\def\xd{14.56}   % borde derecho de la columna derecha
+\def\xt{11.61}   % eje de trayectorias -> GAE
+\def\va{14.69}   % vertical de decide "no"
+\def\vb{14.85}   % vertical de fin "no" (repeticion)
+
+% ---------------------------------------------------------------- espina
+\node[titulo] (tit) at (3.02,-0.04) {U4 · Coordinación distribuida};
+\node[proceso=u2, text width=3.0cm, anchor=north] (lanzar) at (\xs,-0.48)
+  {\nodo{Iniciar el episodio $k$}{arranca SUMO (\itf{1})\\ con su semilla}};
+\coordinate (jh) at (\xs,-1.86);                        % aqui se une fin "no"
+\node[decision, anchor=north] (reloj) at (\xs,-2.36) {¿Múltiplo\\ de 5 s?};
+\node[nota, anchor=south east] (nreloj) at (4.85,-2.68) {reloj global};
+\coordinate (jd) at (\xs,-3.78);                        % aqui se une el mensaje
+\node[decision=u2, anchor=north] (decide) at (\xs,-4.137) {¿Decide el\\ agente $i$?};
+\node[proceso=u2, text width=4.7cm, anchor=north] (cerrar) at (\xs,-5.85)
+  {\nodo{Cerrar la decisión anterior}{$r_i$ = suma por segundo / 5\\ (\textit{spill}: $-$ 2 $\cdot$ exceso / 5);\\ guarda $0.02\,r_i$ en la trayectoria}};
+\node[proceso, text width=4.7cm, anchor=north] (obs) at (\xs,-7.70)
+  {\nodo{Observar}{$o_i$ = 12 locales + id + 8 por lado;\\ $d$ = 31 (53 en P5); local: ranuras 0}};
+\node[proceso=u2, text width=4.7cm, align=flush center, anchor=north] (elegir) at (\xs,-9.23)
+  {\nodo{Elegir: mantener o cambiar}{actor compartido $\pi(a \mid o_i)$,\\ con máscara; muestrea al entrenar;\\ la más probable al evaluar}};
+\node[proceso=u2, text width=4.7cm, anchor=north] (aplicar) at (\xs,-11.08)
+  {\nodo{Aplicar la acción}{0: mantener; 1: ámbar de 3 s\\ y el otro verde}};
+\node[proceso=u2, text width=4.7cm, anchor=north] (avanzar) at (\xs,-12.86)
+  {\nodo{Avanzar 1 s}{acumula la recompensa de $i$\\ (\textit{spill}: y el exceso de cola en $i \to j$)}};
+\node[decision=u2, anchor=north] (fin) at (\xs,-14.39) {¿Red vacía o\\ 6000 pasos?};
+
+% marca de variante (spill) centrada sobre la esquina superior derecha
+\node[marca, anchor=center] at (cerrar.north east) {\textit{spill}};
+\node[marca, anchor=center] at (avanzar.north east) {\textit{spill}};
+
+% ---------------------------------------------------------------- SUMO (U3), fuera del recuadro
+% misma geometria que en u2.tex (text width 2.45 cm, inner xsep 3pt, x 0.02; recuadro desde
+% x 2.97): la columna SUMO + TraCI (U3) mide lo mismo en U2 y en U4
+\node[entorno, text width=2.45cm, inner xsep=3pt, anchor=north west, minimum height=13.51cm]
+  (sumo) at (0.02,-0.48)
+  {\nodo{SUMO + TraCI\\ (U3)}{carga \itf{1} escenario\\ del caso;\\ paso de 1 s\\[2pt] entrega \itf{3}\\ observación\\ y recompensa\\[2pt] recibe \itf{4} acción}};
+
+% ---------------------------------------------------------------- columna derecha
+% align=flush center (msg, elegir): con align=center el espacio de \to y \mid se estira en las
+% lineas mas cortas que la mas larga del nodo
+\node[proceso, text width=5.45cm, align=flush center, anchor=north east] (msg) at (14.60,-2.06)
+  {\nodo{\itfn{5} de $j$ a $i$}{fase de $j$ (avenida, transversal o ámbar)\\ y tiempo en ella; vehículos que descargan\\ hacia $i$; cola en esa aproximación y\\ en el enlace $j \to i$ (vecinos: \itf{2});\\ canal: latencia y pérdida 0 en el plan;\\ $i$ guarda el último mensaje y su edad}};
+\node[proceso=u2, text width=2.35cm, anchor=north west] (cloc) at (\xl,-8.487)
+  {\nodo{Crítico local\\ $V(o_i)$}{compartido}};
+\node[proceso, text width=2.7cm, anchor=north east] (ccen) at (\xd,-8.487)
+  {\nodo{Crítico central\\ $V(o_1 \ldots o_n, i)$}{entrada $n \cdot d + n$;\\ solo al entrenar}};
+% las marcas IPPO y MAPPO no caben centradas en la esquina (se saldrian de los 15 cm o
+% taparian al otro critico): van apoyadas sobre el borde superior, alineadas a la derecha
+\node[marca=u2, anchor=south east] at (cloc.north east) {IPPO};
+\node[marca, anchor=south east] at (ccen.north east) {MAPPO};
+% archivo: el chamfered rectangle suma xsep = 2.2 mm a cada lado (ancho = text width + 0.65 cm);
+% con 5.23 cm el nodo va de x 8.66 a 14.56, alineado con cloc, ccen y gae
+\node[archivo=u2, text width=5.23cm, anchor=north] (tray) at (\xt,-10.45)
+  {\nodo{Trayectorias por agente}{$o_i$, máscara, $a_i$, $\log\pi$, $V$ al decidir;\\ $0.02\,r_i$ al cerrar la decisión}};
+
+% ---------------------------------------------------------------- al final del episodio
+\node[proceso=u2, text width=4.7cm, anchor=north] (ppo) at (\xs,-16.70)
+  {\nodo{Actualización PPO}{recorte 0.2; 10 épocas; minilote 64;\\ actor y crítico (MAPPO: el central)}};
+\node[proceso=u2, text width=5.2cm, anchor=north east] (gae) at (\xd,-16.70)
+  {\nodo{GAE por agente}{sobre las trayectorias; $\gamma = \lambda = 0.95$;\\ si se cortó a los 6000 pasos,\\ $V$ del último estado}};
+% puerto hacia U2: con la punta de 120 grados del estilo mediria 3.2 cm y no cabe bajo SUMO
+\node[puerto=u2, hacia izquierda, signal pointer angle=150, text width=2.3cm, anchor=east]
+  (pu2) at (2.88,-17.16)
+  {\textbf{Sigue el ciclo}\\ \textbf{de U2}:\\ validación,\\ \textit{checkpoint},\\ episodio $k + 1$;\\ publicación de\\ la política (\itf{7})};
+
+% ---------------------------------------------------------------- fondos
+\begin{scope}[on background layer]
+  \node[grupo, fit={(2.97,-0.02) (14.985,-18.38)}] (G) {};
+  \node[subgrupo=u2, fit={(3.35,-16.18) (14.70,-18.24)}] (S) {};
+\end{scope}
+\node[subtitulo=u2] at (3.37,-16.20) {Al final del episodio (IPPO y MAPPO)};
+
+% ---------------------------------------------------------------- flechas de la espina
+\draw[flujo] (lanzar) -- (reloj);
+\draw[flujo] (reloj) -- node[etiqueta en grupo, left, pos=0.4] {no} (decide);
+\draw[flujo] (decide) -- (cerrar);
+\node[etiqueta en grupo, anchor=west] at (6.04,-5.41) {sí: cada 5 s de su verde};
+\draw[flujo] (cerrar) -- (obs);
+\draw[flujo] (obs) -- (elegir);
+\draw[flujo] (elegir) -- (aplicar);
+\draw[flujo] (aplicar) -- (avanzar);
+\node[etiqueta en grupo, anchor=west] at (6.04,-12.45) {tras todos los agentes};
+\draw[flujo] (avanzar) -- (fin);
+
+% reloj "si" -> mensaje; el mensaje se une a reloj -> decide sobre decide
+\draw[flujo] (reloj.east) -- (msg.west |- reloj.east);
+\node[etiqueta en grupo, anchor=south west] at (7.19,-2.76) {sí (no en\\ IPPO local)};
+\draw[flujo] (msg.west |- jd) -- ($(jd)+(0.0105,0)$);
+
+% decide "no": por la derecha hasta avanzar (encierra criticos y trayectorias)
+\draw[flujo] (decide.east) -- (\va,0 |- decide.east) -- (\va,0 |- avanzar.east) -- (avanzar.east);
+\node[etiqueta en grupo, anchor=south west] at (7.60,-4.67) {no};
+
+% fin "no": por la derecha hasta arriba de reloj (encierra todo el bucle de cada segundo)
+\draw[repeticion] (fin.east) -- (\vb,0 |- fin.east) -- (\vb,0 |- jh) -- ($(jh)+(0.0105,0)$);
+\node[etiqueta en grupo, anchor=south west] at (7.95,-14.93) {no: siguiente segundo};
+
+% fin "si" -> GAE; GAE -> PPO -> puerto de U2
+\draw[flujo] (fin.south) -- (\xs,-15.94) -- (9.90,-15.94) -- (9.90,0 |- gae.north);
+% al terminar, cada agente cierra su ultima decision antes de GAE (rl_ippo.py:643-645, 524;
+% MAPPO: transicion con ultima=True, rl_mappo.py:118-133)
+\node[etiqueta en grupo, anchor=south west] at (7.0,-15.92) {sí: cierra la\\ última decisión};
+\draw[flujo] (gae.west |- 0,-17.55) -- (ppo.east |- 0,-17.55);
+\draw[flujo] (ppo.west) -- (pu2.east |- ppo.west);
+
+% ---------------------------------------------------------------- flechas de la columna derecha
+% mensaje -> observar (I5); cruza decide "no" con corte. Sobre el grupo, el corte va con el
+% color de su fondo y extremo recto (en blanco y redondeado se veia como una capsula blanca)
+\draw[u4f, line width=2.4pt, line cap=butt] (9.45,-4.59) -- (9.45,-4.81);
+\draw[interfaz] (9.45,0 |- msg.south) -- (9.45,-7.9645) -- (obs.east |- 0,-7.9645);
+\node[etiqueta en grupo, anchor=west] at (9.53,-6.35) {último mensaje y edad};
+
+% elegir -> trayectorias; criticos -> trayectorias
+\draw[flujo] (elegir.east) -- (10.21,0 |- elegir.east) -- (10.21,0 |- tray.north);
+\node[etiqueta en grupo, anchor=north east] at (10.10,-9.99) {$o_i$, $a_i$, $\log\pi$};
+\draw[flujo] (10.62,0 |- cloc.south) -- (10.62,0 |- tray.north);
+\draw[flujo] (ccen.south) -- (ccen.south |- tray.north);
+\node[etiqueta en grupo] at (11.86,-10.17) {$V$ al decidir};
+
+% trayectorias -> GAE; cruza decide "no" y fin "no" con corte (color del fondo del grupo)
+\draw[u4f, line width=2.4pt, line cap=butt] (\xt,-13.30) -- (\xt,-13.55);
+\draw[u4f, line width=2.4pt, line cap=butt] (\xt,-14.89) -- (\xt,-15.14);
+\draw[flujo] (tray.south) -- (tray.south |- gae.north);
+
+% ---------------------------------------------------------------- SUMO <-> espina (I1, I3, I4)
+% Las etiquetas van dentro del recuadro, encima de su flecha y sin fondo (no cortan ningun
+% trazo), centradas en el hueco entre el borde del recuadro (x 2.984 por dentro) y el nodo:
+% I1 en x 3.66 (hasta lanzar, x 4.34); I3, I4 e I3 en x 3.235 (hasta la espina, x 3.49).
+% Van 0.09 cm por encima de la flecha para librar la punta de 1.6 mm de ancho de I3, cuya
+% base (x 3.28) queda bajo el "3".
+\def\alza{0.09cm}
+\draw[interfaz] (lanzar.west) -- (sumo.east |- lanzar.west);
+\node[etiqueta sin fondo, anchor=south, yshift=\alza] at (3.66,0 |- lanzar.west) {\itf{1}};
+\draw[interfaz] (sumo.east |- obs.west) -- (obs.west);
+\node[etiqueta sin fondo, anchor=south, yshift=\alza] at (3.235,0 |- obs.west) {\itf{3}};
+\draw[interfaz] (aplicar.west) -- (sumo.east |- aplicar.west);
+\node[etiqueta sin fondo, anchor=south, yshift=\alza] at (3.235,0 |- aplicar.west) {\itf{4}};
+\draw[interfaz] (sumo.east |- avanzar.west) -- (avanzar.west);
+\node[etiqueta sin fondo, anchor=south, yshift=\alza] at (3.235,0 |- avanzar.west) {\itf{3}};
+
+% ---------------------------------------------------------------- leyenda
+\draw[black!30, line width=0.4pt] (0,-18.58) -- (15,-18.58);
+\leyenda{(0.1,-18.92)}{proceso, archivo, decision, entorno}
+\leyenda{(0.1,-19.52)}{puerto, flujo, interfaz, repeticion}
+\end{tikzpicture}
+\end{document}

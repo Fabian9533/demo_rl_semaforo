@@ -24,3 +24,7 @@ plan2/tripinfo_*.xml
 plan2/checkpoints/
 plan2/tmp_barrido_*/
 plan2/cola/estado.json.tmp
+
+# Diagramas TikZ (27.09.2026): el PDF que usa la tesis es TESIS/images/diag_*.pdf; aqui solo intermedios
+TESIS/diagramas/*.pdf
+TESIS/diagramas/previa/

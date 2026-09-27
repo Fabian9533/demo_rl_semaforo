@@ -1,0 +1,198 @@
+% estilo_diagramas.tex - Estilo comun de los cinco diagramas TikZ de la tesis
+% (arquitectura, u1, u2, u3, u4). Cada diagrama es un documento standalone que hace
+%   \documentclass[10pt,border=0pt]{standalone}
+%   \usepackage[utf8]{inputenc}  \usepackage[T1]{fontenc}  \usepackage[spanish]{babel}
+%   \usepackage{tikz}            \input{estilo_diagramas}
+% y dibuja a 15 cm exactos de ancho (\useasboundingbox), para que la tesis lo incluya con
+% \includegraphics[width=\textwidth] a escala 1. Letra: \footnotesize (8 pt) en nodos y
+% etiquetas, \small (9 pt) en los titulos de unidad. Nunca \scriptsize ni \tiny.
+% construir.py compila <nombre>.tex y copia el PDF a ../images/diag_<nombre>.pdf.
+% Un diagrama se compila aparte: dentro no van \ref ni \cite (se escribe "U2", "Anexo D").
+%
+% Lenguaje visual
+%   color      = unidad a la que pertenece el elemento (U1 azul, U2 naranja, U3 verde,
+%                U4 violeta; gris = fuera de las unidades); relleno muy claro y borde
+%                oscuro, legible en blanco y negro. Un puerto lleva el color de la unidad
+%                del otro lado de la interfaz (gris si son varias).
+%   forma      = tipo de nodo: proceso (rectangulo redondeado), archivo (esquina cortada),
+%                decision (rombo), inicio/fin (estadio), entorno SUMO + TraCI (gris, doble
+%                borde), puerto de interfaz (flecha-etiqueta), semillas (pildora en cursiva).
+%   trazo      = tipo de flecha: flujo (continua), interfaz I1-I8 (discontinua: dato de una
+%                interfaz del catalogo, lleva \itf o \itfn), repeticion (continua gruesa),
+%                no usado (punteada gris; el borde de un nodo previsto es igual).
+
+\usetikzlibrary{positioning, fit, calc, arrows.meta, backgrounds, chains,
+                shapes.geometric, shapes.misc, shapes.symbols, babel}
+
+% ---------------------------------------------------------------- colores
+% <u>b = borde y titulo; <u>f = fondo del grupo de la unidad; <u>s = fondo de un subgrupo
+\definecolor{u1b}{HTML}{2F5597}  \definecolor{u1f}{HTML}{EDF2FA}  \definecolor{u1s}{HTML}{DCE6F5}
+\definecolor{u2b}{HTML}{A65A0B}  \definecolor{u2f}{HTML}{FDF3E7}  \definecolor{u2s}{HTML}{F9E3CA}
+\definecolor{u3b}{HTML}{3A6E21}  \definecolor{u3f}{HTML}{EEF6EA}  \definecolor{u3s}{HTML}{DDEDD5}
+\definecolor{u4b}{HTML}{5E4A9A}  \definecolor{u4f}{HTML}{F2EFF9}  \definecolor{u4s}{HTML}{E3DDF2}
+% externo: resultados de la tesis (Cap. V y Anexo A) y todo lo que no es de una unidad
+\definecolor{extb}{HTML}{404040} \definecolor{extf}{HTML}{F2F2F2} \definecolor{exts}{HTML}{E6E6E6}
+% unidad "actual" (ub, uf, us): la fija \unidad{u2} (o u1, u3, u4, ext) al comienzo de cada
+% diagrama; los estilos sin argumento usan esa unidad y los que llevan =<u> usan la indicada
+% (p. ej. proceso=u3 para un nodo de U3 dibujado en el diagrama de U2).
+\colorlet{ub}{extb} \colorlet{uf}{extf} \colorlet{us}{exts}
+\newcommand{\unidad}[1]{\colorlet{ub}{#1b}\colorlet{uf}{#1f}\colorlet{us}{#1s}}
+
+% ---------------------------------------------------------------- interfaces I1-I8
+% Nombres cortos EXACTOS (catalogo de la especificacion, seccion 2). Usar siempre estas
+% macros en etiquetas y puertos: \itf{3} -> I3 ; \itfn{3} -> I3 observacion y recompensa ;
+% \itfnn{3} -> el mismo nombre en dos lineas (I3 observacion / y recompensa), para los
+% huecos estrechos (va dentro de un nodo con align, o en una etiqueta con align=center).
+% Revision 27.09: I6 = metricas por corrida e I7 = politica publicada (antes al reves), para
+% que la arquitectura se lea I3, I4, I6, I7, I8 de arriba abajo.
+\newcommand{\nombreinterfaz}[1]{\ifcase#1\relax\or escenario del caso\or
+  aproximaciones, enlaces y vecinos\or observación y recompensa\or acción\or
+  mensajes entre vecinos\or métricas por corrida\or política publicada\or veredicto\fi}
+\newcommand{\nombreinterfazdos}[1]{\ifcase#1\relax\or escenario\\ del caso\or
+  aproximaciones,\\ enlaces y vecinos\or observación\\ y recompensa\or acción\or
+  mensajes\\ entre vecinos\or métricas\\ por corrida\or política\\ publicada\or veredicto\fi}
+\newcommand{\itf}[1]{\textbf{I#1}}
+\newcommand{\itfn}[1]{\textbf{I#1}~\nombreinterfaz{#1}}
+\newcommand{\itfnn}[1]{\textbf{I#1}~\nombreinterfazdos{#1}}
+% texto de un nodo: etiqueta en negrita y detalle debajo
+\newcommand{\nodo}[2]{\textbf{#1}\\#2}
+% babel spanish pone coma decimal en modo matematico; la tesis escribe punto (f = 2.0)
+\AtBeginDocument{\ifdefined\decimalpoint\decimalpoint\fi}
+
+% ---------------------------------------------------------------- estilos
+\tikzset{
+  % estilo de la figura completa
+  % sin cortes de palabra con guion dentro de los nodos (la prueba partia "cru-da")
+  diagrama/.style={font=\footnotesize, line join=round, line cap=round,
+                   node distance=4mm and 5mm, inner sep=2pt,
+                   execute at begin node={\hyphenpenalty=10000\exhyphenpenalty=10000}},
+  % ---- agrupaciones (fondo) ------------------------------------------------
+  % grupo=<u>: unidad completa; subgrupo=<u>: etapa dentro de una unidad
+  grupo/.style={rectangle, rounded corners=5pt, line width=0.8pt, draw=#1b, fill=#1f,
+                inner sep=0pt},
+  grupo/.default=u,
+  subgrupo/.style={rectangle, rounded corners=4pt, line width=0.5pt, draw=#1b, fill=#1s,
+                   inner sep=0pt},
+  subgrupo/.default=u,
+  titulo/.style={font=\small\bfseries, text=#1b, anchor=north west, inner sep=2pt,
+                 align=left},
+  titulo/.default=u,
+  subtitulo/.style={font=\footnotesize\bfseries, text=#1b, anchor=north west,
+                    inner sep=2pt, align=left},
+  subtitulo/.default=u,
+  % ---- nodos --------------------------------------------------------------
+  base nodo/.style={draw=#1b, line width=0.6pt, align=center, font=\footnotesize,
+                    inner xsep=3pt, inner ysep=2.5pt},
+  proceso/.style={base nodo=#1, rectangle, rounded corners=3pt, fill=white,
+                  minimum height=7mm},
+  proceso/.default=u,
+  archivo/.style={base nodo=#1, chamfered rectangle, chamfered rectangle corners=north east,
+                  chamfered rectangle xsep=2.2mm, chamfered rectangle ysep=2.2mm,
+                  fill=white, minimum height=7mm},
+  archivo/.default=u,
+  decision/.style={base nodo=#1, diamond, aspect=2.8, fill=white, inner xsep=0.5pt,
+                   inner ysep=0.5pt},
+  decision/.default=u,
+  iniciofin/.style={base nodo=#1, rounded rectangle, fill=#1f, line width=1pt,
+                    inner xsep=5pt, minimum height=7mm},
+  iniciofin/.default=u,
+  % entorno: SUMO + TraCI (U3). Mismo aspecto en los cinco diagramas.
+  entorno/.style={rectangle, draw=black!75, double=black!12, double distance=1.2pt,
+                  line width=0.5pt, fill=black!12, align=center, font=\footnotesize,
+                  inner xsep=4pt, inner ysep=3pt, minimum height=8mm},
+  % puerto de interfaz con otra unidad: flecha-etiqueta con el color de ESA unidad.
+  % Apunta en el sentido del dato: hacia la derecha por defecto; "hacia izquierda" invierte.
+  % Un puerto arriba o abajo del recuadro apunta en vertical ("hacia abajo", "hacia arriba"),
+  % con el texto horizontal, igual que su flecha.
+  puerto/.style={base nodo=#1, signal, signal to=east, signal pointer angle=120,
+                 fill=#1f, line width=0.8pt, align=left, inner xsep=3pt, inner ysep=2pt,
+                 minimum height=7mm},
+  puerto/.default=u,
+  hacia izquierda/.style={signal to=west},
+  hacia abajo/.style={signal to=south, signal pointer angle=150, inner ysep=3pt},
+  hacia arriba/.style={signal to=north, signal pointer angle=150, inner ysep=3pt},
+  % semillas de SUMO de una etapa (Tabla tab:plan2-semillas): "<etapa>: <semillas>"
+  semillas/.style={rounded rectangle, draw=black!55, fill=black!5, line width=0.5pt,
+                   font=\footnotesize\itshape, align=center, inner xsep=4pt,
+                   inner ysep=1.5pt},
+  % texto suelto (aclaraciones cortas)
+  nota/.style={font=\footnotesize, text=black!85, align=left, inner sep=1pt},
+  % modificador: elemento previsto y no usado (se aplica DESPUES del tipo de nodo)
+  previsto/.style={draw=black!50, dash pattern=on 0.9pt off 1.5pt, line width=0.8pt,
+                   text=black!60, fill=white},
+  % marca de aplicabilidad (T, D, P en U2; variantes en U4)
+  marca/.style={rectangle, rounded corners=1.5pt, draw=#1b, fill=white, text=#1b,
+                font=\footnotesize\bfseries, line width=0.5pt, inner xsep=1.5pt,
+                inner ysep=1pt},
+  marca/.default=u,
+  % barra comun de los aprendices de U2 y U4 (solo en la arquitectura)
+  bus/.style={rectangle, rounded corners=1.5pt, draw=black!65, fill=black!10,
+              line width=0.6pt, minimum width=4mm, inner sep=0pt},
+  % ---- flechas ------------------------------------------------------------
+  punta/.style={-{Stealth[length=2.1mm, width=1.6mm]}},
+  flujo/.style={punta, draw=black!85, line width=0.6pt, rounded corners=3pt},
+  interfaz/.style={punta, draw=black!85, line width=0.6pt, rounded corners=3pt,
+                   dash pattern=on 3pt off 1.8pt},
+  repeticion/.style={punta, draw=black!85, line width=1.2pt, rounded corners=4pt},
+  no usado/.style={punta, draw=black!50, line width=0.8pt, rounded corners=3pt,
+                   dash pattern=on 0.9pt off 1.5pt},
+  doble/.style={{Stealth[length=2.1mm, width=1.6mm]}-{Stealth[length=2.1mm, width=1.6mm]}},
+  % etiqueta de flecha (corta el trazo con fondo blanco; "sin fondo" sobre grupos)
+  etiqueta/.style={font=\footnotesize, inner sep=1pt, align=center, fill=white},
+  etiqueta sin fondo/.style={font=\footnotesize, inner sep=1pt, align=center},
+  etiqueta en grupo/.style={etiqueta, fill=#1f},   % sobre el fondo de un grupo
+  etiqueta en grupo/.default=u,
+  % ---- leyenda ------------------------------------------------------------
+  % Iconos en gris neutro (ext) en las cinco figuras. El archivo toma su tamano de text width y
+  % text height (con minimum width/height el biselado vacio no se dibuja), y el texto fija alto y
+  % profundidad para que todos queden en la misma linea base.
+  ley icono/.style={minimum width=5.5mm, minimum height=3.4mm, inner sep=0pt},
+  ley flecha/.style={minimum width=7mm, minimum height=3.4mm, inner sep=0pt,
+                     append after command={(\tikzlastnode.west) edge[#1] (\tikzlastnode.east)}},
+  ley texto/.style={font=\footnotesize, inner sep=0pt, text height=1.5ex, text depth=.25ex},
+  ley/proceso/.style={proceso=ext, ley icono, minimum height=3.4mm},
+  ley/archivo/.style={archivo=ext, chamfered rectangle xsep=1.1mm, chamfered rectangle ysep=1.1mm,
+                      inner sep=0pt, minimum width=0pt, minimum height=0pt,
+                      text width=3.3mm, text height=1.2mm, text depth=0pt},
+  ley/decision/.style={decision=ext, minimum width=7mm, minimum height=3.8mm, inner sep=0pt},
+  ley/iniciofin/.style={iniciofin=ext, ley icono, minimum height=3.4mm, inner xsep=0pt},
+  ley/entorno/.style={entorno, ley icono, minimum height=3.4mm, inner xsep=0pt},
+  ley/puerto/.style={puerto=ext, ley icono, minimum height=3.4mm, inner xsep=0pt,
+                     minimum width=6.5mm},
+  ley/semillas/.style={semillas, ley icono, minimum height=3.4mm, inner xsep=0pt},
+  ley/previsto/.style={proceso=ext, previsto, ley icono, minimum height=3.4mm},
+  ley/flujo/.style={ley flecha=flujo},
+  ley/interfaz/.style={ley flecha=interfaz},
+  ley/repeticion/.style={ley flecha=repeticion},
+  ley/nousado/.style={ley flecha=no usado},
+}
+% textos de la leyenda (iguales en los cinco diagramas)
+\pgfkeys{/leyenda/.is family, /leyenda,
+  proceso/.initial={proceso},
+  archivo/.initial={archivo o dato},
+  decision/.initial={decisión},
+  iniciofin/.initial={inicio o fin},
+  entorno/.initial={simulador SUMO},
+  puerto/.initial={puerto de interfaz},
+  semillas/.initial={semillas},
+  previsto/.initial={previsto, no usado},
+  flujo/.initial={flujo},
+  interfaz/.initial={interfaz (I1--I8)},
+  repeticion/.initial={repetición},
+  nousado/.initial={camino previsto, no usado},
+}
+% \leyenda{<punto>}{<claves>}: una fila de leyenda que empieza en <punto> (borde izquierdo,
+% altura media). Claves, en este orden: proceso, archivo, decision, iniciofin, entorno,
+% puerto, semillas, previsto, flujo, interfaz, repeticion, nousado. Se ponen solo las que
+% el diagrama usa; si no caben en 15 cm, dos filas (dos llamadas, 6 mm entre ellas).
+% nousado (flecha punteada) se omite si ya esta previsto (el mismo concepto).
+\newcommand{\leyenda}[2]{%
+  \begin{scope}[start chain=leyenda going right]
+    \coordinate[on chain] (leyenda-inicio) at #1;
+    \foreach \clave [count=\k] in {#2}{%
+      \ifnum\k=1 \def\separacion{0mm}\else \def\separacion{3.5mm}\fi
+      \edef\nodoicono{\noexpand\node[node distance=\separacion, on chain, ley/\clave] {};}%
+      \nodoicono
+      \node[node distance=1.3mm, on chain, ley texto] {\pgfkeysvalueof{/leyenda/\clave}};
+    }
+  \end{scope}}

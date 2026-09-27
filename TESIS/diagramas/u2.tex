@@ -1,0 +1,189 @@
+% u2.tex - Flujo de U2 (aprendizaje por refuerzo): un aprendiz y una base b.
+% Especificacion: seccion 3.3 (fig:flujo-u2). Compilar con: python construir.py u2
+\documentclass[10pt,border=0pt]{standalone}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish]{babel}
+\usepackage{tikz}
+\input{estilo_diagramas}
+\begin{document}
+\begin{tikzpicture}[diagrama]
+\unidad{u2}
+% ajuste local (no toca el estilo comun): con text width, align=center estira el espacio de
+% "=" en modo matematico ("N  =  200"); flush center centra las lineas sin estirar nada.
+\tikzset{base nodo/.append style={align=flush center}}
+\useasboundingbox (0,0) rectangle (15,-19.97);
+
+% ---------------------------------------------------------------- guias
+% F = borde superior del recuadro U2; xL / xR = ejes de las columnas izquierda y derecha;
+% v1 / v2 = verticales del hueco central; xV = vertical del margen derecho;
+% xr = subida de la vuelta k + 1
+\def\F{-1.5}
+\def\xL{6.14}
+\def\xR{11.905}
+\def\vA{8.83}
+\def\vB{9.14}
+\def\xV{14.74}
+\def\xr{12.9}
+
+% ---------------------------------------------------------------- puertos (fuera del recuadro)
+\node[puerto=u1, hacia abajo, text width=4.9cm, anchor=south] (P_I2) at (\xL,\F)
+  {\itfn{2}\\ desde U1};
+\node[puerto=u3, hacia arriba, text width=4.6cm, anchor=south] (P_I7) at (\xR,\F)
+  {\itfn{7} hacia U3\\ \texttt{evaluar.py} y \texttt{veredicto.py}};
+
+% ---------------------------------------------------------------- columna izquierda: el episodio
+\node[iniciofin, text width=4.5cm, anchor=north] (ini) at (\xL,\F-0.52)
+  {\nodo{Trabajo de entrenamiento}{escenario, modelo y base $b$;\\ $N = 200$ episodios}};
+\node[proceso, text width=3.0cm, anchor=north] (lanzar) at ([yshift=-0.36cm]ini.south)
+  {\nodo{Iniciar el episodio $k$}{arranca SUMO (\itf{1})\\ con su semilla}};
+\node[semillas, anchor=west] (s_ent) at ([xshift=0.1cm, yshift=-0.71cm]lanzar.north east)
+  {entrenamiento:\\ $b + k$};
+\node[decision, anchor=north] (decide) at ([yshift=-0.36cm]lanzar.south)
+  {¿Decide el\\ agente $i$?};
+\node[proceso, text width=4.7cm, anchor=north] (cerrar) at ([yshift=-0.78cm]decide.south)
+  {\nodo{Cerrar la decisión anterior}{$r_i$ = suma por segundo / 5\\
+   (\texttt{ql\_colas}: colas al decidir)\\ D, P: $\times\,0.02$; \textit{spill} (U4): $-$ término}};
+\node[proceso, text width=4.7cm, anchor=north] (obs) at ([yshift=-0.28cm]cerrar.south)
+  {\nodo{Observar}{T: niveles de cola y fase\\ D, P: vector continuo y máscara\\
+   D, U4: + \itfn{5}}};
+\node[proceso, text width=4.7cm, anchor=north] (act) at ([yshift=-0.28cm]obs.south)
+  {\nodo{Actualizar o guardar}{T: actualiza $Q$ (SARSA: con la\\ acción siguiente, ya elegida)\\
+   D: guarda y entrena · P: anota $r_i$}};
+\node[proceso, text width=4.7cm, anchor=north] (elegir) at ([yshift=-0.28cm]act.south)
+  {\nodo{Elegir: mantener o cambiar}{T, D: $\varepsilon$-greedy\\
+   P: muestrea; anota $o$, $a$, $\log\pi$, $V$}};
+\node[proceso, text width=4.7cm, anchor=north] (aplicar) at ([yshift=-0.28cm]elegir.south)
+  {\nodo{Aplicar la acción}{verde 10--60 s (D, P: máscara;\\ T: se corrige tras elegir)\\
+   1: ámbar de 3 s y el otro verde}};
+\node[proceso, text width=4.7cm, anchor=north] (avanzar) at ([yshift=-0.56cm]aplicar.south)
+  {\nodo{Avanzar 1 s}{acumula la recompensa por agente}};
+\node[decision, anchor=north] (fin) at ([yshift=-0.31cm]avanzar.south)
+  {¿Red vacía o\\ 6000 pasos?};
+
+% ---------------------------------------------------------------- SUMO (U3), a la izquierda
+\path (lanzar.north) ++(0,0) coordinate (sumoN) (avanzar.south) coordinate (sumoS);
+\path let \p1 = (sumoN), \p2 = (sumoS) in
+  node[entorno, text width=2.45cm, inner xsep=3pt, minimum height=\y1-\y2, anchor=north west]
+  (sumo) at (0.02,\y1)
+  {\nodo{SUMO + TraCI\\ (U3)}{carga \itf{1} escenario\\ del caso;\\ paso de 1 s\\[2pt]
+   entrega \itf{3}\\ observación\\ y recompensa\\[2pt] recibe \itf{4} acción}};
+
+% ---------------------------------------------------------------- columna derecha: tras el episodio
+\coordinate (colR) at (\xR,0);
+\node[proceso, text width=4.8cm] (cierre) at (fin.center -| colR)
+  {\nodo{Cierre del episodio}{\itfn{6} del episodio;\\ D, P: cierran la última decisión}};
+\node[proceso, text width=4.8cm, anchor=south] (ppo) at ([yshift=0.325cm]cierre.north)
+  {\nodo{GAE y actualización PPO}{MAPPO (U4): crítico central}};
+\node[decision, anchor=south] (toca) at ([yshift=0.485cm]ppo.north)
+  {¿$k$ múltiplo de 10\\ o $k = N$?};
+\node[proceso, text width=3.6cm, anchor=south] (validar) at ([yshift=0.93cm]toca.north)
+  {\nodo{Validación}{política congelada,\\ un episodio por semilla;\\
+   valor = retraso medio (\itf{6})}};
+% s_val va en dos lineas, igual que s_ent: en una sola mide 3.37 cm y a la derecha de la flecha
+% toca -> validar solo quedan unos 2.6 cm (x 12.03 a 14.64, antes de la vertical \xV); a la
+% izquierda hay 2.4 cm y esta la etiqueta "si". En dos lineas mide 2.06 cm.
+\node[semillas, anchor=west] (s_val) at ([xshift=0.12cm, yshift=-0.465cm]validar.south)
+  {validación:\\ 999 y 1999};
+\node[archivo, text width=4.36cm, anchor=south] (ckpt) at ([yshift=0.273cm]validar.north)
+  {\nodo{\textit{Checkpoint}}{\texttt{checkpoints/<tag>\_ep<NNN>}}};
+\node[archivo, text width=4.36cm, anchor=south] (reg) at ([yshift=0.277cm]ckpt.north)
+  {\nodo{Registro}{\texttt{resultados\_<tag>.csv}:\\ una fila por episodio}};
+\node[decision, anchor=south] (otro) at ([yshift=0.275cm]reg.north) {¿$k < N$?};
+\node[proceso, text width=4.8cm, anchor=south] (ajuste) at ([yshift=0.31cm]otro.north)
+  {\nodo{Ajuste para el episodio $k + 1$}{T, D: baja $\varepsilon$ · P: baja la tasa}};
+\node[marca, anchor=center] at (ppo.north east) {P};
+\node[iniciofin, text width=4.0cm, anchor=north] (publicar) at (\xR,\F-0.52)
+  {\nodo{Publicar el \textit{checkpoint}\\ de menor validación}{empate: el más tardío;\\
+   con sus metadatos}};
+
+% ---------------------------------------------------------------- recuadro y subgrupos
+\coordinate (sgIzqN) at ([yshift=-0.054cm]decide.south);
+\coordinate (sgIzqS) at ([yshift=-0.08cm]aplicar.south);
+\coordinate (sgDerN) at ([yshift=0.45cm]ajuste.north);
+\coordinate (sgDerS) at ([yshift=-0.08cm]cierre.south);
+\coordinate (fondo) at ([yshift=-0.40cm]fin.south);
+\begin{scope}[on background layer]
+  \node[grupo, fit={(2.97,\F) (14.95,0 |- fondo)}] (G) {};
+  \node[subgrupo, fit={(3.58,0 |- sgIzqN) (8.70,0 |- sgIzqS)}] (SI) {};
+  \node[subgrupo, fit={(9.27,0 |- sgDerN) (14.85,0 |- sgDerS)}] (SD) {};
+\end{scope}
+\node[titulo, anchor=north] at (9.02,\F-0.02) {U2 · Aprendizaje por refuerzo};
+\node[subtitulo] at ([xshift=0.04cm, yshift=-0.02cm]SI.north west) {Decisión del\\ agente $i$};
+\node[subtitulo] at ([xshift=0.04cm, yshift=-0.02cm]SD.north west) {Tras cada episodio};
+
+% ---------------------------------------------------------------- flechas del episodio
+\draw[interfaz] (P_I2.south) -- (ini.north);
+\draw[flujo] (ini.south) -- node[etiqueta sin fondo, left] {$k = 1$} (lanzar.north);
+\draw[interfaz] (lanzar.west) -- node[etiqueta sin fondo, above] {\itf{1}} (lanzar.west -| sumo.east);
+\draw[flujo] (lanzar.south) -- (decide.north);
+\draw[flujo] (decide.south) -- (cerrar.north);
+\node[etiqueta sin fondo, anchor=west] at ([xshift=0.1cm]$(decide.south)!0.5!(cerrar.north)$)
+  {sí: cada 5 s\\ de su verde};
+\draw[flujo] (cerrar) -- (obs);
+\draw[flujo] (obs) -- (act);
+\draw[flujo] (act) -- (elegir);
+\draw[flujo] (elegir) -- (aplicar);
+\draw[interfaz] (sumo.east |- obs.west) -- node[etiqueta sin fondo, above, xshift=0.11cm] {\itf{3}}
+  (obs.west);
+\draw[interfaz] (aplicar.west) -- node[etiqueta sin fondo, above, xshift=0.11cm] {\itf{4}}
+  (sumo.east |- aplicar.west);
+\draw[interfaz] (sumo.east |- avanzar.west) -- node[etiqueta sin fondo, below, xshift=0.11cm]
+  {\itf{3}} (avanzar.west);
+% uniones en T (union, union2, union3): la rama que se une va sin punta ("-"); la unica punta
+% es la de la flecha que entra en el nodo (con dos, las puntas se tocaban)
+% aplicar -> avanzar, con la rama "no" de decide unida justo encima de avanzar
+\coordinate (union) at ([yshift=-0.29cm]aplicar.south);
+\draw[flujo] (aplicar.south) -- (avanzar.north);
+\node[etiqueta sin fondo, anchor=north east] at ([xshift=-0.08cm, yshift=-0.175cm]aplicar.south)
+  {tras todos los agentes};
+\draw[flujo, -] (decide.east) -- node[etiqueta sin fondo, above] {no} (\vA,0 |- decide.east)
+  -- (\vA,0 |- union) -- (union);
+\draw[flujo] (avanzar) -- (fin);
+% repeticion: siguiente segundo, se une a la flecha lanzar -> decide. Termina 0.3pt a la derecha
+% del eje, en el borde de la flecha fina, para que su remate redondo no asome por la izquierda.
+\coordinate (union2) at ([yshift=-0.143cm]lanzar.south);
+\draw[repeticion, -] (fin.east) -- (\vB,0 |- fin.east) -- (\vB,0 |- union2)
+  -- ([xshift=0.3pt]union2);
+\node[etiqueta sin fondo, anchor=west] at ([xshift=0.1cm, yshift=-0.23cm]\vB,0 |- union2)
+  {no: siguiente segundo};
+
+% ---------------------------------------------------------------- flechas tras el episodio
+\coordinate (bajo) at ([yshift=-0.22cm]fin.south);
+\draw[flujo] (fin.south) -- (bajo) -- node[etiqueta sin fondo, above, pos=0.1] {sí}
+  (cierre.south |- bajo) -- (cierre.south);
+\draw[flujo] (cierre.north) -- node[etiqueta sin fondo, left] {P} (ppo.south);
+\coordinate (union3) at ([yshift=-0.24cm]toca.south);
+\draw[flujo] (ppo.north) -- (toca.south);
+\draw[flujo, -] (cierre.east) -- (\xV,0 |- cierre.east) -- (\xV,0 |- union3)
+  -- node[etiqueta sin fondo, above, pos=0.3] {T, D} (union3);
+\draw[flujo] (toca.north) -- node[etiqueta sin fondo, left] {sí} (validar.south);
+\draw[flujo] (toca.east) -- node[etiqueta sin fondo, above] {no} (\xV,0 |- toca.east)
+  -- (\xV,0 |- reg.east) -- (reg.east);
+\draw[flujo] (validar) -- (ckpt);
+\draw[flujo] (ckpt) -- (reg);
+\draw[flujo] (reg) -- (otro);
+\draw[flujo] (otro.north) -- node[etiqueta sin fondo, left] {sí} (ajuste.south);
+\draw[flujo] (otro.east) -- node[etiqueta sin fondo, above] {no} (\xV,0 |- otro.east)
+  -- (\xV,0 |- publicar.east) -- (publicar.east);
+\coordinate (vuelta) at ([yshift=-0.2cm]lanzar.north east);
+\draw[repeticion] (\xr,0 |- ajuste.north)
+  -- node[etiqueta sin fondo, right, xshift=0.06cm, pos=0.8] {$k + 1$} (\xr,0 |- vuelta)
+  -- (vuelta);
+\draw[interfaz] (publicar.north) -- (P_I7.south);
+
+% ---------------------------------------------------------------- leyenda (bajo el recuadro)
+\coordinate (L0) at (0.1,0);
+\draw[black!30, line width=0.4pt] ($(0,0 |- G.south)+(0,-0.13)$) -- ($(15,0 |- G.south)+(0,-0.13)$);
+\leyenda{($(L0 |- G.south)+(0,-0.40)$)}{proceso, archivo, decision, iniciofin, entorno, semillas}
+\leyenda{($(L0 |- G.south)+(0,-1.00)$)}{puerto, flujo, interfaz, repeticion}
+\node[ley texto, anchor=west] (marcas) at ($(L0 |- G.south)+(0,-1.60)$)
+  {Marcas: T = tabulares (Q-learning, SARSA, \texttt{ql\_colas}) · D = DQN · P = IPPO y MAPPO
+   · sin marca: todos};
+% control: alto necesario, borde inferior del recuadro y cotas de los nodos que hay que vigilar
+\path let \p1 = (marcas.south), \p2 = (G.south), \p3 = (SD.north), \p4 = (cierre.south),
+  \p5 = (bajo), \p6 = (marcas.east) in
+  \pgfextra{\typeout{COTA alto=\y1\space recuadro=\y2\space
+  SDnorte=\y3\space cierre=\y4\space bajo=\y5\space marcasE=\x6}};
+\end{tikzpicture}
+\end{document}

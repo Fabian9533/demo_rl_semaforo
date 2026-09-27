@@ -1,0 +1,189 @@
+\documentclass[10pt,border=0pt]{standalone}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish]{babel}
+\usepackage{tikz}
+\input{estilo_diagramas}
+\begin{document}
+\begin{tikzpicture}[diagrama]
+\unidad{u1}
+\useasboundingbox (0,0) rectangle (15,-19.75);
+% Ajustes locales (no tocan estilo_diagramas.tex):
+%  - chaflan: archivo sin inner sep, como en u3.tex. La esquina cortada sigue en 2.2 mm (la de
+%    las otras figuras) y ya separa el texto del borde; asi cada archivo mide su text width
+%    + 0.44 cm, y las tres columnas de la banda superior caben en 15 cm.
+% Rutas que difieren de la especificacion 3.2 (se leen bien y no crean cruces):
+%  - el tronco net -> calibrar / cfg / act_f sale de net por el sur (x 3.5), no por el oeste y
+%    el margen izquierdo (x 0.2); las ramas a cfg y a act_f se separan en y "ya";
+%  - el camino punteado netedit -> net baja por x 4.33 y entra a net por el norte (x 3.7), no
+%    por el este.
+% Cruce declarado (uno): la flecha "red" (caso -> nodvia) pasa sobre el camino punteado
+% netedit -> net; el corte se pinta con el fondo del grupo (uf) para que se vea como un hueco.
+\tikzset{
+  chaflan/.style={inner xsep=0pt, inner ysep=0pt},
+  base nodo/.append style={align=flush center},
+}
+
+% ================================================================ franja superior (fuera de U1)
+% inner ysep 1.5 pt en osm, netedit y caso: los tres textos tienen cuatro lineas y asi quedan
+% separados del borde superior del recuadro U1
+\node[proceso, previsto, text width=3.0cm, inner ysep=1.5pt, anchor=north west] (osm) at (0.05,-0.03)
+  {\nodo{Cruce real de Lima\\ (OSM)}{importación cruda,\\ 01.12.2025}};
+\node[proceso, previsto, text width=2.7cm, inner ysep=1.5pt, anchor=north west] (netedit)
+  at ($(osm.north east)+(0.45,0)$)
+  {\nodo{Limpieza\\ en \texttt{netedit}}{prevista,\\ no ejecutada}};
+
+% ================================================================ cabecera de U1
+\node[titulo] (tit) at (0.03,-1.58) {U1 · Preprocesamiento};
+\node[iniciofin, text width=4.4cm, inner ysep=1.5pt, anchor=north] (caso) at (7.5,-1.72)
+  {\nodo{Caso del plan (P1--P5)}{geometría, carriles,\\ semáforos y demanda}};
+
+% ================================================================ banda superior
+% ---- Red vial (x 0.12-4.2)
+\node[archivo, chaflan, text width=3.45cm, anchor=north] (nodvia) at (2.16,-3.63)
+  {\nodo{Nodos y vías}{\texttt{.nod.xml}, \texttt{.edg.xml},\\ escritos a mano}};
+\node[proceso, text width=3.6cm, anchor=north] (netconv) at ($(nodvia.south)+(0,-0.3)$)
+  {\nodo{\texttt{netconvert}}{\texttt{build\_net.bat}}};
+\node[archivo, chaflan, text width=3.45cm, anchor=north] (net) at ($(netconv.south)+(0,-0.56)$)
+  {\nodo{Red (\texttt{.net.xml})}{programa estático\\ por omisión; ámbar de 3 s}};
+\node[nota, anchor=north west] (n_red) at ($(net.south west)+(0.05,-0.1)$)
+  {P2 y P4 usan la red\\ de P1 y P3};
+
+% ---- Demanda (x 4.45-9.48)
+\node[proceso, text width=4.6cm, anchor=north] (flujos) at (6.965,-3.63)
+  {\nodo{Flujos por movimiento\\ y periodo}{\texttt{<flow ... vehsPerHour>};\\ punta invertida a los 1800 s}};
+\node[archivo, chaflan, text width=4.4cm, anchor=north] (rou) at ($(flujos.south)+(0,-0.26)$)
+  {\nodo{Demanda nominal (\texttt{.rou.xml})}{llegadas equiespaciadas}};
+\node[decision, anchor=north] (estres) at ($(rou.south)+(0,-0.26)$) {¿Caso de\\ estrés?};
+\node[proceso, text width=4.6cm, anchor=north] (calibrar) at ($(estres.south)+(0,-0.4)$)
+  {\nodo{Calibrar el factor $f$\\ con el actuado}{P2: cola $\geq$ 34 de 38 plazas;\\ P4: sin saturar la rotonda}};
+\node[archivo, chaflan, text width=4.4cm, anchor=north] (rou_alta) at ($(calibrar.south)+(0,-0.44)$)
+  {\nodo{Demanda escalada (\texttt{.rou.xml})}{P2: $f = 2.0$; P4: $f = 1.2$}};
+\node[semillas, anchor=west] (s_tun1) at ($(calibrar.south)!0.5!(rou_alta.north)+(-1.4,0)$)
+  {tuneo: 2001--2003};
+
+% ---- columna derecha (sin subgrupo)
+\node[archivo, chaflan, text width=4.55cm, anchor=north] (tabla) at (12.34,-3.21)
+  {\nodo{Aproximaciones, enlaces\\ y vecinos}{por semáforo; flujos de extremo\\ a extremo; en \texttt{rl\_corredor.py},\\ \texttt{rl\_ippo.py}, \texttt{escenarios\_plan2.py}}};
+\path (estres.center) -- coordinate[pos=0.5] (medio) (rou_alta.center);
+\node[archivo, chaflan, text width=4.1cm, anchor=west] (cfg) at (9.9,0 |- medio)
+  {\nodo{Configuración (\texttt{.sumocfg})}{red, demanda y fijo de partida;\\ paso de 1 s; sin teletransporte;\\ \texttt{preparar.py} la copia a \texttt{plan2/}}};
+
+% ================================================================ banda inferior: Programas de referencia
+\coordinate (Mfondo) at ($(rou_alta.south)+(0,-0.08)$);
+\coordinate (ya) at ($(Mfondo)+(0,-0.2)$);    % rama net -> cfg y net -> act_f
+\coordinate (yb) at ($(ya)+(0,-0.23)$);       % cfg -> barrido
+\coordinate (PT) at ($(yb)+(0,-0.18)$);       % borde superior del subgrupo
+\coordinate (T) at ($(PT)+(0,-0.4)$);         % parte superior de la fila 1
+
+\node[proceso, text width=3.2cm, anchor=north] (act_f) at (2.28,0 |- T)
+  {\nodo{Programa actuado}{\texttt{comun.py}, al evaluar\\ el actuado (\texttt{evaluar.py})}};
+\node[proceso, text width=4.4cm, anchor=north] (barrido) at (7.415,0 |- T)
+  {\nodo{Barrido (\texttt{barrer\_fijo.py})}{reescribe el fijo de partida:\\ verde de avenida $\times$ transversal\\ $\times$ desfase (P5: tres esquemas)}};
+\node[entorno, text width=3.9cm, anchor=north] (sumo0) at ($(12.23,0 |- T)+(0,0.2)$)
+  {\nodo{SUMO sin TraCI}{una corrida por configuración\\ y semilla}};
+\node[semillas, anchor=north east] (s_tun2) at ($(sumo0.south east)+(0,-0.68)$) {tuneo: 2001--2003};
+\node[decision, anchor=north] (borde) at ($(8.1,0 |- barrido.south)+(0,-0.46)$)
+  {¿Ganador en el borde\\ de un eje de verde?};
+\node[archivo, chaflan, text width=3.6cm, anchor=north] (act) at (2.28,0 |- borde.north)
+  {\nodo{Actuado\\ (\texttt{<esc>\_actuado.add.xml})}{fases del programa\\ por omisión; verde 10--60 s;\\ desfase 0}};
+\node[archivo, chaflan, text width=3.6cm, anchor=north] (fijo) at ($(12.3,0 |- borde.center)+(0,-0.3)$)
+  {\nodo{Fijo tuneado\\ (\texttt{plan2/<esc>.add.xml})}{\texttt{-{}-instalar}; registro en\\ \texttt{barrido\_<esc>.csv}}};
+\node[nota, text width=3.3cm, anchor=north west] (n_piso) at ($(4.9,0 |- borde.south)+(0,-0.13)$)
+  {el verde mínimo de 10 s\\ cuenta como piso válido};
+
+% ================================================================ fondos
+\coordinate (Pfondo) at ($(fijo.south)+(0,-0.1)$);
+\coordinate (Ufondo) at ($(Pfondo)+(0,-0.07)$);
+\begin{scope}[on background layer]
+  \node[grupo, fit={(0.03,-1.58) (14.97,0 |- Ufondo)}] (U1) {};
+  \node[subgrupo, fit={(0.12,-3.21) ($(4.2,0 |- n_red.south)+(0,-0.1)$)}] (g_red) {};
+  \node[subgrupo, fit={(4.45,-3.21) (9.48,0 |- Mfondo)}] (g_dem) {};
+  \node[subgrupo, fit={(0.12,0 |- PT) (14.5,0 |- Pfondo)}] (g_ref) {};
+\end{scope}
+\node[subtitulo] at (g_red.north west) {Red vial};
+\node[subtitulo] at (g_dem.north west) {Demanda};
+\node[subtitulo] at (g_ref.north west) {Programas de referencia};
+
+% ================================================================ puertos (fuera, abajo)
+% punta de P_I1: con los 150 grados del estilo, 7 cm de ancho dan una V de 0.94 cm; con 157.6
+% grados queda en 0.70 cm, la misma de P_I2 y de los puertos verticales de U2 (0.64-0.69 cm)
+\node[puerto=u3, hacia abajo, signal pointer angle=157.6, text width=6.8cm, anchor=north] (P_I1) at (5.32,0 |- Ufondo)
+  {\itfn{1} hacia U3\\ \texttt{plan2/<esc>.sumocfg} con el fijo tuneado; actuado};
+\node[puerto=ext, hacia abajo, text width=5.0cm, anchor=north] (P_I2) at (12.32,0 |- Ufondo)
+  {\itfn{2}\\ hacia U2, U3 y U4};
+
+% ================================================================ aristas
+% ---- camino previsto (OSM)
+\draw[no usado] (osm.east) -- (osm.east -| netedit.west);
+\draw[no usado] (4.33,0 |- netedit.south) -- (4.33,-6.19) -- (3.7,-6.19) -- (3.7,0 |- net.north);
+% en el gris de los nodos previstos: es la etiqueta del camino punteado, no de la flecha "red"
+\node[etiqueta sin fondo, text=black!60, anchor=east] (enous) at (4.25,-2.24) {no usado (Anexo D)};
+
+% ---- desde el caso
+% cruce declarado: la flecha red pasa por encima del camino punteado (corte blanco)
+\draw[uf, line width=2.4pt] (4.2,0 |- caso.187) -- (4.46,0 |- caso.187);
+\draw[flujo] (caso.187) -| (nodvia.north);
+\node[etiqueta sin fondo, anchor=east] (ered) at (2.08,-2.91) {red};
+\draw[flujo] (6.965,0 |- caso.south) -- (flujos.north);
+\node[etiqueta sin fondo, anchor=west] (edem) at (7.05,-2.98) {demanda};
+\draw[flujo] (caso.east) -| (tabla.north);
+\node[etiqueta sin fondo, anchor=north west, align=left] (esem) at (12.42,-2.37) {semáforos\\ y vecinos};
+
+% ---- Red vial
+\draw[flujo] (nodvia) -- (netconv);
+\draw[flujo] (netconv) -- (net);
+
+% ---- Demanda
+\draw[flujo] (flujos) -- (rou);
+\draw[flujo] (rou) -- (estres);
+\draw[flujo] (estres) -- (calibrar);
+\node[etiqueta sin fondo, anchor=west] at ($(estres.south)!0.5!(calibrar.north)+(0.08,0)$) {sí: P2, P4};
+\draw[flujo] (5.2,0 |- calibrar.south) -- (5.2,0 |- rou_alta.north);
+\node[etiqueta sin fondo, anchor=east] at ($(5.2,0 |- s_tun1)+(-0.06,0)$) {$f$};
+
+% ---- hacia cfg (se juntan en x 9.6)
+\draw[flujo] (estres.east) -- (9.6,0 |- estres.east) |- (cfg.west);
+\node[etiqueta sin fondo, anchor=north west] at ($(9.6,0 |- estres.east)+(0.08,-0.12)$) {no: P1, P3, P5};
+\draw[flujo] (rou_alta.east) -- (9.6,0 |- rou_alta.east) |- (cfg.west);
+
+% ---- tronco desde net: calibrar, cfg y act_f
+\draw[flujo] (3.5,0 |- net.south) |- ($(calibrar.west)+(0,-0.25)$);
+\draw[flujo] (3.5,0 |- net.south) |- (10.3,0 |- ya) -- (10.3,0 |- cfg.south);
+\draw[flujo] (3.9,0 |- ya) -- (4.35,0 |- ya) |- (act_f.east);
+\draw[flujo] (act_f) -- (act);
+
+% ---- barrido
+% entra a barrido por arriba en x 9.3: asi no corre 2.9 cm en paralelo a la rama net -> cfg
+\draw[flujo] (12.0,0 |- cfg.south) |- (9.3,0 |- yb) -- (9.3,0 |- barrido.north);
+\draw[repeticion] (barrido.east |- sumo0.center) -- (sumo0.west);
+\coordinate (yr) at ($(sumo0.south)+(0,-0.15)$);
+\draw[flujo] (10.6,0 |- sumo0.south) |- (barrido.east |- yr);
+\node[etiqueta sin fondo, anchor=north west] (eret) at ($(10.5,0 |- yr)+(0,-0.05)$) {retraso medio};
+\draw[flujo] (8.1,0 |- barrido.south) -- (borde.north);
+\node[etiqueta sin fondo, anchor=north west] (emen) at ($(8.1,0 |- barrido.south)+(0.08,-0.04)$) {menor retraso};
+\draw[repeticion] (borde.west) -- (4.7,0 |- borde.west) |- (barrido.west);
+\node[etiqueta sin fondo, anchor=north west] (eamp) at ($(4.7,0 |- barrido.south)+(0.08,-0.3)$) {sí: se amplía el eje};
+\draw[flujo] (borde.east) -| (fijo.north);
+\node[etiqueta sin fondo, anchor=south west] (etecho) at ($(borde.east)+(0.05,0.04)$) {no, o techo de 60 s};
+
+% ---- interfaces hacia los puertos
+\draw[interfaz] (act.south) -- (act.south |- P_I1.north);
+% sale por la parte baja del oeste de fijo: el tramo horizontal pasa bajo la nota n_piso y a su
+% derecha, y la nota queda sola bajo el rombo
+\draw[interfaz] ($(fijo.south west)+(0,0.2)$) -| (8.6,0 |- P_I1.north);
+\draw[interfaz] (14.65,0 |- tabla.south) -- (14.65,0 |- P_I2.north);
+
+% ================================================================ leyenda
+% en gris (\unidad{ext}), como en la arquitectura: las cinco leyendas son identicas y solo
+% explican la forma; el color queda para la unidad, dentro del dibujo. Nada de lo que sigue
+% depende del color de U1.
+\unidad{ext}
+\coordinate (Lraya) at ($(P_I1.south)+(0,-0.12)$);
+\draw[black!30, line width=0.4pt] (0,0 |- Lraya) -- (15,0 |- Lraya);
+\leyenda{($(0.1,0 |- Lraya)+(0,-0.33)$)}{proceso, archivo, decision, iniciofin, entorno, semillas}
+\leyenda{($(0.1,0 |- Lraya)+(0,-0.93)$)}{puerto, flujo, interfaz, repeticion, previsto}
+\path let \p1=($(0.1,0 |- Lraya)+(0,-0.93)$) in \pgfextra{\typeout{ALTO leyenda fila 2: \y1}};
+\path let \p1=(P_I1.south) in \pgfextra{\typeout{ALTO P_I1 sur: \y1}};
+\end{tikzpicture}
+\end{document}

@@ -1,0 +1,174 @@
+% u3.tex - Flujo de U3 (Simulacion y medicion): medicion de cada corrida, evaluacion y veredicto.
+% Especificacion: seccion 3.4. Se compila con: python construir.py u3
+\documentclass[10pt,border=0pt]{standalone}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish]{babel}
+\usepackage{tikz}
+\input{estilo_diagramas}
+% ajustes locales (no tocan el estilo comun):
+%  - archivo sin inner sep: el chaflan (chamfered rectangle xsep/ysep = 2.2 mm) ya separa el
+%    texto del borde y suma 2 x 2.2 mm al ancho y al alto; asi un archivo ocupa lo mismo que un
+%    proceso de su columna.
+%  - puertos de una linea junto a SUMO con 5 mm de alto: los tres entran por el este de SUMO.
+\tikzset{
+  archivo u3/.style={archivo, inner xsep=0pt, inner ysep=0pt},
+  puerto corto/.style={minimum height=5mm},
+}
+\begin{document}
+\begin{tikzpicture}[diagrama]
+\unidad{u3}
+\useasboundingbox (0,0) rectangle (15,-19.93);
+
+% columnas: L (centro 2.935), R (centro 8.265); rombos en x = 3.5; margen izquierdo x = 0.25
+\coordinate (xL) at (2.935,0);
+\coordinate (xR) at (8.265,0);
+\coordinate (xD) at (3.5,0);
+\def\xpuerto{11.2}
+
+% ================================================================ A: medicion en cada corrida
+\node[titulo] (tit) at (0.05,-0.05) {U3 · Simulación y medición};
+\node[subtitulo] (stA) at (0.53,-0.55)
+  {Medición en cada corrida (entrenamiento, validación o evaluación)};
+
+% sumo a todo el ancho de las columnas: el borde exterior de su doble trazo coincide con el de
+% trip (izquierda) y lect (derecha); el doble trazo sobresale 0.85 pt de las anclas del nodo
+\node[entorno, text width=9.71cm, anchor=north] (sumo) at (5.65,-1.06)
+  {\nodo{SUMO + TraCI}{SUMO 1.25.0; paso de 1 s; semilla de la corrida;\\
+   hasta vaciar la red (máx. 6000 pasos)\\ carga \itfn{1}; recibe \itfn{4};\\ entrega \itfn{3}}};
+
+\node[archivo u3, text width=4.26cm, anchor=north] (trip) at ($(sumo.south -| xL)+(0.04,-0.42)$)
+  {\nodo{\texttt{tripinfo} (leído por \texttt{comun.py})}{retraso (\texttt{timeLoss}), espera,\\
+   paradas, \textit{throughput}, CO\textsubscript{2}, NO\textsubscript{x},\\
+   no terminados; corredor: flujos\\ de extremo a extremo (\itf{2})}};
+\node[proceso, text width=4.6cm, anchor=north] (lect) at (trip.north -| xR)
+  {\nodo{Lecturas TraCI por segundo}{aproximaciones: colas,\\
+   \texttt{ret\_retraso}, \texttt{ret\_colas};\\ carriles de enlace (\texttt{comun.py}):\\
+   \textit{spillback} ($\geq$ 90\,\% de las plazas),\\ cola máx., \texttt{ret\_spill}}};
+\node[proceso, text width=4.4cm, anchor=north] (metr) at ($(trip.south -| xL)+(0,-0.37)$)
+  {\nodo{Métricas de la corrida}{mismas columnas en todo control}};
+
+% ================================================================ B: evaluacion
+\coordinate (topB) at ($(metr.south)+(0,-0.27)$);
+% la fila del subtitulo baja 0.08 cm para que la pildora de semillas no toque el borde de B
+\node[subtitulo, anchor=north west] (stB) at ($(0.53,0 |- topB)+(0,-0.08)$) {Evaluación};
+\node[semillas, anchor=east] (seval) at (10.68,0 |- stB.center) {evaluación: 1001--1030};
+\node[archivo u3, text width=4.37cm, anchor=north] (ctrl) at ($(stB.south -| xR)+(0,-0.10)$)
+  {\nodo{Controles evaluados}{fijo tuneado y actuado (\itf{1});\\ políticas congeladas (\itf{7})}};
+\node[proceso, text width=4.4cm, anchor=south] (eva) at (ctrl.south -| xL)
+  {\nodo{\texttt{evaluar.py}}{un control por llamada}};
+\node[proceso, text width=4.6cm, anchor=north] (cons) at ($(ctrl.south -| xR)+(0,-0.32)$)
+  {\nodo{\texttt{consolidar.py}}{media e IC95\,\% ($t$) por control;\\
+   $\Delta$ pareado por semilla frente al\\ fijo y al actuado: IC95\,\%\\
+   \textit{bootstrap} (10\,000) y Wilcoxon}};
+\node[archivo u3, text width=4.17cm] (parc) at (cons.center -| xL)
+  {\nodo{Parciales}{\texttt{eval\_<esc>\_<control>.csv}:\\ una fila por semilla}};
+\node[archivo u3, text width=4.37cm, anchor=north] (resu) at ($(cons.south)+(0,-0.32)$)
+  {\nodo{Resumen}{\texttt{evaluacion\_<esc>\_resumen.csv}}};
+
+% ================================================================ C: veredicto.py
+\coordinate (topC) at ($(resu.south)+(0,-0.27)$);
+\node[subtitulo, anchor=north west] (stC) at (0.53,0 |- topC) {\texttt{veredicto.py}};
+\node[decision, anchor=north] (dec1) at ($(topC -| xD)+(0,-0.31)$) {¿Datos\\ completos?};
+\node[proceso, text width=4.6cm, anchor=north] (base) at ($(dec1.center -| xR)+(0,-0.25)$)
+  {\nodo{Base publicada}{mediana de las tres bases por su\\ valor de validación elegido}};
+\node[proceso, text width=4.4cm, anchor=north] (regla) at ($(dec1.center -| xL)+(0,-1.11)$)
+  {\nodo{Regla de veredicto}{base publicada frente al fijo y\\ al actuado: IC95\,\% \textit{bootstrap}\\
+   de $\Delta$, $p < 0.05$, umbral de $-5$\,\%\\ (actuado: solo frente al fijo)}};
+\node[proceso, text width=4.6cm, anchor=north] (conv) at ($(base.south)+(0,-0.42)$)
+  {\nodo{Convergencia}{último tercio de la validación:\\ meseta y estabilidad $\leq$ 5\,\%}};
+% la T de conv queda 0.12 cm sobre la base de la punta que entra en dec2
+\coordinate (union) at ($(regla.south -| xD)+(0,-0.20)$);
+\node[decision, anchor=north] (dec2) at ($(union)+(0,-0.33)$) {¿Base\\ convergida?};
+\node[archivo u3, text width=4.37cm] (fver) at ($(dec2.center -| xR)+(0,-0.05)$)
+  {\nodo{Tablas de veredicto}{\texttt{veredicto.csv}, \texttt{veredicto.md},\\
+   \texttt{tablas/veredicto\_*.tex}}};
+\coordinate (tramo) at ($(fver.south -| xD)+(0,-0.46)$);
+
+% ================================================================ puertos (fuera del recuadro)
+% bordes izquierdos en x = 11.2 y extremos derechos en x = 14.98: la punta crece con el alto del
+% puerto, asi que los puertos mas bajos llevan un text width algo mayor
+\node[puerto=u1, hacia izquierda, puerto corto, text width=3.395cm, anchor=west] (pi1)
+  at ($(\xpuerto,0 |- sumo.center)+(0,0.62)$) {\itf{1} desde U1};
+\node[puerto=ext, hacia izquierda, puerto corto, text width=3.395cm, anchor=west] (pi4)
+  at (\xpuerto,0 |- sumo.center) {\itf{4} desde U2 y U4};
+\node[puerto=ext, puerto corto, text width=3.395cm, anchor=west] (pi3)
+  at ($(\xpuerto,0 |- sumo.center)+(0,-0.62)$) {\itf{3} hacia U2 y U4};
+\node[puerto=u1, hacia izquierda, text width=3.25cm, anchor=west] (pi2)
+  at (\xpuerto,0 |- lect.center) {\itfnn{2}\\ desde U1};
+\coordinate (sal6) at ($(metr.east)+(0,-0.16)$);
+\node[puerto=ext, text width=3.33cm, anchor=west] (pi6) at (\xpuerto,0 |- sal6)
+  {\itfn{6}\\ hacia U2 y U4};
+\node[puerto=ext, hacia izquierda, text width=3.326cm, anchor=west] (pi7a)
+  at (\xpuerto,0 |- ctrl.center) {\itfn{7}\\ desde U2 y U4 (3 bases)};
+% P_I7b lleva el sentido y la unidad de origen, como todo puerto (especificacion 1.7)
+\node[puerto=ext, hacia izquierda, text width=3.229cm, anchor=west] (pi7b)
+  at (\xpuerto,0 |- base.center) {\itf{7} (metadatos)\\ desde U2 y U4\\ valor elegido y serie};
+\node[puerto=ext, text width=3.33cm, anchor=west] (pi8)
+  at (\xpuerto,0 |- fver.center) {\itfn{8}\\ hacia Cap.~V y Anexo~A};
+
+% ================================================================ fondos
+\coordinate (gSE) at ($(tramo -| 11.0,0)+(0,-0.28)$);
+\coordinate (aNW) at (0.5,-0.53);
+\coordinate (aSE) at ($(metr.south -| 10.8,0)+(0,-0.12)$);
+\coordinate (bNW) at (topB -| 0.5,0);
+\coordinate (bSE) at ($(resu.south -| 10.8,0)+(0,-0.12)$);
+\coordinate (cNW) at (topC -| 0.5,0);
+\coordinate (cSE) at ($(tramo -| 10.8,0)+(0,-0.17)$);
+\begin{scope}[on background layer]
+  \node[grupo, fit={(0,0) (gSE)}] (gU3) {};
+  \node[subgrupo, fit={(aNW) (aSE)}] (sgA) {};
+  \node[subgrupo, fit={(bNW) (bSE)}] (sgB) {};
+  \node[subgrupo, fit={(cNW) (cSE)}] (sgC) {};
+\end{scope}
+
+% ================================================================ aristas
+% --- A
+\draw[interfaz] (pi1.west) -- (sumo.east |- pi1.west);
+\draw[interfaz] (pi4.west) -- (sumo.east |- pi4.west);
+\draw[interfaz] (sumo.east |- pi3.west) -- (pi3.west);
+\draw[flujo] (sumo.south -| 1.0,0) -- node[etiqueta sin fondo, right, xshift=2.5pt] {por viaje; no terminados al cierre}
+  (trip.north -| 1.0,0);
+\draw[flujo] (sumo.south -| 6.9,0) -- node[etiqueta sin fondo, right, xshift=2.5pt] {cada segundo} (lect.north -| 6.9,0);
+\draw[interfaz] (pi2.west) -- (lect.east);
+\draw[flujo] (trip.south -| 1.0,0) -- node[etiqueta sin fondo, right, xshift=2.5pt] {al cerrar la corrida}
+  (metr.north -| 1.0,0);
+\draw[flujo] (lect.south) |- ($(metr.east)+(0,0.16)$);
+\draw[interfaz] (sal6) -- (pi6.west);
+% --- B
+\draw[flujo] (metr.south -| 2.6,0) -- node[etiqueta sin fondo, right, xshift=2.5pt, pos=0.72] {una fila por semilla}
+  (eva.north -| 2.6,0);
+\draw[interfaz] (pi7a.west) -- (ctrl.east);
+\draw[flujo] (ctrl.west |- eva.east) -- (eva.east);
+\draw[flujo] (eva) -- (parc);
+\draw[flujo] (parc) -- (parc -| cons.west);
+\draw[flujo] (cons) -- (resu);
+\draw[repeticion] (eva.west) -- (0.25,0 |- eva.west) -- (0.25,0 |- sumo.west) -- (sumo.west);
+\node[etiqueta en grupo, rotate=90] at (0.25,0 |- trip.center) {una corrida por semilla};
+% --- C
+\draw[flujo] (resu.west) -| (dec1.north);
+\node[etiqueta sin fondo, anchor=south east] at ($(resu.west)+(-0.12,0.03)$)
+  {$\Delta$, IC95\,\% y $p$ de cada control};
+\draw[interfaz] (pi7b.west) -- (base.east);
+\draw[flujo] (base.north) |- node[etiqueta sin fondo, pos=0.75, above] {base publicada} (dec1.east);
+\draw[flujo] (base.south -| 6.9,0) -- node[etiqueta sin fondo, right, xshift=2.5pt] {su serie de validación}
+  (conv.north -| 6.9,0);
+\draw[flujo] (dec1.south) -- node[etiqueta sin fondo, right, xshift=2.5pt] {sí} (regla.north -| dec1.south);
+\draw[flujo] (regla.south -| xD) -- (dec2.north);
+\draw[flujo, -] (conv.south -| 6.9,0) |- (union);
+\draw[flujo] (dec2.east) -- node[etiqueta sin fondo, above] {sí} (dec2.east -| fver.west);
+\draw[flujo] (dec2.south) -- (tramo) -- node[etiqueta sin fondo, above, yshift=0.5pt, pos=0.5]
+  {no: PENDIENTE con veredicto provisional} (tramo -| 9.9,0) -- (fver.south -| 9.9,0);
+% la rama de dec1 sigue 0.25 cm mas alla de la esquina redondeada de dec2 (sin muesca)
+\draw[flujo, -] (dec1.west) -- (0.25,0 |- dec1.west) -- (0.25,0 |- tramo) -- ($(tramo)+(0.25,0)$);
+\node[etiqueta sin fondo, align=left, anchor=north west] at ($(0.6,0 |- dec1.west)+(0,-0.10)$)
+  {no:\\ PENDIENTE\\ (motivo)};
+\draw[interfaz] (fver.east) -- (pi8.west);
+
+% ================================================================ leyenda
+\coordinate (ley) at ($(tramo)+(0,-0.28)$);
+\draw[black!30, line width=0.4pt] (0,0 |- ley) ++(0,-0.10) -- ++(15,0);
+\leyenda{($(0.1,0 |- ley)+(0,-0.37)$)}{proceso, archivo, decision, entorno, semillas}
+\leyenda{($(0.1,0 |- ley)+(0,-0.97)$)}{puerto, flujo, interfaz, repeticion}
+\end{tikzpicture}
+\end{document}
