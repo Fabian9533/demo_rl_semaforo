@@ -29,8 +29,8 @@ cualquier resultado que se vaya a citar en el documento debe correrse con varias
 semillas, no solo la 42.
 
 Esta carpeta es la prueba de concepto de U2, U3 y U4 sobre cruces SINTÉTICOS. El
-cruce real de Lima (importado de OSM y limpiado en netedit, capítulo III) es un
-archivo aparte que aún no está aquí.
+cruce real de Lima (importado de OSM en crudo, sin limpiar en netedit; Anexo D) es
+un archivo aparte que aún no está aquí.
 
 ## Escenarios
 
