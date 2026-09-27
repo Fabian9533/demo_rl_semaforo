@@ -54,8 +54,9 @@ Los cinco escenarios del plan de pruebas
 (Tabla~\ref{tab:plan2-casos}) son sintéticos: su red se describe a
 mano con nodos y vías, y su demanda y sus programas de semáforos se
 escriben en archivos XML de SUMO. Esta sección recorre esos archivos
-con ejemplos del corredor (P1), describe la construcción de malla3
-(P5) y la calibración de la demanda de los dos casos de estrés.
+(Figura~\ref{fig:flujo-u1}) con ejemplos del corredor (P1), describe
+la construcción de malla3 (P5) y la calibración de la demanda de los
+dos casos de estrés.
 
 \subsection{Red vial}
 
@@ -373,11 +374,13 @@ más columna impar) y en onda verde hacia el este (columna por 300~m a
 Si el ganador queda en el borde de la malla de verdes, el script
 agrega un paso en ese eje y barre solo lo nuevo, hasta que el ganador
 quede en el interior; el verde mínimo de 10~s cuenta como un piso
-válido. Con la opción \verb|--instalar| el ganador se escribe como
+válido. En el plan ningún barrido tuvo que ampliar su malla. Con la
+opción \verb|--instalar| el ganador se escribe como
 programa fijo del caso (\texttt{plan2/<esc>.add.xml}), con un
 comentario que registra la malla barrida, las semillas y su retraso.
 La Tabla~\ref{tab:plan2-fijo} da el ganador de cada caso.
-% fuente: docstring de barrer_fijo.py (interioridad, --instalar, corridas sin TraCI)
+% fuente: docstring de barrer_fijo.py (interioridad, --instalar, corridas sin TraCI); ningun
+% plan2/cola/logs/barrido_<esc>.log contiene AVISO (el ganador nunca quedo en el borde y no se llamo a extender)
 
 \begin{table}[H]
 \setstretch{1}
@@ -448,7 +451,8 @@ función \texttt{correr\_episodio} de \texttt{rl\_corredor.py}; IPPO,
 DQN y MAPPO, con la de \texttt{rl\_ippo.py}, que usa el mismo reloj de
 decisión y las mismas métricas y a la que \texttt{rl\_dqn.py} y
 \texttt{rl\_mappo.py} se conectan como decisores externos. Los dos
-scripts están en el Anexo~B.
+scripts están en el Anexo~B y su ciclo, en la
+Figura~\ref{fig:flujo-u2}.
 
 \subsection{Pasos del ciclo}
 
@@ -572,8 +576,6 @@ traci.close()
 % fuente: rl_corredor.correr_episodio (lineas 284-370) y elegir/mejor_accion; VERDE_MIN = 10 s y
 % VERDE_MAX = 60 s en las fases de P1 a P5
 
-% TODO(reestructura): falta un diagrama del ciclo real que reemplace a U2.png (eliminada por generica e inexacta): episodio k con semilla base+k; decision de cada agente cada 5 s de su verde (estado, cierre de la decision anterior con la recompensa acumulada / 5, actualizacion Q-learning o SARSA, o transicion guardada en las redes, eleccion de la accion y ambar); fin por vaciado de la red o 6000 pasos; cada 10 episodios y en el ultimo, validacion con la politica congelada en 999 y 1999 y checkpoint; al terminar, publicacion del checkpoint de menor validacion. Fuente: rl_corredor.py (correr_episodio, entrenar) y rl_ippo.py (main).
-
 \subsection{Reloj de decisión con varios semáforos}
 
 En los escenarios con varios semáforos el bucle es el mismo, con un
@@ -695,7 +697,8 @@ un lote (unas 1250 transiciones en corredor y 1900 en red), se
 normalizan las ventajas y se hace una actualización PPO por episodio
 con el objetivo recortado de la Ecuación~\ref{eq:ppo-clip}; el término
 de entropía se calcula solo sobre las decisiones libres, aquellas en
-que la máscara permite las dos acciones.
+que la máscara permite las dos acciones. La Figura~\ref{fig:flujo-u4}
+sigue este episodio desde la decisión hasta la actualización.
 % fuente: rl_ippo.py (Politica, gae, actualizar: ent_libre sobre decisiones con dos acciones legales)
 
 El entrenamiento es determinista: siembra los generadores de Python,
@@ -898,17 +901,21 @@ curva que IPPO con esos hiperparámetros y al nivel del actuado
 
 Los trabajos del plan son preparar cada escenario, barrer su fijo,
 entrenar cada modelo con cada semilla base y evaluar cada control y
-cada política. El script \texttt{plan2/\allowbreak generar\_trabajos.py}
+cada política; el camino de cada evaluación hasta el veredicto es el
+de la Figura~\ref{fig:flujo-u3}. El script \texttt{plan2/\allowbreak generar\_trabajos.py}
 los escribe en una lista con el comando, la prioridad y las
 dependencias de cada uno, y \texttt{plan2/cola.py} los ejecuta. Las
 dependencias son de dos tipos: una bandera que indica que el código de
 un módulo pasó sus pruebas, o un trabajo previo terminado (una
-evaluación depende del entrenamiento que produce su política, y este
-del barrido de su caso). La cola lanza por orden de prioridad los
+evaluación depende del entrenamiento que produce su política, y este,
+de la preparación de su caso; solo la evaluación del fijo espera al
+barrido). La cola lanza por orden de prioridad los
 trabajos con sus dependencias cumplidas, hasta 11 procesos a la vez,
 guarda el registro de cada uno y su estado, y puede reiniciarse sin
 repetir lo hecho. Cada barrido usa cuatro procesos propios, aunque la
 cola lo cuenta como uno.
+% fuente: plan2/generar_trabajos.py (requiere: train_<esc>_<alg>_s<b> = bandera del modulo y prep_<esc>;
+% eval_<esc>_fijo = barrido_<esc>; eval_<esc>_<alg>_s<b> = su train)
 
 Las prioridades ponen primero lo imprescindible: la preparación de los
 escenarios, luego los barridos y todas las evaluaciones, después

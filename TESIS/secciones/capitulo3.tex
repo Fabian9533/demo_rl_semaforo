@@ -28,18 +28,23 @@ salidas de SUMO y aplica el protocolo de evaluación. U4 añade la
 coordinación entre semáforos vecinos: mensajes entre agentes, una
 observación extendida con la información del vecino y un término de
 penalización por \textit{spillback} (Sección~\ref{sec:teoria-control}).
-La Tabla~\ref{tab:pipeline} resume qué hace cada unidad, qué recibe,
-qué entrega y con qué programas se implementa.
+La Figura~\ref{fig:arquitectura} muestra cómo se conectan las cuatro
+unidades con SUMO y con la cadena de evaluación y qué información
+intercambian (interfaces I1 a I8); la Tabla~\ref{tab:pipeline} resume
+qué hace cada unidad, qué recibe, qué entrega y con qué programas se
+implementa.
 
-U4 se evalúa en variantes incrementales sobre los escenarios de varios
-semáforos, frente a los mismos controles de referencia que U2, de modo
-que el aporte de la comunicación quede aislado del resto de cambios.
-
-Los escenarios evaluados son sintéticos (Sección~\ref{sec:escenarios}).
-La red del cruce real de Lima se importó de OpenStreetMap, pero no se
-ha limpiado ni entra en ningún experimento: el procedimiento previsto
-para completarla está en el Anexo~D y su uso queda como trabajo
-siguiente.
+Las interfaces entre unidades son ocho: I1, el escenario del caso (la
+configuración de SUMO con la red, la demanda y el fijo tuneado, más el
+programa actuado); I2, las aproximaciones, los enlaces y los vecinos de
+cada semáforo; I3, la observación y la recompensa, que cada agente arma
+con las lecturas de TraCI; I4, la acción de cada agente; I5, los
+mensajes entre semáforos vecinos; I6, las métricas de cada corrida; I7,
+la política publicada de cada entrenamiento con su archivo de
+metadatos, e I8, el veredicto por caso y modelo.
+% fuente: plan2/<esc>.sumocfg (net-file, route-files y additional-files = <esc>.add.xml, el fijo que
+% instala barrer_fijo.py --instalar); el actuado <esc>_actuado.add.xml lo escribe comun.archivo_actuado
+% y se pasa aparte con --additional-files (rl_corredor.py, comun.py)
 
 \begin{table}[H]
 \setstretch{1}
@@ -52,9 +57,9 @@ Unidad & Qué hace & Entradas & Salidas & Programas \\
 \midrule
 U1. Preprocesa\-miento & construye cada escenario: red, demanda, programas de referencia y configuración & archivos de nodos y vías escritos a mano (\texttt{.nod.xml}, \texttt{.edg.xml}); flujos por movimiento y periodo & red (\texttt{.net.xml}), demanda (\texttt{.rou.xml}), programas fijo y actuado (\texttt{.add.xml}), configuración (\texttt{.sumocfg}); aproximaciones, enlaces y vecinos de cada semáforo & \texttt{netconvert} (\texttt{build\_net.bat}), \texttt{barrer\_fijo.py}, \texttt{comun.py}, \texttt{escenarios\_\allowbreak plan2.py} \\
 \midrule
-U2. Entrena\-miento & entrena un agente por semáforo, que decide cada 5~s sobre SUMO a través de TraCI; no modifica la red ni las rutas & escenario de U1; semillas de entrenamiento y de validación & \textit{checkpoints}, política publicada con su archivo de metadatos (Sección~\ref{sec:protocolo}) y registro por episodio & \texttt{rl\_corredor.py} (Q-learning y SARSA), \texttt{rl\_ippo.py} (IPPO), \texttt{rl\_dqn.py} (DQN) \\
+U2. Aprendizaje por refuerzo & entrena un agente por semáforo, que decide cada 5~s sobre SUMO a través de TraCI; no modifica la red ni las rutas & escenario de U1; semillas de entrenamiento y de validación & \textit{checkpoints}, política publicada con su archivo de metadatos (Sección~\ref{sec:protocolo}) y registro por episodio & \texttt{rl\_corredor.py} (Q-learning y SARSA), \texttt{rl\_ippo.py} (IPPO), \texttt{rl\_dqn.py} (DQN) \\
 \midrule
-U3. Medición & mide todos los controles con las mismas salidas de SUMO, evalúa las políticas congeladas y aplica la regla de veredicto & salida por vehículo (\texttt{tripinfo}) y lecturas de TraCI de cada corrida; políticas publicadas y programas de referencia & métricas por corrida; media e intervalo de confianza por control; cambio porcentual frente al fijo y al actuado con su intervalo y su valor $p$ (Sección~\ref{sec:estadistica}); tablas de veredicto & \texttt{comun.py}, \texttt{evaluar.py}, \texttt{consolidar.py}, \texttt{veredicto.py} \\
+U3. Simulación y medición & mide todos los controles con las mismas salidas de SUMO, evalúa las políticas congeladas y aplica la regla de veredicto & salida por vehículo (\texttt{tripinfo}) y lecturas de TraCI de cada corrida; políticas publicadas y programas de referencia & métricas por corrida; media e intervalo de confianza por control; cambio porcentual frente al fijo y al actuado con su intervalo y su valor $p$ (Sección~\ref{sec:estadistica}); tablas de veredicto & \texttt{comun.py}, \texttt{evaluar.py}, \texttt{consolidar.py}, \texttt{veredicto.py}; colas y retornos: \texttt{correr\_\allowbreak episodio} de \texttt{rl\_corredor.py} y \texttt{rl\_ippo.py} \\
 \midrule
 U4. Coordina\-ción distribuida & añade mensajes entre vecinos, observación extendida y término de \textit{spillback} (variantes vecinos y \textit{spill} de IPPO) y el crítico centralizado de MAPPO & escenario de U1 con su tabla de vecinos & las mismas que U2 & \texttt{rl\_ippo.py}, \texttt{rl\_mappo.py} \\
 \bottomrule
@@ -68,7 +73,35 @@ y solo deciden y aprenden en su propio programa.}
 % fuente: capitulo4.tex original (7bd8685): Alcance y unidades, Resumen de las unidades, P5 (malla3.nod.xml,
 % malla3.edg.xml, build_net.bat, escenarios_plan2.py), DQN ("el episodio lo corre rl_ippo.py"),
 % Reproducibilidad (comandos); anexos.tex original, Anexo B (descripcion de cada script)
-% TODO(reestructura): dibujar el diagrama del pipeline real que reemplace a Diagrama.png, U1.png y U2.png: .nod.xml/.edg.xml -> netconvert (build_net.bat) -> .net.xml; .rou.xml con flujos vehsPerHour; barrer_fijo.py (semillas 2001-2003) -> <esc>.add.xml y comun.archivo_actuado -> <esc>_actuado.add.xml; .sumocfg -> entrenamiento por TraCI (rl_corredor.py, rl_dqn.py, rl_ippo.py, rl_mappo.py) con validacion cada 10 episodios y checkpoints -> politica publicada y base publicada -> evaluar.py (1001-1030) -> consolidar.py -> veredicto.py; U4 como mensajes entre agentes dentro del bucle. Fuente: esta tabla y el Anexo B.
+
+\begin{figure}[H]
+\setstretch{1}
+\centering
+\includegraphics[width=\textwidth]{diag_arquitectura.pdf}
+\caption[Arquitectura modular del método]{Arquitectura modular del método. Cada recuadro de color
+es una unidad, con sus componentes y los programas que los implementan. SUMO + TraCI es el
+entorno de U3: sobre él entrenan los aprendices de U2 y U4 y se evalúan todos los controles. La
+barra gris reúne a los aprendices, que intercambian con U3 las mismas interfaces. La flecha
+gruesa indica que \texttt{evaluar.py} corre una simulación por semilla. En las semillas de
+entrenamiento, $b$ es la semilla base y $k$ el episodio (Tabla~\ref{tab:plan2-semillas}).
+Marcas: T, tabulares; D, DQN; P, IPPO y MAPPO. En las figuras de cada unidad, el color del borde
+indica la unidad a la que pertenece cada elemento; los puertos llevan el color de la unidad del
+otro lado de la interfaz, o gris si del otro lado hay varias unidades o están los resultados. U1
+se amplía en la Figura~\ref{fig:flujo-u1}; U2, en la Figura~\ref{fig:flujo-u2}; U4, en la
+Figura~\ref{fig:flujo-u4}, y U3, en la Figura~\ref{fig:flujo-u3}.}
+\label{fig:arquitectura}
+\end{figure}
+% fuente: TESIS/diagramas/arquitectura.tex (python construir.py arquitectura)
+
+U4 se evalúa en variantes incrementales sobre los escenarios de varios
+semáforos, frente a los mismos controles de referencia que U2, de modo
+que el aporte de la comunicación quede aislado del resto de cambios.
+
+Los escenarios evaluados son sintéticos (Sección~\ref{sec:escenarios}).
+La red del cruce real de Lima se importó de OpenStreetMap, pero no se
+ha limpiado ni entra en ningún experimento: el procedimiento previsto
+para completarla está en el Anexo~D y su uso queda como trabajo
+siguiente.
 
 %----------------------------------------------------------------------
 
@@ -85,7 +118,30 @@ P1 y de P3 con toda la demanda multiplicada por un factor de demanda
 $f$: 2.0 en P2 y 1.2 en P4. Los dos factores se eligieron antes de
 entrenar, con el control actuado sobre las semillas 2001 a 2003; la
 calibración se describe en la Sección~\ref{sec:calibracion}
-(Tabla~\ref{tab:red-alta-factor}).
+(Tabla~\ref{tab:red-alta-factor}). La Figura~\ref{fig:flujo-u1}
+muestra cómo se construye cada escenario y qué entrega U1 a las demás
+unidades.
+
+\begin{figure}[p]
+\setstretch{1}
+\centering
+\includegraphics[width=\textwidth]{diag_u1.pdf}
+\caption[Flujo de U1: preprocesamiento]{Flujo de U1 para un caso del plan: red vial, demanda,
+programas de referencia y lo que U1 entrega a las demás unidades.}
+\label{fig:flujo-u1}
+\end{figure}
+% fuente: TESIS/diagramas/u1.tex (python construir.py u1)
+
+En la Figura~\ref{fig:flujo-u1}, el flujo tiene dos decisiones: la
+demanda de P2 y P4 se escala por el factor $f$, y el barrido del fijo
+amplía la malla de verdes mientras el ganador quede en su borde
+(Sección~\ref{sec:protocolo}). El programa actuado lo escribe
+\texttt{comun.py} al evaluar ese control, no al preparar el escenario.
+Las aproximaciones, los enlaces y los vecinos de cada semáforo no salen
+de un archivo de SUMO: están escritos en \texttt{rl\_corredor.py},
+\texttt{rl\_ippo.py} y \texttt{escenarios\_\allowbreak plan2.py}.
+% fuente: rl_corredor.ESCENARIOS, rl_ippo.VECINOS y escenarios_plan2.py (ESCENARIOS_RC, VECINOS);
+% comun.archivo_actuado (lo llama rl_corredor.py al correr el brazo actuado)
 
 Todos los escenarios comparten el mismo patrón de demanda: una hora
 dividida en dos periodos de 30 minutos con la punta invertida, de modo
@@ -154,7 +210,37 @@ recompensa. Esta sección define esos elementos. La misma formulación
 sirve para todos los aprendices; cambian la representación del estado
 (tabular o continua), la forma de imponer los límites de verde
 (máscara o corrección después de elegir) y, en la variante
-\emph{spill} y en la ablación, la recompensa.
+\emph{spill} y en la ablación, la recompensa. La
+Figura~\ref{fig:flujo-u2} muestra cómo se encadenan estos elementos
+durante el entrenamiento; la validación y la publicación de la política
+se definen en la Sección~\ref{sec:protocolo}.
+
+\begin{figure}[p]
+\setstretch{1}
+\centering
+\includegraphics[width=\textwidth]{diag_u2.pdf}
+\caption[Flujo de U2: entrenamiento de un aprendiz]{Flujo de U2 para un aprendiz y una semilla
+base $b$: a la izquierda, un episodio sobre SUMO; a la derecha, lo que sigue a cada episodio.}
+\label{fig:flujo-u2}
+\end{figure}
+% fuente: TESIS/diagramas/u2.tex (python construir.py u2)
+
+En la Figura~\ref{fig:flujo-u2}, el episodio $k$ arranca SUMO con la
+semilla $b + k$ y avanza en pasos de 1~s. En cada paso, cada agente al
+que le toca decidir cierra su decisión anterior con la recompensa
+acumulada desde entonces (en \texttt{ql\_colas}, con la recompensa de
+colas leída al decidir), observa, actualiza o guarda, elige y aplica la
+acción; SARSA elige antes de actualizar, porque su objetivo usa la
+acción siguiente. El episodio termina cuando la red se vacía o a los
+6000 pasos. Al cerrarlo, U3 entrega sus métricas (I6) y, en IPPO y
+MAPPO, la política se actualiza con PPO; cada 10 episodios, y en el
+último, se valida la política congelada y se guarda un
+\textit{checkpoint}. Las variantes de U4 siguen este mismo ciclo
+(Figura~\ref{fig:flujo-u4}).
+% fuente: rl_corredor.correr_episodio (r = r_acum / PASO_CONTROL, o recompensa(tls) con colas; SARSA
+% elige a2 antes de actualizar); rl_corredor.py, rl_ippo.py, rl_dqn.py y rl_mappo.py (validacion y
+% checkpoint si ep es multiplo de eval_cada = 10 o ep == episodios); gae/actualizar solo en
+% rl_ippo.py y rl_mappo.py
 
 \subsection{Agentes, decisiones y restricciones de verde}
 
@@ -311,7 +397,33 @@ movimiento (variante \emph{local}), los mensajes de los vecinos
 (\emph{vecinos}) y el término de \textit{spillback} en la recompensa
 (\emph{spill}). IPPO \citep{Schulman2017_PPO,Yu2021_MAPPO} se
 entrena con una sola red compartida por todos los semáforos
-(Secciones~\ref{sec:ppo} y~\ref{sec:marl}).
+(Secciones~\ref{sec:ppo} y~\ref{sec:marl}). En la
+Figura~\ref{fig:flujo-u4} se ve qué añade U4 a un episodio de U2.
+
+\begin{figure}[p]
+\setstretch{1}
+\centering
+\includegraphics[width=\textwidth]{diag_u4.pdf}
+\caption[Flujo de U4: coordinación distribuida]{Flujo de U4 en un episodio, visto desde un
+semáforo $i$ y cada vecino $j$: en naranja, los pasos de U2; en violeta, lo que añade U4. Las
+marcas IPPO, MAPPO y \textit{spill} indican en qué modelos actúa cada paso.}
+\label{fig:flujo-u4}
+\end{figure}
+% fuente: TESIS/diagramas/u4.tex (python construir.py u4)
+
+La Figura~\ref{fig:flujo-u4} distingue dos relojes: los mensajes (I5)
+se envían cada 5~s de reloj global, salvo en IPPO local, y cada agente
+decide cada 5~s de su propio verde con el último mensaje recibido. En
+IPPO y MAPPO, al decidir, el agente guarda en su trayectoria la
+observación, la máscara, la acción, el logaritmo de su probabilidad y
+el valor que estima el crítico, local en IPPO y centralizado en MAPPO;
+al final del episodio se calculan las ventajas con GAE y se actualizan
+el actor y el crítico con PPO. La validación, el \textit{checkpoint} y
+la publicación siguen el ciclo de U2 (Figura~\ref{fig:flujo-u2}). DQN
+recorre el mismo episodio con la observación de \emph{vecinos}, pero
+decide con su red $Q$.
+% fuente: rl_ippo.py (con_vecinos = variante != "local": sin mensajes en local; buffer con obs, mascara,
+% accion, logp y valor; gae y actualizar al final del episodio); rl_mappo.py (transicion: logp, valor)
 
 \subsection{Vecinos y canal de mensajes}
 
@@ -427,6 +539,17 @@ aprendices con redes neuronales se implementaron en PyTorch puro, sin
 Gym ni bibliotecas de aprendizaje por refuerzo de terceros
 (Sección~\ref{sec:aprendices}).
 
+El fijo tuneado es el programa de tiempo fijo ajustado por barrido en
+cada caso (Sección~\ref{sec:protocolo}). El actuado es el control
+actuado nativo de SUMO \citep{SUMO_TLS_Actuated}, que extiende el
+verde mientras los detectores registran vehículos
+(Sección~\ref{sec:teoria-control}). Se genera con las mismas fases que
+el fijo, con los límites de verde de los aprendices (10 y 60~s) y sin
+desfase entre cruces; SUMO crea los detectores
+(Sección~\ref{sec:referencias-fijas}).
+% fuente: comun.archivo_actuado (fases del programa estatico de la red, minDur 10, maxDur 60,
+% offset="0", "SUMO crea solos los detectores"); plan2/corredor_actuado.add.xml
+
 \begin{table}[H]
 \setstretch{1}
 \centering
@@ -455,17 +578,6 @@ coincide con IPPO vecinos; la tabla de veredicto lo reporta como ``= vecinos''. 
 \texttt{ql\_colas} no se programó en P5.}
 \label{tab:plan2-modelos}
 \end{table}
-
-El fijo tuneado es el programa de tiempo fijo ajustado por barrido en
-cada caso (Sección~\ref{sec:protocolo}). El actuado es el control
-actuado nativo de SUMO \citep{SUMO_TLS_Actuated}, que extiende el
-verde mientras los detectores registran vehículos
-(Sección~\ref{sec:teoria-control}). Se genera con las mismas fases que
-el fijo, con los límites de verde de los aprendices (10 y 60~s) y sin
-desfase entre cruces; SUMO crea los detectores
-(Sección~\ref{sec:referencias-fijas}).
-% fuente: comun.archivo_actuado (fases del programa estatico de la red, minDur 10, maxDur 60,
-% offset="0", "SUMO crea solos los detectores"); plan2/corredor_actuado.add.xml
 
 Q-learning y SARSA \citep{SuttonBarto2018} usan el estado tabular de
 la Sección~\ref{sec:formulacion}, con una tabla $Q$ por semáforo, y
@@ -534,7 +646,29 @@ Sección~\ref{sec:teoria-metricas}; todas se calculan con las mismas
 salidas de SUMO para todos los controles. La métrica primaria es el
 retraso por vehículo, la magnitud que la tesis se propone reducir; la
 espera, las colas, las paradas, el \textit{throughput} y las emisiones
-son secundarias.
+son secundarias. La Figura~\ref{fig:flujo-u3} sigue las corridas
+desde la medición hasta el veredicto (Secciones~\ref{sec:estadistica}
+y~\ref{sec:veredicto}).
+
+\begin{figure}[p]
+\setstretch{1}
+\centering
+\includegraphics[width=\textwidth]{diag_u3.pdf}
+\caption[Flujo de U3: medición y evaluación]{Flujo de U3: medición en cada corrida, evaluación
+de cada control con las semillas 1001 a 1030 y veredicto por caso y modelo.}
+\label{fig:flujo-u3}
+\end{figure}
+% fuente: TESIS/diagramas/u3.tex (python construir.py u3)
+
+En la Figura~\ref{fig:flujo-u3}, la franja superior es común a toda
+corrida, sea de entrenamiento, de validación o de evaluación: sus
+métricas van a los aprendices (I6) o, en la evaluación, a una fila por
+semilla. Las otras dos franjas solo intervienen en la evaluación:
+\texttt{evaluar.py} corre cada control una vez por semilla,
+\texttt{consolidar.py} calcula la estadística pareada y
+\texttt{veredicto.py} elige la base publicada con los metadatos de las
+políticas (I7), comprueba que los datos estén completos y solo
+entonces aplica la regla y evalúa la convergencia.
 
 Por vehículo, las métricas salen del archivo \texttt{tripinfo} que
 SUMO escribe al terminar cada viaje: el retraso (\texttt{timeLoss}),
@@ -721,8 +855,9 @@ Evaluación & 1001 a 1030 & política congelada, todos los controles y todas las
 El fijo tuneado se obtiene en cada caso con un barrido del verde de la
 avenida, el verde transversal y el desfase entre cruces sobre las
 semillas 2001 a 2003, por retraso medio. La malla del barrido se amplía
-hasta que el óptimo queda en su interior; el verde mínimo de 10~s es la
-única frontera que se acepta como óptimo. El programa ganador se
+hasta que el óptimo queda en su interior, sin pasar de un verde de
+60~s; el verde mínimo de 10~s es la única frontera que se acepta como
+óptimo. El programa ganador se
 instala en el escenario del caso. Las mallas barridas y el ganador de
 cada caso están en la Sección~\ref{sec:referencias-fijas}
 (Tabla~\ref{tab:plan2-fijo}).
