@@ -7,10 +7,13 @@ urbano en Lima con semáforos inteligentes mediante Aprendizaje por Refuerzo (RL
 simulación en SUMO". Autores: Fabian Alvarado y Neftalí Calixto. Asesor: José
 Antonio Fiestas Iquira. Curso actual: Tesis 2 (2026-II). El documento fuente
 está en `TESIS/` (LaTeX, plantilla UTEC, se compila en Overleaf; `TESIS (12).pdf`
-es solo una copia de septiembre 2026). Al 06.09.2026 el documento está escrito de
-punta a punta: capítulo III (`capitulo4.tex`) cubre U1 a U4, capítulo IV
-(`capitulo5.tex`) los resultados de los cinco escenarios, y conclusiones,
-recomendaciones y anexos ya no son placeholders.
+es solo una copia de septiembre 2026). Desde la reestructura del 27.09.2026 (rama
+`reestructura-tesis`, changelog en `CAMBIOS_reestructura_tesis.md`) cada archivo
+coincide con su capítulo: II marco teórico (`capitulo2.tex`, con ecuaciones), III
+metodología (`capitulo3.tex`), IV implementación (`capitulo4.tex`), V resultados del
+plan de pruebas (`capitulo5.tex`); la fase exploratoria está en el Anexo C
+(`anexo_c_exploratoria.tex`) y el procedimiento OSM en el Anexo D (`anexo_d_osm.tex`).
+Las menciones a "capitulo4.tex" más abajo en este archivo son anteriores a esa fecha.
 
 Arquitectura de la tesis en 4 unidades:
 - U1 preprocesamiento (OSM → red SUMO con netconvert/netedit, rutas, .sumocfg)
@@ -371,8 +374,8 @@ revisa en cascada: introducción, resumen y abstract, capítulo 2, capítulo 4,
 capítulo 5, conclusiones. Cómo y dónde va cada cosa: skill `escribir-tesis`.
 Validar siempre con `python TESIS/validar_tex.py` y compilar con
 `python TESIS/compilar.py` (MiKTeX local desde el 06.09; Overleaf sigue siendo la
-copia oficial). Numeración: `capitulo4.tex` es el Capítulo III y
-`capitulo5.tex` (Resultados) el IV; `capitulo3.tex` está vacío.
+copia oficial). Numeración (desde el 27.09.2026): `capituloN.tex` es el Capítulo N
+(I a V); referencias a capítulos con `\ref{cap:...}`.
 
 Jerarquía de registros: el CSV es el dato crudo; el .tex es el registro oficial;
 LEEME.txt y este archivo son notas y nunca el único lugar de un número. Al .tex

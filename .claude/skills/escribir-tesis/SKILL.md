@@ -42,40 +42,43 @@ El usuario compila en Overleaf; en esta maquina no hay LaTeX.
 
 `main.tex` incluye, en este orden: resumen, abstract, introduccion, capitulo1,
 capitulo2, capitulo3, capitulo4, capitulo5, conclusiones, recomendaciones,
-bibliografia (IEEEtran + natbib numerico), anexos. Los capitulos numerados se
-cuentan por orden de aparicion y el nombre del archivo NO coincide con el numero:
+bibliografia (IEEEtran + natbib numerico), anexos (que incluye anexo_c_exploratoria y
+anexo_d_osm). Desde la reestructura del 27.09.2026 (rama reestructura-tesis) el nombre del
+archivo coincide con el numero del capitulo. Referencias a capitulos siempre con
+`Capitulo~\ref{cap:...}` (labels cap:estado-arte, cap:teoria, cap:metodologia,
+cap:implementacion, cap:resultados; salen en romano).
 
 | Archivo | Capitulo en el PDF | Contenido |
 |---|---|---|
-| introduccion.tex | sin numero | metas, objetivos U1-U4, alcance, metricas de evaluacion |
+| introduccion.tex | sin numero | problema y pregunta, metas, arquitectura U1-U4, objetivos, alcance, herramientas, metricas, organizacion del documento |
 | capitulo1.tex | I | estado del arte (Uniandes 2023, Trinity 2022, UAQ 2024), revision critica, implicancias de diseno |
-| capitulo2.tex | II | marco teorico: arquitectura U1-U4, definiciones |
-| capitulo3.tex | ninguno | VACIO (0 lineas). No escribir aqui sin avisar |
-| capitulo4.tex | III | marco metodologico: U1 (OSM, netedit, demanda) y U2 (formulacion RL, ciclo, Q-learning) |
-| capitulo5.tex | IV | RESULTADOS. Conectado en main.tex el 04.09.2026; mientras solo tenga `\chapter{}` genera una pagina con el titulo y nada mas |
-| conclusiones.tex | sin numero | solo el encabezado `\customchapter{CONCLUSIONES}`, sin contenido |
-| recomendaciones.tex | sin numero | placeholder Lorem ipsum |
-| anexos.tex | sin numero | placeholder de una linea |
+| capitulo2.tex | II | marco teorico con ecuaciones: SUMO/TraCI, control semaforico, metricas, MDP, tabulares, DQN, PPO/GAE, multiagente, evaluacion. Lleva al inicio el `\renewcommand{\theequation}` |
+| capitulo3.tex | III | marco metodologico (diseno): vision general (tab:pipeline), escenarios y casos (U1), formulacion RL y recompensas (U2), coordinacion (U4), modelos, medicion (U3), plan de pruebas (protocolo, estadistica, regla de veredicto) |
+| capitulo4.tex | IV | implementacion: entorno (tab:hw), construccion de escenarios y calibraciones, barrido del fijo, bucle de entrenamiento, aprendices e hiperparametros, prueba de humo, ejecucion y costo, reproducibilidad |
+| capitulo5.tex | V | resultados del plan de pruebas (matriz, resumen, metas, lectura por caso y por modelo, convergencia, alcance) |
+| conclusiones.tex | sin numero | conclusiones en el orden de los objetivos U1-U4, reproducibilidad y alcance |
+| recomendaciones.tex | sin numero | metodologicas y trabajo siguiente |
+| anexos.tex | sin numero | A tablas completas del plan; B codigo; C fase exploratoria (anexo_c_exploratoria.tex); D importacion OSM (anexo_d_osm.tex) |
 
 `recomendaciones.tex` y `anexos.tex` traen el `\chapter*` escrito a mano (tres
-lineas: `\chapter*`, `\addcontentsline`, `\markboth`); al reemplazar el placeholder
-conservar esas lineas o sustituirlas por `\customchapter{...}`.
+lineas: `\chapter*`, `\addcontentsline`, `\markboth`); conservarlas.
 
 Que va donde:
 
 | Contenido nuevo | Archivo y seccion |
 |---|---|
 | Meta, objetivo, metrica de evaluacion, alcance | introduccion.tex, la `\introsection` correspondiente (zona protegida) |
-| Definicion de un concepto en una frase (retraso, espera detenida, throughput, episodio, spillback) | capitulo2.tex, "Definiciones y conceptos fundamentales". Separar retraso (timeLoss: tiempo de viaje menos tiempo a flujo libre) de espera detenida (waitingTime: segundos con velocidad menor o igual a 0.1 m/s); hoy estan juntos |
-| Trabajo relacionado o referencia nueva; cambio en la lista de algoritmos o en el diseno de U4 | capitulo1.tex (estado del arte, revision critica, implicancias) y el mismo cambio en introduccion.tex, resumen.tex, abstract.tex y capitulo2.tex, que hoy repiten la lista |
-| Escenario: red, demanda, programa fijo tuneado (verde, offset), programa actuado (`tlLogic type="actuated"` con minDur/maxDur iguales al verde min/max del agente), ambar | capitulo4.tex, seccion U1: subseccion "Escenarios sinteticos de prueba" con tabla de escenarios (carriles, fases, demanda por periodo, verde tuneado, offset, ambar) |
-| Formulacion RL implementada, hiperparametros, restricciones, definicion operativa de episodio (una hora de demanda mas vaciado de la red, tope 6000 s; N episodios con semilla 42+ep; la Q-table persiste entre episodios), schedule de epsilon y por que N episodios | capitulo4.tex, "Desarrollo del modulo U2" |
-| Algoritmo nuevo (SARSA, DQN, PPO): hiperparametros y arquitectura | capitulo4.tex U2, una subseccion por algoritmo; resultados en la seccion final de capitulo5 con la misma tabla de metricas y las mismas semillas |
-| Como se mide cada metrica (tripinfo, TraCI, device de emisiones, definicion de throughput) | capitulo4.tex, nueva seccion "Modulo U3: medicion" |
-| Plan de pruebas: casos, factores, brazos, semillas, metrica primaria, pruebas estadisticas, decisiones de diseno con su justificacion | capitulo4.tex, nueva seccion "Plan de pruebas" al final del capitulo |
-| U4: mensajeria, estado extendido, spillback, IPPO | capitulo4.tex, nueva seccion "Modulo U4"; resultados en capitulo5. El mismo diseno esta descrito en capitulo1.tex (implicancias), capitulo2.tex e introduccion.tex: mantener los cuatro iguales |
-| Resultados: tablas por caso, por episodio, evaluacion por semillas, figuras, hallazgos positivos y negativos | capitulo5.tex, una `\section` por prueba y una final de comparacion entre escenarios y entre algoritmos |
-| Herramientas y entorno real (SUMO 1.25, Python 3.14, librerias usadas, sin GPU, tiempo por episodio) | introduccion.tex "Areas de investigacion y herramientas", capitulo4.tex tabla `tab:hw`, anexos |
+| Concepto teorico o definicion (metrica, RL, algoritmo, estadistica) | capitulo2.tex, en su seccion, con ecuacion y cita de una fuente del .bib |
+| Trabajo relacionado o referencia nueva; cambio en la lista de algoritmos | capitulo1.tex, y la lista en introduccion.tex, resumen.tex y abstract.tex |
+| Escenario o caso nuevo (diseno) | capitulo3.tex, sec:escenarios (tabla tab:escenarios = tab:plan2-casos) |
+| Como se construyo un escenario, calibracion de demanda, barrido del fijo | capitulo4.tex, sec:construccion y sec:referencias-fijas (tab:plan2-fijo) |
+| Formulacion RL, recompensa, mascara, observacion (diseno) | capitulo3.tex, sec:formulacion y sec:u4 |
+| Hiperparametros, codigo, bucle de entrenamiento | capitulo4.tex, sec:bucle y sec:aprendices (tab:plan2-hiper) |
+| Como se mide cada metrica | capitulo3.tex, sec:u3 |
+| Protocolo, semillas, estadistica, regla de veredicto | capitulo3.tex, sec:plan2 (sec:protocolo, sec:estadistica, sec:veredicto) |
+| Ejecucion, costo de computo, reproducibilidad | capitulo4.tex, sec:ejecucion y sec:reproducibilidad |
+| Resultados | capitulo5.tex; tablas completas en anexos.tex (Anexo A) |
+| Herramientas y entorno real | introduccion.tex "Areas de investigacion y herramientas" y capitulo4.tex tab:hw |
 | Conclusion o recomendacion que ya se puede sostener | conclusiones.tex / recomendaciones.tex |
 | Scripts completos, tablas largas, listados de parametros | anexos.tex |
 | Cambio de metas o de resultado principal | ademas: resumen.tex y abstract.tex (zona protegida) |
@@ -171,10 +174,11 @@ Que va donde:
   instituciones entre doble llave `{{SUMO Project}}`; si no, salen "J. D. C. Mass"
   y "S. Project".
 - Ecuaciones: `equation` con `\label{eq:}` y `Ecuación~\ref{}`. La clase no
-  redefine `\theequation`, asi que capitulo4.tex lleva al inicio
+  redefine `\theequation`, asi que capitulo2.tex lleva al inicio
   `\renewcommand{\theequation}{\arabic{chapter}.\arabic{equation}}` para que
   salga 3.1 y no III.1; no repetirlo en otros archivos. La recompensa
-  implementada esta en capitulo4 U2 con `\label{eq:recompensa}`.
+  comun (retraso) esta en capitulo3 sec:formulacion con `\label{eq:recompensa-u4}`; la
+  de colas (ablacion ql_colas), con `\label{eq:recompensa}`.
 - Codigo: `verbatim` para fragmentos cortos; los scripts completos van al Anexo B
   con `\verbatiminput{codigo/<script>.py}` en `\scriptsize` y dentro de
   `\begin{spacing}{1}` (setspace). `\verbatiminput` no parte lineas: en
