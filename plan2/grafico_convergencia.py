@@ -1,5 +1,5 @@
 """
-grafico_convergencia.py - Curvas de validacion del plan de pruebas v2 (convergencia por caso).
+grafico_convergencia.py - Curvas de validacion del plan de pruebas (convergencia por caso).
 
 Uso (desde demo_rl/plan2):  python grafico_convergencia.py
 Salida: fig_plan2_convergencia.png
@@ -123,7 +123,7 @@ def main():
                  "Validación: semillas 999 y 1999, cada 10 episodios.\n"
                  "Cada panel tiene su propia escala vertical.", color=APAGADO, fontsize=7,
                  va="center", transform=leyenda.transAxes)
-    fig.suptitle("Curvas de aprendizaje del plan de pruebas v2", x=0.02, ha="left",
+    fig.suptitle("Curvas de aprendizaje del plan de pruebas", x=0.02, ha="left",
                  fontsize=11, color=TINTA, fontweight="bold")
     fig.tight_layout(rect=(0, 0, 0.9, 0.97), h_pad=2.2, w_pad=5.5)
     salida = os.path.join(AQUI, "fig_plan2_convergencia.png")
