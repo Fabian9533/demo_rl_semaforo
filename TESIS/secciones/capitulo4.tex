@@ -788,8 +788,9 @@ aproximaciones del propio agente y que el bloque local ya ve en parte
 (componentes 1 a 4). Como los dos sentidos de cada enlace tienen la
 misma longitud en todos los escenarios, la normalización por las
 plazas del enlace de salida da el valor correcto para lo que se mide.
-Todas las políticas de IPPO, DQN y MAPPO de este documento se
-entrenaron con esa componente; la cola del enlace de salida solo llega
+Todas las políticas de IPPO vecinos, IPPO spill, DQN y MAPPO de este
+documento se entrenaron con esa componente (IPPO local tiene a cero
+las ranuras de los vecinos); la cola del enlace de salida solo llega
 al agente a través del término de \textit{spillback} de la variante
 \emph{spill}.
 % fuente: rl_ippo.py, funciones mensaje (cola_salida = enlace emisor->receptor) y observar (componente base+6)

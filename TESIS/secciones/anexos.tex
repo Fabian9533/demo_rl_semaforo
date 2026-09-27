@@ -21,7 +21,7 @@ setiembre de 2026 a las 03:55.
 
 Las tablas de bases (Tablas~\ref{tab:veredicto-bases-ql}
 a~\ref{tab:veredicto-bases-mappo}) listan las tres políticas entrenadas
-de cada modelo y caso. La publicada es la mediana de las tres por la
+de cada modelo y caso. La base publicada es la mediana de las tres por la
 validación. El rango entre bases indica cuánto cambia el resultado con
 la semilla de entrenamiento, y se compara con el IC95\,\% de una sola
 política.
@@ -51,7 +51,7 @@ DQN usa la misma observación y la misma recompensa que IPPO vecinos
 del actor y la observación con mensajes, cambia el crítico por uno
 centralizado y entrena su propia política
 (Tabla~\ref{tab:veredicto-mappo}). En las celdas
-cuya política publicada no convergió (DQN en P5; MAPPO en P3 y P4) el
+cuya base publicada no convergió (DQN en P5; MAPPO en P3 y P4) el
 veredicto es provisional.
 % fuente: plan2/veredicto.csv, filas dqn y mappo (convergio y veredicto)
 \input{secciones/tablas/veredicto_dqn}

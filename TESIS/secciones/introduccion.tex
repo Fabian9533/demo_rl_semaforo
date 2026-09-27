@@ -83,7 +83,7 @@ En U4, IPPO vecinos, IPPO spill (IPPO vecinos con la penalización por \textit{s
 
 \begin{itemize}
     \item \textbf{Ingeniería de transporte:} SUMO 1.25 con \texttt{netconvert} y métricas de tráfico. OpenStreetMap y \texttt{netedit} solo intervienen en el cruce real, importado en crudo y pendiente de limpieza (Anexo~D), que no forma parte de los casos evaluados.
-    \item \textbf{Inteligencia Artificial:} Python 3.14. Los agentes tabulares usan la biblioteca estándar; IPPO, Double DQN y MAPPO se implementan en PyTorch puro sobre CPU, sin Gym ni bibliotecas de RL de terceros. Los entrenamientos corren con un hilo cada uno y sin GPU, en el equipo de la Tabla~\ref{tab:hw}.
+    \item \textbf{Inteligencia Artificial:} Python 3.14. Los agentes tabulares usan la biblioteca estándar; IPPO, Double DQN y MAPPO se implementan en PyTorch puro sobre CPU, sin Gym ni bibliotecas de RL de terceros. Los entrenamientos corren con un hilo cada uno y sin usar la GPU, en el equipo de la Tabla~\ref{tab:hw}.
     \item \textbf{Procesamiento de datos:} Python (\texttt{csv}, \texttt{numpy}) y las salidas por vehículo de SUMO.
     \item \textbf{Modelado y simulación:} SUMO + TraCI.
     \item \textbf{Estadística y visualización:} \texttt{scipy} (intervalo de confianza de la media y prueba de Wilcoxon pareada), \texttt{numpy} (\textit{bootstrap} pareado por semilla) y \texttt{matplotlib}.

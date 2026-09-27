@@ -60,8 +60,8 @@ cap:implementacion, cap:resultados; salen en romano).
 | recomendaciones.tex | sin numero | metodologicas y trabajo siguiente |
 | anexos.tex | sin numero | A tablas completas del plan; B codigo; C fase exploratoria (anexo_c_exploratoria.tex); D importacion OSM (anexo_d_osm.tex) |
 
-`recomendaciones.tex` y `anexos.tex` traen el `\chapter*` escrito a mano (tres
-lineas: `\chapter*`, `\addcontentsline`, `\markboth`); conservarlas.
+`recomendaciones.tex` trae el `\chapter*` escrito a mano (tres lineas: `\chapter*`,
+`\addcontentsline`, `\markboth`); conservarlas. `anexos.tex` usa `\customchapter{ANEXOS}`.
 
 Que va donde:
 
