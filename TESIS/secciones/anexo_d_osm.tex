@@ -1,188 +1,111 @@
 \section*{Anexo D. Importación de un cruce desde OpenStreetMap}
+\phantomsection
+\addcontentsline{toc}{subsection}{Anexo D. Importación de un cruce desde OpenStreetMap}
+\setcounter{figure}{0}
+\renewcommand{\thefigure}{D.\arabic{figure}}
+\renewcommand{\theHfigure}{D.\arabic{figure}}
 
-\section{Instalación y configuración de SUMO}
+Este anexo reúne el procedimiento previsto para llevar al
+\textit{pipeline} una intersección real de Lima a partir de
+OpenStreetMap (OSM). Ninguno de los casos evaluados lo usa: todos se
+construyeron escribiendo directamente los archivos de nodos y vías
+(Sección~\ref{sec:construccion}).
 
-\begin{enumerate}
-  \item \textbf{Descargar e instalar SUMO.} Obtenga la versión estable
-    de SUMO desde el sitio oficial y siga las instrucciones de
-    instalación para su sistema operativo.  SUMO incluye varios
-    ejecutables de consola, como \emph{sumo} (simulación),
-    \emph{sumo-gui} (versión con interfaz gráfica) y
-    \emph{netconvert} (importación de redes).
-    Instale también Python~3, necesario para ejecutar los
-    scripts auxiliares.
+La importación cruda del cruce de la Av.\ Paseo de la República con la
+Av.\ 28 de Julio se hizo el 01.12.2025 con el asistente
+\texttt{osmWebWizard}. Esa red está fuera del repositorio del proyecto,
+conserva la demanda aleatoria del asistente y no se ha limpiado en
+\texttt{netedit} ni evaluado. Los pasos de limpieza que siguen son, por
+tanto, los previstos y no los ejecutados.
+% fuente: recomendaciones.tex (texto original 7bd8685, "Llevar el protocolo al cruce real de Lima")
 
-  \item \textbf{Configurar el entorno.} Defina la variable de
-    entorno \verb|SUMO_HOME| apuntando al directorio donde se instaló
-    SUMO y añada la carpeta \verb|bin| al \verb|PATH| del sistema.
-    Esto permite invocar los programas de SUMO desde cualquier
-    terminal.
+\subsection*{Instalación de SUMO}
 
-  \item \textbf{Verificar la instalación.} Abra una terminal y ejecute
-    los siguientes comandos.  Deben devolver la versión instalada de
-    SUMO para confirmar que el entorno está listo:
+Se instala la versión estable de SUMO desde su sitio oficial. Incluye
+los ejecutables de consola \emph{sumo} (simulación), \emph{sumo-gui}
+(simulación con interfaz gráfica) y \emph{netconvert} (importación de
+redes); los scripts auxiliares requieren además Python~3. La variable de
+entorno \verb|SUMO_HOME| debe apuntar al directorio de instalación y la
+carpeta \verb|bin| debe estar en el \verb|PATH|; el comando
+\verb|sumo -V| devuelve la versión instalada. La versión y el entorno
+usados en esta tesis están en la Tabla~\ref{tab:hw}.
 
-    {\footnotesize\begin{verbatim}
-sumo -V
-sumo-gui -V
-    \end{verbatim}
-    }
-\end{enumerate}
+\subsection*{Herramientas}
 
+Tres herramientas de SUMO cubren el procedimiento. \texttt{netconvert}
+genera el \texttt{.net.xml} a partir de un recorte de OSM o de archivos
+de nodos, vías y conexiones escritos a mano, y fija los tiempos por
+omisión de los semáforos generados (\verb|--tls.green.time|,
+\verb|--tls.left-green.time|). \texttt{netedit} es el editor gráfico de
+redes, semáforos, conexiones y restricciones de circulación, adecuado
+para eliminar segmentos y ajustar sentidos de vía tras la importación.
+\emph{sumo-gui} simula con interfaz gráfica y sirve para validar la red
+depurada y detectar cuellos de botella o comportamientos anómalos.
 
-%----------------------------------------------------------------------
-\section{Limpieza y configuración del escenario OSM \texorpdfstring{$\rightarrow$}{a} SUMO}
-\label{sec:osm-limpieza}
+\subsection*{Importación con osmWebWizard}
 
-Cuando la red proviene de cartografía real, es necesario revisar y
-ajustar el escenario para que represente fielmente la intersección de
-estudio y resulte adecuado para el entrenamiento del agente de control.
-Este proceso consiste en eliminar elementos irrelevantes, corregir
-inconsistencias topológicas y configurar adecuadamente los semáforos y
-la demanda. El procedimiento que sigue es el previsto para el cruce
-real de Lima; los cinco escenarios evaluados en esta fase se
-construyeron por el camino alternativo descrito en la
-Sección~\ref{sec:escenarios}, escribiendo directamente los archivos de
-nodos y vías, por lo que no requirieron limpieza. Las figuras de esta
-sección ilustran el procedimiento sobre una intersección de ejemplo y
-no corresponden a ninguno de los escenarios evaluados.
+\begin{sloppypar}
+SUMO ofrece dos vías para importar la cartografía: el asistente gráfico
+\texttt{osmWebWizard.py} y la descarga manual del recorte con
+\verb|osmGet.py| seguida de su conversión con \verb|netconvert|, que da
+un control más fino sobre los filtros de importación a cambio de más
+pasos. Las dos producen un archivo \texttt{.net.xml} que después
+requiere limpieza. El asistente se ejecuta desde la carpeta de
+herramientas de SUMO:
+\end{sloppypar}
 
-\subsection*{Eliminación y simplificación de la red}
-
-\begin{enumerate}
-  \item \textbf{Abrir la red en un editor.} Utilice \verb|sumo-gui| o
-    \texttt{netedit}, las herramientas de SUMO destinadas a la
-    inspección y edición de redes. Desde la interfaz gráfica se puede
-    seleccionar manualmente cada calle, carril e intersección para
-    examinar su geometría y atributos.
-
-  \item \textbf{Eliminar calles irrelevantes.} Desactive o borre los
-    segmentos de vía que no formen parte del cruce objeto de estudio.
-    En \texttt{netedit} esto puede realizarse en modo ``Edge''
-    seleccionando los elementos y pulsando la tecla Suprimir. También
-    se pueden modificar jerarquías de carreteras para mantener
-    únicamente arterias principales y desechar caminos secundarios.
-
-  \item \textbf{Ajustar sentidos de circulación.} Verifique que las
-    direcciones de cada carril coinciden con la realidad (por ejemplo,
-    si un carril debería ser unidireccional). En \texttt{netedit}
-    es posible invertir la dirección de un carril o fusionar dos
-    carriles paralelos empleando la herramienta de edición de lanes.
-
-  \item \textbf{Simplificar nodos complejos.} Algunas importaciones
-    desde OSM generan nodos excesivamente subdivididos. Estos pueden
-    fusionarse mediante la opción de simplificación de intersecciones
-    en \texttt{netconvert} o mediante edición manual. Una red más
-    simple facilita el entrenamiento y reduce tiempos de simulación.
-\end{enumerate}
-
-Tras completar estos pasos, la red se limpia y simplifica. La
-Figura~\ref{fig:netedit-before-after} muestra un ejemplo antes y
-después de la limpieza realizada en \texttt{netedit} para el cruce
-estudiado. Se observa cómo se eliminan calles secundarias y se ajusta
-la orientación de los carriles.
-
-\begin{figure}[H]
-  \centering
-  \subfigure[Vista inicial en \texttt{netedit} con la intersección
-    importada; hay calles secundarias y direcciones de carril
-    incorrectas.]{\includegraphics[width=0.48\textwidth]{NETEDIT.PNG}}
-  \hfill
-  \subfigure[Misma intersección tras la limpieza: calles irrelevantes
-    eliminadas y sentidos de los carriles corregidos.]{\includegraphics[width=0.48\textwidth]{conexiones.PNG}}
-  \caption{Antes y después de la limpieza de la red en \texttt{netedit}, sobre una intersección de ejemplo importada desde OSM. Ilustra el procedimiento previsto para el cruce real de Lima; los escenarios evaluados en el Capítulo~\ref{cap:resultados} no provienen de OSM.}
-  \label{fig:netedit-before-after}
-\end{figure}
-
-
-\subsection*{Herramientas útiles}
-
-Para tareas de limpieza y configuración puede emplear las siguientes
-herramientas que acompañan a SUMO:
-
-\begin{itemize}
-  \item \textbf{netconvert:} conversor de redes. Genera el
-    \texttt{.net.xml} a partir de un recorte de OSM o de archivos de
-    nodos, vías y conexiones escritos a mano, y es también donde se
-    fijan los tiempos por omisión de los semáforos generados
-    (\verb|--tls.green.time|, \verb|--tls.left-green.time|).
-  \item \textbf{netedit:} editor gráfico que permite crear, modificar
-    y depurar redes, así como editar semáforos, conexiones y
-    restricciones de circulación. Resulta idóneo para eliminar
-    segmentos irrelevantes y ajustar sentidos de vía tras una
-    importación desde OSM.
-  \item \textbf{sumo-gui:} interfaz gráfica de simulación que permite
-    visualizar el comportamiento de los vehículos y los semáforos en
-    tiempo real. Es útil para validar la red depurada y detectar
-    cuellos de botella o comportamientos anómalos.
-\end{itemize}
-
-
-\section{Importación de un cruce desde OSM}
-
-Para llevar al \textit{pipeline} una intersección real, el primer paso
-es importar su cartografía. SUMO ofrece dos vías: el asistente gráfico
-\emph{osmWebWizard}, que se describe a continuación, y la descarga
-manual del recorte con \verb|osmGet.py| seguida de su conversión con
-\verb|netconvert|, que da control más fino sobre los filtros de
-importación a cambio de más pasos. Ambas producen el mismo tipo de
-archivo \texttt{.net.xml} y requieren después la limpieza de la
-Sección~\ref{sec:osm-limpieza}. Este procedimiento es el previsto para
-el cruce de Lima y no se aplicó a los escenarios evaluados en esta
-fase.
-
-\subsection{Asistente OSM (\emph{osmWebWizard})}
-
-\begin{enumerate}
-  \item Ejecute el script \verb|osmWebWizard.py| desde la carpeta de
-    herramientas de SUMO.  El script abre un navegador donde se puede
-    navegar sobre el mapa de OSM, seleccionar la zona deseada y
-    generar el escenario automáticamente.  El uso básico es:
-    {\footnotesize\begin{verbatim}
+{\footnotesize
+\begin{verbatim}
 python tools/osmWebWizard.py
-    \end{verbatim}
-    }
+\end{verbatim}
+}
 
-  \item Seleccione ``Lima, Peru'' en el buscador y ajuste el
-    \emph{bounding box} sobre la intersección de interés.  Active la
-    opción “Traffic lights” si desea que se importen los semáforos y
-    pulse “Generate Scenario”.  El asistente creará la red
-    \texttt{.net.xml}, una demanda aleatoria y un fichero
-    \texttt{.sumocfg}; además iniciará \emph{sumo-gui} con el
-    escenario resultante.  Los archivos se guardan en un
-    subdirectorio con marca temporal.
-
-  \item Revise la red en \emph{sumo-gui} y, si detecta calles
-    desconectadas o giros imposibles, ajuste el recorte y repita la
-    generación hasta obtener una red consistente.
-\end{enumerate}
-
-Para ilustrar este proceso, la Figura~\ref{fig:import-osm-sumo} muestra
-la selección del área en OSM y la red generada en SUMO. A la
-izquierda se observa el recuadro delimitado sobre el mapa en el asistente
-\emph{osmWebWizard}, y a la derecha la red importada tal como aparece en
-\emph{sumo-gui}.
+El asistente abre un navegador con el mapa de OSM, donde se ajusta el
+\textit{bounding box} sobre la intersección de interés. Con la opción
+\textit{Traffic lights} activa se importan también los semáforos, y el
+botón \textit{Generate Scenario} crea la red \texttt{.net.xml}, una
+demanda aleatoria y un archivo \texttt{.sumocfg} en un subdirectorio con
+marca temporal, y abre \emph{sumo-gui} con el escenario. Si la red tiene
+calles desconectadas o giros imposibles, se ajusta el recorte y se
+repite la generación. La Figura~\ref{fig:osm-lima-cruda} muestra la
+importación cruda del cruce de Lima.
 
 \begin{figure}[H]
   \centering
-  \subfigure[Selección del \textit{bounding box} en OSM mediante el
-    asistente \emph{osmWebWizard}.]{\includegraphics[width=0.48\textwidth]{OSM.PNG}}
-  \hfill
-  \subfigure[Red del cruce generada automáticamente en \emph{sumo-gui}.]{\includegraphics[width=0.48\textwidth]{SUMO.PNG}}
-  \caption{Importación de un cruce desde OSM a SUMO mediante el asistente \emph{osmWebWizard}.}
-  \label{fig:import-osm-sumo}
+  \includegraphics[width=\textwidth]{NETEDIT.PNG}
+  \caption[Importación cruda del cruce de Lima]{Importación cruda del cruce de la Av.\ Paseo de la República con la Av.\ 28 de Julio (Lima), generada con \texttt{osmWebWizard} el 01.12.2025 y abierta en \texttt{netedit}, sin limpiar. No se usa en ningún caso evaluado.}
+  \label{fig:osm-lima-cruda}
 \end{figure}
 
-\section{Diagrama de flujo del módulo U1}
+\subsection*{Limpieza prevista}
 
-La Figura~\ref{fig:flow-u1} resume el procedimiento completo del módulo U1,
-desde la selección del cruce en Lima hasta la obtención del escenario SUMO
-listo para ser utilizado en el entrenamiento del agente de RL (U2).
+Una red importada de OSM debe revisarse antes de entrenar sobre ella,
+para que represente la intersección de estudio y sea adecuada para el
+agente. La limpieza prevista se haría en \texttt{netedit}, con
+inspección previa en \emph{sumo-gui}, en cuatro pasos. Primero, se
+borran los segmentos de vía que no forman parte del cruce, en el modo
+de edición de vías, o se ajusta la jerarquía de vías para conservar solo
+las arterias principales. Segundo, se verifica que el sentido de cada
+carril coincide con la realidad y, donde no, se invierte o se fusionan
+carriles paralelos. Tercero, se fusionan los nodos que la importación
+subdivide en exceso, con la simplificación de intersecciones de
+\texttt{netconvert} o a mano; una red más simple facilita el
+entrenamiento y reduce el tiempo de simulación. Cuarto, se revisan las
+fases y los tiempos que el asistente asignó a los semáforos importados
+(elementos \verb|<tlLogic>| del \texttt{.net.xml}).
 
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=\textwidth]{U1.png}
-    \caption{Diagrama de flujo del módulo U1: preprocesamiento y generación del
-    escenario SUMO.}
-    \label{fig:flow-u1}
-\end{figure}
+La red limpia pasaría después por el mismo método de los casos P1 a P5,
+como se propone en las recomendaciones.
+
+\subsection*{Demanda preliminar con randomTrips}
+
+\begin{sloppypar}
+Para poblar una red recién importada e inspeccionarla, la herramienta
+\verb|randomTrips.py| de SUMO genera viajes entre pares de vías elegidos
+al azar, con la intensidad que fija la opción \verb|-p| y una semilla
+reproducible con \verb|--seed|. Sirve para validar visualmente la red,
+pero no produce un reparto direccional controlado, por lo que no se
+emplea en los experimentos: en ellos la demanda se declara con un
+\verb|<flow>| por movimiento y periodo
+(Sección~\ref{sec:construccion}).
+\end{sloppypar}
