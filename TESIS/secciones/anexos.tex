@@ -36,15 +36,21 @@ SARSA usa la misma recompensa de retraso que Q-learning
 mismo Q-learning con la recompensa de colas de la fase exploratoria
 (Tabla~\ref{tab:veredicto-ql-colas}). Falla en P1, P3 y P4, igual que
 Q-learning con la recompensa de retraso (en P4 el veredicto de
-Q-learning es provisional), así que el techo de los agentes tabulares
-no se explica por la recompensa.
-% fuente: plan2/veredicto.csv, filas sarsa, ql_colas y ql (delta_fijo y veredicto)
+Q-learning es provisional). En P2 no convergió (provisional: falla,
+$+6.8$\,\%), mientras que Q-learning con la recompensa de retraso mejora
+al fijo ($-8.8$\,\%), y en P5 no se corrió. Con demanda nominal o
+moderada, el techo de los agentes tabulares no se explica por la
+recompensa.
+% fuente: plan2/veredicto.csv, filas sarsa, ql_colas (10.6, 6.8 no convergio, 9.6, 9.8; P5 sin
+% datos) y ql (9.2, -8.8 MEJORA, 12.4, 9.9 no convergio), columnas delta_fijo y veredicto
 \input{secciones/tablas/veredicto_sarsa}
 \input{secciones/tablas/veredicto_ql_colas}
 
 DQN usa la misma observación y la misma recompensa que IPPO vecinos
-(Tabla~\ref{tab:veredicto-dqn}), y MAPPO es el actor de IPPO vecinos con
-un crítico centralizado (Tabla~\ref{tab:veredicto-mappo}). En las celdas
+(Tabla~\ref{tab:veredicto-dqn}). MAPPO comparte con IPPO vecinos la red
+del actor y la observación con mensajes, cambia el crítico por uno
+centralizado y entrena su propia política
+(Tabla~\ref{tab:veredicto-mappo}). En las celdas
 cuya política publicada no convergió (DQN en P5; MAPPO en P3 y P4) el
 veredicto es provisional.
 % fuente: plan2/veredicto.csv, filas dqn y mappo (convergio y veredicto)
@@ -58,9 +64,20 @@ en esas redes el término de \textit{spillback} nunca se activa y la
 política resultante es idéntica a la de vecinos, como se comprueba en la
 Sección~\ref{sec:spill-vecinos}. En P1 y P2 el término sí se activa y spill
 se entrenó con sus tres bases.
+
+En la tabla de bases de IPPO spill
+(Tabla~\ref{tab:veredicto-bases-ippo-spill}), P3 tiene solo dos filas y
+P4 y P5 ninguna. En esos casos los entrenamientos de spill se
+programaron al final de la cola, solo como confirmación, y al cierre
+únicamente habían terminado los dos de red con las bases 42 y 2042
+(Sección~\ref{sec:spill-vecinos}). Esas dos políticas dan, semilla a
+semilla, el mismo retraso que las de vecinos con la misma base (20.03 y
+21.70~s/veh).
 % fuente: plan2/veredicto.csv, filas ippo_local e ippo_spill; regla en veredicto.spill_inactivo;
 % cola_max_enlace de plan2/resultados_<esc>_ippo_vecinos_s<base>.csv y plazas del meta
-% politica_<esc>_vecinos_s<base>.json (umbral plazas // 2)
+% politica_<esc>_vecinos_s<base>.json (umbral plazas // 2); filas de P3 de la tabla de bases de
+% spill: texto original (git show 7bd8685:TESIS/secciones/anexos.tex) y plan2/evaluacion_red.csv
+% (brazos ippo_spill_s42|s2042 frente a ippo_vecinos_s42|s2042, 30 de 30 semillas iguales)
 \input{secciones/tablas/veredicto_ippo_local}
 \input{secciones/tablas/veredicto_ippo_spill}
 
@@ -69,7 +86,7 @@ se entrenó con sus tres bases.
 \addcontentsline{toc}{subsection}{Anexo B. Código fuente}
 
 Scripts del prototipo tal como se ejecutaron para producir los
-resultados del Capítulo~\ref{cap:resultados} (SUMO 1.25.0,
+resultados del Capítulo~\ref{cap:resultados} y del Anexo~C (SUMO 1.25.0,
 Python 3.14). El código, sus comentarios y sus salidas están en
 español, sin tildes en los identificadores.
 
@@ -115,7 +132,7 @@ a partir de los archivos de nodos y vías.
 \subsection*{rl\_dqn.py: Double DQN con pesos compartidos}
 {\fontsize{7}{8.4}\selectfont \verbatiminput{codigo/rl_dqn.py}}
 
-\subsection*{rl\_mappo.py: MAPPO, actor de IPPO con crítico centralizado}
+\subsection*{rl\_mappo.py: MAPPO, red del actor de IPPO con crítico centralizado}
 {\fontsize{7}{8.4}\selectfont \verbatiminput{codigo/rl_mappo.py}}
 
 \subsection*{evaluar.py: evaluación por semillas con la política congelada}

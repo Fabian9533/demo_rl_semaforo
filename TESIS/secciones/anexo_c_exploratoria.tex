@@ -39,8 +39,9 @@ Los casos se numeran con la letra E:
 E1 (cruce), E2 (cruce2), E3 (corredor) y E4 (red) para el agente
 tabular; E3-U4 y E4-U4 para IPPO en corredor y red; y E6 para
 corredor\_alta. Corredor, corredor\_alta y red son los escenarios de P1,
-P2 y P3 (Tabla~\ref{tab:plan2-casos}); cruce y cruce2 solo existen en
-esta fase.
+P2 y P3 (Tabla~\ref{tab:plan2-casos}); cruce y cruce2 no son casos del
+plan, y cruce se usa además en las pruebas de humo
+(Sección~\ref{sec:humo}).
 
 \subsection*{Escenarios cruce y cruce2}
 
@@ -61,19 +62,21 @@ los casos del plan (Sección~\ref{sec:escenarios}).
 
 \subsection*{Programa fijo de referencia}
 
-El programa fijo se ajustó en dos rondas. La primera barría, sobre las
-semillas 1001 a 1003, que forman parte de las de evaluación, un solo
+El programa fijo se ajustó en dos rondas. La primera barría un solo
 verde común a todas las aproximaciones y, en los corredores, el
-desfase, primero por espera detenida y después por retraso
-(\texttt{barrer\_fijo.py}, Anexo~B). Nunca variaba el reparto entre la
-avenida y las transversales, aunque la avenida lleva entre tres y cinco
+desfase. El criterio fue primero la espera detenida y después el
+retraso, sobre las semillas 1001 a 1003, que forman parte de las de
+evaluación (\texttt{barrer\_fijo.py}, Anexo~B). Nunca variaba el
+reparto entre la avenida y las transversales, aunque la avenida lleva entre tres y cinco
 veces más demanda. La segunda ronda barrió el reparto y el desfase sobre
 las semillas 2001 a 2003, con el verde transversal acotado por abajo a
 los 10~s del verde mínimo del agente, en cruce, corredor, red y
 corredor\_alta. Las comparaciones de este anexo usan esos fijos.
 
-En cruce el 25/25 original resultó el mejor de las 36 combinaciones,
-porque la punta cambia de eje a mitad de hora. En corredor el reparto
+En cruce el reparto original de 25/25 (verde de la avenida/verde
+transversal, en segundos) resultó el mejor de las 36 combinaciones,
+porque la punta cambia de eje a mitad de hora y ningún reparto fijo
+favorece a los dos periodos. En corredor el reparto
 sí importaba: 20~s para la avenida, 10~s para las transversales y
 desfase de 15~s dan 21.2~s de retraso sobre las semillas de evaluación,
 frente a 31.9~s del 25/25 con desfase de 25~s de la primera ronda. En
@@ -105,7 +108,8 @@ En el cruce la tabla Q termina con 130 estados visitados de 512
 posibles tras 40 episodios. Con la política congelada el agente reduce
 el retraso un $6.4$\,\% frente al fijo (intervalo $-9.3$ a $-2.7$\,\%,
 $p = 0.014$) y la espera detenida un $26$\,\%, pero aumenta las paradas
-por vehículo un $27$\,\% (Tabla~\ref{tab:cruce-u4}). Cambia de fase 233
+por vehículo un $27$\,\% (Tablas~\ref{tab:resumen-escenarios}
+y~\ref{tab:cruce-u4}). Cambia de fase 233
 veces por hora frente a 131 del fijo, porque corta el verde en cuanto
 la cola del eje en rojo supera a la del eje en verde. Eso acorta las
 esperas pero obliga a más vehículos a frenar y volver a arrancar, y el
@@ -149,11 +153,21 @@ tiene contraparte en el Capítulo~\ref{cap:resultados}.
 En el corredor cada cruce tiene su propio agente, sin comunicación
 entre ellos. Frente al fijo tuneado, que da $21.2 \pm 0.4$~s, los dos
 agentes aumentan el retraso un $60$\,\% (intervalo $+53$ a $+67$\,\%,
-$p = 0.002$; Tabla~\ref{tab:corredor-u4}). Frente al fijo de la primera
+$p = 0.002$; Tablas~\ref{tab:resumen-escenarios}
+y~\ref{tab:corredor-u4}). Frente al fijo de la primera
 ronda perdían solo un $6$\,\% y reducían la espera un $13$\,\%: la
 magnitud de la derrota depende de lo bien tuneada que esté la
 referencia. El actuado, que tampoco coordina, empata con el fijo
 tuneado ($-1.1$\,\%, intervalo $-2.5$ a $+0.5$\,\%).
+
+El plan de pruebas corrigió esa magnitud, pero no el signo. En P1,
+sobre el mismo corredor, con la misma recompensa de colas y el
+protocolo del plan, la pérdida frente al fijo es del $10.6$\,\%, y con
+la recompensa de retraso, del $9.2$\,\%. Casi toda la corrección viene
+del protocolo: en esta fase había una sola semilla base, 40 episodios y
+la política del último episodio.
+% fuente: plan2/veredicto_congelado_0355.csv (P1, ql y ql_colas, delta_fijo); texto original
+% (git show 7bd8685:TESIS/secciones/conclusiones.tex, conclusiones 4 y 7)
 
 La política tabular es además frágil. Una corrida previa del mismo
 caso, con un desfase del reloj de decisión que dejaba el verde mínimo
@@ -170,7 +184,8 @@ En la red el fijo es una onda verde: 25~s para la avenida, 15~s para
 las transversales y desfases de 0, 23 y 0~s (23~s es el tiempo de
 viaje entre cruces; ciclo de 46~s), con $21.8 \pm 0.2$~s de retraso. Los
 tres agentes quedan un $15$\,\% por encima (intervalo $+14$ a
-$+17$\,\%, $p = 0.002$; Tabla~\ref{tab:red-u4}). No es falta de
+$+17$\,\%, $p = 0.002$; Tablas~\ref{tab:resumen-escenarios}
+y~\ref{tab:red-u4}). No es falta de
 entrenamiento: con 100 episodios la evaluación intermedia se mantiene
 entre 23.8 y 25.5~s desde el episodio~5, sin tendencia a bajar. Tampoco
 son malos en términos absolutos: el mismo fijo sin desfases da
@@ -192,13 +207,18 @@ diferencia son las paradas adicionales de un agente que cambia de fase
 entre un $13$ y un $77$\,\% más veces que el fijo; las paradas por
 vehículo suben en los cuatro escenarios.
 
-El plan de pruebas confirmó el signo en corredor y red y aisló el
-efecto de la recompensa: Q-learning con la recompensa de retraso falla
-en P1 y P3 ($+9.2$ y $+12.4$\,\% frente al fijo), igual que la ablación
-\texttt{ql\_colas}, que conserva la recompensa de colas ($+10.6$ y
-$+9.6$\,\%). El techo tabular no se explica por la recompensa
+El plan de pruebas confirmó el signo en corredor y red, con una pérdida
+mucho menor en el corredor (E3), y aisló el efecto de la recompensa:
+Q-learning con la recompensa de retraso falla en P1 y P3 ($+9.2$ y
+$+12.4$\,\% frente al fijo), igual que la ablación \texttt{ql\_colas},
+que conserva la recompensa de colas ($+10.6$ y $+9.6$\,\%). Con demanda
+nominal o moderada el cambio de recompensa mueve el resultado menos de
+tres puntos, y el techo tabular no se explica por ella. Solo en P2 la
+recompensa de retraso cambia el signo: $-8.8$\,\% frente a $+6.8$\,\%
+con la de colas, este último provisional porque no convergió
 (Anexo~A).
-% fuente: plan2/veredicto_congelado_0355.csv, filas ql y ql_colas de P1 y P3 (columna delta_fijo)
+% fuente: plan2/veredicto_congelado_0355.csv, filas ql y ql_colas de P1 a P4 (columnas delta_fijo y
+% veredicto; ql_colas en P2: PENDIENTE, no convergio, provisional FALLA)
 
 El actuado, que no aprende y solo extiende el verde mientras detecta
 vehículos, fue mejor que el agente tabular en todos los escenarios de
@@ -213,10 +233,10 @@ los mismos controles y las mismas diez semillas
 detectores; en \emph{vecinos} recibe además los mensajes de los
 semáforos vecinos; \emph{spill} agrega a \emph{vecinos} el término de
 \textit{spillback} de la Ecuación~\ref{eq:recompensa-u4}, que penaliza
-la cola de un enlace de salida por encima de la mitad de sus plazas por
-carril ($P_e/2$). En corredor y red, \emph{spill} se entrenó con una
-sola semilla base como control de no daño: una corrida que comprueba
-que el término no empeora el resultado.
+la cola de un enlace de salida $\ell$ por encima de la mitad de sus
+plazas por carril, $\lfloor K_\ell/2 \rfloor$. En corredor y red,
+\emph{spill} se entrenó con una sola semilla base como control de no
+daño: una corrida que comprueba que el término no empeora el resultado.
 
 Las métricas de corredor se calculan sobre los vehículos de paso, los
 que recorren la avenida de extremo a extremo (Sección~\ref{sec:u3}). Las
@@ -232,12 +252,14 @@ En la prueba de humo del módulo (Sección~\ref{sec:humo}),
 IPPO local en el cruce aislado, con una sola semilla base (42) y 60
 episodios, reduce el retraso un $35$\,\% frente al fijo, un $2.6$\,\%
 frente al actuado (intervalo $-3.2$ a $-2.0$\,\%) y un $31$\,\% frente
-a Q-learning (Tabla~\ref{tab:cruce-u4}). Lo hace con un $17$\,\% más de
-cambios de fase que el fijo, no un $77$\,\% como el tabular. El cruce
-aislado no es un caso del plan, y la comparación con Q-learning es de
-paquete completo: cambian a la vez el estado, la recompensa y el
-algoritmo. En los casos P1 a P5 ningún modelo alcanza la meta de
-$-25$\,\%.
+a Q-learning (Tablas~\ref{tab:cruce-u4} y~\ref{tab:cruce-u4-deltas}).
+Lo hace con un $17$\,\% más de cambios de fase que el fijo, no un
+$77$\,\% como el tabular. La comparación con Q-learning es de paquete
+completo: cambian a la vez el estado, la recompensa y el algoritmo.
+
+En este cruce la reducción de IPPO local supera la meta de
+$-25$\,\%, pero el cruce aislado no es un caso del plan y la evaluación
+sigue el protocolo de esta fase. En los casos P1 a P5 ningún modelo alcanza esa meta.
 
 \input{secciones/tablas/cruce_u4}
 
@@ -251,23 +273,38 @@ terminan en 22.1 y 22.2~s y la tercera en 24.2~s. Las tres políticas de
 entre 0.41 y 0.85). La mediana queda a $+0.5$\,\% del fijo (intervalo
 $-0.3$ a $+1.3$\,\%) y a $+2.2$\,\% del actuado (intervalo $+0.8$ a
 $+3.5$\,\%): empata con la onda verde. Cada política de \emph{vecinos}
-es mejor que cada una de \emph{local}. \emph{Spill} coincide con
-\emph{vecinos} de la misma semilla base, porque su término nunca se
-activa en la red (Sección~\ref{sec:spill-vecinos}).
+es mejor que cada una de \emph{local}.
 
-El plan de pruebas cambió esta lectura. En P3, sobre la misma red, la
-política publicada de IPPO vecinos queda un $8.8$\,\% por debajo del
-fijo (intervalo $-9.3$ a $-8.2$\,\%) y un $7.8$\,\% por debajo del
-actuado, con veredicto FUNCIONA. Es el \textit{checkpoint} del
-episodio 40, elegido por validación con 19.69~s; la misma base termina
-el entrenamiento con 21.46~s. Donde esta fase, con la política del
-último episodio, veía un empate con la onda verde, la política elegida
-por validación la supera.
+\emph{Spill}, con una semilla base, coincide con \emph{vecinos} de la
+misma base (21.68~s): su término nunca se activa en la red y los
+tensores de las dos políticas son idénticos bit a bit, así que no es
+una corrida independiente. En el plan ocurre lo mismo
+(Sección~\ref{sec:spill-vecinos}).
+% fuente: texto original (git show 7bd8685:TESIS/secciones/capitulo5.tex, caso E4-U4);
+% tablas/red_fragilidad.tex (spill 42 y vecinos 42: 21.68 +/- 0.13)
+
+El plan de pruebas cambió la lectura de \emph{vecinos}. En P3, sobre la
+misma red, la política publicada de IPPO vecinos queda un $8.8$\,\% por
+debajo del fijo (intervalo $-9.3$ a $-8.2$\,\%) y un $7.8$\,\% por
+debajo del actuado, con veredicto FUNCIONA. Donde esta fase, con la
+política del último episodio, veía un empate con la onda verde, la
+selección por validación encuentra una política que la supera.
+
+Ese resultado es frágil entre bases. La política publicada es un
+\textit{checkpoint} aislado, el del episodio 40, elegido por validación
+con 19.69~s; la misma base termina el entrenamiento con 21.46~s de
+validación. Otra base llega a los mismos 19.69~s en el episodio 50 y
+termina en 22.15~s, y la tercera queda igual al fijo, con $-0.1$\,\% y
+$p = 0.73$ (Tabla~\ref{tab:veredicto-bases-ippo-vecinos}). La
+validación encuentra esa política, pero el entrenamiento no se queda en
+ella.
 % fuente: plan2/veredicto_congelado_0355.csv (P3, ippo_vecinos: delta_fijo -8.8 [-9.3, -8.2],
 % delta_act -7.8, FUNCIONA); ep_elegido, val_elegido y val_serie de plan2/politica_red_vecinos_s4042.json
+% y _s42.json (ep 50, 19.69; ep 200, 22.15); plan2/evaluacion_red_resumen.csv (ippo_vecinos_s2042:
+% -0.1 %, p = 0.734)
 
-La mensajería aporta la progresión de la onda verde. Con el fijo, el
-$98.6$\,\% de los vehículos de paso cruza deteniéndose a lo sumo una
+En esta fase, la mensajería aportaba la progresión de la onda verde.
+Con el fijo, el $98.6$\,\% de los vehículos de paso cruza deteniéndose a lo sumo una
 vez; \emph{vecinos} lo iguala (0.985), \emph{local} queda algo por
 debajo (0.893) y el actuado (0.72) y el tabular (0.53) lo rompen. En la
 Figura~\ref{fig:red-fases} los semáforos aprendidos mantienen la avenida
@@ -338,14 +375,22 @@ tabular 211~s; este es el único que deja vehículos sin terminar a los
 \emph{Vecinos} y \emph{spill} se entrenaron con tres semillas base y
 \emph{local} con una. Las medianas (122.0~s en \emph{local}, 121.3~s en
 \emph{vecinos} y 122.8~s en \emph{spill}) quedan entre un $-20$ y un
-$-23$\,\% del fijo, y frente al actuado sus intervalos incluyen el cero:
-en esta fase lo igualaban.
+$-21$\,\% del fijo (las siete políticas, entre $-20$ y $-23$\,\%), y
+frente al actuado sus intervalos incluyen el cero: en esta fase lo
+igualaban.
 
-El plan de pruebas cambió esta lectura. En P2, con la política elegida
-por validación, las tres variantes IPPO superan al actuado, e IPPO
-vecinos queda un $4.4$\,\% por debajo de él (intervalo $-6.3$ a
-$-2.6$\,\%), con veredicto FUNCIONA.
-% fuente: plan2/veredicto_congelado_0355.csv (P2, ippo_vecinos: delta_act -4.4 [-6.3, -2.6], FUNCIONA)
+El plan de pruebas cambió esta lectura, para IPPO y para el agente
+tabular. En P2, con la política elegida por validación, las tres
+variantes IPPO superan al actuado, e IPPO vecinos queda un $4.4$\,\%
+por debajo de él (intervalo $-6.3$ a $-2.6$\,\%), con veredicto
+FUNCIONA. Q-learning, con la recompensa de retraso y el protocolo del
+plan, mejora al fijo un $8.8$\,\% (veredicto MEJORA) sin dejar
+vehículos sin terminar, aunque queda un $13.7$\,\% por detrás del
+actuado.
+% fuente: plan2/veredicto_congelado_0355.csv (P2, ippo_vecinos: delta_act -4.4 [-6.3, -2.6], FUNCIONA;
+% ql: delta_fijo -8.8 [-9.9, -7.5], delta_act 13.7, MEJORA); vehiculos sin terminar: texto original
+% (git show 7bd8685:TESIS/secciones/conclusiones.tex, conclusion 7); medianas y politicas:
+% tablas/corredor_alta_u4.tex y tablas/corredor_alta_fragilidad.tex
 
 La meta de \textit{throughput}, la única que este escenario permite
 evaluar, no está al alcance de ningún control. Las siete políticas IPPO
@@ -358,11 +403,19 @@ los vehículos terminan su viaje bajo los tres controles y solo entre un
 
 El actuado llena el carril del enlace entre los dos cruces en las diez
 semillas (38 vehículos, la capacidad) y pasa 79~s de la hora en
-\textit{spillback}. Las siete políticas IPPO mantienen la cola máxima
-del enlace entre 31 y 33 vehículos, bajo el umbral de 34 que define el
-\textit{spillback} (Sección~\ref{sec:u3}), y acumulan entre 0 y 3~s
-(Figura~\ref{fig:corredor-alta-spillback}). \emph{Spill} no reduce esa
-cola frente a \emph{vecinos} (31.9 contra 31.1 vehículos): cuando la
+\textit{spillback}. En promedio sobre las diez semillas, las siete
+políticas IPPO mantienen la cola máxima del enlace entre 31 y 33
+vehículos, bajo el umbral de 34 que define el \textit{spillback}
+(Sección~\ref{sec:u3}), y acumulan entre 0 y 3~s de
+\textit{spillback}; en algunas semillas llegan al umbral o lo pasan. La
+Figura~\ref{fig:corredor-alta-spillback} muestra las políticas medianas
+de cada variante.
+% fuente: evaluacion_corredor_alta.csv de demo_rl (cola_max_enlace y spillback_seg por brazo y
+% semilla: medias de 31.1 a 32.6 veh y de 0 a 2.9 s; maximos de 34 a 37 veh en ippo_local,
+% ippo_vecinos_s42 e ippo_spill_s42|s2042|s4042); graficar.py, figura 8 (brazos IPPO = politica mediana)
+
+\emph{Spill} no reduce la cola del enlace frente a \emph{vecinos}
+(31.9 contra 31.1 vehículos en sus políticas medianas): cuando la
 mensajería ya lleva al agente la cola del enlace, la penalización es
 redundante. Con la avenida saturada en los dos sentidos no hay onda
 verde posible, y la ventaja de IPPO en este escenario es de gestión de
