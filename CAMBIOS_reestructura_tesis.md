@@ -1,16 +1,17 @@
 # Changelog de la reestructura de la tesis (27.09.2026)
 
-Documento para revisar con calma lo que se eliminó, movió o reescribió en `TESIS/` y por qué. Cada afirmación se puede comprobar con `git diff 7bd8685 HEAD -- TESIS`, con `git show <commit>` o con los reportes de trabajo (auditoría, edición, verificación y corrección). Las líneas que se citan son las del estado final de `TESIS/` (commit `2ab0d04`).
+Documento para revisar con calma lo que se eliminó, movió o reescribió en `TESIS/` y por qué. Cada afirmación se puede comprobar con `git diff 7bd8685 HEAD -- TESIS`, con `git show <commit>` o con los reportes de trabajo (auditoría, edición, verificación y corrección). Las líneas que se citan en las secciones 1 a 10 son las de `TESIS/` en el commit `2ab0d04`, salvo la lista de TODO de la sección 8, que está al día con la segunda parte (sección 11: diagramas).
 
 ## 1. Resumen
 
-Se auditó la tesis completa y se reestructuró en el orden marco teórico, metodología, implementación y resultados. Después, una verificación adversarial contrastó cada capítulo con el original, el código y los CSV, y las correcciones se aplicaron en commits aparte. El trabajo está en la rama `reestructura-tesis`: 18 commits, de `cc2a353` al que agrega este changelog, sobre `7bd8685` (la punta de `main`, que no se tocó). El PDF pasa de 290 a 247 páginas. `python TESIS/compilar.py` compila sin errores ni referencias o citas sin resolver (el overfull mayor es de 5.6 pt), y `python TESIS/validar_tex.py` da 0 errores y 33 avisos, todos comentarios `TODO(reestructura)`: huecos que piden una fuente, un dato o un diagrama y que no se rellenaron con contenido propio.
+Se auditó la tesis completa y se reestructuró en el orden marco teórico, metodología, implementación y resultados. Después, una verificación adversarial contrastó cada capítulo con el original, el código y los CSV, y las correcciones se aplicaron en commits aparte. El trabajo está en la rama `reestructura-tesis`: 18 commits, de `cc2a353` al que agrega este changelog, sobre `7bd8685` (la punta de `main`, que no se tocó). El PDF pasa de 290 a 247 páginas (253 tras agregar los cinco diagramas de la sección 11). `python TESIS/compilar.py` compila sin errores ni referencias o citas sin resolver (el overfull mayor es de 5.6 pt), y `python TESIS/validar_tex.py` da 0 errores y 33 avisos, todos comentarios `TODO(reestructura)`: huecos que piden una fuente, un dato o un diagrama y que no se rellenaron con contenido propio.
 
 Los cambios más importantes:
 - El antiguo Capítulo III (`capitulo4.tex`, 1967 líneas) se partió en un Capítulo III de metodología (`capitulo3.tex`, nuevo) y un Capítulo IV de implementación (`capitulo4.tex`). El manual de OpenStreetMap pasó al Anexo D.
 - La fase exploratoria salió de Resultados y quedó condensada en el Anexo C. Se eliminaron 19 tablas generadas y 14 figuras exploratorias. El Capítulo V trata solo el plan de pruebas, con dos tablas de resumen nuevas (`tab:plan2-resumen`, `tab:plan2-metas`).
 - El Capítulo II se reescribió como marco teórico completo, con 13 ecuaciones numeradas y una tabla de métricas. Se eliminaron la sección de arquitectura desactualizada (con `Diagrama.png`) y la de resultados esperados.
 - La notación y los términos se unificaron en todo el documento (J_i, L_i, ℓ, q_ℓ, K_ℓ; ε frente a ε_clip; Δ_f y Δ_a; checkpoint, política publicada, base publicada y celda). Se corrigieron las afirmaciones desactualizadas: SARSA, DQN y MAPPO "pendientes" y la sección "Estado de avance".
+- Segunda parte (sección 11): la arquitectura modular y los flujos de U1, U2, U3 y U4 se rehicieron en TikZ a partir del código y se integraron en el Cap. III.
 - Las conclusiones pasaron de 14 a 6, ordenadas por objetivo (U1 a U4, reproducibilidad y alcance), más dos párrafos finales sobre la fase exploratoria.
 
 ## 2. Autorización y alcance
@@ -48,14 +49,14 @@ En la columna "Antes" los capítulos llevan la numeración antigua: "Cap. III" e
 | Cap. III (`capitulo4.tex`): Alcance y unidades; Resumen de las unidades | Cap. III `sec:vision-general` + `tab:pipeline` | Fusionadas |
 | Cap. III: Requisitos de hardware | Cap. IV `sec:entorno` (`tab:hw`) | Movido |
 | Cap. III: Instalación de SUMO; Limpieza OSM; Importación desde OSM | Anexo D | Condensado |
-| Cap. III: Diagrama de flujo del módulo U1 (fig:flow-u1) | eliminado | Queda un TODO para el diagrama del pipeline |
+| Cap. III: Diagrama de flujo del módulo U1 (fig:flow-u1) | eliminado; rehecho como Figura 3.2 (`fig:flujo-u1`) | Ver sección 11 |
 | Cap. III: Generación y ejecución del escenario | Cap. IV `sec:construccion` (flujos, configuración); Anexo D (randomTrips) | Tutorial eliminado |
 | Cap. III: Escenarios sintéticos de prueba | Cap. III `sec:escenarios` (P1-P5) | cruce y cruce2 y la historia del fijo pasan al Anexo C |
 | Cap. III: U2, formulación | Cap. III `sec:formulacion` | Reescrita |
 | Cap. III: U2, interfaz con SUMO y ciclo de entrenamiento | Cap. IV `sec:bucle` | Reescrito según `rl_corredor.py` |
 | Cap. III: U2, Algoritmos recomendados | eliminada | Lo útil pasa a `sec:modelos` |
 | Cap. III: U2, Actualización de los valores Q | Cap. II `sec:tabular` (`eq:q-learning`, `eq:sarsa`) | Movida |
-| Cap. III: U2, Diagrama de flujo (fig:flow-u2) | eliminado | Queda un TODO para el diagrama del ciclo |
+| Cap. III: U2, Diagrama de flujo (fig:flow-u2) | eliminado; rehecho como Figura 3.3 (`fig:flujo-u2`) | Ver sección 11 |
 | Cap. III: U3 (entre U2 y U4) | Cap. III `sec:u3`, después de U4 y de `sec:modelos` | Reescrito y reubicado |
 | Cap. III: U4 (vecinos, observación, recompensa y variantes) | Cap. III `sec:u4`; la recompensa, a `sec:formulacion` | Reescrito |
 | Cap. III: U4, IPPO con pesos compartidos | Cap. IV `sec:aprendices` | `tab:hiper-ippo` fusionada |
@@ -557,9 +558,9 @@ En la columna "Antes" los capítulos llevan la numeración antigua: "Cap. III" e
 
 | Figura (label, archivo) | Antes (numeración antigua) | Después | Qué debería mostrar en su lugar |
 |---|---|---|---|
-| `fig:diseno` (`Diagrama.png`) | Cap. II | Eliminada | Diagrama del pipeline real al inicio del Cap. III (TODO en `capitulo2.tex:14` y `capitulo3.tex:71`): `.nod.xml`/`.edg.xml` → netconvert (`build_net.bat`) → `.net.xml`; `.rou.xml` con flujos vehsPerHour; `barrer_fijo.py` (2001-2003) → `<esc>.add.xml` y `comun.archivo_actuado` → `<esc>_actuado.add.xml`; `.sumocfg` → entrenamiento por TraCI (rl_corredor, rl_dqn, rl_ippo, rl_mappo) con validación cada 10 episodios y checkpoints → política y base publicadas → `evaluar.py` (1001-1030) → `consolidar.py` → `veredicto.py`; U4 como mensajes entre agentes dentro del bucle |
-| `fig:flow-u1` (`U1.png`) | Cap. III (capitulo4), sección propia | Eliminada | El mismo diagrama del pipeline |
-| `fig:flow-u2` (`U2.png`) | Cap. III, U2 | Eliminada | Diagrama del ciclo de entrenamiento (TODO en `capitulo4.tex:575`): episodio k con semilla base+k; decisión cada 5 s de verde (estado, cierre de la decisión anterior con la recompensa acumulada / 5, actualización Q-learning o SARSA o transición a las redes, acción y ámbar); fin por vaciado o 6000 pasos; validación cada 10 episodios y en el último (999 y 1999) con checkpoint; publicación del de menor validación |
+| `fig:diseno` (`Diagrama.png`) | Cap. II | Eliminada; rehecha como `fig:arquitectura` (Figura 3.1) | Ver sección 11 |
+| `fig:flow-u1` (`U1.png`) | Cap. III (capitulo4), sección propia | Eliminada; rehecha como `fig:flujo-u1` (Figura 3.2) | Ver sección 11 |
+| `fig:flow-u2` (`U2.png`) | Cap. III, U2 | Eliminada; rehecha como `fig:flujo-u2` (Figura 3.3) | Ver sección 11 |
 | `fig:netedit-before-after` (`NETEDIT.PNG` + `conexiones.PNG`) | Cap. III, limpieza OSM | `NETEDIT.PNG` sola, como `fig:osm-lima-cruda` (Anexo D); `conexiones.PNG` eliminada | -- |
 | `fig:import-osm-sumo` (`OSM.PNG`, `SUMO.PNG`) | Cap. III, importación OSM | Eliminada | -- |
 | `fig:cruce-curva`, `fig:cruce-qtable`, `fig:cruce-comparacion`, `fig:cruce-serie`, `fig:cruce-ecdf`, `fig:cruce2-curva`, `fig:cruce2-comparacion`, `fig:corredor-curva`, `fig:corredor-comparacion`, `fig:red-curva`, `fig:red-comparacion`, `fig:cruce-curva-ippo`, `fig:red-curva-ippo`, `fig:corredor-curva-ippo` | Cap. IV (fase exploratoria) | Eliminadas (14) | Ninguna. Las curvas quedan superadas por `fig:plan2-convergencia`; las comparaciones repetían tablas; la serie y la ECDF usan una sola semilla; la Q-table de cruce ilustraba dos cifras |
@@ -694,38 +695,36 @@ Además, dentro de las decisiones "aplicado con cambios" se descartaron varias r
 
 ## 8. Pendientes para el autor
 
-### TODO en el texto (33, líneas actuales)
+### TODO en el texto (30, líneas al día tras la sección 11)
 
 Referencias que faltan en el `.bib`, con la obra identificada (10):
-- `capitulo2.tex:351`: optimizador Adam (Kingma y Ba, 2015) y una fuente para el recorte de la norma del gradiente.
-- `capitulo2.tex:378`: pérdida de Huber (Huber, 1964) o la documentación de `smooth_l1_loss` de PyTorch.
-- `capitulo2.tex:395`: Double DQN (van Hasselt, Guez y Silver, 2016).
-- `capitulo2.tex:442`: GAE (Schulman, Moritz, Levine, Jordan y Abbeel, 2016).
-- `capitulo2.tex:542`: IPPO (de Witt et al., 2020).
-- `capitulo2.tex:618`: bootstrap (Efron y Tibshirani, 1993), prueba de Wilcoxon (Wilcoxon, 1945) e intervalo con t de Student.
-- `capitulo3.tex:770`: las mismas del bootstrap percentil pareado y de Wilcoxon (una misma entrada del `.bib` resuelve este TODO y el anterior).
+- `capitulo2.tex:346`: optimizador Adam (Kingma y Ba, 2015) y una fuente para el recorte de la norma del gradiente.
+- `capitulo2.tex:373`: pérdida de Huber (Huber, 1964) o la documentación de `smooth_l1_loss` de PyTorch.
+- `capitulo2.tex:390`: Double DQN (van Hasselt, Guez y Silver, 2016).
+- `capitulo2.tex:437`: GAE (Schulman, Moritz, Levine, Jordan y Abbeel, 2016).
+- `capitulo2.tex:537`: IPPO (de Witt et al., 2020).
+- `capitulo2.tex:613`: bootstrap (Efron y Tibshirani, 1993), prueba de Wilcoxon (Wilcoxon, 1945) e intervalo con t de Student.
+- `capitulo3.tex:905`: las mismas del bootstrap percentil pareado y de Wilcoxon (una misma entrada del `.bib` resuelve este TODO y el anterior).
 - `capitulo1.tex:11`: trabajos de RL multiagente aplicados a semáforos (CoLight, PressLight, MPLight, banco RESCO) como comparación natural de U4. Además de la entrada, hay que leer las fuentes.
-- `capitulo2.tex:40`: documentación de SUMO del modelo de seguimiento por defecto (Krauss, σ, speedFactor).
-- `capitulo2.tex:159`: documentación de la salida `tripinfo` de SUMO (timeLoss, waitingTime, waitingCount).
+- `capitulo2.tex:35`: documentación de SUMO del modelo de seguimiento por defecto (Krauss, σ, speedFactor).
+- `capitulo2.tex:154`: documentación de la salida `tripinfo` de SUMO (timeLoss, waitingTime, waitingCount).
 
 Referencias que faltan, sin obra identificada (7):
 - `introduccion.tex:6`: estudio o informe de movilidad de Lima Metropolitana para la afirmación sobre la congestión.
 - `introduccion.tex:14`: fuente de ingeniería de tránsito para la pérdida de vigencia del fijo cuando cambia el sentido dominante y para la falta de anticipación del actuado aislado.
-- `capitulo2.tex:107`: progresión en los dos sentidos y desfases alternados de medio ciclo ("en ajedrez"), del capítulo de coordinación del manual de la FHWA o del HCM.
-- `capitulo2.tex:518`: formalización del caso con recompensas individuales por agente (juego estocástico parcialmente observable).
-- `capitulo2.tex:558`: RL multiagente con comunicación entre agentes (Yu2021_MAPPO no la trata).
-- `capitulo2.tex:588`: selección de modelo por validación o parada temprana y, opcional, variabilidad entre semillas en RL profundo.
-- `capitulo3.tex:844`: fuente de diseño experimental para el umbral del 5 % (veredicto y convergencia) y la exigencia conjunta de IC bootstrap y p de Wilcoxon (hoy solo consta en `plan2/ESPEC.md`, sección 7).
+- `capitulo2.tex:102`: progresión en los dos sentidos y desfases alternados de medio ciclo ("en ajedrez"), del capítulo de coordinación del manual de la FHWA o del HCM.
+- `capitulo2.tex:513`: formalización del caso con recompensas individuales por agente (juego estocástico parcialmente observable).
+- `capitulo2.tex:553`: RL multiagente con comunicación entre agentes (Yu2021_MAPPO no la trata).
+- `capitulo2.tex:583`: selección de modelo por validación o parada temprana y, opcional, variabilidad entre semillas en RL profundo.
+- `capitulo3.tex:979`: fuente de diseño experimental para el umbral del 5 % (veredicto y convergencia) y la exigencia conjunta de IC bootstrap y p de Wilcoxon (hoy solo consta en `plan2/ESPEC.md`, sección 7).
 
 Verificaciones de fuentes ya citadas (4):
 - `capitulo1.tex:111`: que Chavez2023 usa SUMO (el texto solo dice "escenario simulado").
 - `capitulo1.tex:124`: que UAQ2024 usa SUMO (el texto solo dice "microsimulador").
-- `capitulo2.tex:72`: la sección del HCM 2010 que define fase, ciclo, reparto, desfase, verdes, control prefijado y actuado y progresión. El capítulo 3 de la FHWA citado no los define.
-- `capitulo2.tex:207`: que SuttonBarto2018 (sec. 17.2) trate los procesos semi-markovianos; si no, citar Sutton, Precup y Singh (1999).
+- `capitulo2.tex:67`: la sección del HCM 2010 que define fase, ciclo, reparto, desfase, verdes, control prefijado y actuado y progresión. El capítulo 3 de la FHWA citado no los define.
+- `capitulo2.tex:202`: que SuttonBarto2018 (sec. 17.2) trate los procesos semi-markovianos; si no, citar Sutton, Precup y Singh (1999).
 
-Diagramas por dibujar (3 TODO, 2 diagramas):
-- `capitulo2.tex:14` y `capitulo3.tex:71`: el diagrama del pipeline real, para el inicio del Cap. III (contenido en la sección 5). Al dibujarlo, conviene borrar los dos TODO.
-- `capitulo4.tex:575`: el diagrama del ciclo de entrenamiento que reemplace a `U2.png` (contenido en la sección 5).
+Diagramas por dibujar: resueltos en la segunda parte (sección 11); sus tres TODO (`capitulo2.tex:14`, `capitulo3.tex:71` y `capitulo4.tex:575` de `2ab0d04`) se borraron.
 
 Análisis pendiente de las métricas de corredor del plan (2):
 - `capitulo5.tex:539` y `conclusiones.tex:246`: analizar `paradas_corredor_le1` y `retraso_corredor_punta` de `plan2/evaluacion_<esc>_resumen.csv`. La lectura preliminar del TODO: en P3 la política publicada de IPPO vecinos tiene menos progresión que el fijo (0.93 frente a 0.99).
@@ -734,10 +733,10 @@ Análisis pendiente de las métricas de corredor del plan (2):
   - Afecta al objetivo U4 ("impacto a nivel de corredor"), al Cap. I (lección de UAQ), al Cap. III (`sec:u3`) y al segundo párrafo final de las conclusiones.
 
 Datos faltantes o por confirmar (5):
-- `capitulo3.tex:604`: el número de vehículos de extremo a extremo en corredor_alta, red_alta y malla3. Se obtendría contando en los `.rou.xml` los flujos de `flujos_corredor`.
-- `capitulo4.tex:280`: a qué programa fijo de corredor corresponden los 80 a 94 vehículos sin terminar en P2 y qué archivo lo respalda.
-- `capitulo4.tex:344`: la columna "Espera máx. para entrar" de `tab:red-alta-factor` trae un solo valor por factor. Confirmar si es el máximo de las tres semillas (ningún script la calcula).
-- `capitulo4.tex:828`: el gradiente del crítico, "130 veces" en el texto y en LEEME.txt y "~100" en el comentario de `rl_ippo.actualizar`. Confirmar con `humo/humo1_s42_recorte_global.csv` y unificar el código y su copia en `TESIS/codigo/`.
+- `capitulo3.tex:738`: el número de vehículos de extremo a extremo en corredor_alta, red_alta y malla3. Se obtendría contando en los `.rou.xml` los flujos de `flujos_corredor`.
+- `capitulo4.tex:281`: a qué programa fijo de corredor corresponden los 80 a 94 vehículos sin terminar en P2 y qué archivo lo respalda.
+- `capitulo4.tex:345`: la columna "Espera máx. para entrar" de `tab:red-alta-factor` trae un solo valor por factor. Confirmar si es el máximo de las tres semillas (ningún script la calcula).
+- `capitulo4.tex:831`: el gradiente del crítico, "130 veces" en el texto y en LEEME.txt y "~100" en el comentario de `rl_ippo.actualizar`. Confirmar con `humo/humo1_s42_recorte_global.csv` y unificar el código y su copia en `TESIS/codigo/`.
 - `anexo_c_exploratoria.tex:441`: el "límite de 2 s del criterio de robustez" del texto original no se define en ninguna parte. Definirlo con su fuente o dejar solo las diferencias en segundos.
 
 Justificaciones que solo puede dar el autor (2):
@@ -777,6 +776,7 @@ Hay que subir:
 - `TESIS/main.tex` (una línea nueva: `\input{secciones/capitulo3}`).
 - `TESIS/secciones/`: `resumen.tex`, `abstract.tex`, `introduccion.tex`, `capitulo1.tex`, `capitulo2.tex`, `capitulo3.tex` (nuevo; si en Overleaf existe uno vacío, se reemplaza), `capitulo4.tex`, `capitulo5.tex`, `conclusiones.tex`, `recomendaciones.tex`, `anexos.tex`, `anexo_c_exploratoria.tex` (nuevo) y `anexo_d_osm.tex` (nuevo).
 - `TESIS/images/fig_plan2_convergencia.png` (regenerada solo para quitar "v2" del título).
+- `TESIS/images/diag_arquitectura.pdf`, `diag_u1.pdf`, `diag_u2.pdf`, `diag_u3.pdf` y `diag_u4.pdf` (sección 11). La carpeta `TESIS/diagramas/` (fuentes TikZ) no hace falta en Overleaf: las figuras se compilan aparte.
 
 No cambiaron: `TESIS/secciones/tablas/`, `TESIS/codigo/`, `referencias.bib`, `tesisutec.cls` ni las demás imágenes.
 
@@ -786,7 +786,7 @@ Este changelog (`CAMBIOS_reestructura_tesis.md`) está versionado en la rama, en
 
 Imágenes de `TESIS/images/` que ningún `.tex` incluye (comprobado con grep de `\includegraphics`). Se pueden borrar de Overleaf:
 - Liberadas por esta reestructura (20):
-  - `Diagrama.png`, `U1.png`, `U2.png` (solo aparecen nombradas en comentarios TODO);
+  - `Diagrama.png`, `U1.png`, `U2.png` (reemplazadas por los `diag_*.pdf` de la sección 11);
   - `OSM.PNG`, `SUMO.PNG`, `conexiones.PNG`;
   - `fig_cruce_curva.png`, `fig_cruce_qtable.png`, `fig_cruce_comparacion.png`, `fig_cruce_serie.png`, `fig_cruce_ecdf.png`, `fig_cruce_curva_ippo.png`;
   - `fig_cruce2_curva.png`, `fig_cruce2_comparacion.png`;
@@ -823,7 +823,11 @@ Opcional: las 19 tablas generadas que ya no se incluyen siguen en `TESIS/seccion
 | `cb0234a` | Verificación: anexos |
 | `5bde6b3` | Documentación: `CLAUDE.md` y el skill `escribir-tesis` (no toca `TESIS/`) |
 | `2ab0d04` | Cierre: correcciones precisas detectadas al contrastar este changelog con el diff (conclusión 6, "sin GPU", "base publicada" en el Anexo A, nota de `cola_mi_salida`, `plan2/tablas_cap5.py`, skill) |
-| (último) | Este changelog |
+| `b82354c` | Este changelog (primera parte) |
+| `014f86a` | Diagramas: fuentes TikZ, estilo común, `construir.py`, especificación y los cinco `diag_*.pdf` |
+| `63109a4` | Integración de los diagramas en el Cap. III, citas desde el Cap. IV y la introducción, `tab:pipeline` renombrada y correcciones D4 y D11 |
+| `7e61432` | `CLAUDE.md`: el cruce de Lima no se limpió en netedit |
+| (último) | Este changelog con la sección 11 |
 
 Aviso: los commits por capítulo no son independientes.
 - Los capítulos se citan entre sí por label. El Cap. IV remite a 13 labels del Cap. III y el Cap. V a 12; el Cap. III remite a 11 del Cap. IV y a 9 del Cap. II; la introducción, las conclusiones, las recomendaciones y los anexos remiten a labels nuevos (`cap:*`, `sec:protocolo`, `sec:veredicto`, `eq:delta`, `tab:plan2-resumen`, etc.).
@@ -831,3 +835,46 @@ Aviso: los commits por capítulo no son independientes.
 - Los commits de verificación modifican el texto de los de edición y pueden dar conflictos si se revierte uno sin el otro.
 
 El estado previo completo es `7bd8685`, que sigue siendo la punta de `main`. Para volver a él basta con quedarse en `main` o cambiar a esa rama. Para recuperar un párrafo concreto se puede usar `git show 7bd8685:TESIS/secciones/<archivo>.tex` y copiarlo a mano. Hay que tener en cuenta que en `7bd8685` la metodología está en `capitulo4.tex` y los resultados en `capitulo5.tex`.
+
+## 11. Segunda parte: diagramas de arquitectura y de U1 a U4
+
+Pedido del autor, tras la primera parte: devolver los diagramas que se habían quitado (arquitectura, U1 y U2), pero rehechos por completo y coherentes con la implementación actual, y agregar los de U3 y U4, que nunca existieron. Commits `014f86a` (diagramas), `63109a4` (integración en la tesis) y `7e61432` (`CLAUDE.md`).
+
+### Cómo se hicieron
+
+1. Análisis: cinco fichas, una por diagrama, sacadas del código (`rl_corredor.py`, `rl_ippo.py`, `rl_dqn.py`, `rl_mappo.py`, `comun.py`, `evaluar.py`, `consolidar.py`, `veredicto.py`, `barrer_fijo.py`, `escenarios_plan2.py`, `build_net.bat`, `plan2/generar_trabajos.py`) y del texto actual, con evidencia `archivo:línea` para cada nodo y cada flecha.
+2. Especificación única: qué muestra cada figura, con qué nivel de detalle y cómo se relacionan. Dos críticos la revisaron, uno de fidelidad al código y otro de claridad. Está en `TESIS/diagramas/especificacion.md`.
+3. Dibujo en TikZ, compilado aparte con `standalone` (la plantilla no carga TikZ y sus paquetes no se tocan). Cada figura pasó por su dibujante, un revisor independiente (visual y de fidelidad) y una corrección, y después por una revisión cruzada de las cinco.
+4. Integración en el Cap. III y verificación de los textos nuevos contra el dibujo y el código.
+
+### Qué muestra cada figura
+
+| Figura | Dónde | Qué responde |
+|---|---|---|
+| 3.1 `fig:arquitectura` (`diag_arquitectura.pdf`) | `sec:vision-general` | Cómo se conectan U1 a U4, qué información intercambian (I1 a I8) y por dónde entra cada conjunto de semillas. U3 contiene SUMO + TraCI y la cadena de evaluación; U2 y U4 comparten una barra de "aprendices" porque intercambian lo mismo con U3; el cruce de Lima aparece en punteado, previsto y no usado |
+| 3.2 `fig:flujo-u1` | `sec:escenarios` | Cómo se construye cada caso: red (`netconvert`), demanda (flujos, factor $f$ calibrado con el actuado en P2 y P4), barrido del fijo (con ampliación de la malla) y actuado, configuración y tabla de aproximaciones, enlaces y vecinos |
+| 3.3 `fig:flujo-u2` | `sec:formulacion` | El entrenamiento de un aprendiz con una base: bucle por segundo, decisión cada 5 s de verde, cierre con la recompensa acumulada, actualización según el algoritmo (marcas T, D, P), validación cada 10 episodios en 999 y 1999, *checkpoint* y publicación |
+| 3.4 `fig:flujo-u4` | `sec:u4` | Un episodio con coordinación: los dos relojes (mensajes cada 5 s globales y decisión cada 5 s del verde propio), el mensaje y su canal, la observación extendida, el término *spill*, los críticos local (IPPO) y central (MAPPO), GAE y PPO |
+| 3.5 `fig:flujo-u3` | `sec:u3` | Qué se mide en cada corrida (`tripinfo`, lecturas TraCI por segundo, retornos) y cómo se llega al veredicto: `evaluar.py` en 1001–1030, `consolidar.py` (IC95, Δ pareado, *bootstrap*, Wilcoxon), `veredicto.py` (base publicada, convergencia, regla) |
+
+Lenguaje común: un color por unidad (U1 azul, U2 naranja, U3 verde, U4 violeta, que se distinguen también en gris por los títulos), una forma por tipo de nodo (proceso, archivo o dato, decisión, inicio o fin, simulador, semillas, puerto), un trazo por tipo de flecha (flujo, interfaz, repetición, previsto no usado) y la misma leyenda al pie de las cinco. Ocho interfaces con nombre fijo: I1 escenario del caso, I2 aproximaciones, enlaces y vecinos, I3 observación y recompensa, I4 acción, I5 mensajes entre vecinos, I6 métricas por corrida, I7 política publicada, I8 veredicto. La arquitectura las dibuja como flechas y cada figura de unidad como puertos o citas, con el mismo texto. Todas miden 15 cm de ancho y se incluyen a escala 1, con letra de 8 pt como mínimo. La arquitectura va con `[H]`; las cuatro de unidad, de casi una página, con `[p]` para no dejar medias páginas vacías.
+
+### Cambios de texto que trajo la segunda parte
+
+- Se borraron los tres TODO de diagramas (`capitulo2.tex`, `capitulo3.tex` y `capitulo4.tex`). Quedan 30 TODO.
+- `capitulo3.tex`: pie y párrafo "En la figura..." para cada figura; un párrafo que define I1 a I8 antes de `tab:pipeline`; `tab:pipeline` renombra U2 como "Aprendizaje por refuerzo" y U3 como "Simulación y medición", como la introducción (antes "Entrenamiento" y "Medición"), y su fila U3 dice que colas y retornos los mide `correr_episodio` (hasta ahora se atribuía todo a `comun.py`). `tab:plan2-modelos` bajó un párrafo para no dejar un tercio de página vacío.
+- `capitulo4.tex`: citas a las Figuras 3.2 a 3.5; corregida la frase que decía que el entrenamiento depende del barrido de su caso (en `plan2/generar_trabajos.py` solo depende de preparar el caso; el barrido solo lo espera la evaluación del fijo); agregado que en el plan ningún barrido tuvo que ampliar su malla (ningún `plan2/cola/logs/barrido_*.log` tiene "AVISO").
+- `introduccion.tex`: la arquitectura modular remite a la Figura 3.1.
+- `CLAUDE.md`: el cruce de Lima se importó de OSM pero no se limpió en netedit.
+- La verificación de los textos nuevos corrigió, antes del commit: que la validación y el *checkpoint* van cada 10 episodios y en el último (no tras cada episodio); que la actualización PPO es solo de IPPO y MAPPO; las excepciones de SARSA (elige antes de actualizar) y `ql_colas` (recompensa leída al decidir); que la configuración de SUMO trae el fijo y el actuado se agrega al evaluarlo; y que los puertos grises son los de varias unidades o de los resultados.
+
+### Notas que quedan para el autor (no cambian los dibujos)
+
+- "Las mismas fases que el fijo" (actuado; `sec:modelos` y otros lugares) es aproximado: `comun.archivo_actuado` toma las fases del programa estático por omisión de la red, que tiene los mismos estados, pero en malla3 en otro orden. La figura de U1 lo dice con precisión.
+- Ningún script calcula el factor $f$: la calibración consta en el texto y en las cabeceras de `corredor_alta.rou.xml` y `plan2/red_alta.rou.xml`.
+- Los tabulares no cierran la última decisión al terminar el episodio y las redes sí (lo muestra la Figura 3.3; el texto no lo dice).
+- `rl_corredor.py` observa y luego calcula la recompensa, y `rl_ippo.py` cierra y luego observa. Ocurre en el mismo instante y las figuras siguen el orden de `rl_ippo.py`.
+
+### Cómo regenerar las figuras
+
+`cd TESIS/diagramas && python construir.py` compila las cinco (o `python construir.py u2` una sola), copia cada PDF a `TESIS/images/diag_<nombre>.pdf`, deja una vista previa en `previa/` e informa el tamaño. Cualquier cambio de contenido debe seguir la especificación, que tiene la evidencia de cada elemento; el estilo común está en `estilo_diagramas.tex`.
