@@ -2,43 +2,7 @@
 \addcontentsline{toc}{section}{\bfseries ANEXOS}
 \markboth{ANEXOS}{ANEXOS}
 
-\section*{Anexo A. Tablas completas por episodio}
-
-Las tablas siguientes listan, para cada escenario, los parámetros de
-entrada y las métricas de salida de todos los episodios de
-entrenamiento. Se generan con el script \texttt{tablas\_tex.py}
-directamente desde los archivos de resultados por episodio
-(\texttt{resultados\_}\allowbreak\texttt{<escenario>.csv}), de modo que
-cada número es reproducible con
-los comandos del plan de pruebas. Q ini.\ es el número de estados
-distintos que la tabla Q ya conocía al empezar el episodio; $r$/dec.\ es
-la recompensa media por decisión, medida cada 5~s con el mismo reloj en
-todos los controles.
-
-\input{secciones/tablas/cruce_episodios}
-\input{secciones/tablas/cruce2_episodios}
-\input{secciones/tablas/corredor_episodios}
-\input{secciones/tablas/red_episodios}
-\input{secciones/tablas/corredor_alta_episodios}
-
-Los entrenamientos del módulo U4 se registran en un archivo por
-corrida, nombrado según el escenario, la variante y la semilla base:
-\begin{center}
-\texttt{resultados\_<escenario>\_ippo\_<variante>\_s<base>.csv}
-\end{center}
-Las tablas siguientes muestran los cinco primeros episodios y uno de
-cada diez de cada entrenamiento (variante y semilla base), con la
-recompensa de U2 a reloj fijo, la recompensa que vio el agente, la
-entropía de la política sobre las decisiones libres, la divergencia
-entre la política vieja y la nueva en cada actualización y la
-evaluación intermedia con la semilla 999.
-
-\input{secciones/tablas/cruce_ippo_episodios}
-\input{secciones/tablas/red_ippo_episodios}
-\input{secciones/tablas/corredor_ippo_episodios}
-\input{secciones/tablas/corredor_alta_ippo_episodios}
-
-\subsection*{Plan de pruebas v2: tablas completas}
+\section*{Anexo A. Tablas completas del plan de pruebas}
 
 El plan de pruebas v2 aplica el mismo protocolo a cada caso y a cada
 modelo: tres semillas base de entrenamiento (42, 2042 y 4042), 200
@@ -189,3 +153,6 @@ el repositorio.
 {\fontsize{7}{8.4}\selectfont \verbatiminput{codigo/tablas_tex.py}}
 
 \end{spacing}
+
+\input{secciones/anexo_c_exploratoria}
+\input{secciones/anexo_d_osm}

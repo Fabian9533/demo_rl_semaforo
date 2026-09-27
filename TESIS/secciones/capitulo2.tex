@@ -1,3 +1,5 @@
+\renewcommand{\theequation}{\arabic{chapter}.\arabic{equation}}
+
 \chapter{MARCO TEÓRICO}
 
 El presente capítulo desarrolla los conceptos fundamentales que sustentan la arquitectura del proyecto y explican por qué cada módulo propuesto aporta a la reducción del retraso promedio por vehículo en intersecciones urbanas. El foco es \textit{arquitectural}: qué módulos componen el sistema, qué principios teóricos utiliza cada uno y qué resultados espera producir; el capítulo siguiente describe el flujo operativo.
@@ -41,6 +43,39 @@ Durante el entrenamiento el agente explora, es decir, toma acciones al azar con 
 
 \subsection*{Q-learning y SARSA (RL tabular)}
 Métodos que almacenan el valor de acción $Q(s,a)$ en una tabla indexada por estados discretos. Q-learning es \textit{off-policy}: actualiza sus valores hacia la mejor acción disponible en el estado siguiente, con independencia de la que se haya ejecutado, lo que permite explorar al azar y aprender igualmente la política óptima. SARSA es \textit{on-policy}: actualiza hacia la acción efectivamente tomada, lo que produce políticas más conservadoras. Ambos requieren \textbf{discretizar} el estado, es decir, agrupar magnitudes continuas en un número finito de niveles. Esa discretización es la que hace viable la tabla y, a la vez, su límite: el número de estados crece de forma multiplicativa con las variables observadas y sus niveles, y cuando el espacio es grande el agente visita solo una fracción de él, de modo que la política elige entre valores apenas actualizados. En esta tesis Q-learning es el algoritmo implementado y SARSA queda como comparación pendiente \citep{SuttonBarto2018}.
+
+\subsection*{Actualización de los valores Q y ejemplo de pseudocódigo}
+
+En el caso de algoritmos tabulares, como Q-learning, la política del agente se
+representa mediante una \emph{tabla Q} en la que cada entrada $Q(s,a)$
+almacena la expectativa de recompensa acumulada si se aplica la acción $a$ en
+el estado $s$ y se sigue la mejor política a partir de entonces.
+El proceso de aprendizaje consiste en actualizar iterativamente estos valores
+con información obtenida de las simulaciones.  La regla de actualización de
+Q-learning se basa en el aprendizaje por diferencias temporales y se expresa
+de la siguiente manera:
+
+\[
+  Q(s,a) \leftarrow Q(s,a) + \alpha \bigl[r + \gamma\,\max_{a'} Q(s',a') - Q(s,a)\bigr],
+\]
+donde $\alpha$ es la tasa de aprendizaje, $\gamma$ el factor de descuento,
+$r$ la recompensa inmediata obtenida al ejecutar la acción $a$ en el estado $s$,
+$s'$ el estado siguiente y $a'$ las posibles acciones en $s'$.  Esta
+ecuación desplaza el valor Q actual en dirección del retorno observado
+($r + \gamma \max_{a'} Q(s',a')$).
+
+Para algoritmos \emph{on--policy}, como SARSA, la actualización se realiza con la
+siguiente fórmula:
+
+\[
+  Q(s,a) \leftarrow Q(s,a) + \alpha\bigl[r + \gamma\,Q(s',a') - Q(s,a)\bigr],
+\]
+
+donde $a'$ es la acción efectivamente seleccionada en el estado siguiente $s'$
+y $\alpha,\gamma$ tienen el mismo significado que en Q-learning.  Al emplear
+el valor $Q(s',a')$ asociado a la política vigente en vez del máximo de todas
+las acciones, SARSA mantiene la coherencia entre exploración y actualización
+y suele conducir a comportamientos más conservadores.
 
 \subsection*{DQN y PPO (Deep RL)}
 Sustituyen la tabla por una red neuronal, lo que permite generalizar entre estados parecidos en lugar de aprender cada uno por separado. DQN aproxima $Q(s,a)$ con una red profunda (\textit{value-based}) y estabiliza el aprendizaje con dos mecanismos: una memoria de experiencias pasadas que se remuestrean y una red objetivo que se actualiza con retraso. PPO optimiza directamente la política (\textit{policy-based}) limitando cuánto puede cambiar de una actualización a la siguiente, mediante el recorte de la razón entre la política nueva y la anterior. Son los candidatos naturales cuando la representación tabular toca su techo \citep{Mnih2015_DQN,Schulman2017_PPO,SB3_Docs}.

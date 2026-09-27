@@ -1,0 +1,804 @@
+\chapter{MARCO METODOLÓGICO}
+
+Este capítulo describe el método completo, organizado en las cuatro
+unidades de la arquitectura. Comienza por la construcción del entorno
+de simulación (U1), con dos caminos posibles: la importación de una
+intersección real desde OpenStreetMap, prevista para el cruce de Lima,
+y la descripción directa de nodos y vías, que es la que se usó para los
+escenarios evaluados en esta fase. Sigue con la formulación e
+implementación del agente de aprendizaje por refuerzo (U2), la
+instrumentación de las métricas (U3) y el plan de pruebas con el que se
+obtienen los resultados del Capítulo~\ref{cap:resultados}. La
+coordinación distribuida entre semáforos vecinos (U4), formulada en el
+Capítulo~I, se implementa en la Sección~\ref{sec:u4} sobre los
+escenarios de varios semáforos.
+
+
+\section{Alcance y unidades}
+
+\noindent\textbf{U1: Preprocesamiento.} Comprende todas las tareas
+relacionadas con la construcción del escenario: la instalación y
+configuración de SUMO, la obtención de la red (por conversión de un
+recorte de OSM o por descripción directa de nodos y vías), la
+definición de la demanda vehicular y la creación de archivos de
+configuración reproducibles (\texttt{.net.xml} para la red,
+\texttt{.rou.xml} para la demanda y \texttt{.sumocfg} para el
+escenario). El resultado de U1 es un escenario listo para simular.
+
+\noindent\textbf{U2: Entrenamiento.} Toma como entrada el escenario de
+U1 y ejecuta SUMO a través de la interfaz TraCI para que un agente de
+aprendizaje por refuerzo observe el estado del tráfico y modifique
+las fases de los semáforos.  En U2 no se modifican la red ni las
+rutas: el enfoque se centra en el algoritmo de control.
+
+\noindent\textbf{U3: Medición.} Calcula, sobre las mismas salidas de
+SUMO y para todos los controles comparados, las métricas de desempeño
+con las que se evalúa el sistema (Sección~\ref{sec:u3}).
+
+\noindent\textbf{U4: Coordinación distribuida.} Añade mensajería entre
+agentes vecinos, estado extendido, penalización por \textit{spillback}
+y un algoritmo con aproximación de funciones (Sección~\ref{sec:u4}).
+Se evalúa en variantes incrementales sobre los escenarios de varios
+semáforos, frente a los mismos controles de referencia que U2, de modo
+que el aporte de la comunicación quede aislado del resto de cambios.
+
+
+\section{Resumen de las unidades}
+
+\begin{description}
+  \item[U1:] Instalar y configurar SUMO; importar la intersección
+    mediante el asistente OSM o descarga manual; limpiar y validar
+    la red; generar la demanda vehicular y el archivo de configuración
+    \texttt{.sumocfg}.  El resultado es un escenario reproducible.
+  \item[U2:] Ejecutar el escenario con TraCI y entrenar un agente de
+    aprendizaje por refuerzo que ajuste las fases semafóricas.  U2
+    depende exclusivamente de los archivos generados en U1 y no
+    modifica la red ni las rutas.
+  \item[U3:] Medir el desempeño de cada control con las mismas salidas
+    de SUMO (viajes por vehículo, colas por TraCI, emisiones) y
+    compararlo con el protocolo del plan de pruebas
+    (Secciones~\ref{sec:u3} y~\ref{sec:plan}).
+  \item[U4:] Coordinar los agentes de semáforos vecinos: estado
+    continuo con la información del vecino, mensajería entre cruces,
+    recompensa con penalización por \textit{spillback} y aprendizaje
+    con IPPO (Sección~\ref{sec:u4}).
+\end{description}
+
+%----------------------------------------------------------------------
+
+\section{Escenarios sintéticos de prueba}
+\label{sec:escenarios}
+
+Mientras se completa la importación del cruce real de Lima, los
+módulos U2, U3 y U4 se desarrollaron y validaron sobre siete escenarios
+sintéticos, construidos con \texttt{netconvert} a partir de archivos de
+nodos y vías escritos a mano, del más simple al más complejo
+(Tabla~\ref{tab:escenarios}). Los cuatro primeros comparten el mismo
+nivel de demanda; el quinto, corredor\_alta, es el escenario de estrés
+del módulo U4 y se describe en la Sección~\ref{sec:u4}; los dos
+últimos, red\_alta y malla3, son los casos P4 y P5 del plan de pruebas
+y se describen en la Sección~\ref{sec:plan2}. Todos comparten el mismo tipo de
+vehículo (turismo de 5~m, aceleración 2.6~m/s$^2$, velocidad máxima
+50~km/h, imperfección del conductor $\sigma = 0.5$) y el mismo patrón
+de demanda: una hora dividida en dos periodos de 30 minutos con la
+punta invertida, de modo que un programa de tiempo fijo no pueda ser
+óptimo en ambos a la vez. Los flujos se definen con
+\verb|<flow ... vehsPerHour>| por movimiento y periodo, lo que produce
+llegadas equiespaciadas; el ámbar es de 3~s en todos los casos (valor
+por defecto de \texttt{netconvert}).
+
+\begin{table}[H]
+\setstretch{1}
+\centering
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{p{1.5cm}p{2.7cm}p{1.8cm}p{2.9cm}p{1.0cm}p{2.0cm}}
+\toprule
+Escenario & Geometría & Fases verdes & Demanda del periodo punta (veh/h) & Vehículos en la hora & Programa fijo de referencia \\
+\midrule
+cruce & cruce N--S / E--O, 1 carril por sentido & 2 & eje principal 650 por sentido; transversal 150; giros 40 a 80 & 1844 & verde 25~s, ciclo 56~s \\
+cruce2 & 2 carriles por sentido más carril exclusivo de giro a la izquierda & 4 (2 principales y 2 de giro protegido) & recto 420 por sentido; giro izquierdo 160; transversal 200 & 1884 & verde 20~s, giro 6~s, ciclo 64~s \\
+corredor & dos cruces separados 300~m sobre una avenida E--O, 1 carril por sentido & 2 por cruce & avenida 600 en el sentido punta y 250 en el contrario; transversales 180 & 1810 & avenida 20~s, transversales 10~s, ciclo 36~s; desfase de 15~s en el segundo cruce \\
+red & rotonda sin semáforo más tres cruces separados 300~m sobre una avenida de 2 carriles por sentido & 2 por cruce & avenida 650 y 250; transversales 150; rotonda 80 a 150 & 2152 & avenida 25~s, transversales 15~s, ciclo 46~s; desfases 0, 23 y 0~s \\
+corredor\_alta & la red de corredor con toda la demanda multiplicada por 2 (escenario de estrés del módulo U4) & 2 por cruce & avenida 1200 y 500; transversales 360; giros 120 & 3620 & verde 25~s en la avenida y 15~s en las transversales; desfase de 25~s \\
+red\_alta & la red de red con toda la demanda multiplicada por 1.2 (caso P4) & 2 por cruce & avenida 780 y 300; transversales 180; rotonda 96 a 180 & 2582 & avenida 30~s, transversales 10~s, ciclo 46~s; desfases 0, 20 y 0~s \\
+malla3 & malla de 3 $\times$ 3 cruces separados 300~m, 2 carriles por sentido en todas las vías (caso P5) & 2 por cruce & por fila 600 y 250; por columna 180 por sentido; 12 giros de 60 & 4350 & avenida 25~s, transversales 15~s, ciclo 46~s; desfases en ajedrez, 0 y 23~s \\
+\bottomrule
+\end{tabular}
+\caption{Escenarios sintéticos de prueba. La demanda del segundo periodo es la del primero con la punta invertida.}
+\label{tab:escenarios}
+\end{table}
+% fuente (red_alta, malla3): plan2/red_alta.rou.xml, malla3.rou.xml; programa fijo: plan2/<esc>.add.xml;
+% vehiculos en la hora de corredor_alta, red_alta y malla3: columna vehiculos del brazo fijo en plan2/evaluacion_<esc>.csv
+
+
+Como segunda referencia se usa el control actuado nativo de SUMO, con
+las mismas fases y los mismos límites de verde mínimo y máximo que el
+agente (Sección~\ref{sec:plan}).
+
+
+\section{Desarrollo del módulo U2: Aprendizaje por Refuerzo para el control de semáforos}
+
+El segundo módulo de la metodología aborda el diseño e
+implementación de un controlador inteligente que modifique las fases
+de los semáforos en función del estado del tráfico. Para ello se
+recurre a técnicas de \emph{Aprendizaje por Refuerzo} (\emph{Reinforcement
+Learning}, RL), en las que un agente aprende a tomar decisiones
+mediante la interacción con un entorno simulado. Este apartado
+describe la formulación del problema, la interfaz con SUMO y los
+algoritmos de RL más habituales para el control de intersecciones.
+
+\subsection*{Formulación del problema}
+
+En RL se define un \emph{entorno} compuesto por un conjunto de
+\emph{estados}, un conjunto de \emph{acciones} y una función de
+\emph{recompensa}. La formulación implementada en esta tesis para un
+cruce con cuatro aproximaciones es la siguiente:
+
+\begin{itemize}
+  \item \textbf{Estado:} el número de vehículos detenidos en cada
+    aproximación, leído con \verb|edge.getLastStepHaltingNumber| y
+    discretizado en cuatro niveles (0; 1 a 3; 4 a 8; más de 8), más el
+    índice de la fase verde activa. El estado es $s = (c_N, c_S, c_E,
+    c_O, f)$ con $c_i \in \{0,1,2,3\}$. Con dos fases verdes el espacio
+    tiene $4^4 \times 2 = 512$ estados y con cuatro fases, $1024$. Esta
+    discretización es la que hace viable una tabla Q y, a la vez, la
+    que limita al método tabular cuando crece el número de fases, como
+    se muestra en el Capítulo~\ref{cap:resultados}.
+
+  \item \textbf{Acción:} dos acciones. $a = 0$ mantiene la fase verde
+    actual y $a = 1$ pasa a la siguiente fase verde del programa,
+    insertando automáticamente el ámbar del programa (3~s). El agente
+    no elige una fase arbitraria ni una duración: decide únicamente
+    cuándo termina el verde en curso.
+
+  \item \textbf{Recompensa:} negativa y proporcional a la congestión en
+    el instante de la decisión,
+    \begin{equation}
+      r = -\Bigl(w_1 \sum_i c_i + w_2 \sum_i e_i\Bigr), \qquad
+      w_1 = 1.0,\; w_2 = 0.01,
+      \label{eq:recompensa}
+    \end{equation}
+    donde $c_i$ es el número de vehículos detenidos en la aproximación
+    $i$ (sin discretizar) y $e_i$ es la suma de los tiempos de espera de
+    los vehículos que en ese momento están en la aproximación $i$
+    (\verb|edge.getWaitingTime|). Con estos pesos domina el término de
+    colas; el de espera desempata entre estados con la misma cola. La
+    recompensa mide el nivel de congestión, no su incremento entre
+    decisiones. Es la recompensa de la fase exploratoria. En el plan de
+    pruebas vigente (Sección~\ref{sec:plan2}) Q-learning y SARSA se
+    entrenan con la recompensa de retraso de la
+    Ecuación~\ref{eq:recompensa-u4}, la misma de DQN, IPPO y MAPPO; la
+    de la Ecuación~\ref{eq:recompensa} se conserva solo en la ablación
+    \texttt{ql\_colas}.
+
+  \item \textbf{Restricciones operativas:} el verde dura al menos 10~s
+    antes de que el agente pueda cambiarlo (5~s en las fases de giro
+    protegido, identificadas por tener a lo más dos movimientos en
+    verde) y como máximo 60~s, tras los cuales el cambio se fuerza. El
+    agente decide cada 5~s.
+\end{itemize}
+
+Con estos elementos se modela el control del semáforo como un
+\emph{problema de decisión de Markov} (MDP). El agente observa el
+estado, aplica una acción, avanza la simulación y recibe una
+recompensa; a partir de la secuencia de experiencias va aprendiendo
+una política de control. En los escenarios con varios cruces se
+instancia un agente por semáforo, cada uno con su propia tabla Q, su
+estado local y su recompensa local; los agentes no intercambian
+información (eso es lo que añade el módulo U4).
+
+
+\subsection*{Algoritmos recomendados}
+
+Diversas técnicas de RL han sido aplicadas al control de
+semáforos. Los algoritmos tabulares, como \emph{Q-learning} o
+\emph{SARSA}, son adecuados para intersecciones sencillas con un
+número limitado de estados, y son los que permiten inspeccionar
+directamente la política aprendida. Para espacios de estado mayores se
+emplean métodos de \emph{Deep Reinforcement Learning} como \emph{Deep
+Q-Network} (DQN) y \emph{Proximal Policy Optimization} (PPO), que
+sustituyen la tabla por una red neuronal capaz de generalizar entre
+estados parecidos. Ambos tienen implementación de referencia en
+\texttt{stable-baselines3}, sobre PyTorch, y su acoplamiento a SUMO
+reutiliza el mismo bucle de TraCI descrito arriba.
+
+En esta fase se implementaron los cuatro, sin
+\texttt{stable-baselines3}: Q-learning y SARSA tabulares (este módulo,
+\texttt{rl\_corredor.py}), PPO en su versión multiagente independiente
+(IPPO, módulo U4, Sección~\ref{sec:u4}) y, para el plan de pruebas, un
+Double DQN y un MAPPO en PyTorch puro (Sección~\ref{sec:plan2}).
+La motivación para pasar de la tabla a la red está en los resultados
+del Capítulo~\ref{cap:resultados}: la representación tabular alcanza su
+techo en cuanto crece el número de fases del semáforo, que es
+exactamente el caso en que la aproximación por redes neuronales resulta
+pertinente.
+
+
+
+%----------------------------------------------------------------------
+\section{Módulo U3: medición del desempeño}
+\label{sec:u3}
+
+Todas las métricas se calculan con las mismas salidas de SUMO para los
+tres controles comparados (tiempo fijo, actuado y agente RL), de modo
+que la comparación no dependa de cómo decide cada uno.
+
+\begin{itemize}
+  \item \textbf{Por vehículo}, del archivo \texttt{tripinfo} que SUMO
+    escribe al terminar cada viaje: el retraso (\texttt{timeLoss}), la
+    espera detenida (\texttt{waitingTime}), el número de paradas
+    (\texttt{waitingCount}, veces que la velocidad bajó de 0.1~m/s) y
+    el instante de llegada. El \textit{throughput} se define como el
+    número de vehículos que completan su viaje antes de los 3600~s. Con
+    el dispositivo de emisiones activado
+    (\verb|--device.emissions.probability 1|) cada viaje incluye además
+    sus emisiones acumuladas; se reportan CO$_2$ en gramos y NO$_x$ en
+    miligramos por vehículo, con la clase de emisión por defecto de SUMO
+    (HBEFA3, turismo a gasolina Euro~4) \citep{SUMO_Emissions}. Activar
+    el dispositivo no altera la dinámica ni la secuencia aleatoria de la
+    simulación: las métricas con y sin él coinciden.
+  \item \textbf{Por segundo}, vía TraCI: el número de vehículos
+    detenidos, sumado sobre todas las aproximaciones semaforizadas del
+    escenario. De esa serie salen la cola promedio, que es su media por
+    segundo de simulación, y la cola máxima, que es su mayor valor
+    instantáneo; se guarda además un muestreo por minuto para observar
+    la respuesta de cada control al cambio de demanda.
+  \item \textbf{Por decisión}: la recompensa de la
+    Ecuación~\ref{eq:recompensa} se evalúa cada 5~s de reloj fijo, con
+    el mismo muestreo bajo los tres controles, para comparar lo que el
+    agente optimiza con lo que consiguen el fijo y el actuado. Se
+    reporta como promedio por decisión y no como suma acumulada, para
+    que el valor no dependa de la duración del episodio. Se cuentan
+    además los cambios de fase (entradas a una fase verde) de cada
+    control, sobre el episodio completo.
+  \item \textbf{Retornos por segundo}, desde el plan de pruebas
+    vigente: tres recompensas (de retraso, de colas y de
+    \textit{spillback}) acumuladas cada segundo sobre todos los
+    semáforos, con cualquier control. Se definen en la
+    Sección~\ref{sec:plan2}.
+\end{itemize}
+
+\subsection*{Métricas de corredor y \textit{spillback}}
+
+En los escenarios de varios cruces se miden además, con las mismas
+salidas y para todos los controles, las magnitudes que la coordinación
+debería mover. Del \texttt{tripinfo}, sobre los vehículos que recorren
+la avenida de extremo a extremo (850 en corredor, unos 900 en red): el
+tiempo de viaje y el retraso medios, el retraso medio en el sentido de
+la punta (el que favorece la onda verde del programa fijo), las paradas
+medias y la fracción de vehículos que se detiene a lo sumo una vez,
+que es el indicador más directo de progresión. Por TraCI, en cada
+carril de los enlaces que unen dos cruces: el máximo de vehículos
+detenidos y el máximo de vehículos presentes durante la corrida, y el
+\textit{spillback}, definido como un segundo en el que algún carril de
+algún enlace tiene detenidos al menos el 90\,\% de sus plazas (34 de
+38: la cola queda a menos de 30~m del cruce aguas arriba y el siguiente
+vehículo que se detenga bloquea la intersección). Se reportan la
+fracción de segundos de la hora con \textit{spillback}, los segundos
+totales y el número de episodios de \textit{spillback} (flancos de
+subida). Se cuenta también el número de vehículos que no terminaron su
+viaje al cerrar la simulación, que es cero con la demanda nominal. Al
+pedir la serie se guarda además la fase de cada semáforo en cada
+segundo, para observar el desfase que emerge entre cruces.
+
+Dos precisiones importan para leer los resultados. El retraso de SUMO
+incluye tiempo perdido que no depende del semáforo (arranque desde
+velocidad cero, giros a menor velocidad, vacilaciones del conductor),
+así que un cambio porcentual sobre \texttt{timeLoss} subestima el
+efecto sobre el retraso atribuible al control. Y la espera detenida es
+la señal que optimiza la recompensa, pero no es el retraso: un control
+que fragmenta las colas en paradas más cortas puede bajar la espera y
+subir las paradas sin mover el retraso. Por eso el retraso es la
+métrica primaria y la espera, las colas, las paradas, el
+\textit{throughput} y las emisiones son secundarias.
+
+%----------------------------------------------------------------------
+
+\section{Desarrollo del módulo U4: coordinación distribuida entre semáforos}
+\label{sec:u4}
+
+Los resultados del módulo U2 en los escenarios de varios cruces
+(Capítulo~\ref{cap:resultados}) motivan este módulo: tres agentes
+tabulares independientes pierden un $15$\,\% de retraso frente a la onda
+verde tuneada de red, dos agentes en el corredor pierden un $60$\,\%
+frente al fijo con reparto de verde tuneado (un $6$\,\% frente al fijo
+simétrico de la primera ronda) y su política resultó sensible a un
+cambio de 2~s en el verde mínimo. El
+módulo U4 cambia cuatro cosas a la vez, de forma incremental y
+comparable: el estado pasa de bins a un vector continuo que incluye lo
+que el propio detector ve en movimiento; cada semáforo recibe mensajes
+de sus vecinos sobre la avenida; la recompensa puede penalizar la cola
+que el agente empuja sobre el enlace que comparte con el vecino
+(\textit{spillback}); y el aprendizaje pasa de la tabla Q a
+\emph{Independent PPO} (IPPO) con una sola red compartida por todos los
+semáforos. Todo se implementa en \texttt{rl\_ippo.py} (Anexo~B) sobre
+PyTorch en CPU, sin Gym ni \texttt{stable-baselines3}, reutilizando el
+bucle de TraCI, el reloj de decisión y las métricas de U2 y U3.
+
+\subsection*{Vecinos y canal de mensajes}
+
+Dos semáforos son vecinos cuando comparten un tramo de la avenida: en
+corredor C1 y C2; en red C1--C2 y C2--C3 (la rotonda no tiene semáforo
+y no participa). En la malla de nueve cruces del plan de pruebas (P5)
+cada semáforo tiene de dos a cuatro vecinos, uno por lado
+(Sección~\ref{sec:plan2}). Cada 5~s de reloj global, cada semáforo publica a cada
+vecino un mensaje con cinco datos que un controlador real podría
+transmitir: la fase en curso (avenida, transversal o ámbar), el tiempo
+que lleva en ella, los vehículos presentes en la aproximación que
+descarga hacia el vecino, la cola detenida en esa aproximación y la
+cola detenida en el enlace que une al emisor con el receptor, que es
+el enlace por el que llegan al receptor esos vehículos. El receptor
+conserva el último mensaje recibido y su edad. El canal admite una
+latencia fija y una probabilidad de pérdida por mensaje, ambas nulas
+durante el entrenamiento y usadas solo en la prueba de robustez del
+plan de pruebas; la pérdida usa un generador aleatorio propio para no
+alterar la secuencia de la simulación.
+
+\subsection*{Observación, acciones y máscara}
+
+La observación de cada agente es un vector de 31 componentes
+normalizadas entre 0 y 1 (Tabla~\ref{tab:obs-u4}): un bloque local de
+15 y dos ranuras fijas de 8, una para el vecino del oeste y otra para
+el del este. Las colas se dividen por la capacidad de la aproximación
+(plazas de 7.5~m por carril) y la cola del enlace por sus plazas
+(38 en los enlaces de 300~m). La variante \emph{local} deja las dos
+ranuras a cero: contiene todo lo que un detector propio puede medir, de
+modo que la diferencia entre \emph{vecinos} y \emph{local} se atribuye
+solo a la mensajería. La misma red y la misma disposición sirven para
+los tres escenarios; el identificador del semáforo ocupa tres
+posiciones fijas. En la malla del plan de pruebas (P5) la disposición
+se extiende sin cambiar el bloque local: nueve posiciones de
+identificador y cuatro ranuras de 8 (oeste, este, norte y sur), 53
+componentes en total; ``verde hacia mí'' es el verde este--oeste para
+un vecino al oeste o al este y el norte--sur para uno al norte o al
+sur. Con dos lados la disposición sigue siendo la de la tabla, y las
+políticas anteriores cargan sin cambios.
+
+\begin{table}[H]
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{spacing}{1}
+\begin{tabular}{llp{9.2cm}}
+\toprule
+Bloque & Componentes & Contenido \\
+\midrule
+Local & 1--4 & cola detenida en cada aproximación (O, E, N, S) sobre su capacidad \\
+ & 5--8 & vehículos en movimiento en cada aproximación sobre su capacidad \\
+ & 9--10 & fase verde activa (uno de dos) \\
+ & 11 & tiempo en el verde actual sobre 60~s \\
+ & 12 & 1 si ya se cumplió el verde mínimo \\
+ & 13--15 & identificador del semáforo (uno de tres) \\
+\midrule
+Vecino oeste & 16 & 1 si existe el vecino \\
+(17--22 a cero si & 17 & 1 si el vecino está en la fase de la avenida (descarga hacia mí) \\
+no hay mensaje) & 18 & 1 si el vecino está en ámbar \\
+ & 19 & tiempo del vecino en su fase sobre 60~s \\
+ & 20 & vehículos en la aproximación del vecino que descarga hacia mí, sobre su capacidad; cero si el vecino no está en la fase de la avenida \\
+ & 21 & cola detenida en esa aproximación sobre su capacidad \\
+ & 22 & cola detenida en el enlace que llega desde el vecino (del vecino hacia mí), máximo por carril, sobre sus plazas \\
+ & 23 & edad del último mensaje sobre 30~s (1 si nunca llegó) \\
+\midrule
+Vecino este & 24--31 & igual que 16--23 \\
+\bottomrule
+\end{tabular}
+\end{spacing}
+\caption{Observación de cada agente del módulo U4.}
+\label{tab:obs-u4}
+\end{table}
+
+
+
+Las acciones son las de U2: mantener el verde o pasar a la siguiente
+fase con ámbar automático. El verde mínimo y máximo se imponen con una
+máscara sobre las acciones: antes del mínimo solo es válida mantener,
+a los 60~s solo cambiar, y entre ambos las dos. Las decisiones forzadas
+por la máscara no aportan gradiente a la política (su probabilidad es
+1) pero sí al crítico. Se reportan por episodio las decisiones totales,
+comparables con U2, y las decisiones libres.
+
+\subsection*{Recompensa y variantes}
+
+La recompensa de U4 conserva la estructura y los pesos de la
+Ecuación~\ref{eq:recompensa} ($w_1 = 1$, $w_2 = 0.01$) con dos cambios
+que salieron de la prueba de humo del plan de pruebas (más abajo). El
+término de cola detenida se sustituye por los vehículos-equivalentes
+retrasados de cada aproximación, $n_a\,(1 - \bar v_a / v_{\max,a})$,
+donde $n_a$ es el número de vehículos presentes y $\bar v_a$ su
+velocidad media: un vehículo detenido cuenta 1 y uno que avanza a
+media velocidad cuenta 0.5. Es la versión por segundo del
+\texttt{timeLoss} de SUMO, la métrica primaria, y se lee de la misma
+suscripción por aproximación. Y el agente recibe, por cada transición,
+la suma por segundo de esa cantidad sobre su intervalo de decisión
+dividida entre 5~s (retraso-segundos), en lugar del nivel en el
+siguiente instante de decisión: en un intervalo de mantener coincide
+con el nivel medio y en uno de cambiar, de 8~s, pesa $8/5$. La variante
+\emph{spill} le resta además un término por la cola que el agente
+empuja sobre cada enlace que alimenta hacia un vecino, acumulado de la
+misma forma:
+\begin{equation}
+  \begin{aligned}
+  r_i = -\frac{1}{5}\sum_{t \in \text{intervalo}} \Bigl[\;
+        & w_1 \sum_a n_a(t)\Bigl(1 - \frac{\bar v_a(t)}{v_{\max,a}}\Bigr)
+        + w_2 \sum_a \text{espera}_a(t) \\
+        & + w_3 \sum_{e \in \text{salidas}_i} \max\bigl(0,\; q_e(t) - P_e/2\bigr) \Bigr],
+  \end{aligned}
+  \label{eq:recompensa-u4}
+\end{equation}
+donde $q_e$ es el máximo por carril de vehículos detenidos en el enlace
+$e$, $P_e$ sus plazas por carril (38; 37 en malla3) y $w_3 = 2$ (cero en \emph{local} y
+\emph{vecinos}): el agente aguas arriba ve la cola que bloquea al
+vecino como si fuera propia, con peso doble, desde que ocupa la mitad
+del enlace. La variante \emph{cambio}, opcional, resta $w_4 = 2$ por
+cada cambio de fase ejecutado, elegido o forzado, y se corre aparte
+porque cambia el objetivo. Los pesos están fijados de antemano, sin
+barrido. Lo que ve el algoritmo es la recompensa multiplicada por
+0.02; en el registro por episodio se conserva la recompensa de U2
+(colas detenidas) a reloj fijo de 5~s, comparable con los cuatro casos
+ya evaluados, y aparte la recompensa completa que vio el agente.
+
+
+
+%----------------------------------------------------------------------
+\section{Plan de pruebas}
+\label{sec:plan}
+\label{sec:plan2}
+
+El plan de pruebas vigente, aprobado por el asesor el 23.09.2026,
+aplica un mismo método en todas las configuraciones y mide las mismas
+salidas en todas ellas. Cada caso fija un escenario (red y demanda);
+en cada caso se entrenan y evalúan los mismos modelos con el mismo
+protocolo, y un veredicto prefijado dice si el modelo funciona en ese
+caso. La fase anterior, exploratoria, se resume al final de la
+sección.
+
+
+\subsection*{Fase exploratoria previa}
+
+Antes de este plan hubo una fase exploratoria, cuyos resultados
+reporta el Capítulo~\ref{cap:resultados}, con otra numeración de los
+casos: E1 cruce, E2 cruce2, E3 corredor y E4 red para el agente
+tabular, E3-U4 y E4-U4 para las variantes IPPO en corredor y red, y E6
+para corredor\_alta. En ella el Q-learning se entrenaba con una sola
+semilla base, entre 40 y 120 episodios y con la recompensa de colas;
+IPPO, con tres bases de 200 episodios y la recompensa de retraso; en
+los dos casos se publicaba la política del último episodio, y la
+evaluación usaba diez
+semillas (1001 a 1010), con una validación intermedia en la semilla
+999. El éxito de U4 se juzgaba con siete niveles prefijados, de (N0)
+medición (regresión, determinismo y prueba de humo) a (N6) la meta de
+$-25$\,\% frente al fijo, pasando por estabilidad entre semillas base
+(N1), ventaja sobre Q-learning (N2), coordinación (N3),
+\textit{spillback} (N4) y paridad con el actuado (N5). Esa fase mostró
+que el Q-learning con recompensa de colas quedaba por detrás del
+actuado y que la última política no siempre era la mejor, pero sus
+casos no eran comparables entre sí: cambiaban el número de episodios,
+la recompensa y la regla de selección según el modelo, y los fijos
+nominales se habían tuneado con semillas de evaluación. El plan de
+esta sección corrige esas diferencias y reemplaza sus conclusiones.
+
+
+\subsection*{Objetivo de cada prueba}
+
+La pregunta es la misma en todas las celdas de la matriz caso por
+modelo: \emph{¿el modelo reduce el retraso por vehículo frente al
+tiempo fijo tuneado en ese caso, y no queda por detrás del actuado?}
+Cada caso agrega una dificultad a la anterior. P1 y P2 comparan un
+corredor de dos semáforos con demanda nominal y con demanda doble, y
+responden si el modelo sigue funcionando cuando la demanda supera la
+capacidad de un carril. P3 y P4 repiten la comparación en la red de
+tres semáforos, dos carriles por sentido y una rotonda sin semáforo,
+con la demanda nominal y con una un 20\,\% mayor (el límite que impone
+la rotonda), y responden si funciona con más carriles y con un
+elemento que no controla. P5 pasa a una malla de nueve semáforos en la
+que los cruces tienen vecinos en los dos ejes, hasta cuatro, y
+responde si el método escala a una red.
+
+\subsection*{Casos}
+
+La Tabla~\ref{tab:plan2-casos} resume los casos. P1 a P5 se ejecutan
+en esta fase. P6 (la misma malla con demanda alta) y P7 (una red de
+cuatro por cuatro cruces, con tres carriles por sentido y fase de giro
+protegido) quedan definidos como trabajo siguiente: repiten el mismo
+protocolo sobre escenarios de mayor tamaño y no cambian el método.
+La avenida es siempre el eje este--oeste y la transversal, el
+norte--sur; en la malla los dos ejes tienen dos carriles y la
+convención se mantiene.
+
+\begin{table}[H]
+\setstretch{1}
+\centering
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{llcclc}
+\toprule
+Caso & Escenario & Semáforos & \makecell{Carriles por\\sentido (avenida)} & Demanda & \makecell{Vehículos\\en la hora} \\
+\midrule
+P1 & corredor       & 2              & 1 & nominal                & 1810 \\
+P2 & corredor\_alta & 2              & 1 & 2.0 $\times$ nominal   & 3620 \\
+P3 & red            & 3 + rotonda    & 2 & nominal                & 2150 \\
+P4 & red\_alta      & 3 + rotonda    & 2 & 1.2 $\times$ nominal   & 2580 \\
+P5 & malla3         & 9 (3$\times$3) & 2 & nominal                & 4350 \\
+\midrule
+P6 & malla 3$\times$3 & 9            & 2 & alta                   & por definir \\
+P7 & red 4$\times$4 & 16             & \makecell{3, con giro\\protegido} & por definir & por definir \\
+\bottomrule
+\end{tabular}
+\caption[Casos del plan de pruebas]{Casos del plan de pruebas. P1 a P5 se ejecutan en esta
+fase; P6 y P7 quedan como trabajo siguiente. Carriles por sentido en la avenida. La demanda
+nominal es la de cada escenario en la Tabla~\ref{tab:escenarios} y, en malla3, la descrita en
+esta sección; el factor de P4 se calibró antes de entrenar (Tabla~\ref{tab:red-alta-factor}).
+Vehículos en la hora: suma de los flujos declarados; por el redondeo de las llegadas
+equiespaciadas SUMO genera 2152 en red y 2582 en red\_alta (Tabla~\ref{tab:escenarios}).}
+\label{tab:plan2-casos}
+\end{table}
+% fuente: plan2/veredicto.csv (columna demanda_veh_h, suma de vehsPerHour de cada .rou.xml);
+% vehiculos generados: columna vehiculos de plan2/evaluacion_<esc>.csv
+
+
+
+\subsection*{Modelos}
+
+Cada celda compara los modelos de la Tabla~\ref{tab:plan2-modelos}.
+Los dos controles de referencia no aprenden: el tiempo fijo, con el
+programa tuneado para esa celda, y el actuado nativo de SUMO
+\citep{SUMO_TLS_Actuated}, con las mismas fases y verde de 10 a 60~s
+(Sección~\ref{sec:escenarios}). Los aprendices son dos tabulares
+(Q-learning y SARSA), cuatro de aproximación de funciones que aprenden
+cada uno con la información de su propio semáforo (las tres variantes
+IPPO de la Sección~\ref{sec:u4} y un Double DQN con pesos compartidos)
+y uno con crítico centralizado (MAPPO). DQN y MAPPO usan la misma observación que \emph{vecinos}, de
+modo que la comparación entre algoritmos no se mezcla con la
+comparación entre observaciones. La fila \texttt{ql\_colas} es una
+ablación: el mismo Q-learning entrenado con la recompensa original de
+U2 (Ecuación~\ref{eq:recompensa}), para medir cuánto del resultado se
+debe a la recompensa y cuánto al algoritmo. Entre \texttt{ql} y
+\texttt{ql\_colas} solo cambia la recompensa: el algoritmo, el estado,
+las acciones y el protocolo son los mismos, así que la diferencia entre
+sus dos filas aísla el efecto de la recompensa. Los hiperparámetros de
+DQN y MAPPO se fijaron antes de entrenar en los casos y se comprobaron
+con una prueba de humo en el cruce de un semáforo, que no es un caso
+del plan; quedan registrados en el archivo de metadatos de cada
+política y en la Tabla~\ref{tab:plan2-hiper}.
+
+\begin{table}[H]
+\setstretch{1}
+\centering
+\footnotesize
+\begin{tabular}{l>{\raggedright\arraybackslash}p{6.0cm}ll}
+\toprule
+Modelo & Descripción & \makecell{Recompensa de\\entrenamiento} & Casos \\
+\midrule
+fijo & tiempo fijo tuneado por barrido en cada celda & -- & P1 a P5 \\
+actuado & actuado nativo de SUMO, verde mínimo 10~s y máximo 60~s & -- & P1 a P5 \\
+ql & Q-learning tabular, un agente por semáforo & retraso & P1 a P5 \\
+sarsa & SARSA tabular, un agente por semáforo & retraso & P1 a P5 \\
+ql\_colas & Q-learning con la recompensa de U2 (ablación) & colas & P1 a P4 \\
+ippo\_local & IPPO con pesos compartidos, sin mensajes & retraso & P1 a P5 \\
+ippo\_vecinos & IPPO con mensajes entre vecinos & retraso & P1 a P5 \\
+ippo\_spill & IPPO con mensajes y término de \textit{spillback} & \makecell[l]{retraso +\\\textit{spillback}} & \makecell[l]{P1 y P2; en P3\\a P5 = vecinos} \\
+dqn & Double DQN con pesos compartidos, observación de ippo\_vecinos & retraso & P1 a P5 \\
+mappo & actor de ippo\_vecinos con crítico centralizado & retraso & P1 a P5 \\
+\bottomrule
+\end{tabular}
+\caption[Modelos del plan de pruebas]{Modelos que se comparan en cada caso. La recompensa de
+retraso es la Ecuación~\ref{eq:recompensa-u4} con $w_3 = 0$; la de colas, la
+Ecuación~\ref{eq:recompensa}; la de \textit{spillback}, la Ecuación~\ref{eq:recompensa-u4} con
+$w_3 = 2$. En P3, P4 y P5 el término de \textit{spillback} nunca se activa e ippo\_spill
+coincide con ippo\_vecinos; la tabla de veredicto lo reporta como ``= vecinos''. La ablación
+ql\_colas no se programó en P5.}
+\label{tab:plan2-modelos}
+\end{table}
+
+
+
+\subsection*{Protocolo común}
+
+Todos los aprendices (Q-learning, SARSA, DQN, IPPO y MAPPO) se
+entrenan con la misma recompensa, la de retraso de la
+Ecuación~\ref{eq:recompensa-u4} sin el término de \textit{spillback}
+($w_1 = 1$, $w_2 = 0.01$, $w_3 = 0$): cada segundo se acumula por
+semáforo el retraso de sus aproximaciones más la espera ponderada, y
+la recompensa de una decisión es esa suma desde la decisión anterior
+dividida entre 5. Es la recompensa con la que se entrenó IPPO en la
+fase anterior. Las redes neuronales (DQN, IPPO y MAPPO) la reciben
+multiplicada por 0.02 y los tabulares, sin escalar. Para el Q-learning
+es un cambio respecto de la fase anterior, en la que se entrenaba con
+la recompensa de colas de la Ecuación~\ref{eq:recompensa}; esa
+recompensa se conserva solo en la ablación \texttt{ql\_colas}. La otra
+excepción es la variante \emph{spill}, que por definición añade el
+término de \textit{spillback}.
+
+Cada aprendiz se entrena 200 episodios con tres semillas base (42,
+2042 y 4042); el episodio $k$ usa la semilla de SUMO base$+k$. Cada
+diez episodios, y en el último, se valida la política congelada
+(acción de mayor valor o de mayor probabilidad, sin exploración) con
+las semillas 999 y 1999, y el valor de validación es la media del
+retraso en las dos. La validación guarda y restaura el estado de los
+generadores aleatorios de Python, NumPy y PyTorch, así que el
+entrenamiento reproduce el mismo registro por episodio, dígito a
+dígito, con o sin ella. En cada validación se guarda un
+\textit{checkpoint}; la política publicada de un entrenamiento es el
+\textit{checkpoint} con menor valor de validación (en empate, el más
+tardío), y no la del último episodio. De las tres semillas base, la
+que representa al modelo en la celda es la mediana por ese mismo
+valor. Ninguna de las dos elecciones usa las semillas de evaluación.
+
+Los tabulares usan $\alpha = 0.1$, $\gamma = 0.9$ y
+$\varepsilon$ inicial 1.0 con decaimiento geométrico por episodio
+$0.01^{1/(0.8 N)}$, que para $N = 200$ episodios es 0.9716 y lleva
+$\varepsilon$ a 0.01 al 80\,\% del entrenamiento, con 0.01 como piso.
+IPPO conserva los hiperparámetros de la Tabla~\ref{tab:hiper-ippo};
+los de DQN y MAPPO están en la Tabla~\ref{tab:plan2-hiper}.
+
+El programa fijo se vuelve a tunear en cada celda con un barrido del
+verde de la avenida, el verde transversal y el desfase entre cruces
+sobre las semillas 2001 a 2003, por retraso medio. La malla del
+barrido se amplía hasta que el óptimo queda en su interior; el verde
+mínimo de 10~s es la única frontera que se acepta como óptimo. El
+programa ganador se instala en el escenario de la celda y de él se
+genera el actuado, de modo que los dos controles comparten fases.
+
+
+
+La evaluación final corre cada modelo con la política congelada
+sobre las semillas 1001 a 1030, las mismas treinta para todos los
+brazos, y se evalúan las tres semillas base, no solo la publicada: el
+rango entre ellas mide la fragilidad del entrenamiento.
+La Tabla~\ref{tab:plan2-semillas} resume el uso de cada semilla.
+
+\begin{table}[H]
+\setstretch{1}
+\centering
+\footnotesize
+\begin{tabular}{l>{\raggedright\arraybackslash}p{4.2cm}>{\raggedright\arraybackslash}p{6.2cm}}
+\toprule
+Etapa & Semillas de SUMO & Uso \\
+\midrule
+Tuneo & 2001 a 2003 & calibrar la demanda de P4 y barrer el programa fijo de cada celda \\
+Entrenamiento & base$+k$, $k = 1 \ldots 200$, con bases 42, 2042 y 4042 (43 a 242, 2043 a 2242,
+  4043 a 4242) & episodios de entrenamiento, con exploración \\
+Validación & 999 y 1999 & cada 10 episodios y en el último: elige el \textit{checkpoint} publicado
+  y la base publicada \\
+Evaluación & 1001 a 1030 & política congelada, todos los brazos y todas las bases; única fuente
+  de los veredictos \\
+\bottomrule
+\end{tabular}
+\caption{Semillas de cada etapa del plan de pruebas. Los cuatro rangos no se solapan.}
+\label{tab:plan2-semillas}
+\end{table}
+
+
+\subsection*{Métricas de salida}
+
+Toda corrida, de entrenamiento o de evaluación y de cualquier modelo,
+devuelve las mismas columnas. De los registros por vehículo de SUMO
+salen el retraso (\texttt{timeLoss}), la espera detenida, las paradas
+por vehículo, el \textit{throughput}, los vehículos no terminados y las
+emisiones de CO$_2$ y NO$_x$; de TraCI, la cola media y máxima, las
+decisiones, los cambios de fase y las métricas de corredor y
+\textit{spillback} de la Sección~\ref{sec:u3}. Además se miden cada
+segundo, durante todo el episodio y sobre todos los semáforos, tres
+retornos, con suscripciones de TraCI para no multiplicar las
+llamadas:
+\begin{itemize}
+  \item \texttt{ret\_retraso}: la suma, sobre los segundos del episodio
+    y los semáforos, del término por segundo de la
+    Ecuación~\ref{eq:recompensa-u4} con $w_3 = 0$,
+    $-\bigl(w_1 \sum_a n_a (1 - \bar v_a / v_{\max,a}) + w_2 \sum_a
+    \text{espera}_a\bigr)$. Es la recompensa de entrenamiento común,
+    sin dividir entre 5 ni escalar.
+  \item \texttt{ret\_colas}: la misma suma con la recompensa de U2
+    (Ecuación~\ref{eq:recompensa}) evaluada cada segundo,
+    $-\bigl(w_1 \sum_a c_a + w_2 \sum_a \text{espera}_a\bigr)$.
+  \item \texttt{ret\_spill}: \texttt{ret\_retraso} menos
+    $w_3 \sum_t \sum_e \max\bigl(0,\, q_e(t) - \lfloor P_e/2 \rfloor\bigr)$
+    sobre todos los enlaces entre semáforos, con $w_3 = 2$.
+\end{itemize}
+Se calculan igual para el fijo, el actuado y los aprendices, de modo
+que cada modelo puede compararse con los demás en su propia recompensa
+y no solo en el retraso. En la tabla de veredicto, la columna
+$\Delta$~recompensa compara la media del retorno propio de cada modelo
+(\texttt{ret\_retraso} para Q-learning, SARSA, DQN, IPPO \emph{local},
+IPPO \emph{vecinos} y MAPPO; \texttt{ret\_colas} para
+\texttt{ql\_colas}; \texttt{ret\_spill} para IPPO \emph{spill}) con la
+del mismo retorno medido bajo el fijo, sobre las mismas semillas. Como
+los retornos son negativos, el cambio se divide entre el valor absoluto
+de la media del fijo: un valor positivo indica que el modelo obtiene
+más recompensa que el fijo. Los retornos no entran en el veredicto.
+% fuente: rl_ippo.py y rl_corredor.py (correr_episodio: ret_retraso, ret_colas, ret_spill);
+% consolidar.py (delta sobre |media_ref|); veredicto.py (columna Delta recompensa)
+
+Por brazo y métrica se reportan la media, la desviación estándar y el
+intervalo de confianza al 95\,\% sobre las treinta semillas. Frente al
+fijo y frente al actuado se reportan el cambio porcentual de la media,
+su intervalo al 95\,\% por \textit{bootstrap} pareado por semilla
+(10\,000 remuestreos) y el valor $p$ de la prueba de Wilcoxon pareada.
+El emparejamiento es por semilla, no por posición en el archivo. En
+los retornos, que son negativos, el cambio se calcula sobre el valor
+absoluto de la referencia, de modo que un cambio positivo es una mejor
+recompensa. La métrica primaria es el retraso por vehículo.
+
+Las llegadas son equiespaciadas en todos los casos
+(Sección~\ref{sec:escenarios}): la variabilidad entre semillas
+proviene solo del comportamiento de los conductores, por lo que los
+intervalos de confianza son estrechos. Las llegadas aleatorias,
+con un proceso de Poisson, cambian también los controles de referencia
+y quedan fuera de este plan. Con la demanda nominal todos los
+vehículos terminan su viaje bajo los controles de referencia y solo
+los que entran al final de la hora llegan después de los 3600~s, así
+que el \textit{throughput} y los vehículos no terminados discriminan
+solo en P2. En P4, con $f = 1.2$, el actuado termina todos los
+vehículos en las semillas de calibración
+(Tabla~\ref{tab:red-alta-factor}).
+
+
+\subsection*{Regla de veredicto}
+
+El veredicto de un modelo en una celda se decide con el cambio del
+retraso de su política publicada frente al fijo ($\Delta_f$, con su
+intervalo y su valor $p$) y frente al actuado ($\Delta_a$):
+\begin{itemize}
+  \item \textbf{FUNCIONA:} el intervalo de $\Delta_f$ queda entero por
+    debajo de cero, $p < 0.05$, $\Delta_f \leq -5$\,\% y el modelo no
+    pierde contra el actuado de forma significativa (intervalo de
+    $\Delta_a$ entero por encima de cero con $p < 0.05$).
+  \item \textbf{MEJORA:} el intervalo de $\Delta_f$ queda entero por
+    debajo de cero y $p < 0.05$, pero la mejora es menor del 5\,\% o el
+    modelo pierde contra el actuado de forma significativa.
+  \item \textbf{FALLA:} el intervalo de $\Delta_f$ queda entero por
+    encima de cero y $p < 0.05$.
+  \item \textbf{EMPATA:} cualquier otro caso.
+  \item \textbf{PENDIENTE:} la celda no está completa o la base
+    publicada no convergió; en el segundo caso se escribe también el
+    veredicto provisional.
+\end{itemize}
+El umbral del 5\,\% separa una diferencia estadísticamente clara pero
+pequeña de una que justifica cambiar de controlador; la meta de la
+tesis, $-25$\,\%, es más exigente y se contrasta aparte. La
+convergencia se mide sobre la serie de validación de la base
+publicada, en el último tercio de las validaciones. La meseta es la
+pendiente de la regresión lineal multiplicada por un tercio de los
+episodios y dividida entre la media del tercio, en porcentaje: cuánto
+cambiaría el valor si la tendencia siguiera un tercio más de
+entrenamiento. La estabilidad es la distancia porcentual entre la
+media de las tres últimas validaciones y el mínimo de la media móvil
+de tres. La política converge si la meseta está entre $-5$ y
+$+5$\,\% y la estabilidad no pasa del 5\,\%. Se reporta también
+cuántas de las tres bases convergen.
+
+El veredicto sale solo del retraso. La recompensa de cada modelo es
+un diagnóstico: dice si el aprendiz optimizó lo que se le pidió, no si
+controla mejor el tráfico, y dos recompensas razonables pueden ordenar
+a los controles al revés. En corredor\_alta, con las diez semillas de
+evaluación de la fase anterior, el actuado baja el retraso un 20.1\,\%
+frente al fijo (intervalo de $-22.0$ a $-18.0$\,\%) y a la vez empeora
+un 28.1\,\% la recompensa de colas de U2 por decisión ($-30.60$ frente
+a $-23.89$); por la recompensa de colas se diría que el actuado es
+peor, y por la métrica que la tesis se propone reducir, que es mucho
+mejor.
+% fuente: evaluacion_corredor_alta_resumen.csv (actuado: timeloss_prom y recompensa_decision)
+
+Cada modelo tiene una tabla de veredicto con una fila por caso y estas
+columnas: \emph{Caso} y \emph{Escenario}; \emph{Sem.}, el número de
+semáforos (con la rotonda cuando la hay); \emph{Carriles}, por sentido
+en la avenida; \emph{Demanda}, en veh/h durante la hora simulada;
+\emph{Retraso}, la media por vehículo de la política publicada con su
+intervalo al 95\,\% sobre las semillas 1001 a 1030; \emph{$\Delta$
+retraso vs fijo} y \emph{$\Delta$ retraso vs actuado}, el cambio
+porcentual con su intervalo \textit{bootstrap} y el $p$ de Wilcoxon;
+\emph{$\Delta$ recompensa}, el cambio de la recompensa propia del
+modelo (retraso, colas o \textit{spillback}, según la
+Tabla~\ref{tab:plan2-modelos}) frente a esa misma recompensa medida en
+el fijo, positivo si mejora; \emph{Convergió}, si la política publicada
+cumple el criterio de convergencia y, entre paréntesis, cuántas de las
+tres bases lo cumplen; y \emph{Veredicto}, la categoría de la regla. El
+actuado aparece como fila de referencia, juzgado frente al fijo. Una
+matriz de caso por modelo resume todos los veredictos, y una tabla por
+modelo lista las tres bases de cada caso para medir la fragilidad.
+
+El script \texttt{veredicto.py} genera, a partir de las evaluaciones
+consolidadas, las tablas de veredicto, la matriz y las tablas de
+fragilidad, que se reportan en el Capítulo~\ref{cap:resultados}.
+% Las tablas estan en secciones/tablas/veredicto_*.tex y se incluyen desde capitulo5.tex.
