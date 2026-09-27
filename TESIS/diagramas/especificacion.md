@@ -1,4 +1,4 @@
-> Especificación con la que se dibujaron los diagramas (27.09.2026). Cada nodo y flecha lleva su evidencia `archivo:línea`; las rutas `scratchpad/...` eran archivos de trabajo de esa sesión y no están en el repositorio. Para regenerar las figuras: `cd TESIS/diagramas && python construir.py`.
+> Especificación con la que se dibujaron los diagramas (27.09.2026). Cada nodo y flecha lleva su evidencia `archivo:línea`; las rutas `scratchpad/...` eran archivos de trabajo que no se versionaron. Para regenerar las figuras: `cd TESIS/diagramas && python construir.py`.
 
 # Especificación unificada de los diagramas de la tesis: arquitectura, U1, U2, U3 y U4
 
