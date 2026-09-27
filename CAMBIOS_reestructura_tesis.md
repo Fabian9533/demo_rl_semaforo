@@ -1,10 +1,10 @@
 # Changelog de la reestructura de la tesis (27.09.2026)
 
-Documento para revisar con calma lo que se eliminó, movió o reescribió en `TESIS/` y por qué. Cada afirmación se puede comprobar con `git diff 7bd8685 HEAD -- TESIS`, con `git show <commit>` o con los reportes de trabajo (auditoría, edición, verificación y corrección). Las líneas que se citan en las secciones 1 a 10 son las de `TESIS/` en el commit `2ab0d04`, salvo la lista de TODO de la sección 8, que está al día con la segunda parte (sección 11: diagramas).
+Documento para revisar con calma lo que se eliminó, movió o reescribió en `TESIS/` y por qué. Cada afirmación se puede comprobar con `git diff 7bd8685 HEAD -- TESIS`, con `git show <commit>` o con los reportes de trabajo (auditoría, edición, verificación y corrección). Las líneas que se citan en las secciones 1 a 10 son las de `TESIS/` en el commit `78956d8`, salvo la lista de TODO de la sección 8, que está al día con la segunda parte (sección 11: diagramas).
 
 ## 1. Resumen
 
-Se auditó la tesis completa y se reestructuró en el orden marco teórico, metodología, implementación y resultados. Después, una verificación adversarial contrastó cada capítulo con el original, el código y los CSV, y las correcciones se aplicaron en commits aparte. El trabajo está en la rama `reestructura-tesis`: 18 commits, de `cc2a353` al que agrega este changelog, sobre `7bd8685` (la punta de `main`, que no se tocó). El PDF pasa de 290 a 247 páginas (253 tras agregar los cinco diagramas de la sección 11). `python TESIS/compilar.py` compila sin errores ni referencias o citas sin resolver (el overfull mayor es de 5.6 pt), y `python TESIS/validar_tex.py` da 0 errores y 33 avisos, todos comentarios `TODO(reestructura)`: huecos que piden una fuente, un dato o un diagrama y que no se rellenaron con contenido propio.
+Se auditó la tesis completa y se reestructuró en el orden marco teórico, metodología, implementación y resultados. Después, una verificación adversarial contrastó cada capítulo con el original, el código y los CSV, y las correcciones se aplicaron en commits aparte. El trabajo está en la rama `reestructura-tesis`: 18 commits, de `1398a55` al que agrega este changelog, sobre `7bd8685` (la punta de `main`, que no se tocó). El PDF pasa de 290 a 247 páginas (253 tras agregar los cinco diagramas de la sección 11). `python TESIS/compilar.py` compila sin errores ni referencias o citas sin resolver (el overfull mayor es de 5.6 pt), y `python TESIS/validar_tex.py` da 0 errores y 33 avisos, todos comentarios `TODO(reestructura)`: huecos que piden una fuente, un dato o un diagrama y que no se rellenaron con contenido propio.
 
 Los cambios más importantes:
 - El antiguo Capítulo III (`capitulo4.tex`, 1967 líneas) se partió en un Capítulo III de metodología (`capitulo3.tex`, nuevo) y un Capítulo IV de implementación (`capitulo4.tex`). El manual de OpenStreetMap pasó al Anexo D.
@@ -85,7 +85,7 @@ En la columna "Antes" los capítulos llevan la numeración antigua: "Cap. III" e
 
 Cómo leer esta sección:
 - Cada entrada describe el cambio neto frente a `7bd8685`, salvo que se indique otra cosa.
-- "En la verificación" o "Corregido en la verificación" marca lo que cambió en los commits de verificación (`746a0c3` a `cb0234a`) sobre el texto de la edición. Muchas de esas correcciones deshacen algo que la edición había introducido.
+- "En la verificación" o "Corregido en la verificación" marca lo que cambió en los commits de verificación (`16773ff` a `7ee2954`) sobre el texto de la edición. Muchas de esas correcciones deshacen algo que la edición había introducido.
 - "[sin cambio neto]" marca algo que la edición introdujo y la verificación retiró, o que la edición quitó y la verificación repuso: frente a `7bd8685` no hay cambio. Se deja para que se entienda el historial de commits.
 - "De la propuesta del plan" marca texto que proponía el plan maestro y que nunca llegó a la tesis.
 - Cada capítulo abre con dos o tres líneas sobre lo que más importa revisar.
@@ -115,7 +115,7 @@ Corregido en la verificación
 
 ### Introducción (`introduccion.tex`)
 
-Lo principal: sale "Estado de avance"; la arquitectura modular pasa antes de los objetivos; se agregan la pregunta de investigación y "Organización del documento". Los objetivos no cambian y en las metas solo cambia el ítem de throughput. La frase "sin GPU" de las herramientas se corrigió al final (`2ab0d04`).
+Lo principal: sale "Estado de avance"; la arquitectura modular pasa antes de los objetivos; se agregan la pregunta de investigación y "Organización del documento". Los objetivos no cambian y en las metas solo cambia el ítem de throughput. La frase "sin GPU" de las herramientas se corrigió al final (`78956d8`).
 
 Eliminado
 - "Estado de avance" (Completado, En curso, Pendiente). Por qué: estaba al 06.09 y duplicaba el alcance. Sus pendientes vigentes pasaron a "No incluido en esta etapa".
@@ -141,7 +141,7 @@ Agregado
 - Un segundo párrafo de presentación con las dos etapas: fase exploratoria (Anexo C) y plan de siete casos, de los que se ejecutan cinco.
 - Al final del primer párrafo de presentación: "Los conceptos de control semafórico y de aprendizaje por refuerzo que se mencionan en esta introducción se definen en el Capítulo II".
 - En la formulación, la pregunta de investigación del plan, la definición de fijo tuneado y actuado y una frase puente hacia los casos sintéticos. Fuente: la sección del plan del Cap. III y el texto original de `sec:escenarios`.
-- En herramientas: "Los entrenamientos corren con un hilo cada uno y sin usar la GPU, en el equipo de la Tabla `tab:hw`" (la edición había escrito "sin GPU", que chocaba con el Cap. IV; corregido en `2ab0d04`).
+- En herramientas: "Los entrenamientos corren con un hilo cada uno y sin usar la GPU, en el equipo de la Tabla `tab:hw`" (la edición había escrito "sin GPU", que chocaba con el Cap. IV; corregido en `78956d8`).
 - "Organización del documento", con los Capítulos I a V y los Anexos A a D.
 - Citas: `SUMO_TLS_Actuated` (actuado por detectores) y `Chavez2023`, `Chakrabarti2022` en la justificación. Las citas FHWA/HCM que la edición había puesto en la situación problemática se quitaron en la verificación, porque esas fuentes no respaldan esa afirmación; en su lugar quedó un TODO.
 - Tres TODO (líneas 6, 14 y 31).
@@ -232,14 +232,14 @@ Corregido en la verificación (cada punto, con lo que se contrastó)
 - Los modelos con mensajes se nombran con sus nombres canónicos (IPPO vecinos, IPPO spill, DQN y MAPPO). Por qué: "IPPO con mensajes" no es un nombre del documento.
 - La lectura de γ como horizonte: "el Cap. IV usa esa lectura para interpretar el descuento de las redes". Por qué: el Cap. IV solo la aplica al 0.95 de las redes, no al 0.9 tabular.
 - La apertura ya no asigna DQN a U4. Por qué: `tab:pipeline` lo pone en U2.
-- [sin cambio neto] Las épocas de PPO ya no llevan símbolo. La edición había escrito "durante $K$ épocas"; la verificación (`746a0c3`) lo cambió por "varias épocas". Por qué: K quedó reservada para las plazas K_ℓ.
+- [sin cambio neto] Las épocas de PPO ya no llevan símbolo. La edición había escrito "durante $K$ épocas"; la verificación (`16773ff`) lo cambió por "varias épocas". Por qué: K quedó reservada para las plazas K_ℓ.
 
 ### Capítulo III, Marco metodológico (`capitulo3.tex`, nuevo, 863 líneas)
 
 Lo principal: capítulo nuevo con el diseño del método, armado con texto del antiguo `capitulo4.tex` y reordenado según el plan maestro. Cambia la notación de la recompensa (sección 6) y se agregan `tab:pipeline`, la formulación en tres subsecciones y las definiciones del protocolo (validación, checkpoint, base publicada, celda).
 
 Movido
-- El commit `cc2a353` trasladó por script, sin reescribir párrafos, desde el `capitulo4.tex` original: la apertura, Alcance y unidades, Resumen de las unidades, Escenarios sintéticos, U2, Algoritmos recomendados, U3, U4, Plan de pruebas (introducción, fase exploratoria previa, objetivo y casos), Modelos, Protocolo común, Métricas de salida y Regla de veredicto.
+- El commit `1398a55` trasladó por script, sin reescribir párrafos, desde el `capitulo4.tex` original: la apertura, Alcance y unidades, Resumen de las unidades, Escenarios sintéticos, U2, Algoritmos recomendados, U3, U4, Plan de pruebas (introducción, fase exploratoria previa, objetivo y casos), Modelos, Protocolo común, Métricas de salida y Regla de veredicto.
 - Dentro del capítulo:
   - U3 (medición del desempeño, `sec:u3`) pasa después de U4 y de "Modelos comparados"; en `7bd8685` iba entre U2 y U4. Por qué: es el orden del plan maestro, que presenta qué se compara antes de cómo se mide;
   - la frase del actuado pasa de escenarios a `sec:modelos`;
@@ -263,7 +263,7 @@ Eliminado
 - En la tabla de escenarios, las filas cruce, cruce2, P6 y P7 y las columnas "Programa fijo" y "Fases verdes". P6 y P7 quedan en una frase y la historia del fijo en el Anexo C.
 - Las cifras exploratorias (15 %, 60 %, 6 %, 2 s) como motivación de U4 y la pila de implementación (PyTorch, sin Gym) dentro de U4.
 - "Tres controles comparados" y "el escenario de estrés del módulo U4".
-- [sin cambio neto] La regla de empate de la base mediana ("en empate, la base menor"): la agregó la edición (`7c63dbe`) y la quitó la verificación (`746a0c3`). Por qué: venía de un docstring que no coincide con `veredicto.base_mediana`, que ordena por (valor, base).
+- [sin cambio neto] La regla de empate de la base mediana ("en empate, la base menor"): la agregó la edición (`2bd892a`) y la quitó la verificación (`16773ff`). Por qué: venía de un docstring que no coincide con `veredicto.base_mediana`, que ordena por (valor, base).
 
 Agregado
 - `cap:metodologia` y la apertura.
@@ -289,7 +289,7 @@ Reescrito o corregido
 - La introducción de U4 describe los cuatro cambios frente a los tabulares. La edición había escrito que a los tabulares "les falta información de los vecinos", una causa que el Cap. V contradice; la verificación lo corrigió.
 - En `tab:pipeline`, IPPO pasa a U2, alineado con la Introducción (verificación).
 - La introducción de U3 ya no repite el Cap. II (verificación).
-- [sin cambio neto] La metáfora "escalera" para las variantes la introdujo la edición (`7c63dbe`); la verificación (`746a0c3`) la cambió por "cada una añade un elemento a la anterior". Por qué: regla de lenguaje natural del plan.
+- [sin cambio neto] La metáfora "escalera" para las variantes la introdujo la edición (`2bd892a`); la verificación (`16773ff`) la cambió por "cada una añade un elemento a la anterior". Por qué: regla de lenguaje natural del plan.
 - La variante `cambio`: el original decía que resta w₄ = 2 por cada cambio de fase y que "se corre aparte". Ahora dice "Una cuarta variante, que resta un costo fijo por cada cambio de fase, quedó formulada pero no se entrenó", sin w₄, en línea con `recomendaciones.tex` ("quedó formulada y sin correr"). Por qué: nunca se corrió (auditoría `cap4_u2u3u4`). La frase "los pesos se fijaron de antemano, sin barrido" se conserva.
 - MAPPO "comparte la arquitectura del actor y la observación y entrena su propia política".
 
@@ -362,7 +362,7 @@ Corregido en la verificación (cada punto, con lo que se contrastó)
 Lo principal: queda solo el plan de pruebas, de lo global al detalle, con dos tablas nuevas (`tab:plan2-resumen`, `tab:plan2-metas`); la fase exploratoria pasa al Anexo C. Revisar la frase sobre las métricas de corredor, que no se analizan (TODO), y los valores p, que conservan el redondeo del original.
 
 Eliminado
-- Todo lo que seguía a "Fase exploratoria: resumen de los cuatro casos" pasó al Anexo C (commit `cc2a353`). La apertura ya no anuncia E1-E6.
+- Todo lo que seguía a "Fase exploratoria: resumen de los cuatro casos" pasó al Anexo C (commit `1398a55`). La apertura ya no anuncia E1-E6.
 - La sección "Resultados del plan de pruebas por casos": los dos párrafos que repetían casos y protocolo. Por qué: duplicaban `tab:plan2-casos` y `sec:protocolo`.
 - En la lectura por caso:
   - los resultados de los barridos (20/10/15, 25/15/25, 25/15 con 0/23/0), que viven en el Cap. IV (`tab:plan2-fijo`), y la lista de medias ± IC de nueve modelos, que viven en las tablas `veredicto_*` (Cap. V y Anexo A; `tab:plan2-resumen` solo da la media);
@@ -445,7 +445,7 @@ Reescrito o corregido
 - La 4 dice que spill reproduce a vecinos en P3-P5, sin dar el recuento de corridas, que estaba desactualizado.
 - La 5 usa la evidencia del plan: el 60 % exploratorio pasa a 10.6 y 9.2 % con el protocolo del plan, más el checkpoint y la fragilidad de P3.
 - La 6 pierde las cifras que repetía de la 1.
-- La 6, frase de DQN: el original decía "con los mensajes, IPPO y MAPPO quedan a la par y DQN detrás". La edición (`ad26402`) la cambió por "IPPO vecinos y MAPPO quedan a la par y DQN queda por detrás de IPPO vecinos". Esa corrección se perdió en la verificación: al dividir el párrafo, `024e23e` escribió "Entre los que reciben mensajes, IPPO vecinos y MAPPO quedan a la par y DQN por detrás" (`conclusiones.tex:221`), que contradice la conclusión 2 (en P4, MAPPO 29.45 s y DQN 29.04 s). Queda pendiente (sección 8).
+- La 6, frase de DQN: el original decía "con los mensajes, IPPO y MAPPO quedan a la par y DQN detrás". La edición (`53923a8`) la cambió por "IPPO vecinos y MAPPO quedan a la par y DQN queda por detrás de IPPO vecinos". Esa corrección se perdió en la verificación: al dividir el párrafo, `57098ad` escribió "Entre los que reciben mensajes, IPPO vecinos y MAPPO quedan a la par y DQN por detrás" (`conclusiones.tex:221`), que contradice la conclusión 2 (en P4, MAPPO 29.45 s y DQN 29.04 s). Queda pendiente (sección 8).
 - Los dos párrafos finales. El primero dice qué protocolo usaba la fase exploratoria (viene del párrafo de transición) y que, donde el plan repitió una medición, las conclusiones usan la del plan. En el segundo, la progresión y la robustez al canal quedan como dos observaciones de esa fase "sin confirmar en el plan", con TODO. El canal imperfecto "mantenía el retraso cerca del actuado" pasa a "perdió la progresión y, en el corredor, dejó de superar al actuado".
 - En la verificación (cada punto, con lo que se contrastó):
   - se repuso la salvedad de P5 (el IC bootstrap de +0.4 a +3.4 % no incluye el cero; p = 0.52). Por qué: estaba en el original y coincide con el CSV congelado y el Cap. V;
@@ -527,7 +527,7 @@ Anexo C, Fase exploratoria (nuevo)
   - los párrafos que marcan dónde el plan cambió la lectura: IPPO en P1, P2 y P3 y, en la verificación, el agente tabular en E3 (+60 % pasa a +10.6 y +9.2 % en P1) y en E6 (+37 % pasa a −8.8 %, MEJORA, en P2);
   - la fragilidad del checkpoint de P3;
   - un TODO en la línea 441.
-- Conservado (restituido en la verificación) [sin cambio neto]: la identidad bit a bit de los tensores de spill y vecinos en la red exploratoria (E4-U4). Estaba en el `capitulo5.tex` original; `cc2a353` la llevó al Anexo C, la edición (`3cf37fb`) la reemplazó por una remisión a `sec:spill-vecinos` y la verificación (`cb0234a`) la repuso, condensada.
+- Conservado (restituido en la verificación) [sin cambio neto]: la identidad bit a bit de los tensores de spill y vecinos en la red exploratoria (E4-U4). Estaba en el `capitulo5.tex` original; `1398a55` la llevó al Anexo C, la edición (`fdacb10`) la reemplazó por una remisión a `sec:spill-vecinos` y la verificación (`7ee2954`) la repuso, condensada.
 - Corregido:
   - E2 era "peor en todas las métricas", lo que es falso para el throughput;
   - E6 atribuía los no terminados a todos los controles; eran solo de Q-learning;
@@ -675,7 +675,7 @@ Otras correcciones importantes:
 - Recomendaciones: `cola_mi_salida` (qué coincide y quién la usa), la cota del throughput (+0.6 %) y P6/P7 declarados como estimaciones.
 - Anexos: la excepción de P2 en `ql_colas`, las dos filas de spill en P3, la fragilidad de P3 en el Anexo C y la versión de SUMO de la importación de Lima.
 
-Una corrección de la edición se perdió en la verificación: en la conclusión 6, `ad26402` había dejado a DQN "por detrás de IPPO vecinos", y `024e23e`, al dividir el párrafo, volvió a "IPPO vecinos y MAPPO quedan a la par y DQN por detrás" (`conclusiones.tex:221`). Ver la sección 8.
+Una corrección de la edición se perdió en la verificación: en la conclusión 6, `53923a8` había dejado a DQN "por detrás de IPPO vecinos", y `57098ad`, al dividir el párrafo, volvió a "IPPO vecinos y MAPPO quedan a la par y DQN por detrás" (`conclusiones.tex:221`). Ver la sección 8.
 
 Algunas correcciones de la verificación no dejan cambio neto frente a `7bd8685`, porque deshacen algo que la propia edición había introducido o quitado. En la sección 4 van marcadas "[sin cambio neto]": la regla de empate "la base menor" y la metáfora "escalera" (Cap. III), el símbolo K de las épocas de PPO (Cap. II) y la identidad bit a bit de spill (Anexo C).
 
@@ -724,7 +724,7 @@ Verificaciones de fuentes ya citadas (4):
 - `capitulo2.tex:67`: la sección del HCM 2010 que define fase, ciclo, reparto, desfase, verdes, control prefijado y actuado y progresión. El capítulo 3 de la FHWA citado no los define.
 - `capitulo2.tex:202`: que SuttonBarto2018 (sec. 17.2) trate los procesos semi-markovianos; si no, citar Sutton, Precup y Singh (1999).
 
-Diagramas por dibujar: resueltos en la segunda parte (sección 11); sus tres TODO (`capitulo2.tex:14`, `capitulo3.tex:71` y `capitulo4.tex:575` de `2ab0d04`) se borraron.
+Diagramas por dibujar: resueltos en la segunda parte (sección 11); sus tres TODO (`capitulo2.tex:14`, `capitulo3.tex:71` y `capitulo4.tex:575` de `78956d8`) se borraron.
 
 Análisis pendiente de las métricas de corredor del plan (2):
 - `capitulo5.tex:539` y `conclusiones.tex:246`: analizar `paradas_corredor_le1` y `retraso_corredor_punta` de `plan2/evaluacion_<esc>_resumen.csv`. La lectura preliminar del TODO: en P3 la política publicada de IPPO vecinos tiene menos progresión que el fijo (0.93 frente a 0.99).
@@ -745,8 +745,8 @@ Justificaciones que solo puede dar el autor (2):
 
 ### Decisiones que quedan al autor
 
-Resueltas al final, en `2ab0d04` (las detectó el crítico del changelog):
-- `conclusiones.tex` (conclusión 6): "IPPO vecinos y MAPPO quedan a la par y DQN por detrás" contradecía P4 (DQN 29.04 s, MAPPO 29.45 s); la edición lo había corregido y `024e23e` lo reintrodujo. Ahora: IPPO vecinos tiene menos retraso que DQN en los cinco casos y MAPPO en cuatro.
+Resueltas al final, en `78956d8` (las detectó el crítico del changelog):
+- `conclusiones.tex` (conclusión 6): "IPPO vecinos y MAPPO quedan a la par y DQN por detrás" contradecía P4 (DQN 29.04 s, MAPPO 29.45 s); la edición lo había corregido y `57098ad` lo reintrodujo. Ahora: IPPO vecinos tiene menos retraso que DQN en los cinco casos y MAPPO en cuatro.
 - `introduccion.tex:86`: "sin GPU" pasa a "sin usar la GPU".
 - `anexos.tex:24` y `anexos.tex:54`: "base publicada" donde decía "publicada" y "política publicada no convergió".
 - Nota de `cola_mi_salida` del Cap. IV: excluye a IPPO local, que tiene a cero las ranuras de los vecinos (coincide con las recomendaciones).
@@ -806,27 +806,27 @@ Opcional: las 19 tablas generadas que ya no se incluyen siguen en `TESIS/seccion
 
 | Commit | Contenido |
 |---|---|
-| `cc2a353` | Estructura. Traslado de bloques por script, sin reescribir párrafos: `capitulo4.tex` se reparte en `capitulo3.tex` (nuevo), `capitulo4.tex`, `capitulo2.tex` (ecuaciones Q-learning/SARSA y `\theequation`), `anexo_d_osm.tex` (nuevo) y `anexo_c_exploratoria.tex` (nuevo, con la fase exploratoria del antiguo Cap. IV, `capitulo5.tex`, la historia del fijo en dos rondas y las tablas por episodio del Anexo A). Sí cambia encabezados: `\chapter{IMPLEMENTACIÓN}` en `capitulo4.tex`, `\section*{Anexo C...}` y `\section*{Anexo D...}`, y "Plan de pruebas v2: tablas completas" pasa a `\section*{Anexo A. Tablas completas del plan de pruebas}`. Quita el `\graphicspath` duplicado de `capitulo4.tex` (queda el de `main.tex`). Cambian además `anexos.tex` y `main.tex` |
-| `8378f19` | Marco teórico: Cap. II reescrito con ecuaciones |
-| `7c63dbe` | Metodología: Cap. III reescrito |
-| `1eefa58` | Implementación: Cap. IV reescrito |
-| `432c397` | Resultados: Cap. V solo con el plan; `fig_plan2_convergencia.png` (TESIS y plan2) y `plan2/grafico_convergencia.py` |
-| `d650f3f` | Introducción, resumen y abstract (zonas protegidas) |
-| `8836a27` | Estado del arte: Cap. I |
-| `ad26402` | Conclusiones y recomendaciones |
-| `3cf37fb` | Anexos A, B, C y D |
-| `746a0c3` | Verificación: Cap. II y Cap. III (notación de la recompensa y precisiones) |
-| `5576363` | Verificación: Cap. IV |
-| `094740a` | Verificación: Cap. V |
-| `e242aac` | Verificación: introducción, resumen, abstract y Cap. I |
-| `024e23e` | Verificación: conclusiones y recomendaciones |
-| `cb0234a` | Verificación: anexos |
-| `5bde6b3` | Documentación: `CLAUDE.md` y el skill `escribir-tesis` (no toca `TESIS/`) |
-| `2ab0d04` | Cierre: correcciones precisas detectadas al contrastar este changelog con el diff (conclusión 6, "sin GPU", "base publicada" en el Anexo A, nota de `cola_mi_salida`, `plan2/tablas_cap5.py`, skill) |
-| `b82354c` | Este changelog (primera parte) |
-| `014f86a` | Diagramas: fuentes TikZ, estilo común, `construir.py`, especificación y los cinco `diag_*.pdf` |
-| `63109a4` | Integración de los diagramas en el Cap. III, citas desde el Cap. IV y la introducción, `tab:pipeline` renombrada y correcciones D4 y D11 |
-| `7e61432` | `CLAUDE.md`: el cruce de Lima no se limpió en netedit |
+| `1398a55` | Estructura. Traslado de bloques por script, sin reescribir párrafos: `capitulo4.tex` se reparte en `capitulo3.tex` (nuevo), `capitulo4.tex`, `capitulo2.tex` (ecuaciones Q-learning/SARSA y `\theequation`), `anexo_d_osm.tex` (nuevo) y `anexo_c_exploratoria.tex` (nuevo, con la fase exploratoria del antiguo Cap. IV, `capitulo5.tex`, la historia del fijo en dos rondas y las tablas por episodio del Anexo A). Sí cambia encabezados: `\chapter{IMPLEMENTACIÓN}` en `capitulo4.tex`, `\section*{Anexo C...}` y `\section*{Anexo D...}`, y "Plan de pruebas v2: tablas completas" pasa a `\section*{Anexo A. Tablas completas del plan de pruebas}`. Quita el `\graphicspath` duplicado de `capitulo4.tex` (queda el de `main.tex`). Cambian además `anexos.tex` y `main.tex` |
+| `e491665` | Marco teórico: Cap. II reescrito con ecuaciones |
+| `2bd892a` | Metodología: Cap. III reescrito |
+| `b2fd59d` | Implementación: Cap. IV reescrito |
+| `954a977` | Resultados: Cap. V solo con el plan; `fig_plan2_convergencia.png` (TESIS y plan2) y `plan2/grafico_convergencia.py` |
+| `3310d80` | Introducción, resumen y abstract (zonas protegidas) |
+| `310c359` | Estado del arte: Cap. I |
+| `53923a8` | Conclusiones y recomendaciones |
+| `fdacb10` | Anexos A, B, C y D |
+| `16773ff` | Verificación: Cap. II y Cap. III (notación de la recompensa y precisiones) |
+| `354c507` | Verificación: Cap. IV |
+| `e8b6212` | Verificación: Cap. V |
+| `fe41cb6` | Verificación: introducción, resumen, abstract y Cap. I |
+| `57098ad` | Verificación: conclusiones y recomendaciones |
+| `7ee2954` | Verificación: anexos |
+| `a421178` | Documentación: `CLAUDE.md` y el skill `escribir-tesis` (no toca `TESIS/`) |
+| `78956d8` | Cierre: correcciones precisas detectadas al contrastar este changelog con el diff (conclusión 6, "sin GPU", "base publicada" en el Anexo A, nota de `cola_mi_salida`, `plan2/tablas_cap5.py`, skill) |
+| `750a228` | Este changelog (primera parte) |
+| `b4e9db3` | Diagramas: fuentes TikZ, estilo común, `construir.py`, especificación y los cinco `diag_*.pdf` |
+| `5c0e4c5` | Integración de los diagramas en el Cap. III, citas desde el Cap. IV y la introducción, `tab:pipeline` renombrada y correcciones D4 y D11 |
+| `174b73f` | `CLAUDE.md`: el cruce de Lima no se limpió en netedit |
 | (último) | Este changelog con la sección 11 |
 
 Aviso: los commits por capítulo no son independientes.
@@ -838,7 +838,7 @@ El estado previo completo es `7bd8685`, que sigue siendo la punta de `main`. Par
 
 ## 11. Segunda parte: diagramas de arquitectura y de U1 a U4
 
-Pedido del autor, tras la primera parte: devolver los diagramas que se habían quitado (arquitectura, U1 y U2), pero rehechos por completo y coherentes con la implementación actual, y agregar los de U3 y U4, que nunca existieron. Commits `014f86a` (diagramas), `63109a4` (integración en la tesis) y `7e61432` (`CLAUDE.md`).
+Pedido del autor, tras la primera parte: devolver los diagramas que se habían quitado (arquitectura, U1 y U2), pero rehechos por completo y coherentes con la implementación actual, y agregar los de U3 y U4, que nunca existieron. Commits `b4e9db3` (diagramas), `5c0e4c5` (integración en la tesis) y `174b73f` (`CLAUDE.md`).
 
 ### Cómo se hicieron
 
