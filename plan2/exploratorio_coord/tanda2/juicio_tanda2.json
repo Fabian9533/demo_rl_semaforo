@@ -1,0 +1,763 @@
+{
+ "p4_determinismo_5001": {
+  "V5_s42": {
+   "tanda2": "26.46",
+   "antes": "26.46",
+   "igual": true
+  },
+  "C0_s4042": {
+   "tanda2": "27.44",
+   "antes": "27.44",
+   "igual": true
+  },
+  "ippo_vecinos_s42": {
+   "tanda2": "27.72",
+   "antes": "27.72",
+   "igual": true
+  },
+  "fijo2509": {
+   "tanda2": "27.73",
+   "antes": "27.73",
+   "igual": true
+  },
+  "actuado": {
+   "tanda2": "26.76",
+   "antes": "26.76",
+   "igual": true
+  },
+  "trivial": {
+   "tanda2": "27.14",
+   "antes": "27.14",
+   "igual": true
+  }
+ },
+ "p4_confirmacion": {
+  "6001-6030": {
+   "medias": {
+    "V5_s42": 27.829,
+    "C0_s4042": 28.61,
+    "ippo_vecinos_s42": 28.739,
+    "fijo2509": 29.658,
+    "actuado": 29.759,
+    "trivial": 27.816
+   },
+   "brazos": {
+    "V5_s42": {
+     "vs_fijo2509": {
+      "delta_pct": -6.2,
+      "delta_ic95": "[-7.8, -4.5]",
+      "p_wilcoxon": "2.05e-07",
+      "p_mannwhitney": "0.00474",
+      "cliff": -0.43
+     },
+     "vs_actuado": {
+      "delta_pct_act": -6.5,
+      "delta_ic95_act": "[-8.0, -5.1]",
+      "p_wilcoxon_act": "3.73e-09",
+      "p_mannwhitney_act": "0.00318",
+      "cliff_act": -0.44
+     },
+     "etiqueta_regla": "FUNCIONA",
+     "vs_trivial": {
+      "delta_pct": 0.0,
+      "delta_ic95": "[-0.3, 0.4]",
+      "p_wilcoxon": "0.395",
+      "p_mannwhitney": "0.959",
+      "cliff": -0.01
+     },
+     "cambios_fase": 855.0,
+     "sd": 2.349
+    },
+    "C0_s4042": {
+     "vs_fijo2509": {
+      "delta_pct": -3.5,
+      "delta_ic95": "[-5.3, -1.8]",
+      "p_wilcoxon": "0.00111",
+      "p_mannwhitney": "0.0919",
+      "cliff": -0.25
+     },
+     "vs_actuado": {
+      "delta_pct_act": -3.9,
+      "delta_ic95_act": "[-5.3, -2.3]",
+      "p_wilcoxon_act": "7.91e-05",
+      "p_mannwhitney_act": "0.0604",
+      "cliff_act": -0.28
+     },
+     "etiqueta_regla": "MEJORA",
+     "vs_trivial": {
+      "delta_pct": 2.9,
+      "delta_ic95": "[1.0, 4.9]",
+      "p_wilcoxon": "0.025",
+      "p_mannwhitney": "0.228",
+      "cliff": 0.18
+     },
+     "V5_vs_este": {
+      "delta_pct": -2.7,
+      "delta_ic95": "[-4.6, -1.0]",
+      "p_wilcoxon": "0.0212",
+      "p_mannwhitney": "0.24",
+      "cliff": -0.18
+     },
+     "cambios_fase": 569.7,
+     "sd": 2.407
+    },
+    "ippo_vecinos_s42": {
+     "vs_fijo2509": {
+      "delta_pct": -3.1,
+      "delta_ic95": "[-4.8, -1.5]",
+      "p_wilcoxon": "0.00203",
+      "p_mannwhitney": "0.119",
+      "cliff": -0.24
+     },
+     "vs_actuado": {
+      "delta_pct_act": -3.4,
+      "delta_ic95_act": "[-4.8, -1.9]",
+      "p_wilcoxon_act": "0.000358",
+      "p_mannwhitney_act": "0.085",
+      "cliff_act": -0.26
+     },
+     "etiqueta_regla": "MEJORA",
+     "vs_trivial": {
+      "delta_pct": 3.3,
+      "delta_ic95": "[1.5, 5.1]",
+      "p_wilcoxon": "0.00225",
+      "p_mannwhitney": "0.126",
+      "cliff": 0.23
+     },
+     "V5_vs_este": {
+      "delta_pct": -3.2,
+      "delta_ic95": "[-4.9, -1.5]",
+      "p_wilcoxon": "0.00158",
+      "p_mannwhitney": "0.137",
+      "cliff": -0.22
+     },
+     "cambios_fase": 559.6,
+     "sd": 2.277
+    },
+    "trivial": {
+     "vs_fijo2509": {
+      "delta_pct": -6.2,
+      "delta_ic95": "[-7.9, -4.5]",
+      "p_wilcoxon": "2.05e-07",
+      "p_mannwhitney": "0.00422",
+      "cliff": -0.43
+     },
+     "vs_actuado": {
+      "delta_pct_act": -6.5,
+      "delta_ic95_act": "[-8.1, -5.1]",
+      "p_wilcoxon_act": "1.92e-06",
+      "p_mannwhitney_act": "0.00256",
+      "cliff_act": -0.45
+     },
+     "etiqueta_regla": "FUNCIONA",
+     "V5_vs_este": {
+      "delta_pct": 0.0,
+      "delta_ic95": "[-0.3, 0.4]",
+      "p_wilcoxon": "0.395",
+      "p_mannwhitney": "0.959",
+      "cliff": -0.01
+     },
+     "cambios_fase": 869.0,
+     "sd": 2.326
+    },
+    "actuado": {
+     "vs_fijo2509": {
+      "delta_pct": 0.3,
+      "delta_ic95": "[-1.2, 1.8]",
+      "p_wilcoxon": "0.558",
+      "p_mannwhitney": "0.947",
+      "cliff": 0.01
+     },
+     "vs_actuado": {
+      "delta_pct_act": 0.0,
+      "delta_ic95_act": "[0.0, 0.0]",
+      "p_wilcoxon_act": "1",
+      "p_mannwhitney_act": "1",
+      "cliff_act": 0.0
+     },
+     "etiqueta_regla": "EMPATA",
+     "vs_trivial": {
+      "delta_pct": 7.0,
+      "delta_ic95": "[5.4, 8.8]",
+      "p_wilcoxon": "1.92e-06",
+      "p_mannwhitney": "0.00256",
+      "cliff": 0.45
+     },
+     "V5_vs_este": {
+      "delta_pct": -6.5,
+      "delta_ic95": "[-8.0, -5.1]",
+      "p_wilcoxon": "3.73e-09",
+      "p_mannwhitney": "0.00318",
+      "cliff": -0.44
+     },
+     "cambios_fase": 742.1,
+     "sd": 2.203
+    }
+   },
+   "a": true,
+   "b": false,
+   "igual_trivial": 0
+  },
+  "6011-6030": {
+   "medias": {
+    "V5_s42": 27.495,
+    "C0_s4042": 28.164,
+    "ippo_vecinos_s42": 28.195,
+    "fijo2509": 29.61,
+    "actuado": 29.404,
+    "trivial": 27.405
+   },
+   "brazos": {
+    "V5_s42": {
+     "vs_fijo2509": {
+      "delta_pct": -7.1,
+      "delta_ic95": "[-8.9, -5.3]",
+      "p_wilcoxon": "5.72e-06",
+      "p_mannwhitney": "0.00319",
+      "cliff": -0.55
+     },
+     "vs_actuado": {
+      "delta_pct_act": -6.5,
+      "delta_ic95_act": "[-8.2, -4.9]",
+      "p_wilcoxon_act": "3.81e-06",
+      "p_mannwhitney_act": "0.00364",
+      "cliff_act": -0.54
+     },
+     "etiqueta_regla": "FUNCIONA",
+     "vs_trivial": {
+      "delta_pct": 0.3,
+      "delta_ic95": "[0.0, 0.7]",
+      "p_wilcoxon": "1",
+      "p_mannwhitney": "1",
+      "cliff": 0.0
+     },
+     "cambios_fase": 855.4,
+     "sd": 1.915
+    },
+    "C0_s4042": {
+     "vs_fijo2509": {
+      "delta_pct": -4.9,
+      "delta_ic95": "[-6.9, -2.7]",
+      "p_wilcoxon": "0.000483",
+      "p_mannwhitney": "0.0439",
+      "cliff": -0.38
+     },
+     "vs_actuado": {
+      "delta_pct_act": -4.2,
+      "delta_ic95_act": "[-6.3, -2.0]",
+      "p_wilcoxon_act": "0.00233",
+      "p_mannwhitney_act": "0.0601",
+      "cliff_act": -0.35
+     },
+     "etiqueta_regla": "MEJORA",
+     "vs_trivial": {
+      "delta_pct": 2.8,
+      "delta_ic95": "[0.5, 5.2]",
+      "p_wilcoxon": "0.108",
+      "p_mannwhitney": "0.425",
+      "cliff": 0.15
+     },
+     "V5_vs_este": {
+      "delta_pct": -2.4,
+      "delta_ic95": "[-4.6, -0.3]",
+      "p_wilcoxon": "0.117",
+      "p_mannwhitney": "0.49",
+      "cliff": -0.13
+     },
+     "cambios_fase": 570.3,
+     "sd": 2.272
+    },
+    "ippo_vecinos_s42": {
+     "vs_fijo2509": {
+      "delta_pct": -4.8,
+      "delta_ic95": "[-6.7, -2.9]",
+      "p_wilcoxon": "0.00021",
+      "p_mannwhitney": "0.036",
+      "cliff": -0.39
+     },
+     "vs_actuado": {
+      "delta_pct_act": -4.1,
+      "delta_ic95_act": "[-5.8, -2.3]",
+      "p_wilcoxon_act": "0.0015",
+      "p_mannwhitney_act": "0.0499",
+      "cliff_act": -0.36
+     },
+     "etiqueta_regla": "MEJORA",
+     "vs_trivial": {
+      "delta_pct": 2.9,
+      "delta_ic95": "[0.8, 5.0]",
+      "p_wilcoxon": "0.0266",
+      "p_mannwhitney": "0.218",
+      "cliff": 0.23
+     },
+     "V5_vs_este": {
+      "delta_pct": -2.5,
+      "delta_ic95": "[-4.4, -0.5]",
+      "p_wilcoxon": "0.0441",
+      "p_mannwhitney": "0.285",
+      "cliff": -0.2
+     },
+     "cambios_fase": 560.4,
+     "sd": 2.056
+    },
+    "trivial": {
+     "vs_fijo2509": {
+      "delta_pct": -7.4,
+      "delta_ic95": "[-9.1, -5.7]",
+      "p_wilcoxon": "1.91e-06",
+      "p_mannwhitney": "0.00256",
+      "cliff": -0.56
+     },
+     "vs_actuado": {
+      "delta_pct_act": -6.8,
+      "delta_ic95_act": "[-8.6, -5.2]",
+      "p_wilcoxon_act": "1.91e-06",
+      "p_mannwhitney_act": "0.00245",
+      "cliff_act": -0.56
+     },
+     "etiqueta_regla": "FUNCIONA",
+     "V5_vs_este": {
+      "delta_pct": 0.3,
+      "delta_ic95": "[0.0, 0.7]",
+      "p_wilcoxon": "1",
+      "p_mannwhitney": "1",
+      "cliff": 0.0
+     },
+     "cambios_fase": 869.1,
+     "sd": 1.902
+    },
+    "actuado": {
+     "vs_fijo2509": {
+      "delta_pct": -0.7,
+      "delta_ic95": "[-2.5, 1.2]",
+      "p_wilcoxon": "0.55",
+      "p_mannwhitney": "0.776",
+      "cliff": -0.06
+     },
+     "vs_actuado": {
+      "delta_pct_act": 0.0,
+      "delta_ic95_act": "[0.0, 0.0]",
+      "p_wilcoxon_act": "1",
+      "p_mannwhitney_act": "1",
+      "cliff_act": 0.0
+     },
+     "etiqueta_regla": "EMPATA",
+     "vs_trivial": {
+      "delta_pct": 7.3,
+      "delta_ic95": "[5.5, 9.4]",
+      "p_wilcoxon": "1.91e-06",
+      "p_mannwhitney": "0.00245",
+      "cliff": 0.56
+     },
+     "V5_vs_este": {
+      "delta_pct": -6.5,
+      "delta_ic95": "[-8.2, -4.9]",
+      "p_wilcoxon": "3.81e-06",
+      "p_mannwhitney": "0.00364",
+      "cliff": -0.54
+     },
+     "cambios_fase": 744.1,
+     "sd": 1.677
+    }
+   },
+   "a": true,
+   "b": false,
+   "igual_trivial": 0
+  }
+ },
+ "exito": {
+  "a_5001_5030": true,
+  "b_5001_5030": false,
+  "c_6001_6030": false,
+  "c_a": true,
+  "c_b": false,
+  "EXITO": false,
+  "lectura_c": "reproduce el ciclo minimo (6001-6030)"
+ },
+ "p6": {
+  "referencias": {
+   "fijo2509": 36.843,
+   "actuado": 64.842,
+   "trivial": 184.394,
+   "ippo_vecinos_s42": 37.745
+  },
+  "brazos": {
+   "C0": {
+    "bases": {
+     "42": {
+      "ep_elegido": 60,
+      "val_elegido": 36.454,
+      "convergio": false,
+      "plateau": 9.71,
+      "estabilidad": 3.7,
+      "n_val": 10,
+      "ultimo_ep_val": 200,
+      "corte": null,
+      "media": 36.759,
+      "sd": 4.338,
+      "cambios_fase": 1544.8
+     },
+     "2042": {
+      "ep_elegido": 20,
+      "val_elegido": 41.562,
+      "convergio": false,
+      "plateau": 8.58,
+      "estabilidad": 2.96,
+      "n_val": 10,
+      "ultimo_ep_val": 200,
+      "corte": null,
+      "media": 43.891,
+      "sd": 3.625,
+      "cambios_fase": 1894.5
+     },
+     "4042": {
+      "ep_elegido": 180,
+      "val_elegido": 37.535,
+      "convergio": false,
+      "plateau": -7.2,
+      "estabilidad": 0.0,
+      "n_val": 10,
+      "ultimo_ep_val": 200,
+      "corte": null,
+      "media": 39.636,
+      "sd": 5.054,
+      "cambios_fase": 1585.1
+     }
+    },
+    "publicada": 4042,
+    "etiqueta_regla": "FALLA",
+    "veredicto": "PENDIENTE (no convergió; provisional: FALLA)",
+    "vs_fijo2509": {
+     "delta_pct": 7.6,
+     "delta_ic95": "[2.0, 13.3]",
+     "p_wilcoxon": "0.0185",
+     "p_mannwhitney": "0.174",
+     "cliff": 0.21
+    },
+    "vs_actuado": {
+     "delta_pct_act": -38.9,
+     "delta_ic95_act": "[-41.7, -35.9]",
+     "p_wilcoxon_act": "1.86e-09",
+     "p_mannwhitney_act": "3.02e-11",
+     "cliff_act": -1.0
+    },
+    "vs_ippo_publicado_s42": {
+     "delta_pct": 5.0,
+     "delta_ic95": "[-1.4, 11.8]",
+     "p_wilcoxon": "0.0636",
+     "p_mannwhitney": "0.0224",
+     "cliff": 0.34
+    },
+    "vs_trivial": {
+     "delta_pct": -78.5,
+     "delta_ic95": "[-82.2, -73.8]",
+     "p_wilcoxon": "1.86e-09",
+     "p_mannwhitney": "3.02e-11",
+     "cliff": -1.0
+    },
+    "dispersion_bases": {
+     "min": 36.759,
+     "max": 43.891
+    }
+   },
+   "V5": {
+    "bases": {
+     "42": {
+      "ep_elegido": 200,
+      "val_elegido": 33.911,
+      "convergio": true,
+      "plateau": -4.61,
+      "estabilidad": 0.0,
+      "n_val": 10,
+      "ultimo_ep_val": 200,
+      "corte": null,
+      "val_ep0": 167.542,
+      "media": 34.218,
+      "sd": 1.464,
+      "cambios_fase": 2374.1
+     },
+     "2042": {
+      "ep_elegido": 200,
+      "val_elegido": 33.686,
+      "convergio": false,
+      "plateau": -21.6,
+      "estabilidad": 0.0,
+      "n_val": 10,
+      "ultimo_ep_val": 200,
+      "corte": null,
+      "val_ep0": 167.542,
+      "media": 34.194,
+      "sd": 1.263,
+      "cambios_fase": 2413.9
+     },
+     "4042": {
+      "ep_elegido": 140,
+      "val_elegido": 34.58,
+      "convergio": true,
+      "plateau": 3.01,
+      "estabilidad": 1.5,
+      "n_val": 10,
+      "ultimo_ep_val": 200,
+      "corte": null,
+      "val_ep0": 167.542,
+      "media": 35.837,
+      "sd": 3.438,
+      "cambios_fase": 2396.6
+     }
+    },
+    "publicada": 42,
+    "etiqueta_regla": "FUNCIONA",
+    "veredicto": "FUNCIONA",
+    "vs_fijo2509": {
+     "delta_pct": -7.1,
+     "delta_ic95": "[-9.8, -4.8]",
+     "p_wilcoxon": "2.97e-05",
+     "p_mannwhitney": "7.11e-09",
+     "cliff": -0.87
+    },
+    "vs_actuado": {
+     "delta_pct_act": -47.2,
+     "delta_ic95_act": "[-48.2, -46.1]",
+     "p_wilcoxon_act": "1.86e-09",
+     "p_mannwhitney_act": "3.02e-11",
+     "cliff_act": -1.0
+    },
+    "vs_ippo_publicado_s42": {
+     "delta_pct": -9.3,
+     "delta_ic95": "[-13.8, -5.1]",
+     "p_wilcoxon": "0.000123",
+     "p_mannwhitney": "1.49e-06",
+     "cliff": -0.72
+    },
+    "vs_trivial": {
+     "delta_pct": -81.4,
+     "delta_ic95": "[-84.6, -77.5]",
+     "p_wilcoxon": "1.73e-06",
+     "p_mannwhitney": "3.02e-11",
+     "cliff": -1.0
+    },
+    "dispersion_bases": {
+     "min": 34.194,
+     "max": 35.837
+    },
+    "mejora_en_P6": true,
+    "vs_C0P6": {
+     "delta_pct": -13.7,
+     "delta_ic95": "[-17.8, -9.5]",
+     "p_wilcoxon": "3.15e-07",
+     "p_mannwhitney": "3.49e-09",
+     "cliff": -0.89
+    }
+   },
+   "V2": {
+    "bases": {
+     "42": {
+      "ep_elegido": 180,
+      "val_elegido": 35.205,
+      "convergio": true,
+      "plateau": -2.67,
+      "estabilidad": 0.0,
+      "n_val": 10,
+      "ultimo_ep_val": 200,
+      "corte": null,
+      "media": 34.295,
+      "sd": 1.32,
+      "cambios_fase": 2363.6
+     },
+     "2042": {
+      "ep_elegido": 200,
+      "val_elegido": 33.602,
+      "convergio": false,
+      "plateau": -6.67,
+      "estabilidad": 0.0,
+      "n_val": 10,
+      "ultimo_ep_val": 200,
+      "corte": null,
+      "media": 34.238,
+      "sd": 2.725,
+      "cambios_fase": 2396.2
+     },
+     "4042": {
+      "ep_elegido": 160,
+      "val_elegido": 33.734,
+      "convergio": true,
+      "plateau": 3.19,
+      "estabilidad": 0.0,
+      "n_val": 10,
+      "ultimo_ep_val": 200,
+      "corte": null,
+      "media": 34.141,
+      "sd": 1.101,
+      "cambios_fase": 2404.0
+     }
+    },
+    "publicada": 4042,
+    "etiqueta_regla": "FUNCIONA",
+    "veredicto": "FUNCIONA",
+    "vs_fijo2509": {
+     "delta_pct": -7.3,
+     "delta_ic95": "[-10.0, -5.3]",
+     "p_wilcoxon": "4.66e-08",
+     "p_mannwhitney": "7.76e-09",
+     "cliff": -0.87
+    },
+    "vs_actuado": {
+     "delta_pct_act": -47.3,
+     "delta_ic95_act": "[-48.6, -46.0]",
+     "p_wilcoxon_act": "1.86e-09",
+     "p_mannwhitney_act": "3.02e-11",
+     "cliff_act": -1.0
+    },
+    "vs_ippo_publicado_s42": {
+     "delta_pct": -9.5,
+     "delta_ic95": "[-13.8, -5.4]",
+     "p_wilcoxon": "2.37e-05",
+     "p_mannwhitney": "7.31e-07",
+     "cliff": -0.75
+    },
+    "vs_trivial": {
+     "delta_pct": -81.5,
+     "delta_ic95": "[-84.7, -77.5]",
+     "p_wilcoxon": "1.86e-09",
+     "p_mannwhitney": "3.02e-11",
+     "cliff": -1.0
+    },
+    "dispersion_bases": {
+     "min": 34.141,
+     "max": 34.295
+    },
+    "mejora_en_P6": true,
+    "vs_C0P6": {
+     "delta_pct": -13.9,
+     "delta_ic95": "[-17.7, -10.1]",
+     "p_wilcoxon": "2.13e-06",
+     "p_mannwhitney": "2.03e-09",
+     "cliff": -0.9
+    }
+   }
+  },
+  "C0P6_vs_ippo_publicado_s42": {
+   "delta_pct": 5.0,
+   "delta_ic95": "[-1.4, 11.8]",
+   "p_wilcoxon": "0.0636",
+   "p_mannwhitney": "0.0224",
+   "cliff": 0.34
+  },
+  "V5_vs_V2": {
+   "delta_pct": 0.2,
+   "delta_ic95": "[-1.4, 2.1]",
+   "p_wilcoxon": "0.902",
+   "p_mannwhitney": "1",
+   "cliff": -0.0
+  },
+  "replica_c0p6": "REPLICA FALLA",
+  "reval_determinismo_distintos": 0
+ },
+ "p1": {
+  "referencias": {
+   "fijo2509": 21.272,
+   "actuado": 21.021,
+   "trivial": 102.582,
+   "ippo_vecinos_s4042": 19.848
+  },
+  "bases": {
+   "42": {
+    "ep_elegido": 170,
+    "val_elegido": 19.599,
+    "convergio": true,
+    "plateau": -0.89,
+    "estabilidad": 0.12,
+    "val_ep0": 101.213,
+    "media": 19.882,
+    "sd": 0.365,
+    "cambios_fase": 392.7,
+    "igual_trivial": 0
+   },
+   "2042": {
+    "ep_elegido": 120,
+    "val_elegido": 19.502,
+    "convergio": true,
+    "plateau": -1.78,
+    "estabilidad": 0.61,
+    "val_ep0": 101.213,
+    "media": 19.628,
+    "sd": 0.366,
+    "cambios_fase": 382.9,
+    "igual_trivial": 0
+   },
+   "4042": {
+    "ep_elegido": 200,
+    "val_elegido": 19.554,
+    "convergio": true,
+    "plateau": -2.16,
+    "estabilidad": 0.0,
+    "val_ep0": 101.213,
+    "media": 19.727,
+    "sd": 0.411,
+    "cambios_fase": 390.2,
+    "igual_trivial": 0
+   }
+  },
+  "verificacion_trivial_999": {
+   "42": {
+    "val_ep0_999": 108.24,
+    "trivial_999": 108.24,
+    "igual": true
+   },
+   "2042": {
+    "val_ep0_999": 108.24,
+    "trivial_999": 108.24,
+    "igual": true
+   },
+   "4042": {
+    "val_ep0_999": 108.24,
+    "trivial_999": 108.24,
+    "igual": true
+   }
+  },
+  "publicada": 4042,
+  "etiqueta_regla": "FUNCIONA",
+  "veredicto": "FUNCIONA",
+  "vs_fijo2509": {
+   "delta_pct": -7.3,
+   "delta_ic95": "[-8.7, -6.0]",
+   "p_wilcoxon": "1.86e-09",
+   "p_mannwhitney": "2.61e-10",
+   "cliff": -0.95
+  },
+  "vs_actuado": {
+   "delta_pct_act": -6.2,
+   "delta_ic95_act": "[-6.7, -5.6]",
+   "p_wilcoxon_act": "1.73e-06",
+   "p_mannwhitney_act": "8.13e-11",
+   "cliff_act": -0.98
+  },
+  "vs_ippo_publicado_P1": {
+   "delta_pct": -0.6,
+   "delta_ic95": "[-1.5, 0.3]",
+   "p_wilcoxon": "0.289",
+   "p_mannwhitney": "0.438",
+   "cliff": -0.12
+  },
+  "vs_trivial": {
+   "delta_pct": -80.8,
+   "delta_ic95": "[-81.1, -80.4]",
+   "p_wilcoxon": "1.86e-09",
+   "p_mannwhitney": "3.02e-11",
+   "cliff": -1.0
+  },
+  "NO_REGRESION": true,
+  "dispersion_bases": {
+   "min": 19.628,
+   "max": 19.882
+  },
+  "ippo_publicado_P1_vs_fijo2509": {
+   "delta_pct": -6.7,
+   "delta_ic95": "[-8.0, -5.4]",
+   "p_wilcoxon": "1.73e-06",
+   "p_mannwhitney": "1.29e-09",
+   "cliff": -0.91
+  },
+  "ippo_publicado_P1_etiqueta": "FUNCIONA"
+ }
+}

@@ -1,0 +1,33 @@
+{
+ "brazo": "P1_V5",
+ "base_publicada": 4042,
+ "bases": {
+  "42": {
+   "convergio": true,
+   "plateau": -0.8864735695978159,
+   "estabilidad": 0.11665257819103815,
+   "ep_elegido": 170,
+   "val_elegido": 19.599,
+   "n_val": 20,
+   "corte": null
+  },
+  "2042": {
+   "convergio": true,
+   "plateau": -1.7772098407129016,
+   "estabilidad": 0.6141526559557631,
+   "ep_elegido": 120,
+   "val_elegido": 19.502,
+   "n_val": 20,
+   "corte": null
+  },
+  "4042": {
+   "convergio": true,
+   "plateau": -2.161218469688763,
+   "estabilidad": 0.0,
+   "ep_elegido": 200,
+   "val_elegido": 19.554,
+   "n_val": 20,
+   "corte": null
+  }
+ }
+}

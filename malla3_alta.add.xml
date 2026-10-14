@@ -1,0 +1,63 @@
+<additional>
+    <!-- Programa fijo INICIAL de malla3 (plan v2, 24.09.2026): el mejor del prototipo del 18.09,
+         avenida E-O 22 s, transversal N-S 15 s, ambar 3 s, ciclo 43 s, desfases en 'ajedrez'
+         (0 s si fila+columna es par, 21 s si es impar). Fase 0 = E-O: en cada cruce netconvert
+         ordena los links norte 0-3, este 4-7, sur 8-11, oeste 12-15. El prototipo tenia los estados
+         E-O y N-S cruzados (su "22/15" daba 22 s a la N-S); con las semillas 2001-2003 este programa
+         da 21.6 s de retraso y aquel 26.0 s (actuado 25.4 s). El barrido del plan v2 (barrer_fijo.py,
+         semillas 2001-2003) lo reemplaza en plan2/malla3.add.xml por el ganador. -->
+    <tlLogic id="semaforo_C11" type="static" programID="fijo" offset="0">
+        <phase duration="22" state="rrrrGGGgrrrrGGGg"/>
+        <phase duration="3"  state="rrrryyyyrrrryyyy"/>
+        <phase duration="15" state="GGGgrrrrGGGgrrrr"/>
+        <phase duration="3"  state="yyyyrrrryyyyrrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C12" type="static" programID="fijo" offset="21">
+        <phase duration="22" state="rrrrGGGgrrrrGGGg"/>
+        <phase duration="3"  state="rrrryyyyrrrryyyy"/>
+        <phase duration="15" state="GGGgrrrrGGGgrrrr"/>
+        <phase duration="3"  state="yyyyrrrryyyyrrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C13" type="static" programID="fijo" offset="0">
+        <phase duration="22" state="rrrrGGGgrrrrGGGg"/>
+        <phase duration="3"  state="rrrryyyyrrrryyyy"/>
+        <phase duration="15" state="GGGgrrrrGGGgrrrr"/>
+        <phase duration="3"  state="yyyyrrrryyyyrrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C21" type="static" programID="fijo" offset="21">
+        <phase duration="22" state="rrrrGGGgrrrrGGGg"/>
+        <phase duration="3"  state="rrrryyyyrrrryyyy"/>
+        <phase duration="15" state="GGGgrrrrGGGgrrrr"/>
+        <phase duration="3"  state="yyyyrrrryyyyrrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C22" type="static" programID="fijo" offset="0">
+        <phase duration="22" state="rrrrGGGgrrrrGGGg"/>
+        <phase duration="3"  state="rrrryyyyrrrryyyy"/>
+        <phase duration="15" state="GGGgrrrrGGGgrrrr"/>
+        <phase duration="3"  state="yyyyrrrryyyyrrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C23" type="static" programID="fijo" offset="21">
+        <phase duration="22" state="rrrrGGGgrrrrGGGg"/>
+        <phase duration="3"  state="rrrryyyyrrrryyyy"/>
+        <phase duration="15" state="GGGgrrrrGGGgrrrr"/>
+        <phase duration="3"  state="yyyyrrrryyyyrrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C31" type="static" programID="fijo" offset="0">
+        <phase duration="22" state="rrrrGGGgrrrrGGGg"/>
+        <phase duration="3"  state="rrrryyyyrrrryyyy"/>
+        <phase duration="15" state="GGGgrrrrGGGgrrrr"/>
+        <phase duration="3"  state="yyyyrrrryyyyrrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C32" type="static" programID="fijo" offset="21">
+        <phase duration="22" state="rrrrGGGgrrrrGGGg"/>
+        <phase duration="3"  state="rrrryyyyrrrryyyy"/>
+        <phase duration="15" state="GGGgrrrrGGGgrrrr"/>
+        <phase duration="3"  state="yyyyrrrryyyyrrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C33" type="static" programID="fijo" offset="0">
+        <phase duration="22" state="rrrrGGGgrrrrGGGg"/>
+        <phase duration="3"  state="rrrryyyyrrrryyyy"/>
+        <phase duration="15" state="GGGgrrrrGGGgrrrr"/>
+        <phase duration="3"  state="yyyyrrrryyyyrrrr"/>
+    </tlLogic>
+</additional>

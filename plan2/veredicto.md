@@ -1,6 +1,7 @@
 # Veredicto del plan de pruebas v2
 
 Generado por veredicto.py a partir de plan2/. No editar a mano. Regla: ESPEC seccion 7.
+Metrica primaria: timeloss_prom (retraso (timeLoss)). Fijo de referencia: brazo fijo_2509.
 Delta de retraso en % (negativo = mejor); delta de recompensa en % (positivo = mejor).
 
 ## Matriz caso x modelo
@@ -12,6 +13,7 @@ Delta de retraso en % (negativo = mejor); delta de recompensa en % (positivo = m
 | P3 | red | MEJORA | FALLA | FALLA | FALLA | MEJORA | FALLA | FUNCIONA | = vecinos | PENDIENTE |
 | P4 | red_alta | EMPATA | PENDIENTE | FALLA | FALLA | MEJORA | FALLA | MEJORA | = vecinos | PENDIENTE |
 | P5 | malla3 | FALLA | FALLA | FALLA | PENDIENTE | PENDIENTE | FALLA | EMPATA | = vecinos | EMPATA |
+| P6 | malla3_alta | FALLA | FALLA | PENDIENTE | PENDIENTE | PENDIENTE | FALLA | PENDIENTE | PENDIENTE | PENDIENTE |
 
 ## Actuado (actuado)
 
@@ -22,6 +24,7 @@ Delta de retraso en % (negativo = mejor); delta de recompensa en % (positivo = m
 | P3 | red | 3 + rotonda | 2 | 2150 | - | 21.48 +- 0.12 | -1.1 % [-1.7, -0.5] p=0.00306 | - | - | - | MEJORA |
 | P4 | red_alta | 3 + rotonda | 2 | 2580 | - | 30.04 +- 0.90 | -0.1 % [-1.4, 1.4] p=0.869 | - | - | - | EMPATA |
 | P5 | malla3 | 9 | 2 | 4350 | - | 25.37 +- 0.10 | +21.8 % [21.3, 22.3] p=1.73e-06 | - | - | - | FALLA |
+| P6 | malla3_alta | 9 | 2 | 8700 | - | 63.66 +- 2.33 | +73.3 % [66.9, 79.3] p=1.86e-09 | - | - | - | FALLA |
 
 ## Q-learning (ql)
 
@@ -32,6 +35,7 @@ Delta de retraso en % (negativo = mejor); delta de recompensa en % (positivo = m
 | P3 | red | 3 + rotonda | 2 | 2150 | 42 | 24.41 +- 0.24 | +12.4 % [11.5, 13.6] p=1.73e-06 | +13.6 % [12.5, 14.9] p=1.73e-06 | -11.9 % [-13.3, -10.9] p=1.86e-09 | si (2/3) | FALLA |
 | P4 | red_alta | 3 + rotonda | 2 | 2580 | 4042 | 33.03 +- 0.99 | +9.9 % [8.0, 11.9] p=1.86e-09 | +10.0 % [8.3, 11.7] p=1.86e-09 | -11.2 % [-12.1, -10.4] p=1.86e-09 | no (2/3) | PENDIENTE (no convergió; provisional: FALLA) |
 | P5 | malla3 | 9 | 2 | 4350 | 4042 | 29.69 +- 0.09 | +42.5 % [42.0, 43.0] p=1.73e-06 | +17.0 % [16.4, 17.6] p=1.73e-06 | -34.1 % [-34.6, -33.6] p=1.86e-09 | si (3/3) | FALLA |
+| P6 | malla3_alta | 9 | 2 | 8700 | 4042 | 47.19 +- 2.59 | +28.5 % [22.4, 35.9] p=1.86e-09 | -25.9 % [-30.2, -20.4] p=1.64e-07 | -36.3 % [-44.8, -29.3] p=1.86e-09 | si (1/3) | FALLA |
 
 ## SARSA (sarsa)
 
@@ -42,6 +46,7 @@ Delta de retraso en % (negativo = mejor); delta de recompensa en % (positivo = m
 | P3 | red | 3 + rotonda | 2 | 2150 | 2042 | 24.15 +- 0.11 | +11.2 % [10.6, 11.8] p=1.73e-06 | +12.4 % [11.6, 13.2] p=1.73e-06 | -10.6 % [-11.2, -9.9] p=1.86e-09 | si (3/3) | FALLA |
 | P4 | red_alta | 3 + rotonda | 2 | 2580 | 42 | 33.19 +- 1.02 | +10.4 % [8.5, 12.4] p=3.73e-09 | +10.5 % [8.6, 12.5] p=1.86e-09 | -12.1 % [-13.3, -11.1] p=1.86e-09 | si (2/3) | FALLA |
 | P5 | malla3 | 9 | 2 | 4350 | 42 | 29.18 +- 0.09 | +40.0 % [39.5, 40.6] p=1.73e-06 | +15.0 % [14.5, 15.5] p=1.73e-06 | -31.2 % [-31.7, -30.7] p=1.86e-09 | si (3/3) | FALLA |
+| P6 | malla3_alta | 9 | 2 | 8700 | 2042 | 45.35 +- 1.10 | +23.5 % [21.0, 26.9] p=1.73e-06 | -28.8 % [-31.2, -26.1] p=1.86e-09 | -30.2 % [-34.1, -27.4] p=1.86e-09 | no (0/3) | PENDIENTE (no convergió; provisional: FALLA) |
 
 ## Q-learning (colas) (ql_colas)
 
@@ -52,6 +57,7 @@ Delta de retraso en % (negativo = mejor); delta de recompensa en % (positivo = m
 | P3 | red | 3 + rotonda | 2 | 2150 | 42 | 23.81 +- 0.14 | +9.6 % [8.9, 10.4] p=1.73e-06 | +10.8 % [10.0, 11.7] p=1.73e-06 | +3.0 % [2.0, 3.9] p=5.14e-06 | si (3/3) | FALLA |
 | P4 | red_alta | 3 + rotonda | 2 | 2580 | 2042 | 33.00 +- 0.91 | +9.8 % [8.4, 11.3] p=1.86e-09 | +9.9 % [8.2, 11.5] p=3.73e-09 | +6.4 % [5.3, 7.5] p=5.59e-09 | si (3/3) | FALLA |
 | P5 | malla3 | 9 | 2 | 4350 | - | - | - | - | - | - | PENDIENTE (sin datos) |
+| P6 | malla3_alta | 9 | 2 | 8700 | - | - | - | - | - | - | PENDIENTE (sin datos) |
 
 ## DQN (dqn)
 
@@ -62,6 +68,7 @@ Delta de retraso en % (negativo = mejor); delta de recompensa en % (positivo = m
 | P3 | red | 3 + rotonda | 2 | 2150 | 4042 | 21.32 +- 0.10 | -1.8 % [-2.4, -1.3] p=1.36e-05 | -0.7 % [-1.3, -0.2] p=0.00545 | +3.8 % [3.2, 4.3] p=1.86e-09 | si (3/3) | MEJORA |
 | P4 | red_alta | 3 + rotonda | 2 | 2580 | 4042 | 29.04 +- 1.02 | -3.4 % [-4.7, -2.1] p=4.41e-05 | -3.3 % [-5.0, -1.5] p=0.00233 | +8.7 % [8.3, 9.1] p=1.86e-09 | si (2/3) | MEJORA |
 | P5 | malla3 | 9 | 2 | 4350 | 4042 | 23.15 +- 0.09 | +11.1 % [10.7, 11.4] p=1.73e-06 | -8.8 % [-9.2, -8.4] p=1.73e-06 | -7.8 % [-8.0, -7.5] p=1.86e-09 | no (2/3) | PENDIENTE (no convergió; provisional: FALLA) |
+| P6 | malla3_alta | 9 | 2 | 8700 | 2042 | 40.80 +- 1.18 | +11.1 % [8.1, 14.4] p=1.73e-06 | -35.9 % [-38.5, -33.0] p=1.86e-09 | -15.4 % [-19.0, -12.2] p=1.86e-09 | no (1/3) | PENDIENTE (no convergió; provisional: FALLA) |
 
 ## IPPO local (ippo_local)
 
@@ -72,6 +79,7 @@ Delta de retraso en % (negativo = mejor); delta de recompensa en % (positivo = m
 | P3 | red | 3 + rotonda | 2 | 2150 | 2042 | 22.21 +- 0.16 | +2.3 % [1.5, 3.0] p=4.07e-05 | +3.4 % [2.8, 4.0] p=2.35e-06 | -1.1 % [-1.9, -0.2] p=0.0427 | si (3/3) | FALLA |
 | P4 | red_alta | 3 + rotonda | 2 | 2580 | 2042 | 30.91 +- 1.02 | +2.9 % [1.4, 4.4] p=0.00124 | +2.9 % [1.2, 4.7] p=0.00538 | -1.4 % [-2.7, -0.2] p=0.0384 | si (3/3) | FALLA |
 | P5 | malla3 | 9 | 2 | 4350 | 4042 | 26.23 +- 0.23 | +25.9 % [24.8, 27.0] p=1.73e-06 | +3.4 % [2.5, 4.3] p=6.34e-06 | -15.7 % [-16.8, -14.7] p=1.86e-09 | si (2/3) | FALLA |
+| P6 | malla3_alta | 9 | 2 | 8700 | 4042 | 39.15 +- 0.41 | +6.6 % [5.5, 7.8] p=1.73e-06 | -38.5 % [-40.6, -36.2] p=1.86e-09 | -9.7 % [-11.0, -8.5] p=1.86e-09 | si (3/3) | FALLA |
 
 ## IPPO vecinos (ippo_vecinos)
 
@@ -82,6 +90,7 @@ Delta de retraso en % (negativo = mejor); delta de recompensa en % (positivo = m
 | P3 | red | 3 + rotonda | 2 | 2150 | 4042 | 19.81 +- 0.11 | -8.8 % [-9.3, -8.2] p=1.73e-06 | -7.8 % [-8.4, -7.2] p=1.73e-06 | +15.6 % [15.2, 16.0] p=1.86e-09 | si (3/3) | FUNCIONA |
 | P4 | red_alta | 3 + rotonda | 2 | 2580 | 42 | 28.97 +- 0.92 | -3.6 % [-5.0, -2.3] p=3.45e-05 | -3.6 % [-4.8, -2.4] p=2.6e-05 | +9.2 % [8.5, 9.9] p=1.86e-09 | si (3/3) | MEJORA |
 | P5 | malla3 | 9 | 2 | 4350 | 2042 | 21.21 +- 0.35 | +1.8 % [0.4, 3.4] p=0.523 | -16.4 % [-17.6, -15.0] p=1.73e-06 | +7.3 % [5.3, 9.0] p=4.71e-07 | si (3/3) | EMPATA |
+| P6 | malla3_alta | 9 | 2 | 8700 | 42 | 37.54 +- 1.48 | +2.2 % [-1.4, 6.2] p=0.567 | -41.0 % [-43.3, -38.6] p=1.86e-09 | -7.8 % [-12.2, -3.9] p=0.00322 | no (1/3) | PENDIENTE (no convergió; provisional: EMPATA) |
 
 ## IPPO spill (ippo_spill)
 
@@ -92,6 +101,7 @@ Delta de retraso en % (negativo = mejor); delta de recompensa en % (positivo = m
 | P3 | red | 3 + rotonda | 2 | 2150 | 4042 | 19.81 +- 0.11 | -8.8 % [-9.3, -8.2] p=1.73e-06 | -7.8 % [-8.4, -7.2] p=1.73e-06 | +15.6 % [15.2, 16.0] p=1.86e-09 | si (3/3) | = vecinos (término de spill inactivo; FUNCIONA) |
 | P4 | red_alta | 3 + rotonda | 2 | 2580 | 42 | 28.97 +- 0.92 | -3.6 % [-5.0, -2.3] p=3.45e-05 | -3.6 % [-4.8, -2.4] p=2.6e-05 | +9.2 % [8.5, 9.9] p=1.86e-09 | si (3/3) | = vecinos (término de spill inactivo; MEJORA) |
 | P5 | malla3 | 9 | 2 | 4350 | 2042 | 21.21 +- 0.35 | +1.8 % [0.4, 3.4] p=0.523 | -16.4 % [-17.6, -15.0] p=1.73e-06 | +7.3 % [5.3, 9.0] p=4.71e-07 | si (3/3) | = vecinos (término de spill inactivo; EMPATA) |
+| P6 | malla3_alta | 9 | 2 | 8700 | 42 | 38.05 +- 1.20 | +3.6 % [0.6, 7.0] p=0.114 | -40.2 % [-42.7, -37.5] p=1.86e-09 | -9.7 % [-13.4, -6.4] p=1.02e-07 | no (0/3) | PENDIENTE (no convergió; provisional: EMPATA) |
 
 ## MAPPO (mappo)
 
@@ -102,3 +112,4 @@ Delta de retraso en % (negativo = mejor); delta de recompensa en % (positivo = m
 | P3 | red | 3 + rotonda | 2 | 2150 | 4042 | 20.01 +- 0.21 | -7.8 % [-8.8, -6.8] p=1.92e-06 | -6.8 % [-7.7, -5.8] p=2.85e-06 | +14.1 % [12.5, 15.4] p=1.86e-09 | no (2/3) | PENDIENTE (no convergió; provisional: FUNCIONA) |
 | P4 | red_alta | 3 + rotonda | 2 | 2580 | 2042 | 29.45 +- 0.88 | -2.0 % [-3.1, -0.9] p=0.00225 | -2.0 % [-3.3, -0.6] p=0.0293 | +5.5 % [4.7, 6.3] p=3.73e-09 | no (1/3) | PENDIENTE (no convergió; provisional: MEJORA) |
 | P5 | malla3 | 9 | 2 | 4350 | 2042 | 20.78 +- 0.05 | -0.3 % [-0.6, 0.0] p=0.0896 | -18.1 % [-18.4, -17.8] p=1.73e-06 | +9.8 % [9.6, 10.1] p=1.86e-09 | si (2/3) | EMPATA |
+| P6 | malla3_alta | 9 | 2 | 8700 | 2042 | 41.32 +- 1.93 | +12.5 % [7.7, 17.6] p=0.00017 | -35.1 % [-39.1, -30.8] p=1.86e-09 | -19.1 % [-24.6, -13.8] p=3.73e-09 | no (0/3) | PENDIENTE (no convergió; provisional: FALLA) |

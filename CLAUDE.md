@@ -124,7 +124,9 @@ Hallazgos de la noche del 24.09 (todos deben seguir escritos en la tesis):
    `cola_max_enlace` y `spill_activaciones` de `plan2/resultados_<esc>_ippo_*_s*.csv`,
    `plan2/evaluacion_red.csv`; regla en `veredicto.spill_inactivo` (desde el 25.09
    también cubre celdas de spill parciales o sin evaluar).
-3. Con la malla de verdes ampliada hacia abajo (corredor 12/15/18/20/25/30,
+3. (SUPERADO el 27.09.2026: la malla no llegaba a 10 s de avenida y en red, red_alta y malla3 el
+   ganador del re-barrido v2.1 es el ciclo corto 10/10; ver RE-MEDICION V2.1.) Con la malla de verdes
+   ampliada hacia abajo (corredor 12/15/18/20/25/30,
    corredor_alta 15-35) el óptimo del fijo del corredor sigue en 20/10 con desfase
    15, ahora interior: la referencia ya era la mejor (cierra el A1 del 07.09). En
    corredor_alta (25/15/desfase 25) y red (25/15/0-23-0) el ganador también es el
@@ -193,6 +195,60 @@ Pendiente al cierre de W2 (25.09, 04:00):
   líneas y recopiarlo.
 - `TESIS/codigo/` quedó al día el 25.09 04:00 (consolidar.py y veredicto.py
   recopiados); recopiar si cambia algún script.
+
+## RE-MEDICION V2.1 (27.09.2026): retraso total, fijo desde 10 s, trivial, P6
+
+Qué cambió (tras el diagnóstico pedido por la asesoría del 25.09; la tesis manda, esto es nota):
+- Métrica primaria = retraso total por vehículo (`retraso_total_prom` de `comun.leer_tripinfo`):
+  timeLoss + departDelay (espera para entrar a la red) + espera de los que no alcanzaron a entrar
+  (`--statistic-output`, `comun.args_estadisticas`). En P2 la espera para entrar (~240 s/veh con el
+  fijo) supera al timeLoss: la "ganancia" en timeLoss de IPPO/MAPPO/DQN/actuado era cola desplazada
+  fuera de la red. La validación (selección del checkpoint) sigue en timeLoss, declarado.
+- `barrer_fijo.py`: MALLAS con la avenida desde 10 s y ganador por retraso total. En P3 la política
+  publicada de IPPO vecinos era idéntica (30/30 semillas) a un fijo 10/3/10/3 sincronizado que la
+  malla no contenía. `correr_sumo` y `comun.borrar_tripinfo` reintentan si Windows retiene un archivo.
+- Brazo `trivial` (verdes mínimos, desfases 0; `comun.archivo_trivial`, `evaluar.py --brazo trivial`);
+  `veredicto.py` lo muestra como fila de referencia y marca con * a la política igual al trivial.
+- `veredicto.py --metrica retraso_total_prom|timeloss_prom` (por defecto el total). El veredicto del
+  25.09 queda en `plan2/veredicto_congelado_0355.*` y en git; con el fijo re-barrido ya no se reproduce.
+- P6 = `malla3_alta` (malla3 x2.0, `calibrar_demanda.py`, criterio de corredor_alta y red_alta; tabla en
+  la cabecera de `malla3_alta.rou.xml`). Entrenamientos en la cola (CELDAS_P6 de generar_trabajos.py).
+- Análisis fuera del veredicto: `sintesis_plan.py` (número único = media geométrica del cociente
+  modelo/fijo sobre los casos, en par con el actuado; ANOVA caso x modelo con las bases como réplicas;
+  figura de mejora por caso) y `barrido_demanda.py` (corredor x0.5 a x2.25 y perfil variable; escenarios
+  derivados en `escenarios_plan2.DERIVADOS`, salidas en `plan2/demanda/`).
+- Comparación con otros trabajos: Anexo E (`TESIS/secciones/anexo_e_trabajos.tex`), fichas verificadas
+  en `literatura/fichas_trabajos.json`, generador `literatura/build.py`; 57 entradas nuevas en el .bib.
+- Todo lo re-evaluado reproduce el plan congelado dígito a dígito salvo el fijo de P3-P5 (programa nuevo).
+Cómo se corre: `cd plan2 && python generar_trabajos.py && python cola.py --cpus 11` (trabajos v21_*,
+dem_* y los de malla3_alta); después `python ../consolidar.py --escenario <esc>`, `cd .. && python
+veredicto.py && python sintesis_plan.py`, `cd plan2 && python tablas_cap5.py && python
+../barrido_demanda.py resumir && python grafico_convergencia.py --medir-fijo`.
+Cuidado: en la cola, los trabajos que usan varios procesos van con cpus=1 (con cpus>1 no encuentran
+hueco y quedan esperando para siempre).
+
+## RESULTADO PRINCIPAL = 25.09; v2.1 = ROBUSTEZ (decisión del autor, 28.09.2026)
+
+La tesis presenta como resultado principal el veredicto PRE-REGISTRADO del 25.09 (métrica timeLoss,
+fijo de la malla de entonces; `plan2/veredicto_congelado_0355.*`). Lo de la re-medición v2.1 (retraso
+total, fijo re-barrido desde 10 s, trivial) es un análisis de robustez: `sec:robustez` al final del
+Cap. V y tablas `robustez_*`. No se reemplaza ningún veredicto. El asesor pidió medir el ALCANCE (hasta
+dónde llega el método), no cambiar la métrica: el retraso total fue una propuesta nuestra.
+- El fijo del 25.09 entra como brazo `fijo_2509` (`plan2/fijo_2509.py` → `parciales/eval_<esc>_fijo_2509.csv`;
+  red, red_alta y malla3 salen del commit 37f96801; en corredor, corredor_alta y malla3_alta es el fijo).
+- P6 (malla3_alta) se barrió con la regla del 25.09: `barrer_fijo.py --metrica timeloss_prom --avenida
+  15,20,25,30,35 --transversal 10,15,20,25`; se extendió sola a 10 s; ganador 15/10 desfases cero. El primer
+  intento se colgó (sin tope y con time-to-teleport -1): desde el 28.09 cada corrida del barrido lleva
+  `--end 6000` (`barrer_fijo.FIN_SIM`, el mismo tope que los brazos con TraCI).
+- Comandos del resultado principal (desde demo_rl):
+  `python veredicto.py --metrica timeloss_prom --fijo fijo_2509 --sin-trivial`,
+  `python sintesis_plan.py --metrica timeloss_prom --fijo fijo_2509 --sin-trivial`,
+  `cd plan2 && python tablas_cap5.py --metrica timeloss_prom --fijo fijo_2509 --sin-trivial`,
+  `python grafico_convergencia.py --fijo-json fijo_validacion_2509.json`.
+  Robustez: los mismos sin opciones de referencia, con `--casos P1-P6 --prefijo robustez_`.
+  OJO: correr veredicto.py SIN opciones sobrescribe `plan2/veredicto.csv` y las tablas principales con v2.1.
+- Comprobado: el principal reproduce `veredicto_congelado_0355.csv` en las 45 celdas de P1-P5 y el número
+  único -8.55 % / -7.72 % (P1-P5); con P6, -6.83 % / -14.35 %.
 
 ## Formulación RL implementada (no cambiarla sin actualizar código y documento a la vez)
 

@@ -1,0 +1,93 @@
+== P4 red_alta, cribado 5001-5030 (timeLoss)
+  media fijo2509           30.064
+  media actuado            29.674
+  media trivial            28.152
+  media ippo_vecinos_s42   28.925
+  media fijo_rebarrido     27.633
+  media V2_s2042           28.152
+  media V5_s42             28.068
+  V2_s2042 vs fijo2509                         timeloss_prom        28.152 vs   30.064  -6.4 % [-8.4, -4.3] p=9.22e-06  gana 24/30  iguales 0
+  V2_s2042 vs trivial                          timeloss_prom        28.152 vs   28.152  +0.0 % [0.0, 0.0] p=1  gana 0/30  iguales 30
+  V2_s2042 vs ippo_vecinos_s42                 timeloss_prom        28.152 vs   28.925  -2.7 % [-4.4, -1.0] p=0.0139  gana 21/30  iguales 2
+  V2_s2042 vs fijo_rebarrido                   timeloss_prom        28.152 vs   27.633  +1.9 % [-0.0, 3.8] p=0.084  gana 12/30  iguales 0
+  V2_s2042 igual al trivial (timeLoss y cambios_fase): 30/30
+  V5_s42 vs fijo2509                           timeloss_prom        28.068 vs   30.064  -6.6 % [-8.6, -4.7] p=2.26e-05  gana 26/30  iguales 0
+  V5_s42 vs trivial                            timeloss_prom        28.068 vs   28.152  -0.3 % [-0.8, 0.2] p=0.00819  gana 20/30  iguales 5
+  V5_s42 vs ippo_vecinos_s42                   timeloss_prom        28.068 vs   28.925  -3.0 % [-4.7, -1.3] p=0.00374  gana 23/30  iguales 0
+  V5_s42 vs fijo_rebarrido                     timeloss_prom        28.068 vs   27.633  +1.6 % [-0.2, 3.5] p=0.118  gana 13/30  iguales 0
+  V5_s42 igual al trivial (timeLoss y cambios_fase): 0/30
+== P4 red_alta, confirmacion 6001-6030 (timeLoss)
+  media V5_s42             27.829
+  media C0_s4042           28.610
+  media ippo_vecinos_s42   28.739
+  media fijo2509           29.658
+  media actuado            29.759
+  media trivial            27.816
+  V5_s42 vs fijo2509                           timeloss_prom        27.829 vs   29.658  -6.2 % [-7.8, -4.5] p=2.05e-07  gana 27/30  iguales 0
+  V5_s42 vs trivial                            timeloss_prom        27.829 vs   27.816  +0.0 % [-0.3, 0.4] p=0.395  gana 17/30  iguales 5
+  V5_s42 vs ippo_vecinos_s42                   timeloss_prom        27.829 vs   28.739  -3.2 % [-4.9, -1.5] p=0.00158  gana 24/30  iguales 0
+  V5_s42 vs C0_s4042                           timeloss_prom        27.829 vs   28.610  -2.7 % [-4.6, -1.0] p=0.0212  gana 17/30  iguales 0
+== P4 red_alta, confirmacion 6011-6030 (timeLoss)
+  media V5_s42             27.495
+  media C0_s4042           28.164
+  media ippo_vecinos_s42   28.195
+  media fijo2509           29.610
+  media actuado            29.404
+  media trivial            27.405
+  V5_s42 vs fijo2509                           timeloss_prom        27.495 vs   29.610  -7.1 % [-8.9, -5.3] p=5.72e-06  gana 19/20  iguales 0
+  V5_s42 vs trivial                            timeloss_prom        27.495 vs   27.405  +0.3 % [0.0, 0.7] p=1  gana 10/20  iguales 4
+  V5_s42 vs ippo_vecinos_s42                   timeloss_prom        27.495 vs   28.195  -2.5 % [-4.4, -0.5] p=0.0441  gana 15/20  iguales 0
+  V5_s42 vs C0_s4042                           timeloss_prom        27.495 vs   28.164  -2.4 % [-4.6, -0.3] p=0.117  gana 11/20  iguales 0
+== P6 malla3_alta (timeLoss; fijo = 15/10 de fijo_2509)
+  fijo 15/10, 5 mayores timeLoss en 6001-6030: [(6028, 50.48), (6025, 38.01), (6002, 37.98)]
+-- 5001-5030
+  V2_s4042 vs fijo 15/10                       timeloss_prom        34.141 vs   36.843  -7.3 % [-10.0, -5.3] p=4.66e-08  gana 28/30  iguales 0
+  V2_s4042 vs ippo_vecinos_s42                 timeloss_prom        34.141 vs   37.745  -9.5 % [-13.8, -5.4] p=2.37e-05  gana 25/30  iguales 0
+  V2_s4042 vs fijo 15/10                       retraso_total_prom   79.671 vs   82.328  -3.2 % [-4.4, -2.3] p=1.64e-07  gana 28/30  iguales 0
+  V5_s42 vs fijo 15/10                         timeloss_prom        34.218 vs   36.843  -7.1 % [-9.8, -4.8] p=2.97e-05  gana 28/30  iguales 0
+  V5_s42 vs ippo_vecinos_s42                   timeloss_prom        34.218 vs   37.745  -9.3 % [-13.8, -5.1] p=0.000123  gana 22/30  iguales 0
+  V5_s42 vs fijo 15/10                         retraso_total_prom   79.732 vs   82.328  -3.2 % [-4.4, -2.0] p=4.42e-06  gana 28/30  iguales 0
+  ippo_vecinos_s42 vs fijo 15/10               timeloss_prom        37.745 vs   36.843  +2.4 % [-1.7, 7.1] p=0.719  gana 19/30  iguales 0
+  V2_s4042 vs C0_s4042                         timeloss_prom        34.141 vs   39.636  -13.9 % [-17.7, -10.1] p=2.13e-06  gana 29/30  iguales 0
+  C0_s4042 vs ippo_vecinos_s42                 timeloss_prom        39.636 vs   37.745  +5.0 % [-1.4, 11.8] p=0.0636  gana 9/30  iguales 0
+  retraso de insercion medio (s/veh), todos salvo trivial: min 45.41 max 45.68
+-- 6001-6030
+  V2_s4042 vs fijo 15/10                       timeloss_prom        34.649 vs   37.118  -6.7 % [-9.8, -3.7] p=3.24e-06  gana 29/30  iguales 0
+  V2_s4042 vs ippo_vecinos_s42                 timeloss_prom        34.649 vs   37.586  -7.8 % [-11.7, -3.8] p=0.00049  gana 23/30  iguales 0
+  V2_s4042 vs fijo 15/10                       retraso_total_prom   80.147 vs   82.700  -3.1 % [-4.7, -1.7] p=3.24e-06  gana 29/30  iguales 0
+  V5_s42 vs fijo 15/10                         timeloss_prom        34.546 vs   37.118  -6.9 % [-10.3, -3.7] p=0.000306  gana 28/30  iguales 0
+  V5_s42 vs ippo_vecinos_s42                   timeloss_prom        34.546 vs   37.586  -8.1 % [-11.8, -4.4] p=2.6e-05  gana 26/30  iguales 0
+  V5_s42 vs fijo 15/10                         retraso_total_prom   80.035 vs   82.700  -3.2 % [-5.0, -1.6] p=0.000123  gana 28/30  iguales 0
+  ippo_vecinos_s42 vs fijo 15/10               timeloss_prom        37.586 vs   37.118  +1.3 % [-2.7, 5.5] p=0.797  gana 19/30  iguales 0
+  retraso de insercion medio (s/veh), todos salvo trivial: min 45.49 max 45.65
+-- 6011-6030
+  V2_s4042 vs fijo 15/10                       timeloss_prom        34.876 vs   37.315  -6.5 % [-11.2, -2.1] p=0.000586  gana 19/20  iguales 0
+  V2_s4042 vs ippo_vecinos_s42                 timeloss_prom        34.876 vs   38.264  -8.9 % [-13.8, -3.5] p=0.00511  gana 15/20  iguales 0
+  V2_s4042 vs fijo 15/10                       retraso_total_prom   80.309 vs   82.833  -3.0 % [-5.5, -1.0] p=0.000586  gana 19/20  iguales 0
+  V5_s42 vs fijo 15/10                         timeloss_prom        34.794 vs   37.315  -6.8 % [-11.6, -1.8] p=0.00944  gana 18/20  iguales 0
+  V5_s42 vs ippo_vecinos_s42                   timeloss_prom        34.794 vs   38.264  -9.1 % [-13.9, -3.8] p=0.000779  gana 18/20  iguales 0
+  V5_s42 vs fijo 15/10                         retraso_total_prom   80.305 vs   82.833  -3.1 % [-5.5, -0.7] p=0.00944  gana 18/20  iguales 0
+  ippo_vecinos_s42 vs fijo 15/10               timeloss_prom        38.264 vs   37.315  +2.5 % [-2.7, 8.1] p=0.881  gana 11/20  iguales 0
+  retraso de insercion medio (s/veh), todos salvo trivial: min 45.41 max 45.68
+-- 6001-6030 sin 6028
+  V2_s4042 vs fijo 15/10                       timeloss_prom        34.662 vs   36.657  -5.4 % [-7.1, -3.1] p=6.48e-06  gana 28/29  iguales 0
+  V2_s4042 vs ippo_vecinos_s42                 timeloss_prom        34.662 vs   37.434  -7.4 % [-11.3, -3.3] p=0.000835  gana 22/29  iguales 0
+  V2_s4042 vs fijo 15/10                       retraso_total_prom   80.167 vs   82.185  -2.5 % [-3.2, -1.4] p=6.48e-06  gana 28/29  iguales 0
+  V5_s42 vs fijo 15/10                         timeloss_prom        34.564 vs   36.657  -5.7 % [-7.9, -3.0] p=0.000519  gana 27/29  iguales 0
+  V5_s42 vs ippo_vecinos_s42                   timeloss_prom        34.564 vs   37.434  -7.7 % [-11.6, -3.8] p=4.17e-05  gana 25/29  iguales 0
+  V5_s42 vs fijo 15/10                         retraso_total_prom   80.050 vs   82.185  -2.6 % [-3.7, -1.3] p=0.000242  gana 27/29  iguales 0
+  ippo_vecinos_s42 vs fijo 15/10               timeloss_prom        37.434 vs   36.657  +2.1 % [-1.6, 6.2] p=0.991  gana 18/29  iguales 0
+  retraso de insercion medio (s/veh), todos salvo trivial: min 45.49 max 45.66
+-- 60 semillas
+  V2_s4042 vs fijo 15/10                       timeloss_prom        34.395 vs   36.980  -7.0 % [-9.0, -5.1] p=5.19e-10  gana 57/60  iguales 0
+  V2_s4042 vs ippo_vecinos_s42                 timeloss_prom        34.395 vs   37.665  -8.7 % [-11.7, -5.7] p=2.19e-07  gana 48/60  iguales 0
+  V2_s4042 vs fijo 15/10                       retraso_total_prom   79.909 vs   82.514  -3.2 % [-4.2, -2.3] p=8.66e-10  gana 57/60  iguales 0
+  V5_s42 vs fijo 15/10                         timeloss_prom        34.382 vs   36.980  -7.0 % [-9.2, -5.0] p=4.23e-08  gana 56/60  iguales 0
+  V5_s42 vs ippo_vecinos_s42                   timeloss_prom        34.382 vs   37.665  -8.7 % [-11.6, -5.8] p=2.73e-08  gana 48/60  iguales 0
+  V5_s42 vs fijo 15/10                         retraso_total_prom   79.884 vs   82.514  -3.2 % [-4.3, -2.2] p=4.9e-08  gana 56/60  iguales 0
+  ippo_vecinos_s42 vs fijo 15/10               timeloss_prom        37.665 vs   36.980  +1.9 % [-1.1, 5.0] p=0.915  gana 38/60  iguales 0
+  retraso de insercion medio (s/veh), todos salvo trivial: min 45.5 max 45.6
+== P1 corredor, 5001-5030 (timeLoss)
+  V5_s4042 vs ippo_vecinos_s4042               timeloss_prom        19.727 vs   19.848  -0.6 % [-1.5, 0.3] p=0.289  gana 16/30  iguales 0
+  V5_s4042 vs fijo2509                         timeloss_prom        19.727 vs   21.272  -7.3 % [-8.7, -6.0] p=1.86e-09  gana 30/30  iguales 0
+  ippo_vecinos_s4042 vs fijo2509               timeloss_prom        19.848 vs   21.272  -6.7 % [-8.0, -5.4] p=1.73e-06  gana 30/30  iguales 0

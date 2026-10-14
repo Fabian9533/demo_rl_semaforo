@@ -2,39 +2,76 @@
 
 Esta etapa del trabajo implementó las cuatro unidades de la arquitectura
 propuesta y las evaluó con el plan de pruebas de la
-Sección~\ref{sec:plan2}. Se desarrollaron cinco de sus siete casos, P1
-a P5, con el fijo tuneado de cada caso, el actuado y ocho aprendices
+Sección~\ref{sec:plan2}. Se desarrollaron seis de sus siete casos, P1
+a P6, con el fijo tuneado de cada caso, el actuado y ocho aprendices
 (Tabla~\ref{tab:plan2-modelos}), todos con el mismo protocolo y las
-mismas métricas de salida. Un veredicto prefijado (FUNCIONA, MEJORA,
-EMPATA, FALLA o PENDIENTE) resume cada celda a partir del retraso de la
-política publicada frente al fijo tuneado y frente al actuado
-(Tabla~\ref{tab:veredicto-matriz}). Seis de las cuarenta celdas de
-aprendices quedan PENDIENTE: cinco porque la base publicada no cumple
-el criterio de convergencia y una por falta de datos. Las conclusiones
-siguen el orden de los objetivos específicos: una por cada unidad, de
-U1 a U4, una sobre la reproducibilidad y una sobre el alcance del
-proyecto.
-% fuente: plan2/veredicto.csv y plan2/veredicto.md (veredicto.py; resultados congelados el
-% 25.09.2026 a las 03:55, copia en plan2/veredicto_congelado_0355.csv y .md)
-% celdas sin veredicto firme: ql P4, ql_colas P2, dqn P5, mappo P3 y P4 (no convergio); ql_colas P5 (sin datos)
+mismas métricas de salida. Los resultados de P1 a P5 se congelaron
+primero; P6 se cerró después, con la misma regla. Un
+veredicto prefijado (FUNCIONA, MEJORA, EMPATA, FALLA o PENDIENTE) resume
+cada celda a partir del retraso de la política publicada, medido con el
+\texttt{timeLoss}, frente al fijo tuneado y frente al actuado
+(Tabla~\ref{tab:veredicto-matriz}). La métrica, la referencia y la regla
+son las del plan registrado antes de evaluar. Doce de las cuarenta y
+ocho celdas de aprendices de P1 a P6 quedan PENDIENTE: diez porque la
+base publicada no cumple el criterio de convergencia y dos por falta de
+datos. Seis de las doce son de P6. Una re-medición posterior, con otra
+métrica y otro barrido del
+fijo, se presenta como análisis de robustez
+(Sección~\ref{sec:robustez}). Un análisis exploratorio posterior, al
+final del Capítulo~\ref{cap:resultados} (Sección~\ref{sec:exploratorio}), prueba una corrección del
+entrenamiento de IPPO \emph{vecinos}. Ninguno de los dos reemplaza un
+veredicto; la conclusión~6 resume lo que muestran. Las conclusiones siguen el orden de
+los objetivos específicos: una por cada unidad, de U1 a U4, una sobre
+la reproducibilidad y una sobre el alcance del proyecto.
+% fuente: plan2/veredicto.csv y plan2/veredicto.md (veredicto.py --metrica timeloss_prom --fijo fijo_2509
+% --sin-trivial; P1-P5 iguales en las 45 celdas y en todas las columnas a plan2/veredicto_congelado_0355.csv,
+% congelado el 25.09.2026 a las 03:55; regla y metrica: plan2/ESPEC.md); celdas sin veredicto firme en P1-P5:
+% ql P4, ql_colas P2, dqn P5, mappo P3 y P4 (no convergio); ql_colas P5 (sin datos); robustez:
+% plan2/robustez_veredicto.csv (= plan2/veredicto_v21_respaldo.csv); P6: plan2/veredicto.csv (malla3_alta, cerrado
+% el 28.09.2026 con el fijo de barrer_fijo.py --metrica timeloss_prom; celdas PENDIENTE de P6: sarsa, dqn,
+% ippo_vecinos, ippo_spill y mappo por convergencia, ql_colas sin datos); 12 de 48 en P1-P6
 
-\noindent\textbf{1. Los cinco casos evaluados son escenarios sintéticos
+\noindent\textbf{1. Los casos evaluados son escenarios sintéticos
 construidos en SUMO: la conversión de redes y demanda al formato del
 simulador quedó resuelta, pero no se usaron datos de tráfico
 observados.} Las redes del corredor, de la red de tres cruces con
 rotonda y de la malla de nueve cruces se generaron con
 \texttt{netconvert} a partir de archivos de nodos y vías escritos a
 mano. La demanda de cada caso se define por flujos declarados de una
-hora, con la punta invertida a la mitad, y no por aforos ni matrices
-origen--destino (Sección~\ref{sec:escenarios}). P2 y P4 usan las redes
-de P1 y P3 con más demanda. En P4 la demanda la limitó la rotonda sin
-semáforo, cuyos ramales de un carril se llenan desde 1.3 veces la
-demanda nominal: el caso usa 1.2 veces y es de demanda moderada, no de
-estrés (Tabla~\ref{tab:red-alta-factor}). El cruce real de Lima se
-importó desde OpenStreetMap, pero su red no se ha limpiado y no ha
-pasado por el protocolo del plan (Anexo~D).
+hora, con la punta invertida a la mitad y llegadas equiespaciadas, y no
+por aforos ni matrices origen--destino (Sección~\ref{sec:escenarios}).
+P2, P4 y P6 usan las redes de P1, P3 y P5 con más demanda. En P4 la
+demanda la limitó la rotonda sin semáforo, cuyos ramales de un carril
+se llenan desde 1.3 veces la demanda nominal: el caso usa 1.2 veces y
+es de demanda moderada, no de estrés (Tabla~\ref{tab:red-alta-factor}).
+La malla no tiene un elemento así, y P6 usa el doble de la demanda de
+P5: con ese factor, bajo el actuado, la cola llena los enlaces entre
+cruces y la espera media para entrar a la red llega a 46.2~s por
+vehículo en la semilla más desfavorable
+(Tabla~\ref{tab:malla3-alta-factor}). El cruce real de Lima se importó
+desde OpenStreetMap, pero su red no se ha limpiado y no ha pasado por
+el protocolo del plan (Anexo~D).
 % fuente: build_net.bat (netconvert de corredor, red y malla3); tabla por factor en la cabecera de
-% plan2/red_alta.rou.xml; importacion OSM del 01.12.2025 con osmWebWizard (recomendaciones.tex)
+% plan2/red_alta.rou.xml y de plan2/malla3_alta.rou.xml (calibrar_demanda.py; f = 2.0: cola 37/37/37,
+% espera para entrar 46.2 s = maximo de las tres medias); importacion OSM del 01.12.2025 con osmWebWizard
+% (recomendaciones.tex)
+
+El análisis de sensibilidad a la demanda mostró además un límite del
+escenario del corredor. Con 1.25 y 1.5 veces la demanda nominal, todos
+los controles comparados pierden frente al fijo vuelto a tunear para
+cada nivel entre un 45.0 y un 146.1\,\% de \texttt{timeLoss}
+(Tabla~\ref{tab:plan2-demanda}). La explicación probable es el giro a
+la izquierda permitido en el carril único de la avenida: el vehículo
+que espera un hueco en el sentido contrario para girar detiene a los
+que vienen detrás. Una comprobación de diagnóstico hecha fuera del
+plan, que no quedó registrada en el repositorio, indicó que el colapso
+desaparece al convertir esos giros en movimientos rectos; por eso se
+presenta como hipótesis y no como resultado.
+% fuente: plan2/demanda/resumen_demanda.csv (niveles 1.25 y 1.5, delta_timeloss_prom de fijo_p1, actuado,
+% ippo_vecinos_s4042 e ippo_vecinos_s2042: +93.79/+122.13, +79.34/+45.01, +71.65/+61.88, +146.09/+64.27;
+% en retraso total, de +81.05 a +211.87); tablas/demanda_corredor.tex; giro a la izquierda permitido con
+% cesion de paso: estado "g" de plan2/corredor.add.xml y numLanes="1" en corredor.edg.xml. La prueba con los
+% giros convertidos en rectos no esta en el repositorio: no citar cifras de ella.
 
 \noindent\textbf{2. Con la misma recompensa y el mismo protocolo que
 IPPO, los aprendices tabulares no superan al fijo tuneado con demanda
@@ -42,9 +79,11 @@ nominal, y la causa no es la recompensa sino el aprendiz tabular.}
 Q-learning falla en P1 ($+9.2$\,\%), en P3 ($+12.4$\,\%) y en P5
 ($+42.5$\,\%), y en P4 su resultado provisional también es FALLA. Solo
 en P2 baja el retraso del fijo ($-8.8$\,\%, MEJORA), y aun ahí queda un
-13.7\,\% por detrás del actuado. SARSA falla en los cinco casos, P2
+13.7\,\% por detrás del actuado. SARSA falla en P1 a P5, P2
 incluido: pasar de un método fuera de política a uno dentro de política
-no mueve el techo.
+no mueve el techo. En P6, la malla con demanda doble, Q-learning falla
+($+28.5$\,\%) y SARSA, cuya base publicada no convergió, queda en FALLA
+provisional ($+23.5$\,\%).
 
 La ablación \texttt{ql\_colas}, el mismo Q-learning con la recompensa
 de colas, aísla el efecto de la señal. Con demanda nominal o moderada,
@@ -57,24 +96,28 @@ Tabla~\ref{tab:veredicto-ql-colas}, donde, al revés que en el retraso,
 un valor positivo es una mejora), mientras su retraso sube cerca de un
 10\,\%. El límite está en el aprendiz tabular, algoritmo y
 representación discretizada: IPPO \emph{local}, sin mensajes y con la
-misma recompensa, tiene menos retraso que Q-learning en los cinco
+misma recompensa, tiene menos retraso que Q-learning en los seis
 casos.
 % fuente: plan2/veredicto.csv (ql, sarsa, ql_colas: delta_fijo, delta_act, delta_recompensa,
-% convergio); plan2/evaluacion_<esc>_resumen.csv (timeloss_prom de ql e ippo_local publicadas)
+% convergio; P6: ql +28.5 FALLA, sarsa +23.5 PENDIENTE, provisional FALLA); plan2/evaluacion_<esc>_resumen_fijo_2509.csv
+% (timeloss_prom de ql e ippo_local publicadas: P1 23.261 y 21.186; P2 141.138 y 119.428; P3 24.408 y 22.212;
+% P4 33.029 y 30.913; P5 29.690 y 26.229; P6 47.193 y 39.148)
 
 DQN recibe la misma observación con mensajes y la misma recompensa que
 IPPO \emph{vecinos}, con hiperparámetros fijados antes de su prueba de
 humo en el cruce aislado y sin ajuste por caso. Mejora al fijo en P1,
 P3 y P4 ($-3.5$, $-1.8$ y $-3.4$\,\%), funciona en P2 ($-19.4$\,\%)
-pero ahí empata con el actuado, y en P5 no convergió (provisional
-FALLA, $+11.1$\,\%). IPPO \emph{vecinos} queda por delante de DQN en
-los cinco casos: por entre 0.7 y 6.0~s en P1, P2, P3 y P5, y por
-0.07~s en P4, donde los dos quedan prácticamente iguales. MAPPO queda
-por delante de DQN en cuatro casos; en P4 tiene 29.45~s y DQN,
-29.04~s. Si la distancia entre DQN e IPPO es del algoritmo o de los
-hiperparámetros queda abierto.
+pero ahí empata con el actuado, y en P5 y P6 no convergió (provisional
+FALLA, $+11.1$\,\% en los dos casos). IPPO \emph{vecinos} queda por
+delante de DQN en los seis casos: por entre 0.7 y 6.0~s en P1, P2, P3,
+P5 y P6, y por 0.07~s en P4, donde los dos quedan prácticamente
+iguales. MAPPO queda por delante de DQN en cuatro casos; en P4 tiene
+29.45~s y DQN, 29.04~s, y en P6, 41.32 y 40.80~s. Si la distancia
+entre DQN e IPPO es del algoritmo o de los hiperparámetros queda
+abierto.
 % fuente: plan2/veredicto.csv (dqn, ippo_vecinos y mappo: retraso, delta_fijo,
-% delta_act, p_act, convergio); rl_dqn.py (HIPER, fijados antes de la prueba de humo)
+% delta_act, p_act, convergio; P6: dqn 40.804 +11.1 no convergio, ippo_vecinos 37.542, mappo 41.319);
+% rl_dqn.py (HIPER, fijados antes de la prueba de humo)
 
 \noindent\textbf{3. Medido contra referencias tuneadas en cada caso, el
 margen de mejora lo fijan la referencia y la red, no solo la demanda, y
@@ -83,41 +126,74 @@ volvió a tunear en cada caso (Tabla~\ref{tab:plan2-fijo}). La fase
 exploratoria ya había mostrado el peso de ese paso: al barrer también
 el reparto de verde, el fijo del corredor pasó de 31.9 a 21.2~s de
 retraso, y la mejora de IPPO \emph{vecinos} frente a él, de un 38 a un
-6\,\% (Anexo~C). En la malla de nueve cruces pesa sobre todo la
-coordinación: el fijo con desfases en ajedrez deja 20.8~s de retraso, y
-el mejor programa sin desfases del barrido, 29.0~s. Contra ese fijo coordinado,
-todos los controles sin mensajes pierden entre un 21.8 y un 42.5\,\%, y
-ningún modelo lo supera.
-% fuente: plan2/barrido_<esc>.csv (fila de menor timeloss_prom; malla3: ajedrez 20.81 s, mejor
-% esquema cero 29.01 s); plan2/veredicto.csv (actuado, ql, sarsa e ippo_local en P5); fase
-% exploratoria (Anexo C): fijo 25/25 con desfase de 25 s, 31.9 s; fijo 20/10 con desfase de 15 s,
-% 21.2 s; IPPO vecinos -6 % frente al segundo y -38 % frente al primero
+6\,\% (Anexo~C). En la malla de nueve cruces, dentro de la malla de
+programas que barrió el plan, pesa sobre todo la coordinación: el fijo
+con desfases en ajedrez deja 20.8~s de retraso, y el mejor programa sin
+desfases, 29.0~s. Contra ese fijo coordinado, todos los controles sin
+mensajes pierden entre un 21.8 y un 42.5\,\%, y ningún modelo lo
+supera. Ese barrido empezaba en 15~s de verde de avenida. Con 10~s de
+verde en cada fase, un ciclo corto sin desfases queda a la par del
+programa en ajedrez (Sección~\ref{sec:robustez}), de modo que el peso
+de la coordinación vale para los ciclos que el plan barrió y no para
+cualquier ciclo. Con el doble de demanda (P6) el barrido tampoco
+favorece los desfases: gana un ciclo corto de 31~s sin desfases, con
+15~s de verde de avenida y 10~s de transversal. Como ese ganador quedó
+en el borde de la malla, la regla del plan la extendió hasta 10~s de
+avenida, y el programa se confirmó.
+% fuente P6: plan2/barrido_malla3_alta.csv (barrer_fijo.py --metrica timeloss_prom, 72 configuraciones, semillas
+% 2001-2003; ganador 15/10 esquema cero, timeloss 36.91 s, sd 0.40; mejor 10/10: 139.45 s; ciclo 31 s con el ambar
+% de 3 s); plan2/malla3_alta.add.xml
+% fuente: plan2/barrido_<esc>.csv del 25.09 (git 37f9680 o HEAD; fila de menor timeloss_prom; malla3: ajedrez
+% 25/15 20.81 s, mejor esquema cero 15/10 29.01 s, semillas 2001-2003); plan2/veredicto.csv (actuado, ql, sarsa e
+% ippo_local en P5); barrido de robustez: plan2/barrido_malla3.csv vigente (10/10 cero 21.23 s de retraso total,
+% segundo 25/15 ajedrez 21.28 s); fase exploratoria (Anexo C): fijo 25/25 con desfase de 25 s, 31.9 s; fijo 20/10
+% con desfase de 15 s, 21.2 s; IPPO vecinos -6 % frente al segundo y -38 % frente al primero
 
 El actuado usa las mismas fases y los mismos límites de verde que los
 agentes. Contra los fijos tuneados empata en P1 y P4, mejora un
 1.1\,\% en P3, funciona solo en P2 ($-19.8$\,\%) y falla en P5
-($+21.8$\,\%). Un control que decide cruce por cruce sin información
-del vecino solo supera a un fijo coordinado en un 5\,\% o más cuando
-la demanda excede la capacidad, como en P2. Ninguno de los tres
-trabajos analizados en el estado del arte usa el actuado como línea
-base (Capítulo~\ref{cap:estado-arte}). Como ninguna de las dos
-referencias es siempre la más exigente, un resultado de control
-semafórico por aprendizaje por refuerzo que aspire a ser relevante en
-la práctica debe medirse contra las dos.
-% fuente: plan2/veredicto.csv (actuado: delta_fijo, ic_fijo, p_fijo, veredicto)
+($+21.8$\,\%) y en P6 ($+73.3$\,\%). Un control que decide cruce por
+cruce sin información del vecino solo supera a un fijo tuneado en un
+5\,\% o más en P2, donde la demanda del corredor excede la capacidad de
+un carril. En la malla con demanda doble ocurre lo contrario: el
+actuado colapsa, con \textit{spillback} en los enlaces entre cruces
+durante 164~s de la hora en promedio, frente a 0~s con el fijo. El fijo, a su vez, solo es
+exigente con la demanda para la que se tuneó: en el análisis de
+sensibilidad, el fijo de P1 sin volver a tunear queda por detrás del
+actuado en todos los niveles de demanda distintos del nominal, tanto en
+\texttt{timeLoss} como en retraso total
+(Tabla~\ref{tab:plan2-demanda}). Ninguno de los tres trabajos
+analizados en el estado del arte usa el actuado como línea base
+(Capítulo~\ref{cap:estado-arte}). Como ninguna de las dos referencias
+es siempre la más exigente, un resultado de control semafórico por
+aprendizaje por refuerzo que aspire a ser relevante en la práctica debe
+medirse contra las dos.
+% fuente: plan2/veredicto.csv (actuado: delta_fijo, ic_fijo, p_fijo, veredicto; P6 +73.3 [66.9, 79.3] FALLA);
+% plan2/evaluacion_malla3_alta_resumen_fijo_2509.csv (spillback_seg: actuado 163.77, fijo_2509 0.0; media de 30
+% semillas); plan2/demanda/resumen_demanda.csv
+% (fijo_p1 frente a actuado por nivel, delta_timeloss_prom: 0.5 +6.03/+1.54, 0.75 +3.96/-0.17, 1.25 +93.79/+79.34,
+% 1.5 +122.13/+45.01, 1.75 +34.46/-24.61, 2.0 +53.79/-19.76, 2.25 +62.58/-12.15, variable +27.74/-18.95; en
+% delta_retraso_total_prom el orden es el mismo en todos los niveles)
 
 En las métricas secundarias, la política publicada de IPPO
 \emph{vecinos} cumple la meta de colas ($\geq 20$\,\%) en P3 y P5, y
 la de CO$_2$ ($\geq 5$\,\%) solo en P2, mientras en P3 y P5 las
 emisiones suben. La de \textit{throughput} ($+10$\,\%) solo es
-evaluable en P2, donde la demanda supera la capacidad, y no se cumple:
-allí el cambio es de $+0.2$\,\% (Tabla~\ref{tab:plan2-metas}).
-% fuente: plan2/evaluacion_<esc>_resumen.csv (ippo_vecinos publicada: cola_prom, co2_prom,
-% throughput; delta_pct frente al fijo; throughput en P2: ippo_vecinos_s2042 +0.16 %)
+evaluable en P2 y P6, donde la demanda supera lo que la red sirve en la
+hora, y no se cumple en ninguno: el cambio es de $+0.2$\,\% en P2 y de
+$-0.5$\,\% en P6 (Tabla~\ref{tab:plan2-metas}). En P6 la política
+publicada no cumple ninguna meta secundaria: su cola media sube un
+47.5\,\% y su CO$_2$ baja un 4.2\,\%, por debajo del 5\,\% de la meta.
+% fuente: tablas/plan2_metas.tex (plan2/tablas_cap5.py --metrica timeloss_prom --fijo fijo_2509 --sin-trivial;
+% ippo_vecinos publicada: P3 cola -41.31, P5 cola -28.98; P2 co2 -12.26; P3 co2 +1.90, P5 co2 +5.15; throughput
+% en P2 ippo_vecinos_s2042 +0.16 %); P6: plan2/evaluacion_malla3_alta_resumen_fijo_2509.csv (ippo_vecinos_s42:
+% cola_prom +47.51 [41.42, 54.10], co2_prom -4.25 [-5.01, -3.40], throughput -0.45 [-0.67, -0.25]; en el texto
+% con el redondeo de tablas/plan2_metas.tex: +47.5, -4.2 y -0.5; throughput del fijo 8181.5 veh con 8700 veh/h
+% de demanda)
 
 \noindent\textbf{4. IPPO con mensajería entre vecinos es el único modelo
-con veredicto firme en los cinco casos que no falla en ninguno, y
-supera al actuado en todos. Lo que separa funcionar de fallar es la
+con veredicto firme en P1 a P5 que no falla en ninguno, empata de forma
+provisional en P6 y supera al actuado en los seis casos. Lo que separa funcionar de fallar es la
 información del vecino; ni el término de \textit{spillback} ni el
 crítico centralizado añaden algo medible.} Frente al fijo tuneado, IPPO
 \emph{vecinos} reduce el retraso un 6.8\,\% en P1, un 23.3\,\% en P2 y
@@ -125,18 +201,49 @@ un 8.8\,\% en P3 (FUNCIONA), y un 3.6\,\% en P4, por debajo del umbral
 del 5\,\% (MEJORA). En P5 empata con el fijo coordinado: $+1.8$\,\%,
 con un intervalo \textit{bootstrap} de $+0.4$ a $+3.4$\,\% que no
 incluye el cero, pero sin significancia en la prueba de Wilcoxon
-($p = 0.52$), y la regla exige las dos condiciones. Frente al actuado
-su retraso es menor en los cinco casos, entre un 3.6 y un 7.8\,\% en
-P1 a P4 y un 16.4\,\% en P5, siempre con $p < 0.001$. La variante
+($p = 0.52$), y la regla exige las dos condiciones. En P6 queda un
+2.2\,\% por encima del fijo, con un intervalo de $-1.4$ a $+6.2$\,\% y
+$p = 0.57$; su veredicto es PENDIENTE, con EMPATA provisional, porque
+solo una de sus tres bases converge y no es la publicada. Frente al
+actuado su retraso es menor en los seis casos, entre un 3.6 y un
+7.8\,\% en P1 a P4, un 16.4\,\% en P5 y un 41.0\,\% en P6, siempre con
+$p < 0.001$. La variante
 \emph{local}, con el mismo algoritmo, la misma recompensa y los mismos
 hiperparámetros pero sin mensajes, empata con el fijo en P1 y falla en
-P3, P4 y P5 (Tabla~\ref{tab:veredicto-ippo-local}). Solo funciona en
+P3, P4, P5 y P6 (Tabla~\ref{tab:veredicto-ippo-local}); en P6 sus tres
+bases convergen y queda un 6.6\,\% por encima del fijo. Solo funciona en
 P2 ($-22.8$\,\%), donde también funciona el actuado: cuando la demanda
 del corredor supera la capacidad de un carril, reaccionar a la cola
-local basta.
+local basta. En P3, en cambio, la política publicada de \emph{vecinos}
+da el mismo resultado que un control trivial que no usa los mensajes
+(conclusión~5), así que en ese caso la diferencia con \emph{local} no
+muestra que la información del vecino se use.
 % fuente: plan2/veredicto.csv (ippo_vecinos e ippo_local, P1-P5: delta_fijo, ic_fijo, p_fijo,
-% delta_act, p_act; P5 ippo_vecinos: ic_fijo [0.4, 3.4], p_fijo 0.523, EMPATA);
-% plan2/evaluacion_malla3_resumen.csv (fijo 20.8387, ippo_vecinos_s2042 21.212)
+% delta_act, p_act; P5 ippo_vecinos: ic_fijo [0.4, 3.4], p_fijo 0.523, EMPATA); P3: igual_trivial.txt de la
+% auditoria del 27.09.2026 (red ippo_vecinos_s4042 = trivial en 30/30 semillas);
+% plan2/evaluacion_malla3_resumen_fijo_2509.csv (fijo_2509 20.839, ippo_vecinos_s2042 21.212); P6: plan2/veredicto.csv
+% (ippo_vecinos s42: +2.2 [-1.4, 6.2], p_fijo 0.567, delta_act -41.0, p_act 1.86e-09, convergio no, 1/3;
+% ippo_local s4042: +6.6 [5.5, 7.8], 3/3, FALLA)
+
+Resumido en un número, la media geométrica de los cocientes de IPPO
+\emph{vecinos} sobre P1 a P6 (Ecuación~\ref{eq:media-geometrica}) da un
+cambio del \texttt{timeLoss} de $-6.83$\,\% frente al fijo tuneado, con
+un intervalo de $-7.53$ a $-6.12$\,\%, y de $-14.35$\,\% frente al
+actuado, con un intervalo de $-15.08$ a $-13.64$\,\%
+(Tabla~\ref{tab:plan2-numero-unico}). MAPPO queda después, con $-4.94$ y
+$-12.61$\,\%; DQN, en $-1.55$\,\% frente al fijo, e IPPO \emph{local},
+sin mensajes, en $+1.35$\,\%, con un intervalo de $+0.92$ a
+$+1.78$\,\% que no incluye el cero. El índice de \emph{vecinos}
+descansa sobre todo en P2: sin ese caso, frente al fijo pasa a
+$-3.14$\,\%. Sin P6, es decir, sobre P1 a P5, el índice es de
+$-8.55$\,\% frente al fijo y de $-7.72$\,\% frente al actuado. P6 lo
+reduce frente al fijo, con el que \emph{vecinos} empata en ese caso, y
+casi duplica la ventaja frente al actuado, que ahí colapsa. La celda de P6 que entra al índice es provisional, porque
+su base publicada no convergió.
+% fuente: plan2/sintesis_numero_unico.csv (sintesis_plan.py --metrica timeloss_prom --fijo fijo_2509 --sin-trivial;
+% casos del indice: P1-P6; ippo_vecinos: fijo_2509 -6.83 [-7.53, -6.12], actuado -14.35 [-15.08, -13.64],
+% sin_P2 -3.14, sin_P6 -8.55 (fijo) y -7.72 (actuado), iguales a los del 25.09 sobre P1-P5; mappo -4.94/-12.61;
+% dqn -1.55; ippo_local +1.35 [0.92, 1.78]); plan2/veredicto.csv (P6 ippo_vecinos: convergio no)
 
 La variante \emph{spill} no mejora a \emph{vecinos}. En P1 y P2 el
 término se activa y la variante queda en $-5.2$ y $-22.7$\,\% frente
@@ -144,20 +251,30 @@ al fijo, contra $-6.8$ y $-23.3$\,\% de \emph{vecinos}; en P2 su
 política publicada deja incluso más segundos de \textit{spillback} en
 la hora (11.3 frente a 1.8, medias de treinta semillas). En P3, P4 y P5
 el término nunca se activa, porque la cola de los enlaces no llega a la
-mitad de sus plazas, y la variante reproduce el entrenamiento de
-\emph{vecinos} y comparte sus veredictos
-(Capítulo~\ref{cap:implementacion}). MAPPO comparte con \emph{vecinos}
+mitad de sus plazas: la variante reproduce el entrenamiento de
+\emph{vecinos}, su evaluación coincide con la de \emph{vecinos} semilla
+a semilla en las tres bases y comparte sus veredictos
+(Sección~\ref{sec:spill-vecinos}). En P6 el término sí se activa
+durante el entrenamiento, y la evaluación de \emph{spill} difiere de la
+de \emph{vecinos} en todas las semillas, pero no la mejora: queda un
+3.6\,\% por encima del fijo, frente al 2.2\,\% de \emph{vecinos}, y
+ninguna de sus tres bases converge. MAPPO comparte con \emph{vecinos}
 la red del actor y la observación con mensajes, cambia el crítico por
 uno que ve a todos los semáforos y entrena su propia política. Funciona
-en P1 y P2 y empata con el fijo en P5; en P3 y P4 su base publicada no
-convergió. Su retraso queda a menos de medio segundo del de
-\emph{vecinos} en P1, P3, P4 y P5, y 2.6~s por encima en P2: con la
-misma observación y la misma recompensa, el crítico centralizado no
-mejora el retraso y converge con menos regularidad en las redes.
+en P1 y P2 y empata con el fijo en P5; en P3, P4 y P6 su base publicada
+no convergió. Su retraso queda a menos de medio segundo del de
+\emph{vecinos} en P1, P3, P4 y P5, 2.6~s por encima en P2 y 3.8~s por
+encima en P6, donde ninguna de sus bases converge: con la misma
+observación y la misma recompensa, el crítico centralizado no mejora el
+retraso y converge con menos regularidad en las redes y en la malla con
+demanda doble.
 % fuente: plan2/veredicto.csv (ippo_spill, mappo); plan2/evaluacion_corredor_alta_resumen.csv
-% (spillback_seg); maximo de cola_max_enlace en plan2/resultados_<esc>_ippo_vecinos_s*.csv (red 9,
-% red_alta 12, malla3 8) frente a 19 de 38 plazas (18 de 37 en malla3): comun.plazas_carril;
-% identidad: plan2/resultados_<esc>_ippo_spill_s<base>.csv frente a _ippo_vecinos_s<base>.csv
+% (spillback_seg: ippo_spill_s4042 11.3, ippo_vecinos_s2042 1.7667); identidad semilla a semilla en P3-P5 (30/30
+% en cada base, salvo ret_spill): plan2/parciales/eval_<esc>_ippo_spill_s<base>.csv frente a
+% _ippo_vecinos_s<base>.csv (evaluaciones de spill completadas el 27-28.09.2026); P6: 0/30 semillas identicas en
+% cada base (hechos_2509.py); spill_activaciones > 0 en 124, 107 y 112 de 200 episodios (plan2/resultados_malla3_alta_
+% ippo_spill_s42/_s2042/_s4042.csv); plan2/veredicto.csv P6 (ippo_spill s42 38.053, +3.6 [0.6, 7.0], p 0.114, 0/3;
+% ippo_vecinos s42 37.542, +2.2; mappo s2042 41.319, +12.5, 0/3; 41.319 - 37.542 = 3.8 s)
 
 \noindent\textbf{5. El protocolo experimental resultó determinante para
 la validez de las conclusiones.} Las buenas prácticas que propone el
@@ -168,12 +285,11 @@ evalúa todos los controles sobre las mismas semillas. La fase
 exploratoria mostró cuánto pesa el protocolo. En el corredor, el
 Q-learning de esa fase perdía un 60\,\% frente al fijo, medido con la
 recompensa de colas, 40 episodios, una sola semilla base y la política
-del último episodio; con la misma recompensa y el protocolo
-del plan la pérdida es del 10.6\,\%, y con la de retraso, del
-9.2\,\%. En el mismo corredor, dos entrenamientos que solo diferían en
-el instante en que el agente toma sus decisiones dieron 25.8 y 33.9~s
-de retraso: una única corrida de entrenamiento no caracteriza a la
-política aprendida.
+del último episodio; con la misma recompensa y el protocolo del plan la
+pérdida es del 10.6\,\%, y con la de retraso, del 9.2\,\%. En el mismo
+corredor, dos entrenamientos que solo diferían en el instante en que el
+agente toma sus decisiones dieron 25.8 y 33.9~s de retraso: una única
+corrida de entrenamiento no caracteriza a la política aprendida.
 % fuente: plan2/veredicto.csv (ql y ql_colas, P1); fase exploratoria: evaluacion_corredor_resumen.csv
 % de demo_rl (brazo rl, +60.1; media 33.856, ic95 1.661)
 
@@ -186,45 +302,238 @@ resultado es frágil entre bases. Las dos bases que lo alcanzan
 publicaron un \textit{checkpoint} aislado (episodios 40 y 50 de 200,
 con 19.69~s de validación frente a 21.29~s o más en las otras
 diecinueve validaciones de cada serie), y la tercera queda igual al
-fijo, con $-0.1$\,\% (Tabla~\ref{tab:veredicto-bases-ippo-vecinos}). La
-evaluación con semillas ajenas confirma que esa política existe, pero
-el entrenamiento no se queda en ella. Tres bases por modelo detectan
-esa fragilidad, pero no alcanzan para caracterizarla.
+fijo, con $-0.1$\,\% (Tabla~\ref{tab:veredicto-bases-ippo-vecinos}).
+En P6 las tres bases de \emph{vecinos} quedan entre un 2.2 y un
+13.0\,\% por encima del fijo. Las dos de mejor validación dan 34.80 y
+34.55~s de media en las dos semillas de validación, frente a 36.42~s
+del fijo en esas semillas, y en la evaluación quedan un 2.2 y un
+9.6\,\% por encima de él. Ninguna de las dos converge. La única base
+que converge es la de peor validación, y queda un 13.0\,\% por encima
+del fijo. Tres bases por modelo detectan esa fragilidad, pero no
+alcanzan para caracterizarla.
 % fuente: plan2/politica_red_vecinos_s42.json y _s4042.json (val_serie, ep_elegido);
-% plan2/evaluacion_red_resumen.csv (ippo_vecinos_s2042: -0.1 %, p = 0.73)
+% plan2/evaluacion_red_resumen_fijo_2509.csv (ippo_vecinos_s2042: -0.10 %, p = 0.73); P6: tablas/veredicto_bases.tex
+% y hechos_2509.py (ippo_vecinos s42 val 34.80, eval 37.54, +2.22 %; s2042 val 38.81, +13.03 %; s4042 val 34.55,
+% eval 40.24, +9.57 %); plan2/fijo_validacion_2509.json (malla3_alta_999 36.22, malla3_alta_1999 36.62; media
+% 36.42); convergencia por base: tablas/veredicto_bases.tex (s42 no, s2042 si, s4042 no); por semilla de validacion
+% (plan2/resultados_malla3_alta_ippo_vecinos_s42.csv ep 140: 34.48 y 35.13; _s4042.csv ep 170: 34.36 y 34.75)
+
+El análisis de robustez mostró qué hay detrás de esos \textit{checkpoints}
+aislados. La política publicada de P3 da, semilla a semilla, el mismo
+retraso que un control trivial que cambia de fase en cuanto la máscara
+lo permite, y la otra base que supera al fijo coincide con ese trivial
+en 25 de las 30 semillas. El plan no incluía el trivial. Evaluado
+después con las mismas semillas, tiene un 8.6\,\% menos de retraso
+total que el fijo tuneado de P3 y un 6.9\,\% menos que el de P4, porque
+la malla de ese fijo no bajaba de 15~s de verde de avenida. El
+$-8.8$\,\% de P3 mide, por tanto, lo que el fijo del plan dejaba en
+los ciclos cortos, y no una coordinación aprendida
+(Sección~\ref{sec:robustez}). Solo un control trivial evaluado con las
+mismas semillas permite reconocer ese caso. En P6 el trivial colapsa,
+con un retraso total un 236.7\,\% mayor que el del fijo, así que el
+empate de \emph{vecinos} en ese caso no se explica por él.
+% fuente: igualdad con el trivial: plan2/parciales/eval_red_trivial.csv frente a eval_red_ippo_vecinos_s4042.csv
+% (30/30) y eval_red_ippo_vecinos_s42.csv (25/30), auditoria del 27.09.2026 (igual_trivial.py); trivial frente
+% al fijo del 25.09 en retraso total: P3 -8.6 [-9.2, -8.1], P4 -6.9 [-8.1, -5.8] (contra_trivial.py);
+% malla del 25.09: comentario de 37f9680:plan2/red.add.xml y red_alta.add.xml (avenida 15/20/25/30/35 s);
+% P6: plan2/robustez_veredicto.csv (trivial 276.723 s de retraso total, +236.7 [186.5, 290.3] frente al fijo)
 
 \noindent\textbf{6. Alcance del proyecto: la coordinación aprendida
 mejora al fijo tuneado y al actuado en corredores y redes arteriales
-pequeñas e iguala al fijo coordinado en una malla, pero no alcanza las
-metas cuantitativas.} De los siete casos del plan, cinco (P1 a P5)
-quedaron desarrollados con el mismo método, uno más que el mínimo de
-cuatro (P1 a P4) que fijó el plan aprobado por el asesor el
-23.09.2026; P6 y P7 quedan como trabajo siguiente. La meta principal,
-una reducción del retraso del 25 al 40\,\%, no se cumple en ningún
-caso; el más cercano es P2, con un intervalo que llega a
-$-23.9$\,\%. Las metas secundarias se cumplen solo en parte
-(conclusión~3).
-% fuente: plan2/veredicto.csv (ippo_vecinos P2: ic_fijo [-23.9, -22.7]); plan2/ESPEC.md (aprobado por
-% el asesor, correo del 23.09: P1-P4 como minimo, P5 si se puede)
+pequeñas e iguala al fijo tuneado en la malla de nueve cruces, pero no
+alcanza las metas cuantitativas.} De los siete casos del plan, seis
+(P1 a P6) quedaron desarrollados con el mismo método, dos más que el
+mínimo de cuatro (P1 a P4) que fijó el plan aprobado por el
+asesor. P7 queda como trabajo siguiente. La meta principal, una
+reducción del retraso del 25 al 40\,\%, no se cumple en ningún caso;
+el más cercano es P2, con un intervalo que llega a $-23.9$\,\%. En P6
+ningún aprendiz del plan tiene menos retraso medio que el fijo. Las metas
+secundarias se cumplen solo en parte, y en P6 ninguna (conclusión~3).
+% fuente: plan2/veredicto.csv (ippo_vecinos P2: ic_fijo [-23.9, -22.7]; P6: delta_fijo de todos los aprendices
+% entre +2.2 y +28.5); plan2/ESPEC.md (aprobado por el asesor, correo del 23.09: P1-P4 como minimo, P5 si se
+% puede); metas de P6: tablas/plan2_metas.tex
 
 La afirmación que el trabajo puede sostener es, por tanto, que en
 corredores y redes de dos o tres semáforos sintéticos una coordinación
 aprendida con mensajes entre vecinos supera a las dos referencias
 clásicas por un margen medible, y que en una malla de nueve cruces
-iguala a un fijo coordinado y supera con amplitud al actuado; no que
-reduzca el retraso en la magnitud que fijan las metas.
+iguala al fijo tuneado y supera con amplitud al actuado, con la demanda
+nominal y con el doble de ella; no que reduzca el retraso en la
+magnitud que fijan las metas. Con demanda doble en la malla, ningún
+aprendiz del plan mejora al fijo tuneado. IPPO \emph{vecinos} queda empatado con
+él, de forma provisional porque su base publicada no convergió, y todos
+los aprendices superan al actuado, que colapsa, por entre un 25.9 y un
+41.0\,\%. En ese caso la espera para entrar a la red es de unos
+45.5~s por vehículo con el fijo, el actuado y todas las políticas: el
+cuello de botella está en la inserción y es común a todos, así que, a
+diferencia de P2, sumar esa espera al retraso no cambia el veredicto.
+% fuente: plan2/veredicto.csv (P6: delta_fijo de todos los aprendices >= +2.2; ippo_vecinos PENDIENTE, provisional
+% EMPATA; delta_act de -25.9 (ql) a -41.0 (ippo_vecinos); actuado +73.3); plan2/evaluacion_malla3_alta_resumen_
+% fijo_2509.csv (retraso_insercion_prom: fijo 45.46, actuado 45.52, ippo_vecinos_s42 45.51; entre 45.28 y 45.65 en
+% el fijo, el actuado y las 21 politicas; el trivial, fuera del veredicto, 99.19); plan2/robustez_veredicto.csv (P6 ippo_vecinos, retraso total: +1.1 [-0.6, 2.8], p 0.596)
+
+Ese alcance se puede poner en cifras
+(Figura~\ref{fig:plan2-mejora-caso}). Frente al fijo tuneado, IPPO
+\emph{vecinos} reduce el \texttt{timeLoss} un 6.8\,\% en el corredor
+de dos semáforos y un carril por sentido con 1810~veh/h (P1), un
+23.3\,\% en el mismo corredor con 3620~veh/h (P2), un 8.8\,\% en la red
+de tres semáforos, dos carriles por sentido y una rotonda con
+2150~veh/h (P3) y un 3.6\,\% en esa red con 2580~veh/h (P4); en la
+malla de nueve semáforos y dos carriles por sentido con 4350~veh/h
+(P5) empata, y en esa malla con 8700~veh/h (P6) empata de forma
+provisional, con $+2.2$\,\%. La mejora no crece con el número de
+semáforos, y la demanda alta solo la aumenta en el corredor: es mayor
+donde la demanda supera la capacidad de su carril y nula en la malla de
+nueve cruces, con la demanda nominal y con el doble.
+% fuente: plan2/veredicto.csv (ippo_vecinos, delta_fijo P1-P6; P6 +2.2 [-1.4, 6.2], PENDIENTE, provisional EMPATA);
+% semaforos, carriles de la avenida y demanda por caso: hechos_2509.md (generado por hechos_2509.py desde
+% plan2/<esc>.net.xml y plan2/<esc>.rou.xml); fig_plan2_mejora_caso.png (sintesis_plan.py --metrica timeloss_prom
+% --fijo fijo_2509 --sin-trivial, con el punto de P6)
+
+El análisis de varianza de la Tabla~\ref{tab:plan2-anova} mide de qué
+depende el resultado. Con los seis aprendices que tienen tres bases en
+todos los casos, sobre P1 a P6, el caso explica el 53.7\,\% de la
+variación del cambio frente al fijo, el modelo el 36.5\,\%, su
+interacción el 7.4\,\% y la semilla base el 2.4\,\%. Con los cuatro de
+redes neuronales el caso pesa todavía más (79.5\,\%), frente a un
+7.4\,\% del modelo, un 10.0\,\% de la interacción y un 3.1\,\% de la
+base. Sobre P1 a P5 el reparto era casi el mismo (52.5, 37.7, 7.7 y
+2.1\,\% con los seis; 76.5, 11.5, 9.5 y 2.5\,\% con los cuatro): P6
+sube algo el peso del caso y, entre los de redes neuronales, baja el
+del modelo. El resultado depende ante todo
+del escenario, es decir, de su red, su demanda y el fijo tuneado para
+él, y después del modelo. La semilla base pesa poco en el conjunto,
+aunque en celdas concretas, como la red de P3, decide el veredicto
+(conclusión~5).
+% fuente: plan2/sintesis_anova.csv (sintesis_plan.py --metrica timeloss_prom --fijo fijo_2509 --sin-trivial;
+% casos P1-P6: Todos: caso 53.7, modelo 36.5, interaccion 7.4, base 2.4; Profundos: 79.5/7.4/10.0/3.1); sobre
+% P1-P5 (plan2/p1p5_sintesis_anova.csv, sintesis_plan.py ... --casos P1-P5 --prefijo p1p5_): Todos 52.5/37.7/7.7/2.1;
+% Profundos 76.5/11.5/9.5/2.5
 
 Pesa más la información que el algoritmo. DQN, que recibe los
 mensajes, tiene menos retraso que IPPO \emph{local}, que no los
 recibe, en P1, P3, P4 y P5, y sin mensajes ningún aprendiz supera al
-fijo con demanda nominal. Entre los que reciben mensajes, IPPO
-\emph{vecinos} tiene menos retraso que DQN en los cinco casos, y MAPPO
-en cuatro: en P4 DQN queda por delante de MAPPO (29.04 frente a
-29.45~s). Queda abierto
-si el método se sostiene con demanda alta en la malla (P6), en redes
-mayores (P7) y en el cruce real de Lima.
+fijo con demanda nominal. En P6 el orden se invierte (40.80 frente a
+39.15~s), pero la base publicada de DQN no convergió. Entre los que
+reciben mensajes, IPPO \emph{vecinos} tiene menos retraso que DQN en
+los seis casos, y MAPPO en cuatro: en P4 y P6 DQN queda por delante de
+MAPPO (29.04 frente a 29.45~s y 40.80 frente a 41.32~s).
 % fuente: plan2/veredicto_congelado_0355.md y .csv (retraso de dqn frente a ippo_local: P1 20.56 y
-% 21.19; P3 21.32 y 22.21; P4 29.04 y 30.91; P5 23.15 y 26.23; en P2, 124.66 y 119.43)
+% 21.19; P3 21.32 y 22.21; P4 29.04 y 30.91; P5 23.15 y 26.23; en P2, 124.66 y 119.43); P6: plan2/veredicto.csv
+% (dqn 40.804, no convergio; ippo_local 39.148; ippo_vecinos 37.542; mappo 41.319)
+
+Las políticas tampoco se transfieren a otra demanda. En el análisis de
+sensibilidad del corredor (Tabla~\ref{tab:plan2-demanda}), la política
+de P1 solo gana al fijo vuelto a tunear para cada nivel con la demanda
+nominal ($-6.8$\,\% de \texttt{timeLoss}); con 0.5 y 0.75 veces esa
+demanda pierde un 3.9 y un 3.6\,\%. La de P2 gana en \texttt{timeLoss}
+con 1.75 a 2.25 veces la demanda nominal y con un perfil que cambia
+dentro de la hora, entre un 16.6 y un 23.3\,\%, pero si se suma la
+espera para entrar a la red solo gana con 1.75 veces, un 3.6\,\%: la
+ganancia con demanda alta es en buena parte cola que queda fuera de la
+red.
+% fuente: plan2/demanda/resumen_demanda.csv y tablas/demanda_corredor.tex (ippo_vecinos_s4042: delta_timeloss_prom
+% 1.0 -6.82, 0.5 +3.94, 0.75 +3.59; ippo_vecinos_s2042: delta_timeloss_prom 1.75 -22.84, 2.0 -23.3, 2.25 -17.32,
+% variable -16.57; delta_retraso_total_prom 1.75 -3.64, 2.0 +1.63, 2.25 +10.04, variable +20.62)
+
+Frente a otros trabajos (Sección~\ref{sec:comparacion-literatura} y
+Anexo~E), la mejora reportada depende sobre todo de la referencia. En
+los trabajos con aprendizaje por refuerzo, la mediana es de
+$-46.0$\,\% frente a un fijo sin tunear o no declarado (15 obras), de
+$-35.7$\,\% frente a un fijo tuneado, un plan de Webster o el plan real
+(10 obras), de $-20.7$\,\% frente al actuado (4 obras) y de
+$-15.5$\,\% frente a Max-Pressure u otra heurística adaptativa (17
+obras). Frente a una referencia débil, esta tesis queda en ese rango:
+en la fase exploratoria, con diez semillas, las políticas de IPPO
+\emph{vecinos} daban un $-38$\,\% frente al fijo del corredor de la
+primera ronda, con 25~s de verde en cada fase (Anexo~C). Frente a un
+fijo tuneado, con $-6.83$\,\% en el número único ($-8.55$\,\% sobre P1
+a P5) y $-23.3$\,\% en P2, su mejor caso, la mejora es menor que la mediana publicada, pero del
+orden de la de los trabajos que usan referencias igual de cuidadas:
+frente a un fijo de verde uniforme tuneado por barrido, DDPG reduce el
+tiempo de viaje un 8.9\,\% y DQN un 1.3\,\%
+\citep{Genders2019_Framework}; frente al plan real, IPPO aumenta el
+tiempo de viaje en el corredor de Colonia y en la región de Ingolstadt
+\citep{Nguyen2025_TREX}, y ningún algoritmo de EPyMARL supera al plan
+en el corredor de tres cruces \citep{Ault2022_EPyMARL}. Frente al
+actuado, con $-14.35$\,\% ($-7.72$\,\% sobre P1 a P5), la mejora
+también es menor que la mediana.
+La tesis no se comparó con Max-Pressure y no tiene cifra en la última
+categoría. Las métricas tampoco son iguales: el tiempo de viaje, que
+incluye el recorrido a velocidad libre, diluye el porcentaje, y la
+espera detenida lo infla.
+% fuente: anexo_e_trabajos.tex (medianas por tipo de referencia y su comentario de fuente: -46.0, n = 15;
+% -35.65, n = 10; -20.65, n = 4; -15.5, n = 17; Genders y Razavi 2019: -8.9 y -1.3 DQN frente al fijo
+% tuneado; T-REX y EPyMARL: texto del anexo); Anexo C, E3-U4 (-38 % frente al fijo de la primera ronda,
+% 25/25 con desfase de 25 s); plan2/sintesis_numero_unico.csv (ippo_vecinos P1-P6: fijo_2509 -6.83, actuado
+% -14.35; sin_P6, es decir P1-P5: -8.55 y -7.72);
+% plan2/veredicto.csv (P2 ippo_vecinos -23.3)
+
+El análisis de robustez de la Sección~\ref{sec:robustez} volvió a
+evaluar, sin reentrenar, las mismas políticas con dos cambios decididos
+después del veredicto: una métrica que suma al \texttt{timeLoss} la
+espera para entrar a la red y un fijo barrido desde el verde mínimo de
+10~s. Ninguna política cambió, y el \texttt{timeLoss} de todas se
+reprodujo igual. La ventaja de IPPO \emph{vecinos} frente al actuado se
+sostiene en los seis casos, entre un 3.5 y un 23.9\,\%, y un
+11.45\,\% en el número único (8.71\,\% sobre P1 a P5). Frente al fijo
+tuneado solo se sostiene en P1 ($-6.7$\,\%); en P2 a P5 depende de la
+métrica y de la referencia. En P2 cambia por la métrica: la política baja el \texttt{timeLoss} un
+23.3\,\%, pero su espera para entrar sube de 239.6 a 282.0~s por
+vehículo y su retraso total queda un 1.6\,\% por encima del fijo. En P3
+y P4 cambia por la referencia: barrido desde 10~s, el fijo pasa a ser
+un ciclo corto de 10~s por fase. La ampliación de la malla hacia 10~s
+se decidió después de ver que la política publicada de P3 era el
+control trivial; la regla del plan no la exigía. En P5 el resultado es
+frágil: la política coincide con el fijo re-barrido, que ahí es el
+mismo programa que el trivial, en 24 de las 30 semillas, y su veredicto
+queda en FALLA o en EMPATA según cómo trate la prueba de Wilcoxon esos
+empates. En P6 la re-medición no cambia la lectura: el fijo barrido
+con la regla del plan ya llegaba a 10~s de avenida y es el mismo
+programa, la espera para entrar es común a todas las políticas y
+\emph{vecinos} queda un 1.1\,\% por encima del fijo, con un intervalo
+que incluye el cero. Con los dos cambios, el número único de IPPO \emph{vecinos}
+frente al fijo sobre P1 a P6 queda en $-0.03$\,\%, con un intervalo de
+$-0.56$ a $+0.53$\,\% que incluye el cero; sobre P1 a P5 era de
+$-0.24$\,\%, de $-0.80$ a $+0.32$\,\%. Los \textit{checkpoints} ya guardados
+no lo mejoran: en P3, P4 y P5 ninguno de ningún modelo valida por
+debajo del control trivial, y en P2 elegir el de IPPO \emph{vecinos}
+por retraso total no cambia la elección: ninguno de sus 60 valida por
+debajo del fijo con esa métrica. El resultado principal de esta tesis
+sigue siendo el del plan registrado. Su ventaja frente al fijo es
+robusta en P1, en P2 a P4 está condicionada a la métrica y a la
+referencia, el empate de P5 es frágil y el empate provisional de P6 se
+mantiene con la métrica más estricta.
+% fuente: plan2/robustez_veredicto.csv (= plan2/veredicto_v21_respaldo.csv; ippo_vecinos d_a P1 -5.7, P2 -10.1,
+% P3 -7.6, P4 -3.5, P5 -16.1; d_f P1 -6.7, P2 +1.6, P3 -0.5 "= trivial", P4 +2.6, P5 +2.0); plan2/evaluacion_
+% corredor_alta_resumen.csv (retraso_insercion_prom fijo 239.5657, ippo_vecinos_s2042 282.0237; timeloss -23.3);
+% plan2/robustez_p1p5_sintesis_numero_unico.csv (sintesis_plan.py --casos P1-P5 --prefijo robustez_p1p5_: ippo_vecinos
+% -0.24 [-0.80, 0.32], actuado -8.71; con P6, sintesis_plan.py --prefijo robustez_: ippo_vecinos -0.03 [-0.56, 0.53],
+% actuado -11.45); P6: plan2/robustez_veredicto.csv (ippo_vecinos d_f +1.1 [-0.6, 2.8], p 0.596; d_a -23.9);
+% fijo re-barrido de P6 = fijo_2509 (hechos_2509.md: +0.00 %); P5: 24/30 semillas con diferencia cero frente al fijo re-barrido, Wilcoxon
+% p = 0.0277 con los ceros descartados y 0.0702 repartiendolos (auditoria del 27.09.2026, p5_semillas.py y
+% p5_wilcoxon_ceros.py); checkpoints: auditoria del 27.09.2026 (techo de validacion frente al trivial, semillas
+% 999 y 1999, 60 checkpoints por modelo; re-seleccion por retraso total en P2 de ippo_vecinos, analisis_p2.txt:
+% misma eleccion, el mejor de los 60 queda +0.98 % sobre el fijo); timeLoss reproducido: comparacion
+% de plan2/parciales/eval_<esc>_<brazo>.csv con su version en git
+
+El análisis exploratorio posterior de la Sección~\ref{sec:exploratorio},
+con pre-registro propio y semillas distintas de las del plan, sugiere
+que parte del límite de la coordinación está en el entrenamiento y no
+en la información del vecino. Con el descuento contado por segundo y
+una exploración común a todos los semáforos, IPPO \emph{vecinos}
+aprende en P6 un programa basado en el ciclo mínimo y más
+sincronizado, y reduce el
+\texttt{timeLoss} un 6.7\,\% frente al fijo tuneado, con un intervalo
+de $-9.8$ a $-3.7$\,\% en 30 semillas de confirmación, y un 3.1\,\% si
+se suma la espera para entrar a la red; en P4 solo reproduce el
+control trivial. Ese análisis se decidió después del veredicto, se
+probó solo en P1, P4 y P6 y con demanda determinista, y no cambia
+ningún veredicto ni el alcance de esta conclusión.
+% fuente: plan2/exploratorio_coord/HECHOS.md (secciones 4, 5.2 y 8); conf_p6/salidas/juicio_conf_p6.txt
+% (V2 base 4042, 6001-6030: timeLoss -6.7 [-9.8, -3.7], 29/30; retraso total -3.1 [-4.7, -1.7]);
+% sintesis/analizar_fases_p6.txt (ciclo 26 s, sincronia 63.6 %, semilla 999); tanda2/juicio_tanda2.txt
+% (P4 V5 frente al trivial +0.0 [-0.3, 0.4]; P1 V5 no regresion); semillas 1001-1030 no usadas
 
 La fase exploratoria que precedió al plan (Anexo~C) usaba otro
 protocolo: diez semillas de evaluación (1001 a 1010), Q-learning
@@ -232,20 +541,21 @@ entrenado con la recompensa de colas y la política del último episodio
 como política publicada. Donde el plan repitió una medición, las
 conclusiones anteriores usan la del plan.
 
-Dos observaciones de esa fase quedan sin confirmar en el plan. La
-primera es de progresión: en el corredor, la fracción de vehículos de
-paso que se detiene a lo sumo una vez fue de 0.95 con IPPO
-\emph{vecinos}, 0.91 con el fijo tuneado y 0.73 con el actuado. El
-plan registró las métricas de corredor en cada corrida
-(Sección~\ref{sec:u3}), pero el Capítulo~\ref{cap:resultados} no las
-analiza. La segunda es de robustez al canal: evaluada con latencia o
-pérdida de mensajes, la política mediana de IPPO \emph{vecinos},
-entrenada con mensajes instantáneos, perdió la progresión y, en el
-corredor, dejó de superar al actuado, porque nunca vio un mensaje viejo
-durante el entrenamiento. El plan no repitió esa prueba.
-% TODO(reestructura): si el Cap. V llega a analizar las metricas de corredor del plan (paradas_corredor_le1 y retraso_corredor_punta de plan2/evaluacion_<esc>_resumen.csv), revisar este parrafo; una lectura preliminar de la verificacion indica que en P3 la politica publicada de IPPO vecinos tiene menos progresion que el fijo (0.93 frente a 0.99)
+Dos observaciones de esa fase no se analizan en el plan. La primera es
+de progresión: en el corredor, la fracción de vehículos de paso que se
+detiene a lo sumo una vez fue de 0.95 con IPPO \emph{vecinos}, 0.91
+con el fijo tuneado y 0.73 con el actuado. El plan registró las
+métricas de corredor en cada corrida (Sección~\ref{sec:u3}), y en P1 la
+progresión sigue el mismo orden (0.93, 0.90 y 0.73), pero el
+Capítulo~\ref{cap:resultados} no la analiza. La segunda es de robustez
+al canal: evaluada con latencia o pérdida de mensajes, la política
+mediana de IPPO \emph{vecinos}, entrenada con mensajes instantáneos,
+perdió la progresión y, en el corredor, dejó de superar al actuado,
+porque nunca vio un mensaje viejo durante el entrenamiento. El plan no
+repitió esa prueba.
+% TODO(reestructura): si el Cap. V llega a analizar las metricas de corredor del plan (paradas_corredor_le1 y retraso_corredor_prom de plan2/evaluacion_<esc>_resumen_fijo_2509.csv), revisar este parrafo; en P3 la politica publicada de IPPO vecinos tiene menos progresion que el fijo del 25.09 (0.93 frente a 0.99)
 % fuente: fase exploratoria, Anexo C (corredor: fraccion que se detiene a lo sumo una vez, fijo 0.91,
 % vecinos 0.95, actuado 0.73; canal imperfecto con la politica mediana de vecinos), tablas/corredor_u4.tex,
 % tablas/red_s1.tex y tablas/corredor_s1.tex; retraso con canal imperfecto frente al actuado: +1.7,
-% +5.4 y +7 % en el corredor; plan: evaluacion_red_resumen.csv, paradas_corredor_le1 (fijo 0.9864,
-% ippo_vecinos_s4042 0.9293)
+% +5.4 y +7 % en el corredor; plan: evaluacion_corredor_resumen.csv, paradas_corredor_le1 (fijo 0.9032,
+% ippo_vecinos_s4042 0.9302, actuado 0.727); HEAD evaluacion_red_resumen.csv (fijo 0.9864, ippo_vecinos_s4042 0.9293)

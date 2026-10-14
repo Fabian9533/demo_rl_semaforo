@@ -1,0 +1,83 @@
+== coord2 TANDA 1 (P4 red_alta), metrica timeLoss (timeloss_prom), semillas 5001-5030, 200 ep, val8 999,1999,2999,3999,4999,7999,8999,9999
+  ref fijo_2509          media  30.064
+  ref actuado            media  29.674
+  ref trivial            media  28.152
+  ref ippo_vecinos_s42   media  28.925
+
+-- C0 (vecinos)
+  base 42: ep_elegido 170 val_elegido 28.35 convergio True (plateau -0.1 %, estabilidad 1.9 %)  media 5001-5030 29.072 igual_trivial 0/30 cambios 552.7 ent_ult20 0.0854 acuerdo999 0.4022
+  base 2042: ep_elegido 160 val_elegido 28.234 convergio True (plateau +0.6 %, estabilidad 1.4 %)  media 5001-5030 28.888 igual_trivial 0/30 cambios 570.9 ent_ult20 0.0718 acuerdo999 0.4181
+  base 4042: ep_elegido 140 val_elegido 28.28 convergio True (plateau +2.2 %, estabilidad 1.3 %)  media 5001-5030 29.081 igual_trivial 0/30 cambios 567.0 ent_ult20 0.0691 acuerdo999 0.4259  <== PUBLICADA
+  PUBLICADA 4042: media 29.081  vs fijo_2509 -3.3 % [-4.8, -1.8] p=0.000283  vs actuado -2.0 % [-3.8, -0.2] p=0.0368  -> MEJORA
+      vs trivial            +3.3 % [1.6, 5.0] p=0.00148
+      vs ippo_vecinos_s42   +0.5 % [-0.9, 2.0] p=0.666
+      dispersion entre bases (media 5001-5030): {'min': 28.888, 'max': 29.081}
+
+-- V1 (norm)
+  base 42: ep_elegido 200 val_elegido 27.454 convergio True (plateau -1.9 %, estabilidad 0.0 %)  media 5001-5030 28.035 igual_trivial 0/30 cambios 567.0 ent_ult20 0.0962 acuerdo999 0.4224
+  base 2042: ep_elegido 50 val_elegido 28.584 convergio True (plateau +2.2 %, estabilidad 1.1 %)  media 5001-5030 29.283 igual_trivial 0/30 cambios 568.5 ent_ult20 0.0818 acuerdo999 0.4284
+  base 4042: ep_elegido 140 val_elegido 28.441 convergio True (plateau +0.4 %, estabilidad 0.0 %)  media 5001-5030 29.074 igual_trivial 0/30 cambios 569.8 ent_ult20 0.0832 acuerdo999 0.4302  <== PUBLICADA
+  PUBLICADA 4042: media 29.074  vs fijo_2509 -3.3 % [-4.9, -1.5] p=0.000872  vs actuado -2.0 % [-3.9, -0.1] p=0.0612  -> MEJORA
+      vs trivial            +3.3 % [1.4, 5.3] p=0.00403
+      vs ippo_vecinos_s42   +0.5 % [-1.3, 2.4] p=0.73
+      dispersion entre bases (media 5001-5030): {'min': 28.035, 'max': 29.283}
+
+-- V2 (smdp_crn)
+  base 42: ep_elegido 200 val_elegido 27.078 convergio True (plateau +0.0 %, estabilidad 0.0 %)  media 5001-5030 28.152 igual_trivial 30/30 cambios 868.4 ent_ult20 0.0247 acuerdo999 1.0
+  base 2042: ep_elegido 110 val_elegido 27.078 convergio True (plateau -1.5 %, estabilidad 0.0 %)  media 5001-5030 28.152 igual_trivial 30/30 cambios 868.4 ent_ult20 0.1381 acuerdo999 1.0  <== PUBLICADA
+  base 4042: ep_elegido 200 val_elegido 27.078 convergio True (plateau +0.0 %, estabilidad 0.0 %)  media 5001-5030 28.164 igual_trivial 29/30 cambios 868.3 ent_ult20 0.0334 acuerdo999 1.0
+  PUBLICADA 2042: media 28.152  vs fijo_2509 -6.4 % [-8.4, -4.3] p=9.22e-06  vs actuado -5.1 % [-7.3, -3.0] p=0.000436  -> FUNCIONA
+      vs trivial            +0.0 % [0.0, 0.0] p=1
+      vs ippo_vecinos_s42   -2.7 % [-4.4, -1.0] p=0.0139
+      dispersion entre bases (media 5001-5030): {'min': 28.152, 'max': 28.164}
+
+-- V3 (norm_smdp_crn)
+  base 42: ep_elegido 60 val_elegido 27.242 convergio True (plateau +3.2 %, estabilidad 3.0 %)  media 5001-5030 28.351 igual_trivial 20/30 cambios 864.5 ent_ult20 0.0892 acuerdo999 1.0
+  base 2042: ep_elegido 170 val_elegido 26.973 convergio True (plateau -2.2 %, estabilidad 0.9 %)  media 5001-5030 28.256 igual_trivial 18/30 cambios 864.3 ent_ult20 0.0752 acuerdo999 1.0
+  base 4042: ep_elegido 160 val_elegido 27.078 convergio True (plateau -1.5 %, estabilidad 0.4 %)  media 5001-5030 28.206 igual_trivial 21/30 cambios 866.5 ent_ult20 0.0709 acuerdo999 1.0  <== PUBLICADA
+  PUBLICADA 4042: media 28.206  vs fijo_2509 -6.2 % [-8.2, -4.1] p=7.51e-05  vs actuado -4.9 % [-7.2, -2.7] p=0.000928  -> FUNCIONA
+      vs trivial            +0.2 % [-0.1, 0.5] p=0.213
+      vs ippo_vecinos_s42   -2.5 % [-4.3, -0.7] p=0.0267
+      dispersion entre bases (media 5001-5030): {'min': 28.206, 'max': 28.351}
+
+-- V4 (mappo_equipo)
+  base 42: ep_elegido 200 val_elegido 27.078 convergio True (plateau -3.5 %, estabilidad 0.0 %)  media 5001-5030 28.152 igual_trivial 30/30 cambios 868.4 ent_ult20 0.0818 acuerdo999 1.0  <== PUBLICADA
+  base 2042: ep_elegido 60 val_elegido 27.006 convergio True (plateau +0.0 %, estabilidad 0.0 %)  media 5001-5030 28.176 igual_trivial 26/30 cambios 867.8 ent_ult20 0.1029 acuerdo999 1.0
+  base 4042: ep_elegido 100 val_elegido 27.078 convergio True (plateau -1.9 %, estabilidad 0.0 %)  media 5001-5030 28.152 igual_trivial 30/30 cambios 868.4 ent_ult20 0.2245 acuerdo999 1.0
+  PUBLICADA 42: media 28.152  vs fijo_2509 -6.4 % [-8.4, -4.3] p=9.22e-06  vs actuado -5.1 % [-7.3, -3.0] p=0.000436  -> FUNCIONA
+      vs trivial            +0.0 % [0.0, 0.0] p=1
+      vs ippo_vecinos_s42   -2.7 % [-4.4, -1.0] p=0.0139
+      dispersion entre bases (media 5001-5030): {'min': 28.152, 'max': 28.176}
+
+-- V5 (norm_smdp_crn_triv)
+  base 42: ep_elegido 170 val_elegido 27.069 convergio True (plateau -1.3 %, estabilidad 0.5 %)  media 5001-5030 28.068 igual_trivial 0/30 cambios 854.1 ent_ult20 0.0597 acuerdo999 0.9651 deriva +1.2 % (val_ep0 27.078)  <== PUBLICADA
+  base 2042: ep_elegido 10 val_elegido 27.078 convergio True (plateau -0.9 %, estabilidad 0.0 %)  media 5001-5030 28.219 igual_trivial 29/30 cambios 868.3 ent_ult20 0.0604 acuerdo999 1.0 deriva +4.6 % (val_ep0 27.078)
+  base 4042: ep_elegido 130 val_elegido 26.986 convergio True (plateau -1.3 %, estabilidad 0.0 %)  media 5001-5030 28.128 igual_trivial 0/30 cambios 851.8 ent_ult20 0.017 acuerdo999 0.9529 deriva +0.6 % (val_ep0 27.078)
+  PUBLICADA 42: media 28.068  vs fijo_2509 -6.6 % [-8.6, -4.7] p=2.26e-05  vs actuado -5.4 % [-7.5, -3.3] p=5.59e-05  -> FUNCIONA
+      vs trivial            -0.3 % [-0.8, 0.2] p=0.00819
+      vs ippo_vecinos_s42   -3.0 % [-4.7, -1.3] p=0.00374
+      dispersion entre bases (media 5001-5030): {'min': 28.068, 'max': 28.219}
+
+== Criterio 4.1
+  variantes cuya base publicada converge: ['V5', 'V2', 'V4', 'V3', 'V1']
+  orden (primero las que convergen, por timeLoss medio en 5001-5030): V5 28.068, V2 28.152, V4 28.152, V3 28.206, V1 29.074
+  GANADORA: V5 (norm_smdp_crn_triv), base publicada 42, media 28.068
+  (a) vs fijo_2509: -6.6 % [-8.6, -4.7] p=2.26e-05 -> SE CUMPLE  (etiqueta de la regla: FUNCIONA)
+  (b) vs trivial: -0.3 % [-0.8, 0.2] p=0.00819 -> NO se cumple
+  (c) confirmacion 6001-6030: pendiente (sec. 6.3)
+  LECTURA: reproduce el ciclo minimo
+  TOP 2 para la tanda 2 (P6): V5, V2
+
+== Contrastes secundarios (descriptivos)
+  V1 vs C0: -0.0 % [-1.7, 1.6] p=0.903 p_Holm=0.903
+  V2 vs C0: -3.2 % [-4.8, -1.6] p=0.00148 p_Holm=0.00592
+  V3 vs C0: -3.0 % [-4.6, -1.4] p=0.00349 p_Holm=0.00698
+  V4 vs C0: -3.2 % [-4.8, -1.6] p=0.00148 p_Holm=0.00592
+  V5 vs C0: -3.5 % [-5.0, -2.0] p=0.000153 p_Holm=0.000765
+  C0 vs IPPO vecinos publicado s42 (efecto de val8): +0.5 % [-0.9, 2.0] p=0.666
+  mecanismo V1 - C0: -0.0 % [-1.7, 1.6] p=0.903
+  mecanismo V2 - C0: -3.2 % [-4.8, -1.6] p=0.00148
+  mecanismo V3 - V2: +0.2 % [-0.1, 0.5] p=0.213
+  mecanismo V4 - V3: -0.2 % [-0.5, 0.1] p=0.213
+  mecanismo V5 - V3: -0.5 % [-1.1, 0.1] p=0.0123
+  interaccion (V3 - V2) - (V1 - C0): +0.061 s/veh IC95 [-0.412, +0.558] (bootstrap pareado, rng 0)

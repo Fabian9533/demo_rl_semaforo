@@ -1,5 +1,5 @@
 """
-rl_dqn.py - Double DQN con pesos compartidos entre semaforos (plan de pruebas v2, 24.09.2026).
+rl_dqn.py - Double DQN con pesos compartidos entre semaforos (plan de pruebas v2).
 
 Una sola red Q para todos los semaforos del escenario; cada semaforo decide con su propia
 observacion. Todo lo del entorno es el de rl_ippo.py variante vecinos: la misma observacion
@@ -27,7 +27,7 @@ Algoritmo (HIPER, fijados antes de la prueba de humo):
   Terminal solo si la red se vacio (si el episodio se corta en 6000 s se hace bootstrap).
   La exploracion y el muestreo del replay usan un generador propio (numpy default_rng(base)),
   asi la validacion (modo demo, argmax) no toca ninguna secuencia aleatoria del entrenamiento.
-  Prueba de humo (24.09, cruce, base 42, 60 episodios, validacion 999 cada 10; humo/dqn_humo_cruce.csv):
+  Prueba de humo (cruce, base 42, 60 episodios, validacion 999 cada 10; humo/dqn_humo_cruce.csv):
   val 15.91 / 15.08 / 15.10 / 16.52 / 15.01 / 15.07 en los episodios 10..60, mejor 15.01 (ep 50)
   frente a 23.19 s del fijo del cruce: pasa con estos HIPER, que quedan congelados sin reintento.
 

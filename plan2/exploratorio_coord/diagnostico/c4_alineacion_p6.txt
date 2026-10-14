@@ -1,0 +1,54 @@
+semillas completas: [999, 1999, 2999, 3999, 4999, 7999, 8999, 9999] (val8 declarada: [999, 1999, 2999, 3999, 4999, 7999, 8999, 9999])
+
+Media sobre semillas; entre corchetes Delta % frente al trivial pareado (negativo = mejor que el trivial segun ese criterio; para L/c/J el costo es positivo).
+programa                    tl              rt           L_loc           c_dec           J_dec           J_seg       J_red_dec       J_red_seg           L_red             tau  %cambio %forzada
+fijo2509          36.57[ +0.0]    82.17[ +0.0]   294556[ +0.0]    10.25[ +0.0]   201.47[ +0.0]   163.77[ +0.0]   219.09[ +0.0]   178.11[ +0.0]   320159[ +0.0]     6.19[ +0.0]   40.0  39.9
+ippo_s42          38.25[ +4.6]    83.97[ +2.2]   325062[+10.4]    10.35[ +1.0]   204.37[ +1.4]   177.06[ +8.1]   215.50[ -1.6]   187.00[ +5.0]   342756[ +7.1]     5.78[ -6.6]   26.1  26.4
+mappo_s2042       42.68[+16.7]    88.11[ +7.2]   364639[+23.8]    11.42[+11.4]   225.62[+12.0]   195.16[+19.2]   235.29[ +7.4]   203.83[+14.4]   380160[+18.7]     5.76[ -6.9]   25.6  26.1
+u15_10            36.57[ +0.0]    82.17[ +0.0]   294556[ +0.0]    10.25[ +0.0]   201.55[ +0.0]   163.84[ +0.0]   219.17[ +0.0]   178.18[ +0.0]   320159[ +0.0]     6.19[ +0.0]   39.9  40.1
+u25_15            71.20[+94.7]   116.56[+41.8]   625017[+112.2]    18.73[+82.7]   370.18[+83.7]   323.37[+97.5]   370.41[+69.1]   323.59[+81.7]   625396[+95.3]     5.74[ -7.3]   24.9  25.1
+
+Semillas (de 8) en que cada criterio prefiere al TRIVIAL frente al programa:
+programa              tl        rt     L_loc     c_dec     J_dec     J_seg J_red_dec J_red_seg     L_red
+ippo_s42               5         5         8         5         5         6         2         5         5
+mappo_s2042            6         6         8         6         6         8         5         6         6
+u15_10                 0         0         0         2         2         8         2         8         0
+u25_15                 8         8         8         8         8         8         8         8         8
+
+Descomposicion por cruce (media de semillas): L = costo local por segundo * T; c_dec ~ rho * tau / 5
+  fijo2509       semaforo_C11 L=   34002  c_dec= 10.65  J_dec= 208.48  J_seg= 169.61  tau= 6.19 s
+  fijo2509       semaforo_C12 L=   26498  c_dec=  8.30  J_dec= 162.81  J_seg= 132.40  tau= 6.19 s
+  fijo2509       semaforo_C13 L=   43725  c_dec= 13.69  J_dec= 270.39  J_seg= 219.62  tau= 6.19 s
+  fijo2509       semaforo_C21 L=   30892  c_dec=  9.67  J_dec= 189.33  J_seg= 154.04  tau= 6.19 s
+  fijo2509       semaforo_C22 L=   29275  c_dec=  9.17  J_dec= 180.95  J_seg= 146.91  tau= 6.19 s
+  fijo2509       semaforo_C23 L=   26200  c_dec=  8.21  J_dec= 161.50  J_seg= 131.23  tau= 6.19 s
+  fijo2509       semaforo_C31 L=   42236  c_dec= 13.23  J_dec= 259.97  J_seg= 211.32  tau= 6.19 s
+  fijo2509       semaforo_C32 L=   27234  c_dec=  8.53  J_dec= 167.37  J_seg= 136.10  tau= 6.19 s
+  fijo2509       semaforo_C33 L=   34493  c_dec= 10.80  J_dec= 212.42  J_seg= 172.71  tau= 6.19 s
+  ippo_s42       semaforo_C11 L=   35984  c_dec= 10.21  J_dec= 200.49  J_seg= 175.91  tau= 5.72 s
+  ippo_s42       semaforo_C12 L=   25919  c_dec=  7.45  J_dec= 146.53  J_seg= 127.34  tau= 5.79 s
+  ippo_s42       semaforo_C13 L=   40061  c_dec= 11.71  J_dec= 231.40  J_seg= 195.73  tau= 5.89 s
+  ippo_s42       semaforo_C21 L=   35361  c_dec= 10.02  J_dec= 197.35  J_seg= 173.33  tau= 5.72 s
+  ippo_s42       semaforo_C22 L=   28502  c_dec=  8.18  J_dec= 162.07  J_seg= 139.71  tau= 5.79 s
+  ippo_s42       semaforo_C23 L=   34602  c_dec=  9.93  J_dec= 196.68  J_seg= 168.91  tau= 5.79 s
+  ippo_s42       semaforo_C31 L=   50388  c_dec= 14.28  J_dec= 281.94  J_seg= 247.81  tau= 5.72 s
+  ippo_s42       semaforo_C32 L=   33008  c_dec=  9.43  J_dec= 186.30  J_seg= 163.02  tau= 5.76 s
+  ippo_s42       semaforo_C33 L=   41238  c_dec= 11.98  J_dec= 236.61  J_seg= 201.76  tau= 5.85 s
+
+Sesgo del descuento por decision: cuanto cambia el costo relativo trivial vs programa al pasar de J_seg a J_dec
+  ippo_s42       timeLoss/trivial 1.046   J_seg/trivial 1.081   J_dec/trivial 1.015
+  mappo_s2042    timeLoss/trivial 1.168   J_seg/trivial 1.193   J_dec/trivial 1.121
+  u15_10         timeLoss/trivial 1.000   J_seg/trivial 1.000   J_dec/trivial 1.000
+  u25_15         timeLoss/trivial 1.947   J_seg/trivial 1.975   J_dec/trivial 1.837
+
+(c) Critico: varianza explicada de V(s) frente al retorno realizado G_k (gamma por decision, escala PPO), politica argmax
+  ippo_s42       EV media +0.843 (min +0.823, max +0.869); sesgo V-G -0.051; sd(G) 2.568
+  mappo_s2042    EV media +0.823 (min +0.762, max +0.856); sesgo V-G -0.039; sd(G) 3.319
+
+(f) Reparto del timeLoss total (veh*s, media de semillas) y fraccion del total tripinfo
+programa                aprox        rotonda          resto       internos     total_trip      insercion
+fijo2509        283427(89.1%)       0( 0.0%)   18455( 5.8%)   16288( 5.1%)         318170  396720(124.7%)
+ippo_s42        303130(91.1%)       0( 0.0%)   18923( 5.7%)   10678( 3.2%)         332732  397786(119.6%)
+mappo_s2042     341619(92.0%)       0( 0.0%)   18901( 5.1%)   10797( 2.9%)         371316  395252(106.4%)
+u15_10          283427(89.1%)       0( 0.0%)   18455( 5.8%)   16288( 5.1%)         318170  396720(124.7%)
+u25_15          584732(94.4%)       0( 0.0%)   20896( 3.4%)   13780( 2.2%)         619407  394643(63.7%)

@@ -1,0 +1,28 @@
+{
+ "brazo": "V3",
+ "variante": "norm_smdp_crn",
+ "base_publicada": 4042,
+ "bases": {
+  "42": {
+   "convergio": true,
+   "plateau": 3.2175554698442936,
+   "estabilidad": 3.0455021109226497,
+   "ep_elegido": 60,
+   "val_elegido": 27.242
+  },
+  "2042": {
+   "convergio": true,
+   "plateau": -2.2230923170625596,
+   "estabilidad": 0.9164919205624927,
+   "ep_elegido": 170,
+   "val_elegido": 26.973
+  },
+  "4042": {
+   "convergio": true,
+   "plateau": -1.5204666133414202,
+   "estabilidad": 0.39286459676131846,
+   "ep_elegido": 160,
+   "val_elegido": 27.078
+  }
+ }
+}

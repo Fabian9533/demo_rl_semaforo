@@ -1,0 +1,28 @@
+{
+ "brazo": "V1",
+ "variante": "norm",
+ "base_publicada": 4042,
+ "bases": {
+  "42": {
+   "convergio": true,
+   "plateau": -1.9110381153491736,
+   "estabilidad": 0.0,
+   "ep_elegido": 200,
+   "val_elegido": 27.454
+  },
+  "2042": {
+   "convergio": true,
+   "plateau": 2.198360511582917,
+   "estabilidad": 1.1355831310957432,
+   "ep_elegido": 50,
+   "val_elegido": 28.584
+  },
+  "4042": {
+   "convergio": true,
+   "plateau": 0.41676064210556824,
+   "estabilidad": 0.0,
+   "ep_elegido": 140,
+   "val_elegido": 28.441
+  }
+ }
+}

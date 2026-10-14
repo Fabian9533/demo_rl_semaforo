@@ -1,9 +1,10 @@
 """
 barrer_fijo.py - Barrido del programa de tiempo fijo de un escenario para elegir el
-baseline por la metrica primaria (timeLoss promedio por vehiculo), no por espera detenida.
+baseline por la metrica primaria (tras la re-medicion, el retraso total por vehiculo: timeLoss
+mas la espera para entrar a la red; antes, timeLoss), no por espera detenida.
 
 Uso (plan v2: desde demo_rl/plan2, con los archivos del escenario en el cwd):
-  python ../barrer_fijo.py corredor|corredor_alta|red|red_alta|malla3 [--semillas 2001-2003]
+  python ../barrer_fijo.py corredor|corredor_alta|red|red_alta|malla3|malla3_alta [--semillas 2001-2003]
          [--tmp carpeta] [--procesos N] [--instalar] [--no-extender]
          [--avenida 20,25] [--transversal 10,15] [--limite N]
   python barrer_fijo.py cruce|cruce2 [--asimetrico]
@@ -15,9 +16,9 @@ corredor, corredor_alta, red y red_alta: se reescribe el programa fijo del <esc>
 malla3 (9 semaforos): verde de avenida x verde transversal x esquema de desfases de diseno
 (cero, ajedrez, onda_eo) en vez de barrer desfases libres.
 Las corridas son sumo puro (sin TraCI). Salida: barrido_<esc>.csv con el promedio de cada
-configuracion sobre las semillas, ordenado por timeLoss.
+configuracion sobre las semillas, ordenado por retraso total (METRICA_BARRIDO).
 
-Cambios del plan v2 (24.09.2026):
+Cambios del plan v2:
 - Semillas por defecto 2001-2003 (las de tuneo; la evaluacion usa 1001-1030).
 - Escenarios nuevos red_alta y malla3; mallas nuevas por celda (MALLAS).
 - La fase verde de la avenida se detecta en el .net.xml (la que da verde a mas movimientos que
@@ -43,25 +44,43 @@ import xml.etree.ElementTree as ET
 from xml.sax.saxutils import quoteattr
 
 import comun
+import escenarios_plan2
 
 SILENCIO = {"stdout": subprocess.DEVNULL, "stderr": subprocess.DEVNULL}
-ESCENARIOS = ("cruce", "cruce2", "corredor", "corredor_alta", "red", "red_alta", "malla3")
+ESCENARIOS = ("cruce", "cruce2", "corredor", "corredor_alta", "red", "red_alta", "malla3",
+              "malla3_alta") + tuple(escenarios_plan2.DERIVADOS)
 VERDE_MIN = 10          # verde minimo del agente: piso valido del barrido
 VERDE_TECHO = 60        # verde maximo del agente: el barrido no se extiende mas alla
 DISTANCIA_MALLA = 300   # m entre cruces vecinos de malla3
 VEL_DISENO = 13.89      # m/s (50 km/h), velocidad de la onda verde de diseno
+# Tope de cada corrida (s simulados): el mismo que los brazos con TraCI (rl_corredor y rl_ippo cortan
+# en pasos < 6000). Sin tope, con time-to-teleport -1, una configuracion que traba la red no termina
+# nunca (cuatro de malla3_alta colgaron el barrido). Los vehiculos sin terminar salen en el
+# tripinfo con write-unfinished y cuentan con su retraso hasta el tope. Los barridos v2.1 de corredor a
+# malla3 corrieron sin tope; sus ganadores y todos los brazos evaluados vacian la red antes de 6000 s.
+FIN_SIM = 6000
 
-# Malla de verdes por celda: (verdes de avenida E-O, verdes transversales N-S), en s.
-MALLAS = {"corredor": ((12, 15, 18, 20, 25, 30), (10, 15, 20)),
-          "corredor_alta": ((15, 20, 25, 30, 35), (10, 15, 20, 25)),
-          "red": ((15, 20, 25, 30, 35), (10, 15, 20)),
-          "red_alta": ((15, 20, 25, 30, 35), (10, 15, 20)),
-          "malla3": ((15, 20, 25, 30, 35), (10, 15, 20, 25))}
+# Malla de verdes por celda: (verdes de avenida E-O, verdes transversales N-S), en s. Tras la
+# re-medicion la avenida parte en el verde minimo (10 s) en todas las celdas: con 15 s la malla
+# no contenia el ciclo corto sincronizado (10/10, desfases 0), que en red y malla3 es mejor que
+# el ganador anterior; el paisaje es bimodal y la regla de interioridad no lo detectaba.
+MALLAS = {"corredor": ((10, 12, 15, 18, 20, 25, 30), (10, 15, 20)),
+          "corredor_alta": ((10, 15, 20, 25, 30, 35), (10, 15, 20, 25)),
+          "red": ((10, 15, 20, 25, 30, 35), (10, 15, 20)),
+          "red_alta": ((10, 15, 20, 25, 30, 35), (10, 15, 20)),
+          "malla3": ((10, 15, 20, 25, 30, 35), (10, 15, 20, 25)),
+          "malla3_alta": ((10, 15, 20, 25, 30, 35), (10, 15, 20, 25))}
+# Metrica por la que se elige el ganador: la primaria del plan v2 (retraso total por vehiculo,
+# timeLoss + espera para entrar a la red; comun.leer_tripinfo). Antes de la re-medicion era timeLoss.
+METRICA_BARRIDO = "retraso_total_prom"
+# --metrica timeloss_prom repite la regla del plan (ganador por timeLoss), la del resultado principal.
+NOMBRE_METRICA = {"retraso_total_prom": "retraso total", "timeloss_prom": "timeLoss"}
+SD_METRICA = {"retraso_total_prom": "retraso_total_sd", "timeloss_prom": "timeloss_sd"}
 ESQUEMAS_MALLA3 = ("cero", "ajedrez", "onda_eo")
 
 DESPLEGADO = {"cruce": {"verde": 25}, "cruce2": {"verde": 20, "izquierda": 6},
-              "corredor": {"verde": 20, "verde_tr": 10, "off2": 15},     # asimetrico desde 06.09
-              "red": {"verde": 25, "verde_tr": 15, "off2": 23},          # asimetrico desde 06.09
+              "corredor": {"verde": 20, "verde_tr": 10, "off2": 15},     # asimetrico (fase exploratoria)
+              "red": {"verde": 25, "verde_tr": 15, "off2": 23},          # asimetrico (fase exploratoria)
               "red_alta": {"verde": 25, "verde_tr": 15, "off2": 23},     # hereda el esquema de red
               "corredor_alta": {"verde": 25, "verde_tr": 15, "off2": 25}}
 
@@ -79,24 +98,37 @@ def lista_enteros(texto):
     return [int(x) for x in texto.split(",") if x.strip()]
 
 
-def correr_sumo(cfg, extra, seed, tripinfo):
+def correr_sumo(cfg, extra, seed, tripinfo, intentos=5):
+    """Una corrida de sumo puro. En Windows otro proceso (el antivirus) puede tener tomado un instante
+    el archivo de salida y sumo sale con error (tumbo dos barridos): se repite el mismo
+    comando, que no cambia ningun numero de la simulacion."""
+    import time
     cmd = ["sumo", "-c", cfg, "--seed", str(seed), "--tripinfo-output", tripinfo,
            "--tripinfo-output.write-unfinished", "true", "--device.emissions.probability", "1",
-           "--no-step-log", "true", "--no-warnings", "true"] + extra
-    subprocess.run(cmd, check=True, **SILENCIO)
-    return comun.leer_tripinfo(tripinfo)
+           "--no-step-log", "true", "--no-warnings", "true", "--end", str(FIN_SIM)] + \
+        comun.args_estadisticas(tripinfo) + extra
+    for k in range(intentos):
+        try:
+            subprocess.run(cmd, check=True, **SILENCIO)
+            return comun.leer_tripinfo(tripinfo)
+        except (subprocess.CalledProcessError, PermissionError, ET.ParseError):
+            if k == intentos - 1:
+                raise
+            time.sleep(3.0)
 
 
 def evaluar_config(cfg, nombre, extra, semillas, tmp):
     """Promedio de las metricas de una configuracion sobre las semillas (tripinfo propio)."""
     tripinfo = os.path.join(tmp, f"tripinfo_{nombre}.xml")
     res = [correr_sumo(cfg, extra, s, tripinfo) for s in semillas]
-    os.remove(tripinfo)
+    comun.borrar_tripinfo(tripinfo)
     fila = {}
-    for m in ("timeloss_prom", "espera_prom", "paradas_prom", "throughput", "co2_prom"):
+    for m in ("retraso_total_prom", "timeloss_prom", "retraso_insercion_prom", "espera_prom",
+              "paradas_prom", "throughput", "co2_prom"):
         fila[m] = round(statistics.mean(float(r[m]) for r in res), 2)
-    retrasos = [float(r["timeloss_prom"]) for r in res]
-    fila["timeloss_sd"] = round(statistics.stdev(retrasos), 2) if len(res) > 1 else 0
+    for m, nombre_sd in (("retraso_total_prom", "retraso_total_sd"), ("timeloss_prom", "timeloss_sd")):
+        valores = [float(r[m]) for r in res]
+        fila[nombre_sd] = round(statistics.stdev(valores), 2) if len(res) > 1 else 0
     return fila
 
 
@@ -242,6 +274,17 @@ def escribir_programa(plantilla, ruta, verde_av, verde_tr, offsets, fases_av, co
         f.write("\n".join(lineas) + "\n")
 
 
+def como(esc):
+    """Caso cuya malla, desfases y programa desplegado usa un escenario: el mismo, o para los
+    derivados del barrido de demanda (escenarios_plan2.DERIVADOS) el caso que se indica ahi."""
+    return escenarios_plan2.DERIVADOS[esc][2] if esc in escenarios_plan2.DERIVADOS else esc
+
+
+def es_malla(esc):
+    """malla3 y su caso de estres malla3_alta (P6) comparten red y esquemas de desfase."""
+    return esc.startswith("malla3")
+
+
 def desfases_malla3(ids, geo, ciclo, esquema):
     """Offsets de diseno de malla3 por semaforo (en orden de ids). Fila y columna se cuentan desde
     0 por la posicion del cruce (columna 0 = la mas al oeste).
@@ -275,7 +318,7 @@ class Plantilla:
         self.fases_av = [fase_avenida(tl, self.geo[tl.get("id")]["horizontal"]) for tl in self.tls]
         if f"{esc}.add.xml" not in self.adicionales:
             print(f"AVISO: {cfg} no carga {esc}.add.xml (el que escribe --instalar)")
-        if esc == "malla3":
+        if es_malla(esc):
             xs = sorted({round(self.geo[t]["pos"][0]) for t in self.ids})
             pasos = {b - a for a, b in zip(xs, xs[1:])}
             if any(abs(p - DISTANCIA_MALLA) > 1 for p in pasos):
@@ -298,15 +341,15 @@ def configs_plantilla(p, pares):
     segundo cruce; red / red_alta: del segundo y del tercero (0, el del segundo o el doble);
     malla3: esquema de diseno (ESQUEMAS_MALLA3)."""
     esc = p.esc
-    d = DESPLEGADO.get(esc, {})
-    if esc == "corredor_alta":
+    d = DESPLEGADO.get(como(esc), {})
+    if como(esc) == "corredor_alta":
         offsets2 = [0, 10, 20, 25, 30]
     else:
         offsets2 = sorted(set(range(0, 45, 5)) | ({d["off2"]} if d else set()))
     for verde_av, verde_tr in pares:
         ciclo = p.ciclo(verde_av, verde_tr)
         base = {"verde": verde_av, "izquierda": "", "verde_transversal": verde_tr}
-        if esc == "malla3":
+        if es_malla(esc):
             for esquema in ESQUEMAS_MALLA3:
                 offsets = desfases_malla3(p.ids, p.geo, ciclo, esquema)
                 nombre = f"{esc}_v{verde_av}_t{verde_tr}_{esquema}"
@@ -355,25 +398,30 @@ DESFASES_TEXTO = {
     "corredor_alta": "desfase del segundo cruce en 0, 10, 20, 25 y 30 s",
     "red": _DESFASES_RED,
     "red_alta": _DESFASES_RED,
-    "malla3": "esquemas de desfase " + ", ".join(ESQUEMAS_MALLA3)}
+    "malla3": "esquemas de desfase " + ", ".join(ESQUEMAS_MALLA3),
+    "malla3_alta": "esquemas de desfase " + ", ".join(ESQUEMAS_MALLA3)}
 
 
 def comentario_instalado(esc, ejes, semillas, ganador, n, p):
     """Texto del comentario del .add.xml instalado: malla barrida, semillas y ganador."""
     ejes_txt = ["/".join(map(str, eje)) for eje in ejes]
-    esquema = f" ({ganador['esquema']})" if esc == "malla3" else ""
+    esquema = f" ({ganador['esquema']})" if es_malla(esc) else ""
     return (f"Programa fijo del plan v2 para {esc}, instalado por barrer_fijo.py. Malla barrida: "
             f"verde de avenida (E-O) {ejes_txt[0]} s x verde transversal (N-S) {ejes_txt[1]} s x "
-            f"{DESFASES_TEXTO[esc]}; {n} configuraciones con las semillas {semillas}. Ganador: "
+            f"{DESFASES_TEXTO[como(esc)]}; {n} configuraciones con las semillas {semillas}. Ganador: "
             f"avenida {ganador['verde']} s, transversal {ganador['verde_transversal']} s, ciclo "
             f"{p.ciclo(ganador['verde'], ganador['verde_transversal'])} s, desfases "
-            f"{ganador['offsets']}{esquema}; retraso {ganador['timeloss_prom']} s "
-            f"(sd {ganador['timeloss_sd']}) sobre esas semillas.")
+            f"{ganador['offsets']}{esquema}; elegido por {NOMBRE_METRICA[METRICA_BARRIDO]}: retraso total "
+            f"{ganador['retraso_total_prom']} s (sd {ganador['retraso_total_sd']}), timeLoss "
+            f"{ganador['timeloss_prom']} s (sd {ganador['timeloss_sd']}) sobre esas semillas.")
 
 
 def main():
+    global METRICA_BARRIDO
     ap = argparse.ArgumentParser()
     ap.add_argument("escenario", choices=ESCENARIOS)
+    ap.add_argument("--metrica", choices=list(NOMBRE_METRICA), default=METRICA_BARRIDO,
+                    help="metrica por la que se elige el ganador (timeloss_prom: regla del plan)")
     ap.add_argument("--semillas", default="2001-2003")
     ap.add_argument("--tmp", default="tmp_barrido")
     ap.add_argument("--procesos", type=int, default=1, help="configuraciones en paralelo")
@@ -387,6 +435,7 @@ def main():
     ap.add_argument("--asimetrico", action="store_true",
                     help="cruce: reparto N-S x E-O por .add.xml (salida barrido_cruce_asimetrico.csv)")
     args = ap.parse_args()
+    METRICA_BARRIDO = args.metrica
     esc = args.escenario
     semillas = rango(args.semillas)
     os.makedirs(args.tmp, exist_ok=True)
@@ -403,8 +452,8 @@ def main():
                 filas.append(fila)
                 print(f"verde={fila['verde']:>2} tr={fila.get('verde_transversal', '')!s:>2} "
                       f"izq={fila['izquierda']!s:>2} offsets={fila['offsets']:<10} "
-                      f"{fila.get('esquema', '')} timeLoss={fila['timeloss_prom']:6.2f} "
-                      f"espera={fila['espera_prom']:6.2f}", flush=True)
+                      f"{fila.get('esquema', '')} total={fila['retraso_total_prom']:6.2f} "
+                      f"timeLoss={fila['timeloss_prom']:6.2f}", flush=True)
         return filas
 
     if esc in ("cruce", "cruce2"):
@@ -414,10 +463,10 @@ def main():
         filas = barrer(list(gen)[:args.limite])
     else:
         p = Plantilla(esc, cfg)
-        avenidas, transversales = MALLAS[esc]
+        avenidas, transversales = MALLAS[como(esc)]
         ejes = [lista_enteros(args.avenida) if args.avenida else list(avenidas),
                 lista_enteros(args.transversal) if args.transversal else list(transversales)]
-        d = DESPLEGADO.get(esc)
+        d = DESPLEGADO.get(como(esc))
         a_mano = args.avenida or args.transversal
         extra_desplegado = {(d["verde"], d["verde_tr"])} if d and not a_mano else set()
         hechos = set()
@@ -432,7 +481,7 @@ def main():
                 configs.append((nombre, params, p.extra(ruta)))
             filas += barrer(configs)
             hechos |= set(pares)
-            ganador = min(filas, key=lambda f: f["timeloss_prom"])
+            ganador = min(filas, key=lambda f: f[METRICA_BARRIDO])
             bordes = en_borde(ejes, (ganador["verde"], ganador["verde_transversal"]))
             if not bordes:
                 break
@@ -444,17 +493,17 @@ def main():
                 break
             print(f"  se extiende la malla: avenida {ejes[0]} x transversal {ejes[1]}", flush=True)
 
-    filas.sort(key=lambda f: f["timeloss_prom"])
+    filas.sort(key=lambda f: f[METRICA_BARRIDO])
     salida = f"barrido_{esc}{'_asimetrico' if args.asimetrico else ''}.csv"
     with open(salida, "w", newline="") as f:
         w = csv.DictWriter(f, fieldnames=list(filas[0].keys()))
         w.writeheader()
         w.writerows(filas)
-    print(f"\nMejores 5 por timeLoss ({salida}):")
+    print(f"\nMejores 5 por {NOMBRE_METRICA[METRICA_BARRIDO]} ({salida}):")
     for fila in filas[:5]:
         print(f"  verde={fila['verde']} tr={fila.get('verde_transversal', '')} izq={fila['izquierda']} "
-              f"offsets={fila['offsets']} {fila.get('esquema', '')} timeLoss={fila['timeloss_prom']} "
-              f"(sd {fila['timeloss_sd']}) espera={fila['espera_prom']}")
+              f"offsets={fila['offsets']} {fila.get('esquema', '')} total={fila['retraso_total_prom']} "
+              f"timeLoss={fila['timeloss_prom']} (sd {fila[SD_METRICA[METRICA_BARRIDO]]})")
 
     if args.instalar:
         g = filas[0]
@@ -464,7 +513,7 @@ def main():
         p.escribir(destino + ".nuevo", g["verde"], g["verde_transversal"], offsets, texto)
         os.replace(destino + ".nuevo", destino)
         print(f"\nInstalado en {destino}: avenida {g['verde']} s, transversal {g['verde_transversal']} s, "
-              f"desfases {g['offsets']}, retraso {g['timeloss_prom']} s")
+              f"desfases {g['offsets']}, {NOMBRE_METRICA[METRICA_BARRIDO]} {g[METRICA_BARRIDO]} s")
 
 
 if __name__ == "__main__":

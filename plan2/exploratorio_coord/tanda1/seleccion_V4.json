@@ -1,0 +1,28 @@
+{
+ "brazo": "V4",
+ "variante": "mappo_equipo",
+ "base_publicada": 42,
+ "bases": {
+  "42": {
+   "convergio": true,
+   "plateau": -3.489320381639556,
+   "estabilidad": 0.0,
+   "ep_elegido": 200,
+   "val_elegido": 27.078
+  },
+  "2042": {
+   "convergio": true,
+   "plateau": 0.0,
+   "estabilidad": 0.0,
+   "ep_elegido": 60,
+   "val_elegido": 27.006
+  },
+  "4042": {
+   "convergio": true,
+   "plateau": -1.880701264927288,
+   "estabilidad": 0.0,
+   "ep_elegido": 100,
+   "val_elegido": 27.078
+  }
+ }
+}

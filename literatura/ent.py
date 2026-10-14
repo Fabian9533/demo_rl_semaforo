@@ -1,0 +1,140 @@
+# -*- coding: utf-8 -*-
+"""Tabla de entradas y salidas del Anexo E (solo trabajos con RL que describen su formulacion)."""
+import io, math, re
+
+CM_CHAR = 0.135
+
+def largo(tex):
+    t = re.sub(r"\\citep\{[^}]*\}", "[00]", tex)
+    t = re.sub(r"\\ref\{[^}]*\}", "0.0", t)
+    t = t.replace("$", "")
+    t = re.sub(r"\\times|\\pm", "x", t)
+    t = re.sub(r"\\textit\{([^}]*)\}", r"\1", t)
+    t = re.sub(r"\\,", "", t)
+    t = re.sub(r"\\%", "%", t)
+    t = re.sub(r"_\{?([^}\s]*)\}?", r"\1", t)
+    t = re.sub(r"\\[a-zA-Z]+\s?", "", t)
+    t = t.replace("{", "").replace("}", "").replace("~", " ")
+    return len(t)
+
+def lineas(tex, ancho):
+    return max(1, math.ceil(largo(tex) / (ancho / CM_CHAR)))
+
+E_T, E_E, E_A, E_R, E_M = 2.0, 3.8, 2.4, 2.4, 1.8
+assert abs(E_T + E_E + E_A + E_R + E_M - 12.4) < 1e-9
+Q = "``eficiencia''"
+ENT = [
+ ("SUMO-RL (2019) \\citep{Alegre2019_SUMORL}", "fase, indicador de verde mínimo, densidad y cola por carril",
+  "siguiente fase verde, con ámbar", "cambio de la espera acumulada", "no reporta"),
+ ("Genders y Razavi (2019) \\citep{Genders2019_Framework}", "densidad y cola por carril, fase",
+  "siguiente fase (DQN) o duración del verde (DDPG)", "$-$retraso de los vehículos del cruce",
+  "viaje, cola, retraso"),
+ ("LIT (2019) \\citep{Zheng2019_LIT}", "vehículos por carril, fase", "mantener o cambiar",
+  "$-$suma de colas", "viaje"),
+ ("RESCO (2021) \\citep{Ault2021_RESCO}",
+  "por carril en 200~m: cola, vehículos que se acercan, espera, velocidad, llegadas y salidas (cada algoritmo usa una parte)",
+  "combinación de fases compatibles cada 10~s",
+  "$-$espera (IDQN, IPPO), $-$presión (MPLight), de vecindario (FMA2C)",
+  "retraso, viaje, espera, cola"),
+ ("Cabrejas-Egea et al. (2021) \\citep{CabrejasEgea2021_Comercial}", "cola por carril (m), etapa",
+  "etapa a activar", "$-$suma de colas", "retraso, cola"),
+ ("Efficient Pressure (2021) \\citep{Wu2021_EfficientMP}", "fase, presión eficiente",
+  "siguiente fase, de 15~s", "$-$presión o $-$cola", "viaje"),
+ ("LibSignal (2024) \\citep{Mei2024_LibSignal}", "vehículos por carril y fase; presión y fase (MPLight)",
+  "siguiente fase, acíclica", "vehículos en espera, espera (IPPO) o presión",
+  "viaje, cola, retraso, \\textit{throughput}"),
+ ("Advanced-XLight (2022) \\citep{Zhang2022_AdvancedMP}",
+  "fase, presión eficiente y vehículos en marcha en el rango efectivo", "siguiente fase, mínimo 15~s",
+  "$-$presión o $-$cola", "viaje"),
+ ("T-REX (2025) \\citep{Nguyen2025_TREX}",
+  "por carril: fase, vehículos que se acercan, detenidos, espera y velocidad; presión (MPLight)",
+  "fase compatible, de 10~s", "reducción del retraso acumulado; $-$presión (MPLight)",
+  "viaje, retraso, espera, cola, robustez"),
+ ("MARLIN-ATSC (2012) \\citep{ElTantawy2012_Tesis}",
+  "colas y llegadas por fase; acciones de los vecinos en el modo coordinado",
+  "siguiente fase, en secuencia variable", "reducción del retraso acumulado",
+  "retraso, \\textit{throughput}, paradas, cola, viaje, CO$_2$"),
+ ("Genders y Razavi (2016) \\citep{Genders2016_DQTSC}", "presencia y velocidad por celda (imagen), fase",
+  "una de 4 fases", "cambio del retraso acumulado", "\\textit{throughput}, cola, viaje, retraso"),
+ ("Gao et al. (2017) \\citep{Gao2017_DQN}", "posición y velocidad por celdas de 8~m, fase",
+  "verde O--E o N--S durante 10~s", "reducción del tiempo de permanencia", "retraso"),
+ ("Mousavi et al. (2017) \\citep{Mousavi2017_PGDQN}",
+  "imagen del simulador (128 $\\times$ 128, 4 cuadros)", "verde N--S o E--O",
+  "cambio del retraso acumulado", "retraso, cola"),
+ ("IntelliLight (2018) \\citep{Wei2018_IntelliLight}",
+  "por carril: cola, vehículos y espera; imagen de posiciones; fase actual y siguiente", "mantener o cambiar",
+  "suma ponderada de cola, retraso, espera, cambios, vehículos que pasan y viaje",
+  "viaje, cola, índice de retraso"),
+ ("FRAP (2019) \\citep{Zheng2019_FRAP}", "vehículos por movimiento, fase", "fase del siguiente intervalo (8)",
+  "$-$cola media por movimiento", "viaje"),
+ ("Liang et al. (2019) \\citep{Liang2019_3DQN}", "posición y velocidad en 60 $\\times$ 60 celdas",
+  "$\\pm$5~s a una fase del ciclo siguiente", "cambio de la espera acumulada entre ciclos", "espera"),
+ ("PressLight (2019) \\citep{Wei2019_PressLight}",
+  "fase, vehículos en los carriles de salida y por tramo en los de entrada", "una de 4 fases, acíclica",
+  "$-$presión", "viaje"),
+ ("Wang et al. (2019) \\citep{Wang2019_EventData3DQN}",
+  "ocupación de detectores de lazo en ventanas de 60~s, estado de las señales", "una de 4 fases, acíclica",
+  "vehículos que entran menos espera ponderada", "retraso, \\textit{throughput}, cola, velocidad, paradas"),
+ ("Ault et al. (2020) \\citep{Ault2020_Interpretable}",
+  "señal actual; por carril: vehículos que se acercan, espera, detenidos y velocidad",
+  "par de fases compatibles, mínimo 3~s", "reducción del retraso acumulado", "retraso"),
+ ("S2R2L (2019) \\citep{Guo2019_S2R2L}",
+  "ocupación y cola por carril, etapa, fracción de verde transcurrida; las de los vecinos",
+  "etapa cada 5~s, verde de 10 a 60~s", "cambio de la espera acumulada, ponderada con la de los vecinos",
+  "retraso, cola, combustible"),
+ ("CoLight (2019) \\citep{Wei2019_CoLight}", "fase, vehículos por carril; atención sobre los vecinos",
+  "fase del siguiente intervalo", "$-$suma de colas", "viaje"),
+ ("MA2C (2020) \\citep{Chu2020_MA2C}",
+  "vehículos a menos de 50~m y espera del primero, por carril; estados y políticas de los vecinos",
+  "fase cada 5~s", "$-$(cola + espera), con la de los vecinos descontada",
+  "cola, retraso en el cruce y en el viaje, velocidad"),
+ ("MPLight (2020) \\citep{Chen2020_MPLight}", "fase, presión de 12 movimientos", "una de 8 fases cada 10~s",
+  "$-$presión", "viaje, \\textit{throughput}"),
+ ("FMA2C (2020) \\citep{Ma2020_FMA2C}",
+  "vehículos que llegan y espera por carril; flujo por dirección en el nivel regional",
+  "una de 5 fases; meta de flujo regional", "como MA2C, más una recompensa regional",
+  "cola, retraso en el cruce y en el viaje, velocidad"),
+ ("AttendLight (2020) \\citep{Oroojlooy2020_AttendLight}",
+  "por carril: vehículos en marcha en 3 tramos y en espera, agregados con atención",
+  "fase, verde mínimo 10~s", "$-$presión", "viaje"),
+ ("EPyMARL en RESCO (2022) \\citep{Ault2022_EPyMARL}", "el de RESCO", "fases compatibles",
+  "$-$espera en 200~m, común a todos", "retraso"),
+ ("X-Light (2024) \\citep{Jiang2024_XLight}", "cola, fase, ocupación, flujo y detenidos",
+  "una de 8 fases cada 15~s", "suma ponderada de cola, espera, retraso y presión", "viaje, retraso"),
+ ("CoSLight (2024) \\citep{Ruan2024_CoSLight}",
+  "por movimiento: vehículos, cola, fase y flujo; datos de los colaboradores", "fase cada 15~s",
+  "común a todos los cruces", "viaje, retraso"),
+ ("Higuera (2016) \\citep{Higuera2016_Uniandes}",
+  "hora del día, fase, cola máxima y espera por acceso; las del vecino (Q-BR)",
+  "una de 2 fases, verde mínimo 20 o 14~s", "$-$suma de cuadrados de cola y espera",
+  "cola, espera, velocidad, viaje, CO$_2$"),
+ ("Borges et al. (2021) \\citep{Borges2021_Brasilia}", "flujo, velocidad y tiempo de cada sensor",
+  "verde o rojo por cruce cada 10~s, mínimo 30~s", "flujo de cada cruce y entre los dos",
+  "retraso, velocidad, viaje, cola"),
+ ("Trinity (2022) \\citep{Chakrabarti2022}", "fase; por carril, espera y densidad de detenidos",
+  "fase en cada paso", "$-$espera", "espera"),
+ ("Uniandes (2023) \\citep{Chavez2023}", "fase, verde mínimo cumplido, densidad y cola por carril",
+  "una de 4 fases verdes", "cambio del retraso acumulado", Q + " frente al fijo"),
+ ("Revisión de 160 artículos \\citep{Noaeen2022_SLR}",
+  "cola 38\\,\\%, fase 11\\,\\%, vehículos 10\\,\\%, posición 6\\,\\%, velocidad 6\\,\\%",
+  "por fase 62\\,\\%, por ciclo 32\\,\\%", "cola 30\\,\\%, retraso 13\\,\\%, espera 9\\,\\%, vehículos 6\\,\\%",
+  "retraso 20\\,\\%; viaje, espera y cola 12\\,\\% cada una"),
+ ("Esta tesis",
+  "tabulares: detenidos por aproximación en 4 niveles y fase verde; DQN, IPPO y MAPPO: vector de 31 "
+  "componentes (53 en las mallas) con cola detenida y vehículos en movimiento por aproximación, fase, "
+  "tiempo en verde, verde mínimo cumplido, identificador y mensajes de los vecinos (Tabla~\\ref{tab:obs-u4})",
+  "mantener o pasar a la siguiente fase verde, cada 5~s; verde de 10 a 60~s",
+  "$-$retraso por segundo entre decisiones, más 0.01 por la espera (Ecuación~\\ref{eq:recompensa-u4}); "
+  "término de \\textit{spillback} en IPPO spill; colas en la ablación",
+  "retraso total por vehículo (primaria, Ecuación~\\ref{eq:retraso-total}); retraso en la red, espera "
+  "para entrar, espera detenida, colas, paradas, \\textit{throughput}, CO$_2$ y NO$_x$"),
+]
+tot = 0
+for r in ENT:
+    h = max(lineas(r[0], E_T), lineas(r[1], E_E), lineas(r[2], E_A), lineas(r[3], E_R), lineas(r[4], E_M))
+    tot += h
+    print(f"  {h:2d}  {r[0][:45]}")
+print("lineas totales entradas:", tot, "filas", len(ENT))
+with io.open("entradas_filas.tex", "w", encoding="utf-8") as f:
+    for r in ENT:
+        f.write(" & ".join(r) + " \\\\\n")

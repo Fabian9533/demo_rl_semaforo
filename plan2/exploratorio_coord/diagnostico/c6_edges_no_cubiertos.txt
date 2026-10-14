@@ -1,0 +1,18 @@
+edge                                trivial   ippo_s42   fijo2509   ippo-trivial
+TOTAL tripinfo                        69914      73287      78641      +3373
+APROXIMACIONES (recompensadas)        33761      35749      39008      +1988
+SR_RS                                 16904      18128      19755      +1224
+C1_RE                                  3472       3673       3648       +201
+W_RW                                   3448       3446       3454         -2
+NR_RN                                  2987       3064       3585        +77
+RW_W                                   1656       1673       1671        +17
+C3_E                                   1558       1484       1444        -74
+RE_RN                                   712        763        769        +51
+RN_RW                                   648        660        658        +12
+RS_RE                                   581        585        581         +4
+RW_RS                                   539        533        536         -6
+
+Peso del termino de espera (W2 * suma getWaitingTime) en el costo local L (media val8):
+  trivial    retraso     36757  espera      457  (1.2 % de L)
+  ippo_s42   retraso     39288  espera     1087  (2.7 % de L)
+  fijo2509   retraso     42814  espera     1834  (4.1 % de L)

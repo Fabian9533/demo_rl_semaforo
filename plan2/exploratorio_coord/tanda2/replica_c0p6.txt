@@ -1,0 +1,16 @@
+filas replica 10 (esperadas 10)
+ep 1: timeloss_prom=236.81 kl_aprox=0.0036 perdida_politica=-0.0014 entropia_libre=0.6877 cambios_fase=2912 lr=1.00e-03  DISTINTO ['cambios_fase'] ref=['2916']
+ep 2: timeloss_prom=219.94 kl_aprox=0.0051 perdida_politica=-0.0045 entropia_libre=0.6743 cambios_fase=2776 lr=9.95e-04  DISTINTO ['cambios_fase'] ref=['2780']
+ep 3: timeloss_prom=171.69 kl_aprox=0.0081 perdida_politica=-0.0083 entropia_libre=0.6444 cambios_fase=2517 lr=9.90e-04  DISTINTO ['cambios_fase'] ref=['2521']
+ep 4: timeloss_prom=78.03 kl_aprox=0.0082 perdida_politica=-0.0119 entropia_libre=0.6204 cambios_fase=2179 lr=9.85e-04  DISTINTO ['cambios_fase'] ref=['2183']
+ep 5: timeloss_prom=73.67 kl_aprox=0.0074 perdida_politica=-0.0114 entropia_libre=0.5975 cambios_fase=2093 lr=9.80e-04  DISTINTO ['cambios_fase'] ref=['2097']
+ep 6: timeloss_prom=54.22 kl_aprox=0.0081 perdida_politica=-0.008 entropia_libre=0.5768 cambios_fase=1894 lr=9.75e-04  DISTINTO ['cambios_fase'] ref=['1898']
+ep 7: timeloss_prom=47.91 kl_aprox=0.0071 perdida_politica=-0.0069 entropia_libre=0.5352 cambios_fase=1904 lr=9.70e-04  DISTINTO ['cambios_fase'] ref=['1908']
+ep 8: timeloss_prom=45.22 kl_aprox=0.0067 perdida_politica=-0.0072 entropia_libre=0.514 cambios_fase=1896 lr=9.65e-04  DISTINTO ['cambios_fase'] ref=['1900']
+ep 9: timeloss_prom=53.09 kl_aprox=0.0062 perdida_politica=-0.0051 entropia_libre=0.4855 cambios_fase=1991 lr=9.60e-04  DISTINTO ['cambios_fase'] ref=['1995']
+ep 10: timeloss_prom=43.99 kl_aprox=0.0059 perdida_politica=-0.0047 entropia_libre=0.4615 cambios_fase=1917 lr=9.55e-04  DISTINTO ['cambios_fase'] ref=['1921']
+ep 10 val_999: replica 47.6 repo 47.6 IDENTICO
+ep 10 val_1999: replica 43.19 repo 43.19 IDENTICO
+ep 10 val: replica 45.395 repo 45.395 IDENTICO
+state_dict ep010: 12/12 tensores identicos (torch.equal); claves iguales True
+REPLICA FALLA

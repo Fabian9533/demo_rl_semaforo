@@ -5,6 +5,10 @@ Uso:
   python veredicto.py                           lee plan2/ y escribe las salidas
   python veredicto.py --plan2 DIR --tesis DIR   otras carpetas (por defecto, junto a este script)
   python veredicto.py --probar                  pruebas de las reglas con numeros inventados
+  python veredicto.py --metrica timeloss_prom --fijo fijo_2509 --sin-trivial
+                                                resultado principal: el veredicto pre-registrado
+  python veredicto.py --prefijo robustez_
+                                                analisis de robustez (retraso total, fijo nuevo; P1-P6)
 
 Lee de plan2/:
   evaluacion_<esc>_resumen.csv      (consolidar.py) media, ic95, deltas vs fijo y vs actuado, p
@@ -22,8 +26,10 @@ Escribe:
 Reglas (plan v2, sin cambios respecto de la ESPEC):
   - Base publicada de (modelo, celda) = la mediana de las tres bases por val_elegido del meta
     (empate de val: gana la base menor). Nunca se elige con las semillas de evaluacion.
-  - Veredicto con el retraso (timeloss_prom) de la base publicada frente al fijo (df, IC, p) y
-    frente al actuado (da, IC, p): FUNCIONA, MEJORA, FALLA, EMPATA (funcion veredicto).
+  - Veredicto con la metrica primaria (METRICA: retraso total desde la re-medicion; antes timeLoss)
+    de la base publicada frente al fijo (df, IC, p) y frente al actuado (da, IC, p): FUNCIONA,
+    MEJORA, FALLA, EMPATA (funcion veredicto). La base publicada se sigue eligiendo por la
+    validacion en timeLoss (val_elegido del meta).
   - PENDIENTE si faltan bases, evaluaciones o la base publicada no convergio; en el ultimo caso
     se escribe el veredicto provisional.
   - Convergencia sobre la serie val del ultimo tercio de las validaciones (ceil(n/3), minimo 3
@@ -32,6 +38,15 @@ Reglas (plan v2, sin cambios respecto de la ESPEC):
     convergio si |plateau| <= 5 y estabilidad <= 5.
   - Delta recompensa: el de la recompensa propia del modelo (ret_retraso, ret_colas o ret_spill)
     frente a la del fijo, tal como lo da consolidar.py (positivo = mejor recompensa).
+
+Opciones del resultado principal (sin ellas, todo queda como antes):
+  --fijo BRAZO   brazo de referencia en lugar de "fijo": lee evaluacion_<esc>_resumen_<BRAZO>.csv
+                 (consolidar.py --fijo BRAZO). fijo_2509 = el fijo tuneado del veredicto pre-registrado
+                 (plan2/fijo_2509.py), que con --metrica timeloss_prom reproduce ese veredicto.
+  --sin-trivial  sin la fila del control trivial ni la marca * (el veredicto pre-registrado no tenia trivial).
+  --casos P1-P5  solo esos casos (rango o lista separada por comas).
+  --prefijo P    antepone P a veredicto.csv|md y a los .tex, y sus labels pasan a tab:<P sin _>-...;
+                 los titulos de las tablas llevan el prefijo (p. ej. "Robustez: ...").
 """
 import os
 import re
@@ -46,10 +61,11 @@ import xml.etree.ElementTree as ET
 DIR = os.path.dirname(os.path.abspath(__file__))
 
 CASOS = [("P1", "corredor"), ("P2", "corredor_alta"), ("P3", "red"), ("P4", "red_alta"),
-         ("P5", "malla3")]
-MODELOS = ["actuado", "ql", "sarsa", "ql_colas", "dqn", "ippo_local", "ippo_vecinos", "ippo_spill",
-           "mappo"]
-NOMBRE = {"actuado": "Actuado", "ql": "Q-learning", "sarsa": "SARSA",
+         ("P5", "malla3"), ("P6", "malla3_alta")]
+MODELOS = ["actuado", "trivial", "ql", "sarsa", "ql_colas", "dqn", "ippo_local", "ippo_vecinos",
+           "ippo_spill", "mappo"]
+REFERENCIAS = ("actuado", "trivial")    # filas de referencia: se juzgan solo frente al fijo
+NOMBRE = {"actuado": "Actuado", "trivial": "Trivial", "ql": "Q-learning", "sarsa": "SARSA",
           "ql_colas": "Q-learning (colas)", "dqn": "DQN", "ippo_local": "IPPO local",
           "ippo_vecinos": "IPPO vecinos", "ippo_spill": "IPPO spill", "mappo": "MAPPO"}
 RECOMPENSA = {"ql": "ret_retraso", "sarsa": "ret_retraso", "ql_colas": "ret_colas",
@@ -57,7 +73,15 @@ RECOMPENSA = {"ql": "ret_retraso", "sarsa": "ret_retraso", "ql_colas": "ret_cola
               "ippo_spill": "ret_spill", "mappo": "ret_retraso"}
 TABULARES = ("ql", "sarsa", "ql_colas")
 BASES = [42, 2042, 4042]
-METRICA = "timeloss_prom"
+# Metrica por defecto: retraso total por vehiculo (timeLoss + espera para entrar a la red; ver
+# comun.leer_tripinfo), la del analisis de robustez. El resultado principal de la tesis es
+# el veredicto pre-registrado: --metrica timeloss_prom --fijo fijo_2509 --sin-trivial, que
+# reproduce plan2/veredicto_congelado_0355.* en P1-P5 (decision del autor).
+METRICA = "retraso_total_prom"
+FIJO = "fijo"                # brazo de referencia (--fijo); fijo_2509: el fijo del veredicto pre-registrado
+SIN_TRIVIAL = False          # --sin-trivial: sin la fila del trivial ni la marca *
+PREFIJO = ""                 # --prefijo: antepuesto a los archivos que se escriben y a los labels
+IGUAL = 0.0005               # s/veh: dos brazos con la misma media hasta aqui se toman como iguales
 UMBRAL_DELTA = -5.0          # % de retraso frente al fijo para FUNCIONA
 ALFA = 0.05
 UMBRAL_CONVERGENCIA = 5.0    # % para plateau y estabilidad
@@ -138,10 +162,54 @@ def texto_veredicto(provisional, motivo=None, convergio=True):
 
 
 def palabra(texto):
-    """Solo la palabra del veredicto (para las matrices)."""
+    """Solo la palabra del veredicto (para las matrices); con * si la politica es el trivial."""
     if texto and texto.startswith("= vecinos"):
         return "= vecinos"
-    return texto.split(" ")[0] if texto else "PENDIENTE"
+    marca = "*" if texto and "(= trivial)" in texto else ""
+    return (texto.split(" ")[0] if texto else "PENDIENTE") + marca
+
+
+def elegir_casos(texto):
+    """{"P1", ...} de un texto como "P1-P5" o "P1,P3,P6"."""
+    elegidos = set()
+    for trozo in texto.replace(" ", "").split(","):
+        if "-" in trozo:
+            a, b = (int(x.lstrip("Pp")) for x in trozo.split("-"))
+            elegidos |= {f"P{k}" for k in range(a, b + 1)}
+        elif trozo:
+            elegidos.add("P" + trozo.lstrip("Pp"))
+    return elegidos
+
+
+def configurar(metrica=None, fijo=None, sin_trivial=False, casos=None, prefijo=None):
+    """Opciones de la corrida; tambien las usan sintesis_plan.py y plan2/tablas_cap5.py.
+    Recorta MODELOS y CASOS en su lugar para que quien los importe vea lo mismo."""
+    global METRICA, FIJO, SIN_TRIVIAL, PREFIJO
+    METRICA = metrica or METRICA
+    FIJO = fijo or FIJO
+    PREFIJO = PREFIJO if prefijo is None else prefijo
+    SIN_TRIVIAL = sin_trivial
+    if sin_trivial and "trivial" in MODELOS:
+        MODELOS.remove("trivial")
+    if casos:
+        elegidos = elegir_casos(casos)
+        CASOS[:] = [c for c in CASOS if c[0] in elegidos]
+
+
+def etiqueta(nombre):
+    """\\label de una tabla: tab:<nombre>, o tab:<prefijo sin _>-<nombre> con --prefijo."""
+    pre = PREFIJO.strip("_").replace("_", "-")
+    return f"tab:{pre}-{nombre}" if pre else f"tab:{nombre}"
+
+
+def titulo_prefijo():
+    """Robustez para el prefijo robustez_ (va al inicio de los titulos); vacio sin prefijo."""
+    return PREFIJO.strip("_").replace("_", " ").capitalize()
+
+
+def nombre_retraso():
+    """La metrica primaria en los titulos .tex: retraso a secas es el timeLoss (como en el pre-registro)."""
+    return "retraso" if METRICA == "timeloss_prom" else que_retraso()
 
 
 # ---------------- Lectura ----------------
@@ -186,9 +254,12 @@ def leer_json(ruta):
 
 
 def leer_resumen(plan2, esc):
-    """{(brazo, metrica): fila} de evaluacion_<esc>_resumen.csv."""
-    return {(f["brazo"], f["metrica"]): f
-            for f in leer_csv(os.path.join(plan2, f"evaluacion_{esc}_resumen.csv"))}
+    """{(brazo, metrica): fila} de evaluacion_<esc>_resumen.csv (con --fijo BRAZO, del resumen con
+    los deltas frente a ese brazo, evaluacion_<esc>_resumen_<BRAZO>.csv)."""
+    nombre = f"evaluacion_{esc}_resumen.csv"
+    if FIJO != "fijo":
+        nombre = f"evaluacion_{esc}_resumen_{FIJO}.csv"
+    return {(f["brazo"], f["metrica"]): f for f in leer_csv(os.path.join(plan2, nombre))}
 
 
 def tag(esc, modelo, base):
@@ -361,8 +432,8 @@ def celda(plan2, caso, esc, modelo, resumen, desc):
                  "demanda_veh_h": desc["demanda"],
                  "rotonda": "" if desc["rotonda"] is None else ("si" if desc["rotonda"] else "no")})
     bases = []
-    if modelo == "actuado":
-        ev = fila_brazo(resumen, "actuado")
+    if modelo in REFERENCIAS:
+        ev = fila_brazo(resumen, modelo)
         if ev is None:
             fila["veredicto"] = texto_veredicto(None, "sin evaluación")
             return fila, bases, False
@@ -412,11 +483,23 @@ def celda(plan2, caso, esc, modelo, resumen, desc):
     return fila, bases, hay_datos
 
 
+def igual_a(resumen, brazo_a, brazo_b):
+    """True si dos brazos evaluados tienen la misma media de retraso y de espera (hasta IGUAL):
+    en la practica, la misma politica (p. ej. IPPO que cambia en cuanto la mascara lo permite)."""
+    for m in (METRICA, "espera_prom"):
+        a, b = resumen.get((brazo_a, m)), resumen.get((brazo_b, m))
+        if not a or not b or flotante(a.get("media")) is None or flotante(b.get("media")) is None:
+            return False
+        if abs(flotante(a["media"]) - flotante(b["media"])) > IGUAL:
+            return False
+    return True
+
+
 def spill_inactivo(plan2, esc):
     """True si en ningun episodio de entrenamiento de las tres bases de ippo_vecinos la cola
     maxima de un carril de enlace paso de la mitad de sus plazas. Entonces el termino de spill
     no se habria activado nunca, y con la misma semilla base la politica de ippo_spill es la de
-    vecinos bit a bit (24.09.2026: red, red_alta y malla3; en corredor y corredor_alta si se activa)."""
+    vecinos bit a bit (en red, red_alta y malla3; en corredor y corredor_alta si se activa)."""
     umbral, maximo = None, None
     for b in BASES:
         meta = leer_json(os.path.join(plan2, f"politica_{esc}_vecinos_s{b}.json"))
@@ -447,17 +530,29 @@ def calcular(plan2):
             bases[(modelo, caso)] = bs
             if hay:
                 con_datos.add(modelo)
+        # Politicas que dan lo mismo que el control trivial (verdes minimos, desfases 0): se marcan
+        # "(= trivial)" y en la matriz con *. No cambia el veredicto, que es frente al fijo.
+        for modelo, f in por_modelo.items():
+            b = f.get("base_publicada")
+            if (not SIN_TRIVIAL and modelo not in REFERENCIAS and b is not None and f.get("veredicto")
+                    and igual_a(resumen, f"{modelo}_s{b}", "trivial")):
+                f["veredicto"] += " (= trivial)"
         fs, fv = por_modelo.get("ippo_spill"), por_modelo.get("ippo_vecinos")
-        # Tambien si hay corridas de spill parciales o sin evaluar: el 25.09 las que alcanzaron a
+        # Tambien si hay corridas de spill parciales o sin evaluar: en el plan, las que alcanzaron a
         # correr en red y red_alta (2 completas y 4 parciales) salieron identicas a vecinos
-        # episodio a episodio, con cero activaciones del termino.
-        if (fs and fv and (fs.get("veredicto") or "").startswith("PENDIENTE")
-                and spill_inactivo(plan2, esc)):
-            for c in COLUMNAS:
-                if c not in ("modelo", "recompensa"):
-                    fs[c] = fv[c]
-            fs["veredicto"] = f"= vecinos (término de spill inactivo; {palabra(fv['veredicto'])})"
-            con_datos.add("ippo_spill")
+        # episodio a episodio, con cero activaciones del termino. Si spill ya esta evaluado y da lo
+        # mismo que vecinos, se rotula igual.
+        if fs and fv and spill_inactivo(plan2, esc):
+            pendiente = (fs.get("veredicto") or "").startswith("PENDIENTE")
+            igual = (fs.get("base_publicada") is not None and fv.get("base_publicada") is not None
+                     and igual_a(resumen, f"ippo_spill_s{fs['base_publicada']}",
+                                 f"ippo_vecinos_s{fv['base_publicada']}"))
+            if pendiente or igual:
+                for c in COLUMNAS:
+                    if c not in ("modelo", "recompensa"):
+                        fs[c] = fv[c]
+                fs["veredicto"] = f"= vecinos (término de spill inactivo; {palabra(fv['veredicto'])})"
+                con_datos.add("ippo_spill")
     return filas, bases, [m for m in MODELOS if m in con_datos]
 
 
@@ -503,10 +598,20 @@ def md_delta(d, ic, p):
     return f"{d:+.1f} % {txt_ic(ic)} p={txt_p(p)}"
 
 
+def que_retraso():
+    """Nombre de la metrica primaria para los textos de las tablas."""
+    if METRICA == "retraso_total_prom":
+        return "retraso total (timeLoss más la espera para entrar a la red)"
+    return "retraso (timeLoss)"
+
+
 def texto_md(filas, modelos):
     por = {(f["modelo"], f["caso"]): f for f in filas}
     lineas = ["# Veredicto del plan de pruebas v2", "",
               "Generado por veredicto.py a partir de plan2/. No editar a mano. Regla: ESPEC seccion 7.",
+              f"Metrica primaria: {METRICA} ({que_retraso()})."
+              + ("" if SIN_TRIVIAL else " * = la politica da lo mismo que el control trivial.")
+              + ("" if FIJO == "fijo" else f" Fijo de referencia: brazo {FIJO}."),
               "Delta de retraso en % (negativo = mejor); delta de recompensa en % (positivo = mejor).", ""]
     lineas += ["## Matriz caso x modelo", "",
                "| Caso | Escenario | " + " | ".join(NOMBRE[m] for m in MODELOS) + " |",
@@ -597,9 +702,14 @@ def abrir_tabla(sep="3pt"):
             r"\setlength{\tabcolsep}{" + sep + "}\n")
 
 
-def cerrar_tabla(corto, largo, etiqueta):
+def cerrar_tabla(corto, largo, nombre):
+    """Cierre con titulo y label (tab:<nombre>, con el prefijo si lo hay)."""
+    titulo = titulo_prefijo()
+    if titulo:
+        corto = f"{titulo}: {corto[0].lower()}{corto[1:]}"
+        largo = f"{titulo}. {largo}"
     return (r"\bottomrule" "\n" r"\end{tabular}" "\n" f"\\caption[{corto}]{{{largo}}}\n"
-            f"\\label{{{etiqueta}}}\n" r"\end{table}" "\n")
+            f"\\label{{{etiqueta(nombre)}}}\n" r"\end{table}" "\n")
 
 
 def celda_semaforos(f):
@@ -612,13 +722,16 @@ def tex_matriz(filas):
     cab = " & ".join(r"\makecell{" + caso + r"\\" + tex_esc(esc) + "}" for caso, esc in CASOS)
     lineas = [" & ".join([NOMBRE[m]] + [palabra(por[(m, caso)]["veredicto"]) for caso, _ in CASOS])
               + r" \\" for m in MODELOS]
+    referencias = ("El actuado se juzga frente al fijo." if SIN_TRIVIAL else
+                   "El actuado y el trivial (verdes mínimos, desfases en 0) se juzgan frente al "
+                   "fijo. *: la política da el mismo retraso y la misma espera que el trivial.")
     largo = ("Veredicto de cada modelo en cada caso del plan de pruebas (regla de la sección de "
-             "métodos): retraso de la política publicada frente al fijo tuneado y al actuado, "
-             "semillas de evaluación 1001 a 1030. PENDIENTE: faltan datos o la política no convergió. "
-             "El actuado se juzga frente al fijo.")
+             f"métodos): {nombre_retraso()} de la política publicada frente al fijo tuneado y al "
+             "actuado, semillas de evaluación 1001 a 1030. PENDIENTE: faltan datos o la política no "
+             f"convergió. {referencias}")
     return (abrir_tabla() + r"\begin{tabular}{l" + "c" * len(CASOS) + "}\n" r"\toprule" "\n"
             + "Modelo & " + cab + r" \\" "\n" r"\midrule" "\n" + "\n".join(lineas) + "\n"
-            + cerrar_tabla("Veredicto por caso y modelo", largo, "tab:veredicto-matriz"))
+            + cerrar_tabla("Veredicto por caso y modelo", largo, "veredicto-matriz"))
 
 
 def tex_modelo(filas, modelo):
@@ -645,6 +758,10 @@ def tex_modelo(filas, modelo):
         r"\midrule"]) + "\n"
     if modelo == "actuado":
         detalle = "Controlador actuado de SUMO, fila de referencia juzgada frente al fijo tuneado."
+    elif modelo == "trivial":
+        detalle = ("Control de cordura: el programa fijo con cada verde en el mínimo del agente "
+                   "(10~s) y los desfases en 0, es decir, cambiar de fase en cuanto la máscara lo "
+                   "permite. Fila de referencia juzgada frente al fijo tuneado.")
     else:
         detalle = (f"Política publicada = mediana de las tres semillas base por la validación "
                    f"(semillas 999 y 1999). $\\Delta$ recompensa: cambio de la recompensa propia del "
@@ -652,19 +769,20 @@ def tex_modelo(filas, modelo):
                    f"Conv.: si convergió la política publicada; entre paréntesis, cuántas de las "
                    f"tres bases convergen.")
     largo = (f"{NOMBRE[modelo]}: veredicto por caso. Sem.: semáforos (rot.: más una rotonda); Carr.: "
-             f"carriles por sentido de la avenida; Dem.: demanda total. Retraso: media $\\pm$ "
+             f"carriles por sentido de la avenida; Dem.: demanda total. Retraso: "
+             + ("" if METRICA == "timeloss_prom" else f"{que_retraso()}, ") + "media $\\pm$ "
              f"IC95\\,\\% sobre las semillas de evaluación 1001 a 1030; $\\Delta$ con IC95\\,\\% "
              f"bootstrap pareado y $p$ de Wilcoxon pareado. {detalle}")
-    etiqueta = "tab:veredicto-" + modelo.replace("_", "-")
     return (abrir_tabla("1.5pt") + cab + "\n".join(lineas) + "\n"
-            + cerrar_tabla(f"Veredicto de {NOMBRE[modelo]}", largo, etiqueta))
+            + cerrar_tabla(f"Veredicto de {NOMBRE[modelo]}", largo,
+                           "veredicto-" + modelo.replace("_", "-")))
 
 
 def tex_bases(bases, modelos):
     """Una tabla por modelo con todas sus bases en cada caso (fragilidad del entrenamiento)."""
     texto = ""
     for m in modelos:
-        if m == "actuado":
+        if m in REFERENCIAS:
             continue
         lineas = []
         for caso, esc in CASOS:
@@ -699,13 +817,15 @@ def tex_bases(bases, modelos):
             r"\makecell{$\Delta$ vs fijo\\{}[IC95\,\%]} & $p$ \\",
             r"\midrule"]) + "\n"
         largo = (f"{NOMBRE[m]}: las tres políticas entrenadas (semillas base) de cada caso. La "
-                 f"validación elegida es la media de las semillas 999 y 1999 del checkpoint "
+                 f"validación elegida es la media "
+                 + ("" if METRICA == "timeloss_prom" else "del timeLoss en ")
+                 + f"de las semillas 999 y 1999 del checkpoint "
                  f"publicado; el retraso y el $\\Delta$ frente al fijo, sobre las semillas 1001 a 1030. "
                  f"La base publicada es la mediana por validación. El rango entre bases se compara "
                  f"con el IC95\\,\\% de una sola política.")
         texto += (abrir_tabla() + cab + "\n".join(lineas) + "\n"
                   + cerrar_tabla(f"Bases de {NOMBRE[m]}", largo,
-                                 "tab:veredicto-bases-" + m.replace("_", "-")) + "\n")
+                                 "veredicto-bases-" + m.replace("_", "-")) + "\n")
     return texto or "% Sin bases entrenadas todavia.\n"
 
 
@@ -718,15 +838,22 @@ def escribir(ruta, texto, cabecera=""):
 
 def generar(plan2, tesis):
     filas, bases, modelos = calcular(plan2)
-    escribir_csv(os.path.join(plan2, "veredicto.csv"), filas)
-    escribir(os.path.join(plan2, "veredicto.md"), texto_md(filas, modelos))
+    escribir_csv(os.path.join(plan2, PREFIJO + "veredicto.csv"), filas)
+    escribir(os.path.join(plan2, PREFIJO + "veredicto.md"), texto_md(filas, modelos))
     tablas = os.path.join(tesis, "secciones", "tablas")
-    escribir(os.path.join(tablas, "veredicto_matriz.tex"), tex_matriz(filas), CABECERA_TEX)
+    cabecera = CABECERA_TEX + ("" if FIJO == "fijo" else f"% Fijo de referencia: brazo {FIJO}.\n")
+    for caso, esc in CASOS:
+        if not leer_resumen(plan2, esc).get((FIJO, METRICA)):
+            cabecera += f"% PENDIENTE-{caso}: falta evaluar el fijo de referencia ({FIJO}) de {esc}.\n"
+    escribir(os.path.join(tablas, PREFIJO + "veredicto_matriz.tex"), tex_matriz(filas), cabecera)
     for m in MODELOS:
         # sin datos se escribe un archivo vacio para que un \input del capitulo no rompa la compilacion
         texto = tex_modelo(filas, m) if m in modelos else "% Sin datos todavia.\n"
-        escribir(os.path.join(tablas, f"veredicto_{m}.tex"), texto, CABECERA_TEX)
-    escribir(os.path.join(tablas, "veredicto_bases.tex"), tex_bases(bases, modelos), CABECERA_TEX)
+        escribir(os.path.join(tablas, f"{PREFIJO}veredicto_{m}.tex"), texto, cabecera)
+    if SIN_TRIVIAL:
+        escribir(os.path.join(tablas, f"{PREFIJO}veredicto_trivial.tex"),
+                 "% Sin el control trivial en esta corrida (--sin-trivial).\n", cabecera)
+    escribir(os.path.join(tablas, PREFIJO + "veredicto_bases.tex"), tex_bases(bases, modelos), cabecera)
     for f in filas:
         if f["modelo"] in modelos:
             print(f"  {f['caso']} {f['modelo']:<13} {f['veredicto']}")
@@ -821,7 +948,14 @@ def main():
     ap.add_argument("--plan2", default=os.path.join(DIR, "plan2"))
     ap.add_argument("--tesis", default=os.path.join(DIR, "TESIS"))
     ap.add_argument("--probar", action="store_true", help="solo corre las pruebas de las reglas")
+    ap.add_argument("--metrica", choices=["retraso_total_prom", "timeloss_prom"], default=METRICA,
+                    help="metrica primaria (timeloss_prom: la anterior, con los datos vigentes)")
+    ap.add_argument("--fijo", default="fijo", help="brazo de referencia (fijo_2509: el del pre-registro)")
+    ap.add_argument("--sin-trivial", action="store_true", help="sin la fila del trivial ni la marca *")
+    ap.add_argument("--casos", default=None, help='solo esos casos, p. ej. "P1-P5"')
+    ap.add_argument("--prefijo", default="", help="antepuesto a las salidas y a los labels")
     args = ap.parse_args()
+    configurar(args.metrica, args.fijo, args.sin_trivial, args.casos, args.prefijo)
     if args.probar:
         probar()
         return

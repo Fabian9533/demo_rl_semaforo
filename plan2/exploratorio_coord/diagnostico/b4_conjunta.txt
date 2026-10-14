@@ -1,0 +1,10 @@
+== red_alta: regla conjunta sincronizada (8 semillas [999, 1999, 2999, 3999, 4999, 7999, 8999, 9999]); ref = trivial (thr=inf)
+   thr=1e+09 gmax=25  val8= 27.08 sd= 2.31  vs trivial  +0.0 %  gana 0/8  cambios=  868  por semilla [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+   thr=    3 gmax=25  val8= 39.44 sd= 2.15  vs trivial +45.6 %  gana 0/8  cambios=  561  por semilla [61.9, 37.5, 49.1, 37.4, 39.1, 48.1, 53.3, 42.7]
+   thr=    6 gmax=25  val8= 39.23 sd= 1.88  vs trivial +44.9 %  gana 0/8  cambios=  564  por semilla [60.9, 37.3, 52.5, 36.5, 39.0, 45.8, 53.8, 37.7]
+   thr=    9 gmax=25  val8= 39.23 sd= 1.88  vs trivial +44.9 %  gana 0/8  cambios=  564  por semilla [60.9, 37.3, 52.5, 36.5, 39.0, 45.8, 53.8, 37.7]
+   thr=   12 gmax=25  val8= 39.21 sd= 1.89  vs trivial +44.8 %  gana 0/8  cambios=  565  por semilla [60.8, 37.3, 52.5, 36.4, 38.9, 45.6, 53.8, 37.6]
+   thr=    6 gmax=20  val8= 36.94 sd= 2.36  vs trivial +36.4 %  gana 0/8  cambios=  639  por semilla [51.9, 32.5, 35.4, 27.5, 32.5, 42.8, 37.7, 33.9]
+   thr=    9 gmax=20  val8= 36.94 sd= 2.36  vs trivial +36.4 %  gana 0/8  cambios=  639  por semilla [51.9, 32.5, 35.4, 27.5, 32.5, 42.8, 37.7, 33.9]
+   thr=    6 gmax=30  val8= 34.25 sd= 1.44  vs trivial +26.5 %  gana 0/8  cambios=  504  por semilla [40.4, 21.1, 38.2, 15.6, 24.0, 29.8, 30.7, 17.1]
+   thr=   12 gmax=30  val8= 34.26 sd= 1.44  vs trivial +26.5 %  gana 0/8  cambios=  504  por semilla [40.4, 21.1, 38.2, 15.6, 24.0, 29.8, 30.7, 17.3]

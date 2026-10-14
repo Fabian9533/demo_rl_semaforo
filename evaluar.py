@@ -10,8 +10,8 @@ Modo del plan de pruebas v2 (un brazo por llamada, escribe un CSV parcial; ver p
   El tipo de politica se decide por la extension y el meta:
     .json  Q-tables (rl_corredor, o rl_semaforo en cruce/cruce2) con epsilon 0. Si existe
            q_table_<tag>.meta.json el brazo es <alg>_s<base> (alg = ql, sarsa, ql_colas...
-           segun meta["algoritmo"] y meta["recompensa"]); sin meta es una Q-table vieja del
-           06.09 y el brazo se llama "rl", como en las evaluaciones anteriores.
+           segun meta["algoritmo"] y meta["recompensa"]); sin meta es una Q-table vieja de la
+           fase exploratoria y el brazo se llama "rl", como en las evaluaciones anteriores.
     .pt    se lee el meta <archivo>.json: "algoritmo" ausente o "ippo" -> rl_ippo con su
            variante (brazo ippo_<variante>_s<base>); "dqn" -> rl_dqn (dqn_s<base>);
            "mappo" -> rl_mappo (mappo_s<base>). rl_dqn y rl_mappo se importan solo si hacen falta.
@@ -25,7 +25,7 @@ Modo del plan de pruebas v2 (un brazo por llamada, escribe un CSV parcial; ver p
   y da vehiculos_<esc>_<brazo>.csv; los de las demas semillas se borran tras leerlos. De la primera
   semilla tambien quedan serie_<esc>_<brazo>_s<semilla>.csv y fases_<esc>_<brazo>_s<semilla>.csv.
 
-Modo antiguo (06.09.2026, se conserva sin cambios; escribe evaluacion_<esc>.csv y el resumen):
+Modo antiguo (fase exploratoria, se conserva sin cambios; escribe evaluacion_<esc>.csv y el resumen):
   python evaluar.py --escenario cruce [--semillas 1001-1010] [--brazos baseline,actuado,demo]
   python evaluar.py --escenario red --ippo politica_red_local_s42.pt,politica_red_vecinos_s42.pt
   python evaluar.py --escenario red --brazos "" --ippo politica_red_vecinos_s42.pt --latencia 5 --perdida 0.3
@@ -43,7 +43,7 @@ y las politicas IPPO de U4 (--ippo, una o varias). Escribe:
   serie_<esc>_<brazo>_s<semilla>.csv y fases_<esc>_<brazo>_s<semilla>.csv, primera semilla
 En el modo antiguo --semillas vale 1001-1010 por defecto, como antes.
 
-Cambios del plan v2 (24.09.2026): modo --brazo/--politica/--salida con CSV parcial por brazo
+Cambios del plan v2: modo --brazo/--politica/--salida con CSV parcial por brazo
 (la estadistica pasa a consolidar.py), carga por tipo de politica y meta, nombres de brazo
 <alg>_s<base>, columnas modelo/base/ret_*, tripinfo unico por proceso, escenarios del plan v2
 (los de rl_corredor.ESCENARIOS, que incluye escenarios_plan2).
@@ -66,6 +66,8 @@ import rl_corredor
 METRICAS = ["timeloss_prom", "espera_prom", "cola_prom", "cola_max", "paradas_prom",
             "throughput", "co2_prom", "nox_prom", "recompensa_decision", "cambios_fase",
             "no_terminados",
+            # desde la re-medicion: retraso total (primaria), espera para entrar y no insertados
+            "retraso_total_prom", "retraso_insercion_prom", "no_insertados",
             # solo en escenarios de varios cruces (corredor, red): quedan vacias en los demas
             "viaje_corredor_prom", "retraso_corredor_prom", "retraso_corredor_punta",
             "paradas_corredor", "paradas_corredor_le1",
@@ -77,7 +79,7 @@ ESCENARIOS = ["cruce", "cruce2"] + list(rl_corredor.ESCENARIOS)
 # Plan v2: columnas del CSV parcial
 ID_V2 = ["brazo", "modelo", "base", "semilla"]
 METRICAS_V2 = METRICAS + ["ret_retraso", "ret_colas", "ret_spill", "vehiculos", "recompensa", "decisiones"]
-MODO_REFERENCIA = {"fijo": "baseline", "actuado": "actuado"}
+MODO_REFERENCIA = {"fijo": "baseline", "actuado": "actuado", "trivial": "trivial"}
 # meta["algoritmo"] de rl_corredor -> etiqueta del modelo (ESPEC seccion 2)
 ALG_TABULAR = {"qlearning": "ql", "q-learning": "ql", "ql": "ql", "sarsa": "sarsa"}
 
@@ -171,7 +173,8 @@ def leer_json(ruta):
 
 
 def brazo_referencia(esc, brazo):
-    """fijo o actuado: (brazo, modelo, base, correr)."""
+    """fijo, actuado o trivial (verdes minimos y desfases 0, control de cordura del
+    plan v2): (brazo, modelo, base, correr)."""
     mod = configurar(esc)
 
     def correr(semilla, tripinfo, serie):
@@ -194,7 +197,7 @@ def brazo_tabular(esc, ruta):
         if meta.get("escenario", esc) != esc:
             print(f"AVISO: {ruta} se entreno en {meta['escenario']} y se evalua en {esc}")
     else:
-        brazo = modelo = "rl"      # Q-table vieja (06.09), sin meta
+        brazo = modelo = "rl"      # Q-table vieja (fase exploratoria), sin meta
         base = ""
     mod = configurar(esc)
 
@@ -283,25 +286,26 @@ def main_v2(args):
             res = correr(semilla, tripinfo, serie)
             if primera:
                 guardar_vehiculos(esc, brazo, tripinfo)
-            elif os.path.exists(tripinfo):
-                os.remove(tripinfo)
+            else:
+                comun.borrar_tripinfo(tripinfo)
             w.writerow({"brazo": brazo, "modelo": modelo, "base": base, "semilla": semilla,
                         **{m: res.get(m, "") for m in METRICAS_V2}})
             f.flush()
-            print(f"{brazo:18s} semilla {semilla}: timeLoss={res['timeloss_prom']:6.2f}  "
-                  f"espera={res['espera_prom']:6.2f}  ret_retraso={res.get('ret_retraso', '')}  "
-                  f"{time.time() - t0:.1f}s", flush=True)
+            print(f"{brazo:18s} semilla {semilla}: total={res['retraso_total_prom']:6.2f}  "
+                  f"timeLoss={res['timeloss_prom']:6.2f}  no_insertados={res['no_insertados']}  "
+                  f"ret_retraso={res.get('ret_retraso', '')}  {time.time() - t0:.1f}s", flush=True)
     os.replace(temporal, salida)
     print(f"Escrito {salida}")
 
 
-# ---------------- Modo antiguo (06.09.2026) ----------------
+# ---------------- Modo antiguo (fase exploratoria) ----------------
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--escenario", choices=ESCENARIOS, default="cruce")
     ap.add_argument("--semillas", default=None,
                     help="p. ej. 1001-1030 o 1001,1005 (por defecto 1001-1030; 1001-1010 en el modo antiguo)")
-    ap.add_argument("--brazo", choices=["fijo", "actuado"], default=None, help="plan v2: brazo de referencia")
+    ap.add_argument("--brazo", choices=["fijo", "actuado", "trivial"], default=None,
+                    help="plan v2: brazo de referencia")
     ap.add_argument("--politica", default=None, help="plan v2: q_table_<tag>.json o politica_*.pt")
     ap.add_argument("--salida", default=None, help="plan v2: CSV parcial (parciales/eval_<esc>_<brazo>.csv)")
     ap.add_argument("--brazos", default="baseline,actuado,demo",

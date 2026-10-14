@@ -10,7 +10,7 @@ entrada esta en plan2/ESPEC.md, seccion 1:
   LADOS[esc] = lados que se miran en VECINOS
 Mientras un escenario no este listo, no aparece aqui.
 
-Cambios del plan v2 (24.09.2026):
+Cambios del plan v2:
   red_alta  P4: la red de 3 cruces + rotonda (red.net.xml) con toda la demanda x 1.2. El factor
             y su criterio estan en la cabecera de red_alta.rou.xml. Semaforos, enlaces, flujos y
             vecinos son los de "red" (copiados aqui para no importar rl_corredor ni rl_ippo).
@@ -18,6 +18,8 @@ Cambios del plan v2 (24.09.2026):
             300 m entre cruces, brazos de 400 m, 2 carriles por sentido. La avenida de referencia
             es la fila 2 (E-O): sus flows de punta a punta se llaman como en el corredor.
             En malla3.add.xml la fase 0 de cada semaforo es la E-O (avenida) y la 2 la N-S.
+Cambios posteriores al plan v2:
+  malla3_alta  P6: la misma malla con toda la demanda x f (calibrar_demanda.py).
 """
 
 # ---------------- P4: red_alta ----------------
@@ -85,3 +87,28 @@ def malla3():
 
 ESCENARIOS_RC["malla3"], VECINOS["malla3"] = malla3()
 LADOS["malla3"] = ("oeste", "este", "norte", "sur")
+
+
+# ---------------- P6: malla3_alta ----------------
+# La malla de P5 (malla3.net.xml) con toda la demanda multiplicada por el factor que eligio
+# calibrar_demanda.py (criterio y tabla en la cabecera de malla3_alta.rou.xml). Semaforos,
+# enlaces, flujos y vecinos son los de malla3.
+ESCENARIOS_RC["malla3_alta"] = {**ESCENARIOS_RC["malla3"], "cfg": "malla3_alta.sumocfg"}
+VECINOS["malla3_alta"] = VECINOS["malla3"]
+LADOS["malla3_alta"] = LADOS["malla3"]
+
+
+# ---------------- Barrido de demanda en el corredor ----------------
+# Analisis complementario, fuera del veredicto: la red de P1 con toda la demanda x f y con un perfil
+# que cambia dentro de la hora (barrido_demanda.py escribe los archivos en plan2/). Cada derivado
+# usa la red, los semaforos y los vecinos de su base.
+# DERIVADOS[esc] = (escenario base, .sumocfg, caso cuya malla de barrido y desfases hereda).
+# Los <esc>_p1 cargan el programa fijo de P1 sin retunear (corredor.add.xml).
+FACTORES_DEMANDA = (50, 75, 100, 125, 150, 175, 200, 225)       # f x 100
+DERIVADOS = {}
+for _f in FACTORES_DEMANDA:
+    DERIVADOS[f"corredor_f{_f:03d}"] = ("corredor", f"corredor_f{_f:03d}.sumocfg",
+                                        "corredor" if _f <= 125 else "corredor_alta")
+    DERIVADOS[f"corredor_f{_f:03d}_p1"] = ("corredor", f"corredor_f{_f:03d}_p1.sumocfg", "corredor")
+DERIVADOS["corredor_var"] = ("corredor", "corredor_var.sumocfg", "corredor_alta")
+DERIVADOS["corredor_var_p1"] = ("corredor", "corredor_var_p1.sumocfg", "corredor")

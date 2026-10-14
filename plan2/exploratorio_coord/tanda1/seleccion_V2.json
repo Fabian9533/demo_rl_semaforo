@@ -1,0 +1,28 @@
+{
+ "brazo": "V2",
+ "variante": "smdp_crn",
+ "base_publicada": 2042,
+ "bases": {
+  "42": {
+   "convergio": true,
+   "plateau": 0.0,
+   "estabilidad": 0.0,
+   "ep_elegido": 200,
+   "val_elegido": 27.078
+  },
+  "2042": {
+   "convergio": true,
+   "plateau": -1.495615403278906,
+   "estabilidad": 0.0,
+   "ep_elegido": 110,
+   "val_elegido": 27.078
+  },
+  "4042": {
+   "convergio": true,
+   "plateau": 0.0,
+   "estabilidad": 0.0,
+   "ep_elegido": 200,
+   "val_elegido": 27.078
+  }
+ }
+}

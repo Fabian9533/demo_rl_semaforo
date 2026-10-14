@@ -1,0 +1,77 @@
+Lazo cerrado, timeLoss medio (999, 1999): canal normal vs canal cortado (perdida 1.0)
+  red          vecinos  s4042  normal=  19.69 cortado=  35.40 delta= +79.8 %  (por semilla normal [19.49, 19.89], cortado [36.14, 34.66])
+  red_alta     vecinos  s42    normal=  28.09 cortado=  26.95 delta=  -4.1 %  (por semilla normal [27.49, 28.68], cortado [25.4, 28.49])
+  malla3       vecinos  s2042  normal=  20.77 cortado=  35.33 delta= +70.1 %  (por semilla normal [20.79, 20.76], cortado [35.46, 35.2])
+  malla3_alta  vecinos  s42    normal=  34.80 cortado=  80.67 delta=+131.8 %  (por semilla normal [34.48, 35.13], cortado [99.2, 62.14])
+  red          mappo    s4042  normal=  19.69 cortado=  36.74 delta= +86.6 %  (por semilla normal [19.49, 19.89], cortado [37.3, 36.18])
+  red_alta     mappo    s2042  normal=  28.04 cortado=  27.95 delta=  -0.3 %  (por semilla normal [28.65, 27.42], cortado [26.68, 29.21])
+  malla3       mappo    s2042  normal=  20.77 cortado=  40.19 delta= +93.5 %  (por semilla normal [20.79, 20.76], cortado [39.94, 40.44])
+  malla3_alta  mappo    s2042  normal=  37.19 cortado=  58.11 delta= +56.2 %  (por semilla normal [35.12, 39.26], cortado [61.13, 55.08])
+
+Decisiones libres de la politica publicada (999 + 1999), argmax:
+   {"esc": "red", "modelo": "vecinos", "base": 4042, "decisiones": 3480, "libres": 1734, "p_cambiar_libre": 1.0, "acuerdo_sin_mensajes": 0.498, "acuerdo_sin_colas": 1.0, "acuerdo_sin_id": 0.994, "verde_al_cambiar_media": 10.0, "verde_al_cambiar_p90": 10.0, "frac_cambio_a_los_10s": 1.0}
+   {"esc": "red_alta", "modelo": "vecinos", "base": 42, "decisiones": 3867, "libres": 2739, "p_cambiar_libre": 0.408, "acuerdo_sin_mensajes": 0.805, "acuerdo_sin_colas": 0.912, "acuerdo_sin_id": 0.972, "verde_al_cambiar_media": 17.2, "verde_al_cambiar_p90": 25.0, "frac_cambio_a_los_10s": 0.47}
+   {"esc": "malla3", "modelo": "vecinos", "base": 2042, "decisiones": 10404, "libres": 5184, "p_cambiar_libre": 1.0, "acuerdo_sin_mensajes": 0.627, "acuerdo_sin_colas": 1.0, "acuerdo_sin_id": 0.986, "verde_al_cambiar_media": 10.0, "verde_al_cambiar_p90": 10.0, "frac_cambio_a_los_10s": 1.0}
+   {"esc": "malla3_alta", "modelo": "vecinos", "base": 42, "decisiones": 12379, "libres": 9136, "p_cambiar_libre": 0.351, "acuerdo_sin_mensajes": 0.759, "acuerdo_sin_colas": 0.863, "acuerdo_sin_id": 0.937, "verde_al_cambiar_media": 19.2, "verde_al_cambiar_p90": 30.0, "frac_cambio_a_los_10s": 0.258}
+   {"esc": "red", "modelo": "mappo", "base": 4042, "decisiones": 3480, "libres": 1734, "p_cambiar_libre": 1.0, "acuerdo_sin_mensajes": 0.498, "acuerdo_sin_colas": 1.0, "acuerdo_sin_id": 0.988, "verde_al_cambiar_media": 10.0, "verde_al_cambiar_p90": 10.0, "frac_cambio_a_los_10s": 1.0}
+   {"esc": "red_alta", "modelo": "mappo", "base": 2042, "decisiones": 3847, "libres": 2716, "p_cambiar_libre": 0.413, "acuerdo_sin_mensajes": 0.741, "acuerdo_sin_colas": 0.961, "acuerdo_sin_id": 0.981, "verde_al_cambiar_media": 17.1, "verde_al_cambiar_p90": 25.0, "frac_cambio_a_los_10s": 0.5}
+   {"esc": "malla3", "modelo": "mappo", "base": 2042, "decisiones": 10404, "libres": 5184, "p_cambiar_libre": 1.0, "acuerdo_sin_mensajes": 0.501, "acuerdo_sin_colas": 1.0, "acuerdo_sin_id": 1.0, "verde_al_cambiar_media": 10.0, "verde_al_cambiar_p90": 10.0, "frac_cambio_a_los_10s": 1.0}
+   {"esc": "malla3_alta", "modelo": "mappo", "base": 2042, "decisiones": 12587, "libres": 9355, "p_cambiar_libre": 0.335, "acuerdo_sin_mensajes": 0.781, "acuerdo_sin_colas": 0.78, "acuerdo_sin_id": 0.919, "verde_al_cambiar_media": 19.3, "verde_al_cambiar_p90": 30.0, "frac_cambio_a_los_10s": 0.28}
+
+Magnitud de las entradas (obs_<esc>_<modelo>.csv):
+  red:
+                   grupo     media       p95       max  frac_no_cero
+         cola_local(0-3)    0.0038    0.0263    0.0694     0.169
+        movil_local(4-7)    0.0387    0.0789    0.1316     0.955
+             t_verde(10)    0.1247    0.1667    0.1667     0.998
+       puede_cambiar(11)    0.4983       1.0       1.0     0.498
+            vec_presente       1.0       1.0       1.0       1.0
+      vec_verde_hacia_mi       0.5       1.0       1.0       0.5
+               vec_ambar       0.0       0.0       0.0       0.0
+              vec_t_fase    0.0914    0.1667    0.1667     0.998
+             vec_outflow    0.0214    0.0833    0.1316      0.47
+      vec_cola_alimentadora    0.0026    0.0139    0.0556     0.176
+      vec_cola_mi_salida    0.0013       0.0    0.0526      0.05
+                vec_edad    0.0683    0.1333       1.0       0.8
+  red_alta:
+                   grupo     media       p95       max  frac_no_cero
+         cola_local(0-3)     0.008    0.0263    0.0789     0.299
+        movil_local(4-7)    0.0454    0.1053    0.1974     0.944
+             t_verde(10)    0.2096    0.4167       0.5     0.998
+       puede_cambiar(11)    0.7083       1.0       1.0     0.708
+            vec_presente       1.0       1.0       1.0       1.0
+      vec_verde_hacia_mi    0.5617       1.0       1.0     0.562
+               vec_ambar    0.1125       1.0       1.0     0.112
+              vec_t_fase    0.1411    0.3833       0.5     0.831
+             vec_outflow    0.0293    0.1111    0.1842     0.529
+      vec_cola_alimentadora    0.0039    0.0263    0.0833     0.215
+      vec_cola_mi_salida    0.0032    0.0263    0.1053     0.106
+                vec_edad    0.0685    0.1333       1.0     0.807
+  malla3:
+                   grupo     media       p95       max  frac_no_cero
+         cola_local(0-3)    0.0019    0.0135    0.0541     0.139
+        movil_local(4-7)    0.0321    0.0686    0.1216     0.959
+             t_verde(10)    0.1247    0.1667    0.1667     0.998
+       puede_cambiar(11)    0.4983       1.0       1.0     0.498
+            vec_presente       1.0       1.0       1.0       1.0
+      vec_verde_hacia_mi    0.4991       1.0       1.0     0.499
+               vec_ambar       0.0       0.0       0.0       0.0
+              vec_t_fase    0.0915    0.1667    0.1667     0.998
+             vec_outflow    0.0144    0.0588    0.0946     0.456
+      vec_cola_alimentadora    0.0017    0.0098    0.0392     0.131
+      vec_cola_mi_salida    0.0011       0.0    0.0541      0.04
+                vec_edad    0.0682    0.1333       1.0     0.799
+  malla3_alta:
+                   grupo     media       p95       max  frac_no_cero
+         cola_local(0-3)    0.0102     0.049    0.1892     0.382
+        movil_local(4-7)     0.062    0.1486    0.3108     0.867
+             t_verde(10)    0.2265       0.5    0.8333     0.999
+       puede_cambiar(11)     0.738       1.0       1.0     0.738
+            vec_presente       1.0       1.0       1.0       1.0
+      vec_verde_hacia_mi    0.4508       1.0       1.0     0.451
+               vec_ambar     0.094       1.0       1.0     0.094
+              vec_t_fase    0.1623    0.4167    0.7833     0.859
+             vec_outflow    0.0334    0.1471    0.3378     0.411
+      vec_cola_alimentadora    0.0113     0.049    0.2027     0.418
+      vec_cola_mi_salida    0.0118    0.0541    0.2703      0.28
+                vec_edad    0.0688    0.1333       1.0     0.806

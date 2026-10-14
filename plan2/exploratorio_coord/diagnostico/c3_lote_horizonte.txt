@@ -1,0 +1,64 @@
+HIPER = {'gamma': 0.95, 'lam': 0.95, 'clip': 0.2, 'epocas': 10, 'minibatch': 64, 'lr': 0.001, 'ent': 0.01, 'valor': 0.5, 'grad': 0.5}; ESCALA_R = 0.02; OCULTAS = 64
+horizonte efectivo 1/(1-gamma) = 20 decisiones; vida media ln0.5/ln gamma = 13.5 decisiones = 68 s (todas de 5 s) a 88 s (ciclo minimo: 6.5 s por decision)
+gamma por segundo equivalente: 5 s -> 0.9898, 8 s (cambio con ambar) -> 0.9936
+
+===== red_alta: 3 semaforos, dim_obs 31; parametros actor 6338, critico local 6273, critico central 10433
+  ippo_vecinos  s42    decisiones/ep   1927 (libres 70.7 %), pasos de gradiente/actualizacion 310, muestras/parametro actor 0.30; r/decision (ult. 20 ep)   -4.16 -> escala del retorno ~   -1.7
+      tercios:  kl 0.0040 clip 0.040 ent 0.194 Lv 0.024 lr 8.4e-04 | kl 0.0036 clip 0.032 ent 0.139 Lv 0.017 lr 5.1e-04 | kl 0.0018 clip 0.019 ent 0.099 Lv 0.013 lr 1.7e-04
+  ippo_vecinos  s2042  decisiones/ep   1919 (libres 70.1 %), pasos de gradiente/actualizacion 300, muestras/parametro actor 0.30; r/decision (ult. 20 ep)   -4.28 -> escala del retorno ~   -1.7
+      tercios:  kl 0.0038 clip 0.037 ent 0.182 Lv 0.023 lr 8.4e-04 | kl 0.0025 clip 0.025 ent 0.120 Lv 0.016 lr 5.1e-04 | kl 0.0015 clip 0.016 ent 0.086 Lv 0.015 lr 1.7e-04
+  ippo_vecinos  s4042  decisiones/ep   1916 (libres 69.8 %), pasos de gradiente/actualizacion 300, muestras/parametro actor 0.30; r/decision (ult. 20 ep)   -4.35 -> escala del retorno ~   -1.7
+      tercios:  kl 0.0036 clip 0.036 ent 0.177 Lv 0.025 lr 8.4e-04 | kl 0.0026 clip 0.020 ent 0.078 Lv 0.016 lr 5.1e-04 | kl 0.0015 clip 0.016 ent 0.088 Lv 0.015 lr 1.7e-04
+  mappo         s42    decisiones/ep   1926 (libres 70.5 %), pasos de gradiente/actualizacion 310, muestras/parametro actor 0.30; r/decision (ult. 20 ep)   -4.08 -> escala del retorno ~   -1.6
+      tercios:  kl 0.0038 clip 0.037 ent 0.191 Lv 0.021 lr 8.4e-04 | kl 0.0035 clip 0.029 ent 0.110 Lv 0.015 lr 5.1e-04 | kl 0.0016 clip 0.016 ent 0.072 Lv 0.012 lr 1.7e-04
+  mappo         s2042  decisiones/ep   1922 (libres 70.4 %), pasos de gradiente/actualizacion 310, muestras/parametro actor 0.30; r/decision (ult. 20 ep)   -4.40 -> escala del retorno ~   -1.8
+      tercios:  kl 0.0038 clip 0.037 ent 0.181 Lv 0.021 lr 8.4e-04 | kl 0.0025 clip 0.023 ent 0.091 Lv 0.015 lr 5.1e-04 | kl 0.0011 clip 0.012 ent 0.067 Lv 0.015 lr 1.7e-04
+  mappo         s4042  decisiones/ep   1925 (libres 70.6 %), pasos de gradiente/actualizacion 310, muestras/parametro actor 0.30; r/decision (ult. 20 ep)   -4.43 -> escala del retorno ~   -1.8
+      tercios:  kl 0.0040 clip 0.036 ent 0.157 Lv 0.022 lr 8.4e-04 | kl 0.0023 clip 0.019 ent 0.085 Lv 0.015 lr 5.1e-04 | kl 0.0010 clip 0.010 ent 0.056 Lv 0.015 lr 1.7e-04
+  enlaces entre cruces: 4, largo medio 286 m, viaje a flujo libre 20.6 s = 4.1 decisiones de 5 s -> gamma^k = 0.81 (a 6.5 s/decision 0.85); 3 enlaces (62 s) -> 0.53
+
+===== malla3_alta: 9 semaforos, dim_obs 53; parametros actor 7746, critico local 7681, critico central 35393
+  ippo_vecinos  s42    decisiones/ep   6284 (libres 72.4 %), pasos de gradiente/actualizacion 990, muestras/parametro actor 0.81; r/decision (ult. 20 ep)  -11.70 -> escala del retorno ~   -4.7
+      tercios:  kl 0.0072 clip 0.074 ent 0.340 Lv 0.904 lr 8.4e-04 | kl 0.0061 clip 0.057 ent 0.217 Lv 0.213 lr 5.1e-04 | kl 0.0025 clip 0.029 ent 0.177 Lv 0.261 lr 1.7e-04
+  ippo_vecinos  s2042  decisiones/ep   6341 (libres 72.3 %), pasos de gradiente/actualizacion 1000, muestras/parametro actor 0.82; r/decision (ult. 20 ep)  -11.82 -> escala del retorno ~   -4.7
+      tercios:  kl 0.0071 clip 0.073 ent 0.358 Lv 0.682 lr 8.4e-04 | kl 0.0061 clip 0.059 ent 0.224 Lv 0.289 lr 5.1e-04 | kl 0.0025 clip 0.029 ent 0.182 Lv 0.266 lr 1.7e-04
+  ippo_vecinos  s4042  decisiones/ep   6293 (libres 72.5 %), pasos de gradiente/actualizacion 990, muestras/parametro actor 0.81; r/decision (ult. 20 ep)  -11.11 -> escala del retorno ~   -4.4
+      tercios:  kl 0.0072 clip 0.074 ent 0.338 Lv 0.673 lr 8.4e-04 | kl 0.0060 clip 0.056 ent 0.205 Lv 0.236 lr 5.1e-04 | kl 0.0024 clip 0.028 ent 0.171 Lv 0.250 lr 1.7e-04
+  mappo         s42    decisiones/ep   6398 (libres 73.1 %), pasos de gradiente/actualizacion 1000, muestras/parametro actor 0.83; r/decision (ult. 20 ep)  -10.87 -> escala del retorno ~   -4.3
+      tercios:  kl 0.0070 clip 0.071 ent 0.349 Lv 1.434 lr 8.4e-04 | kl 0.0061 clip 0.057 ent 0.210 Lv 0.134 lr 5.1e-04 | kl 0.0026 clip 0.029 ent 0.184 Lv 0.140 lr 1.7e-04
+  mappo         s2042  decisiones/ep   6324 (libres 71.7 %), pasos de gradiente/actualizacion 990, muestras/parametro actor 0.82; r/decision (ult. 20 ep)  -11.80 -> escala del retorno ~   -4.7
+      tercios:  kl 0.0068 clip 0.072 ent 0.360 Lv 0.914 lr 8.4e-04 | kl 0.0061 clip 0.061 ent 0.237 Lv 0.140 lr 5.1e-04 | kl 0.0026 clip 0.030 ent 0.189 Lv 0.144 lr 1.7e-04
+  mappo         s4042  decisiones/ep   6396 (libres 72.6 %), pasos de gradiente/actualizacion 1000, muestras/parametro actor 0.83; r/decision (ult. 20 ep)  -11.52 -> escala del retorno ~   -4.6
+      tercios:  kl 0.0068 clip 0.071 ent 0.358 Lv 0.748 lr 8.4e-04 | kl 0.0061 clip 0.060 ent 0.228 Lv 0.163 lr 5.1e-04 | kl 0.0023 clip 0.027 ent 0.173 Lv 0.132 lr 1.7e-04
+  enlaces entre cruces: 24, largo medio 279 m, viaje a flujo libre 20.1 s = 4.0 decisiones de 5 s -> gamma^k = 0.81 (a 6.5 s/decision 0.85); 3 enlaces (60 s) -> 0.54
+
+===== red: 3 semaforos, dim_obs 31; parametros actor 6338, critico local 6273, critico central 10433
+  ippo_vecinos  s42    decisiones/ep   1915 (libres 69.6 %), pasos de gradiente/actualizacion 300, muestras/parametro actor 0.30; r/decision (ult. 20 ep)   -3.61 -> escala del retorno ~   -1.4
+      tercios:  kl 0.0028 clip 0.030 ent 0.182 Lv 0.015 lr 8.4e-04 | kl 0.0018 clip 0.017 ent 0.105 Lv 0.010 lr 5.1e-04 | kl 0.0010 clip 0.013 ent 0.098 Lv 0.010 lr 1.7e-04
+  ippo_vecinos  s2042  decisiones/ep   1930 (libres 71.3 %), pasos de gradiente/actualizacion 310, muestras/parametro actor 0.30; r/decision (ult. 20 ep)   -3.60 -> escala del retorno ~   -1.4
+      tercios:  kl 0.0033 clip 0.034 ent 0.179 Lv 0.015 lr 8.4e-04 | kl 0.0024 clip 0.022 ent 0.122 Lv 0.011 lr 5.1e-04 | kl 0.0013 clip 0.016 ent 0.103 Lv 0.011 lr 1.7e-04
+  ippo_vecinos  s4042  decisiones/ep   1913 (libres 69.4 %), pasos de gradiente/actualizacion 300, muestras/parametro actor 0.30; r/decision (ult. 20 ep)   -3.62 -> escala del retorno ~   -1.4
+      tercios:  kl 0.0035 clip 0.028 ent 0.139 Lv 0.015 lr 8.4e-04 | kl 0.0015 clip 0.012 ent 0.068 Lv 0.010 lr 5.1e-04 | kl 0.0006 clip 0.008 ent 0.060 Lv 0.010 lr 1.7e-04
+  mappo         s42    decisiones/ep   1924 (libres 70.5 %), pasos de gradiente/actualizacion 310, muestras/parametro actor 0.30; r/decision (ult. 20 ep)   -3.59 -> escala del retorno ~   -1.4
+      tercios:  kl 0.0032 clip 0.032 ent 0.157 Lv 0.013 lr 8.4e-04 | kl 0.0022 clip 0.020 ent 0.110 Lv 0.010 lr 5.1e-04 | kl 0.0012 clip 0.014 ent 0.100 Lv 0.010 lr 1.7e-04
+  mappo         s2042  decisiones/ep   1913 (libres 69.4 %), pasos de gradiente/actualizacion 300, muestras/parametro actor 0.30; r/decision (ult. 20 ep)   -3.62 -> escala del retorno ~   -1.4
+      tercios:  kl 0.0029 clip 0.028 ent 0.158 Lv 0.013 lr 8.4e-04 | kl 0.0018 clip 0.017 ent 0.112 Lv 0.010 lr 5.1e-04 | kl 0.0010 clip 0.012 ent 0.106 Lv 0.010 lr 1.7e-04
+  mappo         s4042  decisiones/ep   1908 (libres 68.9 %), pasos de gradiente/actualizacion 300, muestras/parametro actor 0.30; r/decision (ult. 20 ep)   -3.57 -> escala del retorno ~   -1.4
+      tercios:  kl 0.0028 clip 0.030 ent 0.170 Lv 0.013 lr 8.4e-04 | kl 0.0014 clip 0.010 ent 0.059 Lv 0.009 lr 5.1e-04 | kl 0.0004 clip 0.004 ent 0.032 Lv 0.009 lr 1.7e-04
+  enlaces entre cruces: 4, largo medio 286 m, viaje a flujo libre 20.6 s = 4.1 decisiones de 5 s -> gamma^k = 0.81 (a 6.5 s/decision 0.85); 3 enlaces (62 s) -> 0.53
+
+===== malla3: 9 semaforos, dim_obs 53; parametros actor 7746, critico local 7681, critico central 35393
+  ippo_vecinos  s42    decisiones/ep   5512 (libres 61.8 %), pasos de gradiente/actualizacion 870, muestras/parametro actor 0.71; r/decision (ult. 20 ep)   -3.29 -> escala del retorno ~   -1.3
+      tercios:  kl 0.0055 clip 0.054 ent 0.252 Lv 0.016 lr 8.4e-04 | kl 0.0053 clip 0.046 ent 0.186 Lv 0.012 lr 5.1e-04 | kl 0.0023 clip 0.025 ent 0.143 Lv 0.011 lr 1.7e-04
+  ippo_vecinos  s2042  decisiones/ep   5780 (libres 71.1 %), pasos de gradiente/actualizacion 910, muestras/parametro actor 0.75; r/decision (ult. 20 ep)   -3.01 -> escala del retorno ~   -1.2
+      tercios:  kl 0.0056 clip 0.055 ent 0.245 Lv 0.015 lr 8.4e-04 | kl 0.0054 clip 0.042 ent 0.135 Lv 0.010 lr 5.1e-04 | kl 0.0021 clip 0.022 ent 0.111 Lv 0.009 lr 1.7e-04
+  ippo_vecinos  s4042  decisiones/ep   5704 (libres 68.6 %), pasos de gradiente/actualizacion 900, muestras/parametro actor 0.74; r/decision (ult. 20 ep)   -3.03 -> escala del retorno ~   -1.2
+      tercios:  kl 0.0054 clip 0.055 ent 0.249 Lv 0.015 lr 8.4e-04 | kl 0.0058 clip 0.047 ent 0.155 Lv 0.011 lr 5.1e-04 | kl 0.0023 clip 0.024 ent 0.119 Lv 0.009 lr 1.7e-04
+  mappo         s42    decisiones/ep   5717 (libres 69.0 %), pasos de gradiente/actualizacion 900, muestras/parametro actor 0.74; r/decision (ult. 20 ep)   -3.08 -> escala del retorno ~   -1.2
+      tercios:  kl 0.0059 clip 0.058 ent 0.270 Lv 0.012 lr 8.4e-04 | kl 0.0055 clip 0.051 ent 0.203 Lv 0.010 lr 5.1e-04 | kl 0.0024 clip 0.027 ent 0.165 Lv 0.009 lr 1.7e-04
+  mappo         s2042  decisiones/ep   5692 (libres 68.1 %), pasos de gradiente/actualizacion 890, muestras/parametro actor 0.73; r/decision (ult. 20 ep)   -3.17 -> escala del retorno ~   -1.3
+      tercios:  kl 0.0055 clip 0.057 ent 0.284 Lv 0.012 lr 8.4e-04 | kl 0.0054 clip 0.053 ent 0.229 Lv 0.010 lr 5.1e-04 | kl 0.0023 clip 0.027 ent 0.166 Lv 0.009 lr 1.7e-04
+  mappo         s4042  decisiones/ep   5617 (libres 65.4 %), pasos de gradiente/actualizacion 880, muestras/parametro actor 0.73; r/decision (ult. 20 ep)   -3.24 -> escala del retorno ~   -1.3
+      tercios:  kl 0.0046 clip 0.051 ent 0.258 Lv 0.011 lr 8.4e-04 | kl 0.0046 clip 0.046 ent 0.220 Lv 0.010 lr 5.1e-04 | kl 0.0023 clip 0.027 ent 0.186 Lv 0.010 lr 1.7e-04
+  enlaces entre cruces: 24, largo medio 279 m, viaje a flujo libre 20.1 s = 4.0 decisiones de 5 s -> gamma^k = 0.81 (a 6.5 s/decision 0.85); 3 enlaces (60 s) -> 0.54
+

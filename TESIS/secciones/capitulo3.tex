@@ -8,7 +8,8 @@ general de las cuatro unidades del método (U1 a U4) y sigue con los
 escenarios de prueba (U1), la formulación del control como problema de
 aprendizaje por refuerzo (U2), la coordinación entre semáforos vecinos
 (U4), los modelos que se comparan, la medición del desempeño (U3) y el
-plan de pruebas. Los conceptos que se usan se definen en el
+plan de pruebas, con los análisis que lo complementan fuera del
+veredicto y el análisis de robustez. Los conceptos que se usan se definen en el
 Capítulo~\ref{cap:teoria}. El Capítulo~\ref{cap:implementacion}
 describe cómo se construyó y ejecutó lo que aquí se diseña, y el
 Capítulo~\ref{cap:resultados} reporta los resultados del plan de
@@ -36,7 +37,7 @@ implementa.
 
 Las interfaces entre unidades son ocho: I1, el escenario del caso (la
 configuración de SUMO con la red, la demanda y el fijo tuneado, más el
-programa actuado); I2, las aproximaciones, los enlaces y los vecinos de
+programa actuado y, para el análisis de robustez, el trivial); I2, las aproximaciones, los enlaces y los vecinos de
 cada semáforo; I3, la observación y la recompensa, que cada agente arma
 con las lecturas de TraCI; I4, la acción de cada agente; I5, los
 mensajes entre semáforos vecinos; I6, las métricas de cada corrida; I7,
@@ -44,7 +45,8 @@ la política publicada de cada entrenamiento con su archivo de
 metadatos, e I8, el veredicto por caso y modelo.
 % fuente: plan2/<esc>.sumocfg (net-file, route-files y additional-files = <esc>.add.xml, el fijo que
 % instala barrer_fijo.py --instalar); el actuado <esc>_actuado.add.xml lo escribe comun.archivo_actuado
-% y se pasa aparte con --additional-files (rl_corredor.py, comun.py)
+% y el trivial <esc>_trivial.add.xml, comun.archivo_trivial; los dos se pasan aparte con
+% --additional-files (rl_corredor.py, modos actuado y trivial; comun.py)
 
 \begin{table}[H]
 \setstretch{1}
@@ -55,24 +57,26 @@ metadatos, e I8, el veredicto por caso y modelo.
 \toprule
 Unidad & Qué hace & Entradas & Salidas & Programas \\
 \midrule
-U1. Preprocesa\-miento & construye cada escenario: red, demanda, programas de referencia y configuración & archivos de nodos y vías escritos a mano (\texttt{.nod.xml}, \texttt{.edg.xml}); flujos por movimiento y periodo & red (\texttt{.net.xml}), demanda (\texttt{.rou.xml}), programas fijo y actuado (\texttt{.add.xml}), configuración (\texttt{.sumocfg}); aproximaciones, enlaces y vecinos de cada semáforo & \texttt{netconvert} (\texttt{build\_net.bat}), \texttt{barrer\_fijo.py}, \texttt{comun.py}, \texttt{escenarios\_\allowbreak plan2.py} \\
+U1. Preprocesa\-miento & construye cada escenario: red, demanda, programas de referencia y configuración & archivos de nodos y vías escritos a mano (\texttt{.nod.xml}, \texttt{.edg.xml}); flujos por movimiento y periodo & red (\texttt{.net.xml}), demanda (\texttt{.rou.xml}), programas fijo, actuado y trivial (\texttt{.add.xml}), configuración (\texttt{.sumocfg}); aproximaciones, enlaces y vecinos de cada semáforo & \texttt{netconvert} (\texttt{build\_net.bat}), \texttt{calibrar\_\allowbreak demanda.py}, \texttt{barrer\_fijo.py}, \texttt{comun.py}, \texttt{escenarios\_\allowbreak plan2.py} \\
 \midrule
 U2. Aprendizaje por refuerzo & entrena un agente por semáforo, que decide cada 5~s sobre SUMO a través de TraCI; no modifica la red ni las rutas & escenario de U1; semillas de entrenamiento y de validación & \textit{checkpoints}, política publicada con su archivo de metadatos (Sección~\ref{sec:protocolo}) y registro por episodio & \texttt{rl\_corredor.py} (Q-learning y SARSA), \texttt{rl\_ippo.py} (IPPO), \texttt{rl\_dqn.py} (DQN) \\
 \midrule
-U3. Simulación y medición & mide todos los controles con las mismas salidas de SUMO, evalúa las políticas congeladas y aplica la regla de veredicto & salida por vehículo (\texttt{tripinfo}) y lecturas de TraCI de cada corrida; políticas publicadas y programas de referencia & métricas por corrida; media e intervalo de confianza por control; cambio porcentual frente al fijo y al actuado con su intervalo y su valor $p$ (Sección~\ref{sec:estadistica}); tablas de veredicto & \texttt{comun.py}, \texttt{evaluar.py}, \texttt{consolidar.py}, \texttt{veredicto.py}; colas y retornos: \texttt{correr\_\allowbreak episodio} de \texttt{rl\_corredor.py} y \texttt{rl\_ippo.py} \\
+U3. Simulación y medición & mide todos los controles con las mismas salidas de SUMO, evalúa las políticas congeladas y aplica la regla de veredicto & salida por vehículo (\texttt{tripinfo}), resumen de estadísticas de SUMO y lecturas de TraCI de cada corrida; políticas publicadas y programas de referencia & métricas por corrida; media e intervalo de confianza por control; cambio porcentual frente al fijo y al actuado con su intervalo y su valor $p$ (Sección~\ref{sec:estadistica}); tablas de veredicto; análisis fuera del veredicto y de robustez & \texttt{comun.py}, \texttt{evaluar.py}, \texttt{consolidar.py}, \texttt{veredicto.py}; colas y retornos: \texttt{correr\_\allowbreak episodio} de \texttt{rl\_corredor.py} y \texttt{rl\_ippo.py}; fuera del veredicto: \texttt{sintesis\_\allowbreak plan.py}, \texttt{barrido\_\allowbreak demanda.py} \\
 \midrule
 U4. Coordina\-ción distribuida & añade mensajes entre vecinos, observación extendida y término de \textit{spillback} (variantes vecinos y \textit{spill} de IPPO) y el crítico centralizado de MAPPO & escenario de U1 con su tabla de vecinos & las mismas que U2 & \texttt{rl\_ippo.py}, \texttt{rl\_mappo.py} \\
 \bottomrule
 \end{tabular}
 \caption[Unidades del método]{Unidades del método: qué hace cada una, qué recibe, qué entrega y
-con qué programas se implementa. Los programas están en el Anexo~B. IPPO vecinos, DQN y MAPPO
-usan la observación con mensajes de U4; DQN y MAPPO corren el episodio con \texttt{rl\_ippo.py}
+con qué programas se implementa. Los programas están en el Anexo~B. IPPO vecinos, IPPO spill, DQN
+y MAPPO usan la observación con mensajes de U4; DQN y MAPPO corren el episodio con \texttt{rl\_ippo.py}
 y solo deciden y aprenden en su propio programa.}
 \label{tab:pipeline}
 \end{table}
 % fuente: capitulo4.tex original (7bd8685): Alcance y unidades, Resumen de las unidades, P5 (malla3.nod.xml,
 % malla3.edg.xml, build_net.bat, escenarios_plan2.py), DQN ("el episodio lo corre rl_ippo.py"),
-% Reproducibilidad (comandos); anexos.tex original, Anexo B (descripcion de cada script)
+% Reproducibilidad (comandos); anexos.tex original, Anexo B (descripcion de cada script);
+% re-medicion v2.1 (27.09.2026): calibrar_demanda.py (factor de P6), comun.args_estadisticas
+% (--statistic-output), comun.archivo_trivial, sintesis_plan.py y barrido_demanda.py (docstrings)
 
 \begin{figure}[H]
 \setstretch{1}
@@ -108,19 +112,23 @@ siguiente.
 \section{Escenarios y casos de prueba (U1)}
 \label{sec:escenarios}
 
-El plan de pruebas se ejecuta sobre cinco escenarios sintéticos, uno
-por caso (Tabla~\ref{tab:escenarios}). Se construyen con
-\texttt{netconvert} a partir de archivos de nodos y vías escritos a
-mano (Sección~\ref{sec:construccion}), del más simple al más complejo:
-un corredor de dos semáforos, una red de tres semáforos con una rotonda
-sin semáforo y una malla de nueve semáforos. P2 y P4 repiten la red de
-P1 y de P3 con toda la demanda multiplicada por un factor de demanda
-$f$: 2.0 en P2 y 1.2 en P4. Los dos factores se eligieron antes de
-entrenar, con el control actuado sobre las semillas 2001 a 2003; la
-calibración se describe en la Sección~\ref{sec:calibracion}
-(Tabla~\ref{tab:red-alta-factor}). La Figura~\ref{fig:flujo-u1}
-muestra cómo se construye cada escenario y qué entrega U1 a las demás
-unidades.
+El plan de pruebas se ejecuta sobre seis escenarios sintéticos, uno
+por caso (Tabla~\ref{tab:escenarios}), construidos sobre tres redes.
+Las redes se construyen con \texttt{netconvert} a partir de archivos de
+nodos y vías escritos a mano (Sección~\ref{sec:construccion}), de la
+más simple a la más compleja: un corredor de dos semáforos, una red de
+tres semáforos con una rotonda sin semáforo y una malla de nueve
+semáforos. P1, P3 y P5 usan cada red con su demanda nominal. P2, P4 y
+P6 repiten la red de P1, de P3 y de P5 con toda la demanda
+multiplicada por un factor de demanda $f$: 2.0 en P2, 1.2 en P4 y 2.0
+en P6. Los tres factores se eligieron antes de entrenar, con el
+control actuado sobre las semillas 2001 a 2003 y un criterio prefijado
+de \textit{spillback}, que en P4 se completó con una regla para la
+rotonda; la calibración se describe en la
+Sección~\ref{sec:calibracion}
+(Tablas~\ref{tab:red-alta-factor} y~\ref{tab:malla3-alta-factor}).
+La Figura~\ref{fig:flujo-u1} muestra cómo se construye cada escenario
+y qué entrega U1 a las demás unidades.
 
 \begin{figure}[p]
 \setstretch{1}
@@ -133,24 +141,29 @@ programas de referencia y lo que U1 entrega a las demás unidades.}
 % fuente: TESIS/diagramas/u1.tex (python construir.py u1)
 
 En la Figura~\ref{fig:flujo-u1}, el flujo tiene dos decisiones: la
-demanda de P2 y P4 se escala por el factor $f$, y el barrido del fijo
-amplía la malla de verdes mientras el ganador quede en su borde
-(Sección~\ref{sec:protocolo}). El programa actuado lo escribe
-\texttt{comun.py} al evaluar ese control, no al preparar el escenario.
+demanda de P2, P4 y P6 se escala por el factor $f$, y el barrido del
+fijo amplía la malla de verdes mientras el ganador quede en su borde
+(Sección~\ref{sec:protocolo}). Los programas actuado y trivial los
+escribe \texttt{comun.py} al evaluar esos controles, no al preparar el
+escenario.
 Las aproximaciones, los enlaces y los vecinos de cada semáforo no salen
 de un archivo de SUMO: están escritos en \texttt{rl\_corredor.py},
 \texttt{rl\_ippo.py} y \texttt{escenarios\_\allowbreak plan2.py}.
 % fuente: rl_corredor.ESCENARIOS, rl_ippo.VECINOS y escenarios_plan2.py (ESCENARIOS_RC, VECINOS);
-% comun.archivo_actuado (lo llama rl_corredor.py al correr el brazo actuado)
+% comun.archivo_actuado y comun.archivo_trivial (los llama rl_corredor.py al correr esos brazos);
+% factores: cabeceras de corredor_alta.rou.xml, red_alta.rou.xml y malla3_alta.rou.xml (calibrar_demanda.py)
 
 Todos los escenarios comparten el mismo patrón de demanda: una hora
 dividida en dos periodos de 30 minutos con la punta invertida, de modo
 que un programa de tiempo fijo no pueda ser óptimo en ambos a la vez.
 Los flujos se definen con \verb|<flow ... vehsPerHour>| por movimiento
-y periodo, lo que produce llegadas equiespaciadas. Por eso la semilla
-de SUMO no cambia cuántos vehículos llegan ni cuándo: solo altera el
-comportamiento de los conductores, es decir, su factor de velocidad
-individual y la imperfección $\sigma$ del modelo de seguimiento.
+y periodo, lo que produce llegadas equiespaciadas. La demanda es, por
+tanto, determinista: la semilla de SUMO no cambia cuántos vehículos
+llegan ni cuándo, y solo altera el comportamiento de los conductores,
+es decir, su factor de velocidad individual y la imperfección $\sigma$
+del modelo de seguimiento. Los intervalos de confianza del plan miden
+solo esa variabilidad y subestiman la que tendría un tráfico real, con
+llegadas aleatorias (Sección~\ref{sec:estadistica}).
 
 Todos usan también el mismo tipo de vehículo (turismo de 5~m,
 aceleración 2.6~m/s$^2$, velocidad máxima 50~km/h, imperfección del
@@ -175,8 +188,12 @@ P2 & corredor\_alta & la red de P1 & 2 & 1 & la de P1 por 2.0: avenida 1200 y 50
 P3 & red & rotonda sin semáforo más tres cruces separados 300~m sobre una avenida & 3 + rotonda & 2 & avenida 650 y 250; transversales 150; rotonda 80 a 150; giros 60 & 2150 \\
 P4 & red\_alta & la red de P3 & 3 + rotonda & 2 & la de P3 por 1.2: avenida 780 y 300; transversales 180; rotonda 96 a 180; giros 72 & 2580 \\
 P5 & malla3 & malla de 3 $\times$ 3 cruces separados 300~m & 9 (3 $\times$ 3) & 2 en los dos ejes & por fila 600 y 250; por columna 180 por sentido; 12 giros de 60 & 4350 \\
+P6 & malla3\_alta & la red de P5 & 9 (3 $\times$ 3) & 2 en los dos ejes & la de P5 por 2.0: por fila 1200 y 500; por columna 360 por sentido; 12 giros de 120 & 8700 \\
 \bottomrule
 \end{tabular}
+% vehiculos que SUMO genera en P6: 8700 en las 30 semillas de evaluacion (vehiculos + no_insertados en
+% plan2/parciales/eval_malla3_alta_actuado.csv y eval_malla3_alta_trivial.csv; la demanda es la misma para
+% todos los brazos); coincide con la suma de los flujos, por eso el caption no lo menciona
 \caption[Casos del plan de pruebas]{Casos del plan de pruebas y sus escenarios. Carriles por
 sentido en la avenida. La demanda del segundo periodo es la del primero con la punta invertida.
 Vehículos en la hora: suma de los flujos declarados; por el redondeo de las llegadas
@@ -184,18 +201,21 @@ equiespaciadas SUMO genera 2152 en red y 2582 en red\_alta.}
 \label{tab:escenarios}\label{tab:plan2-casos}
 \end{table}
 % fuente: flujos del primer periodo en corredor.rou.xml, corredor_alta.rou.xml, red.rou.xml,
-% plan2/red_alta.rou.xml y malla3.rou.xml; vehiculos en la hora: plan2/veredicto_congelado_0355.csv
-% (columna demanda_veh_h, suma de vehsPerHour de cada .rou.xml); vehiculos generados: columna vehiculos
-% del brazo fijo en plan2/evaluacion_<esc>_resumen.csv (1810, 3620, 2152, 2582, 4350)
+% plan2/red_alta.rou.xml, malla3.rou.xml y malla3_alta.rou.xml; vehiculos en la hora: suma de
+% vehsPerHour por la duracion de cada flow en cada .rou.xml (P1-P6 tambien en la columna demanda_veh_h de
+% plan2/veredicto.csv; P6: 8700, dos periodos de 30 min con 8700 veh/h); vehiculos
+% generados P1-P5: columna vehiculos del brazo fijo en plan2/evaluacion_<esc>_resumen.csv (1810, 3620,
+% 2152, 2582, 4350)
 
-P6 (la misma malla con demanda alta) y P7 (una red de cuatro por
-cuatro cruces, con tres carriles por sentido y fase de giro protegido)
-quedan definidos como trabajo siguiente: repiten el mismo protocolo
-sobre escenarios de mayor tamaño y no cambian el método.
+P7 (una red de cuatro por cuatro cruces, con tres carriles por sentido
+y fase de giro protegido) queda definido como trabajo siguiente:
+repite el mismo protocolo sobre un escenario de mayor tamaño y no
+cambia el método.
 
 El programa de tiempo fijo de cada caso sale del barrido descrito en la
-Sección~\ref{sec:protocolo} (Tabla~\ref{tab:plan2-fijo}), y el control
-actuado se genera con las mismas fases (Sección~\ref{sec:modelos}).
+Sección~\ref{sec:protocolo} (Tabla~\ref{tab:plan2-fijo}), y los
+controles actuado y trivial se generan con las mismas fases
+(Sección~\ref{sec:modelos}).
 
 %----------------------------------------------------------------------
 
@@ -331,7 +351,7 @@ El tercer término solo existe en la variante \emph{spill} de U4
 Sección~\ref{sec:u4}: $\mathcal{L}_i$ son los enlaces que salen del
 semáforo $i$ hacia sus vecinos, $q_\ell(t)$ es el máximo por carril de
 vehículos detenidos en el enlace $\ell$, $K_\ell$ sus plazas por carril
-(38; 37 en malla3) y $\lfloor \cdot \rfloor$ la parte entera. Los
+(38; 37 en la malla de P5 y P6) y $\lfloor \cdot \rfloor$ la parte entera. Los
 pesos se fijaron de antemano, sin barrido.
 % fuente: rl_ippo.py (recompensa_paso, retraso_base con min(1, max(0, v)/vmax), termino_spill con
 % plazas // 2, recompensa_agente con r_acum / PASO_CONTROL); rl_corredor.py (recompensa_paso, copia);
@@ -347,6 +367,38 @@ mantener, de 5~s, coincide con el nivel medio, y en uno de cambiar, de
 8~s (3~s de ámbar y 5~s de verde), pesa $8/5$. Las redes neuronales la
 reciben multiplicada por 0.02 y los tabulares, sin escalar
 (Tabla~\ref{tab:plan2-hiper}).
+
+La recompensa, igual que el \texttt{timeLoss}, solo ve a los vehículos
+que ya entraron a la red. Cuando la arista por la que un vehículo debe
+entrar está llena, SUMO no lo inserta y lo retiene fuera. Esa espera no
+aparece en ningún $n_j(t)$ ni en ningún $e_j(t)$, y tampoco en el
+\texttt{timeLoss}, que SUMO cuenta desde la entrada. Una política
+puede entonces mejorar su recompensa, y el \texttt{timeLoss}, dejando
+que la cola de una entrada crezca fuera de la red en lugar de
+servirla. El análisis de robustez muestra que en P2 ocurre en parte
+(Sección~\ref{sec:robustez}): la política publicada de IPPO vecinos
+reduce el \texttt{timeLoss} un 23.3\,\% frente al fijo, pero su espera
+media para entrar sube de 239.6 a 282.0~s/veh, y su retraso total
+queda un 1.6\,\% por encima del que da el fijo.
+% fuente: scratchpad/escritura/hechos_v21.md (P2 corredor_alta, ippo_vecinos_s2042: d_f en timeLoss -23.3 %
+% [-23.92, -22.68]; espera para entrar 239.5657 del fijo y 282.0237; retraso total d_f +1.63 % [0.64, 2.56]);
+% plan2/robustez_veredicto.csv; en P2 el fijo del 25.09 y el re-barrido son el mismo programa
+
+La métrica primaria del plan es el \texttt{timeLoss}, la que fija su
+especificación (\texttt{plan2/ESPEC.md}), y la recompensa lo aproxima.
+% fuente: plan2/ESPEC.md (linea 159: "delta % del retraso (timeloss_prom) frente al fijo")
+La espera para entrar y el retraso total
+(Ecuación~\ref{eq:retraso-total}) se reportan en el análisis de
+robustez (Sección~\ref{sec:diseno-robustez}), que juzga las mismas
+políticas con el retraso total sin cambiar la recompensa ni
+reentrenar. La diferencia entre las dos métricas pesa cuando la
+demanda supera la capacidad de las entradas. En la calibración de P6,
+con el actuado y las semillas 2001 a 2003, el \texttt{timeLoss} medio
+por semilla fue de 62.5 a 69.7~s/veh y el retraso total, de 108.2 a
+115.9~s/veh (Tabla~\ref{tab:malla3-alta-factor}).
+% fuente: comun.leer_tripinfo (docstring de retraso_insercion_prom: "con la arista de entrada llena, SUMO lo
+% retiene fuera y ese tiempo no entra en timeLoss"); cabecera de malla3_alta.rou.xml, fila f = 2.00 (timeLoss
+% 69.7 / 69.0 / 62.5 y total 115.9 / 114.5 / 108.2 s/veh, semillas 2001-2003, actuado; calibrar_demanda.py)
 
 Frente a la recompensa de colas que se define a continuación, esta
 recompensa cambia dos cosas. Primero, cuenta el retraso en lugar de los
@@ -429,7 +481,7 @@ decide con su red $Q$.
 
 Dos semáforos son vecinos cuando comparten un tramo de vía: en el
 corredor, C1 y C2; en la red, C1--C2 y C2--C3 (la rotonda no tiene
-semáforo y no participa). En la malla de P5 cada semáforo tiene de dos
+semáforo y no participa). En la malla de P5 y P6 cada semáforo tiene de dos
 a cuatro vecinos, uno por lado. Cada 5~s de reloj global, cada semáforo
 publica a cada vecino un mensaje con cinco datos que un controlador
 real podría transmitir: la fase en curso (avenida, transversal o
@@ -454,7 +506,7 @@ entre 0 y 1, formado por un bloque local de 12 componentes, un
 identificador del semáforo y una ranura de 8 componentes por lado. Con
 dos lados, oeste y este, el identificador tiene tres posiciones y el
 vector, 31 componentes (Tabla~\ref{tab:obs-u4}); es la disposición de
-los cuatro escenarios de P1 a P4. En la malla de P5 el bloque local no
+los cuatro escenarios de P1 a P4. En la malla de P5 y P6 el bloque local no
 cambia, el identificador tiene nueve posiciones y hay cuatro ranuras
 (oeste, este, norte y sur): 53 componentes. ``Verde hacia mí''
 (componentes 17 y 20) es el verde este--oeste para un vecino al oeste o al este y el norte--sur
@@ -466,7 +518,7 @@ fases verdes por semáforo, como en todos los casos del plan.
 Las colas se dividen por la capacidad de la aproximación (plazas de
 7.5~m por carril) y la cola del enlace, por sus plazas: 38 por carril
 en los enlaces entre cruces de P1 a P4, de 285.6~m, y 37 en los de
-malla3, de 279~m entre líneas de detención. La variante \emph{local}
+malla3 (P5 y P6), de 279~m entre líneas de detención. La variante \emph{local}
 deja las ranuras de los vecinos a cero: contiene todo lo que un detector propio puede medir, de modo que
 la diferencia entre \emph{vecinos} y \emph{local} se atribuye solo a
 la mensajería. DQN y MAPPO usan la observación de \emph{vecinos}. La
@@ -506,7 +558,7 @@ Vecino este & 24--31 & igual que 16--23 \\
 \end{tabular}
 \caption[Observación de cada agente]{Observación de cada agente en la disposición de dos lados
 (31 componentes: bloque local de 12, identificador de 3 y una ranura de 8 por vecino), la de
-P1 a P4. En malla3 el identificador tiene nueve posiciones y hay cuatro ranuras (oeste, este,
+P1 a P4. En la malla de P5 y P6 el identificador tiene nueve posiciones y hay cuatro ranuras (oeste, este,
 norte y sur), 53 componentes. La usan IPPO, DQN y MAPPO.}
 \label{tab:obs-u4}
 \end{table}
@@ -533,8 +585,10 @@ entrenó.
 
 En cada caso se comparan los modelos de la
 Tabla~\ref{tab:plan2-modelos}: dos controles de referencia, que no
-aprenden, y ocho aprendices. Varias parejas de modelos difieren en un
-solo elemento, y su comparación aísla el efecto de ese elemento. Los
+aprenden, y ocho aprendices. El análisis de robustez agrega un tercer
+control que no aprende, el trivial. Varias parejas de modelos difieren
+en un solo elemento, y su comparación aísla el efecto de ese elemento.
+Los
 aprendices con redes neuronales se implementaron en PyTorch puro, sin
 Gym ni bibliotecas de aprendizaje por refuerzo de terceros
 (Sección~\ref{sec:aprendices}).
@@ -550,6 +604,26 @@ desfase entre cruces; SUMO crea los detectores
 % fuente: comun.archivo_actuado (fases del programa estatico de la red, minDur 10, maxDur 60,
 % offset="0", "SUMO crea solos los detectores"); plan2/corredor_actuado.add.xml
 
+El control trivial es un control de cordura, no una referencia que se
+quiera superar, y solo entra en el análisis de robustez. Es el
+programa fijo del caso con cada verde en el verde mínimo de los
+aprendices, 10~s (5~s en una fase de giro protegido, que ningún caso
+del plan tiene), el mismo ámbar y todos los desfases en cero. Equivale
+a la política que cambia de fase en cuanto la máscara lo permite, en
+todos los semáforos a la vez. Un aprendiz que se reduce a esa regla no
+aprendió a coordinar, aunque mejore al fijo tuneado; la comparación con
+el trivial separa la mejora que aporta el aprendizaje de la que da solo
+cambiar de fase lo antes posible. La necesidad de este control se vio
+después del cierre del plan, en P3, donde la política publicada de
+IPPO vecinos resultó ser esa regla (Capítulo~\ref{cap:resultados}).
+El plan no lo había previsto, así que no interviene en el veredicto
+principal; su uso se describe en la Sección~\ref{sec:diseno-robustez}
+y cómo se genera, en la Sección~\ref{sec:programa-trivial}.
+% fuente: comun.archivo_trivial (programa "fijo" del .sumocfg con cada verde en verde_min, 10 s, o
+% verde_min_giro, 5 s, si la fase da verde a dos movimientos o menos, que en el plan no ocurre; offset="0";
+% programID "trivial"); plan2/<esc>_trivial.add.xml de los seis casos: solo fases de 10 s y de 3 s;
+% rl_corredor.py, modo trivial; evaluar.py --brazo trivial; veredicto.REFERENCIAS
+
 \begin{table}[H]
 \setstretch{1}
 \centering
@@ -558,26 +632,35 @@ desfase entre cruces; SUMO crea los detectores
 \toprule
 Modelo & Descripción & \makecell{Recompensa de\\entrenamiento} & Casos \\
 \midrule
-fijo & tiempo fijo tuneado por barrido en cada caso & -- & P1 a P5 \\
-actuado & actuado nativo de SUMO, verde mínimo 10~s y máximo 60~s & -- & P1 a P5 \\
-Q-learning & Q-learning tabular, un agente por semáforo & retraso & P1 a P5 \\
-SARSA & SARSA tabular, un agente por semáforo & retraso & P1 a P5 \\
+fijo & tiempo fijo tuneado por barrido en cada caso & -- & P1 a P6 \\
+actuado & actuado nativo de SUMO, verde mínimo 10~s y máximo 60~s & -- & P1 a P6 \\
+trivial & programa fijo del caso con cada verde en el mínimo, 10~s, y desfases en cero (control de cordura; solo en el análisis de robustez) & -- & P1 a P6 \\
+Q-learning & Q-learning tabular, un agente por semáforo & retraso & P1 a P6 \\
+SARSA & SARSA tabular, un agente por semáforo & retraso & P1 a P6 \\
 \texttt{ql\_colas} & Q-learning con la recompensa de colas (ablación) & colas & P1 a P4 \\
-DQN & Double DQN con pesos compartidos, observación de IPPO vecinos & retraso & P1 a P5 \\
-IPPO local & IPPO con pesos compartidos, sin mensajes & retraso & P1 a P5 \\
-IPPO vecinos & IPPO con mensajes entre vecinos & retraso & P1 a P5 \\
-IPPO spill & IPPO con mensajes y término de \textit{spillback} & \makecell[l]{retraso +\\\textit{spillback}} & \makecell[l]{P1 y P2; en P3\\a P5 = vecinos} \\
-MAPPO & misma arquitectura de actor y observación que IPPO vecinos, con crítico centralizado & retraso & P1 a P5 \\
+DQN & Double DQN con pesos compartidos, observación de IPPO vecinos & retraso & P1 a P6 \\
+IPPO local & IPPO con pesos compartidos, sin mensajes & retraso & P1 a P6 \\
+IPPO vecinos & IPPO con mensajes entre vecinos & retraso & P1 a P6 \\
+IPPO spill & IPPO con mensajes y término de \textit{spillback} & \makecell[l]{retraso +\\\textit{spillback}} & \makecell[l]{P1 a P6; en P3\\a P5 = vecinos} \\
+MAPPO & misma arquitectura de actor y observación que IPPO vecinos, con crítico centralizado & retraso & P1 a P6 \\
 \bottomrule
 \end{tabular}
 \caption[Modelos del plan de pruebas]{Modelos que se comparan en cada caso. La recompensa de
 retraso es la Ecuación~\ref{eq:recompensa-u4} con $w_3 = 0$; la de colas, la
 Ecuación~\ref{eq:recompensa}; la de \textit{spillback}, la Ecuación~\ref{eq:recompensa-u4} con
 $w_3 = 2$. En P3, P4 y P5 el término de \textit{spillback} nunca se activa e IPPO spill
-coincide con IPPO vecinos; la tabla de veredicto lo reporta como ``= vecinos''. La ablación
-\texttt{ql\_colas} no se programó en P5.}
+coincide con IPPO vecinos; la tabla de veredicto lo reporta como ``= vecinos''. En P6 la
+calibración llevó la cola detenida de los enlaces hasta 37 vehículos por carril, todas sus
+plazas, con el actuado (Tabla~\ref{tab:malla3-alta-factor}). Ahí el término se activa en los
+entrenamientos, y la variante se entrena y evalúa aparte
+(Sección~\ref{sec:spill-vecinos}). La ablación \texttt{ql\_colas} no se programó en P5 ni
+en P6.}
 \label{tab:plan2-modelos}
 \end{table}
+% fuente: plan2/generar_trabajos.py (CELDAS + CELDAS_P6; ql_colas se omite en los escenarios malla3*;
+% ippo_spill se entrena en malla3_alta); veredicto.spill_inactivo (malla3_alta: False, 28.09.2026); cabecera de
+% malla3_alta.rou.xml (f = 2.00: cola max enl 37/37/37); trivial de P6: plan2/robustez_veredicto.csv (fila
+% P6 trivial) y plan2/parciales/eval_malla3_alta_trivial.csv
 
 Q-learning y SARSA \citep{SuttonBarto2018} usan el estado tabular de
 la Sección~\ref{sec:formulacion}, con una tabla $Q$ por semáforo, y
@@ -608,9 +691,11 @@ cada semáforo decide con su propia observación y el crítico solo ve esa
 observación (Secciones~\ref{sec:ppo} y~\ref{sec:marl}). Entre sus
 variantes, \emph{local} frente a \emph{vecinos} aísla el aporte de los
 mensajes, y \emph{vecinos} frente a \emph{spill}, el del término de
-\textit{spillback}. Esta última comparación solo existe en P1 y P2: en
-P3 a P5 el término nunca se activa y las dos variantes coinciden
-(Sección~\ref{sec:spill-vecinos}).
+\textit{spillback}. Esta última comparación existe en P1, P2 y P6,
+donde el término se activa. En P3 a P5 nunca se activa y las dos
+variantes coinciden (Sección~\ref{sec:spill-vecinos}).
+% fuente: veredicto.spill_inactivo (malla3_alta: False, 28.09.2026); spill_activaciones de
+% plan2/resultados_malla3_alta_ippo_spill_s<base>.csv (capitulo4.tex, sec:spill-vecinos)
 
 DQN \citep{Mnih2015_DQN} es, en esta tesis, un Double DQN
 (Sección~\ref{sec:dqn}): una red $Q$ compartida por todos los
@@ -644,9 +729,12 @@ Tabla~\ref{tab:plan2-hiper}.
 Esta sección describe de dónde sale cada métrica de la
 Sección~\ref{sec:teoria-metricas}; todas se calculan con las mismas
 salidas de SUMO para todos los controles. La métrica primaria es el
-retraso por vehículo, la magnitud que la tesis se propone reducir; la
-espera, las colas, las paradas, el \textit{throughput} y las emisiones
-son secundarias. La Figura~\ref{fig:flujo-u3} sigue las corridas
+retraso por vehículo (\texttt{timeLoss}), la magnitud que la tesis se
+propone reducir; la espera detenida, las colas, las paradas, el
+\textit{throughput} y las emisiones son secundarias. La espera para
+entrar a la red y el retraso total (Ecuación~\ref{eq:retraso-total}),
+que la suma al \texttt{timeLoss}, se miden para el análisis de
+robustez. La Figura~\ref{fig:flujo-u3} sigue las corridas
 desde la medición hasta el veredicto (Secciones~\ref{sec:estadistica}
 y~\ref{sec:veredicto}).
 
@@ -671,12 +759,14 @@ políticas (I7), comprueba que los datos estén completos y solo
 entonces aplica la regla y evalúa la convergencia.
 
 Por vehículo, las métricas salen del archivo \texttt{tripinfo} que
-SUMO escribe al terminar cada viaje: el retraso (\texttt{timeLoss}),
-la espera detenida (\texttt{waitingTime}), el número de paradas
-(\texttt{waitingCount}, veces que la velocidad bajó de 0.1~m/s) y el
-instante de llegada. El \textit{throughput} es el número de vehículos
-que completan su viaje antes de los 3600~s. Los promedios por vehículo
-incluyen a los que no terminaron al cerrar la simulación. Con el
+SUMO escribe al terminar cada viaje: el retraso
+(\texttt{timeLoss}), la espera para entrar a la red
+(\texttt{departDelay}), la espera detenida (\texttt{waitingTime}), el
+número de paradas (\texttt{waitingCount}, veces que la velocidad bajó
+de 0.1~m/s) y el instante de llegada. El \textit{throughput} es el
+número de vehículos que completan su viaje antes de los 3600~s. Los
+promedios por vehículo incluyen a los que no terminaron al cerrar la
+simulación. Con el
 dispositivo de emisiones activado
 (\verb|--device.emissions.probability 1|) cada viaje incluye además
 sus emisiones acumuladas; se reportan CO$_2$ en gramos y NO$_x$ en
@@ -685,6 +775,31 @@ miligramos por vehículo, con la clase de emisión por defecto de SUMO
 dispositivo no altera la dinámica ni la secuencia aleatoria de la
 simulación: las métricas con y sin él coinciden.
 % fuente: rl_corredor.py (--tripinfo-output.write-unfinished true); comun.leer_tripinfo
+
+SUMO cuenta el \texttt{timeLoss} desde que el vehículo entra a la red.
+Si la arista por la que debe entrar está llena, lo retiene fuera, y ese
+tiempo queda en su \texttt{departDelay}. Los vehículos que al cerrar
+la simulación todavía esperan entrar no aparecen en el
+\texttt{tripinfo}. Su número y su espera media hasta ese momento salen
+del resumen de estadísticas que SUMO escribe junto al \texttt{tripinfo}
+(\verb|--statistic-output|), en los atributos \texttt{waiting} y
+\texttt{departDelayWaiting}. Con esas dos salidas se calcula el
+retraso total de la Ecuación~\ref{eq:retraso-total}: $l_v$ y $e_v$ son
+el \texttt{timeLoss} y el \texttt{departDelay} de cada vehículo $v$ del
+\texttt{tripinfo}, $W$ es el número de vehículos no insertados y $e_W$,
+su espera media. De un no insertado solo se cuenta la espera que lleva
+al cerrar, aunque seguiría esperando, así que el retraso total es una
+cota inferior. El retraso y la espera para entrar se promedian sobre
+los vehículos del \texttt{tripinfo}; el retraso total, sobre esos más
+los no insertados. Las evaluaciones del cierre del plan
+no registraban la espera para entrar ni los no insertados;
+esas columnas salen de la re-evaluación del análisis de robustez
+(Sección~\ref{sec:remedicion}).
+% fuente: plan2/fijo_2509.py (docstring: retraso_total_prom, retraso_insercion_prom y no_insertados "ese dia
+% no se median"); evaluar.METRICAS
+% fuente: comun.leer_tripinfo (retraso_total_prom, retraso_insercion_prom, no_insertados: atributo waiting
+% de <vehicles> y departDelayWaiting de <vehicleTripStatistics>); comun.args_estadisticas y
+% comun.ruta_estadisticas (<tripinfo>_stats.xml), usados en rl_corredor.py, rl_ippo.py y barrer_fijo.py
 
 Por segundo, es decir, en cada paso de la simulación, que dura 1~s, se
 lee por TraCI el número de vehículos detenidos, sumado sobre todas las
@@ -718,9 +833,9 @@ segundo, $-\bigl(w_1 \sum_j h_j + w_2 \sum_j e_j\bigr)$. El retorno de
 \textit{spillback}, \texttt{ret\_spill}, es \texttt{ret\_retraso} menos
 $w_3 \sum_t \sum_\ell \max\bigl(0,\, q_\ell(t) - \lfloor K_\ell/2 \rfloor\bigr)$
 sobre todos los enlaces $\ell$ entre semáforos, con $w_3 = 2$. Se calculan
-igual para el fijo, el actuado y los aprendices, de modo que cada
-modelo puede compararse con los demás en su propia recompensa y no
-solo en el retraso.
+igual para el fijo, el actuado, el trivial y los aprendices, de modo que
+cada modelo puede compararse con los demás en su propia recompensa y no
+solo en la métrica primaria.
 % fuente: rl_ippo.py y rl_corredor.py (correr_episodio: ret_retraso, ret_colas, ret_spill);
 % plan2/ESPEC.md seccion 5
 
@@ -730,27 +845,30 @@ En los escenarios de varios cruces se miden además, con las mismas
 salidas y para todos los controles, las magnitudes que la coordinación
 debería mover. Del \texttt{tripinfo}, sobre los vehículos que recorren
 la avenida de extremo a extremo (850 en corredor, unos 900 en red; en
-malla3, los de la fila central, que hace de avenida de referencia): el
-tiempo de viaje y el retraso medios, el retraso medio en el sentido de
+malla3 y malla3\_alta, los de la fila central, que hace de avenida de
+referencia): el tiempo de viaje y el retraso en la red
+(\texttt{timeLoss}) medios, ese mismo retraso en el sentido de
 la punta (el que favorece la onda verde del programa fijo), las paradas
 medias y la fracción de vehículos que se detiene a lo sumo una vez, que
 es el indicador más directo de progresión.
-% TODO(reestructura): falta el numero de vehiculos de extremo a extremo en corredor_alta, red_alta y malla3; no esta en el documento ni en los CSV consolidados (se obtendria contando en los .rou.xml los flujos listados en flujos_corredor de rl_corredor.ESCENARIOS / escenarios_plan2.ESCENARIOS_RC)
+% TODO(reestructura): falta el numero de vehiculos de extremo a extremo en corredor_alta, red_alta, malla3 y malla3_alta; no esta en el documento ni en los CSV consolidados (se obtendria contando en los .rou.xml los flujos listados en flujos_corredor de rl_corredor.ESCENARIOS / escenarios_plan2.ESCENARIOS_RC)
 
 Por TraCI, en cada carril de los enlaces que unen dos cruces, se miden
 el máximo de vehículos detenidos y el máximo de vehículos presentes
 durante la corrida. Un segundo tiene \textit{spillback} cuando algún
 carril de algún enlace tiene detenidos al menos el 90\,\% de sus
-plazas (34 de 38 en los enlaces de P1 a P4: la cola queda a menos de
-30~m del cruce aguas arriba y el siguiente vehículo que se detenga
-bloquea la intersección). Se reportan la fracción de segundos de la
-hora con \textit{spillback}, los segundos totales y el número de
-eventos de \textit{spillback} (flancos de subida). Se cuenta también el
-número de vehículos que no terminaron su viaje al cerrar la simulación,
-que es cero con la demanda nominal. Al pedir la serie se guarda además
-la fase de cada semáforo en cada segundo, para observar el desfase que
-emerge entre cruces.
-% fuente: comun.py (UMBRAL_SPILLBACK = 0.9, umbral_carril, MedidorEnlaces: eventos = flancos de subida)
+plazas (34 de 38 en los enlaces de P1 a P4 y 33 de 37 en los de P5 y
+P6: la cola queda a 30~m o menos del cruce aguas arriba y el siguiente
+vehículo que se detenga bloquea la intersección). Se reportan la
+fracción de segundos de la hora con \textit{spillback}, los segundos
+totales y el número de eventos de \textit{spillback} (flancos de
+subida). Se cuentan también los vehículos que no terminaron su viaje al
+cerrar la simulación y los que no llegaron a entrar a la red (no
+insertados), que son cero con la demanda nominal. Al pedir la serie se
+guarda además la fase de cada semáforo en cada segundo, para observar
+el desfase que emerge entre cruces.
+% fuente: comun.py (UMBRAL_SPILLBACK = 0.9, umbral_carril = int(0.9 * plazas): 34 de 38 y 33 de 37,
+% MedidorEnlaces: eventos = flancos de subida; leer_tripinfo: no_terminados y no_insertados)
 
 %----------------------------------------------------------------------
 \section{Plan de pruebas}
@@ -794,7 +912,10 @@ con la demanda nominal y con una un 20\,\% mayor (el límite que impone
 la rotonda), y responden si funciona con más carriles y con un elemento
 que no controla. P5 pasa a una malla de nueve semáforos en la que los
 cruces tienen vecinos en los dos ejes, hasta cuatro, y responde si el
-método escala a una red.
+método escala a una red. P6 repite esa malla con toda la demanda
+multiplicada por 2.0, con la que, bajo el actuado, las colas llenan los
+enlaces entre cruces, y responde si la coordinación aprendida supera a
+un fijo coordinado cuando la demanda supera la capacidad de la red.
 
 \subsection{Protocolo común}
 \label{sec:protocolo}
@@ -814,7 +935,8 @@ Cada aprendiz se entrena durante $N = 200$ episodios
 Cada diez episodios, y en el último, se hace una validación: se congela
 la política (acción de mayor valor o de mayor probabilidad, sin
 exploración) y se corre con las semillas 999 y 1999. El valor de
-validación es la media del retraso en las dos. La validación guarda y
+validación es la media del retraso (\texttt{timeLoss}) en las dos, la
+misma métrica del veredicto. La validación guarda y
 restaura el estado de los generadores aleatorios de Python, NumPy y
 PyTorch, así que el entrenamiento reproduce el mismo registro por
 episodio, dígito a dígito, con o sin ella.
@@ -831,6 +953,16 @@ rango de semillas.
 % fuente: plan2/ESPEC.md seccion 3 (checkpoint, politica publicada, base publicada);
 % veredicto.py (base_mediana: ordena por (valor, base) y toma la del medio)
 
+P6 se entrena con la misma validación, para que el método sea igual
+en todos los casos. Como el \texttt{timeLoss} no ve la espera para
+entrar a la red, en los casos donde esa espera es grande, como P2 y P6, el
+\textit{checkpoint} y la base publicados se eligen sin mirarla; el
+análisis de robustez mide lo que eso cambia
+(Sección~\ref{sec:diseno-robustez}).
+% fuente: rl_ippo.py (fila["val_<semilla>"] = res["timeloss_prom"]); rl_corredor.py (val_<semilla> =
+% timeLoss de evaluar_greedy); veredicto.py (docstring: "La base publicada se sigue eligiendo por la
+% validacion en timeLoss")
+
 \begin{table}[H]
 \setstretch{1}
 \centering
@@ -839,28 +971,44 @@ rango de semillas.
 \toprule
 Etapa & Semillas de SUMO & Uso \\
 \midrule
-Tuneo & 2001 a 2003 & calibrar la demanda de P2 y P4 y barrer el programa fijo de cada caso \\
+Tuneo & 2001 a 2003 & calibrar la demanda de P2, P4 y P6 y barrer el programa fijo de cada caso,
+  por \texttt{timeLoss} (en el análisis de robustez, también por retraso total) \\
 Entrenamiento & base$+k$, $k = 1 \ldots 200$, con bases 42, 2042 y 4042 (43 a 242, 2043 a 2242,
   4043 a 4242) & episodios de entrenamiento, con exploración \\
-Validación & 999 y 1999 & cada 10 episodios y en el último: elige el \textit{checkpoint} publicado
-  y la base publicada \\
-Evaluación & 1001 a 1030 & política congelada, todos los controles y todas las bases; única fuente
-  de los veredictos \\
+Validación & 999 y 1999 & cada 10 episodios y en el último, con el \texttt{timeLoss}: elige el
+  \textit{checkpoint} publicado y la base publicada \\
+Evaluación & 1001 a 1030 & política congelada, todos los controles (fijo y actuado) y todas las
+  bases; única fuente de los veredictos \\
 \bottomrule
 \end{tabular}
-\caption{Semillas de cada etapa del plan de pruebas. Los cuatro rangos no se solapan.}
+\caption{Semillas de cada etapa del plan de pruebas. Los cuatro rangos no se solapan. Los análisis
+fuera del veredicto (Sección~\ref{sec:analisis-complementarios}) y el de robustez
+(Sección~\ref{sec:diseno-robustez}) usan los mismos rangos.}
 \label{tab:plan2-semillas}
 \end{table}
 
 El fijo tuneado se obtiene en cada caso con un barrido del verde de la
 avenida, el verde transversal y el desfase entre cruces sobre las
-semillas 2001 a 2003, por retraso medio. La malla del barrido se amplía
-hasta que el óptimo queda en su interior, sin pasar de un verde de
-60~s; el verde mínimo de 10~s es la única frontera que se acepta como
-óptimo. El programa ganador se
-instala en el escenario del caso. Las mallas barridas y el ganador de
-cada caso están en la Sección~\ref{sec:referencias-fijas}
-(Tabla~\ref{tab:plan2-fijo}).
+semillas 2001 a 2003, por retraso medio (\texttt{timeLoss}), la misma
+métrica del veredicto. La malla del barrido se amplía hasta que el
+óptimo queda en su interior, sin pasar de un verde de 60~s; el verde
+mínimo de 10~s es la única frontera que se acepta como óptimo. El
+programa ganador se instala en el escenario del caso. Las mallas
+barridas y el ganador de cada caso están en la
+Sección~\ref{sec:referencias-fijas} (Tabla~\ref{tab:plan2-fijo}).
+% fuente: plan2/ESPEC.md (linea 95: "malla abierta hasta que el optimo sea interior (el verde minimo 10 s es un
+% piso valido)"); git HEAD:barrer_fijo.py (MALLAS del 25.09, en_borde y extender)
+
+La regla de interioridad solo mira el borde de la malla. Si el retraso
+del fijo, como función de sus verdes y desfases, tiene más de un mínimo
+local, por ejemplo uno con un ciclo corto y los cruces sincronizados y
+otro con un ciclo largo y onda verde, una malla cuyo verde menor está
+por encima del mínimo puede dar un ganador interior sin contener el
+mejor programa. Eso ocurrió en P3 y P4, y se vio después del cierre
+del plan. El análisis de robustez vuelve a barrer el fijo con una
+malla que parte de 10~s (Sección~\ref{sec:diseno-robustez}).
+% fuente: scratchpad/escritura/hechos_2509.md (Fijo del 25.09 frente al fijo re-barrido, timeLoss en 1001-1030:
+% P3 -8.35 % [-8.87, -7.80], P4 -6.06 % [-7.54, -4.61], P5 -0.28 % [-0.58, 0.03] p = 0.0896)
 
 La evaluación final corre cada control con la política congelada sobre
 las semillas 1001 a 1030, las mismas treinta para todos. Se evalúan
@@ -890,19 +1038,49 @@ la media,
 donde $\bar x_m$ es la media de la métrica bajo el control $m$ y
 $\bar x_{\text{ref}}$ la media bajo la referencia, las dos sobre las
 semillas que tienen ambos controles. $\Delta_f$ es el cambio del
-retraso frente al fijo y $\Delta_a$, frente al actuado; en el retraso,
-un valor negativo indica menos retraso que la referencia. El
+retraso frente al fijo y $\Delta_a$, frente al actuado; en el
+retraso, un valor negativo indica menos retraso que la referencia. El
 emparejamiento es por semilla, no por posición en el archivo.
 
 El intervalo al 95\,\% de $\Delta$ se obtiene por \textit{bootstrap}
-pareado por semilla: se remuestrean con reemplazo las semillas comunes
-10\,000 veces, con los mismos índices para los dos controles, se
-recalcula $\Delta$ en cada remuestreo y el intervalo va del percentil
-2.5 al 97.5. El valor $p$ es el de la prueba de Wilcoxon de rangos con
-signo sobre las diferencias pareadas por semilla.
+pareado por semilla \citep{Efron1993_Bootstrap}: se remuestrean con
+reemplazo las semillas comunes 10\,000 veces, con los mismos índices
+para los dos controles, se recalcula $\Delta$ en cada remuestreo y el
+intervalo va del percentil 2.5 al 97.5. El valor $p$ es el de la prueba
+de Wilcoxon de rangos con signo sobre las diferencias pareadas por
+semilla \citep{Wilcoxon1945_Rangos}. Esta estadística pareada es la
+misma para todas las métricas y todos los controles; el análisis de
+robustez solo cambia la métrica a la que se aplica la regla de
+veredicto y el fijo de referencia (Sección~\ref{sec:diseno-robustez}).
 % fuente: consolidar.py (docstring y funciones ic95, comparar: default_rng(0), integers con reemplazo,
 % percentiles 2.5 y 97.5, stats.wilcoxon sobre las diferencias)
-% TODO(reestructura): citar el bootstrap percentil pareado y la prueba de Wilcoxon de rangos con signo; referencias.bib no tiene ninguna fuente para ellos (p. ej. Efron y Tibshirani para el bootstrap, Wilcoxon 1945).
+
+Para resumir un modelo en todos los casos, fuera del veredicto, se usa
+la media geométrica, sobre los casos, del cociente entre su retraso
+y el de una referencia, expresada como cambio porcentual:
+\begin{equation}
+  \Delta_{\text{geo}} = 100 \left[ \exp\Bigl( \frac{1}{|\mathcal{C}|}
+    \sum_{c \in \mathcal{C}} \ln \frac{\bar D_{m,c}}{\bar D_{r,c}} \Bigr) - 1 \right],
+  \label{eq:media-geometrica}
+\end{equation}
+donde $\mathcal{C}$ es el conjunto de casos con datos del modelo $m$ y
+de la referencia $r$, el fijo o el actuado, y $\bar D_{m,c}$ y
+$\bar D_{r,c}$ son el retraso medio de la política publicada del
+modelo y el de la referencia en el caso $c$, sobre las semillas de
+evaluación que tienen los dos. Un valor negativo indica menos retraso
+que la referencia. Promediar los cocientes con la media geométrica, y
+no los cambios porcentuales con la media aritmética, es la forma
+correcta de resumir resultados normalizados a una referencia
+\citep{Fleming1986_MediaGeometrica}: un caso en que el retraso se
+reduce a la mitad y otro en que se duplica se compensan. El intervalo
+al 95\,\% de $\Delta_{\text{geo}}$ se obtiene con el mismo \textit{bootstrap}
+pareado: en cada uno de 10\,000 remuestreos se toman, dentro de cada
+caso, semillas con reemplazo, las mismas para el modelo y la
+referencia, y se recalcula $\Delta_{\text{geo}}$; el intervalo va del
+percentil 2.5 al 97.5. Su uso se describe en la
+Sección~\ref{sec:analisis-complementarios}.
+% fuente: sintesis_plan.py (indice_geo: media de ln(x/y) por caso, bootstrap con rng.integers dentro de cada
+% caso y los mismos indices para modelo y referencia, N_BOOT = 10000, default_rng(0))
 
 Los retornos también se comparan con la Ecuación~\ref{eq:delta}, pero,
 como son negativos, el cambio se divide entre el valor absoluto de la
@@ -915,26 +1093,36 @@ IPPO spill) con la del mismo retorno medido bajo el fijo, sobre las
 mismas semillas. Los retornos no entran en el veredicto.
 % fuente: consolidar.py (delta sobre |media_ref|); veredicto.py (RECOMPENSA, columna Delta recompensa)
 
-Como las llegadas son equiespaciadas (Sección~\ref{sec:escenarios}),
-la variabilidad entre semillas proviene solo del comportamiento de los
-conductores, y los intervalos de confianza son estrechos. Las llegadas
+La demanda es determinista (Sección~\ref{sec:escenarios}): las
+semillas solo cambian el comportamiento de los conductores. Los
+intervalos de confianza miden solo esa variabilidad y son condicionales
+a la demanda declarada; por eso son estrechos y subestiman la
+variabilidad que tendría un tráfico real. Las llegadas
 aleatorias, con un proceso de Poisson, cambiarían también los
 controles de referencia y quedan fuera de este plan.
 
-Con la demanda nominal todos los vehículos terminan su viaje bajo los
-controles de referencia y solo los que entran al final de la hora
-llegan después de los 3600~s, así que el \textit{throughput} y los
-vehículos no terminados discriminan solo en P2. En P4, con $f = 1.2$,
+Con la demanda nominal todos los vehículos entran a la red y terminan
+su viaje bajo los controles de referencia, y solo los que entran al
+final de la hora llegan después de los 3600~s. El \textit{throughput},
+los vehículos no terminados y los no insertados solo pueden
+discriminar, por tanto, en los casos de estrés. En P4, con $f = 1.2$,
 el actuado termina todos los vehículos en las semillas de calibración
-(Tabla~\ref{tab:red-alta-factor}).
+(Tabla~\ref{tab:red-alta-factor}). En P6, con $f = 2.0$, la fracción
+de vehículos que deja sin terminar a los 6000 pasos es de 0.0\,\% con
+un decimal, pero la espera media para entrar a la red llega a
+46.2~s/veh en la semilla más desfavorable
+(Tabla~\ref{tab:malla3-alta-factor}).
+% fuente: cabecera de malla3_alta.rou.xml, fila f = 2.00 (sin term. 0.0 %, maximo por semilla redondeado a
+% un decimal; espera entrar 46.2 s, la media de departDelay mas alta de las semillas 2001-2003; calibrar_demanda.py)
 
 \subsection{Regla de veredicto y convergencia}
 \label{sec:veredicto}
 
 La convergencia se mide sobre la serie de validación de la base
-publicada, es decir, sobre el valor de validación frente al episodio,
-en el último tercio de las validaciones (redondeado hacia arriba, con
-un mínimo de tres puntos). La meseta es la pendiente de la regresión
+publicada, es decir, sobre el valor de validación (el \texttt{timeLoss}
+medio en las semillas 999 y 1999) frente al episodio, en el último
+tercio de las validaciones (redondeado hacia arriba, con un mínimo de
+tres puntos). La meseta es la pendiente de la regresión
 lineal en ese tramo, multiplicada por un tercio de los episodios y
 dividida entre la media del tramo, en porcentaje: cuánto cambiaría el
 valor si la tendencia siguiera un tercio más de entrenamiento. La
@@ -969,8 +1157,26 @@ intervalo y su valor $p$ de Wilcoxon) y frente al actuado
 \end{itemize}
 Las dos condiciones sobre $\Delta_f$ se exigen a la vez: si el
 intervalo y la prueba de Wilcoxon no coinciden, la celda queda en
-EMPATA. IPPO spill en P3 a P5 se reporta como ``= vecinos'', con el
-veredicto de IPPO vecinos (Tabla~\ref{tab:plan2-modelos}).
+EMPATA.
+
+Una celda cuya base publicada no convergió queda como PENDIENTE, con
+su veredicto provisional, y se declara como un límite del plan. No se entrena con
+más episodios: extender solo las celdas que no convergen rompería la
+igualdad de método entre celdas, que es la base de la comparación.
+
+IPPO spill se reporta como ``= vecinos'', con el veredicto de IPPO
+vecinos (Tabla~\ref{tab:plan2-modelos}), en los casos donde el
+término de \textit{spillback} no puede activarse: ningún entrenamiento
+de IPPO vecinos lleva la cola detenida de un carril de enlace por
+encima de la mitad de sus plazas, y con la misma semilla base las dos
+variantes dan la misma política. Es lo que ocurre en P3 a P5. En P6
+la comprobación no se cumple: en los entrenamientos de IPPO vecinos la
+cola de un carril de enlace pasa de la mitad de sus plazas, e IPPO
+spill tiene su propio veredicto.
+% fuente: veredicto.spill_inactivo(plan2, "malla3_alta") = False (28.09.2026; umbral 37 // 2 = 18, superado en
+% 109, 169 y 120 de los 200 episodios de vecinos con bases 42, 2042 y 4042)
+% fuente: veredicto.spill_inactivo (cola_max_enlace de resultados_<esc>_ippo_vecinos_s*.csv frente a
+% plazas // 2) y veredicto.calcular (rotulo "= vecinos")
 
 El umbral del 5\,\% separa una diferencia estadísticamente clara pero
 pequeña de una que justifica cambiar de controlador; la meta de la
@@ -978,12 +1184,15 @@ tesis, $-25$\,\%, es más exigente y se contrasta aparte. Este umbral y
 el de la convergencia forman parte de la regla prefijada del plan.
 % TODO(reestructura): fundamentar con una fuente de diseño experimental el umbral del 5 % (veredicto y convergencia) y la exigencia conjunta de intervalo bootstrap y p de Wilcoxon; hoy solo consta como regla prefijada en plan2/ESPEC.md seccion 7.
 
-El veredicto sale solo del retraso. La recompensa de cada modelo es un
-diagnóstico: dice si el aprendiz optimizó lo que se le pidió, no si
-controla mejor el tráfico, y dos recompensas razonables pueden ordenar
-a los controles al revés. La lectura por modelo del
-Capítulo~\ref{cap:resultados} (Sección~\ref{sec:lectura-modelo}) lo
-muestra con la ablación \texttt{ql\_colas}.
+El veredicto sale solo del retraso (\texttt{timeLoss}). La espera para
+entrar y el retraso total no intervienen en él; se usan en el análisis
+de robustez (Sección~\ref{sec:diseno-robustez}). La recompensa de cada
+modelo es un diagnóstico: dice si el aprendiz
+optimizó lo que se le pidió, no si controla mejor el tráfico, y dos
+recompensas razonables pueden ordenar a los controles al revés. La
+lectura por modelo del Capítulo~\ref{cap:resultados}
+(Sección~\ref{sec:lectura-modelo}) lo muestra con la ablación
+\texttt{ql\_colas}.
 
 Cada modelo tiene una tabla de veredicto con una fila por caso: los
 datos del caso (semáforos, carriles y vehículos en la hora), el retraso
@@ -991,8 +1200,263 @@ medio de la política publicada con su intervalo al 95\,\%,
 $\Delta_f$ y $\Delta_a$ con su intervalo \textit{bootstrap} y su $p$,
 el $\Delta$~recompensa, si la base publicada converge y cuántas de las
 tres bases lo hacen, y el veredicto. El actuado aparece como fila de
-referencia, juzgado frente al fijo. Una matriz caso por modelo resume
-todos los veredictos, y una tabla por modelo lista las tres bases de
-cada caso para medir la fragilidad. Las genera \texttt{veredicto.py}
-(Anexo~B) y se reportan en el Capítulo~\ref{cap:resultados}.
+referencia, juzgado frente al fijo. Una matriz caso por
+modelo resume todos los veredictos, y una tabla por modelo lista las
+tres bases de cada caso para medir la fragilidad. Las genera
+\texttt{veredicto.py} (Anexo~B) y se reportan en el
+Capítulo~\ref{cap:resultados}.
 % Las tablas estan en secciones/tablas/veredicto_*.tex y se incluyen desde capitulo5.tex.
+
+\subsection{Análisis fuera del veredicto}
+\label{sec:analisis-complementarios}
+
+El veredicto responde celda por celda. Tres análisis complementan esa
+lectura: un número que resume cada modelo en todos los casos, una
+descomposición de la variación del resultado entre el caso, el modelo
+y la semilla base, y un barrido de la demanda en el corredor. Ninguno
+decide un veredicto ni interviene en la elección de las políticas, y
+los tres usan las políticas publicadas del plan sin reentrenarlas. Los
+dos primeros los calcula \texttt{sintesis\_\allowbreak plan.py} con las
+mismas evaluaciones del veredicto; el tercero,
+\texttt{barrido\_\allowbreak demanda.py}, con corridas propias. Sus
+resultados se reportan en el Capítulo~\ref{cap:resultados}.
+
+\noindent\textbf{Número único por modelo.} Es la media geométrica de
+la Ecuación~\ref{eq:media-geometrica} sobre los casos, con el retraso
+de la política publicada. Se reporta siempre en par, frente al
+fijo tuneado y frente al actuado, cada uno con su intervalo
+\textit{bootstrap}: el fijo es la referencia del veredicto y el
+actuado, la que ya adapta el verde a la demanda, y un modelo puede
+mejorar a una sin mejorar a la otra. El actuado se resume solo frente
+al fijo. El índice frente al fijo se repite
+dejando fuera un caso cada vez, para ver si un solo caso mueve el
+resumen. El número único resume y no reemplaza al veredicto por caso,
+porque una media sobre casos puede esconder un caso en que el modelo
+falla (Tabla~\ref{tab:plan2-numero-unico}).
+
+\noindent\textbf{De qué depende el resultado.} Para cada aprendiz,
+caso y semilla base se toma el cambio porcentual del retraso medio de
+esa base frente al fijo del caso
+(Ecuación~\ref{eq:delta}), sobre las semillas de evaluación. Con esos
+valores se hace un análisis de varianza de dos factores con réplica:
+el caso y el modelo, con las tres bases como réplicas. Se reporta la
+fracción de la suma de cuadrados total que corresponde al caso, al
+modelo, a su interacción y a la base, que es el residuo; esa fracción
+es el eta cuadrado ($\eta^2$) de cada término \citep{Olejnik2003_Eta}.
+Así se ve cuánto del resultado se debe al escenario y cuánto al
+algoritmo. El análisis se hace con los seis aprendices que tienen tres
+bases en todos los casos (Q-learning, SARSA, DQN, IPPO local, IPPO
+vecinos y MAPPO) y, aparte, con los cuatro de redes neuronales. Quedan
+fuera \texttt{ql\_colas}, que no se corre en P5 ni en P6, e IPPO
+spill, que repite a IPPO vecinos en P3 a P5. Solo entran los casos con
+el fijo evaluado y con las tres bases evaluadas en todos esos modelos.
+Un caso sin el fijo evaluado tampoco entra en el número único. Describe cómo se reparte la
+variación en este plan; no es una prueba de hipótesis
+(Tabla~\ref{tab:plan2-anova}).
+% fuente: sintesis_plan.py (docstring; numero_unico: MODELOS, referencias fijo y actuado, sin_<caso>;
+% anova: APRENDICES y PROFUNDOS, casos con las tres bases en todos los modelos, ss_base = residuo)
+
+\noindent\textbf{Barrido de demanda en el corredor.} Es un análisis de
+sensibilidad: mide cómo cambia el resultado con la demanda, sin cambiar
+la red ni reentrenar. Se toma la red de P1 y toda su demanda se
+multiplica por un factor $f$ que toma los valores 0.5, 0.75, 1.0,
+1.25, 1.5, 1.75, 2.0 y 2.25. Se agrega un
+perfil que cambia dentro de la hora, en bloques de 10 minutos con
+factores 1.0, 1.5, 2.0, 2.0, 1.5 y 1.0, en promedio 1.5; dentro de cada
+bloque las llegadas siguen siendo equiespaciadas. En cada nivel se
+evalúan cinco brazos sobre las semillas 1001 a 1030. La referencia es
+el fijo re-barrido para ese nivel con la regla del análisis de
+robustez, malla desde 10~s y ganador por retraso total
+(Sección~\ref{sec:diseno-robustez}), sobre la malla de P1 hasta
+$f = 1.25$ y la de P2 desde $f = 1.5$ y en el perfil variable. En P1
+y P2 esa regla da el mismo programa que la del plan
+(Sección~\ref{sec:remedicion}). Los otros cuatro son
+el fijo de P1 sin volver a tunear, que representa un plan de tiempos
+que no se ajusta a la demanda; el actuado; y las políticas publicadas
+de IPPO vecinos en P1 (base 4042, entrenada con $f = 1.0$) y en P2
+(base 2042, entrenada con $f = 2.0$). Cada brazo se compara con la
+referencia de su nivel con la estadística pareada de la
+Sección~\ref{sec:estadistica}, en retraso total y en \texttt{timeLoss}
+(Tabla~\ref{tab:plan2-demanda} y Figura~\ref{fig:plan2-demanda}).
+
+Con $f = 1.0$ y $f = 2.0$ los escenarios son los de P1 y P2. En esos
+dos niveles el fijo, el actuado y la política de IPPO vecinos
+entrenada en ese caso deben dar, semilla a semilla, el mismo
+\texttt{timeLoss} que en la evaluación del plan. Esa compuerta
+comprueba que el barrido mide igual que el plan;
+\texttt{barrido\_\allowbreak demanda.py} la revisa al resumir y
+termina con error si no se cumple. El barrido no decide veredictos:
+las políticas se evalúan fuera de la demanda con que se entrenaron y
+la referencia se vuelve a tunear en cada nivel. Mide, por tanto, hasta
+dónde se sostiene una política publicada cuando la demanda cambia, y
+no si el método funciona con esa demanda, lo que exigiría entrenar en
+cada nivel. Tampoco generaliza a otras redes, porque usa un único
+escenario base.
+% fuente: barrido_demanda.py (docstring, PERFIL, BRAZOS, comprobar: timeloss_prom semilla a semilla de
+% fijo, actuado e ippo_vecinos_s4042 en corredor_f100 frente a corredor y de fijo, actuado e
+% ippo_vecinos_s2042 en corredor_f200 frente a corredor_alta; main sale con 1 si no coincide);
+% escenarios_plan2.FACTORES_DEMANDA y DERIVADOS (malla de corredor si f <= 1.25, de corredor_alta si no y
+% en corredor_var); plan2/generar_trabajos.agregar_demanda (barrido con 2001-2003, evaluacion 1001-1030; los
+% dem_barrido_* no pasan --metrica, asi que eligen por barrer_fijo.METRICA_BARRIDO = retraso_total_prom, con
+% barrer_fijo.MALLAS desde 10 s); ganador de corredor_f100 = programa de P1 (docstring de barrido_demanda.py)
+
+\subsection{Análisis de robustez}
+\label{sec:diseno-robustez}
+
+Después del cierre del plan se revisaron tres
+decisiones del método y se volvió a medir lo que dependía de ellas,
+sin reentrenar ningún modelo. Esa re-medición no reemplaza al
+veredicto: es un análisis de robustez, que dice cuánto se sostiene el
+veredicto cuando esas decisiones cambian. Sus resultados están en la
+Sección~\ref{sec:robustez} y su ejecución, en la
+Sección~\ref{sec:remedicion}.
+
+La primera decisión es la métrica. En el análisis de robustez la regla
+de veredicto se aplica al retraso total
+(Ecuación~\ref{eq:retraso-total}), que suma al \texttt{timeLoss} la
+espera para entrar a la red. Se revisó porque en P2 los controles
+adaptativos bajan el \texttt{timeLoss} en parte con cola que queda
+fuera de la red (Sección~\ref{sec:formulacion}).
+
+La segunda es el fijo de referencia. Se vuelve a barrer en P1 a P5 con
+la malla de los dos verdes desde el mínimo de 10~s y con el retraso
+total como criterio; la regla de interioridad y el techo de 60~s no
+cambian. Ampliar la malla hacia 10~s se decidió después de ver que la
+política publicada de IPPO vecinos en P3 era el programa trivial. La
+regla del plan no lo exigía, porque ningún ganador del barrido del
+plan había quedado en el borde de su malla. P6 no se vuelve a barrer:
+su barrido, ampliado por la regla de interioridad, ya cubre los dos
+verdes desde 10~s, y el mismo programa gana por \texttt{timeLoss} y
+por retraso total (Sección~\ref{sec:remedicion}).
+
+La tercera es el control trivial (Sección~\ref{sec:modelos}). Se evalúa
+en cada caso con las semillas 1001 a 1030 y se juzga frente al fijo
+re-barrido, como el actuado. La política publicada que da la misma
+media de retraso total y la misma media de espera detenida que el
+trivial, con una diferencia de a lo sumo 0.0005~s/veh en cada una, se
+marca con ``(= trivial)''. La marca no cambia el veredicto: señala que,
+en la práctica, la política aprendida de esa celda es la regla de
+cambiar de fase en cuanto la máscara lo permite.
+
+Todo lo demás es igual que en el plan: las políticas publicadas, con
+sus \textit{checkpoints} y bases elegidos por la validación en
+\texttt{timeLoss}, las semillas, la estadística pareada y la regla de
+veredicto. El número único y el análisis de varianza de la
+Sección~\ref{sec:analisis-complementarios} se repiten con el retraso
+total y el fijo re-barrido. El análisis cubre los seis casos, P1 a
+P6.
+% fuente: plan2/robustez_veredicto.csv, robustez_sintesis_numero_unico.csv y robustez_sintesis_anova.csv
+% (28.09.2026, casos P1/P2/P3/P4/P5/P6); plan2/barrido_malla3_alta.csv (72 filas, avenida 10-35 y transversal
+% 10-25; la fila de menor retraso_total_prom, 82.63, es la de menor timeloss_prom, 36.91: 15/10, cero)
+% fuente: veredicto.py (--prefijo robustez_; IGUAL = 0.0005, igual_a sobre METRICA y
+% espera_prom, marca "(= trivial)"; REFERENCIAS = actuado y trivial); sintesis_plan.py --prefijo robustez_;
+% git HEAD:barrer_fijo.py (MALLAS del 25.09: avenida desde 12 s en corredor y 15 s en los demas; en_borde) y
+% plan2/cola/logs/barrido_<esc>.log del 25.09 sin AVISO; comentario de MALLAS en barrer_fijo.py (27.09.2026);
+% la igualdad de la politica de P3 y el trivial: capitulo4.tex, sec:remedicion
+
+\subsection{Análisis exploratorio posterior}
+\label{sec:diseno-exploratorio}
+
+Después del análisis de robustez se estudió por qué IPPO vecinos no
+mejora la coordinación en P4 y en P6. Es un análisis exploratorio y
+posterior al veredicto: se decidió después de conocer el resultado
+principal, usa otras semillas y no cambia ningún veredicto del plan.
+Un diagnóstico previo, sin entrenar, apuntó a dos causas en el
+entrenamiento y no en el problema. La primera es el descuento de la
+ventaja. La GAE (Ecuación~\ref{eq:gae}) descuenta una vez por decisión,
+aunque una decisión dure 5~s si se mantiene la fase y 8~s si se
+cambia, ámbar incluido (Sección~\ref{sec:aprendices}). Con ese
+descuento el objetivo del entrenamiento no ordena las políticas igual
+que el retraso por segundo. La segunda es la exploración. En
+entrenamiento cada semáforo sortea su acción por separado, y un cambio
+a destiempo en un solo cruce rompe el ciclo que siguen los demás. Las
+cifras del diagnóstico están en la Sección~\ref{sec:exploratorio}.
+
+El diseño se fijó en un pre-registro propio antes de entrenar,
+con su huella sha256 guardada aparte. Los cambios
+posteriores se declararon como desviaciones, sin editar el
+pre-registro. Se comparan un control y cinco variantes
+(Tabla~\ref{tab:exploratorio-variantes}). El control, C0, es IPPO
+vecinos sin cambios en el código, con la validación de ocho semillas
+que usan las variantes. C0, V1, V2 y V3 forman un diseño factorial de
+dos factores: la observación normalizada y las dos correcciones del
+entrenamiento. V4 y V5 agregan a V3 un solo factor cada una. La
+implementación de las dos correcciones está en la
+Sección~\ref{sec:correccion-entrenamiento}.
+
+\begin{table}[H]
+\setstretch{1}
+\centering
+\small
+\begin{tabular}{l>{\raggedright\arraybackslash}p{10.8cm}}
+\toprule
+Brazo & Cambio respecto de IPPO vecinos del plan \\
+\midrule
+C0 & Ninguno en el código; validación con ocho semillas \\
+V1 & Observación normalizada: colas y vehículos en movimiento de cada
+aproximación divididos entre 10~veh por carril, con tope 2 \\
+V2 & Descuento por segundo en la GAE y exploración con un número
+aleatorio común (Sección~\ref{sec:correccion-entrenamiento}) \\
+V3 & V1 y V2 juntas \\
+V4 & V3 con MAPPO y una recompensa de toda la red, que incluye los
+enlaces sin semáforo \\
+V5 & V3 con el actor iniciado en el ciclo mínimo: probabilidad
+inicial de cambiar cercana a 0.97 en toda decisión libre \\
+\bottomrule
+\end{tabular}
+\caption[Análisis exploratorio: control y variantes]{Análisis exploratorio posterior: control y
+variantes de IPPO vecinos. Todos usan los hiperparámetros de la Tabla~\ref{tab:plan2-hiper}, tres
+semillas base y 200 episodios.}
+\label{tab:exploratorio-variantes}
+\end{table}
+% fuente: plan2/exploratorio_coord/PRERREGISTRO.md (secciones 2 y 3; sha256 en prerregistro.sha256:
+% 8d38fe82...6b33) y DESVIACIONES.md (D1-D11, T1-T7); HECHOS.md seccion 1
+
+El resto del protocolo es el del plan
+(Sección~\ref{sec:protocolo}). Cada brazo se entrena con las semillas
+base 42, 2042 y 4042 y 200 episodios, con los hiperparámetros de la
+Tabla~\ref{tab:plan2-hiper}. La elección del \textit{checkpoint}, la
+de la base publicada y el criterio de convergencia son los mismos, y
+el episodio 0 no es candidato. Solo cambia la validación, que usa ocho
+semillas en lugar de dos: 999, 1999, 2999, 3999, 4999, 7999, 8999 y
+9999. Se valida cada 10 episodios en P4 y en P1 y cada 20 en P6. C0 no
+se reentrena. Como la validación guarda y restaura el estado del
+generador aleatorio, entrenar de nuevo daría los mismos pesos, así que
+C0 se obtiene validando con las ocho semillas los \textit{checkpoints}
+ya guardados del plan. Antes se comprobó que diez episodios
+reentrenados reproducen los pesos guardados.
+
+La evaluación usa la política congelada, el \texttt{timeLoss} y la
+estadística pareada de la Sección~\ref{sec:estadistica}. La regla de
+la Sección~\ref{sec:veredicto} se aplica frente al fijo del resultado
+principal. Ninguna evaluación usa las semillas del examen, 1001 a
+1030, y cada script lo comprueba. El cribado usa las semillas 5001 a
+5030 y la confirmación, 6001 a 6030, con las mismas políticas y sin
+reentrenar. Las semillas 6001 a 6010 ya se habían simulado en el
+diagnóstico, así que se informa además el resultado en 6011 a 6030.
+
+El análisis tiene dos tandas. La primera, en P4, entrena las cinco
+variantes. Gana la de menor \texttt{timeLoss} en 5001 a 5030 entre las
+que convergen. Para declarar un éxito, la ganadora debía mejorar al
+fijo en al menos un 5\,\%, con intervalo entero bajo cero y $p < 0.05$,
+superar al programa trivial con intervalo entero bajo cero y repetir
+las dos cosas en 6001 a 6030. La segunda tanda lleva las dos mejores
+variantes de P4, sin cambios, a P6, junto con el control C0 de ese
+caso. En P6 una variante mejora si su base publicada converge, si el
+intervalo de su diferencia con IPPO vecinos del plan queda entero bajo
+cero y si la regla frente al fijo no da FALLA. En P1 la ganadora debe
+dar FUNCIONA, y el límite superior de su intervalo frente a IPPO
+vecinos del plan no debe pasar de $+2$\,\%. La confirmación de P6 en
+6001 a 6030 no estaba en el pre-registro. Se agregó después de ver el
+cribado de P6, con el criterio de que las dos políticas publicadas
+mejoren al fijo y a IPPO vecinos del plan con intervalo entero bajo
+cero. P2, P3 y P5 no se prueban.
+
+La ganadora se elige en 5001 a 5030, así que sus cifras en esas
+semillas son optimistas; solo las de 6001 a 6030 confirman. Los
+resultados están en la Sección~\ref{sec:exploratorio}.
+% fuente: plan2/exploratorio_coord/PRERREGISTRO.md (seccion 2: bases, val8, eleccion, convergencia; seccion 4:
+% ganadora y EXITO a, b, c; seccion 6: tanda 2, criterio de mejora en P6, NO REGRESION en P1 con +2 %,
+% sensibilidad 6011-6030; seccion 7: semillas 1001-1030 prohibidas); DESVIACIONES.md D4 y T7 (replica de C0 y
+% C0-P6 por re-validacion); conf_p6/juzgar_conf_p6.py (docstring: criterio CONFIRMA, fuera del pre-registro);
+% LEEME.md (assert contra 1001-1030)

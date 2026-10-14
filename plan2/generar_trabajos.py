@@ -11,12 +11,17 @@ quede sin correr sea lo opcional:
   6  MAPPO en P1-P4
   7  Q-learning con recompensa de colas (ablacion) en P1-P4
   (DQN y MAPPO en P5 subieron a 5 el 25.09 a las 00:35)
+27.09.2026: re-medicion v2.1 de P1-P5 (agregar_v21: barrido con la avenida desde 10 s, fijo, actuado,
+trivial y todas las politicas re-evaluadas, prioridades 0-2) y P6 = malla3_alta (CELDAS_P6), con el
+mismo protocolo, el brazo trivial y las prioridades de P5.
 """
 import os
 import json
 
 CELDAS = ["corredor", "corredor_alta", "red", "red_alta", "malla3"]
-NUEVAS = {"red_alta": "listo/escenarios_red_alta.ok", "malla3": "listo/escenarios_malla3.ok"}
+CELDAS_P6 = ["malla3_alta"]      # 27.09.2026: P6, la malla con demanda alta (calibrar_demanda.py)
+NUEVAS = {"red_alta": "listo/escenarios_red_alta.ok", "malla3": "listo/escenarios_malla3.ok",
+          "malla3_alta": "listo/escenarios_malla3_alta.ok"}
 BASES = [42, 2042, 4042]
 SEMILLAS = "1001-1030"
 EPISODIOS = 200
@@ -32,7 +37,8 @@ ALGS = {
                  "listo/tabular.ok"),
     "ippo_local": ("python ../rl_ippo.py train --escenario {e} --variante local --seed {b} --episodios {n}",
                    "politica_{e}_local_s{b}.pt", "listo/ippo.ok"),
-    "ippo_vecinos": ("python ../rl_ippo.py train --escenario {e} --variante vecinos --seed {b} --episodios {n}",
+    "ippo_vecinos": ("python ../rl_ippo.py train --escenario {e} --variante vecinos --seed {b} "
+                     "--episodios {n}",
                      "politica_{e}_vecinos_s{b}.pt", "listo/ippo.ok"),
     "ippo_spill": ("python ../rl_ippo.py train --escenario {e} --variante spill --seed {b} --episodios {n}",
                    "politica_{e}_spill_s{b}.pt", "listo/ippo.ok"),
@@ -60,30 +66,92 @@ def prioridad(alg, esc):
     return {"dqn": 5, "mappo": 6, "ql_colas": 7}[alg]
 
 
+def agregar_v21(trabajos, agregar):
+    """Re-medicion v2.1 (27.09.2026), sin reentrenar: barrido del fijo con la avenida desde 10 s y
+    por retraso total, fijo, actuado y trivial re-evaluados, y todas las politicas ya entrenadas
+    re-evaluadas para tener retraso total, espera para entrar y no insertados. Las evaluaciones
+    del plan v2 que seguian pendientes (spill en red, red_alta y malla3) no se duplican: corren
+    con su id original y el codigo nuevo."""
+    ids = {t["id"] for t in trabajos}
+    hechos = set()
+    ruta_estado = os.path.join(os.path.dirname(os.path.abspath(__file__)), "cola", "estado.json")
+    if os.path.exists(ruta_estado):
+        with open(ruta_estado, encoding="utf-8") as f:
+            hechos = set(json.load(f).get("hechos", []))
+    for esc in CELDAS:
+        barrido = f"v21_barrido_{esc}"
+        agregar(barrido, 0, f"python ../barrer_fijo.py {esc} --semillas 2001-2003 --tmp tmp_v21_{esc} "
+                f"--procesos 3 --instalar", [])
+        for brazo in ("fijo", "actuado", "trivial"):
+            agregar(f"v21_eval_{esc}_{brazo}", 1,
+                    f"python ../evaluar.py --escenario {esc} --brazo {brazo} --semillas {SEMILLAS} "
+                    f"--salida parciales/eval_{esc}_{brazo}.csv",
+                    [f"trabajo:{barrido}"] if brazo == "fijo" else [])
+        for alg, (_, archivo, _) in ALGS.items():
+            for b in BASES:
+                viejo = f"eval_{esc}_{alg}_s{b}"
+                if viejo not in ids or viejo not in hechos:
+                    continue
+                agregar(f"v21_{viejo}", 2,
+                        f"python ../evaluar.py --escenario {esc} --politica {archivo.format(e=esc, b=b)} "
+                        f"--semillas {SEMILLAS} --salida parciales/{viejo}.csv",
+                        [f"trabajo:train_{esc}_{alg}_s{b}"])
+
+
+def agregar_demanda(agregar):
+    """Barrido de demanda en el corredor de P1 (27.09.2026, barrido_demanda.py): por nivel, el fijo
+    re-barrido para esa demanda, el fijo de P1 sin retunear, el actuado y las politicas publicadas
+    de IPPO vecinos de P1 (base 4042) y de P2 (base 2042) segun veredicto.csv, sin reentrenar."""
+    import sys
+    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    import escenarios_plan2
+    agregar("dem_preparar", 1, "python ../barrido_demanda.py preparar", ["trabajo:v21_barrido_corredor"])
+    niveles = [e for e in escenarios_plan2.DERIVADOS if not e.endswith("_p1")]
+    politicas = {"ippo_vecinos_s4042": "politica_corredor_vecinos_s4042.pt",
+                 "ippo_vecinos_s2042": "politica_corredor_alta_vecinos_s2042.pt"}
+    for esc in niveles:
+        agregar(f"dem_barrido_{esc}", 2, f"python ../barrer_fijo.py {esc} --semillas 2001-2003 "
+                f"--tmp tmp_dem_{esc} --procesos 3 --instalar", ["trabajo:dem_preparar"])
+        base = f"python ../evaluar.py --semillas {SEMILLAS} "
+        agregar(f"dem_eval_{esc}_fijo", 2, base + f"--escenario {esc} --brazo fijo "
+                f"--salida demanda/eval_{esc}_fijo.csv", [f"trabajo:dem_barrido_{esc}"])
+        agregar(f"dem_eval_{esc}_fijo_p1", 2, base + f"--escenario {esc}_p1 --brazo fijo "
+                f"--salida demanda/eval_{esc}_fijo_p1.csv", ["trabajo:dem_preparar"])
+        agregar(f"dem_eval_{esc}_actuado", 2, base + f"--escenario {esc} --brazo actuado "
+                f"--salida demanda/eval_{esc}_actuado.csv", ["trabajo:dem_preparar"])
+        for brazo, archivo in politicas.items():
+            agregar(f"dem_eval_{esc}_{brazo}", 2, base + f"--escenario {esc} --politica {archivo} "
+                    f"--salida demanda/eval_{esc}_{brazo}.csv", ["trabajo:dem_preparar"])
+
+
 def main():
     trabajos = []
 
     def agregar(tid, prio, cmd, requiere, cpus=1):
         trabajos.append({"id": tid, "prioridad": prio, "cpus": cpus, "requiere": requiere, "cmd": cmd})
 
-    for esc in CELDAS:
+    for esc in CELDAS + CELDAS_P6:
         prep = f"prep_{esc}"
         agregar(prep, 0, f"python preparar.py {esc}", [NUEVAS[esc]] if esc in NUEVAS else [])
-        bandera_barrido = "listo/barrer_malla.ok" if esc == "malla3" else "listo/barrer.ok"
+        bandera_barrido = "listo/barrer_malla.ok" if esc.startswith("malla3") else "listo/barrer.ok"
         agregar(f"barrido_{esc}", 1,
                 f"python ../barrer_fijo.py {esc} --semillas 2001-2003 --tmp tmp_barrido_{esc} "
                 f"--procesos 4 --instalar", [bandera_barrido, f"trabajo:{prep}"], cpus=1)
         # cpus=1 aunque use 4 procesos: con la cola llena, un trabajo de 4 cpus nunca encontraria
         # hueco frente a los de 1; se acepta sobrecargar la maquina unos minutos.
-        for brazo, extra in (("fijo", [f"trabajo:barrido_{esc}"]), ("actuado", [f"trabajo:{prep}"])):
+        referencias = [("fijo", [f"trabajo:barrido_{esc}"]), ("actuado", [f"trabajo:{prep}"])]
+        if esc in CELDAS_P6:
+            # en P1-P5 el trivial entra con la re-medicion v2.1 (agregar_v21)
+            referencias.append(("trivial", [f"trabajo:{prep}"]))
+        for brazo, extra in referencias:
             agregar(f"eval_{esc}_{brazo}", 1,
                     f"python ../evaluar.py --escenario {esc} --brazo {brazo} --semillas {SEMILLAS} "
                     f"--salida parciales/eval_{esc}_{brazo}.csv", ["listo/evaluar.ok"] + extra)
         for alg, (cmd, archivo, bandera) in ALGS.items():
-            if esc == "malla3" and alg == "ql_colas":
+            if esc.startswith("malla3") and alg == "ql_colas":
                 continue
             requiere = [bandera, f"trabajo:{prep}"]
-            if esc == "malla3" and alg not in ("ql", "sarsa"):
+            if esc.startswith("malla3") and alg not in ("ql", "sarsa"):
                 requiere.append("listo/ippo_malla.ok")
             for b in BASES:
                 tid = f"train_{esc}_{alg}_s{b}"
@@ -93,6 +161,8 @@ def main():
                         f"--semillas {SEMILLAS} --salida parciales/eval_{esc}_{alg}_s{b}.csv",
                         ["listo/evaluar.ok", f"trabajo:{tid}"])
 
+    agregar_v21(trabajos, agregar)
+    agregar_demanda(agregar)
     ruta = os.path.join(os.path.dirname(os.path.abspath(__file__)), "cola", "trabajos.jsonl")
     with open(ruta, "w", encoding="utf-8") as f:
         for t in trabajos:

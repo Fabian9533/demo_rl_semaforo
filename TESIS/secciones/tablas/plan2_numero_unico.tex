@@ -1,0 +1,24 @@
+% Generado por sintesis_plan.py. No editar a mano.
+\begin{table}[H]
+\setstretch{1}
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{lccrrrrrr}
+\toprule
+ & \makecell{Frente al fijo\\(\%) [IC95]} & \makecell{Frente al actuado\\(\%) [IC95]} & \multicolumn{6}{c}{Frente al fijo, sin el caso} \\
+\cmidrule(lr){4-9}
+Modelo & & & P1 & P2 & P3 & P4 & P5 & P6 \\
+\midrule
+IPPO vecinos & $-$6.8 [$-$7.5, $-$6.1] & $-$14.3 [$-$15.1, $-$13.6] & $-$6.8 & $-$3.1 & $-$6.4 & $-$7.5 & $-$8.5 & $-$8.6 \\
+MAPPO & $-$4.9 [$-$5.7, $-$4.2] & $-$12.6 [$-$13.6, $-$11.6] & $-$4.5 & $-$1.2 & $-$4.3 & $-$5.5 & $-$5.8 & $-$8.1 \\
+DQN & $-$1.6 [$-$2.1, $-$0.9] & $-$9.5 [$-$10.3, $-$8.7] & $-$1.2 & +2.5 & $-$1.5 & $-$1.2 & $-$3.9 & $-$3.9 \\
+IPPO local & +1.4 [+0.9, +1.8] & $-$6.8 [$-$7.5, $-$6.1] & +1.7 & +7.0 & +1.2 & +1.1 & $-$2.9 & +0.3 \\
+Q-learning & +14.5 [+13.4, +15.7] & +5.3 [+4.0, +6.6] & +15.6 & +19.8 & +14.9 & +15.4 & +9.6 & +11.9 \\
+SARSA & +17.1 [+16.3, +18.0] & +7.7 [+6.8, +8.6] & +17.8 & +19.3 & +18.3 & +18.5 & +13.0 & +15.9 \\
+Actuado & +8.8 [+7.9, +9.6] & -- & +10.9 & +15.6 & +10.9 & +10.6 & +6.3 & $-$0.9 \\
+\bottomrule
+\end{tabular}
+\caption[Resumen en un número]{Resumen en un número: media geométrica, sobre los casos, del cociente entre el timeLoss del modelo (política publicada) y el de la referencia, expresada como cambio \%; negativo es mejor. IC95\,\% bootstrap pareado por semilla dentro de cada caso (semillas 1001 a 1030). Las últimas columnas repiten el índice frente al fijo dejando fuera un caso. $^{a}$: faltan casos (el índice usa los disponibles).}
+\label{tab:plan2-numero-unico}
+\end{table}

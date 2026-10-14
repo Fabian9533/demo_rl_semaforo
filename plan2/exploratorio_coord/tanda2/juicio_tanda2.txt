@@ -1,0 +1,71 @@
+== (1) P4 red_alta: confirmacion de la ganadora V5 (base publicada 42) en 6001-6030 (sec. 6.3)
+  control de determinismo, semilla 5001 (tanda 2 frente a la corrida anterior): V5_s42 26.46=26.46 OK, C0_s4042 27.44=27.44 OK, ippo_vecinos_s42 27.72=27.72 OK, fijo2509 27.73=27.73 OK, actuado 26.76=26.76 OK, trivial 27.14=27.14 OK
+
+  -- semillas 6001-6030 (n=30) medias: V5_s42 27.829, C0_s4042 28.610, ippo_vecinos_s42 28.739, fijo2509 29.658, actuado 29.759, trivial 27.816
+  V5_s42             vs fijo_2509 -6.2 % [-7.8, -4.5] p=2.05e-07  vs actuado -6.5 % [-8.0, -5.1] p=3.73e-09 -> FUNCIONA  vs trivial +0.0 % [-0.3, 0.4] p=0.395  cambios 855.0
+  C0_s4042           vs fijo_2509 -3.5 % [-5.3, -1.8] p=0.00111  vs actuado -3.9 % [-5.3, -2.3] p=7.91e-05 -> MEJORA  vs trivial +2.9 % [1.0, 4.9] p=0.025  cambios 569.7
+  ippo_vecinos_s42   vs fijo_2509 -3.1 % [-4.8, -1.5] p=0.00203  vs actuado -3.4 % [-4.8, -1.9] p=0.000358 -> MEJORA  vs trivial +3.3 % [1.5, 5.1] p=0.00225  cambios 559.6
+  trivial            vs fijo_2509 -6.2 % [-7.9, -4.5] p=2.05e-07  vs actuado -6.5 % [-8.1, -5.1] p=1.92e-06 -> FUNCIONA  cambios 869.0
+  actuado            vs fijo_2509 +0.3 % [-1.2, 1.8] p=0.558  vs actuado +0.0 % [0.0, 0.0] p=1 -> EMPATA  vs trivial +7.0 % [5.4, 8.8] p=1.92e-06  cambios 742.1
+  V5 frente a C0_s4042          : -2.7 % [-4.6, -1.0] p=0.0212
+  V5 frente a ippo_vecinos_s42  : -3.2 % [-4.9, -1.5] p=0.00158
+  V5 frente a trivial           : +0.0 % [-0.3, 0.4] p=0.395
+  (a) V5 vs fijo_2509: -6.2 % [-7.8, -4.5] p=2.05e-07 -> SE CUMPLE (etiqueta FUNCIONA)
+  (b) V5 vs trivial:   +0.0 % [-0.3, 0.4] p=0.395 -> NO se cumple;  igual_trivial 0/30
+
+  -- semillas 6011-6030 (n=20) medias: V5_s42 27.495, C0_s4042 28.164, ippo_vecinos_s42 28.195, fijo2509 29.610, actuado 29.404, trivial 27.405
+  V5_s42             vs fijo_2509 -7.1 % [-8.9, -5.3] p=5.72e-06  vs actuado -6.5 % [-8.2, -4.9] p=3.81e-06 -> FUNCIONA  vs trivial +0.3 % [0.0, 0.7] p=1  cambios 855.4
+  C0_s4042           vs fijo_2509 -4.9 % [-6.9, -2.7] p=0.000483  vs actuado -4.2 % [-6.3, -2.0] p=0.00233 -> MEJORA  vs trivial +2.8 % [0.5, 5.2] p=0.108  cambios 570.3
+  ippo_vecinos_s42   vs fijo_2509 -4.8 % [-6.7, -2.9] p=0.00021  vs actuado -4.1 % [-5.8, -2.3] p=0.0015 -> MEJORA  vs trivial +2.9 % [0.8, 5.0] p=0.0266  cambios 560.4
+  trivial            vs fijo_2509 -7.4 % [-9.1, -5.7] p=1.91e-06  vs actuado -6.8 % [-8.6, -5.2] p=1.91e-06 -> FUNCIONA  cambios 869.1
+  actuado            vs fijo_2509 -0.7 % [-2.5, 1.2] p=0.55  vs actuado +0.0 % [0.0, 0.0] p=1 -> EMPATA  vs trivial +7.3 % [5.5, 9.4] p=1.91e-06  cambios 744.1
+  V5 frente a C0_s4042          : -2.4 % [-4.6, -0.3] p=0.117
+  V5 frente a ippo_vecinos_s42  : -2.5 % [-4.4, -0.5] p=0.0441
+  V5 frente a trivial           : +0.3 % [0.0, 0.7] p=1
+  (a) V5 vs fijo_2509: -7.1 % [-8.9, -5.3] p=5.72e-06 -> SE CUMPLE (etiqueta FUNCIONA)
+  (b) V5 vs trivial:   +0.3 % [0.0, 0.7] p=1 -> NO se cumple;  igual_trivial 0/20
+
+  EXITO = (a) True y (b) False en 5001-5030 y (c) False en 6001-6030 [(a) True, (b) False] -> NO hay EXITO; lectura en 6001-6030: reproduce el ciclo minimo (6001-6030)
+
+== (2) P6 malla3_alta: V5 y V2 (top 2 de la tanda 1) y C0-P6, semillas 5001-5030 (sec. 6.1)
+  referencias (mejora_coord/salidas/sim): fijo2509 36.843 (sd 2.34), actuado 64.842 (sd 4.04), trivial 184.394 (sd 102.16), ippo_vecinos_s42 37.745 (sd 4.55)
+
+  -- C0
+  base 42: ep_elegido 60 val_elegido 36.454 convergio False (plateau 9.71 %, estabilidad 3.7 %, 10 val hasta ep 200)  media 5001-5030 36.759 sd 4.338 cambios 1544.8
+  base 2042: ep_elegido 20 val_elegido 41.562 convergio False (plateau 8.58 %, estabilidad 2.96 %, 10 val hasta ep 200)  media 5001-5030 43.891 sd 3.625 cambios 1894.5
+  base 4042: ep_elegido 180 val_elegido 37.535 convergio False (plateau -7.2 %, estabilidad 0.0 %, 10 val hasta ep 200)  media 5001-5030 39.636 sd 5.054 cambios 1585.1  <== PUBLICADA
+  PUBLICADA 4042: media 39.636 sd 5.054  vs fijo_2509 +7.6 % [2.0, 13.3] p=0.0185  vs actuado -38.9 % [-41.7, -35.9] p=1.86e-09 -> PENDIENTE (no convergió; provisional: FALLA)
+      vs IPPO vecinos publicado s42 +5.0 % [-1.4, 11.8] p=0.0636   vs trivial -78.5 % [-82.2, -73.8] p=1.86e-09   dispersion bases {'min': 36.759, 'max': 43.891}
+
+  -- V5
+  base 42: ep_elegido 200 val_elegido 33.911 convergio True (plateau -4.61 %, estabilidad 0.0 %, 10 val hasta ep 200)  media 5001-5030 34.218 sd 1.464 cambios 2374.1  <== PUBLICADA
+  base 2042: ep_elegido 200 val_elegido 33.686 convergio False (plateau -21.6 %, estabilidad 0.0 %, 10 val hasta ep 200)  media 5001-5030 34.194 sd 1.263 cambios 2413.9
+  base 4042: ep_elegido 140 val_elegido 34.58 convergio True (plateau 3.01 %, estabilidad 1.5 %, 10 val hasta ep 200)  media 5001-5030 35.837 sd 3.438 cambios 2396.6
+  PUBLICADA 42: media 34.218 sd 1.464  vs fijo_2509 -7.1 % [-9.8, -4.8] p=2.97e-05  vs actuado -47.2 % [-48.2, -46.1] p=1.86e-09 -> FUNCIONA
+      vs IPPO vecinos publicado s42 -9.3 % [-13.8, -5.1] p=0.000123   vs trivial -81.4 % [-84.6, -77.5] p=1.73e-06   dispersion bases {'min': 34.194, 'max': 35.837}
+      criterio 'mejora en P6' (converge, IC95 vs IPPO publicado < 0, etiqueta != FALLA): SI
+
+  -- V2
+  base 42: ep_elegido 180 val_elegido 35.205 convergio True (plateau -2.67 %, estabilidad 0.0 %, 10 val hasta ep 200)  media 5001-5030 34.295 sd 1.32 cambios 2363.6
+  base 2042: ep_elegido 200 val_elegido 33.602 convergio False (plateau -6.67 %, estabilidad 0.0 %, 10 val hasta ep 200)  media 5001-5030 34.238 sd 2.725 cambios 2396.2
+  base 4042: ep_elegido 160 val_elegido 33.734 convergio True (plateau 3.19 %, estabilidad 0.0 %, 10 val hasta ep 200)  media 5001-5030 34.141 sd 1.101 cambios 2404.0  <== PUBLICADA
+  PUBLICADA 4042: media 34.141 sd 1.101  vs fijo_2509 -7.3 % [-10.0, -5.3] p=4.66e-08  vs actuado -47.3 % [-48.6, -46.0] p=1.86e-09 -> FUNCIONA
+      vs IPPO vecinos publicado s42 -9.5 % [-13.8, -5.4] p=2.37e-05   vs trivial -81.5 % [-84.7, -77.5] p=1.86e-09   dispersion bases {'min': 34.141, 'max': 34.295}
+      criterio 'mejora en P6' (converge, IC95 vs IPPO publicado < 0, etiqueta != FALLA): SI
+  V5 vs C0-P6: -13.7 % [-17.8, -9.5] p=3.15e-07
+  V2 vs C0-P6: -13.9 % [-17.7, -10.1] p=2.13e-06
+  C0-P6 vs IPPO vecinos publicado s42 (efecto de val8): +5.0 % [-1.4, 11.8] p=0.0636
+  V5 vs V2: +0.2 % [-1.4, 2.1] p=0.902
+  replica C0-P6: REPLICA FALLA
+  re-validacion C0-P6: checkpoints con val_999/1999 distintas del json: 0
+
+== (3) P1 corredor: no regresion de V5 frente a IPPO vecinos publicado P1 (s4042), semillas 5001-5030 (sec. 6.2)
+  referencias: fijo2509 21.272, actuado 21.021, trivial 102.582, ippo_vecinos_s4042 19.848
+  verificacion del trivial en 999 (ep 0 de V5 = cambiar en cuanto se puede): base 42: 108.24 vs 108.24 OK, base 2042: 108.24 vs 108.24 OK, base 4042: 108.24 vs 108.24 OK
+  base 42: ep_elegido 170 val_elegido 19.599 (val_ep0 101.213) convergio True (plateau -0.89 %, estabilidad 0.12 %)  media 5001-5030 19.882 sd 0.365 cambios 392.7 igual_trivial 0/30
+  base 2042: ep_elegido 120 val_elegido 19.502 (val_ep0 101.213) convergio True (plateau -1.78 %, estabilidad 0.61 %)  media 5001-5030 19.628 sd 0.366 cambios 382.9 igual_trivial 0/30
+  base 4042: ep_elegido 200 val_elegido 19.554 (val_ep0 101.213) convergio True (plateau -2.16 %, estabilidad 0.0 %)  media 5001-5030 19.727 sd 0.411 cambios 390.2 igual_trivial 0/30  <== PUBLICADA
+  PUBLICADA 4042: vs fijo_2509 -7.3 % [-8.7, -6.0] p=1.86e-09  vs actuado -6.2 % [-6.7, -5.6] p=1.73e-06 -> FUNCIONA
+      vs IPPO vecinos publicado P1 s4042 -0.6 % [-1.5, 0.3] p=0.289 (limite superior +0.3 %, umbral +2 %)   vs trivial -80.8 % [-81.1, -80.4] p=1.86e-09
+      referencia: IPPO publicado P1 vs fijo_2509 -6.7 % [-8.0, -5.4] p=1.73e-06 -> FUNCIONA
+  NO REGRESION: SI (FUNCIONA: True; limite superior <= +2 %: True)

@@ -1,0 +1,56 @@
+<additional>
+    <tlLogic id="semaforo_C11" type="static" programID="fijo" offset="0">
+        <phase duration="35" state="rrrrGGGgrrrrGGGg"/>
+        <phase duration="3" state="rrrryyyyrrrryyyy"/>
+        <phase duration="10" state="GGGgrrrrGGGgrrrr"/>
+        <phase duration="3" state="yyyyrrrryyyyrrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C12" type="static" programID="fijo" offset="0">
+        <phase duration="35" state="rrrrGGGgrrrrGGGg"/>
+        <phase duration="3" state="rrrryyyyrrrryyyy"/>
+        <phase duration="10" state="GGGgrrrrGGGgrrrr"/>
+        <phase duration="3" state="yyyyrrrryyyyrrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C13" type="static" programID="fijo" offset="0">
+        <phase duration="35" state="rrrrGGGgrrrrGGGg"/>
+        <phase duration="3" state="rrrryyyyrrrryyyy"/>
+        <phase duration="10" state="GGGgrrrrGGGgrrrr"/>
+        <phase duration="3" state="yyyyrrrryyyyrrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C21" type="static" programID="fijo" offset="0">
+        <phase duration="35" state="rrrrGGGgrrrrGGGg"/>
+        <phase duration="3" state="rrrryyyyrrrryyyy"/>
+        <phase duration="10" state="GGGgrrrrGGGgrrrr"/>
+        <phase duration="3" state="yyyyrrrryyyyrrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C22" type="static" programID="fijo" offset="0">
+        <phase duration="35" state="rrrrGGGgrrrrGGGg"/>
+        <phase duration="3" state="rrrryyyyrrrryyyy"/>
+        <phase duration="10" state="GGGgrrrrGGGgrrrr"/>
+        <phase duration="3" state="yyyyrrrryyyyrrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C23" type="static" programID="fijo" offset="0">
+        <phase duration="35" state="rrrrGGGgrrrrGGGg"/>
+        <phase duration="3" state="rrrryyyyrrrryyyy"/>
+        <phase duration="10" state="GGGgrrrrGGGgrrrr"/>
+        <phase duration="3" state="yyyyrrrryyyyrrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C31" type="static" programID="fijo" offset="0">
+        <phase duration="35" state="rrrrGGGgrrrrGGGg"/>
+        <phase duration="3" state="rrrryyyyrrrryyyy"/>
+        <phase duration="10" state="GGGgrrrrGGGgrrrr"/>
+        <phase duration="3" state="yyyyrrrryyyyrrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C32" type="static" programID="fijo" offset="0">
+        <phase duration="35" state="rrrrGGGgrrrrGGGg"/>
+        <phase duration="3" state="rrrryyyyrrrryyyy"/>
+        <phase duration="10" state="GGGgrrrrGGGgrrrr"/>
+        <phase duration="3" state="yyyyrrrryyyyrrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C33" type="static" programID="fijo" offset="0">
+        <phase duration="35" state="rrrrGGGgrrrrGGGg"/>
+        <phase duration="3" state="rrrryyyyrrrryyyy"/>
+        <phase duration="10" state="GGGgrrrrGGGgrrrr"/>
+        <phase duration="3" state="yyyyrrrryyyyrrrr"/>
+    </tlLogic>
+</additional>

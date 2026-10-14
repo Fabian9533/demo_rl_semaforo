@@ -1,0 +1,18 @@
+P6 V5 s42 < fijo2509: 28/30; max 40.21
+P6 V5 s42 < ippo_vecinos_s42: 22/30; max 40.21
+P6 V5 s42 < trivial: 30/30; max 40.21
+P6 V5 s42: min 32.61 max 40.21
+P6 V2 s4042 < fijo2509: 28/30; max 37.86
+P6 V2 s4042 < ippo_vecinos_s42: 25/30; max 37.86
+P6 V2 s4042 < trivial: 30/30; max 37.86
+P6 V2 s4042: min 32.84 max 37.86
+P6 C0 s4042 < fijo2509: 11/30; max 54.27
+P6 C0 s4042 < ippo_vecinos_s42: 9/30; max 54.27
+P6 C0 s4042 < trivial: 30/30; max 54.27
+P6 C0 s4042: min 34.10 max 54.27
+P6 IPPO publicado s42 max 50.56; fijo2509 max 49.12
+P4 6001-6030 V5_s42 < fijo2509: 27/30, == 0/30
+P4 6001-6030 V5_s42 < trivial: 17/30, == 5/30
+P4 6001-6030 V5_s42 < C0_s4042: 17/30, == 0/30
+P4 6001-6030 V5_s42 < ippo_vecinos_s42: 24/30, == 0/30
+P1 V5 s4042 < IPPO P1 s4042: 16/30; < fijo: 30/30

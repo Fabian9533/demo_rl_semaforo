@@ -28,11 +28,11 @@ Mensajeria: cada 5 s de reloj global cada semaforo publica a cada vecino el eje 
 esperando hacia el y la cola que ve en la salida del vecino. El receptor lo lee en su propia
 decision; --latencia y --perdida simulan un canal imperfecto (solo evaluacion).
 
-Cambios del plan de pruebas v2 (24.09.2026, plan2/ESPEC.md):
+Cambios del plan de pruebas v2 (plan2/ESPEC.md):
   - Escenarios nuevos desde escenarios_plan2.py (VECINOS y LADOS): red_alta y malla3.
   - N lados por semaforo (oeste, este y, en malla3, norte y sur). Observacion de dimension
     12 + n_id + 8 * lados, con n_id = max(3, semaforos). Con dos lados el layout es el de
-    siempre (31; id en 12..14; ranuras en 15 y 23) y las politicas del 06.09 cargan igual.
+    siempre (31; id en 12..14; ranuras en 15 y 23) y las politicas de la fase exploratoria cargan igual.
     El mensaje dice el eje del verde; "verde hacia mi" es verde EO para un vecino al oeste o
     al este y verde NS para uno al norte o al sur.
   - Validacion con la politica congelada (argmax) en --val-seeds (999 y 1999) cada
@@ -117,6 +117,8 @@ VECINOS = {
 }
 VECINOS["corredor_alta"] = VECINOS["corredor"]
 VECINOS.update(escenarios_plan2.VECINOS)
+for _esc, (_base, _, _) in escenarios_plan2.DERIVADOS.items():     # barrido de demanda
+    VECINOS[_esc] = VECINOS[_base]
 
 # rl_corredor tambien importa escenarios_plan2; se suman aqui por si acaso
 _FUENTES = {**escenarios_plan2.ESCENARIOS_RC, **rc.ESCENARIOS}
@@ -138,7 +140,7 @@ ESCALA_R = 0.02                # lo que ve PPO es r / 50 (valores de -5 a -10 co
 N_ID = 3                       # minimo de posiciones del id del semaforo (C1, C2, C3)
 DIM_OBS = 15 + 2 * 8           # dos lados: bloque local + dos ranuras de vecinos (C["dim_obs"] manda)
 OCULTAS = 64
-# Fijados en la prueba de humo (cruce, 06.09): con lr 3e-4, minilote 256 y 8 epocas la politica
+# Fijados en la prueba de humo (cruce): con lr 3e-4, minilote 256 y 8 epocas la politica
 # no salia de un programa fijo en 60 episodios (KL < 0.001 por actualizacion); con lr 1e-3,
 # minilote 64 y 10 epocas iguala al actuado en 15 episodios. gamma 0.9 no cambio nada.
 HIPER = {"gamma": 0.95, "lam": 0.95, "clip": 0.2, "epocas": 10, "minibatch": 64,
@@ -400,7 +402,7 @@ def retraso_base(tls, lect):
     Es la version por segundo del timeLoss de SUMO (metrica primaria): un vehiculo detenido
     cuenta 1 y uno que avanza a media velocidad cuenta 0.5. El conteo de detenidos de U2 no ve
     a los que avanzan a paso lento, y por eso cambiar de fase muy seguido (colas que reptan en
-    vez de pararse) le parecia bueno al optimizador (prueba de humo en cruce, 06.09)."""
+    vez de pararse) le parecia bueno al optimizador (prueba de humo en cruce)."""
     total = 0.0
     for a in C["semaforos"][tls]:
         n = leer(lect, a, VEH)
@@ -448,7 +450,7 @@ def correr_episodio(modo, politica, gui, delay, seed, tripinfo=None, serie=None,
         tripinfo = f"tripinfo_{esc}_ippo_{modo}.xml"
     cmd = [binario, "-c", C["cfg"], "--seed", str(seed),
            "--tripinfo-output", tripinfo, "--tripinfo-output.write-unfinished", "true",
-           "--device.emissions.probability", "1"]
+           "--device.emissions.probability", "1"] + comun.args_estadisticas(tripinfo)
     if gui:
         cmd += ["--start", "--quit-on-end", "--delay", str(delay)]
         if os.path.exists(f"vista_{esc}.xml"):
@@ -735,7 +737,7 @@ def actualizar(politica, opt, lote, hiper, rng):
             perdida.backward()
             # Recorte por red y no global: el error inicial del critico (retornos de -20 a -30
             # frente a un valor inicial 0) hace su gradiente ~100 veces mayor que el del actor y
-            # un recorte conjunto reducia el paso del actor 50 veces (prueba de humo, 06.09).
+            # un recorte conjunto reducia el paso del actor 50 veces (prueba de humo).
             nn.utils.clip_grad_norm_(politica.actor.parameters(), hiper["grad"])
             nn.utils.clip_grad_norm_(politica.critico.parameters(), hiper["grad"])
             opt.step()

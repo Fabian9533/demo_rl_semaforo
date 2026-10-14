@@ -1,0 +1,28 @@
+== red_alta (n = semillas 5001-5030)
+   brazo                   timeLoss  ret_retraso  ret/veh  cambios
+   fijo                       27.63       -37368   -14.47      869  n=30
+   trivial                    28.15       -36959   -14.31      868  n=30
+   ippo_vecinos_s42           28.93       -40362   -15.63      559  n=30
+   ippo_vecinos_s4042         29.08       -40553   -15.71      567  n=30
+   mappo_s2042                29.17       -42022   -16.28      558  n=30
+   actuado                    29.67       -41793   -16.19      744  n=30
+   fijo2509                   30.06       -44575   -17.26      490  n=30
+   ippo_vecinos_s2042         30.50       -43940   -17.02      562  n=30
+== malla3_alta (n = semillas 5001-5030)
+   brazo                   timeLoss  ret_retraso  ret/veh  cambios
+   fijo2509                   36.84      -297291   -34.17     2296  n=30
+   ippo_vecinos_s42           37.74      -321254   -36.93     1621  n=30
+   ippo_vecinos_s4042         38.94      -331999   -38.16     1544  n=30
+   ippo_vecinos_s2042         40.96      -350158   -40.25     1590  n=30
+   mappo_s2042                44.77      -383111   -44.04     1663  n=30
+   actuado                    64.84      -594817   -68.37     1563  n=30
+   trivial                   184.39     -3823004  -447.64     3668  n=30
+== malla3 (n = semillas 5001-5030)
+   brazo                   timeLoss  ret_retraso  ret/veh  cambios
+   mappo_s2042                20.75       -75677   -17.40     2588  n=30
+   trivial                    20.75       -75677   -17.40     2588  n=30
+   ippo_vecinos_s4042         20.77       -75962   -17.46     2557  n=30
+   fijo2509                   20.82       -84100   -19.33     1467  n=30
+   ippo_vecinos_s42           20.83       -76053   -17.48     2578  n=30
+   ippo_vecinos_s2042         20.98       -76881   -17.67     2550  n=30
+   actuado                    25.38       -94729   -21.78     2313  n=30

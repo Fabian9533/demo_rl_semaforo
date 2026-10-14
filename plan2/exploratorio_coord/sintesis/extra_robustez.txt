@@ -1,0 +1,35 @@
+== P4 red_alta, 5001-5030, frente al fijo RE-BARRIDO instalado (10/10, desfases 0/25/24)
+  V5_s42 vs fijo_rebarrido                     timeloss_prom            28.068 vs   27.633   +1.6 %    [-0.2, 3.5] p=    0.118  gana 13/30
+  V2_s2042 vs fijo_rebarrido                   timeloss_prom            28.152 vs   27.633   +1.9 %    [-0.0, 3.8] p=    0.084  gana 12/30
+  trivial vs fijo_rebarrido                    timeloss_prom            28.152 vs   27.633   +1.9 %    [-0.0, 3.8] p=    0.084  gana 12/30
+  C0_s4042 vs fijo_rebarrido                   timeloss_prom            29.081 vs   27.633   +5.2 %     [3.9, 6.7] p= 8.01e-08  gana 2/30
+  ippo_vecinos_s42 vs fijo_rebarrido           timeloss_prom            28.925 vs   27.633   +4.7 %     [2.6, 6.8] p=  0.00057  gana 6/30
+  fijo2509 vs fijo_rebarrido                   timeloss_prom            30.064 vs   27.633   +8.8 %    [7.1, 10.4] p= 1.86e-09  gana 0/30
+== P4 red_alta, 5001-5030, retraso total (timeLoss + insercion) frente a fijo2509
+  V5_s42 vs fijo2509                           retraso_total_prom       28.402 vs   30.398   -6.6 %   [-8.5, -4.6] p= 1.99e-06  gana 26/30
+  V2_s2042 vs fijo2509                         retraso_total_prom       28.488 vs   30.398   -6.3 %   [-8.3, -4.2] p= 9.22e-06  gana 24/30
+  trivial vs fijo2509                          retraso_total_prom       28.488 vs   30.398   -6.3 %   [-8.3, -4.2] p= 9.22e-06  gana 24/30
+  C0_s4042 vs fijo2509                         retraso_total_prom       29.417 vs   30.398   -3.2 %   [-4.7, -1.8] p= 0.000593  gana 24/30
+  fijo_rebarrido vs fijo2509                   retraso_total_prom       27.968 vs   30.398   -8.0 %   [-9.3, -6.6] p= 1.86e-09  gana 30/30
+  V5_s42             retraso_insercion medio   0.336 s  no_insertados total 0
+  trivial            retraso_insercion medio   0.336 s  no_insertados total 0
+  fijo2509           retraso_insercion medio   0.336 s  no_insertados total 0
+  fijo_rebarrido     retraso_insercion medio   0.335 s  no_insertados total 0
+  C0_s4042           retraso_insercion medio   0.336 s  no_insertados total 0
+== P6 malla3_alta, 5001-5030, retraso total frente a fijo2509 (15/10) y a IPPO publicado
+  V5_s42 vs fijo2509                           retraso_total_prom       79.732 vs   82.328   -3.2 %   [-4.4, -2.0] p= 4.42e-06  gana 28/30
+  V2_s4042 vs fijo2509                         retraso_total_prom       79.671 vs   82.328   -3.2 %   [-4.4, -2.3] p= 1.64e-07  gana 28/30
+  C0_s4042 vs fijo2509                         retraso_total_prom       85.162 vs   82.328   +3.4 %     [1.0, 5.9] p=   0.0128  gana 11/30
+  ippo_vecinos_s42 vs fijo2509                 retraso_total_prom       83.159 vs   82.328   +1.0 %    [-0.8, 3.1] p=    0.777  gana 20/30
+  V5_s42 vs ippo_vecinos_s42                   retraso_total_prom       79.732 vs   83.159   -4.1 %   [-6.3, -2.1] p= 0.000407  gana 22/30
+  V2_s4042 vs ippo_vecinos_s42                 retraso_total_prom       79.671 vs   83.159   -4.2 %   [-6.3, -2.3] p= 0.000213  gana 25/30
+  V5_s42             retraso_insercion medio  45.515 s  no_insertados total 0  no_terminados total 0  cola_max_enlace media 9.8
+  V2_s4042           retraso_insercion medio  45.529 s  no_insertados total 0  no_terminados total 0  cola_max_enlace media 11.6
+  C0_s4042           retraso_insercion medio  45.525 s  no_insertados total 0  no_terminados total 0  cola_max_enlace media 19.8
+  ippo_vecinos_s42   retraso_insercion medio  45.413 s  no_insertados total 0  no_terminados total 0  cola_max_enlace media 16.6
+  fijo2509           retraso_insercion medio  45.486 s  no_insertados total 0  no_terminados total 0  cola_max_enlace media 10.2
+== P1 corredor, 5001-5030, retraso total
+  V5_s4042 vs fijo2509                         retraso_total_prom       20.099 vs   21.647   -7.1 %   [-8.5, -5.9] p= 1.73e-06  gana 30/30
+  ippo_vecinos_s4042 vs fijo2509               retraso_total_prom       20.223 vs   21.647   -6.6 %   [-7.9, -5.3] p= 1.86e-09  gana 30/30
+  actuado vs fijo2509                          retraso_total_prom       21.397 vs   21.647   -1.2 %   [-2.2, -0.1] p=    0.173  gana 16/30
+  V5_s4042 vs ippo_vecinos_s4042               retraso_total_prom       20.099 vs   20.223   -0.6 %    [-1.5, 0.3] p=    0.261  gana 16/30

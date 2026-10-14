@@ -32,10 +32,45 @@ CAMPOS = ["modo", "episodio", "semilla", "epsilon", "vehiculos",
 
 
 # ---------------- Metricas del tripinfo ----------------
+def ruta_estadisticas(tripinfo):
+    """Archivo de --statistic-output que acompana a un tripinfo (mismo nombre con _stats)."""
+    return (tripinfo[:-4] if tripinfo.endswith(".xml") else tripinfo) + "_stats.xml"
+
+
+def args_estadisticas(tripinfo):
+    """Argumentos de sumo para escribir el resumen de estadisticas junto al tripinfo. De ahi salen
+    los vehiculos que al cerrar la simulacion aun esperaban entrar a la red (no estan en el tripinfo)."""
+    return ["--statistic-output", ruta_estadisticas(tripinfo)]
+
+
+def borrar_tripinfo(tripinfo, intentos=5, espera=1.0):
+    """Borra el tripinfo y su archivo de estadisticas, si existen. En Windows otro proceso (el
+    antivirus) puede tener tomado un instante un archivo recien escrito (paso en un barrido de
+    red): se reintenta y, si sigue tomado, se deja; no cambia ningun numero."""
+    import time
+    for ruta in (tripinfo, ruta_estadisticas(tripinfo)):
+        for k in range(intentos):
+            try:
+                if os.path.exists(ruta):
+                    os.remove(ruta)
+                break
+            except PermissionError:
+                time.sleep(espera)
+
+
 def leer_tripinfo(archivo, flujos_corredor=None):
     """Metricas por vehiculo promediadas sobre el episodio.
     espera_prom   : s detenido por vehiculo (waitingTime, velocidad <= 0.1 m/s)
-    timeloss_prom : s de retraso por vehiculo respecto a la velocidad deseada (timeLoss)
+    timeloss_prom : s de retraso por vehiculo respecto a la velocidad deseada (timeLoss); SUMO lo
+                    cuenta desde que el vehiculo entra a la red
+    retraso_insercion_prom : s que el vehiculo espero para entrar a la red (departDelay): con la
+                    arista de entrada llena, SUMO lo retiene fuera y ese tiempo no entra en timeLoss
+    no_insertados : vehiculos que al cerrar la simulacion seguian esperando entrar (no aparecen en
+                    el tripinfo); se leen del archivo de estadisticas (args_estadisticas)
+    retraso_total_prom : metrica primaria. (suma de timeLoss + departDelay de
+                    los vehiculos del tripinfo + espera acumulada de los no insertados) / (vehiculos
+                    del tripinfo + no insertados). La espera de los no insertados es la que llevaban
+                    al cerrar, una cota inferior. Sin archivo de estadisticas se toma no_insertados = 0.
     paradas_prom  : detenciones por vehiculo (waitingCount)
     throughput    : vehiculos que terminaron su viaje antes de los 3600 s
     co2_prom      : g de CO2 por vehiculo; nox_prom: mg de NOx por vehiculo
@@ -47,6 +82,18 @@ def leer_tripinfo(archivo, flujos_corredor=None):
     n = max(1, len(viajes))
     espera = sum(float(v.get("waitingTime")) for v in viajes) / n
     perdida = sum(float(v.get("timeLoss")) for v in viajes) / n
+    insercion = sum(float(v.get("departDelay", 0)) for v in viajes)
+    no_insertados, espera_fuera = 0, 0.0
+    stats = ruta_estadisticas(archivo)
+    if os.path.exists(stats):
+        raiz = ET.parse(stats).getroot()
+        veh, trip = raiz.find("vehicles"), raiz.find("vehicleTripStatistics")
+        if veh is not None:
+            no_insertados = int(veh.get("waiting", 0))
+        if trip is not None and no_insertados:
+            espera_fuera = no_insertados * float(trip.get("departDelayWaiting", 0))
+    total = (sum(float(v.get("timeLoss")) for v in viajes) + insercion + espera_fuera) / \
+        max(1, len(viajes) + no_insertados)
     paradas = sum(int(v.get("waitingCount", 0)) for v in viajes) / n
     llegados = sum(1 for v in viajes if 0 <= float(v.get("arrival", -1)) <= FIN_HORA)
     co2 = nox = 0.0
@@ -62,6 +109,9 @@ def leer_tripinfo(archivo, flujos_corredor=None):
         "vehiculos": len(viajes),
         "espera_prom": round(espera, 2),
         "timeloss_prom": round(perdida, 2),
+        "retraso_total_prom": round(total, 2),
+        "retraso_insercion_prom": round(insercion / n, 2),
+        "no_insertados": no_insertados,
         "paradas_prom": round(paradas, 3),
         "throughput": llegados,
         "co2_prom": round(co2 / m / 1000, 1) if con_emisiones else "",
@@ -135,6 +185,45 @@ def archivo_actuado(cfg, escenario, tls_ids, verde_min, verde_min_giro, verde_ma
                               f'minDur="{minimo}" maxDur="{verde_max}" state="{estado}"/>')
             else:
                 lineas.append(f'        <phase duration="{int(fase.duration)}" state="{estado}"/>')
+        lineas.append("    </tlLogic>")
+    lineas.append("</additional>")
+    with open(salida, "w") as f:
+        f.write("\n".join(lineas) + "\n")
+    return ",".join(adicionales + [salida])
+
+
+def archivo_trivial(cfg, escenario, tls_ids, verde_min, verde_min_giro):
+    """Genera <escenario>_trivial.add.xml: control de cordura del plan v2. Es el
+    programa fijo del escenario (el "fijo" de los .add.xml del .sumocfg; si no hay, el "0" de la
+    red) con cada verde en el minimo del agente y todos los desfases en 0, es decir, la politica
+    que cambia de fase en cuanto la mascara lo permite. programID "trivial". Devuelve el valor
+    para --additional-files: los del .sumocfg mas el archivo nuevo."""
+    net_file, adicionales = leer_cfg(cfg)
+    fases = {}
+    for ruta in adicionales:
+        if not os.path.exists(ruta):
+            continue
+        for tl in ET.parse(ruta).getroot().findall("tlLogic"):
+            if tl.get("id") in tls_ids and tl.get("programID") == "fijo":
+                fases[tl.get("id")] = [(int(float(p.get("duration"))), p.get("state"))
+                                       for p in tl.findall("phase")]
+    if len(fases) < len(tls_ids):
+        net = sumolib.net.readNet(net_file, withPrograms=True)
+        for tls_id in tls_ids:
+            if tls_id not in fases:
+                programas = net.getTLS(tls_id).getPrograms()
+                programa = programas.get("0", next(iter(programas.values())))
+                fases[tls_id] = [(int(p.duration), p.state) for p in programa.getPhases()]
+    salida = f"{escenario}_trivial.add.xml"
+    lineas = ["<additional>",
+              "    <!-- Control trivial: fases del programa fijo, cada verde en el minimo del agente "
+              f"({verde_min} s, {verde_min_giro} s en giros) y desfases en 0. -->"]
+    for tls_id in tls_ids:
+        lineas.append(f'    <tlLogic id="{tls_id}" type="static" programID="trivial" offset="0">')
+        for duracion, estado in fases[tls_id]:
+            if ("G" in estado or "g" in estado) and "y" not in estado:
+                duracion = verde_min if sum(1 for c in estado if c in "Gg") > 2 else verde_min_giro
+            lineas.append(f'        <phase duration="{duracion}" state="{estado}"/>')
         lineas.append("    </tlLogic>")
     lineas.append("</additional>")
     with open(salida, "w") as f:
@@ -294,7 +383,7 @@ def brazo_ippo(variante, politicas, brazos_csv):
 def iniciar_sumo(cmd, intentos=5, espera=3.0):
     """traci.start con reintentos. En Windows otro proceso (el antivirus) puede tener tomado un
     instante el archivo de salida recien escrito y SUMO sale con 'Could not build output file';
-    una noche de cien entrenamientos lo encuentra seguro (24.09.2026). Se descarta la conexion
+    una noche de cien entrenamientos lo encuentra seguro. Se descarta la conexion
     fallida y se repite el mismo comando: no cambia ningun numero de la simulacion."""
     import time
     import traci

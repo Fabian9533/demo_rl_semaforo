@@ -1,0 +1,27 @@
+== ippo_s42: var(residuo) = 0.0487
+   periodo       R2 fuera de muestra (media de 8 semillas) -0.006  [min -0.036]
+   red           R2 fuera de muestra (media de 8 semillas) +0.017  [min -0.038]
+   vecinos       R2 fuera de muestra (media de 8 semillas) -0.006  [min -0.035]
+   propio_ahora  R2 fuera de muestra (media de 8 semillas) -0.007  [min -0.045]
+   todo          R2 fuera de muestra (media de 8 semillas) +0.028  [min -0.105]
+   residuo medio 0-1800     +0.011 (n=7387)
+   residuo medio 1800-3600  -0.023 (n=7354)
+   residuo medio vaciado    +0.040 (n=676)
+== mappo_s2042: var(residuo) = 0.0566
+   periodo       R2 fuera de muestra (media de 8 semillas) -0.051  [min -0.162]
+   red           R2 fuera de muestra (media de 8 semillas) -0.042  [min -0.148]
+   vecinos       R2 fuera de muestra (media de 8 semillas) -0.047  [min -0.202]
+   propio_ahora  R2 fuera de muestra (media de 8 semillas) -0.047  [min -0.187]
+   todo          R2 fuera de muestra (media de 8 semillas) -0.052  [min -0.183]
+   residuo medio 0-1800     -0.015 (n=7361)
+   residuo medio 1800-3600  +0.024 (n=7365)
+   residuo medio vaciado    +0.042 (n=669)
+== clon42_ep200: var(residuo) = 0.0601
+   periodo       R2 fuera de muestra (media de 8 semillas) -0.003  [min -0.085]
+   red           R2 fuera de muestra (media de 8 semillas) +0.026  [min -0.055]
+   vecinos       R2 fuera de muestra (media de 8 semillas) -0.003  [min -0.062]
+   propio_ahora  R2 fuera de muestra (media de 8 semillas) -0.012  [min -0.054]
+   todo          R2 fuera de muestra (media de 8 semillas) +0.030  [min -0.106]
+   residuo medio 0-1800     -0.046 (n=7398)
+   residuo medio 1800-3600  +0.008 (n=7362)
+   residuo medio vaciado    +0.043 (n=667)

@@ -1,0 +1,98 @@
+semillas completas: [999, 1999, 2999, 3999, 4999, 7999, 8999, 9999] (val8 declarada: [999, 1999, 2999, 3999, 4999, 7999, 8999, 9999])
+
+Media sobre semillas; entre corchetes Delta % frente al trivial pareado (negativo = mejor que el trivial segun ese criterio; para L/c/J el costo es positivo).
+programa                    tl              rt           L_loc           c_dec           J_dec           J_seg       J_red_dec       J_red_seg           L_red             tau  %cambio %forzada
+trivial           27.08[ +0.0]    27.41[ +0.0]    37213[ +0.0]     4.27[ +0.0]    83.44[ +0.0]    65.01[ +0.0]   167.28[ +0.0]   130.26[ +0.0]    74305[ +0.0]     6.49[ +0.0]   49.9  50.1
+fijo2509          30.46[+12.5]    30.80[+12.3]    44648[+20.0]     4.54[ +6.2]    88.83[ +6.5]    77.80[+19.7]   168.09[ +0.5]   146.99[+12.8]    84110[+13.2]     5.74[-11.6]   25.1  25.0
+ippo_s42          28.38[ +4.8]    28.72[ +4.8]    40375[ +8.5]     4.19[ -2.0]    82.17[ -1.5]    70.45[ +8.4]   160.07[ -4.3]   137.14[ +5.3]    78413[ +5.5]     5.87[ -9.6]   29.1  29.3
+mappo_s2042       29.40[ +8.6]    29.73[ +8.5]    42082[+13.1]     4.37[ +2.3]    85.63[ +2.6]    73.44[+13.0]   165.34[ -1.2]   141.62[ +8.7]    80944[ +8.9]     5.87[ -9.6]   29.0  29.3
+clon42_ep010      27.08[ +0.0]    27.41[ +0.0]    37213[ +0.0]     4.27[ +0.0]    83.44[ +0.0]    65.01[ +0.0]   167.28[ +0.0]   130.26[ +0.0]    74305[ +0.0]     6.49[ +0.0]   49.9  50.1
+clon42_ep100      28.86[ +6.6]    29.19[ +6.5]    40627[ +9.2]     4.21[ -1.5]    82.03[ -1.7]    70.42[ +8.3]   161.93[ -3.2]   138.77[ +6.5]    79658[ +7.2]     5.86[ -9.8]   28.7  29.0
+clon42_ep150      29.16[ +7.7]    29.49[ +7.6]    41717[+12.1]     4.32[ +1.1]    84.61[ +1.4]    72.70[+11.8]   163.82[ -2.1]   140.63[ +8.0]    80451[ +8.3]     5.85[ -9.8]   28.6  28.9
+clon42_ep200      28.73[ +6.1]    29.06[ +6.0]    42228[+13.5]     4.38[ +2.5]    85.91[ +3.0]    73.80[+13.5]   161.81[ -3.3]   138.89[ +6.6]    79326[ +6.8]     5.86[ -9.8]   28.7  28.9
+u15_10            31.73[+17.2]    32.07[+17.0]    46854[+25.9]     5.13[+20.0]   100.45[+20.4]    81.72[+25.7]   182.56[ +9.1]   148.53[+14.0]    84939[+14.3]     6.19[ -4.6]   39.9  40.1
+u20_10            36.81[+35.9]    37.14[+35.5]    60160[+61.7]     6.36[+48.7]   124.84[+49.6]   104.70[+61.1]   204.31[+22.1]   171.40[+31.6]    98299[+32.3]     5.99[ -7.7]   33.3  33.5
+u25_10            39.57[+46.1]    39.90[+45.6]    66502[+78.7]     6.85[+60.2]   134.48[+61.2]   115.44[+77.6]   214.62[+28.3]   184.23[+41.4]   105886[+42.5]     5.85[ -9.9]   28.5  28.7
+u30_10            35.32[+30.4]    35.66[+30.1]    54564[+46.6]     5.55[+29.7]   108.81[+30.4]    95.19[+46.4]   191.52[+14.5]   167.43[+28.5]    95751[+28.9]     5.74[-11.5]   24.9  25.1
+u25_15            44.93[+65.9]    45.27[+65.1]    81053[+117.8]     8.15[+90.7]   160.47[+92.3]   140.16[+115.6]   237.91[+42.2]   207.84[+59.6]   120019[+61.5]     5.74[-11.5]   24.9  25.1
+
+Semillas (de 8) en que cada criterio prefiere al TRIVIAL frente al programa:
+programa              tl        rt     L_loc     c_dec     J_dec     J_seg J_red_dec J_red_seg     L_red
+fijo2509               8         8         8         8         8         8         5         8         8
+ippo_s42               7         7         8         1         1         8         1         7         7
+mappo_s2042            7         7         8         5         5         8         5         7         7
+clon42_ep010           0         0         0         0         0         0         0         0         0
+clon42_ep100           7         7         8         1         1         8         2         7         7
+clon42_ep150           7         7         8         4         4         8         2         7         7
+clon42_ep200           6         6         8         7         7         8         2         8         8
+u15_10                 8         8         8         8         8         8         8         8         8
+u20_10                 8         8         8         8         8         8         8         8         8
+u25_10                 8         8         8         8         8         8         8         8         8
+u30_10                 8         8         8         8         8         8         8         8         8
+u25_15                 8         8         8         8         8         8         8         8         8
+
+Descomposicion por cruce (media de semillas): L = costo local por segundo * T; c_dec ~ rho * tau / 5
+  trivial        semaforo_C1  L=   13791  c_dec=  4.75  J_dec=  92.61  J_seg=  72.20  tau= 6.49 s
+  trivial        semaforo_C2  L=    8879  c_dec=  3.06  J_dec=  59.51  J_seg=  46.43  tau= 6.49 s
+  trivial        semaforo_C3  L=   14544  c_dec=  5.01  J_dec=  98.19  J_seg=  76.41  tau= 6.49 s
+  fijo2509       semaforo_C1  L=   15133  c_dec=  4.62  J_dec=  90.22  J_seg=  79.04  tau= 5.74 s
+  fijo2509       semaforo_C2  L=   12687  c_dec=  3.87  J_dec=  75.56  J_seg=  66.21  tau= 5.75 s
+  fijo2509       semaforo_C3  L=   16829  c_dec=  5.13  J_dec= 100.71  J_seg=  88.16  tau= 5.74 s
+  ippo_s42       semaforo_C1  L=   14058  c_dec=  4.38  J_dec=  85.72  J_seg=  73.52  tau= 5.87 s
+  ippo_s42       semaforo_C2  L=   10803  c_dec=  3.36  J_dec=  65.87  J_seg=  56.51  tau= 5.87 s
+  ippo_s42       semaforo_C3  L=   15514  c_dec=  4.83  J_dec=  94.90  J_seg=  81.33  tau= 5.87 s
+  clon42_ep200   semaforo_C1  L=   14814  c_dec=  4.61  J_dec=  90.24  J_seg=  77.54  tau= 5.86 s
+  clon42_ep200   semaforo_C2  L=   11278  c_dec=  3.51  J_dec=  68.77  J_seg=  59.11  tau= 5.86 s
+  clon42_ep200   semaforo_C3  L=   16137  c_dec=  5.02  J_dec=  98.72  J_seg=  84.74  tau= 5.86 s
+  u25_10         semaforo_C1  L=   21172  c_dec=  6.54  J_dec= 128.42  J_seg= 110.25  tau= 5.85 s
+  u25_10         semaforo_C2  L=   21683  c_dec=  6.70  J_dec= 131.51  J_seg= 112.83  tau= 5.85 s
+  u25_10         semaforo_C3  L=   23647  c_dec=  7.31  J_dec= 143.52  J_seg= 123.23  tau= 5.85 s
+
+Sesgo del descuento por decision: cuanto cambia el costo relativo trivial vs programa al pasar de J_seg a J_dec
+  fijo2509       timeLoss/trivial 1.127   J_seg/trivial 1.197   J_dec/trivial 1.065
+  ippo_s42       timeLoss/trivial 1.051   J_seg/trivial 1.084   J_dec/trivial 0.985
+  mappo_s2042    timeLoss/trivial 1.090   J_seg/trivial 1.130   J_dec/trivial 1.026
+  clon42_ep010   timeLoss/trivial 1.000   J_seg/trivial 1.000   J_dec/trivial 1.000
+  clon42_ep100   timeLoss/trivial 1.069   J_seg/trivial 1.083   J_dec/trivial 0.983
+  clon42_ep150   timeLoss/trivial 1.080   J_seg/trivial 1.118   J_dec/trivial 1.014
+  clon42_ep200   timeLoss/trivial 1.065   J_seg/trivial 1.135   J_dec/trivial 1.030
+  u15_10         timeLoss/trivial 1.176   J_seg/trivial 1.257   J_dec/trivial 1.204
+  u20_10         timeLoss/trivial 1.363   J_seg/trivial 1.611   J_dec/trivial 1.496
+  u25_10         timeLoss/trivial 1.466   J_seg/trivial 1.776   J_dec/trivial 1.612
+  u30_10         timeLoss/trivial 1.310   J_seg/trivial 1.465   J_dec/trivial 1.304
+  u25_15         timeLoss/trivial 1.667   J_seg/trivial 2.156   J_dec/trivial 1.924
+
+(c) Critico: varianza explicada de V(s) frente al retorno realizado G_k (gamma por decision, escala PPO), politica argmax
+  ippo_s42       EV media +0.806 (min +0.780, max +0.838); sesgo V-G +0.004; sd(G) 0.498
+  mappo_s2042    EV media +0.800 (min +0.764, max +0.818); sesgo V-G -0.006; sd(G) 0.519
+  clon42_ep010   EV media +0.594 (min +0.575, max +0.621); sesgo V-G -0.440; sd(G) 0.589
+  clon42_ep100   EV media +0.779 (min +0.738, max +0.839); sesgo V-G -0.087; sd(G) 0.501
+  clon42_ep150   EV media +0.775 (min +0.712, max +0.816); sesgo V-G -0.016; sd(G) 0.520
+  clon42_ep200   EV media +0.789 (min +0.762, max +0.804); sesgo V-G +0.016; sd(G) 0.530
+
+(f) Reparto del timeLoss total (veh*s, media de semillas) y fraccion del total tripinfo
+programa                aprox       aprox_C1       aprox_C2       aprox_C3        rotonda          resto       internos     total_trip      insercion
+trivial          33761(48.3%)   12967(18.5%)    7626(10.9%)   13168(18.8%)   31129(44.5%)    3051( 4.4%)    1973( 2.8%)          69914     868( 1.2%)
+fijo2509         39008(49.6%)   13443(17.1%)   11035(14.0%)   14530(18.5%)   34838(44.3%)    3302( 4.2%)    1494( 1.9%)          78641     871( 1.1%)
+ippo_s42         35749(48.8%)   12750(17.4%)    9385(12.8%)   13614(18.6%)   32706(44.6%)    3225( 4.4%)    1606( 2.2%)          73287     871( 1.2%)
+mappo_s2042      37314(49.2%)   13172(17.4%)    9925(13.1%)   14217(18.7%)   33683(44.4%)    3269( 4.3%)    1635( 2.2%)          75901     865( 1.1%)
+clon42_ep010     33761(48.3%)   12967(18.5%)    7626(10.9%)   13168(18.8%)   31129(44.5%)    3051( 4.4%)    1973( 2.8%)          69914     868( 1.2%)
+clon42_ep100     35929(48.2%)   12858(17.3%)    9540(12.8%)   13531(18.2%)   33734(45.3%)    3253( 4.4%)    1595( 2.1%)          74510     859( 1.2%)
+clon42_ep150     36895(49.0%)   13122(17.4%)   10032(13.3%)   13741(18.2%)   33576(44.6%)    3241( 4.3%)    1590( 2.1%)          75301     852( 1.1%)
+clon42_ep200     37359(50.4%)   13404(18.1%)    9807(13.2%)   14148(19.1%)   31960(43.1%)    3255( 4.4%)    1594( 2.1%)          74168     862( 1.2%)
+u15_10           44160(53.9%)   14821(18.1%)   13246(16.2%)   16092(19.6%)   32008(39.1%)    3277( 4.0%)    2488( 3.0%)          81933     878( 1.1%)
+u20_10           56626(59.6%)   18137(19.1%)   18368(19.3%)   20121(21.2%)   32599(34.3%)    3412( 3.6%)    2397( 2.5%)          95034     865( 0.9%)
+u25_10           61821(60.5%)   19773(19.4%)   20397(20.0%)   21650(21.2%)   34577(33.8%)    3612( 3.5%)    2157( 2.1%)         102167     865( 0.8%)
+u30_10           49330(54.1%)   16003(17.5%)   15720(17.2%)   17608(19.3%)   36485(40.0%)    3543( 3.9%)    1841( 2.0%)          91199     868( 1.0%)
+u25_15           75041(64.7%)   23599(20.3%)   26094(22.5%)   25348(21.8%)   35221(30.4%)    3667( 3.2%)    2090( 1.8%)         116019     862( 0.7%)
+
+Spearman (sobre 12 programas) de cada criterio con el timeLoss medio:
+  rt         rho = +1.000
+  L_loc      rho = +0.958
+  c_dec      rho = +0.930
+  J_dec      rho = +0.916
+  J_seg      rho = +0.944
+  J_red_dec  rho = +0.895
+  J_red_seg  rho = +0.993
+  L_red      rho = +1.000
+Mejor programa segun cada criterio: tl: trivial, rt: trivial, L_loc: trivial, c_dec: ippo_s42, J_dec: clon42_ep100, J_seg: trivial, J_red_dec: ippo_s42, J_red_seg: trivial, L_red: trivial

@@ -35,6 +35,22 @@ episodios. De sus tres políticas se cita la mediana según la evaluación
 intermedia final, que es la de la política congelada con la sola
 semilla 999.
 
+Esta fase y el resultado principal del plan miden el retraso con la
+misma métrica, el \texttt{timeLoss} de SUMO, pero frente a programas
+fijos distintos. Por eso sus cifras no se comparan directamente con las
+del Capítulo~\ref{cap:resultados}. Cuando este anexo cita el plan de
+pruebas, usa su resultado principal
+en P1 a P6, y lo que compara con esta
+fase es el signo y el orden de
+magnitud. El análisis de robustez del plan (Sección~\ref{sec:robustez})
+repite la comparación con el retraso total, que suma la espera para
+entrar a la red, y con un fijo re-barrido hasta verdes de 10~s. En P2 y
+P3, dos de los casos que se citan aquí, esa comparación cambia la
+lectura, y el anexo lo indica donde corresponde.
+% fuente: evaluacion_<esc>_resumen.csv de demo_rl (fase exploratoria, timeloss_prom); resultado principal:
+% plan2/veredicto.csv de la corrida principal (= plan2/veredicto_congelado_0355.csv en P1-P5);
+% robustez: plan2/robustez_veredicto.csv y hechos_v21.md
+
 Los casos se numeran con la letra E:
 E1 (cruce), E2 (cruce2), E3 (corredor) y E4 (red) para el agente
 tabular; E3-U4 y E4-U4 para IPPO en corredor y red; y E6 para
@@ -216,9 +232,14 @@ nominal o moderada el cambio de recompensa mueve el resultado menos de
 tres puntos, y el techo tabular no se explica por ella. Solo en P2 la
 recompensa de retraso cambia el signo: $-8.8$\,\% frente a $+6.8$\,\%
 con la de colas, este último provisional porque no convergió
-(Anexo~A).
+(Anexo~A). Esa mejora de Q-learning en P2 no resiste el análisis de
+robustez: su espera para entrar a la red es de 357~s/veh, frente a 240
+del fijo, y con el retraso total queda un $26.4$\,\% por encima del
+fijo (Sección~\ref{sec:robustez}).
 % fuente: plan2/veredicto_congelado_0355.csv, filas ql y ql_colas de P1 a P4 (columnas delta_fijo y
-% veredicto; ql_colas en P2: PENDIENTE, no convergio, provisional FALLA)
+% veredicto; ql_colas en P2: PENDIENTE, no convergio, provisional FALLA); robustez:
+% plan2/robustez_veredicto.csv (P2, ql: delta_fijo 26.4, FALLA) y plan2/evaluacion_corredor_alta_resumen.csv
+% (retraso_insercion_prom: ql_s4042 357.39, fijo 239.57)
 
 El actuado, que no aprende y solo extiende el verde mientras detecta
 vehículos, fue mejor que el agente tabular en todos los escenarios de
@@ -259,7 +280,10 @@ completo: cambian a la vez el estado, la recompensa y el algoritmo.
 
 En este cruce la reducción de IPPO local supera la meta de
 $-25$\,\%, pero el cruce aislado no es un caso del plan y la evaluación
-sigue el protocolo de esta fase. En los casos P1 a P5 ningún modelo alcanza esa meta.
+sigue el protocolo de esta fase. En los casos P1 a P6 ningún modelo
+alcanza esa meta (Capítulo~\ref{cap:resultados}).
+% fuente: plan2/veredicto.csv, corrida principal (el menor delta_fijo de P1-P6 es -23.3 %, ippo_vecinos en P2;
+% en P6 el menor es +2.2 %, ippo_vecinos, PENDIENTE con provisional EMPATA)
 
 \input{secciones/tablas/cruce_u4}
 
@@ -302,6 +326,16 @@ ella.
 % delta_act -7.8, FUNCIONA); ep_elegido, val_elegido y val_serie de plan2/politica_red_vecinos_s4042.json
 % y _s42.json (ep 50, 19.69; ep 200, 22.15); plan2/evaluacion_red_resumen.csv (ippo_vecinos_s2042:
 % -0.1 %, p = 0.734)
+
+El análisis de robustez agrega otra lectura (Sección~\ref{sec:robustez}).
+La política publicada de IPPO vecinos en P3 da, en las treinta
+semillas, el mismo retraso que el control trivial, que cambia de fase
+en cuanto el verde mínimo lo permite. Frente a un fijo re-barrido hasta
+verdes de 10~s, su retraso total queda solo un $0.5$\,\% por debajo
+(intervalo $-0.8$ a $-0.1$\,\%).
+% fuente: scratchpad/explicar/auditoria/igual_trivial.txt (red, ippo_vecinos_s4042 = trivial en 30/30
+% semillas); plan2/robustez_veredicto.csv (P3, ippo_vecinos: delta_fijo -0.5 [-0.8, -0.1], p 0.0128,
+% MEJORA (= trivial)); hechos_v21.md
 
 En esta fase, la mensajería aportaba la progresión de la onda verde.
 Con el fijo, el $98.6$\,\% de los vehículos de paso cruza deteniéndose a lo sumo una
@@ -392,6 +426,16 @@ actuado.
 % (git show 7bd8685:TESIS/secciones/conclusiones.tex, conclusion 7); medianas y politicas:
 % tablas/corredor_alta_u4.tex y tablas/corredor_alta_fragilidad.tex
 
+El análisis de robustez matiza esta lectura (Sección~\ref{sec:robustez}).
+En P2 la espera para entrar a la red es mayor que el
+\texttt{timeLoss}. La política publicada de IPPO vecinos baja el
+\texttt{timeLoss} un $23.3$\,\% frente al fijo, pero su espera para
+entrar sube de 240 a 282~s/veh, y con el retraso total queda un
+$1.6$\,\% por encima del fijo.
+% fuente: plan2/evaluacion_corredor_alta_resumen.csv (fijo: timeloss_prom 154.70, retraso_insercion_prom
+% 239.57; ippo_vecinos_s2042: timeloss_prom delta_pct -23.3, retraso_insercion_prom 282.02);
+% plan2/robustez_veredicto.csv (P2, ippo_vecinos: delta_fijo +1.6, FALLA); hechos_v21.md
+
 La meta de \textit{throughput}, la única que este escenario permite
 evaluar, no está al alcance de ningún control. Las siete políticas IPPO
 completan entre 2914 y 2938 viajes en la hora, un 2 a 3\,\% más que el
@@ -438,7 +482,6 @@ instantáneos, se evaluó sin reentrenar con latencia y pérdida de
 mensajes (Tablas~\ref{tab:red-s1} y~\ref{tab:corredor-s1}). Es la única
 prueba de robustez al canal del documento; el plan de pruebas no la
 repitió.
-% TODO(reestructura): el texto original juzgaba estas diferencias con un "limite de 2 s del criterio de robustez" que no se define en ninguna parte del documento; si el autor lo fijo en el plan de la fase exploratoria, definirlo aqui con su fuente o dejar solo las diferencias en segundos.
 
 En la red, con latencia de 5~s y pérdida del 30\,\% la política pierde
 0.8~s frente al canal perfecto y queda un $4$\,\% por detrás del fijo

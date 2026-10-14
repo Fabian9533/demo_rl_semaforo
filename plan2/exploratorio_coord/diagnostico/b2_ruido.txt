@@ -1,0 +1,12 @@
+== red_alta  regla (10, 10)  (8 semillas [999, 1999, 2999, 3999, 4999, 7999, 8999, 9999])
+   ind    eps=0.00  timeLoss val8=  27.08  sd=  2.31  vs sin ruido   +0.0 %  cambios=   868  por semilla [25.4, 28.5, 23.7, 29.5, 29.7, 25.2, 25.9, 28.8]
+   ind    eps=0.03  timeLoss val8=  32.96  sd=  1.92  vs sin ruido  +21.7 %  cambios=   860  por semilla [32.2, 33.9, 30.9, 34.0, 35.6, 29.7, 34.0, 33.3]
+   ind    eps=0.10  timeLoss val8=  33.04  sd=  1.70  vs sin ruido  +22.0 %  cambios=   837  por semilla [33.4, 33.5, 30.8, 32.3, 36.4, 33.7, 31.3, 33.0]
+   comun  eps=0.03  timeLoss val8=  27.39  sd=  2.05  vs sin ruido   +1.2 %  cambios=   858  por semilla [25.9, 28.4, 24.3, 29.7, 29.8, 26.0, 26.1, 28.8]
+   comun  eps=0.10  timeLoss val8=  29.14  sd=  2.40  vs sin ruido   +7.6 %  cambios=   831  por semilla [30.1, 29.1, 24.0, 30.3, 32.5, 28.6, 29.1, 29.4]
+== malla3_alta  regla (15, 10)  (8 semillas [999, 1999, 2999, 3999, 4999, 7999, 8999, 9999])
+   ind    eps=0.00  timeLoss val8=  36.57  sd=  0.47  vs sin ruido   +0.0 %  cambios=  2290  por semilla [36.2, 36.6, 36.6, 36.5, 36.9, 37.5, 36.3, 35.9]
+   ind    eps=0.03  timeLoss val8=  41.94  sd=  4.93  vs sin ruido  +14.7 %  cambios=  2307  por semilla [39.6, 39.1, 42.9, 39.8, 40.4, 41.8, 53.6, 38.3]
+   ind    eps=0.10  timeLoss val8=  48.06  sd=  9.03  vs sin ruido  +31.4 %  cambios=  2320  por semilla [50.9, 41.5, 66.6, 42.4, 55.4, 42.9, 41.8, 43.1]
+   comun  eps=0.03  timeLoss val8=  37.36  sd=  0.82  vs sin ruido   +2.1 %  cambios=  2288  por semilla [37.5, 37.1, 37.7, 37.6, 37.8, 38.6, 36.7, 35.8]
+   comun  eps=0.10  timeLoss val8=  40.18  sd=  1.51  vs sin ruido   +9.9 %  cambios=  2253  por semilla [43.4, 38.6, 39.2, 40.0, 41.1, 39.9, 39.1, 40.2]

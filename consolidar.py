@@ -1,7 +1,7 @@
 """
 consolidar.py - Junta las evaluaciones parciales de un escenario y hace la estadistica pareada.
 
-Uso (desde demo_rl/plan2):  python ../consolidar.py --escenario red [--parciales parciales]
+Uso (desde demo_rl/plan2):  python ../consolidar.py --escenario red [--parciales parciales] [--fijo BRAZO]
 
 Lee parciales/eval_<esc>_<brazo>.csv (uno por brazo, los escribe evaluar.py). Un archivo se usa
 solo si su nombre coincide con el brazo de sus filas: asi, al consolidar "red", se ignoran los
@@ -27,8 +27,13 @@ Como se compara (plan de pruebas v2, ESPEC seccion 6):
   - Si la media de la referencia es 0 (p. ej. spillback en un escenario sin spillback) no hay
     delta y solo se escribe n_par.
 
-Nuevo en el plan v2 (24.09.2026); la estadistica es la misma que tenia evaluar.py, pero pareada
+Nuevo en el plan v2; la estadistica es la misma que tenia evaluar.py, pero pareada
 por semilla y separada de la simulacion.
+
+--fijo BRAZO: otra referencia en lugar del brazo fijo, p. ej. fijo_2509 (el fijo del
+veredicto pre-registrado; plan2/fijo_2509.py). Solo escribe evaluacion_<esc>_resumen_<BRAZO>.csv, con los
+deltas frente a BRAZO en las columnas de siempre; evaluacion_<esc>.csv y el resumen por defecto no
+se tocan. Sin la opcion, todo queda como antes.
 """
 import os
 import csv
@@ -113,7 +118,8 @@ def comparar(otro, ref, es_retorno, sufijo=""):
     return res
 
 
-def resumir(filas, metricas):
+def resumir(filas, metricas, ref="fijo"):
+    """Resumen por brazo y metrica; los deltas sin sufijo son frente al brazo ref."""
     resumen = []
     for brazo in ordenar_brazos(filas):
         primera = next(r for r in filas if r["brazo"] == brazo)
@@ -126,24 +132,24 @@ def resumir(filas, metricas):
                     "metrica": m, "n": len(v), "media": round(statistics.mean(v), 4),
                     "sd": round(statistics.stdev(v), 4) if len(v) > 1 else 0, "ic95": round(ic95(v), 4)}
             es_retorno = m.startswith("ret_")
-            if brazo != "fijo":
-                fila.update(comparar(vals, por_semilla(filas, "fijo", m), es_retorno))
-            if brazo not in ("fijo", "actuado"):
+            if brazo != ref:
+                fila.update(comparar(vals, por_semilla(filas, ref, m), es_retorno))
+            if brazo not in (ref, "actuado"):
                 fila.update(comparar(vals, por_semilla(filas, "actuado", m), es_retorno, "_act"))
             resumen.append(fila)
     return resumen
 
 
-def imprimir(esc, resumen):
+def imprimir(esc, resumen, ref="fijo"):
     print(f"\n{esc}: retraso (timeloss_prom, s/veh), media +- IC95; delta % pareado por semilla [IC95] "
           f"y p de Wilcoxon")
     for r in resumen:
         if r["metrica"] != "timeloss_prom":
             continue
         texto = f"  {r['brazo']:20s} n={r['n']:2d}  {r['media']:7.2f} +- {r['ic95']:5.2f}"
-        for suf, ref in (("", "fijo"), ("_act", "actuado")):
+        for suf, contra in (("", ref), ("_act", "actuado")):
             if "delta_pct" + suf in r:
-                texto += (f" | vs {ref} {r['delta_pct' + suf]:+6.1f}% {r.get('delta_ic95' + suf, '')} "
+                texto += (f" | vs {contra} {r['delta_pct' + suf]:+6.1f}% {r.get('delta_ic95' + suf, '')} "
                           f"p={r.get('p_wilcoxon' + suf, '')} (n_par {r['n_par' + suf]})")
         print(texto)
 
@@ -152,6 +158,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--escenario", required=True)
     ap.add_argument("--parciales", default="parciales", help="carpeta de los CSV parciales")
+    ap.add_argument("--fijo", default="fijo", help="brazo de referencia de los deltas (p. ej. fijo_2509)")
     args = ap.parse_args()
     esc = args.escenario
     filas, metricas = leer_parciales(esc, args.parciales)
@@ -159,17 +166,26 @@ def main():
         raise SystemExit(f"No hay parciales de {esc} en {args.parciales}/")
     orden = {b: k for k, b in enumerate(ordenar_brazos(filas))}
     filas.sort(key=lambda r: (orden[r["brazo"]], int(r["semilla"])))
-    with open(f"evaluacion_{esc}.csv", "w", newline="") as f:
-        w = csv.DictWriter(f, fieldnames=ID + metricas, extrasaction="ignore")
-        w.writeheader()
-        w.writerows(filas)
-    resumen = resumir(filas, metricas)
-    with open(f"evaluacion_{esc}_resumen.csv", "w", newline="") as f:
+    if args.fijo != "fijo" and args.fijo not in orden:
+        print(f"  aviso: no hay parciales del brazo {args.fijo}; el resumen queda sin deltas frente a el")
+    if args.fijo == "fijo":
+        with open(f"evaluacion_{esc}.csv", "w", newline="") as f:
+            w = csv.DictWriter(f, fieldnames=ID + metricas, extrasaction="ignore")
+            w.writeheader()
+            w.writerows(filas)
+    salida = f"evaluacion_{esc}_resumen.csv"
+    if args.fijo != "fijo":
+        salida = f"evaluacion_{esc}_resumen_{args.fijo}.csv"
+    resumen = resumir(filas, metricas, args.fijo)
+    with open(salida, "w", newline="") as f:
         w = csv.DictWriter(f, fieldnames=CAMPOS_RESUMEN)
         w.writeheader()
         w.writerows(resumen)
-    print(f"{len(filas)} filas de {len(orden)} brazos -> evaluacion_{esc}.csv y evaluacion_{esc}_resumen.csv")
-    imprimir(esc, resumen)
+    if args.fijo == "fijo":
+        print(f"{len(filas)} filas de {len(orden)} brazos -> evaluacion_{esc}.csv y {salida}")
+    else:
+        print(f"{len(filas)} filas de {len(orden)} brazos -> {salida} (deltas frente a {args.fijo})")
+    imprimir(esc, resumen, args.fijo)
 
 
 if __name__ == "__main__":

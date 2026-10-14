@@ -1,0 +1,25 @@
+% Generado por veredicto.py a partir de plan2/. No editar a mano.
+\begin{table}[H]
+\setstretch{1}
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{lcccccc}
+\toprule
+Modelo & \makecell{P1\\corredor} & \makecell{P2\\corredor\_alta} & \makecell{P3\\red} & \makecell{P4\\red\_alta} & \makecell{P5\\malla3} & \makecell{P6\\malla3\_alta} \\
+\midrule
+Actuado & EMPATA & FALLA & FALLA & FALLA & FALLA & FALLA \\
+Trivial & FALLA & FALLA & MEJORA & EMPATA & EMPATA & FALLA \\
+Q-learning & FALLA & FALLA & FALLA & PENDIENTE & FALLA & FALLA \\
+SARSA & FALLA & FALLA & FALLA & FALLA & FALLA & PENDIENTE \\
+Q-learning (colas) & FALLA & PENDIENTE & FALLA & FALLA & PENDIENTE & PENDIENTE \\
+DQN & MEJORA & FALLA & FALLA & FALLA & PENDIENTE & PENDIENTE \\
+IPPO local & EMPATA & MEJORA & FALLA & FALLA & FALLA & FALLA \\
+IPPO vecinos & FUNCIONA & FALLA & MEJORA* & FALLA & FALLA & PENDIENTE \\
+IPPO spill & FUNCIONA & FALLA & = vecinos & = vecinos & = vecinos & PENDIENTE \\
+MAPPO & FUNCIONA & FALLA & PENDIENTE & PENDIENTE & EMPATA* & PENDIENTE \\
+\bottomrule
+\end{tabular}
+\caption[Robustez: veredicto por caso y modelo]{Robustez. Veredicto de cada modelo en cada caso del plan de pruebas (regla de la sección de métodos): retraso total (timeLoss más la espera para entrar a la red) de la política publicada frente al fijo tuneado y al actuado, semillas de evaluación 1001 a 1030. PENDIENTE: faltan datos o la política no convergió. El actuado y el trivial (verdes mínimos, desfases en 0) se juzgan frente al fijo. *: la política da el mismo retraso y la misma espera que el trivial.}
+\label{tab:robustez-veredicto-matriz}
+\end{table}

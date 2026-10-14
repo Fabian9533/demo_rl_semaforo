@@ -1,0 +1,21 @@
+% Generado por veredicto.py a partir de plan2/. No editar a mano.
+\begin{table}[H]
+\setstretch{1}
+\centering
+\scriptsize
+\setlength{\tabcolsep}{1.5pt}
+\begin{tabular}{llcrrrrrrcl}
+\toprule
+Caso & Escenario & Sem. & Carr. & \makecell{Dem.\\(veh/h)} & \makecell{Retraso\\(s/veh)} & \makecell{$\Delta$\\retraso\\vs fijo} & \makecell{$\Delta$\\retraso\\vs actuado} & \makecell{$\Delta$\\recompensa} & Conv. & Veredicto \\
+\midrule
+P1 & corredor & 2 & 1 & 1810 & \makecell[r]{20.94\\{}$\pm$ 0.16} & \makecell[r]{$-$3.4\,\%\\{}[$-$4.8,\,$-$2.2]\\$p$ $<$\,0.001} & \makecell[r]{$-$2.4\,\%\\{}[$-$3.2,\,$-$1.5]\\$p$ $<$\,0.001} & \makecell[r]{+3.0\,\%\\{}[1.7,\,4.5]\\$p$ $<$\,0.001} & \makecell[c]{sí\\{}(3/3)} & MEJORA \\
+P2 & corredor\_alta & 2 & 1 & 3620 & \makecell[r]{461.12\\{}$\pm$ 5.70} & \makecell[r]{+17.0\,\%\\{}[15.4,\,18.5]\\$p$ $<$\,0.001} & \makecell[r]{+3.5\,\%\\{}[1.9,\,5.2]\\$p$ $<$\,0.001} & \makecell[r]{+17.4\,\%\\{}[16.4,\,18.4]\\$p$ $<$\,0.001} & \makecell[c]{sí\\{}(3/3)} & FALLA \\
+P3 & red & \makecell[c]{3\\{}+ rot.} & 2 & 2150 & \makecell[r]{21.68\\{}$\pm$ 0.10} & \makecell[r]{+7.0\,\%\\{}[6.4,\,7.6]\\$p$ $<$\,0.001} & \makecell[r]{$-$0.7\,\%\\{}[$-$1.3,\,$-$0.2]\\$p$ = 0.00515} & \makecell[r]{$-$13.3\,\%\\{}[$-$13.9,\,$-$12.6]\\$p$ $<$\,0.001} & \makecell[c]{sí\\{}(3/3)} & FALLA \\
+P4 & red\_alta & \makecell[c]{3\\{}+ rot.} & 2 & 2580 & \makecell[r]{29.37\\{}$\pm$ 1.02} & \makecell[r]{+2.8\,\%\\{}[1.1,\,4.6]\\$p$ = 0.0019} & \makecell[r]{$-$3.3\,\%\\{}[$-$5.0,\,$-$1.5]\\$p$ = 0.00158} & \makecell[r]{$-$8.8\,\%\\{}[$-$9.5,\,$-$8.1]\\$p$ $<$\,0.001} & \makecell[c]{sí\\{}(2/3)} & FALLA \\
+P5 & malla3 & 9 & 2 & 4350 & \makecell[r]{23.62\\{}$\pm$ 0.09} & \makecell[r]{+11.2\,\%\\{}[10.7,\,11.6]\\$p$ $<$\,0.001} & \makecell[r]{$-$8.6\,\%\\{}[$-$9.0,\,$-$8.2]\\$p$ $<$\,0.001} & \makecell[r]{$-$19.5\,\%\\{}[$-$20.0,\,$-$19.1]\\$p$ $<$\,0.001} & \makecell[c]{no\\{}(2/3)} & \makecell[l]{PENDIENTE\\{}(no convergió;\\{}provisional:\\{}FALLA)} \\
+P6 & malla3\_alta & 9 & 2 & 8700 & \makecell[r]{86.33\\{}$\pm$ 1.18} & \makecell[r]{+5.0\,\%\\{}[3.7,\,6.5]\\$p$ $<$\,0.001} & \makecell[r]{$-$20.9\,\%\\{}[$-$22.7,\,$-$19.0]\\$p$ $<$\,0.001} & \makecell[r]{$-$15.4\,\%\\{}[$-$19.0,\,$-$12.2]\\$p$ $<$\,0.001} & \makecell[c]{no\\{}(1/3)} & \makecell[l]{PENDIENTE\\{}(no convergió;\\{}provisional:\\{}FALLA)} \\
+\bottomrule
+\end{tabular}
+\caption[Robustez: veredicto de DQN]{Robustez. DQN: veredicto por caso. Sem.: semáforos (rot.: más una rotonda); Carr.: carriles por sentido de la avenida; Dem.: demanda total. Retraso: retraso total (timeLoss más la espera para entrar a la red), media $\pm$ IC95\,\% sobre las semillas de evaluación 1001 a 1030; $\Delta$ con IC95\,\% bootstrap pareado y $p$ de Wilcoxon pareado. Política publicada = mediana de las tres semillas base por la validación (semillas 999 y 1999). $\Delta$ recompensa: cambio de la recompensa propia del modelo (ret\_retraso) frente a la del fijo, positivo = mejor. Conv.: si convergió la política publicada; entre paréntesis, cuántas de las tres bases convergen.}
+\label{tab:robustez-veredicto-dqn}
+\end{table}

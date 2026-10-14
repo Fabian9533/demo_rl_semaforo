@@ -138,7 +138,8 @@ def main():
                 print(f"{time.strftime('%H:%M:%S')} OK    {tid} ({dur} s)", flush=True)
             else:
                 fallidos[tid] = proc.returncode
-                print(f"{time.strftime('%H:%M:%S')} FALLO {tid} (codigo {proc.returncode}, {dur} s)", flush=True)
+                print(f"{time.strftime('%H:%M:%S')} FALLO {tid} (codigo {proc.returncode}, {dur} s)",
+                      flush=True)
             del corriendo[tid]
         # 1b. huerfanos que terminaron
         if huerfanos and time.time() - revisado > 30:

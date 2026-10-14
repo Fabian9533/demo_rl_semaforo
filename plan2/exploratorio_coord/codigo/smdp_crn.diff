@@ -1,0 +1,189 @@
+--- a/rl_ippo.py
++++ b/plan2/exploratorio_coord/codigo/rl_ippo_smdp_crn.py
+@@ -146,7 +146,12 @@
+ HIPER = {"gamma": 0.95, "lam": 0.95, "clip": 0.2, "epocas": 10, "minibatch": 64,
+          "lr": 1e-3, "ent": 0.01, "valor": 0.5, "grad": 0.5}
+ EDAD_MAX = 30                  # edad de mensaje que satura la observacion (s)
+-RECOMPENSA = {"local": "retraso", "vecinos": "retraso", "spill": "spill", "cambio": "cambio"}
++RECOMPENSA = {"local": "retraso", "vecinos": "retraso", "spill": "spill", "cambio": "cambio",
++              "smdp_crn": "retraso"}          # coord2 V2 (28.09.2026)
++# Variantes con descuento por segundo (SMDP) y exploracion comun (coord2, PRERREGISTRO.md, V2)
++SMDP_CRN = {"smdp_crn"}
++SEMILLA_EXPL = 104729          # rng_expl = default_rng(semilla del episodio + SEMILLA_EXPL)
++TRAZA_CRN = None               # lista -> se anota (t, u, p_cambiar, acciones, mascaras) (humo)
+ CAMPOS_IPPO = ["variante", "base", "episodio", "semilla", "lr", "segundos", "vehiculos",
+                "espera_prom", "timeloss_prom", "cola_prom", "cola_max",
+                "recompensa", "recompensa_decision", "recompensa_total_decision",
+@@ -158,7 +163,9 @@
+                "spill_activaciones", "spill_suma",
+                "perdida_politica", "perdida_valor", "entropia_libre", "kl_aprox", "clipfrac",
+                "eval_timeloss", "eval_espera",
+-               "ret_retraso", "ret_colas", "ret_spill", "val_999", "val_1999", "val",
++               "ret_retraso", "ret_colas", "ret_spill", "val_999", "val_1999",
++               "val_2999", "val_3999", "val_4999", "val_7999", "val_8999", "val_9999", "val",
++               "expl_minoritaria", "dt_medio", "frac_dt8",
+                "algoritmo", "recompensa_tipo"]
+ 
+ # Se rellena con preparar(escenario)
+@@ -459,6 +466,9 @@
+     suscribir()
+     medidor = comun.MedidorEnlaces(C["net"], C["enlaces"])
+     canal = Canal(latencia, perdida, seed)
++    crn = modo == "train" and variante in SMDP_CRN and decidir is None
++    rng_expl = np.random.default_rng(seed + SEMILLA_EXPL) if crn else None
++    minoritarias = 0               # decisiones libres de train con a != argmax
+ 
+     rc.SEMAFOROS = C["semaforos"]          # fases_verdes usa el programa activo del semaforo
+     agentes = {}
+@@ -480,7 +490,7 @@
+     if buffer is not None:
+         for tls in orden:
+             buffer[tls] = {"obs": [], "mascara": [], "accion": [], "logp": [], "valor": [],
+-                           "recompensa": [], "v_final": 0.0}
++                           "recompensa": [], "v_final": 0.0, "t": [], "t_final": 0}
+ 
+     pasos = 0
+     cola_acum = 0.0
+@@ -571,7 +581,20 @@
+                 with torch.no_grad():
+                     logits, valores = politica(torch.from_numpy(obs))
+                     logits = Politica.enmascarar(logits, torch.from_numpy(masc))
+-                    if modo == "train":
++                    if crn:
++                        # Exploracion comun: un solo u por segundo, el mismo para todos los que
++                        # deciden; a = 1 si p_cambiar > u. La marginal de cada agente es su
++                        # politica; las acciones conjuntas quedan correlacionadas.
++                        dist = torch.distributions.Categorical(logits=logits)
++                        u = float(rng_expl.random())
++                        p_cambiar = dist.probs[:, 1]
++                        acciones = (p_cambiar > u).long()
++                        logp = dist.log_prob(acciones)
++                        assert all(masc[k, int(acciones[k])] > 0 for k in range(len(deciden)))
++                        if TRAZA_CRN is not None:
++                            TRAZA_CRN.append((pasos, u, p_cambiar.tolist(), acciones.tolist(),
++                                              masc.tolist(), list(deciden)))
++                    elif modo == "train":
+                         dist = torch.distributions.Categorical(logits=logits)
+                         acciones = dist.sample()
+                         logp = dist.log_prob(acciones)
+@@ -587,6 +610,8 @@
+                 a = int(acciones[k])
+                 if masc[k].sum() > 1:
+                     decisiones_libres += 1
++                    if modo == "train" and decidir is None and a != int(logits[k].argmax()):
++                        minoritarias += 1
+                 if buffer is not None:
+                     b = buffer[tls]
+                     b["obs"].append(obs[k])
+@@ -594,6 +619,7 @@
+                     b["accion"].append(a)
+                     b["logp"].append(float(logp[k]))
+                     b["valor"].append(float(valores[k]))
++                    b["t"].append(pasos)
+                 if transicion is not None:
+                     ag["ultima"] = (obs[k], a, extras[k])
+                 ag["pendiente"] = True
+@@ -646,6 +672,7 @@
+         ag = agentes[tls]
+         r = cerrar_pendiente(tls, ag)
+         if buffer is not None:
++            buffer[tls]["t_final"] = pasos
+             if vaciada:
+                 buffer[tls]["v_final"] = 0.0
+             else:
+@@ -679,14 +706,26 @@
+         "ret_retraso": round(ret_retraso, 2),
+         "ret_colas": round(ret_colas, 2),
+         "ret_spill": round(ret_retraso - W3 * exceso, 2),
++        "expl_minoritaria": round(minoritarias / max(1, decisiones_libres), 4),
+     })
+     res.update(medidor.resumen())
+     return res
+ 
+ 
+ # ---------------- PPO ----------------
+-def gae(buffer, gamma, lam):
+-    """Ventajas y retornos por agente; devuelve el lote concatenado."""
++def intervalos(b):
++    """dt de cada decision del buffer de un agente: t de la siguiente decision (o t_final) - t."""
++    n = len(b["recompensa"])
++    t_sig = b["t"][1:n] + [b["t_final"]]
++    dt = np.array(t_sig, dtype=np.float64) - np.array(b["t"][:n], dtype=np.float64)
++    assert len(dt) == n and (dt > 0).all(), dt
++    return dt
++
++
++def gae(buffer, gamma, lam, smdp=False):
++    """Ventajas y retornos por agente; devuelve el lote concatenado. smdp=True (coord2 V2):
++    descuento por segundo, gamma^(dt/5) y (gamma*lam)^(dt/5) con dt el intervalo real de cada
++    decision (5 s mantener, 8 s cambiar, t_final - t en la ultima, tambien para v_final)."""
+     obs, masc, acc, logp, adv, ret = [], [], [], [], [], []
+     for tls, b in buffer.items():
+         n = len(b["recompensa"])
+@@ -695,10 +734,17 @@
+         valores = b["valor"] + [b["v_final"]]
+         ventaja = np.zeros(n, dtype=np.float32)
+         ultimo = 0.0
+-        for t in reversed(range(n)):
+-            delta = b["recompensa"][t] + gamma * valores[t + 1] - valores[t]
+-            ultimo = delta + gamma * lam * ultimo
+-            ventaja[t] = ultimo
++        if smdp:
++            expo = intervalos(b) / PASO_CONTROL
++            for t in reversed(range(n)):
++                delta = b["recompensa"][t] + gamma ** expo[t] * valores[t + 1] - valores[t]
++                ultimo = delta + (gamma * lam) ** expo[t] * ultimo
++                ventaja[t] = ultimo
++        else:
++            for t in reversed(range(n)):
++                delta = b["recompensa"][t] + gamma * valores[t + 1] - valores[t]
++                ultimo = delta + gamma * lam * ultimo
++                ventaja[t] = ultimo
+         obs.extend(b["obs"][:n])
+         masc.extend(b["mascara"][:n])
+         acc.extend(b["accion"][:n])
+@@ -818,7 +864,11 @@
+             "latencia_entrenamiento": 0, "perdida_entrenamiento": 0.0,
+             "val_seeds": val_seeds, "eval_seed": val_seeds[0] if val_seeds else None,
+             "torch": torch.__version__, "python": sys.version.split()[0], "sumo": "1.25.0",
+-            "git": hash_git(), "features": nombres_features()}
++            "git": hash_git(), "features": nombres_features(),
++            "descuento": ("por segundo: gamma^(dt/5)" if args.variante in SMDP_CRN
++                          else "por decision"),
++            "exploracion": (f"comun: un u por segundo, default_rng(semilla + {SEMILLA_EXPL})"
++                            if args.variante in SMDP_CRN else "independiente (dist.sample)")}
+ 
+ 
+ # ---------------- Main ----------------
+@@ -826,7 +876,8 @@
+     ap = argparse.ArgumentParser()
+     ap.add_argument("modo", choices=["train", "demo"])
+     ap.add_argument("--escenario", choices=sorted(ESCENARIOS), default="corredor")
+-    ap.add_argument("--variante", choices=["local", "vecinos", "spill", "cambio"], default="vecinos")
++    ap.add_argument("--variante", choices=["local", "vecinos", "spill", "cambio", "smdp_crn"],
++                    default="vecinos")
+     ap.add_argument("--episodios", type=int, default=200)
+     ap.add_argument("--seed", type=int, default=42, help="semilla base (entrenamiento: base + episodio)")
+     ap.add_argument("--eval-cada", type=int, default=10, help="validar cada N episodios (0 = nunca)")
+@@ -882,7 +933,10 @@
+         res = correr_episodio("train", politica, args.gui, args.delay, args.seed + ep,
+                               tripinfo=f"tripinfo_{etiqueta}_train.xml", variante=args.variante,
+                               buffer=buffer)
+-        lote = gae(buffer, HIPER["gamma"], HIPER["lam"])
++        lote = gae(buffer, HIPER["gamma"], HIPER["lam"], smdp=args.variante in SMDP_CRN)
++        dts = np.concatenate([intervalos(b) for b in buffer.values() if b["recompensa"]])
++        res.update({"dt_medio": round(float(dts.mean()), 3),
++                    "frac_dt8": round(float((dts == 8).mean()), 4)})
+         diag = actualizar(politica, opt, lote, HIPER, rng)
+         fila = {"variante": args.variante, "base": args.seed, "episodio": ep, "semilla": args.seed + ep,
+                 "lr": f"{lr:.2e}", "segundos": round(time.time() - t0, 1), **res, **diag,
+@@ -897,7 +951,8 @@
+         salida.flush()
+         print(f"Ep {ep:3d}  timeLoss={res['timeloss_prom']:6.2f}  espera={res['espera_prom']:5.2f}  "
+               f"r/dec={res['recompensa_decision']:6.2f}  cambios={res['cambios_fase']:4d}  "
+-              f"kl={diag['kl_aprox']:.4f} ent={diag['entropia_libre']:.3f}  {fila['segundos']}s"
++              f"kl={diag['kl_aprox']:.4f} ent={diag['entropia_libre']:.3f}  "
++              f"minor={res['expl_minoritaria']:.3f} dt={res['dt_medio']:.2f}  {fila['segundos']}s"
+               + (f"  val={fila['val']:.2f}" if "val" in fila else ""), flush=True)
+     salida.close()
+ 

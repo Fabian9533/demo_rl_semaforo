@@ -5,6 +5,7 @@ independiente por cruce (sin comunicacion entre ellos; es la antesala del modulo
 Modos:
   python rl_corredor.py baseline                 # todos los semaforos a tiempo fijo (con offsets tuneados)
   python rl_corredor.py actuado                  # todos actuados (SUMO nativo), sin coordinacion
+  python rl_corredor.py trivial                  # control de cordura: verdes minimos y desfases 0
   python rl_corredor.py train --escenario red --algoritmo qlearning --recompensa retraso --seed 42
   python rl_corredor.py demo --qtable q_table_red_ql_s42.json [--gui]
 
@@ -20,7 +21,7 @@ Cada agente ve solo su cruce: estado = cola discretizada en sus 4 aproximaciones
 ese agente no decide. Un episodio es una hora simulada completa con la misma red y demanda;
 entre episodios cambian solo epsilon, la semilla de SUMO y las Q-tables heredadas.
 
-Cambios del plan de pruebas v2 (24.09.2026, plan2/ESPEC.md):
+Cambios del plan de pruebas v2 (plan2/ESPEC.md):
   --algoritmo qlearning|sarsa. SARSA elige a2 epsilon-greedy en s2 ANTES de actualizar,
       usa Q(s2, a2) y ejecuta a2.
   --recompensa retraso|colas (por defecto retraso). "retraso" es la de U4 (rl_ippo.recompensa_paso):
@@ -94,8 +95,11 @@ ESCENARIOS = {
 }
 # corredor_alta: el mismo corredor con toda la demanda escalada (escenario de estres para U4)
 ESCENARIOS["corredor_alta"] = {**ESCENARIOS["corredor"], "cfg": "corredor_alta.sumocfg"}
-# escenarios nuevos del plan v2 (red_alta, malla3)
+# escenarios nuevos del plan v2 (red_alta, malla3, malla3_alta)
 ESCENARIOS.update(escenarios_plan2.ESCENARIOS_RC)
+# derivados del barrido de demanda: la red y los semaforos de su base, otro .sumocfg
+for _esc, (_base, _cfg, _) in escenarios_plan2.DERIVADOS.items():
+    ESCENARIOS[_esc] = {**ESCENARIOS[_base], "cfg": _cfg}
 
 # Se definen en main() segun --escenario
 ESCENARIO = "corredor"
@@ -231,10 +235,13 @@ def correr_episodio(modo, Q, eps, gui, delay, seed, tripinfo=None, serie=None,
         tripinfo = f"tripinfo_{ESCENARIO}_{modo}.xml"
     cmd = [binario, "-c", CFG, "--seed", str(seed),
            "--tripinfo-output", tripinfo, "--tripinfo-output.write-unfinished", "true",
-           "--device.emissions.probability", "1"]
+           "--device.emissions.probability", "1"] + comun.args_estadisticas(tripinfo)
     if modo == "actuado":
         cmd += ["--additional-files",
                 comun.archivo_actuado(CFG, ESCENARIO, list(SEMAFOROS), VERDE_MIN, VERDE_MIN_GIRO, VERDE_MAX)]
+    elif modo == "trivial":
+        cmd += ["--additional-files",
+                comun.archivo_trivial(CFG, ESCENARIO, list(SEMAFOROS), VERDE_MIN, VERDE_MIN_GIRO)]
     if gui:
         cmd += ["--start", "--quit-on-end", "--delay", str(delay)]
         if os.path.exists(f"vista_{ESCENARIO}.xml"):
@@ -245,9 +252,9 @@ def correr_episodio(modo, Q, eps, gui, delay, seed, tripinfo=None, serie=None,
     aprende = modo == "train"
     sarsa = algoritmo == "sarsa"
     con_retraso = tipo_recompensa == "retraso"
-    if modo == "actuado":
+    if modo in ("actuado", "trivial"):
         for tls in SEMAFOROS:
-            traci.trafficlight.setProgram(tls, "actuado")
+            traci.trafficlight.setProgram(tls, modo)
 
     # Un estado de control por semaforo
     agentes = {}
@@ -504,7 +511,7 @@ def entrenar(args, Q):
 def main():
     global ESCENARIO, CFG, SEMAFOROS, ENLACES, FLUJOS_CORREDOR, Q_FILE, RESULTADOS
     ap = argparse.ArgumentParser()
-    ap.add_argument("modo", choices=["baseline", "actuado", "train", "demo"])
+    ap.add_argument("modo", choices=["baseline", "actuado", "trivial", "train", "demo"])
     ap.add_argument("--escenario", choices=sorted(ESCENARIOS), default="corredor")
     ap.add_argument("--algoritmo", choices=["qlearning", "sarsa"], default="qlearning")
     ap.add_argument("--recompensa", choices=["retraso", "colas"], default="retraso",
@@ -555,9 +562,10 @@ def main():
     salida, escritor = comun.abrir_csv(RESULTADOS)
     serie = (f"serie_{ESCENARIO}_{args.modo}_s{args.seed}.csv" if args.serie else None)
 
-    if args.modo in ("baseline", "actuado"):
+    if args.modo in ("baseline", "actuado", "trivial"):
         res = correr_episodio(args.modo, Q, 0.0, args.gui, args.delay, args.seed, serie=serie)
-        nombre = "TIEMPO FIJO" if args.modo == "baseline" else "ACTUADO (SUMO)"
+        nombre = {"baseline": "TIEMPO FIJO", "actuado": "ACTUADO (SUMO)",
+                  "trivial": "TRIVIAL (verdes minimos, desfases 0)"}[args.modo]
         print(f"{nombre} ({len(SEMAFOROS)} semaforos):", res)
         escritor.writerow({"modo": args.modo, "episodio": 0, "semilla": args.seed, "epsilon": 0, **res})
     else:  # demo

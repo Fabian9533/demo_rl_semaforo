@@ -36,12 +36,12 @@ Hiperparametros: los HIPER de rl_ippo sin cambios (gamma 0.95, lambda 0.95, clip
 por red). Un solo Adam (eps 1e-5) para actor y critico central, como IPPO. Critico central: MLP
 de dos capas ocultas de 64 con tanh (como el de IPPO), entrada n_tls * dim_obs + n_tls. Con la
 misma semilla base el actor arranca con los mismos pesos que el de ippo_vecinos.
-Prueba de humo en cruce (24.09.2026, base 42, 30 episodios, validacion cada 5; con un solo
+Prueba de humo en cruce (base 42, 30 episodios, validacion cada 5; con un solo
 semaforo el critico central es el de IPPO mas un one-hot constante): val 36.30, 18.15, 15.79,
 15.26, 15.37, 14.86, la misma curva que IPPO con estos HIPER (humo5: 36.43, 16.90, 15.38 ...
 14.99) y al nivel del actuado (15.46): no hizo falta tocar HIPER.
 
-Plan de pruebas v2 (24.09.2026, plan2/ESPEC.md): archivo nuevo. Protocolo de la seccion 3
+Plan de pruebas v2 (plan2/ESPEC.md): archivo nuevo. Protocolo de la seccion 3
 (semillas base 42/2042/4042, episodio k con semilla base + k, validacion argmax cada --eval-cada
 episodios y en el ultimo con las semillas 999 y 1999, checkpoint en cada validacion, publicada =
 menor val con empate al mas tardio), columnas de la seccion 5 (las de rl_ippo, con

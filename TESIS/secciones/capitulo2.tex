@@ -24,7 +24,11 @@ sus restricciones de giro. Se construye con \texttt{netconvert}, a partir de arc
 vías o de cartografía de OpenStreetMap \citep{SUMO_Netconvert_OSM,OSM_About}. Sobre la red se
 declaran los tipos de vehículo, la demanda y los programas de los semáforos. Al terminar cada
 viaje, SUMO escribe un registro por vehículo (\texttt{tripinfo}), del que salen casi todas las
-métricas de la Sección~\ref{sec:teoria-metricas}.
+métricas de la Sección~\ref{sec:teoria-metricas}. El tiempo de viaje y el retraso del registro se
+cuentan desde que el vehículo entra a la red. Si la vía por la que debe entrar no tiene espacio,
+SUMO lo retiene fuera hasta que lo haya y anota esa espera aparte, en el mismo registro
+(\texttt{departDelay}). Un vehículo que al cerrar la simulación todavía espera entrar no tiene
+registro: solo lo cuenta el resumen de estadísticas de la corrida (\verb|--statistic-output|).
 
 La conducción sigue un modelo de seguimiento vehicular con componentes aleatorias: la
 imperfección del conductor, controlada por el parámetro $\sigma$, y un factor de velocidad
@@ -79,7 +83,7 @@ el semáforo puede despachar y la cola crece.
 El control de tiempo fijo y el actuado son los dos controles de referencia contra los que se mide
 cualquier mejora. El control de tiempo fijo repite el mismo programa en todos los ciclos, con duraciones independientes del tráfico
 presente. Su calidad depende del ajuste del ciclo, del reparto y, en un corredor, de los desfases
-\citep{HCM2000_or_2010}. Un programa fijo sin ajustar sobrestima la
+\citep{HCM2000_or_2010}. Comparar con un programa fijo sin ajustar sobrestima la
 mejora de cualquier alternativa; por eso el método compara contra un fijo ajustado por barrido en
 cada caso, el fijo tuneado (Capítulo~\ref{cap:metodologia}).
 
@@ -101,6 +105,8 @@ información local. La progresión se mide con la fracción de
 vehículos que cruzan el corredor deteniéndose a lo sumo una vez (Sección~\ref{sec:teoria-metricas}).
 % TODO(reestructura): progresion en los dos sentidos y desfases alternados de medio ciclo ("en ajedrez", fijo de
 % P5 en tab:plan2-fijo): falta una fuente (capitulo de coordinacion del manual de la FHWA o el HCM).
+% En el analisis de robustez (re-barrido v2.1, tab:robustez-fijo) el ajedrez queda segundo en P5 y gana 10/10 s
+% con los desfases en cero; el fijo del resultado principal sigue siendo el ajedrez.
 
 Cuando la cola de un enlace entre dos semáforos ocupa todo el espacio disponible, rebasa el enlace
 y bloquea la intersección aguas arriba, que ya no puede despachar hacia él aunque tenga verde: es
@@ -125,7 +131,14 @@ Capítulo~\ref{cap:metodologia} describe cómo se mide cada una.
 Métrica & Definición & Salida de SUMO \\
 \midrule
 Retraso (primaria) & tiempo de viaje real menos el que tomaría el mismo recorrido a la velocidad
-  deseada, sin otros vehículos ni semáforos (s/veh) & \texttt{timeLoss} (\texttt{tripinfo}) \\
+  deseada, sin otros vehículos ni semáforos, contado desde que el vehículo entra a la red (s/veh) &
+  \texttt{timeLoss} (\texttt{tripinfo}) \\
+Espera para entrar & tiempo entre la salida programada y la entrada a la red, que el vehículo pasa
+  fuera por falta de espacio en la vía de entrada (s/veh) & \texttt{departDelay}
+  (\texttt{tripinfo}) \\
+Retraso total (robustez) & retraso más espera para entrar, incluida la de los vehículos que al
+  cerrar la simulación no habían entrado (s/veh; Ecuación~\ref{eq:retraso-total}) &
+  \texttt{timeLoss} y \texttt{departDelay} (\texttt{tripinfo}); resumen de estadísticas \\
 Espera detenida & segundos con velocidad de a lo sumo 0.1~m/s (s/veh) & \texttt{waitingTime} \\
 Paradas & veces que la velocidad baja de 0.1~m/s (por vehículo) & \texttt{waitingCount} \\
 Cola promedio y máxima & detenidos sumados sobre las aproximaciones semaforizadas: media por
@@ -134,6 +147,8 @@ Cola promedio y máxima & detenidos sumados sobre las aproximaciones semaforizad
   \texttt{tripinfo} \\
 Emisiones & CO$_2$ (g/veh) y NO$_x$ (mg/veh) acumulados en el viaje & dispositivo de emisiones \\
 No terminados & viajes sin llegada al cerrar la simulación & \texttt{tripinfo} \\
+No insertados & vehículos que al cerrar la simulación seguían esperando entrar a la red (veh) &
+  resumen de estadísticas \\
 \midrule
 Viaje, retraso y paradas de corredor & medias sobre los vehículos que recorren la avenida de
   extremo a extremo, en s/veh (las paradas, por vehículo); el retraso, también solo en el sentido
@@ -145,29 +160,58 @@ Cola máxima del enlace & máximo por carril de detenidos en los enlaces entre s
   menos un umbral de sus plazas & TraCI \\
 \bottomrule
 \end{tabular}
-\caption[Métricas de desempeño]{Métricas de desempeño. Las del bloque inferior se refieren a la
-avenida y a los enlaces entre semáforos. El umbral de \textit{spillback} y el detalle de cada medición
-están en el Capítulo~\ref{cap:metodologia}.}
+\caption[Métricas de desempeño]{Métricas de desempeño. El retraso total solo se usa en el
+análisis de robustez. Las del bloque inferior se refieren a la avenida y a los enlaces entre
+semáforos. El umbral de \textit{spillback} y el detalle de cada medición están en el
+Capítulo~\ref{cap:metodologia}.}
 \label{tab:metricas}
 \end{table}
-% fuente: capitulo2 y modulo U3 del capitulo4 originales (7bd8685); comun.py (leer_tripinfo)
-% TODO(reestructura): citar la documentacion de la salida tripinfo de SUMO (timeLoss, waitingTime, waitingCount).
+% fuente: capitulo2 y modulo U3 del capitulo4 originales (7bd8685); comun.py (leer_tripinfo: retraso_total_prom,
+% retraso_insercion_prom, no_insertados; args_estadisticas)
+% TODO(reestructura): citar la documentacion de las salidas tripinfo (timeLoss, departDelay, waitingTime,
+% waitingCount) y statistic-output (waiting, departDelayWaiting) de SUMO.
 
 El retraso es la métrica primaria e incluye frenadas, detenciones y aceleraciones. La espera
 detenida es una parte del retraso, no su equivalente: un control puede reducirla y aumentar las
 paradas sin mejorar el retraso. Retraso, colas y paradas son medidas habituales en la evaluación
 de controles de tráfico \citep{FHWA_Toolbox_Definitions,FHWA_Timing_Manual_Chapter3}; las
 emisiones las estima el modelo de emisiones de SUMO \citep{SUMO_Emissions}. El
-\textit{throughput} solo discrimina entre controles cuando la demanda supera la capacidad
-(Sección~\ref{sec:teoria-control}).
+\textit{throughput}, los no terminados y los no insertados solo discriminan entre controles cuando
+la demanda supera la capacidad (Sección~\ref{sec:teoria-control}).
+
+El retraso se cuenta desde que el vehículo entra a la red, y un vehículo entra solo si hay espacio
+en el primer tramo de su ruta. Cuando la cola llega hasta el borde de la red, los que siguen
+llegando esperan fuera, y esa espera no entra en el \texttt{timeLoss}
+(Sección~\ref{sec:teoria-simulacion}). Es, sin embargo, retraso real: en una red de verdad esos
+vehículos harían cola aguas arriba, en la vía que la alimenta, y cuánto esperan depende de cómo
+el semáforo despacha la cola que tienen delante. Un control puede entonces bajar el
+\texttt{timeLoss} dejando que la cola llegue al borde de la red, porque desde ahí la cola crece
+fuera, donde el \texttt{timeLoss} no la ve. Para medir cuánto pesa ese efecto, el análisis de
+robustez del Capítulo~\ref{cap:resultados} usa el retraso total, que suma las dos partes:
+\begin{equation}
+  D = \frac{\sum_{v \in V} \bigl(l_v + e_v\bigr) + W\, e_W}{|V| + W},
+  \label{eq:retraso-total}
+\end{equation}
+donde $V$ es el conjunto de vehículos con registro en el \texttt{tripinfo}, incluidos los que no
+terminaron su viaje al cerrar la simulación; $l_v$ es el retraso en la red del vehículo $v$
+(\texttt{timeLoss}) y $e_v$, su espera para entrar (\texttt{departDelay}). $W$ es el número de
+vehículos que al cerrar seguían esperando entrar, que no tienen registro y salen del resumen de
+estadísticas, y $e_W$ es la espera media que llevaban acumulada en ese instante. Esos vehículos
+seguirían esperando después del cierre, así que $W\,e_W$ es una cota inferior de su espera; lo
+mismo vale para el retraso en la red de los que no terminaron, que se cuenta hasta el cierre. Si
+ningún vehículo espera para entrar, $D$ coincide con el \texttt{timeLoss} medio. En el retraso
+total la espera cuenta dentro y fuera de la red, y desplazar la cola no la hace desaparecer. La
+espera para entrar se reporta también por separado, como métrica secundaria.
 
 Conviene precisar la analogía con la ingeniería de transporte. El \textit{control delay} del HCM y
 de la FHWA es el tiempo de viaje adicional atribuible al dispositivo de control
-\citep{FHWA_Timing_Manual_Chapter3,HCM2000_or_2010}; el \texttt{timeLoss} de SUMO incluye además
-tiempo perdido que el semáforo no causa, como el de los giros y las variaciones de la conducción.
-Por eso un cambio porcentual
-medido sobre \texttt{timeLoss} subestima el efecto del control: parte del retraso medido no
-depende de él.
+\citep{FHWA_Timing_Manual_Chapter3,HCM2000_or_2010}. El \texttt{timeLoss} de SUMO difiere de él
+en dos sentidos. Incluye tiempo perdido que el semáforo no causa, como el de los giros y las
+variaciones de la conducción; por eso un cambio porcentual medido sobre el \texttt{timeLoss}
+subestima el efecto del control, ya que parte del retraso medido no depende de él. Y deja fuera la
+espera para entrar a la red, que el semáforo sí puede causar; cuando la demanda supera la capacidad
+de las entradas, el cambio medido sobre el \texttt{timeLoss} puede entonces sobrestimar ese
+efecto. El retraso total corrige lo segundo, no lo primero.
 
 Cada corrida, con cualquier control, registra además la recompensa de colas y tres retornos por
 segundo, que se definen con la formulación (Capítulo~\ref{cap:metodologia}). Como se miden igual en
@@ -197,8 +241,8 @@ En un semáforo, el estado resume el tráfico que ve el agente, la acción decid
 verde o se pasa a la fase siguiente y la recompensa penaliza la congestión; su forma concreta se
 formula en el Capítulo~\ref{cap:metodologia}. El MDP supone que todos los pasos pesan lo mismo en
 el descuento. Si las decisiones duran intervalos distintos, como cuando cambiar de fase consume
-además el ámbar, el problema es en rigor semi-markoviano \citep{SuttonBarto2018}; esta tesis trata
-cada decisión como un paso con el mismo descuento (Capítulo~\ref{cap:implementacion}).
+además el ámbar, el problema es en rigor semi-markoviano \citep{SuttonBarto2018}; el plan de pruebas trata
+cada decisión como un paso con el mismo descuento (Capítulo~\ref{cap:implementacion}), y el análisis exploratorio posterior prueba descontar por segundo (Sección~\ref{sec:correccion-entrenamiento}).
 % TODO(reestructura): verificar que SuttonBarto2018 (sec. 17.2) trate los procesos semi-markovianos; si no,
 % citar Sutton, Precup y Singh (1999), que no esta en referencias.bib.
 
@@ -597,18 +641,55 @@ diseño pareado reduce la variabilidad que se debe a la semilla y no al control.
 
 Por control y métrica se reporta la media con su intervalo de confianza al 95\,\%, calculado con la
 distribución $t$ de Student. Frente a una referencia, un modelo se compara por el cambio porcentual
-de la media (Ecuación~\ref{eq:delta}), cuyo intervalo se estima por \textit{bootstrap} pareado: se
-remuestrean las semillas con reposición, conservando juntos los dos valores de cada semilla, y se
-recalcula el cambio en cada remuestreo. La significancia se contrasta con la prueba de Wilcoxon de
-rangos con signo sobre las diferencias pareadas por semilla, cuya hipótesis nula es que esas
-diferencias se reparten de forma simétrica alrededor de cero.
+de la media (Ecuación~\ref{eq:delta}), cuyo intervalo se estima por \textit{bootstrap} pareado
+\citep{Efron1993_Bootstrap}: se remuestrean las semillas con reposición, conservando juntos los dos
+valores de cada semilla, y se recalcula el cambio en cada remuestreo. La significancia se contrasta
+con la prueba de Wilcoxon de rangos con signo \citep{Wilcoxon1945_Rangos} sobre las diferencias
+pareadas por semilla, cuya hipótesis nula es que esas diferencias se reparten de forma simétrica
+alrededor de cero.
+% TODO(reestructura): citar el intervalo con t de Student; no esta en referencias.bib. Procedimiento:
+% consolidar.py (docstring).
 
 Las dos herramientas responden a preguntas distintas. El intervalo se refiere al cambio de la media,
 que pueden mover unas pocas semillas con diferencias grandes; la prueba usa el signo y el rango de
-todas las diferencias. Pueden por tanto discrepar, como ocurre en P5 con IPPO vecinos frente al
-fijo y en P2 con MAPPO frente al actuado (Capítulo~\ref{cap:resultados}); la regla de veredicto del
-Capítulo~\ref{cap:metodologia} exige las dos condiciones.
-% fuente: plan2/veredicto_congelado_0355.csv (P5 ippo_vecinos: ic_fijo [0.4, 3.4], p_fijo 0.523;
-% P2 mappo: ic_act [-4.5, -0.1], p_act 0.0687)
-% TODO(reestructura): citar el bootstrap (Efron y Tibshirani, 1993), la prueba de Wilcoxon (Wilcoxon, 1945) y el
-% intervalo con t de Student; ninguna esta en referencias.bib. Procedimiento: consolidar.py (docstring).
+todas las diferencias. Por eso pueden discrepar. Si unas pocas semillas tienen diferencias grandes
+de un signo y las demás se reparten alrededor de cero, el intervalo puede excluir el cero sin que la
+prueba sea significativa; si muchas diferencias pequeñas de un signo conviven con unas pocas
+grandes del otro, puede ocurrir lo contrario. Lo primero ocurre en P5 y en P6 frente al fijo,
+con IPPO vecinos en P5 y con IPPO spill en P6, y en P2 con MAPPO frente al actuado
+(Capítulo~\ref{cap:resultados}). La regla de veredicto del Capítulo~\ref{cap:metodologia} exige
+las dos condiciones.
+% fuente: plan2/veredicto_congelado_0355.csv (= plan2/veredicto.csv del resultado principal; P5 ippo_vecinos:
+% ic_fijo [0.4, 3.4], p_fijo 0.523; P2 mappo: ic_act [-4.5, -0.1], p_act 0.0687); P6: plan2/veredicto.csv
+% (28.09.2026; ippo_spill: ic_fijo [0.6, 7.0], p_fijo 0.114; las demas celdas de P6 no discrepan)
+
+El intervalo mide la variabilidad que introduce la semilla, y esa variabilidad depende de cómo se
+declara la demanda. Si la demanda es determinista, con la salida programada de cada vehículo fijada de
+antemano, la semilla cambia solo el comportamiento de los conductores y el intervalo no recoge la
+variación de las llegadas. Es entonces condicional a la demanda declarada y subestima la
+variabilidad de un tráfico real. La demanda de los escenarios de esta tesis es
+determinista (Secciones~\ref{sec:escenarios} y~\ref{sec:estadistica}).
+
+\subsection{Resumen sobre varios casos}
+
+El veredicto se decide en cada caso por separado (Capítulo~\ref{cap:metodologia}). Para resumir un
+modelo en todos los casos a la vez no sirve el promedio aritmético de sus retrasos, porque los casos
+tienen escalas distintas y el de más retraso dominaría el promedio. Tampoco sirve el promedio
+aritmético de los cocientes frente a una referencia, que puede ordenar dos sistemas de forma
+distinta según la referencia elegida. La forma correcta de resumir resultados normalizados respecto
+de una referencia es la media geométrica de los cocientes \citep{Fleming1986_MediaGeometrica}. No
+depende de la escala de cada caso, porque cada cociente se toma dentro de su caso, y el cociente
+entre las medias geométricas de dos modelos es el mismo con cualquier referencia. Es un resumen y no
+reemplaza al veredicto por caso (Sección~\ref{sec:analisis-complementarios}).
+
+Para saber de qué depende el resultado, si del caso o del modelo, la variación de la respuesta se
+descompone con un análisis de varianza de dos factores con réplica. La suma de cuadrados total se
+reparte entre el caso, el modelo, su interacción y la variación entre las réplicas de una misma
+celda. La fracción que corresponde a cada fuente,
+$\eta^2 = \mathrm{SC}_{\text{fuente}} / \mathrm{SC}_{\text{total}}$, con SC la suma de cuadrados,
+es el eta cuadrado, una medida del tamaño del efecto \citep{Olejnik2003_Eta}. Un $\eta^2$ alto del
+caso indica que el resultado depende sobre todo del escenario, y uno alto del modelo, que depende
+sobre todo del algoritmo. Las fracciones suman uno y se leen como el reparto de la variación en esa
+muestra de casos y modelos; su valor depende del diseño, así que no se compara con el de estudios
+de otro diseño. La respuesta y las réplicas que usa esta tesis están en la
+Sección~\ref{sec:analisis-complementarios}.

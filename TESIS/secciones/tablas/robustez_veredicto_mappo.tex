@@ -1,0 +1,21 @@
+% Generado por veredicto.py a partir de plan2/. No editar a mano.
+\begin{table}[H]
+\setstretch{1}
+\centering
+\scriptsize
+\setlength{\tabcolsep}{1.5pt}
+\begin{tabular}{llcrrrrrrcl}
+\toprule
+Caso & Escenario & Sem. & Carr. & \makecell{Dem.\\(veh/h)} & \makecell{Retraso\\(s/veh)} & \makecell{$\Delta$\\retraso\\vs fijo} & \makecell{$\Delta$\\retraso\\vs actuado} & \makecell{$\Delta$\\recompensa} & Conv. & Veredicto \\
+\midrule
+P1 & corredor & 2 & 1 & 1810 & \makecell[r]{20.16\\{}$\pm$ 0.18} & \makecell[r]{$-$7.0\,\%\\{}[$-$8.3,\,$-$5.7]\\$p$ $<$\,0.001} & \makecell[r]{$-$6.0\,\%\\{}[$-$6.9,\,$-$5.1]\\$p$ $<$\,0.001} & \makecell[r]{+7.2\,\%\\{}[5.8,\,8.6]\\$p$ $<$\,0.001} & \makecell[c]{sí\\{}(3/3)} & FUNCIONA \\
+P2 & corredor\_alta & 2 & 1 & 3620 & \makecell[r]{402.56\\{}$\pm$ 5.01} & \makecell[r]{+2.1\,\%\\{}[0.7,\,3.6]\\$p$ = 0.00501} & \makecell[r]{$-$9.6\,\%\\{}[$-$11.0,\,$-$8.1]\\$p$ $<$\,0.001} & \makecell[r]{+17.7\,\%\\{}[16.5,\,18.8]\\$p$ $<$\,0.001} & \makecell[c]{sí\\{}(3/3)} & FALLA \\
+P3 & red & \makecell[c]{3\\{}+ rot.} & 2 & 2150 & \makecell[r]{20.37\\{}$\pm$ 0.21} & \makecell[r]{+0.5\,\%\\{}[$-$0.3,\,1.6]\\$p$ = 0.544} & \makecell[r]{$-$6.7\,\%\\{}[$-$7.6,\,$-$5.7]\\$p$ $<$\,0.001} & \makecell[r]{$-$1.1\,\%\\{}[$-$2.9,\,0.3]\\$p$ = 0.191} & \makecell[c]{no\\{}(2/3)} & \makecell[l]{PENDIENTE\\{}(no convergió;\\{}provisional:\\{}EMPATA)} \\
+P4 & red\_alta & \makecell[c]{3\\{}+ rot.} & 2 & 2580 & \makecell[r]{29.78\\{}$\pm$ 0.88} & \makecell[r]{+4.3\,\%\\{}[2.5,\,6.1]\\$p$ $<$\,0.001} & \makecell[r]{$-$1.9\,\%\\{}[$-$3.3,\,$-$0.6]\\$p$ = 0.031} & \makecell[r]{$-$12.6\,\%\\{}[$-$13.6,\,$-$11.7]\\$p$ $<$\,0.001} & \makecell[c]{no\\{}(1/3)} & \makecell[l]{PENDIENTE\\{}(no convergió;\\{}provisional:\\{}FALLA)} \\
+P5 & malla3 & 9 & 2 & 4350 & \makecell[r]{21.25\\{}$\pm$ 0.05} & \makecell[r]{+0.0\,\%\\{}[0.0,\,0.0]\\$p$ = 1} & \makecell[r]{$-$17.8\,\%\\{}[$-$18.1,\,$-$17.4]\\$p$ $<$\,0.001} & \makecell[r]{$-$0.0\,\%\\{}[$-$0.0,\,0.0]\\$p$ = 0.47} & \makecell[c]{sí\\{}(2/3)} & EMPATA (= trivial) \\
+P6 & malla3\_alta & 9 & 2 & 8700 & \makecell[r]{86.82\\{}$\pm$ 1.94} & \makecell[r]{+5.6\,\%\\{}[3.5,\,7.9]\\$p$ $<$\,0.001} & \makecell[r]{$-$20.5\,\%\\{}[$-$23.1,\,$-$17.7]\\$p$ $<$\,0.001} & \makecell[r]{$-$19.1\,\%\\{}[$-$24.6,\,$-$13.8]\\$p$ $<$\,0.001} & \makecell[c]{no\\{}(0/3)} & \makecell[l]{PENDIENTE\\{}(no convergió;\\{}provisional:\\{}FALLA)} \\
+\bottomrule
+\end{tabular}
+\caption[Robustez: veredicto de MAPPO]{Robustez. MAPPO: veredicto por caso. Sem.: semáforos (rot.: más una rotonda); Carr.: carriles por sentido de la avenida; Dem.: demanda total. Retraso: retraso total (timeLoss más la espera para entrar a la red), media $\pm$ IC95\,\% sobre las semillas de evaluación 1001 a 1030; $\Delta$ con IC95\,\% bootstrap pareado y $p$ de Wilcoxon pareado. Política publicada = mediana de las tres semillas base por la validación (semillas 999 y 1999). $\Delta$ recompensa: cambio de la recompensa propia del modelo (ret\_retraso) frente a la del fijo, positivo = mejor. Conv.: si convergió la política publicada; entre paréntesis, cuántas de las tres bases convergen.}
+\label{tab:robustez-veredicto-mappo}
+\end{table}

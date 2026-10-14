@@ -152,3 +152,711 @@
   url       = {https://www.jpautoceste.ba/wp-content/uploads/2022/05/Highway-Capacity-Manual-2010-PDFDrive-.pdf},
   note      = {Metodolog{\'i}a de LOS y control delay en intersecciones}
 }
+
+% ===== Entradas agregadas el 27.09.2026 (comparacion con otros trabajos y estadistica) =====
+% referencias_nuevas.bib -- entradas para la comparacion con otros trabajos (Cap. V)
+% Generado el 27.09.2026 a partir de scratchpad/wf1/lit_todas.json (fichas con
+% verificacion 'confirmado' o 'corregido'). Metadatos contrastados en linea el
+% 27.09.2026 con Crossref (api.crossref.org/works/DOI), la API de arXiv, las paginas
+% de los editores (NeurIPS, PMLR, IFAAMAS) y los repositorios institucionales.
+% Para anexar a TESIS/referencias.bib. No repite ninguna clave existente
+% (Chakrabarti2022, Chavez2023 y UAQ2024 ya estan en el .bib y no se duplican).
+% Solo ASCII: tildes con comandos LaTeX, como en el resto del .bib.
+% Estos comentarios no llevan arroba a proposito (BibTeX la leeria como entrada).
+
+% =====================================================================
+% Bloque 1. Obras pedidas para la comparacion
+% =====================================================================
+
+% --- Bancos de prueba y bibliotecas -----------------------------------
+
+% ficha: Ault2021_RESCO (corregido). Pagina de NeurIPS Datasets and Benchmarks.
+@inproceedings{Ault2021_RESCO,
+  author    = {James Ault and Guni Sharon},
+  title     = {Reinforcement Learning Benchmarks for Traffic Signal Control},
+  booktitle = {Proceedings of the Neural Information Processing Systems Track on Datasets and Benchmarks},
+  volume    = {1},
+  year      = {2021},
+  url       = {https://datasets-benchmarks-proceedings.neurips.cc/paper/2021/hash/f0935e4cd5920aa6c7c996a5ee53a70f-Abstract-round1.html},
+}
+
+% fichas: Mei2022_LibSignal (confirmado x2, corregido x1). Version de revista
+% (Crossref): Machine Learning 113(8), 2024, en linea el 28.11.2023. La version corta
+% es del taller RL4RealLife de NeurIPS 2022; preprint arXiv:2211.10649.
+@article{Mei2024_LibSignal,
+  author  = {Hao Mei and Xiaoliang Lei and Longchao Da and Bin Shi and Hua Wei},
+  title   = {{LibSignal}: An Open Library for Traffic Signal Control},
+  journal = {Machine Learning},
+  year    = {2024},
+  volume  = {113},
+  number  = {8},
+  pages   = {5235--5271},
+  doi     = {10.1007/s10994-023-06412-y},
+  url     = {https://doi.org/10.1007/s10994-023-06412-y}
+}
+
+% fichas: Genders2019_ATSCFramework y Genders2019_Framework (confirmado). Solo arXiv.
+@article{Genders2019_Framework,
+  author  = {Wade Genders and Saiedeh Razavi},
+  title   = {An Open-Source Framework for Adaptive Traffic Signal Control},
+  journal = {arXiv preprint arXiv:1909.00395},
+  year    = {2019},
+  url     = {https://arxiv.org/abs/1909.00395}
+}
+
+% fichas: Nguyen2025_TREX (confirmado x2). Se cita el preprint (v1), que es de donde
+% salen las cifras de la ficha. Crossref registra una version en revista con otro
+% titulo, no revisada numero por numero: "A framework for benchmarking traffic signal
+% control robustness under incidents: comparative study of reinforcement
+% learning-based methods", European Transport Research Review 18, art. 85
+% (16.09.2026), doi 10.1186/s12544-026-00841-1.
+@article{Nguyen2025_TREX,
+  author  = {Dang Viet Anh Nguyen and Lima Azevedo, Carlos and Tomer Toledo and Filipe Rodrigues},
+  title   = {Robustness of Reinforcement Learning-Based Traffic Signal Control under Incidents: A Comparative Study},
+  journal = {arXiv preprint arXiv:2506.13836},
+  year    = {2025},
+  url     = {https://arxiv.org/abs/2506.13836}
+}
+
+% ficha: Alegre2019_SUMORL (confirmado). Cita que pide el README del repositorio.
+@misc{Alegre2019_SUMORL,
+  author       = {Lucas N. Alegre},
+  title        = {{SUMO-RL}},
+  howpublished = {\url{https://github.com/LucasAlegre/sumo-rl}},
+  year         = {2019},
+  note         = {Repositorio de {GitHub}; entornos de aprendizaje por refuerzo para control sem{\'a}f{\'o}rico sobre {SUMO}}
+}
+
+% ficha: Zhang2019_CityFlow (confirmado). Crossref.
+@inproceedings{Zhang2019_CityFlow,
+  author    = {Huichu Zhang and Siyuan Feng and Chang Liu and Yaoyao Ding and Yichen Zhu and Zihan Zhou and Weinan Zhang and Yong Yu and Haiming Jin and Zhenhui Li},
+  title     = {{CityFlow}: A Multi-Agent Reinforcement Learning Environment for Large Scale City Traffic Scenario},
+  booktitle = {The World Wide Web Conference ({WWW} '19)},
+  publisher = {ACM},
+  year      = {2019},
+  pages     = {3620--3624},
+  doi       = {10.1145/3308558.3314139},
+  url       = {https://doi.org/10.1145/3308558.3314139}
+}
+
+% --- RL en una interseccion y en redes ---------------------------------
+
+% ficha: Abdulhai2003_QLearning (verificacion 'parcial': la cifra de -44 % viene de
+% fuente secundaria). Se incluye porque la pidieron; los metadatos si estan
+% confirmados en Crossref.
+@article{Abdulhai2003_QLearning,
+  author  = {Baher Abdulhai and Rob Pringle and Grigoris J. Karakoulas},
+  title   = {Reinforcement Learning for \emph{True} Adaptive Traffic Signal Control},
+  journal = {Journal of Transportation Engineering},
+  year    = {2003},
+  volume  = {129},
+  number  = {3},
+  pages   = {278--285},
+  doi     = {10.1061/(ASCE)0733-947X(2003)129:3(278)},
+  url     = {https://doi.org/10.1061/(ASCE)0733-947X(2003)129:3(278)}
+}
+
+% fichas: ElTantawy2012_MARLIN (confirmado), ElTantawy2012_Aislada (confirmado, cap. 5)
+% y ElTantawy2012_MARLIN5 (corregido, cap. 6). Repositorio TSpace/Scholaris (2012-11).
+@phdthesis{ElTantawy2012_Tesis,
+  author  = {Samah El-Tantawy},
+  title   = {Multi-Agent Reinforcement Learning for Integrated Network of Adaptive Traffic Signal Controllers ({MARLIN-ATSC})},
+  school  = {University of Toronto},
+  address = {Toronto, Canad{\'a}},
+  year    = {2012},
+  url     = {http://hdl.handle.net/1807/67269}
+}
+
+% ficha: ElTantawy2013_MARLIN (confirmado). Crossref.
+@article{ElTantawy2013_MARLIN,
+  author  = {Samah El-Tantawy and Baher Abdulhai and Hossam Abdelgawad},
+  title   = {Multiagent Reinforcement Learning for Integrated Network of Adaptive Traffic Signal Controllers ({MARLIN-ATSC}): Methodology and Large-Scale Application on Downtown {Toronto}},
+  journal = {IEEE Transactions on Intelligent Transportation Systems},
+  year    = {2013},
+  volume  = {14},
+  number  = {3},
+  pages   = {1140--1150},
+  doi     = {10.1109/TITS.2013.2255286},
+  url     = {https://doi.org/10.1109/TITS.2013.2255286}
+}
+
+% ficha: Gao2017_DQN (confirmado). Solo arXiv.
+@article{Gao2017_DQN,
+  author  = {Juntao Gao and Yulong Shen and Jia Liu and Minoru Ito and Norio Shiratori},
+  title   = {Adaptive Traffic Signal Control: Deep Reinforcement Learning Algorithm with Experience Replay and Target Network},
+  journal = {arXiv preprint arXiv:1705.02755},
+  year    = {2017},
+  url     = {https://arxiv.org/abs/1705.02755}
+}
+
+% ficha: Wei2018_IntelliLight (confirmado). Crossref.
+@inproceedings{Wei2018_IntelliLight,
+  author    = {Hua Wei and Guanjie Zheng and Huaxiu Yao and Zhenhui Li},
+  title     = {{IntelliLight}: A Reinforcement Learning Approach for Intelligent Traffic Light Control},
+  booktitle = {Proceedings of the 24th {ACM} {SIGKDD} International Conference on Knowledge Discovery \& Data Mining ({KDD})},
+  publisher = {ACM},
+  year      = {2018},
+  pages     = {2496--2505},
+  doi       = {10.1145/3219819.3220096},
+  url       = {https://doi.org/10.1145/3219819.3220096}
+}
+
+% ficha: Liang2019_3DQN (corregido). Se cita la version de revista (Crossref), que
+% cambio de titulo; las cifras de la ficha se leyeron en el preprint arXiv:1803.11115.
+@article{Liang2019_3DQN,
+  author  = {Xiaoyuan Liang and Xunsheng Du and Guiling Wang and Zhu Han},
+  title   = {A Deep Reinforcement Learning Network for Traffic Light Cycle Control},
+  journal = {IEEE Transactions on Vehicular Technology},
+  year    = {2019},
+  volume  = {68},
+  number  = {2},
+  pages   = {1243--1253},
+  doi     = {10.1109/TVT.2018.2890726},
+  url     = {https://doi.org/10.1109/TVT.2018.2890726},
+}
+
+% ficha: Wang2019_EventData3DQN (confirmado). Crossref.
+@article{Wang2019_EventData3DQN,
+  author  = {Song Wang and Xu Xie and Kedi Huang and Junjie Zeng and Zimin Cai},
+  title   = {Deep Reinforcement Learning-Based Traffic Signal Control Using High-Resolution Event-Based Data},
+  journal = {Entropy},
+  year    = {2019},
+  volume  = {21},
+  number  = {8},
+  pages   = {744},
+  doi     = {10.3390/e21080744},
+  url     = {https://doi.org/10.3390/e21080744}
+}
+
+% ficha: Zheng2019_FRAP (confirmado). Crossref.
+@inproceedings{Zheng2019_FRAP,
+  author    = {Guanjie Zheng and Yuanhao Xiong and Xinshi Zang and Jie Feng and Hua Wei and Huichu Zhang and Yong Li and Kai Xu and Zhenhui Li},
+  title     = {Learning Phase Competition for Traffic Signal Control},
+  booktitle = {Proceedings of the 28th {ACM} International Conference on Information and Knowledge Management ({CIKM})},
+  publisher = {ACM},
+  year      = {2019},
+  pages     = {1963--1972},
+  doi       = {10.1145/3357384.3357900},
+  url       = {https://doi.org/10.1145/3357384.3357900}
+}
+
+% ficha: Zheng2019_LIT (confirmado). Solo arXiv.
+@article{Zheng2019_LIT,
+  author  = {Guanjie Zheng and Xinshi Zang and Nan Xu and Hua Wei and Zhengyao Yu and Vikash Gayah and Kai Xu and Zhenhui Li},
+  title   = {Diagnosing Reinforcement Learning for Traffic Signal Control},
+  journal = {arXiv preprint arXiv:1905.04716},
+  year    = {2019},
+  url     = {https://arxiv.org/abs/1905.04716}
+}
+
+% ficha: Wei2019_PressLight (confirmado). Crossref.
+@inproceedings{Wei2019_PressLight,
+  author    = {Hua Wei and Chacha Chen and Guanjie Zheng and Kan Wu and Vikash Gayah and Kai Xu and Zhenhui Li},
+  title     = {{PressLight}: Learning Max Pressure Control to Coordinate Traffic Signals in Arterial Network},
+  booktitle = {Proceedings of the 25th {ACM} {SIGKDD} International Conference on Knowledge Discovery \& Data Mining ({KDD})},
+  publisher = {ACM},
+  year      = {2019},
+  pages     = {1290--1298},
+  doi       = {10.1145/3292500.3330949},
+  url       = {https://doi.org/10.1145/3292500.3330949}
+}
+
+% ficha: Wei2019_CoLight (confirmado). Crossref.
+@inproceedings{Wei2019_CoLight,
+  author    = {Hua Wei and Nan Xu and Huichu Zhang and Guanjie Zheng and Xinshi Zang and Chacha Chen and Weinan Zhang and Yanmin Zhu and Kai Xu and Zhenhui Li},
+  title     = {{CoLight}: Learning Network-level Cooperation for Traffic Signal Control},
+  booktitle = {Proceedings of the 28th {ACM} International Conference on Information and Knowledge Management ({CIKM})},
+  publisher = {ACM},
+  year      = {2019},
+  pages     = {1913--1922},
+  doi       = {10.1145/3357384.3357902},
+  url       = {https://doi.org/10.1145/3357384.3357902}
+}
+
+% ficha: Chu2019_MA2C (confirmado). Se cita la version de revista (Crossref, 2020);
+% preprint arXiv:1903.04527 (2019).
+@article{Chu2020_MA2C,
+  author  = {Tianshu Chu and Jie Wang and Lara Codec{\`a} and Zhaojian Li},
+  title   = {Multi-Agent Deep Reinforcement Learning for Large-Scale Traffic Signal Control},
+  journal = {IEEE Transactions on Intelligent Transportation Systems},
+  year    = {2020},
+  volume  = {21},
+  number  = {3},
+  pages   = {1086--1095},
+  doi     = {10.1109/TITS.2019.2901791},
+  url     = {https://doi.org/10.1109/TITS.2019.2901791}
+}
+
+% ficha: Chen2020_MPLight (confirmado). Crossref.
+@inproceedings{Chen2020_MPLight,
+  author    = {Chacha Chen and Hua Wei and Nan Xu and Guanjie Zheng and Ming Yang and Yuanhao Xiong and Kai Xu and Zhenhui Li},
+  title     = {Toward A Thousand Lights: Decentralized Deep Reinforcement Learning for Large-Scale Traffic Signal Control},
+  booktitle = {Proceedings of the {AAAI} Conference on Artificial Intelligence},
+  volume    = {34},
+  number    = {4},
+  year      = {2020},
+  pages     = {3414--3421},
+  doi       = {10.1609/aaai.v34i04.5744},
+  url       = {https://doi.org/10.1609/aaai.v34i04.5744}
+}
+
+% ficha: Ma2020_FMA2C (confirmado). Crossref (el DOI resuelve a la ficha de ACM DL de
+% AAMAS 2020) y PDF de IFAAMAS.
+@inproceedings{Ma2020_FMA2C,
+  author    = {Jinming Ma and Feng Wu},
+  title     = {Feudal Multi-Agent Deep Reinforcement Learning for Traffic Signal Control},
+  booktitle = {Proceedings of the 19th International Conference on Autonomous Agents and Multiagent Systems ({AAMAS})},
+  year      = {2020},
+  pages     = {816--824},
+  doi       = {10.65109/uxza9095},
+  url       = {https://www.ifaamas.org/Proceedings/aamas2020/pdfs/p816.pdf}
+}
+
+% ficha: Oroojlooy2020_AttendLight (confirmado). Pagina de NeurIPS.
+@inproceedings{Oroojlooy2020_AttendLight,
+  author    = {Afshin Oroojlooy and Mohammadreza Nazari and Davood Hajinezhad and Jorge Silva},
+  title     = {{AttendLight}: Universal Attention-Based Reinforcement Learning Model for Traffic Signal Control},
+  booktitle = {Advances in Neural Information Processing Systems},
+  volume    = {33},
+  year      = {2020},
+  pages     = {4079--4090},
+  url       = {https://proceedings.neurips.cc/paper/2020/hash/29e48b79ae6fc68e9b6480b677453586-Abstract.html}
+}
+
+% ficha: Ault2022_EPyMARL_TSC (confirmado). El PDF no trae el venue; la pagina de
+% publicaciones de G. Sharon lo da como taller de CIKM 2022.
+@inproceedings{Ault2022_EPyMARL,
+  author    = {James Ault and Guni Sharon},
+  title     = {Cooperative Multi-agent Reinforcement Learning Applied to Multi-intersection Traffic Signal Control},
+  booktitle = {The Third Workshop on Data-driven Intelligent Transportation at {CIKM} 2022},
+  year      = {2022},
+  url       = {https://people.engr.tamu.edu/guni/papers/CIKM22-MATCS.pdf}
+}
+
+% ficha: Jiang2024_XLight (confirmado). Crossref.
+@inproceedings{Jiang2024_XLight,
+  author    = {Haoyuan Jiang and Ziyue Li and Hua Wei and Xuantang Xiong and Jingqing Ruan and Jiaming Lu and Hangyu Mao and Rui Zhao},
+  title     = {{X-Light}: Cross-City Traffic Signal Control Using Transformer on Transformer as Meta Multi-Agent Reinforcement Learner},
+  booktitle = {Proceedings of the Thirty-Third International Joint Conference on Artificial Intelligence ({IJCAI-24})},
+  year      = {2024},
+  pages     = {94--102},
+  doi       = {10.24963/ijcai.2024/11},
+  url       = {https://doi.org/10.24963/ijcai.2024/11}
+}
+
+% ficha: Ruan2024_CoSLight (confirmado). Crossref.
+@inproceedings{Ruan2024_CoSLight,
+  author    = {Jingqing Ruan and Ziyue Li and Hua Wei and Haoyuan Jiang and Jiaming Lu and Xuantang Xiong and Hangyu Mao and Rui Zhao},
+  title     = {{CoSLight}: Co-optimizing Collaborator Selection and Decision-making to Enhance Traffic Signal Control},
+  booktitle = {Proceedings of the 30th {ACM} {SIGKDD} Conference on Knowledge Discovery and Data Mining ({KDD})},
+  publisher = {ACM},
+  year      = {2024},
+  pages     = {2500--2511},
+  doi       = {10.1145/3637528.3671998},
+  url       = {https://doi.org/10.1145/3637528.3671998}
+}
+
+% ficha: CabrejasEgea2021_Comercial (confirmado). Crossref; preprint arXiv:2104.10455.
+@article{CabrejasEgea2021_Comercial,
+  author  = {Alvaro Cabrejas-Egea and Raymond Zhang and Neil Walton},
+  title   = {Reinforcement Learning for Traffic Signal Control: Comparison with Commercial Systems},
+  journal = {Transportation Research Procedia},
+  year    = {2021},
+  volume  = {58},
+  pages   = {638--645},
+  doi     = {10.1016/j.trpro.2021.11.084},
+  url     = {https://doi.org/10.1016/j.trpro.2021.11.084}
+}
+
+% --- Max pressure y variantes ------------------------------------------
+
+% Sin ficha propia (la cita la ficha Lioris2014_MaxPressure como la referencia de
+% max pressure). Crossref.
+@article{Varaiya2013_MaxPressure,
+  author  = {Pravin Varaiya},
+  title   = {Max pressure control of a network of signalized intersections},
+  journal = {Transportation Research Part C: Emerging Technologies},
+  year    = {2013},
+  volume  = {36},
+  pages   = {177--195},
+  doi     = {10.1016/j.trc.2013.08.014},
+  url     = {https://doi.org/10.1016/j.trc.2013.08.014}
+}
+
+% ficha: Lioris2014_MaxPressure (corregido). Crossref (cuatro autores).
+@article{Lioris2014_MaxPressure,
+  author  = {Jennie Lioris and Alexander A. Kurzhanskiy and Dimitrios Triantafyllos and Pravin Varaiya},
+  title   = {Control experiments for a network of signalized intersections using the `{.Q}' simulator},
+  journal = {IFAC Proceedings Volumes},
+  year    = {2014},
+  volume  = {47},
+  number  = {2},
+  pages   = {332--337},
+  doi     = {10.3182/20140514-3-FR-4046.00128},
+  url     = {https://doi.org/10.3182/20140514-3-FR-4046.00128}
+}
+
+% ficha: Wu2021_EfficientMP (confirmado). Solo arXiv.
+@article{Wu2021_EfficientMP,
+  author  = {Qiang Wu and Liang Zhang and Jun Shen and Linyuan L{\"u} and Bo Du and Jianqing Wu},
+  title   = {Efficient Pressure: Improving efficiency for signalized intersections},
+  journal = {arXiv preprint arXiv:2112.02336},
+  year    = {2021},
+  url     = {https://arxiv.org/abs/2112.02336}
+}
+
+% fichas: Zhang2022_AdvancedMP y Zhang2022_AdvancedXLight (confirmado). Pagina de PMLR.
+@inproceedings{Zhang2022_AdvancedMP,
+  author    = {Liang Zhang and Qiang Wu and Jun Shen and Linyuan L{\"u} and Bo Du and Jianqing Wu},
+  title     = {Expression might be enough: representing pressure and demand for reinforcement learning based traffic signal control},
+  booktitle = {Proceedings of the 39th International Conference on Machine Learning ({ICML})},
+  series    = {Proceedings of Machine Learning Research},
+  volume    = {162},
+  publisher = {PMLR},
+  year      = {2022},
+  pages     = {26645--26654},
+  url       = {https://proceedings.mlr.press/v162/zhang22ah.html}
+}
+
+% --- Revisiones ---------------------------------------------------------
+
+% fichas: Noaeen2022_SLR y Noaeen2022_RevisionNTSC (confirmado). Crossref (orden de
+% autores de Crossref). Crossref parte mal el apellido compuesto de la sexta autora
+% (family 'Abad'); ella firma 'Shakeri Hossein Abad, Z.' (PubMed, ORCID).
+@article{Noaeen2022_SLR,
+  author  = {Mohammad Noaeen and Atharva Naik and Liana Goodman and Jared Crebo and Taimoor Abrar and Shakeri Hossein Abad, Zahra and Ana L. C. Bazzan and Behrouz Far},
+  title   = {Reinforcement learning in urban network traffic signal control: A systematic literature review},
+  journal = {Expert Systems with Applications},
+  year    = {2022},
+  volume  = {199},
+  pages   = {116830},
+  doi     = {10.1016/j.eswa.2022.116830},
+  url     = {https://doi.org/10.1016/j.eswa.2022.116830}
+}
+
+% ficha: Haydari2020_Survey (confirmado). Se cita la version de revista (Crossref,
+% 2022); preprint arXiv:2005.00935 (2020).
+@article{Haydari2022_Survey,
+  author  = {Ammar Haydari and Yasin Yilmaz},
+  title   = {Deep Reinforcement Learning for Intelligent Transportation Systems: A Survey},
+  journal = {IEEE Transactions on Intelligent Transportation Systems},
+  year    = {2022},
+  volume  = {23},
+  number  = {1},
+  pages   = {11--32},
+  doi     = {10.1109/TITS.2020.3008612},
+  url     = {https://doi.org/10.1109/TITS.2020.3008612}
+}
+
+% ficha: Wei2019_Survey (confirmado). Solo arXiv (v3 del 16.01.2020).
+@article{Wei2019_Survey,
+  author  = {Hua Wei and Guanjie Zheng and Vikash Gayah and Zhenhui Li},
+  title   = {A Survey on Traffic Signal Control Methods},
+  journal = {arXiv preprint arXiv:1904.08117},
+  year    = {2019},
+  url     = {https://arxiv.org/abs/1904.08117}
+}
+
+% --- America Latina -------------------------------------------------------
+
+% ficha: Higuera2016_Bogota (confirmado). Registro OAI del repositorio Uniandes.
+@mastersthesis{Higuera2016_Uniandes,
+  author  = {Higuera Arias, Carolina},
+  title   = {Control de intersecciones semaforizadas aplicando aprendizaje por refuerzo multiagente},
+  school  = {Universidad de los Andes},
+  address = {Bogot{\'a}, Colombia},
+  year    = {2016},
+  type    = {Tesis de Maestr{\'\i}a en Ingenier{\'\i}a Electr{\'o}nica y de Computadores},
+  url     = {https://hdl.handle.net/1992/13675}
+}
+
+% ficha: Borges2021_Brasilia (confirmado). Crossref (division nombre/apellido de
+% Crossref y de MDPI: apellido Borges).
+@article{Borges2021_Brasilia,
+  author  = {Borges, F{\'a}bio de Souza Pereira and Fonseca, Adelayda Pallavicini and Garcia, Reinaldo Crispiniano},
+  title   = {Deep Reinforcement Learning Model to Mitigate Congestion in Real-Time Traffic Light Networks},
+  journal = {Infrastructures},
+  year    = {2021},
+  volume  = {6},
+  number  = {10},
+  pages   = {138},
+  doi     = {10.3390/infrastructures6100138},
+  url     = {https://doi.org/10.3390/infrastructures6100138}
+}
+
+% ficha: Montoya2021_PUCP_Miraflores (confirmado). Repositorio de tesis PUCP: tesis
+% de titulo profesional (bachelorThesis); IEEEtran no tiene tipo de pregrado, se usa
+% mastersthesis con el campo type.
+@mastersthesis{Montoya2021_PUCP,
+  author  = {Montoya Calder{\'o}n, Andr{\'e}e Yordan},
+  title   = {Dise{\~n}o de un controlador descentralizado adaptable al sistema de semaforizaci{\'o}n de {Lima} {Metropolitana} para la optimizaci{\'o}n de tiempos de los ciclos semaf{\'o}ricos en tiempo real},
+  school  = {Pontificia Universidad Cat{\'o}lica del Per{\'u}},
+  address = {Lima, Per{\'u}},
+  year    = {2021},
+  type    = {Tesis para optar el t{\'\i}tulo profesional de Ingeniero Mecatr{\'o}nico},
+  url     = {http://hdl.handle.net/20.500.12404/20852}
+}
+
+% ficha: Tarquino2023_LimaPetitThouars (confirmado). Crossref da pp. 93-118; el
+% numero es jul.-dic. 2023 (Crossref registra el 24.04.2024 como fecha de emision).
+@article{Tarquino2023_Lima,
+  author  = {Tarquino Torres, Fernando Mauricio},
+  title   = {Sistema de gesti{\'o}n y operaci{\'o}n de la red semaf{\'o}rica de la ciudad de {Lima}},
+  journal = {Industrial Data},
+  year    = {2023},
+  volume  = {26},
+  number  = {2},
+  pages   = {93--118},
+  doi     = {10.15381/idata.v26i2.24038},
+  url     = {https://doi.org/10.15381/idata.v26i2.24038}
+}
+
+% --- Sistemas en operacion y referencias de practica ------------------------
+
+% ficha: Smith2013_Surtrac (corregido). Crossref (AAAI OJS).
+@inproceedings{Smith2013_Surtrac,
+  author    = {Stephen F. Smith and Gregory J. Barlow and Xiao-Feng Xie and Zachary B. Rubinstein},
+  title     = {Smart Urban Signal Networks: Initial Application of the {SURTRAC} Adaptive Traffic Signal Control System},
+  booktitle = {Proceedings of the International Conference on Automated Planning and Scheduling ({ICAPS})},
+  volume    = {23},
+  year      = {2013},
+  pages     = {434--442},
+  doi       = {10.1609/icaps.v23i1.13594},
+  url       = {https://doi.org/10.1609/icaps.v23i1.13594}
+}
+
+% ficha: DfT1999_SCOOT (corregido). PDF del folleto (abril de 1999, DETR; el PDF
+% disponible es la reedicion del DfT).
+@techreport{DETR1999_SCOOT,
+  author      = {{Department of the Environment, Transport and the Regions}},
+  title       = {The ``{SCOOT}'' Urban Traffic Control System},
+  institution = {Department of the Environment, Transport and the Regions},
+  type        = {Traffic Advisory Leaflet},
+  number      = {7/99},
+  month       = apr,
+  year        = {1999},
+  url         = {https://tsrgd.co.uk/pdf/tal/1999/tal-7-99.pdf}
+}
+
+% ficha: FHWA_EDC1_ASCT (confirmado). Pagina de la FHWA (WebFetch); el anio es el de
+% la ultima modificacion de la pagina. El titulo es el encabezado exacto de la
+% pagina (verificado el 27.09.2026); la ronda EDC-1 va en la nota.
+@misc{FHWA2017_EDC1ASCT,
+  author       = {{Federal Highway Administration}},
+  title        = {Adaptive Signal Control Technology},
+  howpublished = {\url{https://www.fhwa.dot.gov/innovation/everydaycounts/edc-1/asct.cfm}},
+  year         = {2017},
+  note         = {Programa Every Day Counts, ronda 1 ({EDC-1}, 2010--2012); p{\'a}gina modificada el 8 de septiembre de 2017}
+}
+
+% =====================================================================
+% Bloque 2. Otras fichas 'confirmado' o 'corregido' de lit_todas.json
+% (no estaban en la lista pedida; se incluyen para que la tabla de
+% comparacion pueda citarlas sin volver a buscar)
+% =====================================================================
+
+% ficha: ElTantawy2012_MARLIN5 (corregido). Crossref: solo dos autores.
+@inproceedings{ElTantawy2012_ITSC,
+  author    = {Samah El-Tantawy and Baher Abdulhai},
+  title     = {Multi-Agent Reinforcement Learning for Integrated Network of Adaptive Traffic Signal Controllers ({MARLIN-ATSC})},
+  booktitle = {2012 15th International {IEEE} Conference on Intelligent Transportation Systems ({ITSC})},
+  publisher = {IEEE},
+  year      = {2012},
+  pages     = {319--326},
+  doi       = {10.1109/ITSC.2012.6338707},
+  url       = {https://doi.org/10.1109/ITSC.2012.6338707}
+}
+
+% ficha: ElTantawy2012_Aislada (confirmado): el cap. 5 de la tesis publicado en
+% revista. Crossref.
+@article{ElTantawy2014_Parametros,
+  author  = {Samah El-Tantawy and Baher Abdulhai and Hossam Abdelgawad},
+  title   = {Design of Reinforcement Learning Parameters for Seamless Application of Adaptive Traffic Signal Control},
+  journal = {Journal of Intelligent Transportation Systems},
+  year    = {2014},
+  volume  = {18},
+  number  = {3},
+  pages   = {227--245},
+  doi     = {10.1080/15472450.2013.810991},
+  url     = {https://doi.org/10.1080/15472450.2013.810991}
+}
+
+% ficha: Yau2017_Survey (confirmado). Crossref (en linea el 29.06.2017).
+@article{Yau2017_Survey,
+  author  = {Kok-Lim Alvin Yau and Junaid Qadir and Hooi Ling Khoo and Mee Hong Ling and Peter Komisarczuk},
+  title   = {A Survey on Reinforcement Learning Models and Algorithms for Traffic Signal Control},
+  journal = {ACM Computing Surveys},
+  year    = {2017},
+  volume  = {50},
+  number  = {3},
+  pages   = {34:1--34:38},
+  doi     = {10.1145/3068287},
+  url     = {https://doi.org/10.1145/3068287}
+}
+
+% ficha: Greguric2020_Review (confirmado). Crossref.
+@article{Greguric2020_Review,
+  author  = {Martin Greguri{\'c} and Miroslav Vuji{\'c} and Charalampos Alexopoulos and Mladen Mileti{\'c}},
+  title   = {Application of Deep Reinforcement Learning in Traffic Signal Control: An Overview and Impact of Open Traffic Data},
+  journal = {Applied Sciences},
+  year    = {2020},
+  volume  = {10},
+  number  = {11},
+  pages   = {4011},
+  doi     = {10.3390/app10114011},
+  url     = {https://doi.org/10.3390/app10114011}
+}
+
+% ficha: Genders2016_DQTSCA (confirmado). Solo arXiv.
+@article{Genders2016_DQTSC,
+  author  = {Wade Genders and Saiedeh Razavi},
+  title   = {Using a Deep Reinforcement Learning Agent for Traffic Signal Control},
+  journal = {arXiv preprint arXiv:1611.01142},
+  year    = {2016},
+  url     = {https://arxiv.org/abs/1611.01142}
+}
+
+% ficha: Mousavi2017_PGDQN (confirmado). Crossref; preprint arXiv:1704.08883.
+@article{Mousavi2017_PGDQN,
+  author  = {Seyed Sajad Mousavi and Michael Schukat and Enda Howley},
+  title   = {Traffic light control using deep policy-gradient and value-function-based reinforcement learning},
+  journal = {IET Intelligent Transport Systems},
+  year    = {2017},
+  volume  = {11},
+  number  = {7},
+  pages   = {417--423},
+  doi     = {10.1049/iet-its.2017.0153},
+  url     = {https://doi.org/10.1049/iet-its.2017.0153}
+}
+
+% ficha: Ault2020_Interpretable (confirmado). Crossref (el DOI resuelve a ACM DL) y
+% PDF de IFAAMAS.
+@inproceedings{Ault2020_Interpretable,
+  author    = {James Ault and Josiah P. Hanna and Guni Sharon},
+  title     = {Learning an Interpretable Traffic Signal Control Policy},
+  booktitle = {Proceedings of the 19th International Conference on Autonomous Agents and Multiagent Systems ({AAMAS})},
+  year      = {2020},
+  pages     = {88--96},
+  doi       = {10.65109/ydpi1201},
+  url       = {https://www.ifaamas.org/Proceedings/aamas2020/pdfs/p88.pdf}
+}
+
+% ficha: Guo2019_S2R2L (confirmado). Portada de la tesis en arXiv:2007.03433.
+@mastersthesis{Guo2019_S2R2L,
+  author  = {Jin Guo},
+  title   = {Decentralized Deep Reinforcement Learning for Network Level Traffic Signal Control},
+  school  = {University of California, Davis},
+  address = {Davis, California, EE.~UU.},
+  year    = {2019},
+  type    = {Tesis de Maestr{\'\i}a en Transportation Technology and Policy},
+  url     = {https://arxiv.org/abs/2007.03433}
+}
+
+% ficha: Mahato2025_MARLvsFijo (confirmado). Solo arXiv (v4 del 27.11.2025).
+@article{Mahato2025_MARLvsFijo,
+  author  = {Saahil Mahato},
+  title   = {Smart Traffic Signals: Comparing {MARL} and Fixed-Time Strategies},
+  journal = {arXiv preprint arXiv:2505.14544},
+  year    = {2025},
+  url     = {https://arxiv.org/abs/2505.14544}
+}
+
+% ficha: Vivacity2021_Manchester (corregido). PDF del fabricante (autora y fecha en
+% la portada y en los metadatos del PDF). Informe del fabricante, sin evaluacion
+% independiente.
+@techreport{Velasco2021_Vivacity,
+  author      = {Raquel Velasco},
+  title       = {Smart Junctions: {AI} for Traffic Signals. {Vivacity Labs} Three-Year Research and Development},
+  institution = {Vivacity Labs},
+  type        = {White paper},
+  month       = sep,
+  year        = {2021},
+  url         = {https://vivacitylabs.com/site/wp-content/uploads/2021/09/Vivacity-Labs-Smart-Junctions-for-Traffic-Signals-Paper-Sept202.pdf}
+}
+
+% ficha: FHWA2008_TSTM (corregido). Registro ROSA P (autor principal y fecha) y lista
+% de coautores de la publicacion; el url apunta al cap. 1 que cita la ficha. Es el
+% mismo manual que la entrada existente FHWA_Timing_Manual_Chapter3.
+@techreport{Koonce2008_TSTM,
+  author      = {Peter Koonce and Lee Rodegerdts and Kevin Lee and Shaun Quayle and Scott Beaird and Cade Braud and Jim Bonneson and Phil Tarnoff and Tom Urbanik},
+  title       = {Traffic Signal Timing Manual},
+  institution = {Federal Highway Administration},
+  number      = {FHWA-HOP-08-024},
+  address     = {Washington, DC, EE.~UU.},
+  month       = jun,
+  year        = {2008},
+  url         = {https://ops.fhwa.dot.gov/publications/fhwahop08024/chapter1.htm},
+}
+
+% ficha: Google2023_GreenLight (confirmado). Pagina del proyecto.
+@misc{Google2023_GreenLight,
+  author       = {{Google Research}},
+  title        = {Green Light},
+  howpublished = {\url{https://sites.research.google/gr/greenlight/}},
+  year         = {2023},
+  note         = {P{\'a}gina del proyecto (lanzado en 2023)}
+}
+
+% ficha: Alibaba2018_CityBrain (confirmado). Se usa la url corta del blog (la larga
+% lleva un guion largo codificado con signos de porcentaje).
+@misc{Alibaba2018_CityBrain,
+  author       = {{Alibaba Clouder}},
+  title        = {How {ET City Brain} Is Transforming the Way We Live -- One City at a Time},
+  howpublished = {\url{https://www.alibabacloud.com/blog/593745}},
+  year         = {2018},
+  note         = {Blog de Alibaba Cloud Community, 11 de junio de 2018}
+}
+
+% ficha: MML2019_OlaVerde_Lima (corregido). Nota de prensa; autora y fecha en los
+% metadatos de la pagina.
+@misc{Sovero2019_OlaVerde,
+  author       = {Sovero Delgado, Claudia},
+  title        = {M{\'a}s sem{\'a}foros, menos polic{\'\i}as: {Lima} apunta a extender sistema de ola verde},
+  howpublished = {\href{https://elcomercio.pe/lima/transporte/semaforos-policias-municipalidad-lima-apunta-extender-sistema-ola-verde-ecpm-noticia-670681-noticia/}{\nolinkurl{https://elcomercio.pe/lima/transporte/}\allowbreak\nolinkurl{semaforos-policias-municipalidad-lima-}\allowbreak\nolinkurl{apunta-extender-sistema-ola-verde-ecpm-}\allowbreak\nolinkurl{noticia-670681-noticia/}}},
+  year         = {2019},
+  note         = {El Comercio (Lima), 30 de agosto de 2019}
+}
+
+% --- Estadistica (27.09.2026): bootstrap, Wilcoxon, media geometrica de cocientes y eta cuadrado.
+% Metadatos contrastados con Crossref el 27.09.2026.
+@book{Efron1993_Bootstrap,
+  author    = {Bradley Efron and Robert J. Tibshirani},
+  title     = {An Introduction to the Bootstrap},
+  publisher = {Chapman \& Hall},
+  address   = {New York},
+  year      = {1993},
+  doi       = {10.1007/978-1-4899-4541-9}
+}
+
+@article{Wilcoxon1945_Rangos,
+  author    = {Frank Wilcoxon},
+  title     = {Individual Comparisons by Ranking Methods},
+  journal   = {Biometrics Bulletin},
+  volume    = {1},
+  number    = {6},
+  pages     = {80--83},
+  year      = {1945},
+  doi       = {10.2307/3001968}
+}
+
+@article{Fleming1986_MediaGeometrica,
+  author    = {Philip J. Fleming and John J. Wallace},
+  title     = {How Not to Lie with Statistics: The Correct Way to Summarize Benchmark Results},
+  journal   = {Communications of the {ACM}},
+  volume    = {29},
+  number    = {3},
+  pages     = {218--221},
+  year      = {1986},
+  doi       = {10.1145/5666.5673}
+}
+
+@article{Olejnik2003_Eta,
+  author    = {Stephen Olejnik and James Algina},
+  title     = {Generalized Eta and Omega Squared Statistics: Measures of Effect Size for Some Common Research Designs},
+  journal   = {Psychological Methods},
+  volume    = {8},
+  number    = {4},
+  pages     = {434--447},
+  year      = {2003},
+  doi       = {10.1037/1082-989X.8.4.434}
+}

@@ -1,0 +1,25 @@
+% Generado por sintesis_plan.py. No editar a mano.
+\begin{table}[H]
+\setstretch{1}
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{lccrrrrrr}
+\toprule
+ & \makecell{Frente al fijo\\(\%) [IC95]} & \makecell{Frente al actuado\\(\%) [IC95]} & \multicolumn{6}{c}{Frente al fijo, sin el caso} \\
+\cmidrule(lr){4-9}
+Modelo & & & P1 & P2 & P3 & P4 & P5 & P6 \\
+\midrule
+IPPO vecinos & $-$0.0 [$-$0.6, +0.5] & $-$11.4 [$-$11.9, $-$10.9] & +1.4 & $-$0.4 & +0.1 & $-$0.5 & $-$0.4 & $-$0.2 \\
+MAPPO & +0.8 [+0.2, +1.4] & $-$10.7 [$-$11.3, $-$10.1] & +2.5 & +0.6 & +0.9 & +0.2 & +1.0 & $-$0.1 \\
+DQN & +6.4 [+5.9, +6.9] & $-$5.8 [$-$6.3, $-$5.2] & +8.5 & +4.4 & +6.3 & +7.1 & +5.5 & +6.7 \\
+IPPO local & +7.5 [+7.1, +7.9] & $-$4.8 [$-$5.3, $-$4.3] & +9.2 & +9.4 & +6.7 & +7.1 & +4.2 & +8.4 \\
+Q-learning & +21.1 [+20.3, +22.0] & +7.3 [+6.4, +8.2] & +23.7 & +20.1 & +20.9 & +22.0 & +17.3 & +22.8 \\
+SARSA & +20.1 [+19.4, +20.8] & +6.4 [+5.7, +7.0] & +21.4 & +20.0 & +19.9 & +20.6 & +16.5 & +22.1 \\
+Actuado & +12.9 [+12.2, +13.5] & -- & +15.9 & +12.9 & +13.9 & +14.3 & +11.2 & +9.3 \\
+Trivial & +87.6 [+82.3, +92.4] & -- & +54.8 & +74.7 & +112.9 & +113.1 & +112.7 & +66.9 \\
+\bottomrule
+\end{tabular}
+\caption[Robustez: resumen en un número]{Robustez. Resumen en un número: media geométrica, sobre los casos, del cociente entre el retraso total del modelo (política publicada) y el de la referencia, expresada como cambio \%; negativo es mejor. IC95\,\% bootstrap pareado por semilla dentro de cada caso (semillas 1001 a 1030). Las últimas columnas repiten el índice frente al fijo dejando fuera un caso. $^{a}$: faltan casos (el índice usa los disponibles).}
+\label{tab:robustez-numero-unico}
+\end{table}
