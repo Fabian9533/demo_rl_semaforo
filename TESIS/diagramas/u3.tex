@@ -39,8 +39,8 @@
 
 \node[archivo u3, text width=4.26cm, anchor=north] (trip) at ($(sumo.south -| xL)+(0.04,-0.42)$)
   {\nodo{\texttt{tripinfo} (leído por \texttt{comun.py})}{retraso (\texttt{timeLoss}), espera,\\
-   paradas, \textit{throughput}, CO\textsubscript{2}, NO\textsubscript{x},\\
-   no terminados; corredor: flujos\\ de extremo a extremo (\itf{2})}};
+   paradas, \textit{throughput}, no\\
+   terminados; corredor: flujos\\ de extremo a extremo (\itf{2})}};
 \node[proceso, text width=4.6cm, anchor=north] (lect) at (trip.north -| xR)
   {\nodo{Lecturas TraCI por segundo}{aproximaciones: colas,\\
    \texttt{ret\_retraso}, \texttt{ret\_colas};\\ carriles de enlace (\texttt{comun.py}):\\

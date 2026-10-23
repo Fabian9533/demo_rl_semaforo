@@ -168,7 +168,8 @@ def tabla_episodios(esc, train, filas, escogidas=None, sufijo="", nota=""):
 METRICAS_EVAL = [("timeloss_prom", "Retraso (s/veh)"), ("espera_prom", "Espera detenida (s/veh)"),
                  ("cola_prom", "Cola promedio (veh)"), ("cola_max", "Cola máxima (veh)"),
                  ("paradas_prom", "Paradas por vehículo"), ("throughput", "Throughput (veh)"),
-                 ("co2_prom", "CO$_2$ (g/veh)"), ("nox_prom", "NO$_x$ (mg/veh)"),
+                 # Entrega 3 (24.10.2026): sin emisiones (CO2 y NOx), que la tesis retiro del analisis
+                 # el 13.10; siguen en los CSV de evaluacion.
                  ("recompensa_decision", "Recompensa por decisión"),
                  ("cambios_fase", "Cambios de fase"),
                  # solo en corredor y red
@@ -249,18 +250,17 @@ def tabla_resumen(escenarios):
             f"{con_signo(tl['actuado']['delta_pct'])}\\,\\%",
             f"{con_signo(r('rl', 'espera_prom')['delta_pct'])}\\,\\%",
             f"{con_signo(r('rl', 'paradas_prom')['delta_pct'])}\\,\\%",
-            f"{con_signo(r('rl', 'co2_prom')['delta_pct'])}\\,\\%",
         ]) + r" \\")
     if not lineas:
         return ""
     cabecera = "\n".join([
-        r"\begin{tabular}{lrrrrrrrrr}",
+        r"\begin{tabular}{lrrrrrrrr}",
         r"\toprule",
         r" & \multicolumn{3}{c}{Retraso (s/veh)} & \multicolumn{2}{c}{RL vs fijo} & Actuado & "
-        r"\multicolumn{3}{c}{RL vs fijo, secundarias} \\",
-        r"\cmidrule(lr){2-4}\cmidrule(lr){5-6}\cmidrule(lr){7-7}\cmidrule(lr){8-10}",
+        r"\multicolumn{2}{c}{RL vs fijo, secundarias} \\",
+        r"\cmidrule(lr){2-4}\cmidrule(lr){5-6}\cmidrule(lr){7-7}\cmidrule(lr){8-9}",
         r"Escenario & Fijo & Actuado & RL & $\Delta$ [IC95\,\%] & $p$ & $\Delta$ vs fijo & "
-        r"Espera & Paradas & CO$_2$ \\",
+        r"Espera & Paradas \\",
         r"\midrule",
     ]) + "\n"
     largo = (f"Resumen por escenario: retraso promedio por vehículo con política congelada, {n_sem} "
