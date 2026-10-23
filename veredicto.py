@@ -717,18 +717,42 @@ def celda_semaforos(f):
     return apilar([sem, "+ rot."]) if f["rotonda"] == "si" else sem
 
 
+# Red y demanda de cada escenario del plan, para los encabezados de la matriz .tex (entrega 3, 23.10.2026:
+# antes el encabezado era el nombre del escenario, p. ej. "corredor_alta"). "Red con rotonda" va en dos lineas
+# para que la matriz quepa en el ancho del texto.
+RED_DEMANDA = {"corredor": ("Corredor", "nominal"), "corredor_alta": ("Corredor", "alta"),
+               "red": (r"Red con\\rotonda", "nominal"), "red_alta": (r"Red con\\rotonda", "alta"),
+               "malla3": (r"Malla $3 \times 3$", "nominal"), "malla3_alta": (r"Malla $3 \times 3$", "alta")}
+
+
+def encabezado_caso(caso, esc):
+    """Encabezado de la columna de un caso en la matriz: caso, red y demanda."""
+    red, dem = RED_DEMANDA.get(esc, (tex_esc(esc), ""))
+    return r"\makecell{" + r"\\".join(x for x in (caso, red, dem) if x) + "}"
+
+
+def nombre_fijo():
+    """El fijo de referencia en los titulos .tex: el ajustado del plan (fijo_2509) o el re-barrido."""
+    return "fijo ajustado" if FIJO == "fijo_2509" else "fijo re-barrido"
+
+
 def tex_matriz(filas):
     por = {(f["modelo"], f["caso"]): f for f in filas}
-    cab = " & ".join(r"\makecell{" + caso + r"\\" + tex_esc(esc) + "}" for caso, esc in CASOS)
+    cab = " & ".join(encabezado_caso(caso, esc) for caso, esc in CASOS)
     lineas = [" & ".join([NOMBRE[m]] + [palabra(por[(m, caso)]["veredicto"]) for caso, _ in CASOS])
               + r" \\" for m in MODELOS]
     referencias = ("El actuado se juzga frente al fijo." if SIN_TRIVIAL else
                    "El actuado y el trivial (verdes mínimos, desfases en 0) se juzgan frente al "
                    "fijo. *: la política da el mismo retraso y la misma espera que el trivial.")
-    largo = ("Veredicto de cada modelo en cada caso del plan de pruebas (regla de la sección de "
-             f"métodos): {nombre_retraso()} de la política publicada frente al fijo tuneado y al "
-             "actuado, semillas de evaluación 1001 a 1030. PENDIENTE: faltan datos o la política no "
-             f"convergió. {referencias}")
+    # nombres cortos de las filas y rotulo "= vecinos", explicados en el titulo (glosario de la tesis)
+    nombres = ("IPPO local, vecinos y spill: IPPO sin mensajes, con mensajes y con penalización de "
+               r"\textit{spillback}; DQN: Double DQN. ")
+    igual = ("= vecinos: la penalización no se activa e IPPO spill lleva el veredicto de IPPO vecinos. "
+             if any(palabra(f["veredicto"]) == "= vecinos" for f in filas) else "")
+    largo = (r"Veredicto de cada modelo en cada caso, con la regla de la Tabla~\ref{tab:veredictos}: "
+             f"{nombre_retraso()} de la versión evaluada frente al {nombre_fijo()} y al actuado, "
+             "semillas 1001 a 1030. " + nombres + igual + "PENDIENTE: faltan datos o el entrenamiento "
+             f"de la versión evaluada no se estabilizó. {referencias}")
     return (abrir_tabla() + r"\begin{tabular}{l" + "c" * len(CASOS) + "}\n" r"\toprule" "\n"
             + "Modelo & " + cab + r" \\" "\n" r"\midrule" "\n" + "\n".join(lineas) + "\n"
             + cerrar_tabla("Veredicto por caso y modelo", largo, "veredicto-matriz"))

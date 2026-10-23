@@ -7,7 +7,7 @@
 \setlength{\tabcolsep}{3pt}
 \begin{tabular}{lcccccc}
 \toprule
-Modelo & \makecell{P1\\corredor} & \makecell{P2\\corredor\_alta} & \makecell{P3\\red} & \makecell{P4\\red\_alta} & \makecell{P5\\malla3} & \makecell{P6\\malla3\_alta} \\
+Modelo & \makecell{P1\\Corredor\\nominal} & \makecell{P2\\Corredor\\alta} & \makecell{P3\\Red con\\rotonda\\nominal} & \makecell{P4\\Red con\\rotonda\\alta} & \makecell{P5\\Malla $3 \times 3$\\nominal} & \makecell{P6\\Malla $3 \times 3$\\alta} \\
 \midrule
 Actuado & EMPATA & FUNCIONA & MEJORA & EMPATA & FALLA & FALLA \\
 Q-learning & FALLA & MEJORA & FALLA & PENDIENTE & FALLA & FALLA \\
@@ -20,6 +20,6 @@ IPPO spill & FUNCIONA & FUNCIONA & = vecinos & = vecinos & = vecinos & PENDIENTE
 MAPPO & FUNCIONA & FUNCIONA & PENDIENTE & PENDIENTE & EMPATA & PENDIENTE \\
 \bottomrule
 \end{tabular}
-\caption[Veredicto por caso y modelo]{Veredicto de cada modelo en cada caso del plan de pruebas (regla de la sección de métodos): retraso de la política publicada frente al fijo tuneado y al actuado, semillas de evaluación 1001 a 1030. PENDIENTE: faltan datos o la política no convergió. El actuado se juzga frente al fijo.}
+\caption[Veredicto por caso y modelo]{Veredicto de cada modelo en cada caso, con la regla de la Tabla~\ref{tab:veredictos}: retraso de la versión evaluada frente al fijo ajustado y al actuado, semillas 1001 a 1030. IPPO local, vecinos y spill: IPPO sin mensajes, con mensajes y con penalización de \textit{spillback}; DQN: Double DQN. = vecinos: la penalización no se activa e IPPO spill lleva el veredicto de IPPO vecinos. PENDIENTE: faltan datos o el entrenamiento de la versión evaluada no se estabilizó. El actuado se juzga frente al fijo.}
 \label{tab:veredicto-matriz}
 \end{table}

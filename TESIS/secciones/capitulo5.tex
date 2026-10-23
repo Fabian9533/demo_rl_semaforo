@@ -11,10 +11,15 @@
 Este capítulo responde la pregunta de la tesis, que es la misma en los
 seis casos del plan que se ejecutaron: ¿el control aprendido reduce el retraso por
 vehículo frente al programa de tiempo fijo ajustado para ese caso, sin
-quedar por detrás del control actuado?
+quedar por detrás del control actuado? El control aprendido que se
+juzga es IPPO con mensajes. IPPO (\textit{Independent Proximal Policy
+Optimization}) pone un agente PPO en cada semáforo, todos con la misma
+red neuronal (Sección~\ref{sec:marl}); en IPPO con mensajes, cada
+agente recibe además información de sus semáforos vecinos.
+% fuente: capitulo2.tex, sec:marl (IPPO: PPO con agentes independientes; parametros compartidos entre semaforos)
 
 La respuesta corta es esta. Con la regla fijada antes de evaluar, IPPO
-con mensajes entre vecinos reduce el retraso frente al fijo ajustado en
+con mensajes reduce el retraso frente al fijo ajustado en
 el corredor y en la red con rotonda, entre un 3.6 y un 23.3\,\% (casos
 P1 a P4); empata con él en la malla de nueve semáforos (P5, y de forma
 provisional P6), y tiene menos retraso que el actuado en los seis casos.
@@ -24,27 +29,25 @@ entre un 25 y un 40\,\%. El capítulo mide además dos salvedades, con
 comprobaciones que se decidieron después del veredicto. En la red con
 rotonda y demanda nominal, la política aprendida da el mismo retraso que
 el ciclo más corto posible, que el barrido del fijo no había probado. Y
-con una medición más estricta la ventaja frente al fijo solo se mantiene
-con claridad en el corredor con demanda nominal; la ventaja frente al
-actuado se mantiene.
+con una medición más estricta, que suma al retraso la espera para entrar
+a la red y vuelve a ajustar el fijo con un barrido que empieza en el
+verde mínimo de 10~s (Sección~\ref{sec:robustez}), la ventaja frente al
+fijo solo se mantiene con claridad en el corredor con demanda nominal;
+la ventaja frente al actuado se mantiene.
 % fuente: plan2/veredicto.csv (ippo_vecinos: delta_fijo -6.8, -23.3, -8.8, -3.6, +1.8, +2.2; delta_act de
 % -3.6 a -41.0); plan2/sintesis_numero_unico.csv (-6.83 y -14.35); P3 igual al ciclo minimo (trivial,
 % -8.78 % frente al fijo en plan2/evaluacion_red_resumen_fijo_2509.csv); plan2/robustez_veredicto.csv
 % (P1 -6.7 FUNCIONA; P3 -0.5 "MEJORA (= trivial)"; P2, P4, P5 y P6 entre +1.1 y +2.6) y
-% plan2/robustez_sintesis_numero_unico.csv (-11.45 frente al actuado)
+% plan2/robustez_sintesis_numero_unico.csv (-11.45 frente al actuado); medicion mas estricta: retraso total
+% (timeLoss mas la espera para entrar, Ecuacion eq:retraso-total) frente al fijo re-barrido con la malla desde 10 s
+% (capitulo3.tex, sec:diseno-robustez; capitulo4.tex, sec:remedicion)
 
-\textbf{Qué se compara.} El retraso es el tiempo que cada vehículo
-pierde frente a un viaje a velocidad libre (el \texttt{timeLoss} de
-SUMO), promediado sobre los vehículos de la hora simulada. El fijo
-ajustado es el mejor programa de tiempo fijo que encontró, para cada
-caso, un barrido de verdes y desfases hecho antes de evaluar
-(Sección~\ref{sec:referencias-fijas}); en las tablas generadas y en las
-secciones de detalle aparece como ``fijo tuneado''. El actuado es el
-control de SUMO que alarga el verde mientras sus detectores ven
-vehículos. Son las dos referencias habituales en ingeniería de
-tránsito, y un control nuevo tiene que superar a las dos.
+% Entrega 3 (22.10.2026): las definiciones de la metrica, las referencias, el cambio porcentual y los
+% veredictos (antes "Que se compara", "Como se leen las cifras" y "Regla de veredicto" en esta apertura)
+% estan ahora en un solo lugar, al comienzo de sec:resultado-principal, junto a la tabla de resultados.
 
-En IPPO con mensajes (``IPPO vecinos'' en las tablas generadas), cada
+En IPPO con mensajes (``IPPO vecinos'' en las tablas generadas y en las
+secciones de detalle), cada
 semáforo es un agente que cada 5~s decide si mantiene el verde o pasa a
 la fase siguiente, con lo que ve en sus accesos y lo que le informan
 sus vecinos: la fase en que están, el tiempo que llevan en ella y sus
@@ -52,9 +55,10 @@ colas. Dos controles dicen si una mejora viene de la coordinación. IPPO
 sin mensajes (``IPPO local''), que está en el plan desde el principio,
 usa la misma red neuronal y la misma recompensa, pero no recibe nada de
 los vecinos: si el modelo con mensajes gana y este no, la diferencia la
-pone la información del vecino. El ciclo mínimo, que se agregó después
-del veredicto (Sección~\ref{sec:robustez}, donde se llama ``trivial''),
-es un programa fijo que da a cada fase los 10~s del verde mínimo: si la
+pone la información del vecino. El ciclo mínimo (``trivial'' en las
+tablas generadas y en las secciones de detalle), que se agregó después
+del veredicto (Sección~\ref{sec:robustez}), es un programa fijo que da
+a cada fase los 10~s del verde mínimo: si la
 política aprendida da lo mismo que él, la mejora no es una coordinación
 nueva, sino un ciclo corto que el barrido del fijo no había probado. Los
 demás modelos (Q-learning, SARSA, Double DQN y MAPPO) dicen qué aporta
@@ -66,6 +70,9 @@ corredor de dos semáforos, una red de tres semáforos con una rotonda y
 una malla de nueve), cada una con demanda nominal y alta; los casos
 impares tienen la nominal y los pares, la alta, y todos los parámetros
 se fijaron antes de entrenar. Segundo, la
+Sección~\ref{sec:resultado-principal} reúne en un solo lugar las
+definiciones que hacen falta para leer las cifras: la métrica, las dos
+referencias, el cambio porcentual y los veredictos. Con ellas, la
 Tabla~\ref{tab:resultado-principal} da el resultado de IPPO con
 mensajes en cada caso frente a las dos referencias, y la
 Tabla~\ref{tab:metas} lo compara con las metas. Tercero, la
@@ -87,37 +94,10 @@ al plan de pruebas; la lectura por modelo, a U2 y U4; el alcance, a U1
 y al impacto de U4 a nivel de corredor, y la robustez, a U3 y a la
 reproducibilidad.
 
-\textbf{Cómo se leen las cifras.} Un cambio es el porcentaje en que
-varía el retraso medio de un control frente a una referencia, sobre las
-mismas 30 semillas de evaluación (1001 a 1030), que ningún modelo vio al
-entrenar; un valor negativo indica menos retraso. Cada cambio tiene un
-intervalo de confianza al 95\,\% por \textit{bootstrap} pareado y el
-valor $p$ de la prueba de Wilcoxon pareada
-(Sección~\ref{sec:estadistica}). La recompensa es la señal que cada
-agente aprende a maximizar: la suma, segundo a segundo, de los vehículos
-retrasados en sus accesos, con signo negativo (un vehículo detenido
-cuenta 1, y uno que avanza a media velocidad, 0.5). Un cambio positivo
-de la recompensa indica que el agente aprendió lo que se le pidió, pero
-no decide el veredicto.
-
-\textbf{Regla de veredicto.} La regla
-(Sección~\ref{sec:veredicto}) se fijó antes de correr el plan: P1 a P5
-se congelaron el 25.09 y P6 se cerró el 28.09 con la misma regla. Exige
-que el intervalo de confianza al 95\,\% y la prueba de Wilcoxon
-coincidan, y da a cada modelo, en cada caso, uno de cinco veredictos:
-\begin{itemize}
-  \item FUNCIONA, si reduce el retraso al menos un 5\,\% sin perder
-    contra el actuado;
-  \item MEJORA, si lo reduce menos o pierde contra el actuado;
-  \item EMPATA, si el intervalo y la prueba no muestran juntos una
-    diferencia;
-  \item FALLA, si lo aumenta;
-  \item PENDIENTE, si el entrenamiento no se estabilizó; en ese caso se
-    da una lectura provisional.
-\end{itemize}
-El 5\,\% separa una mejora clara (FUNCIONA) de una mejora significativa
-pero pequeña (MEJORA); el empate lo deciden el intervalo y la prueba.
-Tampoco es la meta, que se contrasta aparte en la Tabla~\ref{tab:metas}.
+\textbf{Regla de veredicto.} Cada modelo recibe en cada caso uno de
+cinco veredictos (FUNCIONA, MEJORA, EMPATA, FALLA o PENDIENTE), con una
+regla fijada antes de correr el plan y definida con sus números en la
+Tabla~\ref{tab:veredictos}.
 
 \textbf{Criterio de análisis.} Cada caso se analiza con cinco
 preguntas, en este orden. Las tres primeras salen de la regla y la
@@ -130,7 +110,9 @@ comprobaciones de la cuarta se decidieron después del veredicto.
   \item ¿El veredicto es firme, o el entrenamiento no se estabilizó?
   \item ¿Es lo que el plan esperaba? Si no, ¿de dónde viene la
     diferencia? Se revisa, en este orden, la referencia (si el ciclo
-    mínimo o un fijo ajustado desde 10~s dan lo mismo), la métrica (si
+    mínimo, o un fijo ajustado con un barrido que empieza en el verde
+    mínimo de 10~s, dan lo mismo; Sección~\ref{sec:robustez}), la
+    métrica (si
     la ganancia se paga con espera para entrar a la red), la demanda (si
     el caso satura o la política se entrenó con otra) y el entrenamiento
     (si se estabilizó).
@@ -147,26 +129,22 @@ parámetros. La Tabla~\ref{tab:plan-resultados} repite el plan de la
 Sección~\ref{sec:plan2} para que el capítulo se lea solo. Ningún
 parámetro de la tabla se eligió después de ver un resultado.
 
-% fuente: Tabla tab:plan2-casos (Cap. III); columnas semaforos, carriles y demanda_veh_h de plan2/veredicto.csv;
-% calles y carriles: aristas no internas de plan2/corredor.net.xml, red.net.xml y malla3.net.xml
-\begin{table}[H]
+% fuente: secciones/tablas/plan_pruebas.tex, la misma tabla del plan del Cap. III (tab:plan2-casos), sin table,
+% caption ni label, que se ponen aqui para no duplicar etiquetas; columnas semaforos, carriles y demanda_veh_h de
+% plan2/veredicto.csv; calles y carriles: aristas no internas de plan2/corredor.net.xml (avenida y 2 transversales),
+% red.net.xml (avenida, 3 transversales y la calle de la rotonda) y malla3.net.xml (3 filas y 3 columnas); factores
+% de la demanda alta (2.0, 1.2 y 2.0) y su regla: capitulo4.tex, sec:calibracion (menor factor con el que una cola
+% de enlace llega al umbral de spillback en 2 de 3 semillas; en la red, el mayor factor que no satura la rotonda,
+% que se satura desde 1.3) y tab:red-alta-factor y tab:malla3-alta-factor
+% 23.10.2026: flota ([!tbp]); en [H] no cabia despues del titulo de la seccion y dejaba en blanco media pagina antes
+% del titulo y casi toda la pagina siguiente
+\begin{table}[!tbp]
 \setstretch{1}
 \centering
 \footnotesize
 \setlength{\tabcolsep}{3pt}
-\begin{tabular}{l>{\raggedright\arraybackslash}p{1.7cm}>{\raggedright\arraybackslash}p{1.4cm}rccc>{\raggedright\arraybackslash}p{3.6cm}}
-\toprule
-Caso & Red & Demanda & \makecell{Vehículos\\por hora} & \makecell{Semáforos\\(= agentes)} & Calles & \makecell{Carriles\\por sentido} & Qué pone a prueba \\
-\midrule
-P1 & Corredor & Nominal & 1810 & 2 & 3 & 1 & La pregunta común, en la red más simple \\
-P2 & Corredor & Alta ($\times 2.0$) & 3620 & 2 & 3 & 1 & Si sigue funcionando cuando la demanda supera la capacidad de un carril \\
-P3 & Red con rotonda & Nominal & 2150 & 3 & 5 & 2 & Si funciona con más carriles y con un elemento que no controla (la rotonda) \\
-P4 & Red con rotonda & Alta ($\times 1.2$) & 2580 & 3 & 5 & 2 & Lo mismo con un 20\,\% más de demanda, el límite que impone la rotonda \\
-P5 & Malla $3 \times 3$ & Nominal & 4350 & 9 & 6 & 2 & Si el método escala a una red con hasta cuatro vecinos por cruce \\
-P6 & Malla $3 \times 3$ & Alta ($\times 2.0$) & 8700 & 9 & 6 & 2 & Si supera a un fijo coordinado cuando la demanda supera la capacidad de la red \\
-\bottomrule
-\end{tabular}
-\caption[Plan de pruebas]{Plan de pruebas: parámetros de cada caso, fijados antes de entrenar. Tres redes, cada una con demanda nominal y alta. Carriles por sentido en la avenida (en la malla, en los dos ejes). El desglose de la demanda por tipo de flujo está en la Tabla~\ref{tab:demanda-flujos}.}
+\input{secciones/tablas/plan_pruebas}
+\caption[Plan de pruebas]{Plan de pruebas: parámetros de cada caso, fijados antes de entrenar. Tres redes, cada una con demanda nominal y alta; entre los dos casos de una misma red solo cambia la demanda. Demanda (veh/h): vehículos por hora que entran a la red. La base es la demanda nominal de cada red (P1, P3 y P5). En los casos con demanda alta (P2, P4 y P6) todos los flujos se multiplican por un factor elegido con la misma regla en las tres redes, subir la demanda hasta saturar los semáforos sin que colapse un elemento que no se controla: 2.0 en el corredor y en la malla, y 1.2 en la red con rotonda, porque desde 1.3 se satura la rotonda, que no tiene semáforo (Sección~\ref{sec:calibracion}). Semáforos: hay un agente por semáforo. Calles: la avenida y las que la cruzan, más la calle de la rotonda en la red; en la malla, tres filas y tres columnas. Carriles: en la malla, en los dos ejes. Qué mide: la pregunta que responde cada caso. El desglose de la demanda por tipo de flujo está en la Tabla~\ref{tab:demanda-flujos}.}
 \label{tab:plan-resultados}
 \end{table}
 
@@ -188,9 +166,9 @@ Común a los seis casos:
   \item \textbf{Controles:} el fijo ajustado y el actuado (referencias)
     y 8 modelos que aprenden (7 en la malla: la variante con recompensa
     de colas no se corrió en P5 ni en P6).
-  \item \textbf{Resultado esperado en cada caso:} FUNCIONA, que es la
-    pregunta común. Antes de correr no hubo predicciones numéricas por
-    caso.
+  \item \textbf{Resultado esperado en cada caso:} FUNCIONA, es decir, un
+    sí a la pregunta común. Antes de correr no hubo predicciones
+    numéricas por caso.
 \end{itemize}
 
 %----------------------------------------------------------------------
@@ -202,12 +180,148 @@ Común a los seis casos:
 Esta sección responde al objetivo general. La
 Tabla~\ref{tab:resultado-principal} es el resultado de la tesis: el
 retraso de IPPO con mensajes en cada caso frente al fijo ajustado y al
-actuado, con el cambio de su recompensa y el veredicto.
+actuado, con el cambio de su recompensa y el veredicto. Antes de la
+tabla se reúnen, en un solo lugar, las definiciones para leerla.
+
+\noindent\textbf{Métrica.} Es el retraso promedio por vehículo, en
+s/veh: el \texttt{timeLoss} que entrega SUMO, es decir, el tiempo que
+cada vehículo pierde frente a viajar a su velocidad ideal, sin otros
+vehículos ni semáforos, desde que entra a la red. Se promedia sobre los
+vehículos de la hora simulada y luego sobre las 30 semillas de
+evaluación (1001 a 1030), que ningún modelo vio al entrenar. Menos
+retraso es mejor (Secciones~\ref{sec:teoria-metricas}
+y~\ref{sec:u3}).
+% fuente: capitulo2.tex, tab:metricas (fila Retraso) y capitulo3.tex, sec:u3; por semilla, timeloss_prom de
+% comun.leer_tripinfo (media sobre los vehiculos del tripinfo); sobre las semillas, columna media (n = 30) de
+% plan2/evaluacion_<esc>_resumen_fijo_2509.csv
+
+\noindent\textbf{Referencias.} Son las dos habituales en ingeniería de
+tránsito (Sección~\ref{sec:teoria-control}), las mismas para todos los
+modelos; un control nuevo tiene que superar a las dos.
+\begin{itemize}
+  \item El \emph{fijo ajustado} (``fijo tuneado'' en las tablas
+    generadas y en las secciones de detalle) repite siempre el mismo
+    ciclo, con verdes y desfases que no cambian con el tráfico. En cada
+    caso es el programa con menos retraso de un barrido de verdes y
+    desfases hecho antes de evaluar, con las semillas 2001 a 2003
+    (Sección~\ref{sec:referencias-fijas} y Tabla~\ref{tab:plan2-fijo}).
+    Como el barrido se hace para cada caso, cada caso tiene su propio
+    programa fijo; en todos, el ganador da más verde a la avenida que a
+    las transversales. De P1 a P2, el retraso del fijo sube de 21.30 a 154.70~s/veh
+    sobre todo porque la demanda se duplica (de 1810 a 3620~veh/h);
+    además, su programa se ajustó por separado: 20~s de verde en la
+    avenida y 10~s en la transversal, con un desfase de 15~s entre los
+    dos cruces, en P1, y 25 y 15~s, con un desfase de 25~s, en P2.
+  \item El \emph{actuado} es el control nativo de SUMO por detectores:
+    alarga el verde mientras siguen llegando vehículos y pasa a la fase
+    siguiente cuando detecta un hueco, siempre entre 10 y 60~s de verde,
+    los mismos límites del agente. No aprende ni tiene verdes fijados de
+    antemano: reacciona a la demanda de cada momento
+    (Sección~\ref{sec:referencias-fijas}).
+\end{itemize}
+% fuente: fijo ajustado: capitulo4.tex, sec:referencias-fijas y tab:plan2-fijo (P1 20/10 s, ciclo 36, desfases
+% 0/15; P2 25/15 s, ciclo 46, desfases 0/25; verde de la avenida mayor que el transversal en los seis casos);
+% retraso del fijo: columna media del brazo fijo_2509, metrica timeloss_prom, en
+% plan2/evaluacion_corredor_resumen_fijo_2509.csv (21.2967) y plan2/evaluacion_corredor_alta_resumen_fijo_2509.csv
+% (154.7013); demanda: columna demanda_veh_h de plan2/veredicto.csv (1810 y 3620); actuado: capitulo2.tex
+% (subseccion Control de tiempo fijo y control actuado) y capitulo4.tex (subseccion Programa actuado:
+% comun.archivo_actuado, minDur 10, maxDur 60 y desfase 0 en todos los cruces)
+% glosario: las aclaraciones ``fijo tuneado'', ``IPPO vecinos'' y ``trivial'' (en las tablas generadas y en las
+% secciones de detalle) se quitan cuando el cambio de nombres llegue a las secciones 5.4 a 5.9 y a los scripts que
+% escriben esas tablas (veredicto.py, tablas_cap5.py, sintesis_plan.py, barrido_demanda.py). 23.10.2026: vuelve
+% "y en las secciones de detalle", que estaba el 14.10, porque la prosa de 5.4 a 5.9 sigue con los nombres viejos
+
+\noindent\textbf{Versión evaluada.} Cada modelo se entrena tres veces
+en cada caso, con las semillas base 42, 2042 y 4042. Durante cada
+entrenamiento la política se valida cada 10 episodios con las semillas
+999 y 1999, y se guarda la versión con menos retraso en esa validación.
+De los tres entrenamientos se toma el mediano por ese valor, y su
+versión guardada es la versión evaluada: la que representa al modelo en
+las tablas. La regla se fijó antes de correr y no usa las semillas de
+evaluación (Sección~\ref{sec:protocolo}, donde la versión evaluada se
+llama política publicada).
+% fuente: capitulo3.tex, sec:protocolo (validacion cada diez episodios y en el ultimo, con la media del timeLoss en
+% 999 y 1999; politica publicada = checkpoint con menor valor de validacion; base publicada = mediana de las tres
+% bases por ese valor); veredicto.base_mediana; plan2/ESPEC.md seccion 3
+
+\noindent\textbf{Cambio porcentual.} Se calcula como en el programa que
+compara los controles (\texttt{consolidar.py},
+Ecuación~\ref{eq:delta}), con el retraso medio de cada control sobre las
+mismas 30 semillas, y se da con un decimal:
+\begin{equation*}
+  \text{cambio} = \frac{\text{retraso del modelo} - \text{retraso de la referencia}}{\text{retraso de la referencia}} \times 100 .
+\end{equation*}
+En P2 frente al fijo, por ejemplo,
+$(118.66 - 154.70) / 154.70 \times 100 = -23.3$\,\%. El cálculo usa las
+medias sin redondear, así que rehacer la cuenta con los valores de la
+tabla puede cambiar el último decimal: en P1, los valores de la tabla
+dan $-6.9$\,\%, y las medias sin redondear, $-6.8$\,\%. Un cambio
+negativo indica menos retraso que la referencia, y por eso es una
+mejora; uno positivo, más retraso. El signo importa: el cambio no es un
+valor absoluto, y un $-3$\,\% (3\,\% menos de retraso) es mejor que un
+$+6$\,\% (6\,\% más). Cada cambio lleva un intervalo de confianza al
+95\,\% (IC95), por \textit{bootstrap} pareado por semilla con 10\,000
+remuestreos, y el valor $p$ de la prueba de Wilcoxon pareada
+(Sección~\ref{sec:estadistica}). El cambio de la recompensa se lee al
+revés, como explica la nota de la Tabla~\ref{tab:resultado-principal}.
+% fuente: consolidar.comparar (consolidar.py l. 90-118: round((a.mean() - b.mean()) / b.mean() * 100, 2) sobre las
+% semillas comunes; bootstrap pareado con N_BOOT = 10000, default_rng(0) y percentiles 2.5 y 97.5; stats.wilcoxon
+% sobre las diferencias por semilla); veredicto.escribir_csv lo escribe con un decimal (txt(delta, 1));
+% evaluar.comparar (evaluar.py l. 145-158) usa la misma formula en el modo antiguo de la fase exploratoria.
+% P2: retraso 118.659 de ippo_vecinos y delta_fijo -23.3 en plan2/veredicto.csv; media 154.7013 del brazo
+% fijo_2509 (timeloss_prom) en plan2/evaluacion_corredor_alta_resumen_fijo_2509.csv. P1: (19.84 - 21.30) / 21.30
+% = -6.85 % con los valores de la tabla; con las medias 19.845 de ippo_vecinos_s4042 y 21.2967 de fijo_2509
+% (plan2/evaluacion_corredor_resumen_fijo_2509.csv), -6.82 %, que se da como -6.8 %. 23.10.2026 (verificacion):
+% antes citaba evaluar.comparar, que redondea directo a un decimal; las cifras del plan salen de consolidar.py
+
+\noindent\textbf{Veredicto.} Se obtiene comparando el modelo con el
+fijo ajustado (el cambio frente al fijo, su IC95 y su valor $p$), y la
+condición frente al actuado solo decide entre FUNCIONA y MEJORA. La
+regla (Tabla~\ref{tab:veredictos} y Sección~\ref{sec:veredicto}) se
+fijó antes de correr el plan y se aplicó sin cambios: P1 a P5 se
+congelaron el 25.09 y P6 se cerró el 28.09 con la misma regla. El
+5\,\% separa una mejora clara (FUNCIONA) de una pequeña (MEJORA); no es
+la meta de la tesis, de $-25$ a $-40$\,\%, que se contrasta aparte en
+la Tabla~\ref{tab:metas}.
+
+% fuente: capitulo3.tex, sec:veredicto (condiciones de cada veredicto, criterio de convergencia y umbral del 5 %);
+% plan2/ESPEC.md, seccion 7; veredicto.py (funciones veredicto y pierde_con_actuado: UMBRAL_DELTA = -5.0 y
+% ALFA = 0.05; convergencia y tercio_final: UMBRAL_CONVERGENCIA = 5.0 para la meseta y la estabilidad)
+\begin{table}[H]
+\setstretch{1}
+\centering
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{l>{\raggedright\arraybackslash}p{8.4cm}>{\raggedright\arraybackslash}p{3.5cm}}
+\toprule
+Veredicto & Condición (frente al fijo ajustado, salvo donde se indica) & Cómo se lee \\
+\midrule
+FUNCIONA & Baja el retraso al menos un 5\,\% (cambio de $-5$\,\% o más negativo), el IC95 queda entero bajo cero, Wilcoxon da $p < 0.05$ y el modelo no pierde contra el actuado & Mejora clara; no quiere decir que se cumpla la meta \\
+MEJORA & El IC95 queda entero bajo cero y $p < 0.05$, pero la baja es menor del 5\,\% (cambio entre $-5$ y $0$\,\%) o el modelo pierde contra el actuado & Mejora real, pero pequeña o por detrás del actuado \\
+EMPATA & El IC95 incluye el cero o $p \geq 0.05$: el intervalo y la prueba no muestran juntos una diferencia & No se distingue del fijo \\
+FALLA & El IC95 queda entero sobre cero y $p < 0.05$ & Más retraso que el fijo \\
+PENDIENTE & Faltan datos, o el entrenamiento del que sale la versión evaluada no se estabilizó (en el último tercio de su validación, meseta fuera de $-5$ a $+5$\,\% o estabilidad mayor del 5\,\%); en ese caso se da además un veredicto provisional con las filas anteriores & Sin veredicto firme; el que se da es provisional \\
+\bottomrule
+\end{tabular}
+
+\smallskip
+{\raggedright\setlength{\parindent}{0pt}\setlength{\parskip}{2pt}
+Pierde contra el actuado: el IC95 del cambio frente al actuado queda entero sobre cero, con $p < 0.05$.\par
+Meseta: cuánto cambiaría la validación si su tendencia siguiera un tercio más del entrenamiento. Estabilidad: distancia porcentual entre la media de las tres últimas validaciones y el mínimo de su media móvil de tres.\par}
+\caption[Regla de veredicto]{Regla de veredicto, fijada antes de correr el plan (Sección~\ref{sec:veredicto}). IC95: intervalo de confianza al 95\,\% del cambio; $p$: prueba de Wilcoxon.}
+\label{tab:veredictos}
+\end{table}
 
 % fuente: plan2/veredicto.csv, filas ippo_vecinos (retraso, delta_fijo, delta_act, delta_recompensa, convergio,
 % veredicto) y actuado (retraso); retraso del fijo: brazo fijo_2509, metrica timeloss_prom, columna media de
 % plan2/evaluacion_<esc>_resumen_fijo_2509.csv (21.2967, 154.7013, 21.7187, 30.0517, 20.8387, 36.726);
-% resumen en un numero: plan2/sintesis_numero_unico.csv (ippo_vecinos frente a fijo_2509 y al actuado)
+% resumen en un numero: plan2/sintesis_numero_unico.csv (ippo_vecinos frente a fijo_2509 y al actuado: delta_geo,
+% ic_lo, ic_hi); notas: P6 convergio "no" y convergen 1/3 en plan2/veredicto.csv (converge la base 2042; la evaluada
+% es la 42: tablas/veredicto_bases.tex, tab:veredicto-bases-ippo-vecinos, validacion 34.80 de la 42, 38.81 de la
+% 2042, que es la que converge, y 34.55 de la 4042; la mediana es la 42); IC95 y p: columnas ic_fijo, p_fijo,
+% ic_act y p_act de las filas ippo_vecinos de plan2/veredicto.csv; recompensa: consolidar.py (delta de los retornos
+% sobre |media_ref|, frente al brazo de referencia fijo_2509: veredicto.delta_recompensa lee delta_pct sin sufijo de
+% evaluacion_<esc>_resumen_fijo_2509.csv) y retorno ret_retraso (capitulo3.tex, subseccion Retornos por segundo)
 \begin{table}[!tbp]
 \setstretch{1}
 \centering
@@ -215,7 +329,7 @@ actuado, con el cambio de su recompensa y el veredicto.
 \setlength{\tabcolsep}{2pt}
 \begin{tabular}{l>{\raggedright\arraybackslash}p{2.1cm}rrrrrrl}
 \toprule
- & & & \multicolumn{2}{c}{Retraso (s/veh)} & \multicolumn{2}{c}{\makecell{Cambio frente\\al (\%)}} & \makecell{Cambio de\\la recompensa} & \\
+ & & & \multicolumn{2}{c}{Retraso (s/veh)} & \multicolumn{2}{c}{\makecell{Cambio (\%)\\frente al}} & \makecell{Cambio de\\la recompensa} & \\
 \cmidrule(lr){4-5}\cmidrule(lr){6-7}
 Caso & Red y demanda & Veh/h & Fijo & \makecell{IPPO con\\mensajes} & fijo & actuado & (\%, + = mejor) & Veredicto \\
 \midrule
@@ -224,19 +338,26 @@ P2 & Corredor, alta & 3620 & 154.70 & 118.66 & $-23.3$ & $-4.4$ & $+19.9$ & FUNC
 P3 & Red con rotonda, nominal & 2150 & 21.72 & 19.81 & $-8.8$ & $-7.8$ & $+15.6$ & FUNCIONA \\
 P4 & Red con rotonda, alta & 2580 & 30.05 & 28.97 & $-3.6$ & $-3.6$ & $+9.2$ & MEJORA \\
 P5 & Malla $3 \times 3$, nominal & 4350 & 20.84 & 21.21 & $+1.8$ & $-16.4$ & $+7.3$ & EMPATA \\
-P6 & Malla $3 \times 3$, alta & 8700 & 36.73 & 37.54 & $+2.2$ & $-41.0$ & $-7.8$ & PENDIENTE$^{\mathrm{a}}$ \\
+P6 & Malla $3 \times 3$, alta & 8700 & 36.73 & 37.54 & $+2.2$ & $-41.0$ & $-7.8$ & PENDIENTE \\
 \midrule
-\multicolumn{3}{l}{\makecell[l]{Resumen en un\\número, P1 a P6$^{\mathrm{b}}$}} & & & $-6.83$ & $-14.35$ & & \\
+\multicolumn{3}{l}{\makecell[l]{Resumen en un\\número, P1 a P6}} & & & $-6.83$ & $-14.35$ & & \\
 \bottomrule
 \end{tabular}
-\caption[Resultado principal]{Resultado principal: retraso de IPPO con mensajes frente al fijo ajustado y al actuado en cada caso, sobre las semillas de evaluación 1001 a 1030. Un cambio negativo del retraso es una mejora. (a) Veredicto provisional: empate; se estabiliza 1 de los 3 entrenamientos. (b) Media geométrica de los seis cocientes, con intervalo de $-7.53$ a $-6.12$\,\% frente al fijo y de $-15.08$ a $-13.64$\,\% frente al actuado.}
+
+\smallskip
+{\raggedright\setlength{\parindent}{0pt}\setlength{\parskip}{2pt}
+P6: veredicto provisional, empate. La regla da un veredicto provisional cuando el entrenamiento del que sale la versión evaluada no se estabilizó (Tabla~\ref{tab:veredictos}). En P6 se estabiliza 1 de los 3 entrenamientos de IPPO con mensajes, pero la regla de la versión evaluada no lo elige: su validación es la peor de los tres.\par
+Resumen en un número: en cada caso se divide el retraso de IPPO con mensajes entre el de la referencia, se saca la media geométrica de esos seis cocientes y se expresa como cambio porcentual. Se usa porque promedia razones sin que un caso pese más solo por tener retrasos más grandes (Sección~\ref{sec:evaluacion} y Ecuación~\ref{eq:media-geometrica}). Su IC95 va de $-7.53$ a $-6.12$\,\% frente al fijo y de $-15.08$ a $-13.64$\,\% frente al actuado.\par
+IC95 del cambio frente al fijo (\%): P1 [$-8.0$, $-5.8$], P2 [$-23.9$, $-22.7$], P3 [$-9.3$, $-8.2$], P4 [$-5.0$, $-2.3$], P5 [$+0.4$, $+3.4$] y P6 [$-1.4$, $+6.2$]; $p < 0.001$ en P1 a P4, $p = 0.523$ en P5 y $p = 0.567$ en P6. Frente al actuado, los seis IC95 quedan enteros bajo cero, con $p < 0.001$.\par
+Cambio de la recompensa: la recompensa es la señal que cada agente aprende a maximizar, la suma segundo a segundo de los vehículos retrasados en sus accesos, con signo negativo (un vehículo detenido cuenta 1, y uno a media velocidad, 0.5). Su cambio se mide frente al fijo ajustado y, como la recompensa es negativa, se divide entre el valor absoluto de la misma señal medida con el fijo; un valor positivo indica que el agente acumuló menos retraso en su propia señal. Dice si aprendió lo que se le pidió, pero no decide el veredicto.\par}
+\caption[Resultado principal]{Resultado principal: retraso de IPPO con mensajes frente al fijo ajustado y al actuado en cada caso, sobre las semillas de evaluación 1001 a 1030. Un cambio negativo del retraso es una mejora. Veredicto según la Tabla~\ref{tab:veredictos}.}
 \label{tab:resultado-principal}
 \end{table}
 
 El retraso del actuado en los seis casos es de 21.07, 124.14, 21.48,
 30.04, 25.37 y 63.66~s/veh. En P5 el veredicto es un empate aunque el
-intervalo ($+0.4$ a $+3.4$\,\%) no toca el cero, porque la prueba de
-Wilcoxon no muestra diferencia ($p = 0.523$). El resumen en un número
+IC95 no toca el cero, porque la prueba de Wilcoxon no muestra
+diferencia ($p = 0.523$). El resumen en un número
 depende sobre todo de P2: sin ese caso queda en $-3.14$\,\% frente al
 fijo. Sin P6, sobre P1 a P5, queda en $-8.55$\,\% frente al fijo y en
 $-7.72$\,\% frente al actuado, porque el actuado colapsa en P6.
@@ -303,8 +424,8 @@ Cola promedio & $-20$\,\% o más & $-9.1$, $-5.0$, $-41.3$, $-16.6$, $-29.0$, $+
 \label{sec:esperado-obtenido}
 \label{sec:lectura-caso}
 
-Esta sección responde a U3 y al plan de pruebas: qué casos no salieron
-como se esperaba y de dónde viene la diferencia, medida. Lo esperado es
+Esta sección responde a U3 y al plan de pruebas: dice qué casos no
+salieron como se esperaba y mide de dónde viene la diferencia. Lo esperado es
 la pregunta de cada caso (Sección~\ref{sec:plan2}), con FUNCIONA como
 hipótesis común. La Tabla~\ref{tab:esperado-obtenido} aplica a cada
 caso las preguntas 1 y 4 del criterio de análisis; las preguntas 2 y 3
@@ -314,7 +435,12 @@ Sección~\ref{sec:lectura-modelo}.
 % fuente: plan2/veredicto.csv (ippo_vecinos); trivial en plan2/evaluacion_<esc>_resumen_fijo_2509.csv (timeloss_prom:
 % corredor +385.2, red -8.78, red_alta -6.99); P3 igual al trivial en 30/30 semillas (plan2/evaluacion_red.csv);
 % P5: ippo_vecinos_s2042 igual al trivial en 24/30 semillas (plan2/evaluacion_malla3.csv); P6: convergio 1/3
-\begin{table}[!tbp]
+% (converge la base 2042; la evaluada es la 42: tablas/veredicto_bases.tex). Entrega 3: la pregunta de P3 ya no
+% dice "con mas carriles", porque entre casos cambian tambien calles, semaforos, demanda y red, y el plan no aisla
+% el efecto de los carriles. 23.10.2026: la pregunta de P6 es la de la columna "Que mide" de
+% tablas/plan_pruebas.tex (Tablas 3.4 y 5.1); antes decia "Supera a un fijo coordinado cuando la demanda supera la
+% capacidad de la red?", la del plan del 14.10. La tabla va en [H] para que no flote sobre el titulo de la seccion
+\begin{table}[H]
 \setstretch{1}
 \centering
 \footnotesize
@@ -325,10 +451,10 @@ Caso & Pregunta del plan & Obtenido & ¿Salió como se esperaba? & Origen de la 
 \midrule
 P1 & La pregunta común, en la red más simple & $-6.8$\,\%, FUNCIONA & Sí & Ninguno: el ciclo mínimo aumenta el retraso un 385\,\% \\
 P2 & ¿Sigue funcionando con demanda por encima de la capacidad de un carril? & $-23.3$\,\%, FUNCIONA & Sí, con la métrica del plan & La métrica: la ganancia se paga con espera para entrar a la red \\
-P3 & ¿Funciona con más carriles y con un elemento que no controla? & $-8.8$\,\%, FUNCIONA & Solo en apariencia & La referencia: la política es el ciclo mínimo, que el barrido del fijo no probó \\
+P3 & ¿Funciona cuando una parte de la red, la rotonda, no se controla con semáforos? & $-8.8$\,\%, FUNCIONA & Solo en apariencia & La referencia: la política es el ciclo mínimo, que el barrido del fijo no probó \\
 P4 & ¿Y con un 20\,\% más de demanda? & $-3.6$\,\%, MEJORA & En parte & La referencia: el ciclo mínimo baja más ($-7.0$\,\%) \\
 P5 & ¿Escala a una malla con hasta cuatro vecinos por cruce? & $+1.8$\,\%, EMPATA & No & La referencia: el fijo ya coordina la malla; la política es el ciclo mínimo en 24 de 30 semillas \\
-P6 & ¿Supera a un fijo coordinado cuando la demanda supera la capacidad de la red? & $+2.2$\,\%, PENDIENTE & No & El entrenamiento: se estabiliza 1 de los 3 entrenamientos \\
+P6 & ¿Y con el doble de demanda, cuando con el actuado las colas llenan los enlaces entre cruces? & $+2.2$\,\%, PENDIENTE & No & El entrenamiento: se estabiliza 1 de los 3 entrenamientos, y no el de la versión evaluada \\
 \bottomrule
 \end{tabular}
 \caption[Lo esperado frente a lo obtenido]{Lo esperado frente a lo obtenido con IPPO con mensajes, caso por caso. Lo esperado es la pregunta de cada caso, con FUNCIONA como hipótesis común. Las comprobaciones de la última columna se decidieron después del veredicto; el ciclo mínimo se agregó al ver la política de P3.}
@@ -535,7 +661,8 @@ retraso medio en las semillas 999 y 1999, medido cada 10 episodios, y se
 compara con el fijo tuneado del caso medido en esas mismas dos
 semillas.
 
-\begin{figure}[H]
+% 23.10.2026: flota ([!tbp]); en [H], con 0.72 de la altura del texto, dejaba en blanco casi media pagina
+\begin{figure}[!tbp]
 \centering
 \includegraphics[width=\textwidth,height=0.72\textheight,keepaspectratio]{fig_plan2_convergencia.png}
 \caption[Curvas de aprendizaje del plan de pruebas]{Curvas de aprendizaje de IPPO vecinos, MAPPO, DQN y Q-learning en cada caso del plan de pruebas: serie de validación de la base publicada (la mediana de las tres bases por su valor de validación). Cada punto es el retraso medio (s/veh) en las semillas de validación 999 y 1999, medido cada 10 episodios de entrenamiento; el punto grande con borde negro es el \textit{checkpoint} publicado, que es el que se evalúa con las semillas 1001 a 1030. La línea gris discontinua es el fijo tuneado del caso en las mismas dos semillas. La banda sombreada es el último tercio del entrenamiento, que contiene las siete últimas validaciones (episodios 140 a 200), sobre las que se mide la convergencia; ``no conv.'' marca las bases publicadas que no la cumplen. Cada panel tiene su propia escala vertical.}
@@ -759,7 +886,8 @@ Figura~\ref{fig:plan2-demanda} dan el cambio en las dos métricas.
 % fuente: python barrido_demanda.py resumir (desde demo_rl/) -> plan2/demanda/resumen_demanda.csv
 \input{secciones/tablas/demanda_corredor}
 
-\begin{figure}[H]
+% 23.10.2026: flota ([!tbp]); en [H] dejaba en blanco media pagina
+\begin{figure}[!tbp]
 \centering
 \includegraphics[width=\textwidth]{fig_plan2_demanda.png}
 \caption[Barrido de demanda en el corredor: cambio por control]{Barrido de demanda en la red de P1: cambio porcentual de cada control frente al fijo re-barrido para ese nivel de demanda, en retraso total (panel superior) y en \texttt{timeLoss} (panel inferior), sobre las semillas de evaluación 1001 a 1030. Filas: el plan fijo de P1 sin retunear, el actuado y las políticas publicadas de IPPO vecinos entrenadas con $\times$1.0 (P1) y con $\times$2.0 (P2), sin reentrenar. Columnas: factor que multiplica toda la demanda de P1, y el perfil variable. Color: rojo, más retraso que el fijo re-barrido; azul, menos; la intensidad crece con el tamaño del cambio.}
@@ -1091,10 +1219,11 @@ espera para entrar es de 0.37~s/veh con el fijo, el actuado y las
 políticas de IPPO, DQN y MAPPO, así que el retraso total solo suma una
 constante. IPPO vecinos queda en $-6.7$\,\% (frente a $-6.8$\,\% en el
 veredicto pre-registrado), MAPPO en $-7.0$\,\% e IPPO spill en $-5.1$\,\%, y ningún
-veredicto cambia. El trivial falla por mucho ($+390.3$\,\%): con un
-carril por sentido y la demanda nominal, el ciclo corto no alcanza.
+veredicto cambia. El trivial falla por mucho ($+390.3$\,\%): en el
+corredor, con la demanda nominal, el ciclo corto no alcanza.
 % fuente: plan2/robustez_veredicto.csv (P1); plan2/evaluacion_corredor_resumen.csv (retraso_insercion_prom
-% 0.37 en fijo, actuado, ippo_vecinos_s4042, mappo_s42 y dqn_s4042)
+% 0.37 en fijo, actuado, ippo_vecinos_s4042, mappo_s42 y dqn_s4042). 23.10.2026 (entrega 3, pedido 2b): antes
+% decia "con un carril por sentido y la demanda nominal"; el plan no aisla el efecto de los carriles
 
 \noindent\textbf{P2: la métrica.} El programa fijo tampoco cambia;
 cambia lo que se mide. Con el fijo, cada vehículo espera en promedio
