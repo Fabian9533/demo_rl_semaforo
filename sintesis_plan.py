@@ -28,7 +28,19 @@ Lee plan2/evaluacion_<esc>.csv (consolidar.py, una fila por brazo y semilla) y p
      y el de la re-medicion.
 Salidas: plan2/sintesis_numero_unico.csv, plan2/sintesis_anova.csv,
   TESIS/secciones/tablas/plan2_numero_unico.tex (tab:plan2-numero-unico),
-  TESIS/secciones/tablas/plan2_anova.tex (tab:plan2-anova), TESIS/images/fig_plan2_mejora_caso.png.
+  TESIS/secciones/tablas/plan2_anova.tex (tab:plan2-anova), TESIS/images/fig_plan2_mejora_caso.png
+  y, con --fijo distinto de "fijo", el mismo dibujo en PDF vectorial (fig_plan2_mejora_caso.pdf).
+
+Entrega 3 (23.10.2026): los .tex y las figuras usan los nombres del glosario de la tesis (veredicto.NOMBRE_TEX:
+IPPO con mensajes, IPPO sin mensajes, ciclo minimo, version evaluada, medicion mas estricta) y la nota de los
+casos que faltan va en palabras junto al modelo (antes, un superindice a). La figura de la mejora por caso
+(figura_mejora) cambio la linea de la meta por bandas de veredicto: verde para -5 % o menos, verde muy claro de
+-5 a 0 % y roja para valores positivos; cada punto lleva el color de su veredicto de veredicto.csv (hueco si es
+PENDIENTE, con el borde del color del provisional), la forma dice la serie y una linea punteada marca la meta.
+Los CSV no cambian.
+Verificacion de la fase 2 (23.10.2026): el rotulo de la banda de FUNCIONA agrega "y no pierde contra el actuado";
+la tabla del resumen en un numero da dos decimales (DEC_NUMERO), como el texto, y la del ANOVA llama
+"Entrenamiento" a la semilla base y "Double DQN" a DQN. Los CSV siguen sin cambios.
 
 Opciones del resultado principal (sin ellas, todo queda como antes; las mismas de veredicto.py):
   --fijo BRAZO   referencia del numero unico, del ANOVA y de la figura (fijo_2509: el fijo del veredicto
@@ -182,8 +194,14 @@ def escribir_csv(ruta, filas):
     print("Escrito", ruta)
 
 
-def num(x):
-    return f"{x:+.1f}".replace("-", "$-$")
+def num(x, dec=1):
+    return f"{x:+.{dec}f}".replace("-", "$-$")
+
+
+# Decimales del resumen en un numero en la tabla (verificacion de la fase 2 de la entrega 3, 23.10.2026): dos, como
+# fija la regla 2 del plan del 14.10 y como lo cita el texto (-6.83, -14.35, -0.03 [-0.56, +0.53]); con uno, la tabla
+# de robustez imprimia "-0.0 [-0.6, +0.5]" junto a un texto que dice -0.03.
+DEC_NUMERO = 2
 
 
 def etiqueta(nombre):
@@ -202,22 +220,31 @@ def titulo(corto, largo):
 def tabla_numero(filas, casos, ruta, metrica):
     por = {(f["modelo"], f["referencia"]): f for f in filas}
     lineas = []
+    faltan_casos = False
     for m in MODELOS:
         f, a = por.get((m, FIJO)), por.get((m, "actuado"))
         if not f:
             continue
-        celda_f = f"{num(f['delta_geo'])} [{num(f['ic_lo'])}, {num(f['ic_hi'])}]"
-        celda_a = "--" if not a else f"{num(a['delta_geo'])} [{num(a['ic_lo'])}, {num(a['ic_hi'])}]"
-        sens = [num(f[f"sin_{c}"]) if f"sin_{c}" in f else "--" for c in casos]
-        nota = "" if f["casos"] == "/".join(casos) else r"$^{a}$"
-        lineas.append(" & ".join([vd.NOMBRE[m] + nota, celda_f, celda_a] + sens) + r" \\")
+        # con dos decimales la tabla no cabe en el ancho del texto con el intervalo al lado: va debajo del valor
+        d = DEC_NUMERO
+        celda_f = vd.apilar([num(f["delta_geo"], d), f"[{num(f['ic_lo'], d)}, {num(f['ic_hi'], d)}]"])
+        celda_a = "--" if not a else vd.apilar([num(a["delta_geo"], d),
+                                                f"[{num(a['ic_lo'], d)}, {num(a['ic_hi'], d)}]"])
+        sens = [num(f[f"sin_{c}"], d) if f"sin_{c}" in f else "--" for c in casos]
+        # entrega 3: la nota va en palabras junto al modelo (antes, un superindice a explicado en el titulo)
+        faltan = [c for c in casos if c not in f["casos"].split("/")]
+        faltan_casos = faltan_casos or bool(faltan)
+        nombre = vd.NOMBRE_TEX[m] + (f" (sin {', '.join(faltan)})" if faltan else "")
+        lineas.append(" & ".join([nombre, celda_f, celda_a] + sens) + r" \\")
     que = "retraso total" if metrica == "retraso_total_prom" else "timeLoss"
     corto, largo = titulo("Resumen en un número", (
         r"Resumen en un número: media geométrica, sobre los casos, del "
-        r"cociente entre el " + que + r" del modelo (política publicada) y el de la referencia, "
+        r"cociente entre el " + que + r" del modelo (versión evaluada) y el de la referencia, "
         r"expresada como cambio \%; negativo es mejor. IC95\,\% bootstrap pareado por semilla dentro de "
         r"cada caso (semillas 1001 a 1030). Las últimas columnas repiten el índice frente al fijo "
-        r"dejando fuera un caso. $^{a}$: faltan casos (el índice usa los disponibles)."))
+        r"dejando fuera un caso."
+        + (r" Entre paréntesis junto al modelo, los casos que le faltan; el índice usa los demás."
+           if faltan_casos else "")))
     texto = "\n".join([
         "% Generado por sintesis_plan.py. No editar a mano.",
         r"\begin{table}[H]", r"\setstretch{1}", r"\centering", r"\scriptsize", r"\setlength{\tabcolsep}{3pt}",
@@ -245,15 +272,15 @@ def tabla_anova(filas, ruta):
     corto, largo = titulo("De qué depende el resultado", (
         r"Fracción de la variación del cambio del "
         r"retraso frente al fijo (\%) que explica cada factor: análisis de varianza de dos "
-        r"factores (caso y modelo) con las tres semillas base como réplicas. Todos: Q-learning, "
-        r"SARSA, DQN, IPPO "
-        r"local, IPPO vecinos y MAPPO; profundos: los cuatro últimos. Solo entran los casos con "
-        r"las tres bases evaluadas en todos esos modelos."))
+        r"factores (caso y modelo) con los tres entrenamientos de cada modelo y caso como réplicas. Todos: "
+        r"Q-learning, SARSA, Double DQN, IPPO "
+        r"sin mensajes, IPPO con mensajes y MAPPO; profundos: los cuatro últimos. Solo entran los casos con "
+        r"los tres entrenamientos evaluados en todos esos modelos."))
     texto = "\n".join([
         "% Generado por sintesis_plan.py. No editar a mano.",
         r"\begin{table}[H]", r"\setstretch{1}", r"\centering", r"\small",
         r"\begin{tabular}{llrrrr}", r"\toprule",
-        r"Aprendices & Casos & Caso & Modelo & Interacción & \makecell{Semilla\\base} \\", r"\midrule"]
+        r"Aprendices & Casos & Caso & Modelo & Interacción & Entrenamiento \\", r"\midrule"]
         + lineas + [r"\bottomrule", r"\end{tabular}",
                     r"\caption[" + corto + "]{" + largo + "}",
                     r"\label{" + etiqueta("anova") + "}", r"\end{table}"])
@@ -273,63 +300,148 @@ def etiquetas_casos(filas):
     return etiquetas
 
 
+# Figura de cambio por caso con bandas de veredicto (entrega 3, tarea 4b del pedido del profesor, 23.10.2026).
+# Antes: una linea discontinua en la meta y los puntos con el color de la serie. Ahora las bandas marcan los rangos
+# de la regla de veredicto (Tabla tab:veredictos: el 5 % separa una mejora clara de una pequena; el signo, mejora de
+# mas retraso) y cada punto lleva el color de su veredicto real de plan2/veredicto.csv; la serie va en la forma
+# (circulo, IPPO con mensajes; cuadrado, MAPPO). Paleta de la skill dataviz: tinta, ejes y verde y rojo de estado.
+# El verde y el rojo no se separan bien con daltonismo, asi que el rango lo dicen tambien la banda rotulada, el eje
+# y el valor escrito junto a cada punto; y los rellenos difieren en luminosidad (verde oscuro, verde medio, gris
+# claro y rojo), para que la figura se lea tambien impresa en gris.
+FONDO, TINTA, TINTA2, APAGADO, EJE = "#fcfcfb", "#0b0b0b", "#52514e", "#898781", "#c3c2b7"
+VERDE, VERDE_OSCURO, ROJO = "#0ca30c", "#006300", "#d03b3b"
+COLOR_VEREDICTO = {"FUNCIONA": VERDE_OSCURO, "MEJORA": VERDE, "EMPATA": EJE, "FALLA": ROJO}
+BORDE_VEREDICTO = {"FUNCIONA": VERDE_OSCURO, "MEJORA": VERDE, "EMPATA": APAGADO, "FALLA": ROJO}
+UMBRAL = vd.UMBRAL_DELTA       # -5 %: el umbral de FUNCIONA de la regla de veredicto
+META = -25.0                   # meta de retraso de la tesis (de -25 a -40 %)
+
+
+def mezcla(color, alfa, fondo=FONDO):
+    """Color solido equivalente a `color` con opacidad `alfa` sobre el fondo (sin transparencias en el PDF)."""
+    from matplotlib.colors import to_rgb, to_hex
+    return to_hex([alfa * c + (1 - alfa) * f for c, f in zip(to_rgb(color), to_rgb(fondo))])
+
+
+def veredicto_punto(texto):
+    """(veredicto que da el color, es_pendiente) a partir del texto de veredicto.csv. Un PENDIENTE toma el
+    color de su veredicto provisional, que solo se dibuja en el borde del marcador hueco."""
+    texto = (texto or "").replace(vd.MARCA_TRIVIAL, "")
+    if texto.startswith("PENDIENTE"):
+        prov = texto.split("provisional:")[1].strip(" )") if "provisional:" in texto else None
+        return prov, True
+    return texto.split(" ")[0], False
+
+
+def etiquetas_casos_lineas(filas):
+    """Como etiquetas_casos, pero sin abreviar y una cosa por linea, para el ancho de la figura con bandas."""
+    etiquetas = []
+    for c, e in vd.CASOS:
+        r = filas.get(("ippo_vecinos", c)) or {}
+        sem, carr = r.get("semaforos", "?"), r.get("carriles", "?")
+        etiquetas.append(f"{c}\n{sem} semáforo{'s' if sem != '1' else ''}\n{carr} carril{'es' if carr != '1' else ''}"
+                         f"\n{r.get('demanda_veh_h', '?')} veh/h")
+    return etiquetas
+
+
 def figura_mejora(plan2, ruta, metrica):
-    """Cambio frente a la referencia por caso: IPPO vecinos y MAPPO con su IC95."""
+    """Cambio frente a la referencia por caso: IPPO con mensajes y MAPPO con su IC95, sobre bandas de veredicto.
+    Escribe el PNG de `ruta` y el mismo dibujo en PDF vectorial al lado (la misma ruta con .pdf)."""
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
     from matplotlib.lines import Line2D
     filas = {(r["modelo"], r["caso"]): r for r in leer_csv(os.path.join(plan2, PREFIJO + "veredicto.csv"))}
     casos = [c for c, _ in vd.CASOS]
-    fondo, eje, rojo, tinta2 = "#fcfcfb", "#c3c2b7", "#d03b3b", "#52514e"
-    series = (("ippo_vecinos", "IPPO vecinos", "#2a78d6", -0.14), ("mappo", "MAPPO", "#eb6834", 0.14))
-    bajo = -25.0
-    fig, ax = plt.subplots(figsize=(8.2, 4.2), facecolor=fondo)
-    ax.set_facecolor(fondo)
+    series = (("ippo_vecinos", "o", 7.6, -0.15, "right"), ("mappo", "s", 6.6, 0.15, "left"))
+    puntos, bajo, alto = [], META, 0.0
     for i, c in enumerate(casos):
-        hay = False
-        for m, _, color, dx in series:
+        for m, marca, tam, dx, lado in series:
             r = filas.get((m, c))
             y = vd.flotante(r["delta_fijo"]) if r else None
             if y is None:
                 continue
-            hay = True
-            x = i + dx
             ic = vd.intervalo({"delta_ic95": r["ic_fijo"]})
+            ver, pendiente = veredicto_punto(r["veredicto"])
+            puntos.append((i + dx, y, ic, ver, pendiente, marca, tam, lado))
+            bajo, alto = min(bajo, y, ic[0] if ic else y), max(alto, y, ic[1] if ic else y)
+    y0, y1 = 5 * (bajo // 5) - 3, 5 * (alto // 5 + 1) + 3
+    menos = "−"
+    with plt.rc_context({"font.family": "DejaVu Sans", "pdf.fonttype": 42, "axes.edgecolor": EJE,
+                         "axes.labelcolor": TINTA2, "xtick.color": TINTA2, "ytick.color": TINTA2}):
+        fig, ax = plt.subplots(figsize=(7.2, 4.6), facecolor=FONDO)
+        ax.set_facecolor(FONDO)
+        x0, x1 = -0.68, len(casos) - 0.32
+        # bandas por rango del cambio frente al fijo (regla de la Tabla tab:veredictos)
+        ax.axhspan(y0, UMBRAL, color=mezcla(VERDE, 0.15), lw=0, zorder=0)
+        ax.axhspan(UMBRAL, 0, color=mezcla(VERDE, 0.06), lw=0, zorder=0)
+        ax.axhspan(0, y1, color=mezcla(ROJO, 0.09), lw=0, zorder=0)
+        ax.grid(axis="y", color=FONDO, lw=0.8, zorder=1)
+        ax.set_axisbelow(True)
+        ax.axhline(0, color=APAGADO, lw=0.9, zorder=2)
+        ax.axhline(META, color=TINTA2, lw=0.9, ls=(0, (1, 2.2)), zorder=2)
+        rotulo = dict(fontsize=7.6, color=TINTA2, linespacing=1.25, zorder=2)
+        ax.text(x0 + 0.1, y1 - 1.2, "Más retraso que el fijo (cambio positivo):\nFALLA si es significativo",
+                ha="left", va="top", **rotulo)
+        ax.text(x0 + 0.1, UMBRAL / 2, f"Mejora pequeña, entre {menos}5 y 0 %:\nMEJORA si es significativa",
+                ha="left", va="center", **rotulo)
+        # verificacion de la fase 2 (23.10.2026): el rotulo dice tambien la condicion frente al actuado de la Tabla
+        # tab:veredictos (antes solo "FUNCIONA si es significativa")
+        ax.text(x1 - 0.1, (UMBRAL + META) / 2 + 2,
+                f"Mejora clara, de {menos}5 % o más negativo:\nFUNCIONA si es significativa\n"
+                "y no pierde contra el actuado", ha="right", va="center", **rotulo)
+        ax.text(x1 - 0.1, META + 0.6, f"meta de la tesis: {menos}25 %", ha="right", va="bottom",
+                fontsize=7.6, color=TINTA2, zorder=2)
+        for x, y, ic, ver, pendiente, marca, tam, lado in puntos:
             if ic:
-                ax.plot([x, x], list(ic), color=color, lw=2, zorder=3, solid_capstyle="round")
-                bajo = min(bajo, ic[0])
-            firme = not r["veredicto"].startswith("PENDIENTE")
-            ax.plot(x, y, "o", ms=8, color=color if firme else fondo, mec=color if not firme else fondo,
-                    mew=1.6 if not firme else 1.2, zorder=5)
-            izq = dx < 0
-            ax.annotate(f"{y:+.1f}".replace("-", "\u2212"), (x, y), xytext=(-7 if izq else 7, 0),
-                        textcoords="offset points", ha="right" if izq else "left", va="center",
-                        fontsize=7.4, color=tinta2)
-        if not hay:
-            ax.text(i, 0.8, "pendiente", ha="center", va="bottom", fontsize=7.6, color="#898781",
-                    style="italic")
-    ax.axhline(0, color=eje, lw=1.2)
-    ax.axhline(-25, color=rojo, lw=1.2, ls=(0, (5, 4)))
-    ax.text(len(casos) - 0.55, -24.3, "meta de la tesis: \u221225 %", color=rojo, fontsize=8, ha="right",
-            va="bottom")
-    ax.set_ylim(bottom=bajo - 2)
-    ax.set_xticks(range(len(casos)))
-    ax.set_xticklabels(etiquetas_casos(filas), fontsize=7.6, color=tinta2)
-    ax.set_xlim(-0.5, len(casos) - 0.5)
-    que = "del timeLoss" if metrica == "timeloss_prom" else "del retraso total"
-    ax.set_ylabel(f"Cambio {que} frente al fijo (%)")
-    for s in ("top", "right"):
-        ax.spines[s].set_visible(False)
-    ax.grid(axis="y", color="#e1e0d9", lw=0.6)
-    ley = [Line2D([], [], marker="o", ls="-", color=col, label=nom) for _, nom, col, _ in series]
-    ley += [Line2D([], [], marker="o", ls="", mfc=fondo, mec="#898781", mew=1.5,
-                   label="base publicada no convergió"),
-            Line2D([], [], color="#898781", lw=2, label="IC95 %")]
-    ax.legend(handles=ley, ncol=4, loc="upper left", bbox_to_anchor=(0, 1.13), fontsize=7.6, frameon=False)
-    fig.savefig(ruta, dpi=200, bbox_inches="tight", facecolor=fondo)
-    plt.close(fig)
+                ax.plot([x, x], list(ic), color=TINTA2, lw=1.3, zorder=3, solid_capstyle="butt")
+            if pendiente:
+                estilo = dict(mfc=FONDO, mec=BORDE_VEREDICTO.get(ver, TINTA2), mew=1.9)
+            else:
+                estilo = dict(mfc=COLOR_VEREDICTO.get(ver, EJE), mec=APAGADO if ver == "EMPATA" else FONDO,
+                              mew=1.0 if ver == "EMPATA" else 1.2)
+            ax.plot(x, y, marca, ms=tam, zorder=5, **estilo)
+            izq = lado == "right"
+            ax.annotate(f"{y:+.1f}".replace("-", menos), (x, y), xytext=(-7 if izq else 7, 0),
+                        textcoords="offset points", ha=lado, va="center", fontsize=7.6, color=TINTA,
+                        zorder=6)
+        ax.set_ylim(y0, y1)
+        marcas = list(range(int(5 * -(-y0 // 5)), int(y1) + 1, 5))
+        ax.set_yticks(marcas)
+        ax.set_yticklabels([f"{t:+d}".replace("-", menos) if t else "0" for t in marcas], fontsize=7.8)
+        ax.set_xticks(range(len(casos)))
+        ax.set_xticklabels(etiquetas_casos_lineas(filas), fontsize=7.6, color=TINTA2, linespacing=1.3)
+        ax.set_xlim(x0, x1)
+        ax.tick_params(length=0)
+        que = "del retraso" if metrica == "timeloss_prom" else "del retraso total"
+        nombre = "fijo ajustado" if FIJO == "fijo_2509" else "fijo ajustado desde 10 s"
+        ax.set_ylabel(f"Cambio {que} frente al {nombre} (%)\nnegativo = menos retraso = mejora",
+                      fontsize=8.2, linespacing=1.4)
+        for s in ("top", "right"):
+            ax.spines[s].set_visible(False)
+        # dos leyendas con titulo: el color dice el veredicto y la forma, el modelo
+        punto = dict(ls="", ms=7.2)
+        por_veredicto = [Line2D([], [], marker="o", mfc=COLOR_VEREDICTO[v], mec=APAGADO if v == "EMPATA" else FONDO,
+                                label=v, **punto) for v in ("FUNCIONA", "MEJORA", "EMPATA", "FALLA")]
+        por_veredicto.append(Line2D([], [], marker="o", mfc=FONDO, mec=TINTA2, mew=1.6, **punto,
+                                    label="PENDIENTE: hueco, con el borde\ndel color de su veredicto provisional"))
+        por_modelo = [Line2D([], [], marker="o", mfc=TINTA2, mec=FONDO, label="IPPO con mensajes", **punto),
+                      Line2D([], [], marker="s", mfc=TINTA2, mec=FONDO, label="MAPPO", **punto),
+                      Line2D([], [], marker="|", ms=11, mew=1.3, color=TINTA2, ls="", label="IC95 %")]
+        comun = dict(fontsize=7.6, title_fontsize=7.6, frameon=False, handletextpad=0.4, borderaxespad=0.2,
+                     alignment="left", labelcolor=TINTA)
+        ley1 = ax.legend(handles=por_veredicto, ncol=3, loc="lower left", bbox_to_anchor=(-0.01, 1.01),
+                         title="Color del punto: veredicto", columnspacing=1.2, **comun)
+        ax.add_artist(ley1)
+        ax.legend(handles=por_modelo, ncol=1, loc="lower right", bbox_to_anchor=(1.01, 1.01),
+                  title="Forma: modelo", **comun)
+        for ley in ax.get_legend(), ley1:
+            ley.get_title().set_color(TINTA2)
+        fig.savefig(ruta, dpi=200, bbox_inches="tight", facecolor=FONDO)
+        pdf = os.path.splitext(ruta)[0] + ".pdf"
+        fig.savefig(pdf, bbox_inches="tight", facecolor=FONDO, metadata={"CreationDate": None})
+        plt.close(fig)
     print("Escrito", ruta)
+    print("Escrito", pdf)
 
 
 def figura(plan2, ruta):
@@ -370,11 +482,13 @@ def figura(plan2, ruta):
     for s in ("top", "right"):
         ax.spines[s].set_visible(False)
     ax.grid(axis="y", color="#e1e0d9", lw=0.6)
-    ley = [Line2D([], [], marker="o", ls="", color="#2a78d6", label="IPPO vecinos"),
+    # nombres del glosario de la tesis (entrega 3): IPPO con mensajes; medicion mas estricta (antes "re-medicion")
+    ley = [Line2D([], [], marker="o", ls="", color="#2a78d6", label="IPPO con mensajes"),
            Line2D([], [], marker="o", ls="", color="#eb6834", label="MAPPO"),
            Line2D([], [], marker="o", ls="", mfc=fondo, mec="#898781", mew=1.5,
                   label="veredicto pre-registrado (timeLoss)"),
-           Line2D([], [], marker="o", ls="", color="#898781", label="re-medición (retraso total), IC95")]
+           Line2D([], [], marker="o", ls="", color="#898781",
+                  label="medición más estricta (retraso total), IC95")]
     ax.legend(handles=ley, ncol=4, loc="upper left", bbox_to_anchor=(0, 1.13), fontsize=7.6, frameon=False)
     fig.savefig(ruta, dpi=200, bbox_inches="tight", facecolor=fondo)
     plt.close(fig)

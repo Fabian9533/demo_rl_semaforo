@@ -10,15 +10,15 @@
 \cmidrule(lr){4-9}
 Modelo & & & P1 & P2 & P3 & P4 & P5 & P6 \\
 \midrule
-IPPO vecinos & $-$6.8 [$-$7.5, $-$6.1] & $-$14.3 [$-$15.1, $-$13.6] & $-$6.8 & $-$3.1 & $-$6.4 & $-$7.5 & $-$8.5 & $-$8.6 \\
-MAPPO & $-$4.9 [$-$5.7, $-$4.2] & $-$12.6 [$-$13.6, $-$11.6] & $-$4.5 & $-$1.2 & $-$4.3 & $-$5.5 & $-$5.8 & $-$8.1 \\
-DQN & $-$1.6 [$-$2.1, $-$0.9] & $-$9.5 [$-$10.3, $-$8.7] & $-$1.2 & +2.5 & $-$1.5 & $-$1.2 & $-$3.9 & $-$3.9 \\
-IPPO local & +1.4 [+0.9, +1.8] & $-$6.8 [$-$7.5, $-$6.1] & +1.7 & +7.0 & +1.2 & +1.1 & $-$2.9 & +0.3 \\
-Q-learning & +14.5 [+13.4, +15.7] & +5.3 [+4.0, +6.6] & +15.6 & +19.8 & +14.9 & +15.4 & +9.6 & +11.9 \\
-SARSA & +17.1 [+16.3, +18.0] & +7.7 [+6.8, +8.6] & +17.8 & +19.3 & +18.3 & +18.5 & +13.0 & +15.9 \\
-Actuado & +8.8 [+7.9, +9.6] & -- & +10.9 & +15.6 & +10.9 & +10.6 & +6.3 & $-$0.9 \\
+IPPO con mensajes & \makecell[c]{$-$6.83\\{}[$-$7.53, $-$6.12]} & \makecell[c]{$-$14.35\\{}[$-$15.08, $-$13.64]} & $-$6.84 & $-$3.14 & $-$6.44 & $-$7.47 & $-$8.47 & $-$8.55 \\
+MAPPO & \makecell[c]{$-$4.94\\{}[$-$5.73, $-$4.16]} & \makecell[c]{$-$12.61\\{}[$-$13.62, $-$11.59]} & $-$4.51 & $-$1.20 & $-$4.35 & $-$5.52 & $-$5.85 & $-$8.09 \\
+DQN & \makecell[c]{$-$1.55\\{}[$-$2.15, $-$0.94]} & \makecell[c]{$-$9.49\\{}[$-$10.27, $-$8.69]} & $-$1.16 & +2.48 & $-$1.49 & $-$1.18 & $-$3.89 & $-$3.90 \\
+IPPO sin mensajes & \makecell[c]{+1.35\\{}[+0.92, +1.78]} & \makecell[c]{$-$6.83\\{}[$-$7.53, $-$6.09]} & +1.73 & +7.02 & +1.17 & +1.05 & $-$2.94 & +0.34 \\
+Q-learning & \makecell[c]{+14.50\\{}[+13.41, +15.68]} & \makecell[c]{+5.26\\{}[+4.04, +6.58]} & +15.59 & +19.82 & +14.93 & +15.44 & +9.60 & +11.89 \\
+SARSA & \makecell[c]{+17.11\\{}[+16.27, +18.00]} & \makecell[c]{+7.66\\{}[+6.75, +8.58]} & +17.75 & +19.34 & +18.33 & +18.50 & +13.00 & +15.88 \\
+Actuado & \makecell[c]{+8.78\\{}[+7.94, +9.59]} & -- & +10.86 & +15.60 & +10.87 & +10.63 & +6.35 & $-$0.90 \\
 \bottomrule
 \end{tabular}
-\caption[Resumen en un número]{Resumen en un número: media geométrica, sobre los casos, del cociente entre el timeLoss del modelo (política publicada) y el de la referencia, expresada como cambio \%; negativo es mejor. IC95\,\% bootstrap pareado por semilla dentro de cada caso (semillas 1001 a 1030). Las últimas columnas repiten el índice frente al fijo dejando fuera un caso. $^{a}$: faltan casos (el índice usa los disponibles).}
+\caption[Resumen en un número]{Resumen en un número: media geométrica, sobre los casos, del cociente entre el timeLoss del modelo (versión evaluada) y el de la referencia, expresada como cambio \%; negativo es mejor. IC95\,\% bootstrap pareado por semilla dentro de cada caso (semillas 1001 a 1030). Las últimas columnas repiten el índice frente al fijo dejando fuera un caso.}
 \label{tab:plan2-numero-unico}
 \end{table}
