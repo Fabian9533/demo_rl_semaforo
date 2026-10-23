@@ -7,6 +7,7 @@ Uso (plan v2: desde demo_rl/plan2, con los archivos del escenario en el cwd):
   python ../barrer_fijo.py corredor|corredor_alta|red|red_alta|malla3|malla3_alta [--semillas 2001-2003]
          [--tmp carpeta] [--procesos N] [--instalar] [--no-extender]
          [--avenida 20,25] [--transversal 10,15] [--limite N]
+  (o un derivado de escenarios_plan2.DERIVADOS: usa la malla y los desfases del caso que se indica ahi)
   python barrer_fijo.py cruce|cruce2 [--asimetrico]
 
 cruce y cruce2: se regenera la red con netconvert para cada verde (y cada verde de giro
@@ -115,6 +116,21 @@ def correr_sumo(cfg, extra, seed, tripinfo, intentos=5):
             if k == intentos - 1:
                 raise
             time.sleep(3.0)
+
+
+def reemplazar(origen, destino, intentos=10, espera=2.0):
+    """os.replace con reintentos. En Windows falla si en ese instante otro proceso tiene abierto el
+    destino (el sumo de un entrenamiento o de una evaluacion del mismo escenario que lee el .add.xml al
+    arrancar, o el antivirus); no cambia ningun numero."""
+    import time
+    for k in range(intentos):
+        try:
+            os.replace(origen, destino)
+            return
+        except PermissionError:
+            if k == intentos - 1:
+                raise
+            time.sleep(espera)
 
 
 def evaluar_config(cfg, nombre, extra, semillas, tmp):
@@ -281,8 +297,9 @@ def como(esc):
 
 
 def es_malla(esc):
-    """malla3 y su caso de estres malla3_alta (P6) comparten red y esquemas de desfase."""
-    return esc.startswith("malla3")
+    """malla3 y su caso de estres malla3_alta (P6) comparten red y esquemas de desfase; un derivado
+    (dem_malla3_t...) es malla si lo es el caso cuya malla hereda."""
+    return como(esc).startswith("malla3")
 
 
 def desfases_malla3(ids, geo, ciclo, esquema):
@@ -511,7 +528,7 @@ def main():
         destino = f"{esc}.add.xml"
         texto = comentario_instalado(esc, ejes, args.semillas, g, len(filas), p)
         p.escribir(destino + ".nuevo", g["verde"], g["verde_transversal"], offsets, texto)
-        os.replace(destino + ".nuevo", destino)
+        reemplazar(destino + ".nuevo", destino)
         print(f"\nInstalado en {destino}: avenida {g['verde']} s, transversal {g['verde_transversal']} s, "
               f"desfases {g['offsets']}, {NOMBRE_METRICA[METRICA_BARRIDO]} {g[METRICA_BARRIDO]} s")
 

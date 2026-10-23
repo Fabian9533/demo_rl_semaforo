@@ -127,6 +127,8 @@ ESCENARIOS["cruce"] = {"cfg": "cruce.sumocfg", "semaforos": {"semaforo_C": ["W_C
                        "enlaces": [], "flujos_corredor": None, "vecinos": VECINOS["cruce"]}
 # Orden de las aproximaciones en SEMAFOROS: [avenida oeste, avenida este, norte, sur]
 LADOS = {esc: tuple(escenarios_plan2.LADOS.get(esc, ("oeste", "este"))) for esc in ESCENARIOS}
+for _esc, (_base, _, _) in escenarios_plan2.DERIVADOS.items():     # los lados de su red base
+    LADOS[_esc] = LADOS[_base]          # (22.10.2026: los derivados de malla3 miran cuatro lados)
 OPUESTO = {"oeste": "este", "este": "oeste", "norte": "sur", "sur": "norte"}
 IDX_LADO = {"oeste": 0, "este": 1, "norte": 2, "sur": 3}     # indice de la aproximacion de ese lado
 EJE = {"oeste": "EO", "este": "EO", "norte": "NS", "sur": "NS"}

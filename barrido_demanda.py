@@ -4,6 +4,8 @@ barrido_demanda.py - Barrido de demanda en el corredor de P1 (analisis complemen
 Uso (desde demo_rl/plan2):
   python ../barrido_demanda.py preparar     escribe los escenarios derivados en el cwd
   python ../barrido_demanda.py resumir      junta demanda/eval_*.csv y escribe la tabla y la figura
+  python ../barrido_demanda.py preparar2    niveles de demanda comunes a las tres redes (22.10.2026):
+                                            escribe dem_<base>_t<veh/h>.* en el cwd (ver preparar2)
 
 Pregunta: como cambia el resultado con la demanda, sin cambiar la red ni los controles. Se toma la
 red de P1 (dos semaforos, un carril) y toda la demanda de corredor.rou.xml x f, con f en
@@ -52,18 +54,55 @@ def niveles():
     return filas + [("corredor_var", "variable", sum(PERFIL) / len(PERFIL))]
 
 
-def escribir_cfg(destino, rou, add):
-    arbol = ET.parse("corredor.sumocfg")
+def escribir_cfg(destino, rou, add, base="corredor"):
+    arbol = ET.parse(f"{base}.sumocfg")
     arbol.getroot().find(".//route-files").set("value", rou)
     arbol.getroot().find(".//additional-files").set("value", add)
     arbol.write(destino, encoding="unicode")
 
 
-def rou_escalado(f):
-    with open("corredor.rou.xml", encoding="utf-8") as fh:
+def rou_escalado(f, base="corredor"):
+    with open(f"{base}.rou.xml", encoding="utf-8") as fh:
         texto = fh.read()
     return re.sub(r'vehsPerHour="([0-9.]+)"',
                   lambda m: 'vehsPerHour="%d"' % round(float(m.group(1)) * f), texto)
+
+
+def sumas_periodo(texto):
+    """{(begin, end): suma de vehsPerHour} de los flows de un .rou.xml (cada periodo de la demanda)."""
+    sumas = {}
+    for flujo in ET.fromstring(texto).iter("flow"):
+        clave = (flujo.get("begin"), flujo.get("end"))
+        sumas[clave] = sumas.get(clave, 0) + float(flujo.get("vehsPerHour"))
+    return sumas
+
+
+def rou_escalado_total(f, base, total, comentario=None):
+    """Como rou_escalado (cada vehsPerHour x f, entero), pero cada periodo suma exactamente total veh/h:
+    cada flow se redondea hacia abajo y lo que falta se reparte de a 1 veh/h entre los flows de mayor
+    parte decimal (metodo del mayor resto; empate: el primero del archivo). Cada flow queda a menos de
+    1 veh/h de v x f. Redondeando cada flow por separado, la red con rotonda y la malla no llegan al
+    total (p. ej. 904 en vez de 905 veh/h, o 2706 en vez de 2715). Con f = 1 devuelve la demanda base."""
+    with open(f"{base}.rou.xml", encoding="utf-8") as fh:
+        texto = fh.read()
+    flujos = [(flujo.get("begin"), flujo.get("end"), float(flujo.get("vehsPerHour")) * f)
+              for flujo in ET.fromstring(texto).iter("flow")]
+    nuevos = [int(x + 1e-9) for _, _, x in flujos]       # piso (x >= 0), sin perder un entero exacto
+    for periodo in sorted({(b, e) for b, e, _ in flujos}):
+        indices = [k for k, (b, e, _) in enumerate(flujos) if (b, e) == periodo]
+        falta = total - sum(nuevos[k] for k in indices)
+        if not 0 <= falta <= len(indices):
+            raise SystemExit(f"{base}: el periodo {periodo} no puede sumar {total} veh/h con f = {f}")
+        restos = sorted(indices, key=lambda k: (-(flujos[k][2] - nuevos[k]), k))
+        for k in restos[:falta]:
+            nuevos[k] += 1
+    valores = iter(nuevos)
+    texto, n = re.subn(r'vehsPerHour="([0-9.]+)"', lambda m: 'vehsPerHour="%d"' % next(valores), texto)
+    if n != len(nuevos):
+        raise SystemExit(f"{base}.rou.xml: {n} vehsPerHour y {len(nuevos)} flows")
+    if comentario:
+        texto = texto.replace("<routes>", "<routes>\n    <!-- " + comentario + " -->", 1)
+    return texto
 
 
 def rou_perfil():
@@ -101,6 +140,34 @@ def preparar():
         escribir_cfg(f"{esc}.sumocfg", f"{esc}.rou.xml", f"{esc}.add.xml")
         escribir_cfg(f"{esc}_p1.sumocfg", f"{esc}.rou.xml", "corredor.add.xml")
         print(f"  {esc}: {esc}.rou.xml, {esc}.sumocfg, {esc}_p1.sumocfg")
+
+
+def preparar2(niveles=None):
+    """Niveles de demanda comunes a las tres redes (escenarios_plan2.NIVELES_DEMANDA2, 22.10.2026). Por
+    nivel escribe en el cwd <esc>.rou.xml (rou_escalado_total), <esc>.sumocfg (el de la red base con esa
+    demanda) y, si no existe, <esc>.add.xml: copia del fijo de la red base, solo como plantilla de fases;
+    el barrido lo reemplaza por el fijo ajustado del nivel. Comprueba que cada periodo de 30 min sume
+    los veh/h del nivel; si no, sale con error sin escribir ese nivel."""
+    for esc, (base, f, total, _) in (niveles or ep.NIVELES_DEMANDA2).items():
+        # Los comentarios que siguen se copian de la red base y describen su demanda con f = 1 (p. ej.
+        # el de malla3.rou.xml dice "Demanda 1.0x" y "Total 4350 veh/h"): la primera linea lo advierte.
+        comentario = (f"{esc} (niveles de demanda, 22.10.2026): la demanda de {base}.rou.xml con cada "
+                      f"vehsPerHour x {f:.6f}, redondeado a entero sin cambiar el total de cada periodo "
+                      f"({total} veh/h; barrido_demanda.py preparar2). Los demas comentarios de este "
+                      f"archivo son los de {base}.rou.xml y describen la demanda base (f = 1).")
+        texto = rou_escalado_total(f, base, total, comentario)
+        sumas = sumas_periodo(texto)
+        if len(sumas) != 2 or any(s != total for s in sumas.values()):
+            raise SystemExit(f"{esc}: los periodos suman {sumas}, no {total} veh/h")
+        with open(f"{esc}.rou.xml", "w", encoding="utf-8") as fh:
+            fh.write(texto)
+        if not os.path.exists(f"{esc}.add.xml"):
+            with open(f"{base}.add.xml", encoding="utf-8") as fh, \
+                    open(f"{esc}.add.xml", "w", encoding="utf-8") as g:
+                g.write(fh.read())
+        escribir_cfg(f"{esc}.sumocfg", f"{esc}.rou.xml", f"{esc}.add.xml", base)
+        print(f"  {esc}: {base} x {f:.4f}, {' / '.join('%g' % s for s in sumas.values())} veh/h por "
+              f"periodo; {esc}.rou.xml, {esc}.sumocfg, {esc}.add.xml")
 
 
 def leer(ruta, metrica):
@@ -246,11 +313,13 @@ def figura(filas, ruta):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("modo", choices=["preparar", "resumir"])
+    ap.add_argument("modo", choices=["preparar", "resumir", "preparar2"])
     ap.add_argument("--tesis", default=os.path.join(AQUI, "TESIS"))
     args = ap.parse_args()
     if args.modo == "preparar":
         preparar()
+    elif args.modo == "preparar2":
+        preparar2()
     else:
         sys.exit(0 if resumir(args.tesis) else 1)
 

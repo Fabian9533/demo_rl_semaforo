@@ -20,6 +20,8 @@ Cambios del plan v2:
             En malla3.add.xml la fase 0 de cada semaforo es la E-O (avenida) y la 2 la N-S.
 Cambios posteriores al plan v2:
   malla3_alta  P6: la misma malla con toda la demanda x f (calibrar_demanda.py).
+  dem_<base>_t<veh/h>  22.10.2026: niveles de demanda comunes a las tres redes (NIVELES_DEMANDA2, al
+            final); se registran como DERIVADOS, con los semaforos, vecinos y lados de su base.
 """
 
 # ---------------- P4: red_alta ----------------
@@ -112,3 +114,27 @@ for _f in FACTORES_DEMANDA:
     DERIVADOS[f"corredor_f{_f:03d}_p1"] = ("corredor", f"corredor_f{_f:03d}_p1.sumocfg", "corredor")
 DERIVADOS["corredor_var"] = ("corredor", "corredor_var.sumocfg", "corredor_alta")
 DERIVADOS["corredor_var_p1"] = ("corredor", "corredor_var_p1.sumocfg", "corredor")
+
+
+# ---------------- Niveles de demanda comunes a las tres redes (22.10.2026) ----------------
+# Cada red base (corredor, red, malla3) con toda la demanda x f, para comparar las redes con la misma
+# demanda total (1810, 2715 y 3620 veh/h) y completar la curva de cada una. Mismo protocolo del plan:
+# fijo ajustado con la regla del 25.09, actuado, ciclo minimo (trivial) e IPPO con mensajes x 3 bases.
+# barrido_demanda.py preparar2 escribe los archivos en plan2/; las evaluaciones van a plan2/demanda2/.
+# TOTAL_BASE: veh/h de cada periodo de 30 min en la red base (la suma de vehsPerHour de cada periodo).
+# NIVELES_DEMANDA2[esc] = (escenario base, f, veh/h de cada periodo, caso cuya malla de barrido y
+#                          desfases hereda: el caso alto de la red por encima de la demanda nominal).
+# En la red y en la malla f = veh/h del nivel / TOTAL_BASE (red 1358: 1358/2150 = 0.632, el factor
+# efectivo; con 1357.5/2150 los flows salen iguales). En el corredor f = 0.5, 0.75 y 1.5, como en
+# corredor_f050, f075 y f150 (1810 x 0.75 = 1357.5, que se redondea a 1358 veh/h).
+TOTAL_BASE = {"corredor": 1810, "red": 2150, "malla3": 4350}
+_NIVELES2 = [("corredor", 905, 0.5, "corredor"), ("corredor", 1358, 0.75, "corredor"),
+             ("corredor", 2715, 1.5, "corredor_alta"),
+             ("red", 905, 905 / 2150, "red"), ("red", 1358, 1358 / 2150, "red"),
+             ("red", 1810, 1810 / 2150, "red"), ("red", 2715, 2715 / 2150, "red_alta"),
+             ("red", 3620, 3620 / 2150, "red_alta"),
+             ("malla3", 1810, 1810 / 4350, "malla3"), ("malla3", 2715, 2715 / 4350, "malla3"),
+             ("malla3", 3620, 3620 / 4350, "malla3"), ("malla3", 6525, 1.5, "malla3_alta")]
+NIVELES_DEMANDA2 = {f"dem_{b}_t{n}": (b, f, n, caso) for b, n, f, caso in _NIVELES2}
+for _esc, (_base, _, _, _caso) in NIVELES_DEMANDA2.items():
+    DERIVADOS[_esc] = (_base, f"{_esc}.sumocfg", _caso)

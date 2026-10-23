@@ -14,12 +14,26 @@ quede sin correr sea lo opcional:
 27.09.2026: re-medicion v2.1 de P1-P5 (agregar_v21: barrido con la avenida desde 10 s, fijo, actuado,
 trivial y todas las politicas re-evaluadas, prioridades 0-2) y P6 = malla3_alta (CELDAS_P6), con el
 mismo protocolo, el brazo trivial y las prioridades de P5.
+22.10.2026: niveles de demanda comunes a las tres redes (agregar_demanda2, ids dem2_*), con sus propias
+prioridades (0-6, lo mas largo primero). Todos los trabajos anteriores ya estan hechos; regenerar este
+archivo los deja con los mismos ids y comandos (el barrido de P6 se escribe con la regla del 25.09 con
+que se corrio), asi que la cola solo lanza los dem2_*.
 """
 import os
+import sys
 import json
 
 CELDAS = ["corredor", "corredor_alta", "red", "red_alta", "malla3"]
 CELDAS_P6 = ["malla3_alta"]      # 27.09.2026: P6, la malla con demanda alta (calibrar_demanda.py)
+# Regla del fijo del resultado principal (25.09): ganador por timeLoss sobre la malla de verdes de ese dia
+# (git show 37f9680:barrer_fijo.py, MALLAS; los desfases no cambiaron). P6 se barrio el 28.09 con la
+# malla de malla3. La extension automatica de barrer_fijo.py sigue activa.
+MALLAS_2509 = {"corredor": ("12,15,18,20,25,30", "10,15,20"),
+               "corredor_alta": ("15,20,25,30,35", "10,15,20,25"),
+               "red": ("15,20,25,30,35", "10,15,20"),
+               "red_alta": ("15,20,25,30,35", "10,15,20"),
+               "malla3": ("15,20,25,30,35", "10,15,20,25"),
+               "malla3_alta": ("15,20,25,30,35", "10,15,20,25")}
 NUEVAS = {"red_alta": "listo/escenarios_red_alta.ok", "malla3": "listo/escenarios_malla3.ok",
           "malla3_alta": "listo/escenarios_malla3_alta.ok"}
 BASES = [42, 2042, 4042]
@@ -47,6 +61,12 @@ ALGS = {
     "mappo": ("python ../rl_mappo.py train --escenario {e} --seed {b} --episodios {n}",
               "politica_{e}_mappo_s{b}.pt", "listo/mappo.ok"),
 }
+
+
+def regla_2509(caso):
+    """Opciones de barrer_fijo.py para la regla del 25.09 con la malla de verdes de caso."""
+    avenida, transversal = MALLAS_2509[caso]
+    return f" --metrica timeloss_prom --avenida {avenida} --transversal {transversal}"
 
 
 def prioridad(alg, esc):
@@ -102,11 +122,11 @@ def agregar_demanda(agregar):
     """Barrido de demanda en el corredor de P1 (27.09.2026, barrido_demanda.py): por nivel, el fijo
     re-barrido para esa demanda, el fijo de P1 sin retunear, el actuado y las politicas publicadas
     de IPPO vecinos de P1 (base 4042) y de P2 (base 2042) segun veredicto.csv, sin reentrenar."""
-    import sys
     sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     import escenarios_plan2
     agregar("dem_preparar", 1, "python ../barrido_demanda.py preparar", ["trabajo:v21_barrido_corredor"])
-    niveles = [e for e in escenarios_plan2.DERIVADOS if not e.endswith("_p1")]
+    niveles = [e for e in escenarios_plan2.DERIVADOS
+               if not e.endswith("_p1") and e not in escenarios_plan2.NIVELES_DEMANDA2]
     politicas = {"ippo_vecinos_s4042": "politica_corredor_vecinos_s4042.pt",
                  "ippo_vecinos_s2042": "politica_corredor_alta_vecinos_s2042.pt"}
     for esc in niveles:
@@ -124,6 +144,60 @@ def agregar_demanda(agregar):
                     f"--salida demanda/eval_{esc}_{brazo}.csv", ["trabajo:dem_preparar"])
 
 
+def agregar_demanda2(agregar):
+    """Niveles de demanda comunes a las tres redes (22.10.2026; escenarios_plan2.NIVELES_DEMANDA2): 3 en el
+    corredor, 5 en la red con rotonda y 4 en la malla, con el protocolo del plan. Por nivel:
+      dem2_barrido_<esc>    fijo ajustado con la regla del 25.09 (regla_2509) y la malla del caso que
+                            hereda el nivel; --instalar deja el ganador en <esc>.add.xml
+      dem2_train_<esc>_ippo_vecinos_s<b>   IPPO con mensajes, bases 42, 2042 y 4042, con los mismos
+                            argumentos que train_<celda>_ippo_vecinos_s<b> (200 episodios, validacion
+                            con 999 y 1999 cada 10, checkpoints, HIPER por defecto)
+      dem2_eval_<esc>_<brazo>   fijo, actuado, trivial (ciclo minimo) e ippo_vecinos_s<b>, semillas
+                            1001-1030, parcial en demanda2/eval_<esc>_<brazo>.csv
+      dem2_consolidar_<esc> consolidar.py con esos parciales: evaluacion_<esc>.csv y _resumen.csv
+    Todo con cpus=1, y es exacto: cada barrido corre con un proceso (--procesos 1; el resultado no
+    depende de N). Con 4 procesos y cpus=1, los barridos entraban juntos al terminar los entrenamientos
+    de la red y la maquina llegaba a unos 39 hilos sobre 16; con cpus=4 no encontrarian hueco frente a
+    los de 1. Prioridad, lo mas largo primero: 0 preparar; 1 barridos (los 12 arrancan juntos al
+    principio; el de dem_red_t3620, unas 2 h con un proceso, es el trabajo mas largo); 2 IPPO en la
+    malla; 3 IPPO en la red; 4 IPPO en el corredor; 5 evaluaciones; 6 consolidar. Dentro de cada
+    prioridad, el nivel con mas demanda primero.
+    Las salidas llevan dem_ en el nombre (no pisan nada del plan); los temporales del barrido van a
+    tmp_barrido_dem2_<esc>/, que .gitignore ya excluye."""
+    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    import escenarios_plan2
+    niveles = escenarios_plan2.NIVELES_DEMANDA2
+    redes = ("red", "malla3", "corredor")             # orden de los barridos: la red es la mas cara
+    prio_ippo = {"malla3": 2, "red": 3, "corredor": 4}
+    prep = "dem2_preparar"
+    agregar(prep, 0, "python ../barrido_demanda.py preparar2", [])
+    orden = sorted(niveles, key=lambda e: (prio_ippo[niveles[e][0]], -niveles[e][2]))
+    for esc in orden:
+        for b in BASES:
+            agregar(f"dem2_train_{esc}_ippo_vecinos_s{b}", prio_ippo[niveles[esc][0]],
+                    ALGS["ippo_vecinos"][0].format(e=esc, b=b, n=EPISODIOS), [f"trabajo:{prep}"])
+    for esc in sorted(niveles, key=lambda e: (redes.index(niveles[e][0]), -niveles[e][2])):
+        agregar(f"dem2_barrido_{esc}", 1, f"python ../barrer_fijo.py {esc} --semillas 2001-2003 "
+                f"--tmp tmp_barrido_dem2_{esc} --procesos 1 --instalar" + regla_2509(niveles[esc][3]),
+                [f"trabajo:{prep}"])
+    for esc in orden:
+        evaluar = f"python ../evaluar.py --escenario {esc} --semillas {SEMILLAS} "
+        evals = []
+        for brazo in ("fijo", "actuado", "trivial"):
+            requiere = [f"trabajo:dem2_barrido_{esc}" if brazo == "fijo" else f"trabajo:{prep}"]
+            agregar(f"dem2_eval_{esc}_{brazo}", 5,
+                    evaluar + f"--brazo {brazo} --salida demanda2/eval_{esc}_{brazo}.csv", requiere)
+            evals.append(f"trabajo:dem2_eval_{esc}_{brazo}")
+        for b in BASES:
+            agregar(f"dem2_eval_{esc}_ippo_vecinos_s{b}", 5,
+                    evaluar + f"--politica politica_{esc}_vecinos_s{b}.pt "
+                    f"--salida demanda2/eval_{esc}_ippo_vecinos_s{b}.csv",
+                    [f"trabajo:dem2_train_{esc}_ippo_vecinos_s{b}"])
+            evals.append(f"trabajo:dem2_eval_{esc}_ippo_vecinos_s{b}")
+        agregar(f"dem2_consolidar_{esc}", 6,
+                f"python ../consolidar.py --escenario {esc} --parciales demanda2", evals)
+
+
 def main():
     trabajos = []
 
@@ -136,7 +210,8 @@ def main():
         bandera_barrido = "listo/barrer_malla.ok" if esc.startswith("malla3") else "listo/barrer.ok"
         agregar(f"barrido_{esc}", 1,
                 f"python ../barrer_fijo.py {esc} --semillas 2001-2003 --tmp tmp_barrido_{esc} "
-                f"--procesos 4 --instalar", [bandera_barrido, f"trabajo:{prep}"], cpus=1)
+                f"--procesos 4 --instalar" + (regla_2509(esc) if esc in CELDAS_P6 else ""),
+                [bandera_barrido, f"trabajo:{prep}"], cpus=1)
         # cpus=1 aunque use 4 procesos: con la cola llena, un trabajo de 4 cpus nunca encontraria
         # hueco frente a los de 1; se acepta sobrecargar la maquina unos minutos.
         referencias = [("fijo", [f"trabajo:barrido_{esc}"]), ("actuado", [f"trabajo:{prep}"])]
@@ -163,6 +238,7 @@ def main():
 
     agregar_v21(trabajos, agregar)
     agregar_demanda(agregar)
+    agregar_demanda2(agregar)
     ruta = os.path.join(os.path.dirname(os.path.abspath(__file__)), "cola", "trabajos.jsonl")
     with open(ruta, "w", encoding="utf-8") as f:
         for t in trabajos:
