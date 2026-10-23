@@ -22,6 +22,13 @@ Escribe:
   TESIS/secciones/tablas/veredicto_matriz.tex, veredicto_<modelo>.tex, veredicto_bases.tex
     (la matriz .tex lleva los modelos en filas y los casos en columnas para caber en 15 cm;
     un modelo sin datos deja su veredicto_<modelo>.tex solo con un comentario)
+  Nombres de los .tex (entrega 3, 23.10.2026): los del glosario de la tesis (NOMBRE_TEX: IPPO con
+    mensajes, IPPO sin mensajes, IPPO con penalización, ciclo mínimo, fijo ajustado, versión evaluada)
+    y las notas en palabras ("igual a IPPO con mensajes", "igual al ciclo mínimo") en lugar de los
+    rotulos "= vecinos" y "*". El CSV y el .md conservan los rotulos internos, sin cambios.
+    Verificacion de la fase 2 (23.10.2026), mismo glosario: en las tablas por modelo y de entrenamientos la
+    columna "Escenario" (corredor_alta, red_alta, malla3...) pasa a "Red y demanda" (Corredor, nominal; Red con
+    rotonda, alta...), "semilla base"/"bases" pasa a "entrenamiento(s)" y el Delta de los encabezados, a "cambio".
 
 Reglas (plan v2, sin cambios respecto de la ESPEC):
   - Base publicada de (modelo, celda) = la mediana de las tres bases por val_elegido del meta
@@ -68,6 +75,14 @@ REFERENCIAS = ("actuado", "trivial")    # filas de referencia: se juzgan solo fr
 NOMBRE = {"actuado": "Actuado", "trivial": "Trivial", "ql": "Q-learning", "sarsa": "SARSA",
           "ql_colas": "Q-learning (colas)", "dqn": "DQN", "ippo_local": "IPPO local",
           "ippo_vecinos": "IPPO vecinos", "ippo_spill": "IPPO spill", "mappo": "MAPPO"}
+# Nombres que se escriben a los .tex: los del glosario de la tesis (entrega 3, ajuste A8, 23.10.2026). NOMBRE se
+# queda con los rotulos de siempre porque solo lo usan plan2/veredicto.md y la consola, que no van a la tesis; asi
+# ni los CSV ni los .md de plan2/ cambian. En las tablas, la forma corta "IPPO con penalización"; en los titulos,
+# NOMBRE_LARGO, con "de spillback".
+NOMBRE_TEX = {"actuado": "Actuado", "trivial": "Ciclo mínimo", "ql": "Q-learning", "sarsa": "SARSA",
+              "ql_colas": "Q-learning (colas)", "dqn": "DQN", "ippo_local": "IPPO sin mensajes",
+              "ippo_vecinos": "IPPO con mensajes", "ippo_spill": "IPPO con penalización", "mappo": "MAPPO"}
+NOMBRE_LARGO = dict(NOMBRE_TEX, ippo_spill=r"IPPO con penalización de \textit{spillback}")
 RECOMPENSA = {"ql": "ret_retraso", "sarsa": "ret_retraso", "ql_colas": "ret_colas",
               "dqn": "ret_retraso", "ippo_local": "ret_retraso", "ippo_vecinos": "ret_retraso",
               "ippo_spill": "ret_spill", "mappo": "ret_retraso"}
@@ -688,17 +703,45 @@ def partir(texto, ancho=14):
     return lineas
 
 
+MARCA_TRIVIAL = " (= trivial)"     # sufijo de veredicto.csv: la politica da lo mismo que el ciclo minimo
+
+
+def palabra_frase(p):
+    """Palabra del veredicto (de palabra()) con la marca * dicha en palabras."""
+    return p[:-1] + ", igual al ciclo mínimo" if p.endswith("*") else p
+
+
+def palabra_tex(texto):
+    """Celda de las matrices .tex: la palabra del veredicto, con las notas en palabras (entrega 3): el rotulo
+    "= vecinos" de veredicto.csv como "igual a IPPO con mensajes" y la marca * como "igual al ciclo mínimo"."""
+    p = palabra(texto)
+    if p == "= vecinos":
+        return r"\makecell{igual a IPPO\\con mensajes}"
+    if p.endswith("*"):
+        return r"\makecell{" + p[:-1] + r",\\igual al\\ciclo mínimo}"
+    return p
+
+
 def tex_veredicto(texto):
-    """Veredicto con el motivo del PENDIENTE (o de "= vecinos") partido en lineas cortas."""
+    """Veredicto con el motivo del PENDIENTE partido en lineas cortas. Las notas van en palabras (entrega 3):
+    "= vecinos (término de spill inactivo; X)" de veredicto.csv sale como "igual a IPPO con mensajes
+    (penalización inactiva; X)" y la marca "(= trivial)", como "(igual al ciclo mínimo)"."""
+    extra = []
+    if texto.endswith(MARCA_TRIVIAL):
+        texto, extra = texto[:-len(MARCA_TRIVIAL)], ["(igual al", "ciclo mínimo)"]
     if texto.startswith("= vecinos ("):
-        return apilar(["= vecinos"] + [tex_esc(x) for x in partir(texto[len("= vecinos "):])], "l")
-    if not texto.startswith("PENDIENTE ("):
-        return texto
-    return apilar(["PENDIENTE"] + [tex_esc(x) for x in partir(texto[len("PENDIENTE "):])], "l")
+        ver = texto[len("= vecinos ("):-1].split("; ")[-1]
+        lineas = ["igual a IPPO", "con mensajes"] + partir(f"(penalización inactiva; {palabra_frase(ver)})")
+        return apilar([tex_esc(x) for x in lineas + extra], "l")
+    if texto.startswith("PENDIENTE ("):
+        return apilar(["PENDIENTE"] + [tex_esc(x) for x in partir(texto[len("PENDIENTE "):]) + extra], "l")
+    return apilar([texto] + extra, "l") if extra else texto
 
 
-def abrir_tabla(sep="3pt"):
-    return (r"\begin{table}[H]" "\n" r"\setstretch{1}" "\n" r"\centering" "\n" r"\scriptsize" "\n"
+def abrir_tabla(sep="3pt", lugar="H"):
+    """Comienzo de una tabla .tex. lugar: posicion del flotante; la matriz va en !tbp (verificacion de la fase 2 de la
+    entrega 3, 23.10.2026: en [H] no cabia al pie de su pagina en el Cap. V y dejaba en blanco media pagina)."""
+    return ("\\begin{table}[" + lugar + "]\n" r"\setstretch{1}" "\n" r"\centering" "\n" r"\scriptsize" "\n"
             r"\setlength{\tabcolsep}{" + sep + "}\n")
 
 
@@ -731,29 +774,62 @@ def encabezado_caso(caso, esc):
     return r"\makecell{" + r"\\".join(x for x in (caso, red, dem) if x) + "}"
 
 
+# Celda "Red y demanda" de las tablas por modelo y de entrenamientos (verificacion de la fase 2 de la entrega 3,
+# 23.10.2026; glosario del plan del 14.10): antes la columna "Escenario" daba el nombre interno del escenario
+# (corredor_alta, red_alta, malla3...). La red va en una linea, o en dos en las tablas por modelo, cuyas filas ya
+# tienen tres, y la demanda en la ultima.
+RED_Y_DEMANDA = {"corredor": ("Corredor", "nominal"), "corredor_alta": ("Corredor", "alta"),
+                 "red": ("Red con rotonda", "nominal"), "red_alta": ("Red con rotonda", "alta"),
+                 "malla3": (r"Malla $3 \times 3$", "nominal"), "malla3_alta": (r"Malla $3 \times 3$", "alta")}
+
+
+def celda_red(esc, partir=False):
+    """Red y demanda de un escenario del plan, en lineas cortas; con partir=True, 'Red con rotonda' en dos."""
+    if esc not in RED_Y_DEMANDA:
+        return tex_esc(esc)
+    red, dem = RED_Y_DEMANDA[esc]
+    lineas = ["Red con", "rotonda"] if partir and red == "Red con rotonda" else [red]
+    return apilar(lineas[:-1] + [lineas[-1] + ","] + [dem], "l")
+
+
 def nombre_fijo():
-    """El fijo de referencia en los titulos .tex: el ajustado del plan (fijo_2509) o el re-barrido."""
-    return "fijo ajustado" if FIJO == "fijo_2509" else "fijo re-barrido"
+    """El fijo de referencia en los titulos .tex, con el nombre del glosario (entrega 3): el ajustado del plan
+    (fijo_2509) o el del analisis de robustez, ajustado con el barrido que parte del verde minimo de 10 s."""
+    return "fijo ajustado" if FIJO == "fijo_2509" else "fijo ajustado desde 10~s"
+
+
+def de_nombre(modelo):
+    """'de <modelo>' en los titulos cortos; las dos referencias van en minuscula y con articulo."""
+    return {"actuado": "del actuado", "trivial": "del ciclo mínimo"}.get(modelo, f"de {NOMBRE_LARGO[modelo]}")
+
+
+def nombre_fila(modelo):
+    """Nombre de la fila de la matriz: el mas largo (IPPO con penalización) en dos lineas, para que la matriz
+    quepa en el ancho del texto con los nombres del glosario."""
+    nombre = NOMBRE_TEX[modelo]
+    return r"\makecell[l]{" + r"\\".join(nombre.rsplit(" ", 1)) + "}" if len(nombre) > 18 else nombre
 
 
 def tex_matriz(filas):
     por = {(f["modelo"], f["caso"]): f for f in filas}
     cab = " & ".join(encabezado_caso(caso, esc) for caso, esc in CASOS)
-    lineas = [" & ".join([NOMBRE[m]] + [palabra(por[(m, caso)]["veredicto"]) for caso, _ in CASOS])
+    lineas = [" & ".join([nombre_fila(m)] + [palabra_tex(por[(m, caso)]["veredicto"]) for caso, _ in CASOS])
               + r" \\" for m in MODELOS]
+    hay_igual_ciclo = any(palabra(f["veredicto"]).endswith("*") for f in filas)
     referencias = ("El actuado se juzga frente al fijo." if SIN_TRIVIAL else
-                   "El actuado y el trivial (verdes mínimos, desfases en 0) se juzgan frente al "
-                   "fijo. *: la política da el mismo retraso y la misma espera que el trivial.")
-    # nombres cortos de las filas y rotulo "= vecinos", explicados en el titulo (glosario de la tesis)
-    nombres = ("IPPO local, vecinos y spill: IPPO sin mensajes, con mensajes y con penalización de "
-               r"\textit{spillback}; DQN: Double DQN. ")
-    igual = ("= vecinos: la penalización no se activa e IPPO spill lleva el veredicto de IPPO vecinos. "
+                   "El actuado y el ciclo mínimo (verdes mínimos, desfases en 0) se juzgan frente al fijo."
+                   + (" Igual al ciclo mínimo: la política da el mismo retraso y la misma espera que el "
+                      "ciclo mínimo." if hay_igual_ciclo else ""))
+    # nombres cortos de las filas y rotulo "igual a IPPO con mensajes", explicados en el titulo (glosario)
+    nombres = r"IPPO con penalización: con penalización de \textit{spillback}; DQN: Double DQN. "
+    igual = ("Igual a IPPO con mensajes: la penalización no se activa e IPPO con penalización lleva el "
+             "veredicto de IPPO con mensajes. "
              if any(palabra(f["veredicto"]) == "= vecinos" for f in filas) else "")
     largo = (r"Veredicto de cada modelo en cada caso, con la regla de la Tabla~\ref{tab:veredictos}: "
              f"{nombre_retraso()} de la versión evaluada frente al {nombre_fijo()} y al actuado, "
              "semillas 1001 a 1030. " + nombres + igual + "PENDIENTE: faltan datos o el entrenamiento "
              f"de la versión evaluada no se estabilizó. {referencias}")
-    return (abrir_tabla() + r"\begin{tabular}{l" + "c" * len(CASOS) + "}\n" r"\toprule" "\n"
+    return (abrir_tabla(lugar="!tbp") + r"\begin{tabular}{l" + "c" * len(CASOS) + "}\n" r"\toprule" "\n"
             + "Modelo & " + cab + r" \\" "\n" r"\midrule" "\n" + "\n".join(lineas) + "\n"
             + cerrar_tabla("Veredicto por caso y modelo", largo, "veredicto-matriz"))
 
@@ -766,7 +842,7 @@ def tex_modelo(filas, modelo):
         conv = "--" if not f["convergio"] else \
             apilar(["sí" if f["convergio"] == "si" else "no", f"({f['convergen']})"])
         lineas.append(" & ".join([
-            f["caso"], tex_esc(f["escenario"]), celda_semaforos(f),
+            f["caso"], celda_red(f["escenario"], partir=True), celda_semaforos(f),
             "?" if f["carriles"] is None else str(f["carriles"]),
             "?" if f["demanda_veh_h"] is None else str(f["demanda_veh_h"]), ret,
             tex_delta(f["delta_fijo"], f["ic_fijo"], f["p_fijo"]),
@@ -776,29 +852,32 @@ def tex_modelo(filas, modelo):
     cab = "\n".join([
         r"\begin{tabular}{llcrrrrrrcl}",
         r"\toprule",
-        r"Caso & Escenario & Sem. & Carr. & \makecell{Dem.\\(veh/h)} & \makecell{Retraso\\(s/veh)} & "
-        r"\makecell{$\Delta$\\retraso\\vs fijo} & \makecell{$\Delta$\\retraso\\vs actuado} & "
-        r"\makecell{$\Delta$\\recompensa} & Conv. & Veredicto \\",
+        r"Caso & \makecell[l]{Red y\\demanda} & Sem. & Carr. & \makecell{Dem.\\(veh/h)} & "
+        r"\makecell{Retraso\\(s/veh)} & \makecell{Cambio\\frente al\\fijo} & \makecell{Cambio\\frente al\\actuado} & "
+        r"\makecell{Cambio de\\la recom-\\pensa} & Conv. & Veredicto \\",
         r"\midrule"]) + "\n"
     if modelo == "actuado":
-        detalle = "Controlador actuado de SUMO, fila de referencia juzgada frente al fijo tuneado."
+        detalle = f"Controlador actuado de SUMO, fila de referencia juzgada frente al {nombre_fijo()}."
     elif modelo == "trivial":
         detalle = ("Control de cordura: el programa fijo con cada verde en el mínimo del agente "
                    "(10~s) y los desfases en 0, es decir, cambiar de fase en cuanto la máscara lo "
-                   "permite. Fila de referencia juzgada frente al fijo tuneado.")
+                   f"permite. Fila de referencia juzgada frente al {nombre_fijo()}.")
     else:
-        detalle = (f"Política publicada = mediana de las tres semillas base por la validación "
-                   f"(semillas 999 y 1999). $\\Delta$ recompensa: cambio de la recompensa propia del "
+        detalle = (f"Versión evaluada: la versión guardada del entrenamiento mediano de los tres por la "
+                   f"validación (semillas 999 y 1999). Cambio de la recompensa: el de la recompensa propia del "
                    f"modelo ({tex_esc(RECOMPENSA[modelo])}) frente a la del fijo, positivo = mejor. "
-                   f"Conv.: si convergió la política publicada; entre paréntesis, cuántas de las "
-                   f"tres bases convergen.")
-    largo = (f"{NOMBRE[modelo]}: veredicto por caso. Sem.: semáforos (rot.: más una rotonda); Carr.: "
+                   f"Conv.: si convergió el entrenamiento de la versión evaluada; entre paréntesis, "
+                   f"cuántos de los tres entrenamientos convergen.")
+    if any(f["modelo"] == modelo and (f["veredicto"] or "").endswith(MARCA_TRIVIAL) for f in filas):
+        detalle += (" Igual al ciclo mínimo: la política da el mismo retraso y la misma espera que el "
+                    "ciclo mínimo.")
+    largo = (f"{NOMBRE_LARGO[modelo]}: veredicto por caso. Sem.: semáforos (rot.: más una rotonda); Carr.: "
              f"carriles por sentido de la avenida; Dem.: demanda total. Retraso: "
              + ("" if METRICA == "timeloss_prom" else f"{que_retraso()}, ") + "media $\\pm$ "
-             f"IC95\\,\\% sobre las semillas de evaluación 1001 a 1030; $\\Delta$ con IC95\\,\\% "
+             f"IC95\\,\\% sobre las semillas de evaluación 1001 a 1030; cambio (\\%) con IC95\\,\\% "
              f"bootstrap pareado y $p$ de Wilcoxon pareado. {detalle}")
     return (abrir_tabla("1.5pt") + cab + "\n".join(lineas) + "\n"
-            + cerrar_tabla(f"Veredicto de {NOMBRE[modelo]}", largo,
+            + cerrar_tabla(f"Veredicto {de_nombre(modelo)}", largo,
                            "veredicto-" + modelo.replace("_", "-")))
 
 
@@ -815,7 +894,7 @@ def tex_bases(bases, modelos):
                 info, ev = x["info"], x["eval"]
                 semilla = str(x["base"])
                 if x.get("publicada"):
-                    semilla = apilar([semilla, "(publicada)"], "l")
+                    semilla = apilar([semilla, "(evaluada)"], "l")
                 val = "--" if not info or info["val"] is None else tex_num(info["val"])
                 if info and info["ep"] is not None:
                     val = apilar([val, f"(ep {info['ep']})"], "r")
@@ -827,28 +906,28 @@ def tex_bases(bases, modelos):
                 delta = "--" if not ev or ev["delta_fijo"] is None else apilar(
                     [f"{ev['delta_fijo']:+.1f}".replace("-", "$-$") + r"\,\%", tex_ic(ev["ic_fijo"])], "r")
                 p = "--" if not ev or ev["p_fijo"] is None else tex_p(ev["p_fijo"]).lstrip("= ")
-                lineas.append(" & ".join([caso, tex_esc(esc), semilla, val, conv, ret, delta, p]) + r" \\")
+                lineas.append(" & ".join([caso, celda_red(esc), semilla, val, conv, ret, delta, p]) + r" \\")
             if len(retrasos) > 1:
-                lineas.append(" & & " + apilar(["rango entre", "bases"], "l") + " & & & "
+                lineas.append(" & & " + apilar(["rango entre", "los tres"], "l") + " & & & "
                               + tex_num(max(retrasos) - min(retrasos)) + r" & & \\")
         if not lineas:
             continue
         cab = "\n".join([
             r"\begin{tabular}{lllrlrrr}",
             r"\toprule",
-            r"Caso & Escenario & \makecell{Semilla\\base} & \makecell{Validación\\elegida\\(s/veh)} & "
-            r"\makecell{Conver-\\gió} & \makecell{Retraso\\evaluación\\(s/veh)} & "
-            r"\makecell{$\Delta$ vs fijo\\{}[IC95\,\%]} & $p$ \\",
+            r"Caso & Red y demanda & \makecell{Semilla del\\entrenamiento} & "
+            r"\makecell{Validación\\elegida\\(s/veh)} & \makecell{Conver-\\gió} & "
+            r"\makecell{Retraso\\evaluación\\(s/veh)} & \makecell{Cambio frente\\al fijo [IC95\,\%]} & $p$ \\",
             r"\midrule"]) + "\n"
-        largo = (f"{NOMBRE[m]}: las tres políticas entrenadas (semillas base) de cada caso. La "
+        largo = (f"{NOMBRE_LARGO[m]}: los tres entrenamientos de cada caso. La "
                  f"validación elegida es la media "
-                 + ("" if METRICA == "timeloss_prom" else "del timeLoss en ")
-                 + f"de las semillas 999 y 1999 del checkpoint "
-                 f"publicado; el retraso y el $\\Delta$ frente al fijo, sobre las semillas 1001 a 1030. "
-                 f"La base publicada es la mediana por validación. El rango entre bases se compara "
-                 f"con el IC95\\,\\% de una sola política.")
+                 + ("" if METRICA == "timeloss_prom" else "del timeLoss ")
+                 + f"en las semillas 999 y 1999 de la versión guardada que se elige en cada entrenamiento; el "
+                 f"retraso y el cambio frente al fijo, sobre las semillas 1001 a 1030. El entrenamiento marcado "
+                 f"(evaluada) es el mediano por validación y da la versión evaluada. El rango entre los tres "
+                 f"se compara con el IC95\\,\\% de una sola política.")
         texto += (abrir_tabla() + cab + "\n".join(lineas) + "\n"
-                  + cerrar_tabla(f"Bases de {NOMBRE[m]}", largo,
+                  + cerrar_tabla(f"Entrenamientos {de_nombre(m)}", largo,
                                  "veredicto-bases-" + m.replace("_", "-")) + "\n")
     return texto or "% Sin bases entrenadas todavia.\n"
 
@@ -933,6 +1012,14 @@ def probar():
     assert tex_p(1.9e-9) == "$<$\\,0.001" and tex_p(0.0421) == "= 0.0421" and tex_p(None) == "--"
     assert partir("(no convergió; provisional: MEJORA)") == ["(no convergió;", "provisional:", "MEJORA)"]
     assert tex_esc("corredor_alta 5%") == "corredor\\_alta 5\\%"
+    # notas en palabras en los .tex (entrega 3): los rotulos del CSV no llegan a la tesis
+    assert palabra_tex("= vecinos (término de spill inactivo; EMPATA)") == r"\makecell{igual a IPPO\\con mensajes}"
+    assert palabra_tex("MEJORA (= trivial)") == r"\makecell{MEJORA,\\igual al\\ciclo mínimo}"
+    assert palabra_tex("PENDIENTE (no convergió; provisional: FALLA)") == "PENDIENTE"
+    assert tex_veredicto("EMPATA (= trivial)") == r"\makecell[l]{EMPATA\\{}(igual al\\{}ciclo mínimo)}"
+    assert tex_veredicto("= vecinos (término de spill inactivo; MEJORA*)") == apilar(
+        ["igual a IPPO", "con mensajes", "(penalización", "inactiva;", "MEJORA, igual", "al ciclo", "mínimo)"], "l")
+    assert tex_veredicto("FUNCIONA") == "FUNCIONA"
     # demanda: 600 veh/h durante media hora + number 100 + period 36 s en una hora
     with tempfile.TemporaryDirectory() as tmp:
         ruta = os.path.join(tmp, "x.rou.xml")

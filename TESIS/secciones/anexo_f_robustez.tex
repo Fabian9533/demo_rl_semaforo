@@ -1,0 +1,751 @@
+\section*{Anexo F. Análisis de robustez}
+\phantomsection
+\addcontentsline{toc}{subsection}{Anexo F. Análisis de robustez}
+\setcounter{table}{0}
+\renewcommand{\thetable}{F.\arabic{table}}
+\renewcommand{\theHtable}{F.\arabic{table}}
+\setcounter{figure}{0}
+\renewcommand{\thefigure}{F.\arabic{figure}}
+\renewcommand{\theHfigure}{F.\arabic{figure}}
+\setcounter{equation}{0}
+\renewcommand{\theequation}{F.\arabic{equation}}
+\renewcommand{\theHequation}{F.\arabic{equation}}
+% Entrega 3, fase 2 (23.10.2026; plan del 14.10, movimientos 1, 2, 4, 7 y 8): este anexo junta el analisis de
+% robustez que estaba en capitulo5.tex (l. 1109-1399 del commit 7181ab8, seccion "Robustez de los resultados"),
+% capitulo3.tex (3.7.7, sec:diseno-robustez), capitulo4.tex (4.7.5, sec:remedicion) y el bloque "Tablas del
+% analisis de robustez" del Anexo A (anexos.tex l. 134-197), mas el barrido de demanda del corredor
+% (capitulo5.tex l. 865-948). El texto que viene del Cap. V se movio sin reescribirlo: solo cambian las remisiones
+% que ya no valen fuera del capitulo y se quitan los rotulos en negrita que repetian el titulo de su apartado. Los
+% nombres del glosario se aplicaron en la pasada del glosario (23.10.2026, tarea 3f): IPPO con mensajes, sin mensajes
+% y con penalizacion de spillback, fijo ajustado, fijo ajustado desde 10 s, ciclo minimo, medicion mas estricta,
+% version evaluada y resumen en un numero. El material de los Caps. III y IV y del Anexo A se integro el
+% 23.10.2026 sin reescribirlo: cada tramo lleva un comentario "Integracion" con su origen y con lo que se ajusto
+% (remisiones, opciones de linea de ordenes dichas en palabras y frases que repetian lo ya dicho en este anexo).
+% Ninguna etiqueta despues de los titulos con asterisco; tablas, figuras y ecuaciones llevan su etiqueta despues del
+% caption y numeran F.n.
+
+Este anexo reúne el análisis de robustez completo: qué cambia la
+medición más estricta, el fijo ajustado desde 10~s de cada caso, la
+ejecución, los veredictos de todos los modelos con esa medición, la
+lectura por caso, el resumen en un número y el reparto de la variación,
+las comprobaciones, lo que queda en pie, el barrido de demanda en el
+corredor sin reentrenar y las tablas por modelo. Su resumen, con el
+resultado de IPPO con mensajes en cada caso, está en la
+Sección~\ref{sec:robustez}. Se remite también a este anexo desde el
+diseño del análisis (Sección~\ref{sec:diseno-robustez}), desde su
+ejecución (Sección~\ref{sec:remedicion}), desde el efecto de la demanda
+(Sección~\ref{sec:sensibilidad-demanda}) y desde las conclusiones y las
+recomendaciones. El análisis se decidió después
+del veredicto: P1 a P5 se congelaron el 25.09.2026, y P6 se cerró el
+28.09.2026 con la misma regla.
+% fuente: fechas: plan2/veredicto_congelado_0355.csv (P1-P5, 25.09) y plan2/veredicto.csv (P6, 28.09).
+% Pasada del glosario (23.10.2026, tarea 3f): la prosa de este anexo usa los nombres del glosario del plan del 14.10
+% (seccion 3.5) y se quito la lista de nombres anteriores que iba aqui, porque las tablas se regeneran con los nombres
+% nuevos. images/fig_robustez_mejora_caso.png se regenero el 23.10.2026 con los nombres nuevos; images/fig_plan2_demanda.png
+% (del 27.09) no, y su caption aclara los rotulos viejos que usa. Si se regenera, quitar esa ultima frase del caption.
+% La tabla tablas/demanda_corredor.tex tampoco se habia regenerado al 23.10.2026 03:30 (dice IPPO vecinos, re-barrido)
+
+% Integracion (23.10.2026): aqui iban capitulo3.tex l. 1557-1563 (comienzo de 3.7.7, sec:diseno-robustez) y
+% capitulo4.tex l. 1288-1297 (comienzo de 4.7.5, sec:remedicion) del commit 7181ab8. No se repiten: todo lo que
+% dicen (tres decisiones del metodo revisadas despues del cierre, sin reentrenar; la metrica, el fijo barrido desde el
+% verde minimo y el control trivial; que no reemplaza al veredicto; resultados en sec:robustez y ejecucion en
+% sec:remedicion) ya esta en esta entrada, en "Que cambia" y en "Ejecucion". El texto sigue en el commit 7181ab8.
+
+% Verificacion de la fase 2 (23.10.2026): la entrada y "Que cambia" se reescribieron para que cada idea vaya una vez
+% (antes los tres cambios se contaban tres veces, que P6 no se vuelve a barrer cuatro, la decision tomada al ver P3
+% dos y que las versiones evaluadas son las del plan dos). Los tres puntos que encontro la revision pasan a "Que
+% cambia", cada uno con su decision; el parrafo "La medicion mas estricta cambia tres cosas" se quito, porque sus
+% programas ya estan en "Fijo ajustado desde 10 s" y su baja del fijo se da alli una sola vez, con sus semillas. Se
+% aplica tambien el glosario del plan del 14.10 (rejilla de valores por malla del barrido; P1 a P6 por los nombres
+% internos de escenario; version guardada, entrenamiento, control y cambio frente al fijo).
+Después de cerrar el plan, una revisión del alcance buscó de qué
+dependían las cifras del veredicto y encontró tres puntos que la
+especificación no cubría, que se describen más abajo, en ``Qué cambia''.
+Este anexo repite el análisis de P1 a P5 con esos tres puntos
+cambiados, sin reentrenar ningún modelo, y lo extiende a P6 una vez
+cerrado su fijo. La especificación del plan pedía abrir la rejilla de
+valores del barrido hasta que el óptimo quedara en su interior, con el
+verde mínimo de 10~s como piso válido, y los ganadores del primer
+barrido cumplían esa regla: en P3, por ejemplo, 25~s de avenida y 15~s
+de transversal, dentro de una rejilla de 15 a 35~s y de 10 a 20~s.
+Ampliar la rejilla hasta 10~s en la avenida se decidió después de ver
+que la versión evaluada de IPPO con mensajes en P3 daba el mismo
+resultado que el ciclo mínimo, y la especificación no lo exigía. Por
+eso esta medición más estricta es un análisis de robustez: su
+referencia se eligió después de ver los resultados, y no reemplaza el
+veredicto pre-registrado.
+% fuente: plan2/ESPEC.md, seccion 3 ("malla abierta hasta que el optimo sea interior (el verde minimo 10 s es un
+% piso valido)"); comentario de plan2/red.add.xml en el commit 37f9680 (malla 15-35 x 10-20; ganador 25/15, ciclo
+% 46 s, desfases 0/23/0)
+
+\subsection*{Qué cambia}
+
+% Integracion (23.10.2026): los cuatro parrafos siguientes son capitulo3.tex l. 1565-1598 del commit 7181ab8 (3.7.7),
+% con su fuente (l. 1599-1606). Sin reescribir; solo cambian: (1) salen las dos frases que repetian la decision de
+% ampliar la malla a 10 s despues de ver P3 ("Ampliar la malla hacia 10 s se decidio despues de ver que la politica
+% publicada de IPPO vecinos en P3 era el programa trivial. La regla del plan no lo exigia, porque ningun ganador del
+% barrido del plan habia quedado en el borde de su malla."), que ya esta en la entrada; (2) la remision a
+% sec:remedicion de l. 1581 pasa a texto interno ("mas abajo, en Fijo ajustado desde 10 s", donde esta lo de P6).
+% Verificacion de la fase 2 (23.10.2026): cada decision lleva aqui el punto de la revision que la motivo (antes en la
+% entrada) y lo que antes decia "La medicion mas estricta cambia tres cosas" (vehiculos que no entran, semillas de
+% ajuste, ciclo de 26 s); P6 se trata una sola vez, en "Fijo ajustado desde 10 s".
+La primera decisión es la métrica. En P2 la espera para entrar a la
+red, que el \texttt{timeLoss} no incluye, es mayor que el propio
+\texttt{timeLoss}: con el fijo ajustado, 239.6 frente a 154.7~s/veh, y
+los controles adaptativos bajan el \texttt{timeLoss} en parte con cola
+que queda fuera de la red (Sección~\ref{sec:formulacion}). En
+el análisis de robustez la regla de veredicto se aplica, por eso, al
+retraso total (Ecuación~\ref{eq:retraso-total}), que suma al
+\texttt{timeLoss} la espera para entrar a la red y cuenta también a los
+vehículos que no llegan a entrar.
+% fuente: plan2/evaluacion_corredor_alta_resumen.csv (fijo: retraso_insercion_prom 239.5657, timeloss_prom
+% 154.7013)
+
+La segunda es el fijo de referencia. El barrido del plan partía de
+12~s de verde en la avenida en P1 y de 15~s en P2 a P5, por encima del
+verde mínimo del agente, de 10~s. En el análisis de robustez se vuelve a
+barrer con la rejilla de los dos verdes desde el mínimo de 10~s, con el
+retraso total como criterio y con las mismas semillas de ajuste, 2001 a
+2003; la regla de interioridad y el techo de 60~s no cambian. El
+resultado, el fijo ajustado desde 10~s de cada caso, está más abajo, en
+``Fijo ajustado desde 10~s''.
+% fuente: mallas del 25.09: comentarios de plan2/<esc>.add.xml en el commit 37f9680 (corredor: avenida desde 12 s;
+% corredor_alta, red, red_alta y malla3: avenida 15/20/25/30/35 s)
+
+La tercera es un control nuevo, el ciclo mínimo
+(Secciones~\ref{sec:modelos} y~\ref{sec:programa-trivial}): cada verde
+en 10~s, los ámbares de 3~s y todos los desfases en cero, un ciclo de
+26~s. El plan no tenía un control que dijera si un aprendiz gana solo
+por cambiar de fase en cuanto la máscara lo permite. El ciclo mínimo se
+evalúa en cada caso con las semillas 1001 a 1030 y se juzga frente al
+fijo ajustado desde 10~s, como el actuado. La versión evaluada que da
+la misma media de retraso total y la misma media de espera detenida que
+el ciclo mínimo, con una diferencia de a lo sumo 0.0005~s/veh en cada
+una, se marca como ``igual al ciclo mínimo''. La marca no cambia el
+veredicto: señala que, en la práctica, la política aprendida de ese
+modelo en ese caso es la regla de cambiar de fase en cuanto la máscara
+lo permite.
+% fuente: trivial: plan2/<esc>_trivial.add.xml (10/3/10/3, desfases en cero)
+
+Todo lo demás es igual que en el plan: las versiones evaluadas, con
+sus versiones guardadas y sus entrenamientos elegidos por la validación
+en \texttt{timeLoss} (en P6, las del cierre de ese caso), las semillas,
+la estadística pareada y la regla de veredicto. El resumen en un número
+y el análisis de varianza de la
+Sección~\ref{sec:analisis-complementarios} se repiten con el retraso
+total y el fijo ajustado desde 10~s. El análisis cubre los seis casos,
+P1 a P6.
+% fuente: plan2/robustez_veredicto.csv, robustez_sintesis_numero_unico.csv y robustez_sintesis_anova.csv
+% (28.09.2026, casos P1/P2/P3/P4/P5/P6); plan2/barrido_malla3_alta.csv (72 filas, avenida 10-35 y transversal
+% 10-25; la fila de menor retraso_total_prom, 82.63, es la de menor timeloss_prom, 36.91: 15/10, cero)
+% fuente: veredicto.py (--prefijo robustez_; IGUAL = 0.0005, igual_a sobre METRICA y
+% espera_prom, marca "(= trivial)"; REFERENCIAS = actuado y trivial); sintesis_plan.py --prefijo robustez_;
+% git HEAD:barrer_fijo.py (MALLAS del 25.09: avenida desde 12 s en corredor y 15 s en los demas; en_borde) y
+% plan2/cola/logs/barrido_<esc>.log del 25.09 sin AVISO; comentario de MALLAS en barrer_fijo.py (27.09.2026);
+% la igualdad de la politica de P3 y el trivial: este anexo, "Que cambia" (antes capitulo4.tex, sec:remedicion)
+
+% Verificacion de la fase 2 (23.10.2026): aqui iba el parrafo "La medicion mas estricta cambia tres cosas" (de
+% capitulo5.tex l. 1144-1170 del commit 7181ab8). Su metrica, su barrido y su ciclo minimo estan en los tres
+% parrafos de arriba; sus programas, mas abajo, en "Fijo ajustado desde 10 s"; su baja del fijo (21.72 -> 19.91,
+% 30.05 -> 28.23 y 20.84 -> 20.78 s/veh, que son de las semillas 1001-1030) va alli una sola vez, junto al
+% intervalo y al valor p; lo de P6 tambien, y que las versiones evaluadas son las del plan, en el parrafo anterior.
+
+% Integracion (23.10.2026): el parrafo siguiente es capitulo4.tex l. 1299-1317 del commit 7181ab8 (4.7.5), con su
+% fuente (l. 1318-1323). Sin reescribir; salen sus dos ultimas frases ("Ampliar la malla hacia 10 s se decidio
+% despues de ver ese resultado, y la especificacion del plan no lo exigia. Por eso el re-barrido forma parte del
+% analisis de robustez y no cambia el fijo del resultado principal."), que repiten la entrada. Verificacion de la
+% fase 2 (23.10.2026): salen tambien el punto de partida del barrido (ya en "La segunda es el fijo de referencia") y
+% el hallazgo de P3 (la decision esta en la entrada y la igualdad, en "Lectura por caso")
+El barrido del plan no llegó a 10~s aunque la regla admitía el verde
+mínimo como óptimo (Sección~\ref{sec:protocolo}): ningún ganador quedó
+en el borde y la rejilla no se amplió. El retraso en función del
+programa tiene al menos dos óptimos locales, el ciclo corto
+sincronizado y un ciclo de 46~s con los cruces coordinados en onda
+verde, y el ganador del plan estaba en el segundo. La regla solo mira si
+el ganador toca el borde de la rejilla: con el ganador en el interior,
+el otro óptimo quedaba por debajo del borde inferior y la rejilla nunca
+se amplió hacia él.
+% fuente: comentario de MALLAS en barrer_fijo.py (27.09.2026); mallas del plan en git (HEAD:barrer_fijo.py:
+% avenida 12-30 s en corredor y 15-35 s en los demas); plan2/cola/logs/barrido_<esc>.log del 24.09 sin AVISO;
+% igualdad de ippo_vecinos publicada en P3 (base 4042) y el trivial: parciales/eval_red_trivial.csv frente a
+% eval_red_ippo_vecinos_s4042.csv, 30 semillas, todas las columnas de trafico iguales (solo difieren
+% decisiones y el redondeo de ret_*; revisado 27.09.2026); plan2/ESPEC.md linea 95 (interioridad, 10 s piso
+% valido; no pide partir de 10 s)
+% Integracion (23.10.2026): el parrafo de entrada del bloque "Tablas del analisis de robustez" del Anexo A
+% (anexos.tex l. 136-152 del commit 7181ab8) no se repite aqui: la metrica, el fijo re-barrido desde 10 s, P6 con el
+% mismo fijo, el control trivial, las mismas politicas sin reentrenar, la decision tomada despues de ver P3 y que no
+% reemplaza al veredicto ya estan en la entrada y en los parrafos de arriba. Su primera frase, la que presenta las
+% tablas, va al comienzo de "Tablas por modelo".
+
+\subsection*{Fijo ajustado desde 10~s}
+
+% Integracion (23.10.2026): capitulo4.tex l. 1325-1428 del commit 7181ab8 (4.7.5), con la Tabla tab:robustez-fijo
+% (aqui F.1). Sin reescribir; solo la opcion de linea de ordenes de l. 1327 (--metrica retraso_total_prom) se dice en
+% palabras. En la pasada del glosario (23.10.2026) el texto y el caption de la tabla pasaron a los nombres nuevos.
+% Verificacion de la fase 2 (23.10.2026): "malla" del barrido pasa a "rejilla de valores" y los nombres internos de
+% escenario (corredor, corredor_alta, red, red_alta, malla3, malla3_alta) a P1-P6, tambien en la tabla, que pierde la
+% columna Escenario (repetia el caso); aqui se dice, una sola vez en el anexo, que P6 no se vuelve a barrer.
+\begin{sloppypar}
+El barrido desde 10~s usa \texttt{barrer\_fijo.py} con su opción por omisión,
+el retraso total como criterio, y la rejilla de los dos verdes desde
+10~s en todos los casos: avenida de 10 a 30~s en P1 y de 10 a 35~s en
+los demás. Ningún ganador de P1 a P5 quedó en el borde superior de su
+rejilla, y ningún barrido tuvo que ampliarla. P6 no se vuelve a barrer.
+Su barrido del plan, después de la ampliación a 10~s por la regla de
+interioridad (Sección~\ref{sec:referencias-fijas}), cubre la misma
+rejilla que el barrido desde 10~s de P5, 72 configuraciones con los dos
+verdes desde 10~s, y su ganador por \texttt{timeLoss}, 15~s de avenida
+y 10~s de transversal sin desfases, es también el de menor retraso
+total. En P6 el fijo del análisis de robustez es, entonces, el mismo
+del resultado principal. La Tabla~\ref{tab:robustez-fijo} da el fijo de
+los seis casos.
+\end{sloppypar}
+% fuente: plan2/cola/logs/v21_barrido_<esc>.log (sin AVISO de borde) y plan2/barrido_<esc>.csv de la re-medicion
+% (los verdes barridos son exactamente los de barrer_fijo.MALLAS en los cinco casos); P6: plan2/barrido_malla3_alta.csv
+% (72 filas, avenida 10-35, transversal 10-25, tres esquemas; minimo de retraso_total_prom 82.63 y de timeloss_prom
+% 36.91 en la misma fila); plan2/robustez_veredicto.csv (P6 frente al brazo fijo = eval_malla3_alta_fijo.csv)
+
+\begin{table}[H]
+\setstretch{1}
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{lcclcccc}
+\toprule
+Caso & \makecell{Verde avenida /\\transversal (s)} & \makecell{Ciclo\\(s)} & Desfases (s) & \makecell{Retraso total\\(s/veh)} & \makecell{\texttt{timeLoss}\\(s/veh)} & Config. & \makecell{Posición\\(av. / tr.)} \\
+\midrule
+P1 & 20 / 10 & 36 & 0 / 15          & 20.88 (0.22)   & 20.50  & 170 & int. / piso \\
+P2 & 25 / 15 & 46 & 0 / 25          & 384.97 (11.58) & 152.13 & 119 & int. / int. \\
+P3 & 10 / 10 & 26 & 0 / 25 / 24     & 20.20 (0.19)   & 19.85  & 471 & piso / piso \\
+P4 & 10 / 10 & 26 & 0 / 25 / 24     & 26.52 (3.60)   & 26.19  & 471 & piso / piso \\
+P5 & 10 / 10 & 26 & todos en 0      & 21.23 (0.10)   & 20.77  & 72  & piso / piso \\
+P6 & 15 / 10 & 31 & todos en 0      & 82.63 (0.40)   & 36.91  & 72  & int. / piso \\
+\bottomrule
+\end{tabular}
+\caption[Robustez: fijo ajustado desde 10~s por caso]{Análisis de robustez: fijo ajustado desde
+10~s de cada caso, el programa fijo ganador del barrido que parte del verde mínimo (semillas 2001
+a 2003), elegido por el retraso total por vehículo
+(Ecuación~\ref{eq:retraso-total}). Ciclo: los dos verdes más dos ámbares de 3~s. Desfases: del
+primer cruce al último. Retraso total: media y, entre paréntesis, desviación estándar sobre las
+tres semillas. \texttt{timeLoss}: media del mismo programa. Config.: configuraciones barridas.
+Posición: dónde queda el verde de la avenida y el transversal del ganador en su rejilla; int.:
+interior; piso: el verde mínimo de 10~s, que no cuenta como borde. Rejillas: verde de la avenida de
+10 a 30~s en P1 y de 10 a 35~s en los demás; verde transversal de 10 a 20~s (10 a 25~s en
+P2, P5 y P6); desfase del segundo cruce de 0 a 40~s (0 a 30~s en
+P2); en P5 y P6, tres esquemas de desfases. En P6 no hay un barrido
+nuevo: el programa es el ganador del barrido del plan, que ya cubre esta rejilla y es también el de menor
+retraso total. El fijo del resultado principal es el de la Tabla~\ref{tab:plan2-fijo}.}
+\label{tab:robustez-fijo}
+\end{table}
+% fuente: plan2/barrido_<esc>.csv de la re-medicion del 27.09.2026 (fila de menor retraso_total_prom; columnas
+% verde, verde_transversal, offsets, esquema, retraso_total_prom, retraso_total_sd, timeloss_prom; configuraciones
+% = filas del csv), tomadas de la version de este capitulo del 27.09 (tab:plan2-fijo v2.1) y de
+% scratchpad/escritura/hechos_v21.md (Fijo ganador del re-barrido); ciclo: cabecera de plan2/<esc>.add.xml;
+% mallas: barrer_fijo.MALLAS. plan2/barrido_corredor.csv se estaba restaurando el 28.09 y no se releyo; P1 coincide
+% con plan2/barrido_corredor_f100.csv (misma configuracion); P6: plan2/barrido_malla3_alta.csv (28.09.2026; fila
+% 15/10 cero: retraso_total_prom 82.63, retraso_total_sd 0.4, timeloss_prom 36.91; 72 filas); ciclo 31 s:
+% cabecera de plan2/malla3_alta.add.xml
+
+En P1 y P2 el barrido desde 10~s conserva el programa del plan: 20/10~s con
+desfase de 15~s en P1 y 25/15~s con desfase de 25~s en P2. En esos dos
+casos el ciclo corto queda lejos: el mejor programa con 10~s de verde
+en cada fase da 102.71~s/veh de retraso total en P1 y 961.54~s/veh en
+P2, casi cinco veces y 2.5 veces el del ganador.
+
+En P3, P4 y P5 el ganador cambia. El barrido del plan había elegido un
+ciclo de 46~s (25/15~s en P3 y P5, 30/10~s en P4); con la rejilla que
+parte del mínimo gana el ciclo corto de 26~s, con 10~s de verde en cada
+fase. En P3 y P4 sus desfases son 0, 25 y 24~s (el tercero es el doble
+del segundo, módulo el ciclo), a 1 y 2~s de la sincronía en un ciclo de
+26~s. En P5 gana el esquema con todos los desfases en cero, así que el
+fijo ajustado desde 10~s de P5 es el mismo programa que el ciclo
+mínimo. El esquema en ajedrez, que ganaba el barrido del plan, queda
+segundo, con 25/15~s y 21.28~s/veh.
+
+La ventaja del nuevo ganador sobre el del plan, medida con el retraso
+total en las mismas semillas de ajuste, no es igual de clara en los
+tres casos. En P3 es de 1.67~s/veh, casi nueve veces la desviación
+estándar del ganador entre esas semillas (0.19). En P4 es de
+1.84~s/veh, menos que esa desviación (3.60), y en P5, de 0.05~s/veh,
+frente a 0.10. En estos dos casos los dos óptimos quedan dentro de la
+variación entre las tres semillas de ajuste, y el barrido elige el de
+menor media, como fija la regla.
+% fuente: plan2/barrido_<esc>.csv de la re-medicion (retraso_total_prom y retraso_total_sd): corredor 10/10
+% mejor 0/25 = 102.71 frente a 20.88; corredor_alta 10/10 mejor 0/10 = 961.54 frente a 384.97; ganador del
+% barrido del plan (git, HEAD:plan2/<esc>.add.xml) en la malla nueva: red 25/15 0/23/0 = 21.87 (sd 0.28) frente
+% a 20.20 (sd 0.19); red_alta 30/10 0/20/0 = 28.36 (sd 3.04) frente a 26.52 (sd 3.60); malla3 25/15 ajedrez
+% 0/23/... = 21.28 (sd 0.31) frente a 21.23 (sd 0.10); los tres son el mejor programa con algun verde de mas
+% de 10 s en su csv. Igualdad del fijo de P5 y el trivial: plan2/malla3.add.xml y malla3_trivial.add.xml
+% (10/3/10/3, offset 0 en los nueve)
+
+La Tabla~\ref{tab:robustez-fijo} da el retraso de cada programa en las
+semillas de ajuste, 2001 a 2003. En las de evaluación, 1001 a 1030, y
+con el \texttt{timeLoss}, la métrica del resultado principal, la
+diferencia es clara en P3 y también en P4. Frente al fijo del plan, el
+fijo ajustado desde 10~s baja el \texttt{timeLoss} de 21.72 a
+19.91~s/veh en P3, un 8.35\,\% (intervalo de $-8.87$ a $-7.80$\,\%), y
+de 30.05 a 28.23~s/veh en P4, un 6.06\,\% ($-7.54$ a $-4.61$\,\%), con
+$p < 0.001$ en los dos. En P5 el cambio, de 20.84 a 20.78~s/veh
+($-0.28$\,\%, de $-0.58$ a $0.03$\,\%, $p = 0.090$), no es
+significativo. En P3 esa diferencia es del mismo tamaño que la mejora
+de IPPO con mensajes frente al fijo del plan ($-8.8$\,\%), y en P4 la
+supera ($-3.6$\,\%).
+% fuente: scratchpad/escritura/hechos_2509.md (Fijo del 25.09 frente al fijo re-barrido, timeLoss, 1001-1030:
+% P3 -8.35 % [-8.87, -7.80] p=1.73e-06; P4 -6.06 % [-7.54, -4.61] p=8.01e-08; P5 -0.28 % [-0.58, 0.03]
+% p=0.0896); medias en 1001-1030 (verificadas el 23.10.2026): brazo fijo frente a fijo_2509, metrica timeloss_prom,
+% columnas media, delta_pct, delta_ic95 y p_wilcoxon de plan2/evaluacion_<esc>_resumen_fijo_2509.csv (red 19.9053
+% frente a 21.7187; red_alta 28.2317 frente a 30.0517; malla3 20.7803 frente a 20.8387);
+% plan2/veredicto_congelado_0355.csv (ippo_vecinos delta_fijo P3 -8.8 %, P4 -3.6 %)
+
+\subsection*{Ejecución}
+
+% Integracion (23.10.2026): capitulo4.tex l. 1430-1460 y 1484-1529 del commit 7181ab8 (4.7.5); las l. 1462-1482 van a
+% "Comprobaciones". Sin reescribir; solo cambian: las opciones de linea de ordenes de l. 1500-1505 (--prefijo
+% robustez_, --casos y --metrica timeloss_prom sin --fijo) se dicen en palabras, y el parrafo del antivirus va en
+% sloppypar, porque en el Cap. IV se salia 27 pt del margen por los identificadores largos.
+% Verificacion de la fase 2 (23.10.2026; plan del 14.10, seccion 3.1: la bitacora del proceso se quita): el apartado
+% se condenso. Salen la funcion agregar_v21 y sus prioridades, el detalle de las siete evaluaciones de IPPO con
+% penalizacion que corrieron dos veces, el antivirus y las opciones de los programas que escriben las tablas; queda
+% lo que se corrio, que dos barridos se repitieron sin cambiar ningun numero y el costo. Las fuentes siguen abajo.
+En P1 a P5 la medición más estricta tiene tres grupos de trabajos. El
+primero es el barrido desde 10~s del fijo de cada caso, que instala el
+ganador como programa fijo del caso. El segundo es la evaluación del
+fijo, del actuado y del ciclo mínimo con las semillas 1001 a 1030. El
+tercero es la evaluación de todas las políticas ya entrenadas, los tres
+entrenamientos de cada modelo y caso, con las mismas semillas, para
+obtener el retraso total, la espera para entrar y los no insertados,
+que el plan no registraba. Con el código nuevo corrieron también las
+siete evaluaciones de IPPO con penalización de \textit{spillback} que
+habían quedado pendientes (Sección~\ref{sec:spill-vecinos}). La
+elección de la versión guardada de cada entrenamiento y de la versión
+evaluada no se rehízo: sigue la validación en \texttt{timeLoss} del
+plan (Sección~\ref{sec:protocolo}). Dos barridos se interrumpieron por
+un error al escribir un archivo de salida y se repitieron con la misma
+orden, sin que cambiara ningún número de la simulación. Las tablas las
+escriben los mismos programas del resultado principal, con el retraso
+total y el fijo ajustado desde 10~s.
+% fuente: plan2/cola/cola.out (eval_<esc>_ippo_spill_s<b> de red, red_alta y malla3 entre las 18:35 y las
+% 19:03; v21_eval_<esc>_ippo_spill_s<b> despues, por ejemplo v21_eval_red_ippo_spill_s4042 de 20:03 a 20:06)
+% y plan2/cola/estado.json (tiempos de los dos identificadores); barridos interrumpidos: FALLO de v21_barrido_red y
+% v21_barrido_red_alta a las 19:00 y 19:15 en plan2/cola/cola.out, repetidos con exito; docstrings de
+% barrer_fijo.correr_sumo (5 intentos, 3 s; "tumbo dos barridos"), comun.borrar_tripinfo (5 intentos, 1 s) y
+% comun.iniciar_sumo (24.09.2026); tablas: docstrings de veredicto.py, sintesis_plan.py y plan2/tablas_cap5.py
+% (--prefijo robustez_; 28.09.2026); plan2/robustez_veredicto.csv (28.09.2026, P1 a P6): sus filas de P1 a P5
+% coinciden con plan2/veredicto_v21_respaldo.csv, donde P6 aun figuraba sin evaluacion
+
+La medición más estricta no entrena, así que su costo lo fijan los
+barridos y las evaluaciones. En P1 a P5 son 137 trabajos: los cinco
+barridos del fijo y 132 evaluaciones, las del fijo, el actuado y el
+ciclo mínimo de cada caso y las de 117 políticas, tres entrenamientos
+por modelo y caso. Terminaron todos, sin ninguno fallido al cierre. Sus
+duraciones suman 16.4 horas: 2.0 en los barridos y 14.4 en las
+evaluaciones; como cada barrido corre tres simulaciones a la vez, el
+tiempo de CPU puede llegar a 20.4 horas. P6 no suma trabajos a la
+medición más estricta: sus evaluaciones, incluida la del ciclo mínimo,
+corrieron con el código que ya registra el retraso total
+(Sección~\ref{sec:p6-demanda}).
+% fuente: plan2/cola/estado.json (tiempos, en s, de los trabajos v21_*; hechos; fallidos vacio):
+% v21_ 137 trabajos, 59 086 s (barridos 5, 7173 s; evaluaciones 132, 51 913 s); cota de CPU = evaluaciones + 3 x
+% barridos (--procesos 3 en plan2/cola/trabajos.jsonl); plan2/cola/cola.out (INICIO v21_barrido_corredor
+% 18:35:22; ultimo OK v21_ 20:55:26; FALLO de v21_barrido_red y v21_barrido_red_alta a las 19:00 y 19:15,
+% repetidos con exito: son los dos barridos que interrumpio el antivirus); las siete
+% eval_<esc>_ippo_spill_s<b> pendientes del plan corrieron con su identificador original entre las 18:35 y las
+% 19:03 (2688 s en total) y despues otra vez como v21_eval_*; no se suman a los 137
+
+\subsection*{Veredictos con la medición más estricta}
+
+La Tabla~\ref{tab:robustez-veredicto-matriz} da el veredicto con estos
+cambios, y la Tabla~\ref{tab:robustez-plan2-resumen}, el retraso total
+y el cambio frente al fijo de cada modelo. La nota ``igual al ciclo mínimo''
+señala las versiones evaluadas que dan el mismo retraso total y la
+misma espera detenida que el ciclo mínimo.
+
+% fuente: plan2/robustez_veredicto.csv (= plan2/veredicto_v21_respaldo.csv, la re-medicion del 27.09.2026); se
+% regenera con "python veredicto.py --prefijo robustez_" desde demo_rl/ (con los seis casos; hasta el 28.09 se
+% corria con --casos P1-P5)
+\input{secciones/tablas/robustez_veredicto_matriz}
+
+% fuente: plan2/robustez_veredicto.csv y fila fijo (retraso_total_prom) de plan2/evaluacion_<esc>_resumen.csv;
+% tabla escrita por "python tablas_cap5.py --prefijo robustez_" desde plan2/ (con los seis casos)
+\input{secciones/tablas/robustez_plan2_resumen}
+
+Con la medición estricta, ningún aprendiz funciona fuera de P1. En P1
+funcionan los mismos tres modelos que en el veredicto pre-registrado.
+IPPO con mensajes mejora al fijo en P3 solo porque su política es el
+ciclo mínimo, falla en P2, P4 y P5, y en P6 queda pendiente, con empate
+provisional. MAPPO falla en P2 y empata en P5 con una política que
+también es el ciclo mínimo, y en P3, P4 y P6 queda pendiente. IPPO sin
+mensajes es el único aprendiz que mejora al fijo en P2 ($-1.7$\,\%). El
+actuado falla en P2 a P6. De los 45 veredictos de modelos y actuado de
+P1 a P5, contando los provisionales, 26 no cambian. Diez cambian por el
+fijo ajustado desde 10~s, todos en P3 y P4; siete por la métrica, todos
+en P2; y dos, los de IPPO con mensajes e IPPO con penalización de
+\textit{spillback} en P5, por un borde estadístico. Para separar las
+dos causas, la regla se aplicó también con el \texttt{timeLoss} frente
+al fijo ajustado desde 10~s. En P6 no cambia ninguno de los nueve
+veredictos. La Figura~\ref{fig:robustez-mejora-caso} compara, para
+IPPO con mensajes y MAPPO, el cambio frente al fijo del veredicto
+pre-registrado con el de la medición más estricta.
+% fuente: plan2/robustez_veredicto.csv; atribucion de causas: tabla_antes_despues.md de la auditoria del
+% 27.09.2026 (25.09 -> timeLoss con el fijo re-barrido [fijo] -> retraso total con el fijo re-barrido [metrica];
+% conteo: sin cambio 26, fijo 10, metrica 7, borde estadistico 2, trivial 5 celdas nuevas); P6: columna veredicto
+% de malla3_alta en plan2/veredicto.csv y plan2/robustez_veredicto.csv, igual en las nueve filas de modelos y actuado
+
+% Verificacion de la fase 2 (23.10.2026): flota ([!tbp]); en [H] no cabia al pie de la pagina y dejaba en blanco
+% mas de media pagina
+\begin{figure}[!tbp]
+\centering
+\includegraphics[width=\textwidth]{fig_robustez_mejora_caso.png}
+\caption[Robustez: cambio frente al fijo, veredicto y medición más estricta]{Robustez. Cambio del retraso frente al fijo (\%) de las versiones evaluadas de IPPO con mensajes (azul) y MAPPO (naranja) en P1 a P6; P6 solo tiene el valor de la medición más estricta, porque el veredicto congelado no incluía ese caso (su cambio con el \texttt{timeLoss} está en la Tabla~\ref{tab:plan2-resumen}). Círculo hueco: veredicto pre-registrado, con el \texttt{timeLoss} y el fijo ajustado (los valores de la Tabla~\ref{tab:plan2-resumen}); a diferencia de la Figura~\ref{fig:plan2-mejora-caso}, aquí el hueco no indica un veredicto PENDIENTE. Punto relleno: medición más estricta, con el retraso total y el fijo ajustado desde 10~s; la barra vertical es su IC95\,\% por \textit{bootstrap} pareado sobre las semillas 1001 a 1030. La línea tenue une los dos valores de una misma política. Línea roja discontinua: meta de la tesis, $-25$\,\%. Bajo cada caso, su número de semáforos, los carriles por sentido de la avenida y la demanda total (veh/h). Un valor negativo indica menos retraso que el fijo.}
+\label{fig:robustez-mejora-caso}
+\end{figure}
+% fuente: figura escrita por "python sintesis_plan.py --prefijo robustez_" desde
+% plan2/robustez_veredicto.csv (delta_fijo, ic_fijo) y plan2/veredicto_congelado_0355.csv (delta_fijo); regenerada
+% con P6 el 28.09.2026: P6 solo tiene el punto de la re-medicion, porque el congelado del 25.09 no lo incluye.
+% Verificacion de la fase 2 (23.10.2026): el caption aclara que aqui el hueco no es PENDIENTE (en la Figura
+% fig:plan2-mejora-caso si lo es) y dice "cambio del retraso frente al fijo" en lugar de Delta_f
+
+\subsection*{Lectura por caso}
+
+\noindent\textbf{P1: sin cambio.} El programa fijo es el mismo, y la
+espera para entrar es de 0.37~s/veh con el fijo, el actuado y las
+versiones evaluadas de IPPO con mensajes, Double DQN y MAPPO, así que
+el retraso total solo suma una constante. IPPO con mensajes queda en $-6.7$\,\% (frente a $-6.8$\,\%
+en el veredicto pre-registrado), MAPPO en $-7.0$\,\% e IPPO con
+penalización de \textit{spillback} en $-5.1$\,\%, y ningún veredicto
+cambia. El ciclo mínimo falla por mucho ($+390.3$\,\%): en el
+corredor, con la demanda nominal, el ciclo corto no alcanza.
+% fuente: plan2/robustez_veredicto.csv (P1); plan2/evaluacion_corredor_resumen.csv (retraso_insercion_prom
+% 0.37 en fijo, actuado, ippo_vecinos_s4042, mappo_s42 y dqn_s4042). 23.10.2026 (entrega 3, pedido 2b): antes
+% decia "con un carril por sentido y la demanda nominal"; el plan no aisla el efecto de los carriles
+
+\noindent\textbf{P2: la métrica.} El programa fijo tampoco cambia;
+cambia lo que se mide. Con el fijo, cada vehículo espera en promedio
+más para entrar a la red (239.6~s) que dentro de ella (154.7~s), y el
+retraso total es de 394.3~s/veh. La política de IPPO con mensajes sigue con
+un \texttt{timeLoss} un $23.3$\,\% menor que el del fijo, pero su
+espera para entrar sube a 282.0~s/veh y su retraso total queda un
+$1.6$\,\% por encima, una falla. El actuado baja el \texttt{timeLoss}
+un $19.8$\,\% y sube el retraso total un $13.0$\,\%, con 321.3~s/veh
+de espera para entrar. Estos controles despachan mejor a los vehículos
+que ya están en la red y dejan crecer la cola en las entradas, donde
+ni el \texttt{timeLoss} ni la recompensa la ven
+(Sección~\ref{sec:formulacion}). Ningún vehículo queda sin entrar ni
+sin terminar con el fijo, el actuado y esas políticas, así que su
+retraso total es el valor medido y no una cota. IPPO sin mensajes es
+el único aprendiz que baja el retraso total ($-1.7$\,\%, $p = 0.001$).
+% fuente: plan2/evaluacion_corredor_alta_resumen.csv (fijo: timeloss_prom 154.7013, retraso_insercion_prom
+% 239.5657, retraso_total_prom 394.2653; retraso_insercion_prom de ippo_vecinos_s2042 282.0237 y actuado 321.32;
+% no_insertados y no_terminados 0.0); plan2/robustez_veredicto.csv (P2)
+
+\noindent\textbf{P3 y P4: el fijo.} En estos casos la métrica casi no
+importa, porque la espera para entrar es en promedio de 0.35~s/veh o
+menos con todos los controles. Lo que cambia es la referencia. El
+ciclo mínimo, que la rejilla del primer barrido no incluía, tiene un
+retraso total un $8.6$\,\% menor que el del fijo del primer barrido en
+P3 y un $6.9$\,\% menor en P4. La versión evaluada de IPPO con mensajes
+en P3 da, en las treinta semillas y en todas las métricas de tráfico,
+lo mismo que el ciclo mínimo: su $-8.8$\,\% del veredicto pre-registrado era la
+ventaja del ciclo corto sobre el largo, no la de una coordinación
+aprendida. Frente al fijo ajustado desde 10~s esa política mejora
+apenas ($-0.5$\,\%, $p = 0.013$) y lleva la nota ``igual al ciclo
+mínimo''. En P4, donde el ciclo mínimo empata con el fijo ajustado
+desde 10~s ($-1.0$\,\%, $p = 0.22$), IPPO con mensajes, Double DQN y
+MAPPO quedan por encima del fijo, entre $+2.6$ y $+4.3$\,\%.
+% fuente: plan2/evaluacion_red_resumen.csv y plan2/evaluacion_red_alta_resumen.csv (retraso_insercion_prom 0.35 y
+% 0.34); trivial frente al fijo del 25.09 en retraso total: contra_trivial.txt de la auditoria del 27.09.2026
+% (P3 -8.6 % [-9.2, -8.1], P4 -6.9 % [-8.1, -5.8]); igualdad con el trivial: igual_trivial.txt de la auditoria
+% (red ippo_vecinos_s4042 = trivial en 30/30 semillas) y parciales/eval_red_trivial.csv frente a
+% eval_red_ippo_vecinos_s4042.csv (todas las columnas de trafico iguales; revisado 27.09.2026; antes en el parrafo
+% de los dos optimos de "Que cambia"); plan2/robustez_veredicto.csv (P3 y P4)
+
+\noindent\textbf{P5: un borde estadístico.} El fijo ajustado desde
+10~s es el ciclo mínimo, y su \texttt{timeLoss} apenas difiere del fijo
+del primer barrido. IPPO con mensajes pasa de empate a falla: su
+cambio frente al fijo es de $+2.0$\,\%, con un intervalo de $+0.7$ a
+$+3.6$\,\% y $p = 0.028$. Su política da el mismo resultado que el ciclo mínimo en
+24 de las 30 semillas; en las otras seis
+su \texttt{timeLoss} queda entre 1.0 y 2.8~s/veh por encima. La prueba
+de Wilcoxon descarta las diferencias nulas y decide con esas seis,
+todas positivas. Con la variante que reparte los ceros entre los dos
+signos, el valor $p$ sería 0.070 y el veredicto, empate. La versión
+evaluada de MAPPO es el ciclo mínimo y empata. El veredicto de IPPO con
+mensajes en P5 es, así, frágil con cualquiera de los dos fijos.
+% fuente: plan2/robustez_veredicto.csv (P5); p5_semillas.txt de la auditoria del 27.09.2026 (diferencias por
+% semilla de ippo_vecinos_s2042 frente al fijo re-barrido: 24 nulas, seis entre +0.97 y +2.78 s/veh);
+% p5_wilcoxon_ceros.txt (wilcox 0.0277, zsplit 0.0702); igual_trivial.txt (malla3 ippo_vecinos_s2042 = trivial en
+% 24/30, mappo_s2042 en 30/30)
+
+\noindent\textbf{P6: el mismo fijo y la misma espera para entrar.} El
+fijo es el mismo con las dos métricas, y la espera para entrar a la
+red es de 45.46 a 45.65~s/veh con el fijo, el actuado y todas las
+versiones evaluadas, así que el retraso total suma a cada uno casi la
+misma constante; solo el ciclo mínimo llega a unos 99~s/veh. Con el fijo, el retraso
+total es de 82.19~s/veh, de los que 45.46 son de espera para entrar.
+Los veredictos son los mismos que con el \texttt{timeLoss}, y los
+cambios se reducen a cerca de la mitad porque el denominador crece.
+IPPO con mensajes queda en $+1.1$\,\% (de $-0.6$ a $+2.8$\,\%,
+$p = 0.596$) e IPPO con penalización de \textit{spillback} en
+$+1.7$\,\%, los dos con un empate provisional. MAPPO ($+5.6$\,\%), Double DQN
+($+5.0$\,\%) y SARSA ($+10.7$\,\%) fallan de forma provisional, e IPPO
+sin mensajes ($+3.0$\,\%), Q-learning ($+13.0$\,\%) y el actuado
+($+32.8$\,\%) fallan. El ciclo mínimo falla por mucho
+($+236.7$\,\%): con la demanda doble, un ciclo de 26~s no alcanza,
+como tampoco alcanzaba en los corredores.
+% fuente: plan2/robustez_veredicto.csv (P6: delta_fijo, ic_fijo, p_fijo y veredicto); retraso_total_prom y
+% retraso_insercion_prom de fijo, actuado, ippo_vecinos_s42 y demas bases publicadas en
+% plan2/evaluacion_malla3_alta_resumen.csv (fijo 82.1873 y 45.4617; actuado y
+% publicadas entre 45.50 y 45.65, maximo ql_s4042 45.6483; el trivial 99.185, columna media de retraso_insercion_prom,
+% verificado el 23.10.2026; antes solo en el bloque "Tablas del analisis de robustez" del Anexo A, anexos.tex l. 171-172
+% del commit 7181ab8: "llega a 99 s/veh"); veredictos de P6 con timeLoss: plan2/veredicto.csv
+
+\noindent\textbf{Frente al actuado.} Con la medición estricta, IPPO
+con mensajes sigue superando al actuado en los seis casos: en un
+$5.7$\,\% en P1, un $10.1$\,\% en P2, un $7.6$\,\% en P3, un
+$3.5$\,\% en P4, un $16.1$\,\% en P5 y un $23.9$\,\% en P6. En P2 la
+ventaja crece respecto del resultado principal, porque el actuado deja más cola fuera
+de la red que la política.
+% fuente: plan2/robustez_veredicto.csv (delta_act de ippo_vecinos: -5.7, -10.1, -7.6, -3.5, -16.1, -23.9)
+
+\subsection*{Resumen en un número y reparto de la variación}
+
+La Tabla~\ref{tab:robustez-numero-unico} repite el resumen en un
+número. Sobre los seis casos, IPPO con mensajes queda en $-0.03$\,\%
+frente al fijo ajustado desde 10~s, con un intervalo de $-0.56$ a
+$+0.53$\,\% que incluye el cero, y en $-11.45$\,\% frente al actuado
+(de $-11.95$ a $-10.95$\,\%). MAPPO queda en $+0.85$ y $-10.67$\,\%.
+Sobre P1 a P5, IPPO con mensajes quedaba en $-0.24$ y $-8.71$\,\%, y
+MAPPO en $-0.09$ y $-8.57$\,\%. Frente al resultado principal ($-6.83$
+y $-14.35$\,\% con los seis casos), la ventaja frente al fijo
+desaparece y la ventaja frente al actuado se mantiene. Sin P1, IPPO con
+mensajes pasa a
+$+1.36$\,\% frente al fijo. El reparto de la variación también cambia:
+con todos los aprendices, el modelo explica el $55.5$\,\%, el caso el
+$23.5$\,\%, la interacción el $14.9$\,\% y el entrenamiento el
+$6.1$\,\%, al revés que en la Tabla~\ref{tab:plan2-anova}, donde el
+caso explica el $53.7$\,\% y el modelo el $36.5$\,\%. Con los cuatro
+de redes neuronales el caso sigue siendo el primer factor, pero baja
+del $79.5$ al $36.6$\,\%, y la interacción sube al $30.4$\,\%. Sobre
+P1 a P5, con todos los aprendices, el modelo explicaba el $59.4$\,\% y
+el caso el $23.1$\,\%.
+% fuente: plan2/robustez_sintesis_numero_unico.csv (P1-P6: ippo_vecinos -0.03 [-0.56, 0.53], -11.45 [-11.95,
+% -10.95], sin_P1 1.36; mappo 0.85 y -10.67; P1-P5, columna sin_P6: ippo_vecinos -0.24 y -8.71, mappo -0.09 y
+% -8.57); plan2/robustez_sintesis_anova.csv (P1-P6: Todos 23.5/55.5/14.9/6.1; Profundos 36.6/20.5/30.4/12.5);
+% P1-P5 (caso 23.1, modelo 59.4, interaccion 11.4, base 6.1): plan2/robustez_p1p5_sintesis_anova.csv y
+% robustez_p1p5_sintesis_numero_unico.csv ("python sintesis_plan.py --casos P1-P5 --prefijo robustez_p1p5_ --tesis
+% <carpeta aparte>", 28.09.2026); principal:
+% plan2/sintesis_anova.csv y plan2/sintesis_numero_unico.csv
+
+% fuente: python sintesis_plan.py --prefijo robustez_ (desde demo_rl/, con los seis casos)
+% -> plan2/robustez_sintesis_numero_unico.csv. Verificacion de la fase 2 (23.10.2026): la tabla va despues del
+% parrafo que la presenta; antes iba bajo el titulo y, en [H], no cabia en la pagina y dejaba en blanco casi la mitad
+\input{secciones/tablas/robustez_numero_unico}
+
+La Tabla~\ref{tab:robustez-veredicto-trivial}, con las demás tablas por
+modelo de la medición más estricta, da el veredicto del ciclo mínimo
+frente al fijo ajustado desde 10~s. Falla en los dos corredores ($+390.3$ y
+$+167.7$\,\%), mejora al fijo en P3 ($-0.5$\,\%), empata en P4 y P5,
+y vuelve a fallar por mucho en P6 ($+236.7$\,\%). En P5 es el mismo
+programa que el fijo.
+% fuente: plan2/robustez_veredicto.csv (fila trivial); la tabla robustez_veredicto_trivial.tex se incluye una sola
+% vez, en "Tablas por modelo", al final de este anexo, para no duplicar tab:robustez-veredicto-trivial
+% Entrega 3, fase 2: antes decia "en el Anexo A con las demas tablas por modelo"; desde la integracion del 23.10.2026
+% el bloque de tablas por modelo esta al final de este anexo
+
+\subsection*{Comprobaciones}
+
+% Integracion (23.10.2026): capitulo4.tex l. 1462-1482 del commit 7181ab8 (4.7.5), sin cambios. El parrafo de la
+% auditoria, que sigue, remite a este ("mas arriba, en este apartado") en vez de repetir las 117 re-evaluaciones.
+Re-evaluar una política o el actuado no cambia lo que ya estaba
+medido. Con las mismas semillas, todas las columnas que ya existían
+(\texttt{timeLoss}, espera, colas, paradas, \textit{throughput},
+emisiones y métricas de corredor y de \textit{spillback}) se
+reproducen dígito a dígito, y las columnas nuevas se agregan al final.
+Esta comprobación se hizo al cerrar la medición más estricta, con las
+117 evaluaciones que tenían una versión anterior: 110 de políticas, las
+cinco del actuado y las del fijo de P1 y P2, cuyo programa no cambió.
+Ninguna tiene un valor distinto en las 30 semillas. Solo el fijo de P3
+a P5, que cambió de programa, da otros números; el del plan se conserva
+como un control propio (Sección~\ref{sec:ejecucion}). Por eso, en P1 a P5, las diferencias
+entre el análisis de robustez y el resultado principal salen solo de
+la métrica y del fijo ajustado desde 10~s. En P6, cuyo fijo es el mismo en los
+dos análisis, salen solo de la métrica.
+% fuente: comparacion de cada plan2/parciales/eval_<esc>_<brazo>.csv re-evaluado contra su version en git
+% (HEAD), revisada el 27.09.2026 despues del cierre: 120 archivos con version anterior, 117 con 0 celdas
+% distintas en las columnas comunes (110 politicas, 5 actuados, fijo de corredor y corredor_alta) y 3
+% distintos (fijo de red, red_alta y malla3); sin version anterior: el trivial de cada caso y las siete
+% evaluaciones de spill que no se habian lanzado; nuevas: retraso_total_prom, retraso_insercion_prom y
+% no_insertados (evaluar.METRICAS)
+
+\noindent\textbf{Lo que dice la auditoría.} La medición más estricta
+se auditó con tres preguntas. La primera, si cambió algún modelo: no.
+Al volver a evaluar las políticas y el actuado con las mismas semillas,
+todas las columnas que ya se medían se reproducen dígito a dígito
+(más arriba, en este apartado), y el \texttt{timeLoss} de las 39
+versiones evaluadas y del actuado de P1 a P5 es el del veredicto
+pre-registrado. Solo el fijo de P3 a P5, que cambió de programa, da
+otros números. La segunda, si algún error de simulación explica los
+cambios: en las re-simulaciones de control, con los dos fijos y con
+IPPO con mensajes, no hubo teletransportes, colisiones ni frenadas de
+emergencia, y el \texttt{timeLoss} recalculado del \texttt{tripinfo}
+coincide con el del archivo de resultados. La tercera, si lo ya
+entrenado recupera la ventaja con otra selección: no. En P2, elegir la
+versión guardada de IPPO con mensajes por el retraso total en la
+validación da la misma que ya se había elegido, y ninguna de sus 60
+versiones guardadas, tres entrenamientos por veinte validaciones, baja
+del fijo en retraso total: la mejor queda un $0.98$\,\% por encima. En P3 a P5,
+ninguna validación de ningún aprendiz queda por debajo del ciclo mínimo.
+% fuente: Cap. IV, sec:remedicion (117 evaluaciones con version anterior, 0 celdas distintas); timeloss_prom de las
+% politicas publicadas y del actuado frente a plan2/veredicto_congelado_0355.csv (diferencia maxima 0.0005);
+% auditoria del 27.09.2026: seguridad.txt (14 re-simulaciones de P1 a P5 con tripinfo y estadisticas de SUMO:
+% 0 teleports, 0 colisiones, 0 paradas y frenadas de emergencia; timeLoss del tripinfo igual al del CSV),
+% analisis_p2.txt (validacion en 999 y 1999 por retraso total de los 60 checkpoints de ippo_vecinos en
+% corredor_alta: base publicada s2042, ep120 por las dos metricas; minimo +0.98 % frente al fijo, s4042 ep90) y
+% techo_validacion.txt (red, red_alta y malla3: 0 validaciones por debajo del trivial en todos los aprendices)
+
+\subsection*{Qué queda en pie}
+
+La ventaja frente al fijo
+de los modelos con el actor de IPPO y mensajes es robusta en P1: con
+las dos métricas y los dos fijos, IPPO con mensajes, MAPPO e IPPO con
+penalización de \textit{spillback} funcionan, entre $-5.1$ y
+$-7.1$\,\%. En P2 a P5 depende de la métrica y de la referencia. En P2
+la ganancia en \texttt{timeLoss} va acompañada de más espera para
+entrar a la red, y con el retraso total desaparece. En P3 y P4, un fijo
+de ciclo corto que la rejilla del primer barrido no incluía iguala o
+supera a las versiones evaluadas. En P5, el empate y la falla los
+separa el tratamiento de las diferencias nulas en la prueba. En P6 la
+medición no cambia ningún veredicto, porque el fijo es el mismo y la
+espera para entrar es común al fijo, al actuado y a las versiones
+evaluadas: con las dos métricas, ningún aprendiz del plan mejora al
+fijo. Frente al actuado, en cambio, la ventaja de IPPO con mensajes se
+mantiene en los seis casos y en el resumen en un número de P1 a P6: $-14.35$\,\% con el \texttt{timeLoss} y
+$-11.45$\,\% con el retraso total ($-7.72$ y $-8.71$\,\% sobre P1 a
+P5). Con lo ya entrenado la ventaja frente al fijo no se recupera, y
+no está medido si un reentrenamiento con el retraso total en la
+validación la recuperaría. El reentrenamiento del
+Anexo~G corrige otra cosa, el descuento y la
+exploración, y se mide con otras semillas. El veredicto del Capítulo~\ref{cap:resultados} sigue siendo el
+pre-registrado; este anexo acota hasta dónde llega.
+% fuente: plan2/veredicto_congelado_0355.csv y plan2/robustez_veredicto.csv (P1: ippo_vecinos, mappo e ippo_spill
+% entre -5.1 y -7.1 en las dos; P6: mismos veredictos que plan2/veredicto.csv); plan2/sintesis_numero_unico.csv
+% (ippo_vecinos frente al actuado -14.35, sin_P6 -7.72) y plan2/robustez_sintesis_numero_unico.csv (-11.45, sin_P6
+% -8.71)
+
+\subsection*{Barrido de demanda en el corredor, sin reentrenar}
+
+El barrido de demanda de la Sección~\ref{sec:analisis-complementarios}
+evalúa, en la red de P1 y con la demanda multiplicada por factores de
+0.5 a 2.25 o con un perfil variable, las versiones evaluadas de IPPO
+con mensajes de P1 y de P2, sin reentrenarlas, el actuado y el plan
+fijo de P1 sin volver a ajustar. La referencia de cada nivel es un fijo
+ajustado desde 10~s para ese nivel, con el mismo procedimiento que en
+el resto de este anexo: una rejilla que parte del verde mínimo de 10~s,
+las semillas 2001 a 2003 y el retraso total como criterio. Con
+$\times$1.0 y $\times$2.0 ese barrido elige los mismos programas que
+los fijos ajustados de P1 y P2,
+así que en esos niveles el cambio en \texttt{timeLoss} coincide con el
+de la Tabla~\ref{tab:plan2-resumen}: $-6.8$ y $-23.3$\,\% para las dos
+políticas. La Tabla~\ref{tab:plan2-demanda} y la
+Figura~\ref{fig:plan2-demanda} dan el cambio en las dos métricas. Su
+resumen está en la Sección~\ref{sec:sensibilidad-demanda}.
+% fuente: plan2/barrido_corredor_f<nivel>.csv (ganador por retraso_total_prom; malla con verde de avenida desde
+% 10 s; f100: 20/10 0/15 y f200: 25/15 0/25, los programas del fijo de P1 y P2 del 25.09);
+% plan2/demanda/resumen_demanda.csv (delta_timeloss_prom de ippo_vecinos_s4042 en corredor_f100, -6.82, y de
+% ippo_vecinos_s2042 en corredor_f200, -23.3)
+
+% fuente: python barrido_demanda.py resumir (desde demo_rl/) -> plan2/demanda/resumen_demanda.csv
+\input{secciones/tablas/demanda_corredor}
+
+% 23.10.2026: flota ([!tbp]); en [H] dejaba en blanco media pagina
+\begin{figure}[!tbp]
+\centering
+\includegraphics[width=\textwidth]{fig_plan2_demanda.png}
+\caption[Barrido de demanda en el corredor: cambio por control]{Barrido de demanda en la red de P1: cambio porcentual de cada control frente al fijo ajustado desde 10~s para ese nivel de demanda, en retraso total (panel superior) y en \texttt{timeLoss} (panel inferior), sobre las semillas de evaluación 1001 a 1030. Filas: el plan fijo de P1 sin volver a ajustar, el actuado y las versiones evaluadas de IPPO con mensajes entrenadas con $\times$1.0 (P1) y con $\times$2.0 (P2), sin reentrenar. Columnas: factor que multiplica toda la demanda de P1, y el perfil variable. Color: rojo, más retraso que ese fijo; azul, menos; la intensidad crece con el tamaño del cambio. La figura usa los nombres anteriores: ``fijo re-barrido'' es el fijo ajustado desde 10~s; ``sin retunear'', sin volver a ajustar, e ``IPPO vecinos'', IPPO con mensajes.}
+\label{fig:plan2-demanda}
+\end{figure}
+% fuente: figura escrita por barrido_demanda.py resumir desde plan2/demanda/resumen_demanda.csv
+
+La política de P1 solo gana con la demanda con que se entrenó. En
+\texttt{timeLoss}, con $\times$1.0 reduce el retraso un $6.8$\,\%, y
+con $\times$0.5 y $\times$0.75 pierde un $3.9$ y un $3.6$\,\%. Con
+esas demandas el fijo ajustado desde 10~s es un ciclo corto sin desfases
+(10/10~s con $\times$0.5 y 12/10~s con $\times$0.75), y la política no
+lo alcanza, aunque queda por delante del plan de P1 sin volver a ajustar, que
+pierde un $6.0$ y un $4.0$\,\%. La política de P2 gana en
+\texttt{timeLoss} con $\times$1.75, $\times$2.0 y $\times$2.25 y con el
+perfil variable, entre un $16.6$ y un $23.3$\,\%, y con $\times$0.5 a
+$\times$1.0 pierde entre un $58.1$ y un $71.5$\,\%: una política
+entrenada con la avenida saturada no sirve con poca demanda.
+% fuente: plan2/demanda/resumen_demanda.csv (delta_timeloss_prom de ippo_vecinos_s4042, ippo_vecinos_s2042 y
+% fijo_p1); plan2/barrido_corredor_f050.csv (ganador 10/10 0/0) y plan2/barrido_corredor_f075.csv (12/10 0/0)
+
+En retraso total, que suma la espera para entrar a la red, la ganancia
+con demanda alta casi desaparece. Con $\times$1.75 a $\times$2.25, la
+política de P2 pasa a $-3.6$, $+1.6$ y $+10.0$\,\%, y el actuado, que
+en \texttt{timeLoss} ganaba entre un $12.2$ y un $24.6$\,\%, pierde
+entre un $4.3$ y un $15.4$\,\%. Con el perfil variable, que pasa de
+$\times$1.0 a $\times$2.0 y vuelve dentro de la hora, pierden todos en
+retraso total, entre un $20.6$ y un $46.4$\,\%. Es la misma cola que
+queda fuera de la red en P2 (más arriba, en ``Lectura por caso''): con
+demanda
+por encima de la capacidad, la ventaja en \texttt{timeLoss} de los
+controles adaptativos no se sostiene cuando se cuenta la espera para
+entrar. Con $\times$1.0 o menos la espera para entrar es pequeña y las
+dos métricas dan casi lo mismo.
+% fuente: plan2/demanda/resumen_demanda.csv (delta_retraso_total_prom y delta_timeloss_prom de actuado e
+% ippo_vecinos_s2042 en corredor_f175, f200 y f225; corredor_var: delta_retraso_total_prom de +20.62 a +46.41)
+
+Entre $\times$1.25 y $\times$1.5 colapsan todos los controles salvo el
+fijo ajustado desde 10~s, que en esos niveles pasa a 25/10~s, con desfase de
+25~s en $\times$1.25 y sin desfase en $\times$1.5: frente a él pierden
+entre un $45.0$ y un $146.1$\,\% en \texttt{timeLoss}. La explicación
+más probable del colapso es el giro a la izquierda permitido en el
+carril único de la avenida, que el programa da en verde sin prioridad
+(\texttt{g}, Sección~\ref{sec:construccion}): un vehículo que espera
+un hueco en el tránsito opuesto para girar detiene a los que vienen
+detrás en el mismo carril. En una comprobación de la fase de
+diagnóstico, con diez semillas y fuera del protocolo del plan, el
+colapso desaparecía al convertir esos giros en movimientos rectos. Esa
+comprobación no forma parte de los resultados registrados del plan, y
+la explicación queda como probable. El barrido mide hasta dónde se
+sostiene una política fuera de su demanda de entrenamiento, no si el
+método funciona con otra demanda, lo que exigiría entrenar en cada
+nivel, y usa un único escenario base
+(Sección~\ref{sec:analisis-complementarios}).
+% fuente: plan2/demanda/resumen_demanda.csv (corredor_f125 y corredor_f150, delta_timeloss_prom: fijo_p1 +93.79 y
+% +122.13, actuado +79.34 y +45.01, ippo_vecinos_s4042 +71.65 y +61.88, ippo_vecinos_s2042 +146.09 y +64.27);
+% plan2/barrido_corredor_f125.csv (25/10 0/25) y plan2/barrido_corredor_f150.csv (25/10 0/0). La comprobacion
+% con los giros convertidos en rectos (diagnostico del 27.09.2026) no tiene archivo en el repositorio: para
+% citarla como resultado hay que repetirla con el protocolo del plan.
+
+\subsection*{Tablas por modelo}
+
+% Integracion (23.10.2026): bloque "Tablas del analisis de robustez" del Anexo A (anexos.tex l. 134-197 del commit
+% 7181ab8), con sus 11 inclusiones, que aqui pasan a F.6 en adelante y salen del Anexo A (cada tabla generada se
+% incluye una sola vez). De su primer parrafo (l. 136-152) queda solo la primera frase, con "las anteriores" cambiado
+% por "las del Anexo A" y la remision a sec:robustez cambiada por "mas arriba, en Que cambia", porque el resto ya esta
+% en la entrada y en "Que cambia". El segundo parrafo (l. 160-186) no se pega, porque repite "Lectura por caso"; su
+% unica cifra que no esta en el texto de este anexo, el retraso de insercion del trivial en P6 (99 s/veh), esta en la
+% fuente del parrafo de P6 de "Lectura por caso" (99.185 en plan2/evaluacion_malla3_alta_resumen.csv).
+Las Tablas~\ref{tab:robustez-veredicto-actuado}
+a~\ref{tab:robustez-veredicto-bases-mappo} repiten las del Anexo~A en P1
+a P6 con la medición del análisis de robustez
+(más arriba, en ``Qué cambia'').
+% fuente: hechos_v21.md; plan2/robustez_veredicto.csv (28.09.2026 09:15, P1-P6; en P1-P5 igual a
+% plan2/veredicto_v21_respaldo.csv); P6: hechos_2509.md (fijo_2509 = fijo re-barrido = 36.726 s/veh de
+% timeLoss) y cabecera de plan2/malla3_alta.add.xml (avenida 10-35 s, transversal 10-25 s);
+% plan2/barrido_malla3_alta.csv (72 filas; el menor timeloss_prom, 36.91, y el menor retraso_total_prom,
+% 82.63, son la misma fila: avenida 15 s, transversal 10 s, desfases cero);
+% se regeneran con "python veredicto.py --prefijo robustez_" desde demo_rl/
+\input{secciones/tablas/robustez_veredicto_actuado}
+\input{secciones/tablas/robustez_veredicto_trivial}
+\input{secciones/tablas/robustez_veredicto_ql}
+\input{secciones/tablas/robustez_veredicto_sarsa}
+\input{secciones/tablas/robustez_veredicto_ql_colas}
+\input{secciones/tablas/robustez_veredicto_dqn}
+\input{secciones/tablas/robustez_veredicto_ippo_local}
+\input{secciones/tablas/robustez_veredicto_ippo_vecinos}
+\input{secciones/tablas/robustez_veredicto_ippo_spill}
+\input{secciones/tablas/robustez_veredicto_mappo}
+\input{secciones/tablas/robustez_veredicto_bases}

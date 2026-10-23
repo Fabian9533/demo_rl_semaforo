@@ -1,5 +1,5 @@
 % Generado por veredicto.py a partir de plan2/. No editar a mano.
-\begin{table}[H]
+\begin{table}[!tbp]
 \setstretch{1}
 \centering
 \scriptsize
@@ -9,17 +9,17 @@
 Modelo & \makecell{P1\\Corredor\\nominal} & \makecell{P2\\Corredor\\alta} & \makecell{P3\\Red con\\rotonda\\nominal} & \makecell{P4\\Red con\\rotonda\\alta} & \makecell{P5\\Malla $3 \times 3$\\nominal} & \makecell{P6\\Malla $3 \times 3$\\alta} \\
 \midrule
 Actuado & EMPATA & FALLA & FALLA & FALLA & FALLA & FALLA \\
-Trivial & FALLA & FALLA & MEJORA & EMPATA & EMPATA & FALLA \\
+Ciclo mínimo & FALLA & FALLA & MEJORA & EMPATA & EMPATA & FALLA \\
 Q-learning & FALLA & FALLA & FALLA & PENDIENTE & FALLA & FALLA \\
 SARSA & FALLA & FALLA & FALLA & FALLA & FALLA & PENDIENTE \\
 Q-learning (colas) & FALLA & PENDIENTE & FALLA & FALLA & PENDIENTE & PENDIENTE \\
 DQN & MEJORA & FALLA & FALLA & FALLA & PENDIENTE & PENDIENTE \\
-IPPO local & EMPATA & MEJORA & FALLA & FALLA & FALLA & FALLA \\
-IPPO vecinos & FUNCIONA & FALLA & MEJORA* & FALLA & FALLA & PENDIENTE \\
-IPPO spill & FUNCIONA & FALLA & = vecinos & = vecinos & = vecinos & PENDIENTE \\
-MAPPO & FUNCIONA & FALLA & PENDIENTE & PENDIENTE & EMPATA* & PENDIENTE \\
+IPPO sin mensajes & EMPATA & MEJORA & FALLA & FALLA & FALLA & FALLA \\
+IPPO con mensajes & FUNCIONA & FALLA & \makecell{MEJORA,\\igual al\\ciclo mínimo} & FALLA & FALLA & PENDIENTE \\
+\makecell[l]{IPPO con\\penalización} & FUNCIONA & FALLA & \makecell{igual a IPPO\\con mensajes} & \makecell{igual a IPPO\\con mensajes} & \makecell{igual a IPPO\\con mensajes} & PENDIENTE \\
+MAPPO & FUNCIONA & FALLA & PENDIENTE & PENDIENTE & \makecell{EMPATA,\\igual al\\ciclo mínimo} & PENDIENTE \\
 \bottomrule
 \end{tabular}
-\caption[Robustez: veredicto por caso y modelo]{Robustez. Veredicto de cada modelo en cada caso, con la regla de la Tabla~\ref{tab:veredictos}: retraso total (timeLoss más la espera para entrar a la red) de la versión evaluada frente al fijo re-barrido y al actuado, semillas 1001 a 1030. IPPO local, vecinos y spill: IPPO sin mensajes, con mensajes y con penalización de \textit{spillback}; DQN: Double DQN. = vecinos: la penalización no se activa e IPPO spill lleva el veredicto de IPPO vecinos. PENDIENTE: faltan datos o el entrenamiento de la versión evaluada no se estabilizó. El actuado y el trivial (verdes mínimos, desfases en 0) se juzgan frente al fijo. *: la política da el mismo retraso y la misma espera que el trivial.}
+\caption[Robustez: veredicto por caso y modelo]{Robustez. Veredicto de cada modelo en cada caso, con la regla de la Tabla~\ref{tab:veredictos}: retraso total (timeLoss más la espera para entrar a la red) de la versión evaluada frente al fijo ajustado desde 10~s y al actuado, semillas 1001 a 1030. IPPO con penalización: con penalización de \textit{spillback}; DQN: Double DQN. Igual a IPPO con mensajes: la penalización no se activa e IPPO con penalización lleva el veredicto de IPPO con mensajes. PENDIENTE: faltan datos o el entrenamiento de la versión evaluada no se estabilizó. El actuado y el ciclo mínimo (verdes mínimos, desfases en 0) se juzgan frente al fijo. Igual al ciclo mínimo: la política da el mismo retraso y la misma espera que el ciclo mínimo.}
 \label{tab:robustez-veredicto-matriz}
 \end{table}

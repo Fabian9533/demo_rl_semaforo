@@ -1,6 +1,6 @@
 % Generado por veredicto.py a partir de plan2/. No editar a mano.
 % Fijo de referencia: brazo fijo_2509.
-\begin{table}[H]
+\begin{table}[!tbp]
 \setstretch{1}
 \centering
 \scriptsize
@@ -14,12 +14,12 @@ Q-learning & FALLA & MEJORA & FALLA & PENDIENTE & FALLA & FALLA \\
 SARSA & FALLA & FALLA & FALLA & FALLA & FALLA & PENDIENTE \\
 Q-learning (colas) & FALLA & PENDIENTE & FALLA & FALLA & PENDIENTE & PENDIENTE \\
 DQN & MEJORA & FUNCIONA & MEJORA & MEJORA & PENDIENTE & PENDIENTE \\
-IPPO local & EMPATA & FUNCIONA & FALLA & FALLA & FALLA & FALLA \\
-IPPO vecinos & FUNCIONA & FUNCIONA & FUNCIONA & MEJORA & EMPATA & PENDIENTE \\
-IPPO spill & FUNCIONA & FUNCIONA & = vecinos & = vecinos & = vecinos & PENDIENTE \\
+IPPO sin mensajes & EMPATA & FUNCIONA & FALLA & FALLA & FALLA & FALLA \\
+IPPO con mensajes & FUNCIONA & FUNCIONA & FUNCIONA & MEJORA & EMPATA & PENDIENTE \\
+\makecell[l]{IPPO con\\penalización} & FUNCIONA & FUNCIONA & \makecell{igual a IPPO\\con mensajes} & \makecell{igual a IPPO\\con mensajes} & \makecell{igual a IPPO\\con mensajes} & PENDIENTE \\
 MAPPO & FUNCIONA & FUNCIONA & PENDIENTE & PENDIENTE & EMPATA & PENDIENTE \\
 \bottomrule
 \end{tabular}
-\caption[Veredicto por caso y modelo]{Veredicto de cada modelo en cada caso, con la regla de la Tabla~\ref{tab:veredictos}: retraso de la versión evaluada frente al fijo ajustado y al actuado, semillas 1001 a 1030. IPPO local, vecinos y spill: IPPO sin mensajes, con mensajes y con penalización de \textit{spillback}; DQN: Double DQN. = vecinos: la penalización no se activa e IPPO spill lleva el veredicto de IPPO vecinos. PENDIENTE: faltan datos o el entrenamiento de la versión evaluada no se estabilizó. El actuado se juzga frente al fijo.}
+\caption[Veredicto por caso y modelo]{Veredicto de cada modelo en cada caso, con la regla de la Tabla~\ref{tab:veredictos}: retraso de la versión evaluada frente al fijo ajustado y al actuado, semillas 1001 a 1030. IPPO con penalización: con penalización de \textit{spillback}; DQN: Double DQN. Igual a IPPO con mensajes: la penalización no se activa e IPPO con penalización lleva el veredicto de IPPO con mensajes. PENDIENTE: faltan datos o el entrenamiento de la versión evaluada no se estabilizó. El actuado se juzga frente al fijo.}
 \label{tab:veredicto-matriz}
 \end{table}

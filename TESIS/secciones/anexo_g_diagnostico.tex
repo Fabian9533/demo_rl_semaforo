@@ -1,0 +1,454 @@
+\section*{Anexo G. Diagnóstico posterior del entrenamiento}
+\phantomsection
+\addcontentsline{toc}{subsection}{Anexo G. Diagnóstico posterior del entrenamiento}
+\setcounter{table}{0}
+\renewcommand{\thetable}{G.\arabic{table}}
+\renewcommand{\theHtable}{G.\arabic{table}}
+\setcounter{figure}{0}
+\renewcommand{\thefigure}{G.\arabic{figure}}
+\renewcommand{\theHfigure}{G.\arabic{figure}}
+\setcounter{equation}{0}
+\renewcommand{\theequation}{G.\arabic{equation}}
+\renewcommand{\theHequation}{G.\arabic{equation}}
+% Entrega 3, fase 2 (23.10.2026; plan del 14.10, movimientos 3, 5 y 6): este anexo junta el diagnostico posterior
+% del entrenamiento que estaba en capitulo5.tex (l. 1401-1642 del commit 7181ab8, seccion "Analisis exploratorio:
+% correccion del entrenamiento", cuya etiqueta sec:exploratorio se borro), capitulo3.tex (3.7.8,
+% sec:diseno-exploratorio) y capitulo4.tex (4.7.7, sec:correccion-entrenamiento). El texto del Cap. V se movio sin
+% reescribirlo: solo cambian las remisiones que ya no valen fuera del capitulo y se quitan los rotulos en negrita que
+% repetian el titulo de su apartado. Pasada del glosario (23.10.2026, tarea 3f): IPPO con mensajes, ciclo minimo,
+% fijo ajustado, version evaluada, diagnostico posterior del entrenamiento y fijo ajustado desde 10 s. Verificacion
+% de la fase 2 (23.10.2026): tambien "cribado", "confirmacion", "examen", "brazo", "base" y "checkpoint" pasan a los
+% nombres del glosario del plan del 14.10 (primera prueba, repeticion con semillas nuevas, evaluacion del plan,
+% control o variante, entrenamiento y version guardada), y "Las dos correcciones" ya no explica dos veces seguidas
+% el descuento y la exploracion. El material de
+% los Caps. III y IV se integro el 23.10.2026 sin reescribirlo: cada tramo lleva un comentario "Integracion" con su
+% origen y con lo que se ajusto (remisiones, la opcion de linea de ordenes, las rutas remitidas al Anexo B y los
+% parrafos que repetian lo ya dicho en este anexo). Ninguna etiqueta despues de los titulos con asterisco; tablas y
+% ecuaciones llevan su etiqueta despues del caption y numeran G.n.
+
+Este anexo reúne el diagnóstico posterior del entrenamiento de IPPO con
+mensajes: qué aprende y por qué, el diseño y su pre-registro, las dos
+correcciones del entrenamiento, los resultados en P4, P6 y P1, lo que no
+ayudó y sus límites. Su resumen, una frase sobre el origen de lo que
+pasa en P4 y en P6, está en la Sección~\ref{sec:esperado-obtenido}. Se
+remite también a este anexo desde el resumen de su diseño, al final de
+la Sección~\ref{sec:diseno-robustez}, desde el de las correcciones en el
+Capítulo~\ref{cap:implementacion}, desde lo que el plan no permite
+afirmar, en el Capítulo~\ref{cap:resultados}, y desde las conclusiones
+y las recomendaciones.
+
+Este anexo es posterior al veredicto pre-registrado y
+no lo modifica. Se hizo después de cerrar P6, y usa semillas de
+evaluación distintas de las de la evaluación del plan: 5001 a 5030 para
+una primera prueba y 6001 a 6030 para su repetición con semillas
+nuevas. Las semillas 1001 a 1030 no se simularon. No debe confundirse con la fase exploratoria del
+Anexo~C, que es anterior al plan. La pregunta es por qué IPPO con
+mensajes no mejora la coordinación en P4 y P6, y si eso se corrige cambiando
+solo su entrenamiento. El diseño está más abajo, en ``Diseño y
+pre-registro'', y los cambios del entrenamiento, en ``Las dos
+correcciones''. La métrica es la del Capítulo~\ref{cap:resultados}, el
+\texttt{timeLoss} medio por vehículo, y la estadística, la de la
+Sección~\ref{sec:estadistica}.
+% fuente: plan2/exploratorio_coord/LEEME.md y HECHOS.md (estatus; cada script lleva un assert contra 1001-1030);
+% plan2/exploratorio_coord/PRERREGISTRO.md (alcance y semillas, seccion 7)
+
+% Integracion (23.10.2026): aqui iba capitulo3.tex l. 1611-1614 del commit 7181ab8 (comienzo de 3.7.8,
+% sec:diseno-exploratorio). No se repite: lo que dice (despues del analisis de robustez se estudio por que IPPO
+% vecinos no mejora la coordinacion en P4 y P6; es posterior al veredicto, usa otras semillas y no cambia ningun
+% veredicto) ya esta en los dos parrafos de arriba. El texto sigue en el commit 7181ab8.
+
+\subsection*{Qué aprende IPPO con mensajes y por qué}
+
+\noindent\textbf{Qué aprende hoy IPPO con mensajes.} Su versión
+evaluada no aprende lo mismo en todos los casos. En P3 y P5 aprende el ciclo
+mínimo y lo sincroniza con los mensajes: si se cortan todos los
+mensajes, su \texttt{timeLoss} sube un $79.8$\,\% en P3 y un
+$70.1$\,\% en P5 (semillas 999 y 1999). En P4 aprende un plan casi
+fijo y largo, de unos 25~s de avenida y 10~s de transversal, con un
+ciclo de 41~s; ahí cortar los mensajes no lo empeora ($-4.1$\,\%). En
+P6 cortarlos sí lo empeora ($+131.8$\,\%), pero el programa que
+aprende también es largo y poco sincronizado. Con la semilla 999, su
+verde de avenida tiene una mediana de 25~s, su ciclo una de 46~s, y
+dos cruces vecinos están en la misma fase solo el $18.3$\,\% de la
+hora.
+% fuente: plan2/exploratorio_coord/diagnostico/mejora_coord/a3_obs_sensibilidad.txt (perdida 1.0: red +79.8,
+% malla3 +70.1, red_alta -4.1, malla3_alta +131.8); diagnostico/mejora_coord/SINTESIS.md (P4 ~24-25/10, ciclo
+% 41 s); sintesis/analizar_fases_p6.txt (ippo_s42: vEO 25, ciclo 46, sinc 18.3 %)
+
+\noindent\textbf{Por qué.} El diagnóstico apunta a dos causas en el
+entrenamiento. La primera es el descuento. GAE
+(Ecuación~\ref{eq:gae}) descuenta por decisión, y las decisiones no
+duran lo mismo: 5~s si se mantiene la fase y 8~s si se cambia, ámbar
+incluido (Sección~\ref{sec:aprendices}). Medido en decisiones, un
+verde largo parece más barato de lo que es en segundos. En P4, con
+ocho semillas de validación, la versión evaluada tiene un
+\texttt{timeLoss} un $4.8$\,\% mayor que el del ciclo mínimo, pero su
+costo descontado por decisión es un $1.5$\,\% menor: el objetivo del
+entrenamiento prefiere el plan largo aunque el tráfico espere más. En
+P6 pasa lo mismo frente al fijo ajustado: $+4.6$\,\% en
+\texttt{timeLoss} y $-1.6$\,\% en el costo por decisión. La
+segunda es la exploración. Cada semáforo sortea su acción por
+separado, y un cambio de fase a destiempo en un solo cruce rompe el
+ciclo común. Con un 3\,\% de acciones al azar sorteadas por separado,
+el ciclo mínimo de P4 empeora un $21.7$\,\% y el fijo de P6, un
+$14.7$\,\%. Si todos los semáforos usan el mismo número aleatorio, el
+daño baja a $1.2$ y $2.1$\,\%. Durante el entrenamiento, ese ruido
+castiga a los programas que dependen de la sincronía.
+% fuente: plan2/exploratorio_coord/diagnostico/c4_alineacion.txt (P4, val8, ippo_s42 frente al trivial: timeLoss
+% +4.8 %, J_dec -1.5 %) y c4_alineacion_p6.txt (P6 frente al 15/10: +4.6 %, J_red_dec -1.6 %);
+% diagnostico/b2_ruido.txt (val8: red_alta trivial 27.08 -> 32.96 independiente, 27.39 comun; malla3_alta 15/10
+% 36.57 -> 41.94 y 37.36); duracion de las decisiones: PRERREGISTRO.md (V2) y docstring de gae()
+
+% Integracion (23.10.2026): aqui iba capitulo3.tex l. 1615-1624 del commit 7181ab8 (3.7.8: las dos causas que
+% senalo un diagnostico previo, sin entrenar). No se repite: las dos causas, el descuento por decision con
+% decisiones de 5 y 8 s (eq:gae, sec:aprendices) y la exploracion sorteada por separado en cada semaforo, ya estan en
+% el parrafo anterior con sus cifras, y su remision a sec:exploratorio remitia a este mismo apartado. El texto sigue
+% en el commit 7181ab8.
+
+\subsection*{Diseño y pre-registro}
+
+% Integracion (23.10.2026): capitulo3.tex l. 1626-1713 del commit 7181ab8 (3.7.8), con la Tabla
+% tab:exploratorio-variantes (aqui G.1) y sus fuentes. Sin reescribir; solo cambian las remisiones: la de l. 1636 a
+% sec:correccion-entrenamiento pasa a "mas abajo, en Las dos correcciones"; la de la fila V2 de la tabla (l. 1650) se
+% quita, y la de l. 1708 a sec:exploratorio pasa a "mas abajo, en Resultados". En la pasada del glosario
+% (23.10.2026) el texto y el caption pasaron a los nombres nuevos. El parrafo que resumia este mismo diseno desde capitulo5.tex (l.
+% 1474-1490 del commit 7181ab8) no se repite: cada una de sus frases esta en el texto siguiente (C0 y las cinco
+% variantes, tres bases y 200 episodios, la regla de seleccion y convergencia del plan, ganadora en 5001-5030 y
+% confirmacion sin reentrenar en 6001-6030, las dos mejores a P6 y la ganadora a P1, la confirmacion de P6 fuera del
+% pre-registro, P2, P3 y P5 sin probar). Su fuente (PRERREGISTRO.md secciones 2 a 7; prerregistro.sha256
+% 8d38fe82...6b33; DESVIACIONES.md D1-D11 y T1-T7, replica de C0 en D4 y de C0-P6 en T7; conf_p6/juzgar_conf_p6.py,
+% criterio CONFIRMA; HECHOS.md seccion 1) es la misma de los parrafos siguientes.
+El diseño se fijó en un pre-registro propio antes de entrenar,
+con su huella sha256 guardada aparte. Los cambios
+posteriores se declararon como desviaciones, sin editar el
+pre-registro. Se comparan un control y cinco variantes
+(Tabla~\ref{tab:exploratorio-variantes}). El control, C0, es IPPO con
+mensajes sin cambios en el código, con la validación de ocho semillas
+que usan las variantes. C0, V1, V2 y V3 forman un diseño factorial de
+dos factores: la observación normalizada y las dos correcciones del
+entrenamiento. V4 y V5 agregan a V3 un solo factor cada una. La
+implementación de las dos correcciones está más abajo, en ``Las dos
+correcciones''.
+
+\begin{table}[H]
+\setstretch{1}
+\centering
+\small
+\begin{tabular}{l>{\raggedright\arraybackslash}p{10.8cm}}
+\toprule
+Control o variante & Cambio respecto de IPPO con mensajes del plan \\
+\midrule
+C0 & Ninguno en el código; validación con ocho semillas \\
+V1 & Observación normalizada: colas y vehículos en movimiento de cada
+aproximación divididos entre 10~veh por carril, con tope 2 \\
+V2 & Descuento por segundo en la GAE y exploración con un número
+aleatorio común \\
+V3 & V1 y V2 juntas \\
+V4 & V3 con MAPPO y una recompensa de toda la red, que incluye los
+enlaces sin semáforo \\
+V5 & V3 con el actor iniciado en el ciclo mínimo: probabilidad
+inicial de cambiar cercana a 0.97 en toda decisión libre \\
+\bottomrule
+\end{tabular}
+\caption[Diagnóstico posterior: control y variantes]{Diagnóstico posterior del entrenamiento:
+control y variantes de IPPO con mensajes. Todos usan los hiperparámetros de la Tabla~\ref{tab:plan2-hiper}, tres
+entrenamientos y 200 episodios.}
+\label{tab:exploratorio-variantes}
+\end{table}
+% fuente: plan2/exploratorio_coord/PRERREGISTRO.md (secciones 2 y 3; sha256 en prerregistro.sha256:
+% 8d38fe82...6b33) y DESVIACIONES.md (D1-D11, T1-T7); HECHOS.md seccion 1
+
+El resto del protocolo es el del plan
+(Sección~\ref{sec:protocolo}). El control y cada variante se entrenan
+tres veces, con las semillas 42, 2042 y 4042 y 200 episodios, con los
+hiperparámetros de la Tabla~\ref{tab:plan2-hiper}. La elección de la
+versión guardada de cada entrenamiento, la de la versión evaluada y el
+criterio de convergencia son los mismos, y el episodio 0 no es
+candidato. Solo cambia la validación, que usa ocho
+semillas en lugar de dos: 999, 1999, 2999, 3999, 4999, 7999, 8999 y
+9999. Se valida cada 10 episodios en P4 y en P1 y cada 20 en P6. C0 no
+se reentrena. Como la validación guarda y restaura el estado del
+generador aleatorio, entrenar de nuevo daría los mismos pesos, así que
+C0 se obtiene validando con las ocho semillas las versiones ya
+guardadas del plan. Antes se comprobó que diez episodios
+reentrenados reproducen los pesos guardados.
+
+La evaluación usa la política congelada, el \texttt{timeLoss} y la
+estadística pareada de la Sección~\ref{sec:estadistica}. La regla de
+la Sección~\ref{sec:veredicto} se aplica frente al fijo del resultado
+principal. Ninguna evaluación usa las semillas de la evaluación del
+plan, 1001 a 1030, y cada script lo comprueba. La primera prueba usa las
+semillas 5001 a 5030 y la repetición, 6001 a 6030, con las mismas
+políticas y sin reentrenar. Las semillas 6001 a 6010 ya se habían simulado en el
+diagnóstico, así que se informa además el resultado en 6011 a 6030.
+
+El análisis tiene dos tandas. La primera, en P4, entrena las cinco
+variantes. Gana la de menor \texttt{timeLoss} en 5001 a 5030 entre las
+que convergen. Para declarar un éxito, la ganadora debía mejorar al
+fijo en al menos un 5\,\%, con intervalo entero bajo cero y $p < 0.05$,
+superar al ciclo mínimo con intervalo entero bajo cero y repetir
+las dos cosas en 6001 a 6030. La segunda tanda lleva las dos mejores
+variantes de P4, sin cambios, a P6, junto con el control C0 de ese
+caso. En P6 una variante mejora si el entrenamiento de su versión
+evaluada converge, si el intervalo de su diferencia frente a IPPO con
+mensajes del plan queda entero bajo cero y si la regla frente al fijo
+no da FALLA. En P1 la ganadora debe dar FUNCIONA, y el límite superior
+de su intervalo frente a IPPO con mensajes del plan no debe pasar de
+$+2$\,\%. La repetición de P6 en 6001 a 6030 no estaba en el
+pre-registro. Se agregó después de ver la primera prueba de P6, con el
+criterio de que las dos versiones evaluadas mejoren al fijo y a IPPO
+con mensajes del plan con intervalo entero bajo cero. P2, P3 y P5 no se prueban.
+
+La ganadora se elige en 5001 a 5030, así que sus cifras en esas
+semillas son optimistas; solo las de 6001 a 6030 confirman. Los
+resultados están más abajo, en ``Resultados''.
+% fuente: plan2/exploratorio_coord/PRERREGISTRO.md (seccion 2: bases, val8, eleccion, convergencia; seccion 4:
+% ganadora y EXITO a, b, c; seccion 6: tanda 2, criterio de mejora en P6, NO REGRESION en P1 con +2 %,
+% sensibilidad 6011-6030; seccion 7: semillas 1001-1030 prohibidas); DESVIACIONES.md D4 y T7 (replica de C0 y
+% C0-P6 por re-validacion); conf_p6/juzgar_conf_p6.py (docstring: criterio CONFIRMA, fuera del pre-registro);
+% LEEME.md (assert contra 1001-1030)
+
+\subsection*{Las dos correcciones}
+
+% Verificacion de la fase 2 (23.10.2026): los dos parrafos de entrada de este apartado (el que venia del Cap. V,
+% capitulo5.tex l. 1460-1472 del commit 7181ab8, y el de la 4.7.7) explicaban dos veces seguidas el descuento y la
+% exploracion antes del detalle que sigue; quedan en uno, que remite a las causas de "Que aprende IPPO con mensajes
+% y por que" (antes remitia a "Diseno y pre-registro", donde no estan).
+% Integracion (23.10.2026): capitulo4.tex l. 1600-1680 del commit 7181ab8 (4.7.7), con la Ecuacion eq:gae-smdp (aqui
+% G.1) y sus fuentes. Sin reescribir; solo cambian: (1) la remision a sec:diseno-exploratorio (l. 1602) pasa a "mas
+% arriba, en Diseno y pre-registro"; (2) sale la opcion de linea de ordenes --variante smdp_crn (l. 1605); (3) las
+% rutas de plan2/exploratorio_coord/ (l. 1606-1608 y 1666-1671: rl_ippo_smdp_crn.py, smdp_crn.diff,
+% rl_ippo_norm_smdp_crn_triv.py y lo que guarda la carpeta, con verificar_hechos.py y la remision a sec:exploratorio)
+% se remiten al Anexo B, que las lista; (4) no se repite el parrafo de l. 1655-1661 (PPO con el logaritmo de cada
+% accion por separado, estimador sesgado, heuristica, los dos cambios siempre juntos), porque el sesgo y la
+% heuristica estan en el parrafo siguiente y los dos cambios juntos en "Lo que no ayudo".
+\begin{sloppypar}
+La variante V2 cambia los dos puntos del entrenamiento de IPPO que
+señala el diagnóstico (más arriba, en ``Qué aprende IPPO con mensajes y
+por qué''), el descuento de la ventaja y la forma de explorar, y nada
+más. Su código y su diferencia con \texttt{rl\_ippo.py}, el único
+archivo que cambia, están en la carpeta del análisis (Anexo~B). La
+observación, la máscara, la recompensa, los mensajes y los
+hiperparámetros son los del plan. La evaluación tampoco cambia: con la
+política congelada se toma la acción de mayor probabilidad, y ninguna
+de las dos correcciones actúa fuera del entrenamiento. La exploración
+común es una heurística: con probabilidades distintas entre semáforos,
+el estimador del gradiente queda sesgado.
+\end{sloppypar}
+% fuente: plan2/exploratorio_coord/codigo/smdp_crn.diff y rl_ippo_smdp_crn.py (gae con gamma^(dt/5); u comun de
+% default_rng(semilla + 104729)); limitacion del estimador: PRERREGISTRO.md (V2) y SINTESIS.md seccion 6;
+% HECHOS.md seccion 1 (codigo cambiado: solo rl_ippo.py)
+
+La primera corrección es el descuento por segundo. En el plan, un
+intervalo de 5~s y uno de 8~s cuentan como un paso con el mismo
+descuento (Sección~\ref{sec:aprendices}). En la corrección cada
+decisión guarda el segundo $t_k$ en que se tomó, y la duración de su
+intervalo es $\Delta t_k = t_{k+1} - t_k$; en la última decisión,
+$t_{k+1}$ es el segundo en que cierra el episodio. La
+Ecuación~\ref{eq:gae} se calcula entonces hacia atrás con exponentes
+proporcionales a esa duración:
+\begin{equation}
+  \delta_k = r_k + \gamma^{\Delta t_k/5}\, V(o_{k+1}) - V(o_k), \qquad
+  \hat A_k = \delta_k + (\gamma\lambda)^{\Delta t_k/5}\, \hat A_{k+1},
+  \label{eq:gae-smdp}
+\end{equation}
+donde $r_k$ es la recompensa de la decisión $k$, que no cambia, y
+$V(o_k)$ el valor que estima el crítico. Si se mantiene la fase el
+exponente es 1, como en el plan; si se cambia es 1.6. El valor final,
+cero si la red se vació y el estimado si el episodio se cortó, se
+descuenta igual.
+
+La segunda corrección es la exploración común. En el plan cada
+semáforo muestrea su acción de su propia distribución, de forma
+independiente. En la corrección se sortea un solo número $u$, uniforme
+entre 0 y 1, en cada segundo en que algún semáforo decide, y es el
+mismo para todos los que deciden en ese segundo. Cada uno cambia de
+fase si su probabilidad de cambiar, calculada con la política
+enmascarada, supera a $u$. La probabilidad de cambiar de cada
+semáforo sigue siendo la de su política, pero sus desvíos quedan
+correlacionados: con probabilidades parecidas, los semáforos se
+desvían juntos y el ciclo común se conserva. La máscara sigue
+decidiendo sola cuando una de las dos acciones está prohibida. El
+número $u$ sale de un generador propio, \texttt{default\_rng} con la
+semilla del episodio más 104\,729, que no toca los
+generadores de Python, NumPy ni PyTorch; el resto del entrenamiento y
+la validación usan los mismos números que en el plan.
+% fuente: plan2/exploratorio_coord/codigo/smdp_crn.diff (correr_episodio: crn, rng_expl, u, p_cambiar, acciones,
+% logp, b["t"]; intervalos; gae con smdp=True; SEMILLA_EXPL = 104729) y rl_ippo_smdp_crn.py (docstring de gae:
+% 5 s mantener, 8 s cambiar, t_final - t en la ultima, tambien para v_final); PASO_CONTROL = 5 (rl_corredor.py)
+% 22.10.2026 (entrega 3, sin codigo en la tesis): se quito el extracto simplificado de correr_episodio y gae con los
+% dos cambios; el texto y la Ecuacion eq:gae-smdp los describen. Sigue en el commit 5b9b7a6
+
+V5 agrega a V2 la observación normalizada de V1 y un actor que empieza
+en el ciclo mínimo. Su código, necesario también para cargar sus
+políticas, está en la carpeta del análisis (Anexo~B). Los metadatos de cada política declaran el
+descuento y la exploración con que se entrenó. Los entrenamientos
+usan SUMO 1.25.0 y un hilo por proceso, y son deterministas: la
+semilla 5001, repetida en la repetición con semillas nuevas, dio lo
+mismo en el control y en todas las variantes.
+% fuente: plan2/exploratorio_coord/LEEME.md (contenido, como se reproduce, versiones), HECHOS.md seccion 1 (codigo
+% cambiado: solo rl_ippo.py; sha256 iguales a tanda2/lanzamiento_p6_entrenamiento.sha256) y seccion 8 (limitaciones
+% 4 y 5); HECHOS.md secciones 4 y 5.2 (determinismo, semilla 5001 en los 6 y 10 brazos); smdp_crn.diff (meta
+% "descuento" y "exploracion"); politicas/*.json
+
+\subsection*{Resultados}
+
+% fuente: plan2/exploratorio_coord/tanda1/juicio_tanda1.txt (P4, 5001-5030), tanda2/juicio_tanda2.txt (P4
+% 6001-6030, P6 5001-5030 y P1), conf_p6/salidas/juicio_conf_p6.txt (P6 6001-6030 y 60 semillas); todas las
+% cifras recalculadas desde los CSV por semilla con plan2/exploratorio_coord/verificar_hechos.py (verificar_hechos.txt)
+% Integracion (23.10.2026): flota ([!tbp], tabla grande, regla de formato del plan); en [H] dejaba en blanco media
+% pagina antes de "Resultados"
+\begin{table}[!tbp]
+\setstretch{1}
+\centering
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{lrrrr}
+\toprule
+\makecell[l]{Control o variante\\(entrenamiento)} & \makecell{Retraso\\(s/veh)} & \makecell{Frente al fijo\\ajustado (\%)} & \makecell{Frente al\\ciclo mínimo (\%)} & \makecell{Frente a IPPO\\del plan (\%)} \\
+\midrule
+\multicolumn{5}{l}{\textit{P4, primera prueba, semillas 5001 a 5030}} \\
+C0 (4042) & 29.08 & $-3.3$ [$-4.8$, $-1.8$] & $+3.3$ [$+1.6$, $+5.0$] & $+0.5$ [$-0.9$, $+2.0$] \\
+V2 (2042) & 28.15 & $-6.4$ [$-8.4$, $-4.3$] & $0.0$ (igual) & $-2.7$ [$-4.4$, $-1.0$] \\
+V5 (42) & 28.07 & $-6.6$ [$-8.6$, $-4.7$] & $-0.3$ [$-0.8$, $+0.2$] & $-3.0$ [$-4.7$, $-1.3$] \\
+\multicolumn{5}{l}{\textit{P4, repetición con semillas nuevas, 6001 a 6030}} \\
+IPPO del plan (42) & 28.74 & $-3.1$ [$-4.8$, $-1.5$] & $+3.3$ [$+1.5$, $+5.1$] & -- \\
+V5 (42) & 27.83 & $-6.2$ [$-7.8$, $-4.5$] & $+0.0$ [$-0.3$, $+0.4$] & $-3.2$ [$-4.9$, $-1.5$] \\
+\multicolumn{5}{l}{\textit{P6, primera prueba, semillas 5001 a 5030}} \\
+IPPO del plan (42) & 37.75 & $+2.4$ [$-1.7$, $+7.1$] & -- & -- \\
+C0 (4042) & 39.64 & $+7.6$ [$+2.0$, $+13.3$] & -- & $+5.0$ [$-1.4$, $+11.8$] \\
+V2 (4042) & 34.14 & $-7.3$ [$-10.0$, $-5.3$] & -- & $-9.5$ [$-13.8$, $-5.4$] \\
+V5 (42) & 34.22 & $-7.1$ [$-9.8$, $-4.8$] & -- & $-9.3$ [$-13.8$, $-5.1$] \\
+\multicolumn{5}{l}{\textit{P6, repetición con semillas nuevas, 6001 a 6030}} \\
+IPPO del plan (42) & 37.59 & $+1.3$ [$-2.7$, $+5.5$] & -- & -- \\
+V2 (4042) & 34.65 & $-6.7$ [$-9.8$, $-3.7$] & -- & $-7.8$ [$-11.7$, $-3.8$] \\
+V5 (42) & 34.55 & $-6.9$ [$-10.3$, $-3.7$] & -- & $-8.1$ [$-11.8$, $-4.4$] \\
+\multicolumn{5}{l}{\textit{P6, las 60 semillas (5001 a 5030 y 6001 a 6030)}} \\
+IPPO del plan (42) & 37.67 & $+1.9$ [$-1.1$, $+5.0$] & -- & -- \\
+V2 (4042) & 34.40 & $-7.0$ [$-9.0$, $-5.1$] & -- & $-8.7$ [$-11.7$, $-5.7$] \\
+V5 (42) & 34.38 & $-7.0$ [$-9.2$, $-5.0$] & -- & $-8.7$ [$-11.6$, $-5.8$] \\
+\multicolumn{5}{l}{\textit{P1, no regresión, semillas 5001 a 5030}} \\
+IPPO del plan (4042) & 19.85 & $-6.7$ [$-8.0$, $-5.4$] & -- & -- \\
+V5 (4042) & 19.73 & $-7.3$ [$-8.7$, $-6.0$] & -- & $-0.6$ [$-1.5$, $+0.3$] \\
+\bottomrule
+\end{tabular}
+\caption[Diagnóstico posterior: variantes del entrenamiento de IPPO con mensajes]{Diagnóstico posterior del entrenamiento, fuera del veredicto. Retraso (\texttt{timeLoss} medio, s/veh) de la versión evaluada del control y de cada variante y su cambio porcentual frente al fijo ajustado del resultado principal (en P6, 15~s de avenida y 10~s de transversal sin desfases), al ciclo mínimo y a IPPO con mensajes del plan, con el IC95\,\% por \textit{bootstrap} pareado entre corchetes. C0 es IPPO con mensajes sin cambios validado con ocho semillas; V2, descuento por segundo y exploración común; V5, V2 con la observación normalizada y el inicio en el ciclo mínimo. IPPO del plan es la versión evaluada de IPPO con mensajes en el plan. ``Igual'': el mismo resultado que el ciclo mínimo en las 30 semillas. En P1 y P6 no se da el cambio frente al ciclo mínimo, que falla por mucho (102.58 y 184.39~s/veh en 5001 a 5030). Medias de las referencias en P4: fijo 30.06 y ciclo mínimo 28.15 (5001 a 5030); fijo 29.66 y ciclo mínimo 27.82 (6001 a 6030). En P6 el fijo da 36.84 y 37.12, y en P1, 21.27. Un valor negativo es una mejora.}
+\label{tab:exploratorio}
+\end{table}
+
+La Tabla~\ref{tab:exploratorio} resume los resultados por caso. Los
+archivos por semilla y el script que recalcula sus cifras están en la
+carpeta del análisis (Anexo~B).
+
+\noindent\textbf{P4: el ciclo mínimo.} Con el descuento por segundo y
+la exploración común, IPPO con mensajes aprende en P4 el ciclo mínimo.
+La versión evaluada de V2 da el mismo resultado que el ciclo mínimo
+(Sección~\ref{sec:programa-trivial}) en las 30 semillas, y la de V4
+también. V5 fue la ganadora de la primera prueba: $-6.6$\,\% frente al
+fijo ajustado y $-0.3$\,\% frente al ciclo mínimo, con un intervalo que
+incluye el cero. En la repetición con semillas nuevas queda en
+$-6.2$\,\% y $+0.0$\,\%, así que la pequeña ventaja de la primera
+prueba venía, probablemente, de elegir a la
+mejor de cinco variantes con esas mismas semillas. El pre-registro pedía, para declarar un éxito, ganarle
+también al ciclo mínimo, y eso no se cumple: V5 reproduce el ciclo
+mínimo y no lo supera. Frente a IPPO con mensajes del plan reduce el
+retraso un $3.2$\,\% en la repetición. Frente al fijo ajustado desde
+10~s del Anexo~F, que en P4 es un ciclo de 10~s por fase con
+desfases, V5 empata: $+1.6$\,\%, de $-0.2$ a $+3.5$\,\%, en las
+semillas 5001 a 5030; ese fijo no se simuló en 6001 a 6030. La
+ganancia en P4 consiste en pasar del plan largo al ciclo corto, algo
+que un fijo bien barrido también logra.
+% fuente: tanda1/juicio_tanda1.txt (V2 y V4 igual_trivial 30/30; V5 ganadora; criterio (b) no se cumple);
+% tanda2/juicio_tanda2.txt seccion 1 (V5 6001-6030; NO hay EXITO); sintesis/extra_robustez.txt (fijo re-barrido
+% 10/10, desfases 0/25/24: V5 +1.6 % [-0.2, 3.5], p 0.118, gana 13/30)
+
+\noindent\textbf{P6: una mejora real.} En P6 el resultado es otro. La
+versión evaluada de V2 reduce el retraso un $7.3$\,\% frente al fijo
+ajustado en la primera prueba y gana en 28 de las 30 semillas. En la
+repetición con semillas nuevas lo reduce un $6.7$\,\%, de $-9.8$ a $-3.7$\,\%, y gana en
+29 de 30. Frente a IPPO con mensajes del plan, que en esas mismas semillas
+empata con el fijo ($+1.3$\,\%), como en la evaluación del plan ($+2.2$\,\%), la
+reducción es de un $7.8$\,\%. V5 da lo mismo: $-7.1$ y $-6.9$\,\%. El
+pre-registro no esperaba ganarle al fijo en P6, por eso la mejora se
+revisó con tres cortes más. Con las 60 semillas, V2 queda en
+$-7.0$\,\% (de $-9.0$ a $-5.1$\,\%). En las semillas 6011 a 6030, que
+no se habían usado antes en ningún diagnóstico, queda en $-6.5$\,\%
+(de $-11.2$ a $-2.1$\,\%). Sin la semilla 6028, en la que el fijo da
+50.48~s/veh, su peor valor en esas 30 semillas (el siguiente es
+38.01~s/veh), queda en $-5.4$\,\% (de $-7.1$
+a $-3.1$\,\%). Es la primera vez en esta tesis que un control le gana
+de forma consistente al fijo ajustado de P6.
+% fuente: tanda2/juicio_tanda2.txt seccion 2 (V2 4042: -7.3 % [-10.0, -5.3], 28/30); conf_p6/salidas/
+% juicio_conf_p6.txt (6001-6030: V2 29/30, IPPO publicado +1.3 %; 60 semillas); verificar_hechos.txt (6011-6030 y
+% sin 6028; siguiente valor del fijo 38.01); examen: plan2/veredicto.csv (malla3_alta, ippo_vecinos +2.2)
+
+Lo que aprende en P6 no es el ciclo mínimo, que ahí se traba
+(184.39~s/veh), ni el fijo de 15 y 10~s. Con la semilla 999, V2 y V5
+parten del ciclo mínimo: su ciclo tiene una mediana de 26~s, la
+transversal recibe siempre 10~s, y el $72$\,\% (V2) y el $66$\,\% (V5)
+de los verdes de avenida duran 10~s. El resto se extiende a entre 15 y
+35~s, con verdes distintos dentro de un mismo cruce. Dos cruces
+vecinos están en la misma fase el $63.6$\,\% y el $60.5$\,\% de la
+hora, frente al $18.3$\,\% de IPPO con mensajes del plan. No se sabe a qué
+reacciona la extensión del verde, y no se comparó con una regla simple
+de ciclo mínimo con extensión cuando hay cola, que podría igualarla.
+Por eso el resultado se describe como una política adaptativa que
+supera a todas las referencias medidas, y no como una coordinación
+aprendida demostrada. En convergencia, los entrenamientos de las
+versiones evaluadas de V2 y de V5 convergen, pero el de la semilla 2042
+no lo hace en ninguna de las dos, y la versión evaluada de V5 se eligió
+en el último episodio. C0 no converge en P6 en ninguno de sus tres
+entrenamientos.
+% fuente: sintesis/analizar_fases_p6.txt (semilla 999: ciclo 26, vNS 10, %vEO=10 72 y 66, verdes E-O de 15 a 35 s,
+% sinc 63.6/60.5/18.3); SINTESIS.md seccion 3.1 (lo que no se sabe); tanda2/juicio_tanda2.txt (convergencia por
+% base; V5 ep_elegido 200; C0-P6 0/3)
+
+\noindent\textbf{P1: sin regresión.} En el corredor, V5 queda en
+$-7.3$\,\% frente al fijo ajustado, e IPPO con mensajes del plan, en
+$-6.7$\,\%. La diferencia entre los dos, $-0.6$\,\% con un límite
+superior de $+0.3$\,\%, cumple el umbral de no regresión del
+pre-registro, $+2$\,\%. La corrección no daña el caso en que IPPO con
+mensajes ya funcionaba. V2 no se corrió en P1.
+% fuente: tanda2/juicio_tanda2.txt seccion 3 (V5 4042 frente a ippo_vecinos_s4042 -0.6 % [-1.5, 0.3], p 0.289;
+% NO REGRESION: SI)
+
+\subsection*{Lo que no ayudó}
+
+Lo que mejora el resultado es la corrección de V2: en P4, V2 reduce el
+retraso un $3.2$\,\% frente a C0 (de $-4.8$ a $-1.6$\,\%, $p = 0.006$
+con la corrección de Holm). Normalizar las colas, sola, no cambia nada:
+V1 queda a $0.0$\,\% de C0 (de $-1.7$ a $+1.6$\,\%). MAPPO con la
+recompensa de toda la red (V4) termina en el ciclo mínimo. Elegir la
+versión guardada con ocho semillas en vez de dos tampoco ayuda: C0
+queda a $+0.5$\,\% de IPPO con mensajes del plan en P4 y a $+5.0$\,\%
+en P6, los dos con un intervalo que incluye el cero. En P6, el inicio
+en el ciclo mínimo y la observación normalizada de V5 no suman nada a
+V2 ($+0.2$\,\% en la primera prueba y $-0.3$\,\% en la repetición).
+Como V2 cambia el descuento y la exploración a la vez, no se sabe cuál
+de los dos pesa más.
+% fuente: tanda1/juicio_tanda1.txt (contrastes frente a C0 con Holm; C0 frente a IPPO publicado); tanda2/
+% juicio_tanda2.txt (C0-P6 +5.0 % [-1.4, 11.8]; V5 frente a V2 +0.2 %); conf_p6/salidas/juicio_conf_p6.txt (-0.3 %)
+
+\subsection*{Límites}
+
+El análisis es post hoc: se decidió
+después de ver el veredicto, y la repetición de P6 con semillas nuevas
+se agregó después de la primera prueba. Con el retraso total de la Ecuación~\ref{eq:retraso-total}
+la mejora de P6 se reduce a menos de la mitad: V2 queda en $-3.1$\,\% (de
+$-4.7$ a $-1.7$\,\%) frente al fijo en 6001 a 6030. La espera para
+entrar a la red, de unos 45.5~s/veh, es la misma con todos los
+controles salvo el ciclo mínimo, así que no es cola desplazada fuera de la
+red, pero diluye la ganancia. En P4 esa espera es de 0.34~s/veh y el
+retraso total da la misma lectura. Las conclusiones descansan en tres
+entrenamientos por variante, y en P6 uno de ellos no converge. La demanda es
+determinista, así que las semillas solo cambian el comportamiento de
+los conductores. P2, P3 y P5 no se probaron, y en P4 la mejora
+desaparece frente al fijo ajustado desde 10~s. Ningún veredicto del
+Capítulo~\ref{cap:resultados} cambia. Lo que el análisis sí muestra es que el plan largo y
+poco sincronizado que IPPO con mensajes aprende en P4 y P6 se debe en
+buena parte a cómo se entrena, y que corregir el descuento y la
+exploración basta para que en P6 supere al fijo ajustado. Medirlo con el protocolo
+completo, en los seis casos, queda como trabajo siguiente.
+% fuente: conf_p6/salidas/juicio_conf_p6.txt (retraso total V2 4042 -3.1 % [-4.7, -1.7]; retraso de insercion
+% 45.49-45.65 s/veh salvo el trivial 95.51; 0 no insertados); sintesis/extra_robustez.txt (P4: insercion 0.336 s/veh,
+% V5 retraso total -6.6 % [-8.5, -4.6]); tanda2/juicio_tanda2.txt (convergencia); HECHOS.md seccion 8
