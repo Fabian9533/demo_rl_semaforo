@@ -12,11 +12,14 @@ red de P1 (dos semaforos, un carril) y toda la demanda de corredor.rou.xml x f, 
 escenarios_plan2.FACTORES_DEMANDA (0.5 a 2.25), mas un perfil que cambia dentro de la hora
 (corredor_var: bloques de 10 min con x1.0, 1.5, 2.0, 2.0, 1.5 y 1.0, en promedio x1.5). Brazos por
 nivel, todos con las semillas de evaluacion 1001-1030:
-  fijo      el fijo re-barrido para ese nivel (barrer_fijo.py, semillas 2001-2003, retraso total)
-  fijo_p1   el programa fijo de P1 sin retunear (lo que hace un plan de ciudad que no se ajusta)
+  fijo      el fijo ajustado desde 10 s para ese nivel (barrer_fijo.py, semillas 2001-2003, retraso total)
+  fijo_p1   el programa fijo de P1 sin reajustar (lo que hace un plan de ciudad que no se ajusta)
   actuado   el actuado de SUMO
-  ippo_vecinos_s4042 / ippo_vecinos_s2042   las politicas publicadas de IPPO vecinos en P1 (entrenada
-            con x1.0) y en P2 (x2.0), sin reentrenar
+  ippo_vecinos_s4042 / ippo_vecinos_s2042   las versiones evaluadas de IPPO con mensajes en P1
+            (entrenada con x1.0) y en P2 (x2.0), sin reentrenar
+Nombres: los del glosario de la tesis (entrega 3, 23.10.2026); antes "fijo re-barrido", "sin retunear" e
+"IPPO vecinos". En la tabla, un cambio no significativo (Wilcoxon p >= 0.05) va entre parentesis y el
+caption lo dice en palabras; antes llevaba el superindice ns. Las cifras no cambian.
 Los trabajos de la cola (generar_trabajos.py) escriben demanda/eval_<esc>_<brazo>.csv. Con x1.0 y
 x2.0 los brazos deben dar, semilla a semilla, lo mismo que P1 y P2 (parciales/eval_corredor_*.csv y
 eval_corredor_alta_*.csv): resumir lo comprueba. Salidas de resumir:
@@ -39,9 +42,9 @@ sys.path.insert(0, AQUI)
 import escenarios_plan2 as ep            # noqa: E402
 
 PERFIL = (1.0, 1.5, 2.0, 2.0, 1.5, 1.0)     # corredor_var: factor por bloque de 600 s
-BRAZOS = [("fijo_p1", "Plan fijo de P1 sin retunear"), ("actuado", "Actuado (SUMO)"),
-          ("ippo_vecinos_s4042", "IPPO vecinos entrenado con x1.0 (P1)"),
-          ("ippo_vecinos_s2042", "IPPO vecinos entrenado con x2.0 (P2)")]
+BRAZOS = [("fijo_p1", "Fijo de P1 sin reajustar"), ("actuado", "Actuado (SUMO)"),
+          ("ippo_vecinos_s4042", "IPPO con mensajes entrenado con x1.0 (P1)"),
+          ("ippo_vecinos_s2042", "IPPO con mensajes entrenado con x2.0 (P2)")]
 METRICAS = [("retraso_total_prom", "retraso total"), ("timeloss_prom", "timeLoss")]
 N_BOOT = 10000
 
@@ -234,11 +237,12 @@ def resumir(tesis):
 
 
 def celda(fila, m):
+    """Cambio % con un decimal; entre parentesis si no es significativo (Wilcoxon p >= 0.05)."""
     d = fila.get(f"delta_{m}")
     if d in (None, ""):
         return "--"
     txt = f"{d:+.1f}".replace("-", "$-$")
-    return txt + ("" if fila[f"p_{m}"] < 0.05 else r"$^{\mathrm{ns}}$")
+    return txt if fila[f"p_{m}"] < 0.05 else f"({txt})"
 
 
 def tabla_tex(filas, ruta):
@@ -262,14 +266,14 @@ def tabla_tex(filas, ruta):
         r"Demanda & \makecell{Fijo\\(s/veh)} & " + cab + " & " + cab + r" \\", r"\midrule"]
         + lineas + [r"\bottomrule", r"\end{tabular}",
                     r"\caption[Barrido de demanda en el corredor]{Barrido de demanda en la red de P1: cambio "
-                    r"del retraso de cada control frente al fijo re-barrido para ese nivel (semillas de "
-                    r"evaluación 1001 a 1030, IC95\,\% bootstrap pareado; ns: Wilcoxon $p \geq 0.05$). "
-                    r"Fijo: "
-                    r"retraso total del fijo re-barrido. Plan de P1: el programa fijo de P1 sin retunear. "
-                    r"IPPO P1 y P2: las políticas publicadas de IPPO vecinos entrenadas con $\times$1.0 y "
-                    r"$\times$2.0, sin reentrenar. Variable: bloques de 10~min con $\times$1.0, 1.5, "
-                    r"2.0, 2.0, "
-                    r"1.5 y 1.0.}", r"\label{tab:plan2-demanda}", r"\end{table}"])
+                    r"del retraso de cada control frente al fijo ajustado desde 10~s para ese nivel "
+                    r"(semillas de evaluación 1001 a 1030, IC95\,\% bootstrap pareado). Entre paréntesis, "
+                    r"los cambios que no son significativos: su $p$ de Wilcoxon pareado es de 0.05 o más. "
+                    r"Fijo: retraso total del fijo ajustado desde 10~s. Plan de P1: el programa fijo de P1 "
+                    r"sin volver a ajustar. IPPO P1 y P2: las versiones evaluadas de IPPO con mensajes "
+                    r"entrenadas con $\times$1.0 y $\times$2.0, sin reentrenar. Variable: bloques de 10~min "
+                    r"con $\times$1.0, 1.5, 2.0, 2.0, 1.5 y 1.0.}", r"\label{tab:plan2-demanda}",
+                    r"\end{table}"])
     with open(ruta, "w", encoding="utf-8") as fh:
         fh.write(texto + "\n")
     print("Escrito", ruta)
@@ -303,8 +307,8 @@ def figura(filas, ruta):
         ax.tick_params(length=0)
         for s in ax.spines.values():
             s.set_visible(False)
-        ax.set_title(f"Cambio del {nombre} frente al fijo re-barrido para cada demanda (%)", fontsize=8.6,
-                     loc="left")
+        ax.set_title(f"Cambio del {nombre} frente al fijo ajustado desde 10 s para cada demanda (%)",
+                     fontsize=8.6, loc="left")
     fig.tight_layout()
     fig.savefig(ruta, dpi=200, bbox_inches="tight", facecolor="#fcfcfb")
     plt.close(fig)

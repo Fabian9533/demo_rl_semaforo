@@ -256,15 +256,17 @@ semáforos vecinos, e IPPO con penalización de \textit{spillback} le
 agrega el término de \textit{spillback} de la
 Ecuación~\ref{eq:recompensa-u4}, que penaliza la cola de un enlace de
 salida $\ell$ por encima de la mitad de sus plazas por carril,
-$\lfloor K_\ell/2 \rfloor$. Las figuras de este anexo, generadas en esta
-fase, las llaman ``IPPO local'', ``IPPO vecinos'' e ``IPPO spill''. En
+$\lfloor K_\ell/2 \rfloor$. En
 corredor y red, IPPO con penalización de \textit{spillback} se entrenó
 con una sola semilla base como control de no daño: una corrida que
 comprueba que el término no empeora el resultado.
 % glosario (23.10.2026, pasada del glosario, tarea 3f): la prosa usa los nombres del glosario. Las tablas de esta fase
 % (tablas/resumen_u4, cruce_u4, red_u4, corredor_u4, corredor_alta_u4, red_s1 y corredor_s1) se regeneraron el
-% 23.10.2026 con los nombres nuevos; las figuras (fig_red_fases, fig_corredor_fases y fig_corredor_alta_spillback, de
-% graficar.py, 06.09) no, y conservan los rotulos IPPO local, vecinos y spill. Si se regeneran, quitar la frase
+% 23.10.2026 con los nombres nuevos, y las figuras fig_red_fases, fig_corredor_fases y fig_corredor_alta_spillback
+% (graficar.py) tambien, el mismo dia: solo cambian los rotulos (IPPO sin mensajes, IPPO con mensajes e IPPO con
+% penalizacion de spillback en lugar de IPPO local, vecinos y spill); los datos son los mismos (comprobado artista
+% por artista contra las figuras del 06.09, que graficar.py reproducia byte a byte). Por eso se quito la frase que
+% decia que las figuras usaban los nombres anteriores.
 
 Las métricas de corredor se calculan sobre los vehículos de paso, los
 que recorren la avenida de extremo a extremo (Sección~\ref{sec:u3}). Las

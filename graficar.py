@@ -21,10 +21,14 @@ Con politicas IPPO (resultados_<esc>_ippo_<variante>_s<base>.csv) anade ademas:
   fig_<esc>_fases.png        verde de la avenida por semaforo en una ventana de 5 min (desfase)
   fig_<esc>_spillback.png    spillback, cola maxima en enlace y no terminados por brazo
 Los brazos IPPO que entran en las figuras son la politica mediana de cada variante.
+Nombres de los controles: los del glosario de la tesis (entrega 3, ajuste A8, 23.10.2026), como en
+tablas_tex.py: IPPO sin mensajes, IPPO con mensajes e IPPO con penalizacion de spillback (antes IPPO
+local, vecinos y spill). Solo cambian los rotulos; los datos y el dibujo son los mismos.
 """
 import os
 import csv
 import sys
+import textwrap
 import statistics
 
 import matplotlib
@@ -42,8 +46,8 @@ GRIS_CLARO = "#e6e6e3"
 TINTA = "#0b0b0b"
 TINTA2 = "#52514e"
 NOMBRE = {"fijo": "Tiempo fijo", "actuado": "Actuado (SUMO)", "rl": "Q-learning",
-          "ippo_local": "IPPO local", "ippo_vecinos": "IPPO vecinos", "ippo_spill": "IPPO spill",
-          "ippo_cambio": "IPPO cambio"}
+          "ippo_local": "IPPO sin mensajes", "ippo_vecinos": "IPPO con mensajes",
+          "ippo_spill": "IPPO con penalización de spillback", "ippo_cambio": "IPPO cambio"}
 FASE_AVENIDA = {"corredor": 2, "corredor_alta": 2, "red": 0}   # indice de la fase verde de la avenida
 
 
@@ -59,6 +63,13 @@ def color_de(brazo):
 
 def nombre_de(brazo):
     return NOMBRE.get(variante_de(brazo), brazo)
+
+
+def rotulo_eje(brazo):
+    """Nombre del control bajo el eje x, en lineas cortas: 'IPPO con\\nmensajes',
+    'IPPO con\\npenalización\\nde spillback'; el actuado sin '(SUMO)'."""
+    nombre = nombre_de(brazo).replace(" (SUMO)", "")
+    return "\n".join(textwrap.wrap(nombre, 12)) if nombre.startswith("IPPO ") else nombre
 METRICA = {
     "timeloss_prom": ("Retraso por vehículo (timeLoss)", "s/veh"),
     "espera_prom": ("Espera detenida por vehículo", "s/veh"),
@@ -235,8 +246,7 @@ if evaluacion and len(brazos) >= 2:
         ax.set_title(titulo + sub, loc="left", fontsize=8.5)
         ax.set_ylabel(unidad + (" (eje recortado)" if recortado else ""))
         ax.set_xticks(range(len(brazos)))
-        ax.set_xticklabels([nombre_de(b).replace(" (SUMO)", "").replace("IPPO ", "IPPO\n") for b in brazos],
-                           fontsize=8)
+        ax.set_xticklabels([rotulo_eje(b) for b in brazos], fontsize=8)
         ax.set_xlim(-0.5, len(brazos) - 0.5)
         if recortado:
             margen = (max(todos) - min(todos)) * 0.25
@@ -413,8 +423,7 @@ if evaluacion and any(numero(f.get("spillback_tasa")) for f in evaluacion):
         ax.set_title(titulo, loc="left", fontsize=9)
         ax.set_ylabel(unidad)
         ax.set_xticks(range(len(brazos)))
-        ax.set_xticklabels([nombre_de(b).replace(" (SUMO)", "").replace("IPPO ", "IPPO\n") for b in brazos],
-                           fontsize=7.5)
+        ax.set_xticklabels([rotulo_eje(b) for b in brazos], fontsize=7.5)
         ax.set_xlim(-0.5, len(brazos) - 0.5)
         ax.set_ylim(bottom=0)
         ax.grid(axis="x", visible=False)
