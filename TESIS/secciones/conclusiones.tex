@@ -3,11 +3,14 @@
 \textbf{Respuesta en breve.} Se construyó y se evaluó en SUMO un control
 de semáforos con aprendizaje por refuerzo en el que cada semáforo recibe
 mensajes de sus vecinos, programado desde cero. Con una regla fijada
-antes de evaluar y 30 semillas, reduce el retraso por vehículo frente al
-fijo ajustado en el corredor y en la red con rotonda, empata con él en
-la malla y tiene menos retraso que el actuado en los seis casos:
-$-6.83$\,\% frente al fijo y $-14.35$\,\% frente al actuado, resumido en
-un número (Tabla~\ref{tab:resultado-principal}). Fuera del corredor con
+antes de evaluar y 30 semillas, en los seis casos del plan reduce el
+retraso por vehículo frente al fijo ajustado en el corredor y en la red
+con rotonda, empata con él en la malla y tiene menos retraso que el
+actuado en todos: $-6.83$\,\% frente al fijo y $-14.35$\,\% frente al
+actuado, resumido en un número (Tabla~\ref{tab:resultado-principal}).
+% Verificacion de las tareas 4 y 5 (23.10.2026): se acota a los seis casos del plan, porque en los niveles de demanda
+% adicionales hay FALLA en el corredor y en la malla (plan2/demanda2/resumen_demanda2.csv; cuarto limite, abajo)
+Fuera del corredor con
 demanda alta, donde IPPO sin mensajes también funciona, lo que separa
 funcionar de fallar es la información del vecino. La mejora es menor que
 la que suele publicarse porque la referencia está bien ajustada.
@@ -29,7 +32,18 @@ El resultado tiene cuatro límites:
     (Anexo~G).
   \item Se probó en escenarios sintéticos, con mensajes instantáneos y
     con la misma demanda con que se entrenó cada política; no en Lima,
-    con un canal imperfecto ni con otra demanda.
+    con un canal imperfecto ni con otra demanda. En niveles de demanda
+    adicionales, con el modelo entrenado en cada uno, el resultado del
+    corredor alterna entre FUNCIONA y FALLA (falla con 1358 y
+    2715~veh/h), en la red con rotonda no hay diferencia significativa
+    con 2715 y 3620~veh/h y en la malla no hay mejora en ningún nivel
+    (Sección~\ref{sec:efecto-demanda}).
+% fuente: plan2/demanda2/resumen_demanda2.csv (corredor: FUNCIONA en 905, 1810 y 3620 y FALLA en 1358 y 2715 veh/h;
+% red con rotonda: 2715 +0.9, IC [-0.5, 2.4], p 0.28, y 3620 -0.1, IC [-0.4, 0.1], p 0.276; malla 3x3: cambio_fijo
+% de +0.7 a +2.2 en sus seis niveles, sin FUNCIONA ni MEJORA). Entrega 3, tareas 4 y 5 (23.10.2026): se agrega el
+% resultado de los niveles de demanda (Cap. V, sec:efecto-demanda). Verificacion de las tareas 4 y 5 (23.10.2026):
+% antes decia solo que en el corredor "la mejora no crece de forma regular", que deja entender que siempre hay
+% mejora, y no decia nada de la red con rotonda; ahora usa las frases de la Seccion sec:efecto-demanda y de 5.9.1
 \end{itemize}
 En suma: las herramientas funcionan, la información del vecino separa
 funcionar de fallar en casi todos los casos y el tamaño de cualquier
@@ -391,15 +405,26 @@ se explica por él.
 % malla del 25.09: comentario de 37f9680:plan2/red.add.xml y red_alta.add.xml (avenida 15/20/25/30/35 s);
 % P6: plan2/robustez_veredicto.csv (trivial 276.723 s de retraso total, +236.7 [186.5, 290.3] frente al fijo)
 
-\noindent\textbf{6. Alcance del proyecto: IPPO con mensajes mejora al
-fijo ajustado y al actuado en el corredor y en la red con rotonda,
-aunque en esta su mejora no pasa de la del ciclo mínimo, e iguala al
-fijo ajustado en la malla de nueve cruces, pero no alcanza las metas
-cuantitativas.}
+\noindent\textbf{6. Alcance del proyecto: en los casos P1 a P6, IPPO
+con mensajes mejora al fijo ajustado y al actuado en el corredor y en la
+red con rotonda, aunque en esta su mejora no pasa de la del ciclo
+mínimo, e iguala al fijo ajustado en la malla de nueve cruces; no
+alcanza las metas cuantitativas, y en los niveles de demanda adicionales
+la mejora no se mantiene en todos los niveles.}
+% Verificacion de las tareas 4 y 5 (23.10.2026): el titulo se acota a los casos P1 a P6 ("los casos P1 a P6" y no
+% "los seis casos del plan", porque la frase siguiente dice que el plan tenia siete) y dice lo que agregan
+% los niveles de demanda (corredor FALLA con 1358 y 2715 veh/h, malla FALLA con 2715, 3620 y 6525, red con rotonda sin
+% diferencia significativa con 2715 y 3620: plan2/demanda2/resumen_demanda2.csv); lo del ciclo minimo vale para P3 y
+% P4, los casos de la red en el plan (en los niveles nuevos de la red la version evaluada baja del ciclo minimo con 905,
+% 1358 y 3620 veh/h: cambio_ciclo_minimo -3.3, -3.9 y -3.2)
 % Verificacion de la fase 2 (23.10.2026): antes decia "la coordinacion aprendida mejora al fijo ajustado y al
 % actuado en corredores y redes arteriales pequenas", que choca con la conclusion 5 (P3 es el ciclo minimo, "no una
 % coordinacion aprendida") y con el Cap. V (sec:plan-conclusion: "Red con rotonda (P3 y P4): no pasa del ciclo
-% minimo"); se corrige con la misma salvedad del Cap. V, sin cifras nuevas (plan del 14.10, decision D17) De los siete casos del plan, seis
+% minimo"); se corrige con la misma salvedad del Cap. V, sin cifras nuevas (plan del 14.10, decision D17)
+% Verificacion de las tareas 4 y 5 (23.10.2026): "De los siete casos del plan, seis" habia quedado al final de la
+% linea de comentario de arriba (commit ddff17e) y no se imprimia: el PDF decia "...metas cuantitativas. (P1 a P6)
+% quedaron desarrollados". Vuelve a su linea, como en el commit 7181ab8
+De los siete casos del plan, seis
 (P1 a P6) quedaron desarrollados con el mismo método, dos más que el
 mínimo de cuatro (P1 a P4) que fijó el plan aprobado por el
 asesor. P7 queda como trabajo siguiente. La meta principal, una
@@ -412,13 +437,16 @@ secundarias se cumplen solo en parte, y en P6 ninguna (conclusión~3).
 % puede); metas de P6: tablas/plan2_metas.tex
 
 La afirmación que el trabajo puede sostener es, por tanto, que en
-corredores y redes de dos o tres semáforos sintéticos un control
-aprendido con mensajes entre vecinos supera a las dos referencias
-clásicas por un margen medible (en la red con rotonda, sin pasar del
-ciclo mínimo; conclusión~5), y que en una malla de nueve cruces
-iguala al fijo ajustado y supera con amplitud al actuado, con la demanda
-nominal y con el doble de ella; no que reduzca el retraso en la
-magnitud que fijan las metas. Con demanda doble en la malla, ningún
+corredores y redes de dos o tres semáforos sintéticos, con las demandas
+de los casos del plan, un control aprendido con mensajes entre vecinos
+supera a las dos referencias clásicas por un margen medible (en la red
+con rotonda, sin pasar del ciclo mínimo; conclusión~5), y que en una
+malla de nueve cruces iguala al fijo ajustado y supera con amplitud al
+actuado, con la demanda nominal y con el doble de ella; no que reduzca
+el retraso en la magnitud que fijan las metas, ni que la mejora se
+mantenga con cualquier demanda: en los niveles de demanda adicionales
+falla en el corredor con 1358 y 2715~veh/h y en la malla con 2715, 3620
+y 6525~veh/h (Sección~\ref{sec:efecto-demanda}). Con demanda doble en la malla, ningún
 aprendiz del plan mejora al fijo ajustado. IPPO con mensajes queda
 empatado con él, de forma provisional porque el entrenamiento de su
 versión evaluada no convergió, y todos
@@ -431,6 +459,9 @@ diferencia de P2, sumar esa espera al retraso no cambia el veredicto.
 % EMPATA; delta_act de -25.9 (ql) a -41.0 (ippo_vecinos); actuado +73.3); plan2/evaluacion_malla3_alta_resumen_
 % fijo_2509.csv (retraso_insercion_prom: fijo 45.46, actuado 45.52, ippo_vecinos_s42 45.51; entre 45.28 y 45.65 en
 % el fijo, el actuado y las 21 politicas; el trivial, fuera del veredicto, 99.19); plan2/robustez_veredicto.csv (P6 ippo_vecinos, retraso total: +1.1 [-0.6, 2.8], p 0.596)
+% Verificacion de las tareas 4 y 5 (23.10.2026): la afirmacion se acota a las demandas de los casos del plan y dice
+% donde falla en los niveles de demanda adicionales (plan2/demanda2/resumen_demanda2.csv, veredicto FALLA: corredor
+% 1358 y 2715 veh/h; malla 3x3 2715, 3620 y 6525 veh/h), como "Alcance demostrado" de la Seccion sec:plan-conclusion
 
 Ese alcance se puede poner en cifras
 (Figura~\ref{fig:plan2-mejora-caso}). Frente al fijo ajustado, IPPO
@@ -440,13 +471,22 @@ con 3620~veh/h (P2), un 8.8\,\% en la red de tres semáforos y una
 rotonda con 2150~veh/h (P3) y un 3.6\,\% en esa red con 2580~veh/h
 (P4); en la malla de nueve semáforos con 4350~veh/h (P5) empata, y en
 esa malla con 8700~veh/h (P6) empata de forma provisional, con
-$+2.2$\,\%. La mejora no crece con el número de semáforos, y la demanda
-alta solo la aumenta en el corredor; en la malla de nueve cruces es
-nula, con la demanda nominal y con el doble. Entre una red y otra
-cambian a la vez los semáforos, las calles, los carriles y la demanda,
-así que esas diferencias no se pueden atribuir a uno solo de esos
-parámetros; en particular, el efecto de los carriles no se puede aislar
-con este diseño (Tabla~\ref{tab:plan-comparaciones}).
+$+2.2$\,\%. La mejora no crece con el número de semáforos, y en los
+pares del plan la demanda alta solo la aumenta en el corredor; en la
+malla de nueve cruces es nula, con la demanda nominal y con el doble. En
+los niveles de demanda adicionales, con el modelo entrenado en cada uno,
+hay indicios de que en el corredor la mejora no crece de forma regular
+con la demanda (el resultado alterna entre FUNCIONA y FALLA) y de que en
+la red con rotonda baja por encima de unos 2150~veh/h; en la malla no
+hay mejora en ningún nivel, de 1810 a 8700~veh/h. Con la misma demanda
+total (1810, 2715 y 3620~veh/h), hay indicios de que el resultado
+cambia de una red a otra, sin un orden que se repita
+(Sección~\ref{sec:efecto-demanda}). Entre una red y otra cambian a la
+vez los semáforos, las calles, los carriles y la demanda o, con el
+mismo total, la carga por calle, así que esas diferencias no se pueden
+atribuir a uno solo de esos parámetros; en particular, el efecto de los
+carriles no se puede aislar con este diseño
+(Tabla~\ref{tab:plan-comparaciones}).
 % fuente: plan2/veredicto.csv (ippo_vecinos, delta_fijo P1-P6; P6 +2.2 [-1.4, 6.2], PENDIENTE, provisional EMPATA);
 % semaforos, carriles de la avenida y demanda por caso: hechos_2509.md (generado por hechos_2509.py desde
 % plan2/<esc>.net.xml y plan2/<esc>.rou.xml); fig_plan2_mejora_caso.png (sintesis_plan.py --metrica timeloss_prom
@@ -455,6 +495,15 @@ con este diseño (Tabla~\ref{tab:plan-comparaciones}).
 % cada caso y la frase "es mayor donde la demanda supera la capacidad de su carril"; entre redes cambian a la vez
 % semaforos, calles, carriles y demanda, y el efecto de los carriles no se puede aislar (Cap. III,
 % tab:plan-comparaciones)
+% fuente (niveles de demanda; tareas 4 y 5, 23.10.2026): plan2/demanda2/resumen_demanda2.csv (corredor: FUNCIONA en
+% 905, 1810 y 3620 y FALLA en 1358 y 2715 veh/h; red con rotonda: cambio_fijo de -7.1 a -9.8 de 905 a 2150, -3.6 en
+% 2580 y sin diferencia significativa en 2715, +0.9, y 3620, -0.1; malla 3x3: de +0.7 a +2.2 de 1810 a 8700, sin
+% FUNCIONA ni MEJORA); lectura de analisis_demanda2 (entrega 3), con "hay indicios de". Verificacion de las tareas 4
+% y 5 (23.10.2026): "la demanda alta solo la aumenta en el corredor" se acota a los pares del plan (P1/P2, P3/P4 y
+% P5/P6); se agrega la comparacion entre redes con la misma demanda total, que la Seccion sec:efecto-demanda reporta
+% ("Comparacion entre redes": con 1810 veh/h corredor -6.8, red -7.1 y malla +1.7; con 2715, +6.6, +0.9 y +1.7; con
+% 3620, -23.3, -0.1 y +0.7, columna cambio_fijo de resumen_demanda2.csv), con su salvedad de la carga por calle
+% (tab:demanda-flujos)
 
 El análisis de varianza de la Tabla~\ref{tab:plan2-anova} mide de qué
 depende el resultado. Con los seis aprendices que tienen tres bases en

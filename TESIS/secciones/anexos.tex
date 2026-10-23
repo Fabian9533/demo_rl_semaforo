@@ -52,7 +52,8 @@ reparto se invierte.
 Las tablas de este anexo completan las del
 Capítulo~\ref{cap:resultados}: aquí quedan las tablas de entrenamientos
 de todos los modelos y las de veredicto de los modelos que el capítulo
-no incluye; las del análisis de robustez están en el Anexo~F. Todas
+no incluye; las del análisis de robustez, en el Anexo~F y en el
+repositorio. Todas
 siguen el protocolo del plan de pruebas (Sección~\ref{sec:plan}): tres
 entrenamientos por modelo y caso, 200 episodios, versión guardada elegida por
 validación y evaluación final con las semillas 1001 a 1030, las mismas
@@ -70,6 +71,9 @@ del barrido (Sección~\ref{sec:referencias-fijas}).
 % plan2/evaluacion_<esc>.csv en el commit 37f9680 del 25.09); P6: cabecera de plan2/malla3_alta.add.xml
 % (barrer_fijo.py --metrica timeloss_prom, semillas 2001-2003) y
 % plan2/evaluacion_malla3_alta_resumen_fijo_2509.csv (fijo_2509 timeloss_prom 36.726, n = 30); hechos_2509.md
+% Integracion de la reduccion del Anexo F (23.10.2026): antes decia "las del analisis de robustez estan en el Anexo
+% F"; ese anexo conserva solo las tablas del ciclo minimo, de IPPO con mensajes y de entrenamientos de Double DQN, y
+% remite para las demas a plan2/robustez_veredicto.csv y .md y a tablas/robustez_veredicto_bases.tex
 
 Las tablas de entrenamientos (Tablas~\ref{tab:veredicto-bases-ql}
 a~\ref{tab:veredicto-bases-mappo}) listan los tres entrenamientos de
@@ -273,7 +277,8 @@ Programa & Unidad & Qué hace \\
 \texttt{consolidar.py} & U3 & junta las evaluaciones de un escenario y hace la estadística pareada por semilla frente al fijo y al actuado \\
 \texttt{veredicto.py} & U3 & aplica la regla de veredicto del plan y escribe las tablas de veredicto \\
 \texttt{sintesis\_plan.py} & U3 & resumen en un número y descomposición de la variación, fuera del veredicto \\
-\texttt{barrido\_demanda.py} & U3 & barrido de demanda en el corredor, fuera del veredicto \\
+\texttt{barrido\_demanda.py} & U3 & barrido de demanda en el corredor, fuera del veredicto; con \texttt{preparar2} prepara los niveles de demanda adicionales \\
+\texttt{curvas\_demanda.py} & U3 & veredictos, tabla y figura de los niveles adicionales \\
 \midrule
 \texttt{plan2/\allowbreak preparar.py} & -- & copia a \texttt{plan2/} los archivos de cada escenario \\
 \texttt{plan2/\allowbreak generar\_trabajos.py} & -- & escribe la lista de comandos de cada caso y modelo \\
@@ -293,7 +298,16 @@ resultados (penúltimo bloque) o de la fase exploratoria (último bloque, Anexo~
 \end{table}
 % fuente: anexos.tex del 14.10 (5b9b7a6), Anexo B: titulos de los 15 listados y parrafo de los scripts omitidos;
 % docstrings de cada programa; unidades: tab:pipeline de capitulo3.tex (U3 en rl_corredor.py y rl_ippo.py por
-% correr_episodio, que mide colas y retornos); nombres de los modelos segun el glosario del 14.10
+% correr_episodio, que mide colas y retornos); nombres de los modelos segun el glosario del 14.10. Entrega 3, tareas
+% 4 y 5 (23.10.2026): fila nueva de curvas_demanda.py (docstring: junta los 12 niveles nuevos con P1-P6, aplica la
+% regla de veredicto.py y escribe plan2/demanda2/resumen_demanda2.csv, tablas/demanda2.tex e
+% images/fig_demanda_bandas.pdf); barrido_demanda.py, modo preparar2 (docstring: escribe dem_<base>_t<veh/h>.rou.xml,
+% .sumocfg y .add.xml con la demanda de la red base escalada); su unidad sigue siendo U3, la de tab:pipeline, como
+% con el modo preparar del barrido del corredor. La tabla mide 580.2 pt en HEAD (1873eac) y \textheight es 615.4 pt
+% (medido con tesisutec.cls; cada linea de fila mide 12 pt): solo caben dos lineas mas, asi que la fila de
+% curvas_demanda.py dice en una linea lo que hace (aplica la regla de veredicto del plan a los niveles de demanda
+% adicionales y genera su tabla y su figura) y la de escenarios_plan2.py, que tambien registra los
+% dem_<base>_t<veh/h> (NIVELES_DEMANDA2), no cambia
 
 \input{secciones/anexo_c_exploratoria}
 \input{secciones/anexo_d_osm}

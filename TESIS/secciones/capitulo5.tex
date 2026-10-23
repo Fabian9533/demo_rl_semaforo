@@ -208,13 +208,21 @@ evaluaron con las semillas 1001 a 1030. P1 a P5 se cerraron el
 entrenamientos suman unas 144~horas de CPU; el tiempo por episodio de
 cada modelo y caso está en la Tabla~\ref{tab:plan2-costo}. Los niveles
 de demanda adicionales (Sección~\ref{sec:plan-demanda}) se corrieron
-después, con el mismo protocolo, y sus resultados se presentan en la
-Sección~\ref{sec:efecto-demanda}. \textbf{[PENDIENTE: entrenamientos y
-evaluaciones de los niveles de demanda adicionales
-(\texttt{plan2/demanda2/}).]}
+después, con el mismo protocolo: 12 niveles, con 36 entrenamientos más
+de IPPO con mensajes, de 200 episodios cada uno, y 72 evaluaciones con
+las semillas 1001 a 1030, seis por nivel (el fijo ajustado, el actuado,
+el ciclo mínimo y los tres entrenamientos de IPPO con mensajes). Esos
+entrenamientos suman unas 27~horas de CPU; con ellos, el total es de
+174 entrenamientos y unas 171~horas. Sus resultados están en la
+Sección~\ref{sec:efecto-demanda}.
 % fuente: plan2/cola/cola_dem2.out (133 trabajos dem2_ con OK, ningun FALLO, "cola: fin" a las 04:27 del
-% 23.10.2026; resultados en el commit be2c2a1). Verificacion de la fase 2 (23.10.2026): antes decia "siguen
-% corriendo"; las cifras siguen pendientes de incorporar
+% 23.10.2026; resultados en el commit be2c2a1): 1 preparacion, 12 barridos del fijo, 36 entrenamientos, 72
+% evaluaciones y 12 consolidaciones; 36 archivos plan2/resultados_dem_<esc>_ippo_vecinos_s<base>.csv (bases 42,
+% 2042 y 4042 en los 12 niveles), 200 filas cada uno (7200 episodios); suma de su columna segundos = 96 993 s =
+% 26.9 h (sumado el 23.10.2026: corredor 3.1 h, red 8.2 h, malla 15.6 h); 72 parciales
+% plan2/demanda2/eval_dem_<esc>_<brazo>.csv (brazos fijo, actuado, trivial e ippo_vecinos_s42, _s2042 y _s4042),
+% cada uno con las 30 semillas 1001-1030; total: 138 + 36 = 174 entrenamientos y 143.6 + 26.9 = 170.5 h.
+% Entrega 3, tareas 4 y 5 (23.10.2026): reemplaza el marcador PENDIENTE de estas corridas
 % fuente: 138 archivos plan2/resultados_<esc>_<modelo>_s<base>.csv de los seis casos del plan (sin los de la
 % re-medicion ni los dem_), 27 600 filas; suma de la columna segundos = 143.6 h (recalculado el 23.10.2026; el mismo
 % valor del comentario de introduccion.tex, Aporte propio y trabajo computacional); 24 = 8 modelos x 3 entrenamientos
@@ -390,10 +398,10 @@ modelos; un control nuevo tiene que superar a las dos.
 % glosario (23.10.2026, pasada del glosario, tarea 3f): se quitaron las aclaraciones ``fijo tuneado'', ``IPPO
 % vecinos'', ``IPPO local'' y ``trivial'', porque las tablas se regeneran con los nombres nuevos (veredicto.py,
 % tablas_cap5.py, sintesis_plan.py, barrido_demanda.py). Las figuras fig:plan2-convergencia,
-% fig:plan2-mejora-caso y fig:robustez-mejora-caso se regeneraron el 23.10.2026 con los nombres nuevos; las que no se
-% regeneraron (fig:plan2-demanda en el Anexo F y las de la fase exploratoria del Anexo C) aclaran los rotulos viejos
-% en su caption o en el texto. El parrafo "Version evaluada" que iba aqui paso a sec:ejecucion-indicadores, antes de
-% esta seccion
+% fig:plan2-mejora-caso y fig:robustez-mejora-caso se regeneraron el 23.10.2026 con los nombres nuevos, y despues,
+% el mismo dia, fig:plan2-demanda (Anexo F, barrido_demanda.py) y las figuras de la fase exploratoria del Anexo C
+% (graficar.py); por eso ya no se aclaran rotulos viejos en sus captions ni en el texto. El parrafo "Version evaluada"
+% que iba aqui paso a sec:ejecucion-indicadores, antes de esta seccion
 
 \noindent\textbf{Cambio porcentual.} Se calcula como en el programa que
 compara los controles (\texttt{consolidar.py},
@@ -679,14 +687,16 @@ ciclo mínimo en esas mismas semillas.
 \section{Efecto de la demanda}
 \label{sec:efecto-demanda}
 \label{sec:sensibilidad-demanda}
+\suppressfloats[t]
 
 Esta sección responde a U1 y al objetivo general: cómo cambia la mejora
 de IPPO con mensajes frente al fijo ajustado con la demanda, dentro de
 una misma red y entre redes con la misma demanda total.
-% Entrega 3, fase 2 (23.10.2026): seccion nueva (pedido 4 y tarea 5). Las etiquetas tab:efecto-demanda y
-% fig:efecto-demanda quedan reservadas para la tabla y la figura de esta seccion: no se crean ni se citan hasta que
-% existan los datos de plan2/demanda2/, porque una referencia sin su etiqueta rompe validar_tex.py. La figura ira
-% como TESIS/images/fig_efecto_demanda.pdf, vectorial
+% Entrega 3, fase 2 (23.10.2026): seccion nueva (pedido 4 y tarea 5). Tareas 4 y 5 (23.10.2026, con las corridas
+% de plan2/demanda2/, commits be2c2a1 y 1873eac): la tabla tab:efecto-demanda (secciones/tablas/demanda2.tex) y la
+% figura fig:efecto-demanda (images/fig_demanda_bandas.pdf, vectorial) salen de curvas_demanda.py; el nombre
+% fig_efecto_demanda.pdf que se reservaba aqui no se usa. \suppressfloats[t], como en las secciones 5.4 y 5.6 a
+% 5.8, evita que la tabla o la figura suban sobre el titulo de la seccion
 
 \noindent\textbf{Lo que muestran los pares del plan.} Cada par de casos
 cambia solo la demanda (Sección~\ref{sec:plan-casos}). En el corredor la
@@ -701,73 +711,6 @@ la red con rotonda, pero no se puede afirmar una tendencia.
 % fuente: plan2/veredicto.csv (ippo_vecinos: delta_fijo -6.8, -23.3, -8.8, -3.6, +1.8 y +2.2; P6 PENDIENTE con
 % EMPATA provisional); factor de P4: capitulo3.tex, sec:plan-casos (1.2, el mayor aumento que no satura la rotonda)
 
-\noindent\textbf{Qué se mide en los niveles nuevos.} Para confirmar esos
-indicios y para comparar las redes con la misma demanda total, el plan
-se amplió después del veredicto con los niveles de demanda de la
-Sección~\ref{sec:plan-demanda} (Tabla~\ref{tab:plan-demanda-niveles}):
-cinco puntos en el corredor, siete en la red con rotonda y seis en la
-malla, contando los casos del plan, con 1810, 2715 y 3620~veh/h comunes
-a las tres redes. Cada nivel usa la red y los flujos del caso nominal de
-su red, con toda la demanda multiplicada por un factor, y se corre con
-el protocolo del plan: el fijo ajustado se vuelve a barrer para ese
-nivel con la misma regla, se evalúan además el actuado y el ciclo
-mínimo, IPPO con mensajes se entrena tres veces en ese nivel y su
-versión evaluada se evalúa con las semillas 1001 a 1030 y la misma
-regla de veredicto. Se mide lo mismo que en la
-Tabla~\ref{tab:resultado-principal}: el retraso del fijo ajustado, del
-actuado y de IPPO con mensajes, el cambio frente a cada referencia y el
-veredicto. Estos niveles no cambian ningún veredicto de P1 a P6.
-% fuente: capitulo3.tex, sec:plan-demanda y tab:plan-demanda-niveles; escenarios_plan2.NIVELES_DEMANDA2 y
-% plan2/generar_trabajos.agregar_demanda2 (barrido con la regla del 25.09, actuado, trivial e ippo_vecinos con bases
-% 42, 2042 y 4042, 200 episodios, validacion con 999 y 1999 y evaluacion con 1001-1030)
-
-\textbf{[PENDIENTE: tabla de resultados por nivel, con el formato de la
-Tabla~\ref{tab:resultado-principal}.]}
-% PENDIENTE (entrega 3): tabla de resultados por nivel (etiqueta reservada tab:efecto-demanda), con los datos de
-% plan2/demanda2/: demanda en veh/h, retraso del fijo ajustado, del actuado y de IPPO con mensajes, cambio frente a
-% cada referencia y veredicto. Las corridas dem2_ terminaron el 23.10.2026 a las 04:27 (commit be2c2a1).
-% Verificacion de la fase 2 (23.10.2026): la descripcion de la tabla, que se leia como texto de la tesis fuera del
-% marcador, paso a este comentario
-
-\noindent\textbf{Cómo se leerá la figura.} La figura pondrá la demanda
-total, en veh/h, en el eje horizontal y, en el vertical, el cambio del
-retraso de IPPO con mensajes frente al fijo ajustado de cada nivel, con
-una serie por red, sobre las mismas bandas de la
-Figura~\ref{fig:plan2-mejora-caso} y con la misma lectura: un cambio
-negativo es una mejora, la banda dice en qué rango de la regla cae el
-cambio y el marcador, el veredicto real del punto. Un punto puede
-quedar en una banda y ser EMPATA, si el intervalo o la prueba de
-Wilcoxon no muestran una diferencia; MEJORA dentro de la primera banda,
-si pierde contra el actuado, o PENDIENTE, si el entrenamiento no se
-estabilizó. Por eso el empate no tiene una banda propia.
-% fuente: umbrales y condiciones de cada veredicto: Tabla tab:veredictos (capitulo3.tex, sec:veredicto); pedido de
-% cambios de la entrega 3, tareas 4a y 4b (bandas por rango de veredicto en lugar de una linea en el 5 %).
-% Verificacion de la fase 2 (23.10.2026): remite a las bandas de la Figura fig:plan2-mejora-caso en lugar de
-% describirlas otra vez en futuro
-
-\textbf{[PENDIENTE: figura de demanda contra cambio frente al fijo, con
-las bandas de la Figura~\ref{fig:plan2-mejora-caso}, y su
-interpretación.]}
-% PENDIENTE (entrega 3): figura (etiqueta reservada fig:efecto-demanda) e interpretacion, con los datos de
-% plan2/demanda2/. La figura, en formato vectorial y con colores sobrios; la interpretacion, breve y solo con lo que
-% muestren los datos: con pocos puntos por red, "hay indicios de" y no "se comprueba" (pedido 4d). Verificacion de
-% la fase 2 (23.10.2026): estas instrucciones se leian como texto de la tesis fuera del marcador
-
-\noindent\textbf{Comparación entre redes.} Con los niveles de 1810, 2715
-y 3620~veh/h las tres redes se comparan con la misma demanda total. La
-comparación tiene las dos salvedades de la
-Sección~\ref{sec:plan-demanda}. Con el mismo total, la carga por calle
-es distinta en cada red, porque la red con rotonda y la malla lo
-reparten entre más calles y más carriles. Y con 2715 y 3620~veh/h la
-rotonda está saturada o cerca de saturarse, así que el resultado de esa
-red incluye un efecto que ningún semáforo controla. La comparación dirá
-si el resultado cambia de una red a otra, pero no permitirá separar el
-efecto de la red, el de la carga por calle y el de los carriles.
-\textbf{[PENDIENTE: comparación entre redes en 1810, 2715 y
-3620~veh/h.]}
-% fuente: capitulo3.tex, sec:plan-demanda (rotonda saturada desde 1.3 veces la demanda base: 2715 veh/h es f = 1.26
-% y 3620 veh/h, f = 1.68; carga por calle con tab:demanda-flujos) y tab:plan-comparaciones
-
 \noindent\textbf{Barrido de demanda en el corredor, sin reentrenar.}
 Antes de los niveles nuevos, un análisis fuera del veredicto
 (Sección~\ref{sec:analisis-complementarios}) evaluó en la red de P1, con
@@ -778,28 +721,220 @@ P1 solo gana con la demanda con que se entrenó: lo reduce un 6.8\,\% con
 $\times$1.0, y pierde un 3.9 y un 3.6\,\% con $\times$0.5 y
 $\times$0.75. La de P2 gana entre un 16.6 y un 23.3\,\% con
 $\times$1.75 a $\times$2.25 y con el perfil variable, y pierde entre un
-58.1 y un 71.5\,\% con $\times$0.5 a $\times$1.0; con el retraso total,
-que suma la espera para entrar a la red, esa ganancia casi desaparece
-con demanda alta y se vuelve pérdida con el perfil variable. Una
-política no se sostiene fuera de la demanda con que se entrenó, y por
-eso en los niveles nuevos el modelo se entrena en cada nivel. En ese
-barrido la referencia de cada nivel es un fijo ajustado para ese nivel
-con la regla del análisis de robustez (Sección~\ref{sec:diseno-robustez}).
-Su tabla y su figura (Tabla~\ref{tab:plan2-demanda} y
-Figura~\ref{fig:plan2-demanda}), las cifras con el retraso total y el
-colapso de todos los controles, salvo el fijo de cada nivel, entre
-$\times$1.25 y $\times$1.5 están en el Anexo~F.
+58.1 y un 71.5\,\% con $\times$0.5 a $\times$1.0. Con el retraso total,
+que suma la espera para entrar a la red, esa ganancia baja a un
+3.6\,\% con $\times$1.75 y se vuelve pérdida con $\times$2.0,
+$\times$2.25 y el perfil variable ($+1.6$, $+10.0$ y $+20.6$\,\%). Hay
+indicios de que una política no se sostiene lejos de la demanda con que
+se entrenó. En ese barrido, con las políticas sin reentrenar, todos los
+controles salvo el fijo de cada nivel colapsan entre $\times$1.25 y
+$\times$1.5. A diferencia de él, que no reentrena las políticas y
+ajusta el fijo de cada nivel con la regla del análisis de robustez
+(Sección~\ref{sec:diseno-robustez}), en los niveles de la
+Tabla~\ref{tab:efecto-demanda} IPPO con mensajes se entrena en cada
+nivel y el fijo se ajusta con la regla del plan. La tabla y la figura
+del barrido (Tabla~\ref{tab:plan2-demanda} y
+Figura~\ref{fig:plan2-demanda}) y sus cifras con el retraso total están
+en el Anexo~F.
 % fuente: plan2/demanda/resumen_demanda.csv (delta_timeloss_prom de ippo_vecinos_s4042: corredor_f050 +3.94, f075
 % +3.59, f100 -6.82; de ippo_vecinos_s2042: f175 -22.84, f200 -23.3, f225 -17.32, corredor_var -16.57, y f050
-% +58.08, f075 +62.96, f100 +71.52; delta_retraso_total_prom de ippo_vecinos_s2042: f175 -3.64, f200 +1.63, f225
-% +10.04, corredor_var +20.62; colapso: delta_timeloss_prom de fijo_p1, actuado e ippo_vecinos_s4042 y s2042 entre
+% +58.08, f075 +62.96, f100 +71.52; delta_retraso_total_prom de ippo_vecinos_s2042: f175 -3.64 [-4.95, -2.38] p
+% 3.24e-06, f200 +1.63 [0.64, 2.56] p 0.00219, f225 +10.04 [8.61, 11.43] p 1.86e-09, corredor_var +20.62 [17.75,
+% 23.58] p 1.86e-09; colapso: delta_timeloss_prom de fijo_p1, actuado e ippo_vecinos_s4042 y s2042 entre
 % +45.0 y +146.1 en corredor_f125 y f150, Anexo F); regla del fijo de cada nivel: capitulo3.tex, sec:analisis-complementarios
 % (fijo re-barrido desde 10 s con el retraso total como criterio). Entrega 3, fase 2 (23.10.2026): la subseccion
 % "Sensibilidad a la demanda" (capitulo5.tex l. 865-948 del commit 7181ab8) paso al Anexo F; aqui queda este
 % parrafo, sin tabla ni figura, porque su referencia es la del analisis de robustez y mide otra cosa que los niveles
 % nuevos (una politica evaluada fuera de su demanda, no un modelo entrenado en cada nivel). Verificacion de la fase 2
 % (23.10.2026): recupera la salvedad del retraso total que daba el Cap. V del commit 7181ab8 (l. 912-923) y dice
-% que colapsa (antes "el colapso entre x1.25 y x1.5", sin decir de que)
+% que colapsa (antes "el colapso entre x1.25 y x1.5", sin decir de que). Tareas 4 y 5 (23.10.2026): la diferencia
+% con los niveles nuevos se dice en una frase (antes: "y por eso en los niveles nuevos el modelo se entrena en cada
+% nivel. En ese barrido la referencia de cada nivel es un fijo ajustado para ese nivel con la regla del analisis de
+% robustez"); regla del fijo de los niveles nuevos: capitulo3.tex, sec:plan-demanda. Verificacion de las tareas 4 y 5
+% (23.10.2026): (1) el parrafo cerraba la seccion y pasa aqui, antes de los niveles nuevos; (2) decia que con el
+% retraso total "esa ganancia casi desaparece con demanda alta", pero con x2.0 y x2.25 es una perdida significativa
+% (cifras de arriba); (3) "Una politica no se sostiene fuera de la demanda con que se entreno" pasa a "hay indicios
+% de" y a "lejos de", porque son dos politicas en una sola red y la de P2 gana en timeLoss con x1.75, x2.25 y el
+% perfil variable; (4) la ultima frase se parte y dice que el colapso es con las politicas sin reentrenar (con
+% 2715 veh/h, x1.5, IPPO con mensajes reentrenado queda en +6.6 %, Tabla tab:efecto-demanda)
+
+\noindent\textbf{Qué se mide en los niveles nuevos.} Para confirmar los
+indicios de los pares del plan y para comparar las redes con la misma
+demanda total, el plan
+se amplió después del veredicto con los niveles de demanda de la
+Sección~\ref{sec:plan-demanda} (Tabla~\ref{tab:plan-demanda-niveles}):
+cinco puntos en el corredor, siete en la red con rotonda y seis en la
+malla, contando los casos del plan, con 1810, 2715 y 3620~veh/h comunes
+a las tres redes. Cada nivel usa la red y los flujos del caso nominal de
+su red, con toda la demanda multiplicada por un factor, y se corre con
+el protocolo del plan: el fijo ajustado se vuelve a barrer para ese
+nivel con la misma regla, se evalúan además el actuado y el ciclo
+mínimo, IPPO con mensajes se entrena tres veces en ese nivel y su
+versión evaluada se evalúa con las semillas 1001 a 1030 y la misma
+regla de veredicto. La Tabla~\ref{tab:efecto-demanda} da, para cada
+nivel, el retraso del fijo ajustado, del actuado y de IPPO con mensajes,
+el cambio frente a cada referencia y el veredicto. Estos niveles no
+cambian ningún veredicto de P1 a P6.
+% fuente: capitulo3.tex, sec:plan-demanda y tab:plan-demanda-niveles; escenarios_plan2.NIVELES_DEMANDA2 y
+% plan2/generar_trabajos.agregar_demanda2 (barrido con la regla del 25.09, actuado, trivial e ippo_vecinos con bases
+% 42, 2042 y 4042, 200 episodios, validacion con 999 y 1999 y evaluacion con 1001-1030). Verificacion de las tareas 4
+% y 5 (23.10.2026): antes decia que la tabla daba "lo mismo que la Tabla tab:resultado-principal", pero esa tabla no
+% tiene el retraso del actuado y tiene el cambio de la recompensa, que tab:efecto-demanda no trae
+
+% fuente: secciones/tablas/demanda2.tex, generada por curvas_demanda.py (commit 1873eac) desde
+% plan2/demanda2/resumen_demanda2.csv (columnas red, vehiculos_hora, caso_plan, retraso_fijo, retraso_actuado,
+% retraso_ippo, cambio_fijo, cambio_actuado, veredicto e igual_ciclo_minimo). Niveles nuevos: la referencia es el
+% brazo fijo, con el programa que barrer_fijo.py eligio para ese nivel (columna programa_fijo), y el veredicto sale
+% de veredicto.celda; P1-P6: filas ippo_vecinos de plan2/veredicto.csv (referencia fijo_2509). El entorno
+% (\setstretch{1}, \footnotesize y tabcolsep de 3 pt, en [!tbp]) es el que pide el comentario del archivo: asi la
+% tabla mide 405.8 pt de ancho, de los 427.4 pt del texto. Con el caption mide 595.5 pt de alto, de los 615.4 pt de
+% \textheight (medido el 23.10.2026 con tesisutec.cls); con el primer caption, mas largo, media 649.9 pt y no cabia
+% en la pagina ("Float too large"): un caption mas largo que este no cabe
+\begin{table}[!tbp]
+\setstretch{1}
+\centering
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\input{secciones/tablas/demanda2}
+\caption[Resultado por nivel de demanda]{Resultado de IPPO con mensajes en cada nivel de demanda, sobre las semillas de evaluación 1001 a 1030. Veh/h: demanda total que entra a la red. Caso: código de los casos del plan; las demás filas son los niveles nuevos. Retraso: \texttt{timeLoss} medio por vehículo. Cambio: diferencia relativa del retraso frente a cada referencia; un valor negativo es una mejora. La referencia de cada nivel nuevo es su propio fijo ajustado; la de P1 a P6, el del plan. Veredicto según la Tabla~\ref{tab:veredictos}. ``(provisional: X)'': el entrenamiento de la versión evaluada no se estabilizó y X es el veredicto provisional. ``(igual al ciclo mínimo)'': la versión evaluada da los mismos valores que el ciclo mínimo en las 30 semillas.}
+\label{tab:efecto-demanda}
+\end{table}
+
+\noindent\textbf{Cómo se lee la figura.} La
+Figura~\ref{fig:efecto-demanda} pone la demanda total, en veh/h, en el
+eje horizontal y, en el vertical, el cambio del retraso de IPPO con
+mensajes frente al fijo ajustado de cada nivel, con una serie por red,
+sobre las mismas bandas de la Figura~\ref{fig:plan2-mejora-caso}: un
+cambio negativo es una mejora y la banda dice en qué rango de la regla
+cae el cambio. Los marcadores se leen de otra forma que en esa figura:
+el color y la forma dicen la red, y el relleno, el veredicto; el
+marcador hueco es un EMPATA y el de borde punteado, un PENDIENTE. Un
+punto puede quedar en una banda y ser EMPATA, si el intervalo o la
+prueba de Wilcoxon no muestran una diferencia; MEJORA dentro de la
+banda de mejora clara, si pierde contra el actuado, o PENDIENTE, si el
+entrenamiento no se estabilizó. Por eso el empate no tiene una banda
+propia.
+% fuente: umbrales y condiciones de cada veredicto: Tabla tab:veredictos (capitulo3.tex, sec:veredicto); pedido de
+% cambios de la entrega 3, tareas 4a y 4b (bandas por rango de veredicto en lugar de una linea en el 5 %).
+% Verificacion de la fase 2 (23.10.2026): remite a las bandas de la Figura fig:plan2-mejora-caso en lugar de
+% describirlas otra vez. Tareas 4 y 5 (23.10.2026): en presente, con la figura ya hecha (antes "Como se leera la
+% figura"); el relleno del marcador da el veredicto y el color y la forma, la red (leyenda de fig_demanda_bandas.pdf).
+% Verificacion de las tareas 4 y 5 (23.10.2026): se avisa que los marcadores no se leen como en fig:plan2-mejora-caso,
+% donde el color es el veredicto y el hueco es PENDIENTE (caption de esa figura); aqui el hueco es EMPATA y
+% el PENDIENTE lleva borde punteado (leyenda de fig_demanda_bandas.pdf)
+
+% fuente: plan2/demanda2/resumen_demanda2.csv (cambio_fijo, ic_fijo, veredicto y convergio de cada red y nivel), que
+% dibuja curvas_demanda.py (images/fig_demanda_bandas.pdf, 23.10.2026 05:39; mide 429.9 x 313.6 pt y va a \textwidth
+% como fig_plan2_mejora_caso); demandas compartidas desplazadas a la derecha: corredor x1.07 y malla x1.15, sin
+% cambiar el orden de los puntos (curvas_demanda.py; analisis_demanda2, advertencia "Figura"); bandas: umbrales de
+% tab:veredictos; meta de -25 %: tab:metas. Con el caption mide 539.4 pt de alto, de los 615.4 pt de \textheight
+% (medido el 23.10.2026 con tesisutec.cls)
+\begin{figure}[!tbp]
+\centering
+\includegraphics[width=\textwidth]{fig_demanda_bandas.pdf}
+\caption[Cambio del retraso frente al fijo según la demanda]{Cambio del retraso (\texttt{timeLoss}) de IPPO con mensajes frente al fijo ajustado de cada nivel (\%), según la demanda total de cada red, sobre las semillas de evaluación 1001 a 1030, con su IC95 por \textit{bootstrap} pareado (barra vertical). Un valor negativo es menos retraso que el fijo. El eje horizontal está en escala logarítmica. En las demandas que comparten varias redes (905, 1358, 1810, 2715 y 3620~veh/h), la red con rotonda va en su demanda exacta, y el corredor y la malla se dibujan desplazados a la derecha ($\times$1.07 y $\times$1.15) para que no se tapen. Las bandas son los umbrales de la Tabla~\ref{tab:veredictos}: la verde, un cambio de $-5$\,\% o más negativo (FUNCIONA si además es significativo y el modelo no pierde contra el actuado); la verde clara, entre $-5$ y $0$\,\% (MEJORA si es significativo), y la roja, un cambio positivo (FALLA si es significativo). El color y la forma del marcador dicen la red, y su relleno, el veredicto: lleno, FUNCIONA o FALLA según la banda; medio lleno, MEJORA; hueco, EMPATA, y con borde punteado, PENDIENTE, porque el entrenamiento de esa versión evaluada no se estabilizó. El veredicto provisional de los PENDIENTE está en la Tabla~\ref{tab:efecto-demanda}. P1 a P6 son los casos del plan. La línea fina punteada en $-25$\,\% es la meta de la tesis.}
+\label{fig:efecto-demanda}
+\end{figure}
+
+\noindent\textbf{Lo que muestran los niveles nuevos.} Con cinco a siete
+puntos por red, la tabla y la figura muestran lo siguiente:
+\begin{itemize}
+  \item \textbf{Corredor.} El resultado frente al fijo ajustado alterna
+    entre FUNCIONA (905~veh/h, P1 y P2) y FALLA (1358 y 2715~veh/h, con
+    $+5.4$ y $+6.6$\,\%; 2715~veh/h está entre la demanda nominal y la
+    alta), y la única mejora grande es la de P2 ($-23.3$\,\%). Con cinco
+    puntos hay indicios de que la mejora no crece de forma regular con la
+    demanda, a diferencia de lo que sugería el par del plan.
+  \item \textbf{Red con rotonda.} Hasta unos 2150~veh/h (P3) el cambio
+    se mantiene entre $-7.1$ y $-9.8$\,\%; con 1810~veh/h el veredicto
+    es MEJORA y no FUNCIONA porque pierde contra el actuado. Por encima,
+    en P4, la mejora se reduce a un 3.6\,\%, y con 2715 y 3620~veh/h no
+    hay diferencia significativa ($+0.9$ y $-0.1$\,\%). Hay indicios de
+    que la mejora baja por encima de unos 2150~veh/h, como sugería el par
+    del plan.
+  \item \textbf{Malla.} No hay mejora en ningún nivel: el cambio va de
+    $+0.7$ a $+2.2$\,\%, con FALLA en 2715, 3620 y 6525~veh/h, EMPATA
+    en P5 y PENDIENTE con 1810~veh/h y en P6. Frente al actuado, en
+    cambio, el retraso es menor en los seis niveles, de $-9.0$\,\% con
+    1810~veh/h a $-41.0$\,\% con 8700 (P6), y hay indicios de que esa
+    diferencia crece con la demanda.
+\end{itemize}
+% fuente: plan2/demanda2/resumen_demanda2.csv. Corredor: cambio_fijo -5.6 (905), +5.4 (1358), -6.8 (P1), +6.6 (2715)
+% y -23.3 (P2), con veredicto FUNCIONA, FALLA, FUNCIONA, FALLA y FUNCIONA. Red con rotonda: -7.5 (905), -9.8 (1358),
+% -7.1 (1810) y -8.8 (P3); 1810 MEJORA con cambio_actuado +3.0, IC [2.1, 3.9], p 1.02e-05; P4 -3.6 MEJORA; 2715 +0.9,
+% IC [-0.5, 2.4], p 0.28, PENDIENTE con provisional EMPATA; 3620 -0.1, IC [-0.4, 0.1], p 0.276, EMPATA. Malla:
+% cambio_fijo +1.7 (1810), +1.7 (2715), +0.7 (3620), +1.8 (P5), +1.9 (6525) y +2.2 (P6); veredicto PENDIENTE
+% (provisional FALLA), FALLA, FALLA, EMPATA, FALLA y PENDIENTE (provisional EMPATA); cambio_actuado -9.0, -13.2,
+% -14.7, -16.4, -20.2 y -41.0. Lectura: analisis_demanda2 (entrega 3), "lo que muestran los datos"; el indicio de
+% los pares es el del parrafo "Lo que muestran los pares del plan". Verificacion de las tareas 4 y 5 (23.10.2026):
+% la vineta del corredor decia "hay indicios de que la mejora de P2 no se extiende a toda la demanda alta", pero en el
+% corredor la demanda alta es solo P2 (3620 veh/h, x2.0; capitulo3.tex, sec:plan-casos) y 2715 veh/h (x1.5) queda
+% entre la nominal y la alta; ahora usa la lectura del analisis, con "hay indicios de" (cinco puntos)
+
+% Verificacion de las tareas 4 y 5 (23.10.2026): sin cortes de palabra en este parrafo (sloppypar y
+% \hyphenpenalty=10000), porque partia los veredictos ("PENDIEN-TE", "MEJO-RA", "EM-PATA"); con \mbox en cada
+% palabra una linea se salia 7.8 pt del margen
+\begin{sloppypar}\hyphenpenalty=10000
+\noindent\textbf{Comparación entre redes.} Con los niveles de 1810, 2715
+y 3620~veh/h las tres redes se comparan con la misma demanda total. Con
+1810~veh/h, el cambio es de $-6.8$\,\% en el corredor (FUNCIONA), de
+$-7.1$\,\% en la red con rotonda (MEJORA) y de $+1.7$\,\% en la malla
+(PENDIENTE); con 2715, de $+6.6$ (FALLA), $+0.9$ (PENDIENTE) y
+$+1.7$\,\% (FALLA), y con 3620, de $-23.3$ (FUNCIONA), $-0.1$ (EMPATA)
+y $+0.7$\,\% (FALLA). Hay indicios de que, con la misma demanda total,
+el resultado cambia de una red a otra, sin un orden que se repita en
+los tres niveles. La comparación tiene las dos salvedades de la
+Sección~\ref{sec:plan-demanda}. Con el mismo total, la carga por calle
+es distinta en cada red, porque la red con rotonda y la malla lo
+reparten entre más calles y más carriles, así que la comparación no
+separa el efecto de la red, el de la carga por calle y el de los
+carriles. Y con 2715 y 3620~veh/h la rotonda está saturada o cerca de
+saturarse: el resultado de esa red incluye un efecto que ningún
+semáforo controla.
+\end{sloppypar}
+% fuente: plan2/demanda2/resumen_demanda2.csv (cambio_fijo y veredicto en 1810, 2715 y 3620 veh/h de las tres redes;
+% el corredor de 1810 y 3620 es P1 y P2); orden por cambio: 1810 red < corredor < malla; 2715 red < malla < corredor;
+% 3620 corredor < red < malla; salvedades: capitulo3.tex, sec:plan-demanda (rotonda saturada desde 1.3 veces la
+% demanda base: 2715 veh/h es f = 1.26, entre 1.2 y 1.3, y 3620 veh/h, f = 1.68; carga por calle con
+% tab:demanda-flujos) y tab:plan-comparaciones
+
+\noindent\textbf{Salvedades.} Cuatro datos ayudan a leer la tabla y la
+figura:
+\begin{itemize}
+  \item En el corredor con 1358~veh/h, el fijo ajustado es un ciclo
+    corto: 12~s de verde en la avenida y 10~s en la transversal, con un
+    ciclo de 28~s y sin desfase. Quedó en el borde inferior de la
+    rejilla del barrido; la regla la amplió hasta 10~s de avenida y el
+    ganador no cambió.
+  \item En el corredor con 2715~veh/h, el FALLA está en el borde: el
+    valor $p$ es 0.0497, y su IC95, de $+0.5$ a $+13.1$\,\%, es el más
+    ancho de los 18 puntos.
+  \item En la malla con 1810, 2715 y 3620~veh/h, la versión evaluada da
+    los mismos valores que el ciclo mínimo en las 30 semillas, así que
+    en esos niveles el veredicto compara, en la práctica, el ciclo
+    mínimo con el fijo ajustado. En esos tres niveles los tres
+    entrenamientos dan la misma validación, y la regla de la versión
+    evaluada los ordena por número de semilla y toma el del medio, el de
+    2042; con 1810~veh/h, ese es el que no se estabilizó.
+  \item En la red con rotonda con 2715~veh/h y en la malla con
+    1810~veh/h, el entrenamiento de la versión evaluada no se estabilizó
+    (se estabilizan 2 de los 3 entrenamientos), y el veredicto queda
+    PENDIENTE, con el provisional que da la tabla.
+\end{itemize}
+% fuente: plan2/demanda2/resumen_demanda2.csv: corredor 1358, programa_fijo "12/10 s, ciclo 28 s, desfases 0/0 s;
+% malla extendida (avenida 10 s)"; plan2/barrido_dem_corredor_t1358.csv (verdes de avenida 10, 12, 15, 18, 20, 25 y
+% 30 s; gana 12/10, 0/0, con 18.03 s de timeLoss; 10/10 da 18.28 o mas) y plan2/generar_trabajos.MALLAS_2509 (la
+% rejilla del corredor empezaba en 12 s). Corredor 2715: p_fijo 0.0497 e ic_fijo [0.5, 13.1], el IC mas ancho de los
+% 18 puntos. Malla 1810, 2715 y 3620: igual_ciclo_minimo "si" (curvas_demanda.iguales: mismas metricas de trafico en
+% las 30 semillas). Red 2715 (base 42) y malla 1810 (base 2042): convergio "no" y entrenamientos_estables 2/3.
+% Salvedades elegidas de las advertencias de analisis_demanda2 (entrega 3). Desempate (verificacion de las tareas 4
+% y 5, 23.10.2026): val_elegido de plan2/politica_dem_malla3_t<veh/h>_vecinos_s<base>.json, bases 42, 2042 y 4042:
+% 19.835 en las tres con 1810, 19.935 con 2715 y 20.415 con 3620; veredicto.base_mediana ordena por (valor, base) y
+% toma la del medio, la 2042 (base_evaluada de resumen_demanda2.csv); con 1810 la 2042 no converge (meseta -5.60 %)
+% y las otras dos si. No se dice que veredicto daria otra base: es un contrafactual y la regla no cambia
+% Verificacion de las tareas 4 y 5 (23.10.2026): el parrafo "Barrido de demanda en el corredor, sin reentrenar", que
+% cerraba esta seccion, paso despues de "Lo que muestran los pares del plan", para que la seccion termine con los
+% niveles nuevos, que responden su pregunta
 
 %----------------------------------------------------------------------
 \section{Qué aporta cada pieza}
@@ -1156,19 +1291,35 @@ fijo. En P6 el entrenamiento no se estabiliza (lo hace 1 de los 3
 entrenamientos, y no el de la versión evaluada), y el empate es
 provisional. En los dos casos todo control sin mensajes queda por
 detrás del fijo, y el modelo supera con holgura al actuado, que en P6
-colapsa. Con los criterios del plan, que no se cambian, la malla queda
-fuera del alcance que el modelo demuestra hoy.
+colapsa. Los niveles de demanda adicionales no cambian esa lectura: en
+ninguno de los seis niveles, de 1810 a 8700~veh/h, IPPO con mensajes
+reduce el retraso frente al fijo ajustado
+(Sección~\ref{sec:efecto-demanda}). Con los criterios del plan, que no
+se cambian, la malla queda fuera del alcance que el modelo demuestra
+hoy, en todo el rango de demanda probado.
 % fuente: capitulo4.tex, tab:plan2-fijo (P5: desfases alternados de 0 y 23 s); plan2/evaluacion_malla3.csv
 % (ippo_vecinos_s2042 igual al trivial en 24/30 semillas); plan2/veredicto.csv (P5 y P6 frente al fijo: actuado +21.8
 % y +73.3, ql +42.5 y +28.5, sarsa +40.0 y +23.5, ippo_local +25.9 y +6.6; ippo_vecinos en P6: convergen 1/3, veredicto
-% provisional EMPATA; delta_act de ippo_vecinos -16.4 y -41.0)
+% provisional EMPATA; delta_act de ippo_vecinos -16.4 y -41.0); niveles de demanda: plan2/demanda2/resumen_demanda2.csv
+% (malla 3x3: cambio_fijo de +0.7 a +2.2 en 1810, 2715, 3620, 4350, 6525 y 8700 veh/h; FALLA, EMPATA o PENDIENTE,
+% ningun FUNCIONA ni MEJORA). Entrega 3, tareas 4 y 5 (23.10.2026): se agrega lo que los niveles de demanda dicen del
+% alcance (pedido 6)
 
 \noindent\textbf{Alcance demostrado.} El alcance que el modelo demuestra
 hoy es el de dos y tres semáforos en fila, con demanda nominal o alta y
 con un elemento no controlado, la rotonda. En esos cuatro casos, con
-1810 a 3620~veh/h, mejora al fijo ajustado entre un 3.6 y un 23.3\,\%,
-y la mayor mejora corresponde al corredor saturado. No todos los casos
-superan el 5\,\%: P4 queda por debajo y la malla no mejora al fijo; la
+1810, 2150, 2580 y 3620~veh/h, mejora al fijo ajustado entre un 3.6 y
+un 23.3\,\%, y la mayor mejora corresponde al corredor saturado. Los
+niveles de demanda adicionales acotan ese alcance
+(Sección~\ref{sec:efecto-demanda}): en el corredor el resultado alterna
+entre FUNCIONA y FALLA (falla con 1358 y 2715~veh/h), y hay indicios de
+que la mejora no crece de forma regular con la demanda; en la red con
+rotonda no hay diferencia significativa con 2715 y 3620~veh/h. Con la
+misma demanda total, hay indicios de que el resultado cambia de una red
+a otra sin un orden que se repita, aunque esa comparación no separa el
+efecto de la red, el de la carga por calle y el de los carriles. No
+todos los casos superan el 5\,\%: P4 queda por debajo y la malla no
+mejora al fijo; la
 Tabla~\ref{tab:esperado-obtenido} da el origen medido de cada
 diferencia. La meta de $-25$\,\% no se alcanza en ningún caso; se
 acerca solo donde el fijo está saturado. El resultado depende ante todo
@@ -1181,20 +1332,34 @@ el reparto se invierte (Anexo~F).
 % plan2/robustez_sintesis_anova.csv (fila Todos: caso 23.5, modelo 55.5). Entrega 3 (pedido 2b): el alcance ya no
 % dice "con uno o dos carriles", porque el plan no aisla el efecto de los carriles. Verificacion de la fase 2
 % (23.10.2026): recupera la salvedad del reparto con la medicion mas estricta (capitulo5.tex l. 823-827 del commit
-% 7181ab8)
+% 7181ab8). Niveles de demanda (tareas 4 y 5, 23.10.2026): plan2/demanda2/resumen_demanda2.csv (corredor: FUNCIONA en
+% 905, 1810 y 3620 y FALLA en 1358 y 2715 veh/h; red con rotonda: 2715 +0.9, IC [-0.5, 2.4], p 0.28, y 3620 -0.1,
+% IC [-0.4, 0.1], p 0.276). Verificacion de las tareas 4 y 5 (23.10.2026): (1) "con 1810 a 3620 veh/h" se leia como
+% un rango continuo, y dentro de el hay un FALLA (corredor, 2715) y un nivel sin diferencia (red, 2715): ahora da las
+% demandas de los cuatro casos (demanda_veh_h de plan2/veredicto.csv); (2) "no crece de forma regular" lleva "hay
+% indicios de", como en la Seccion sec:efecto-demanda; (3) se agrega la comparacion entre redes con la misma demanda
+% total, con la lectura y la salvedad de "Comparacion entre redes" de esa seccion (analisis_demanda2, "Misma demanda
+% total"; carga por calle: tab:demanda-flujos)
 
-\noindent\textbf{Conclusión.} Con la regla fijada antes de evaluar, IPPO
-con mensajes reduce el retraso frente al fijo ajustado en el corredor y
-en la red con rotonda, aunque en esta su mejora no pasa de la del ciclo
-mínimo; en la malla empata con él, y frente al actuado gana en los seis
-casos. Salvo en el corredor con demanda alta, donde IPPO sin mensajes
-también funciona, lo que separa funcionar de fallar son los mensajes
-entre vecinos; el tamaño de la ventaja depende de contra qué referencia
-y con qué métrica se mide.
+\noindent\textbf{Conclusión.} En los seis casos del plan, con la regla
+fijada antes de evaluar, IPPO con mensajes reduce el retraso frente al
+fijo ajustado en el corredor y en la red con rotonda, aunque en esta, en
+P3 y P4, su mejora no pasa de la del ciclo mínimo; en la malla empata
+con él, y frente al actuado gana en los seis casos. Salvo en el corredor
+con demanda alta, donde IPPO sin mensajes también funciona, lo que
+separa funcionar de fallar son los mensajes entre vecinos; el tamaño de
+la ventaja depende de contra qué referencia y con qué métrica se mide.
+En los niveles de demanda adicionales, la mejora frente al fijo ajustado
+no se mantiene en todos los niveles del corredor ni de la red con
+rotonda.
 % fuente: plan2/veredicto.csv (ippo_local: P1 EMPATA, P2 -22.8 FUNCIONA, FALLA en P3-P6; ippo_vecinos: FUNCIONA en
 % P1-P3, MEJORA en P4, EMPATA en P5 y provisional en P6); la misma salvedad que resumen.tex l. 8 y conclusiones.tex
 % l. 10-12. Verificacion de la fase 2 (23.10.2026): antes decia "La ventaja viene de los mensajes entre vecinos", sin
-% la salvedad de P2
+% la salvedad de P2. Verificacion de las tareas 4 y 5 (23.10.2026): se acota a los seis casos del plan, y lo del
+% ciclo minimo a P3 y P4, porque en los niveles nuevos de la red la version evaluada tiene menos retraso que el ciclo
+% minimo con 905, 1358 y 3620 veh/h (cambio_ciclo_minimo de plan2/demanda2/resumen_demanda2.csv: -3.3, -3.9 y -3.2,
+% IC entero bajo cero); la ultima frase resume "Alcance demostrado" (corredor: FALLA con 1358 y 2715; red con rotonda:
+% sin diferencia significativa con 2715 y 3620)
 
 \subsection{Lo que el plan no permite afirmar}
 \label{sec:limites}
@@ -1213,11 +1378,11 @@ Con lo medido en el plan no se puede afirmar:
     mensajes llegan al instante y sin pérdida. En la fase exploratoria,
     con latencia o pérdida de mensajes, la política quedó entre un 1.7 y
     un 7.0\,\% por encima del actuado en el corredor (Anexo~C).
-  \item \textbf{Que una política sirva con otra demanda.} Una política
-    no se sostiene fuera de la demanda con que se entrenó
-    (Sección~\ref{sec:efecto-demanda}). Los resultados de los niveles de
-    demanda nuevos, con el modelo entrenado en cada nivel, están
-    pendientes de incorporar.
+  \item \textbf{Que una política sirva con otra demanda.} Hay indicios
+    de que una política no se sostiene lejos de la demanda con que se
+    entrenó, y aun con el modelo entrenado en cada nivel, la mejora no se
+    mantiene en todos los niveles de demanda de una misma red
+    (Sección~\ref{sec:efecto-demanda}).
   \item \textbf{Que el entrenamiento conserve su mejor versión.} En P3
     los tres entrenamientos de IPPO con mensajes (dos de ellos después
     de llegar a 19.69~s), en P5 los de las versiones evaluadas de IPPO
@@ -1264,4 +1429,11 @@ Con lo medido en el plan no se puede afirmar:
 % plan2/politica_malla3_vecinos_s2042.json, plan2/politica_malla3_mappo_s2042.json y
 % plan2/politica_malla3_alta_vecinos_s42.json (ep 140: 34.805; ep 200: 39.455); malla: plan2/veredicto.csv
 % (malla3_alta: delta_act de -25.9, ql, a -41.0, ippo_vecinos; 12 PENDIENTE en 48, 6 en P6); demanda: las corridas
-% dem2_ terminaron el 23.10.2026 (plan2/cola/cola_dem2.out; commit be2c2a1)
+% dem2_ terminaron el 23.10.2026 (plan2/cola/cola_dem2.out; commit be2c2a1) y su resultado esta en
+% plan2/demanda2/resumen_demanda2.csv (commit 1873eac): corredor FALLA en 1358 y 2715 veh/h, red con rotonda sin
+% diferencia significativa en 2715 y 3620 y malla sin FUNCIONA ni MEJORA en sus seis niveles. Tareas 4 y 5
+% (23.10.2026): antes decia "Los resultados de los niveles de demanda nuevos, con el modelo entrenado en cada nivel,
+% estan pendientes de incorporar". Verificacion de las tareas 4 y 5 (23.10.2026): "Una politica no se sostiene fuera
+% de la demanda con que se entreno" pasa a "Hay indicios de que una politica no se sostiene lejos de...", como en la
+% Seccion sec:efecto-demanda: son dos politicas en una sola red, y la de P2 gana en timeLoss con x1.75, x2.25 y el
+% perfil variable (plan2/demanda/resumen_demanda.csv, ippo_vecinos_s2042: -22.84, -17.32 y -16.57)
