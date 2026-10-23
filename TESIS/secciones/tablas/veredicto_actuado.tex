@@ -7,16 +7,16 @@
 \setlength{\tabcolsep}{1.5pt}
 \begin{tabular}{llcrrrrrrcl}
 \toprule
-Caso & Escenario & Sem. & Carr. & \makecell{Dem.\\(veh/h)} & \makecell{Retraso\\(s/veh)} & \makecell{$\Delta$\\retraso\\vs fijo} & \makecell{$\Delta$\\retraso\\vs actuado} & \makecell{$\Delta$\\recompensa} & Conv. & Veredicto \\
+Caso & \makecell[l]{Red y\\demanda} & Sem. & Carr. & \makecell{Dem.\\(veh/h)} & \makecell{Retraso\\(s/veh)} & \makecell{Cambio\\frente al\\fijo} & \makecell{Cambio\\frente al\\actuado} & \makecell{Cambio de\\la recom-\\pensa} & Conv. & Veredicto \\
 \midrule
-P1 & corredor & 2 & 1 & 1810 & \makecell[r]{21.07\\{}$\pm$ 0.15} & \makecell[r]{$-$1.1\,\%\\{}[$-$2.1,\,0.1]\\$p$ = 0.0571} & -- & -- & -- & EMPATA \\
-P2 & corredor\_alta & 2 & 1 & 3620 & \makecell[r]{124.14\\{}$\pm$ 2.48} & \makecell[r]{$-$19.8\,\%\\{}[$-$21.3,\,$-$18.2]\\$p$ $<$\,0.001} & -- & -- & -- & FUNCIONA \\
-P3 & red & \makecell[c]{3\\{}+ rot.} & 2 & 2150 & \makecell[r]{21.48\\{}$\pm$ 0.12} & \makecell[r]{$-$1.1\,\%\\{}[$-$1.7,\,$-$0.5]\\$p$ = 0.00306} & -- & -- & -- & MEJORA \\
-P4 & red\_alta & \makecell[c]{3\\{}+ rot.} & 2 & 2580 & \makecell[r]{30.04\\{}$\pm$ 0.90} & \makecell[r]{$-$0.1\,\%\\{}[$-$1.4,\,1.4]\\$p$ = 0.869} & -- & -- & -- & EMPATA \\
-P5 & malla3 & 9 & 2 & 4350 & \makecell[r]{25.37\\{}$\pm$ 0.10} & \makecell[r]{+21.8\,\%\\{}[21.3,\,22.3]\\$p$ $<$\,0.001} & -- & -- & -- & FALLA \\
-P6 & malla3\_alta & 9 & 2 & 8700 & \makecell[r]{63.66\\{}$\pm$ 2.33} & \makecell[r]{+73.3\,\%\\{}[66.9,\,79.3]\\$p$ $<$\,0.001} & -- & -- & -- & FALLA \\
+P1 & \makecell[l]{Corredor,\\{}nominal} & 2 & 1 & 1810 & \makecell[r]{21.07\\{}$\pm$ 0.15} & \makecell[r]{$-$1.1\,\%\\{}[$-$2.1,\,0.1]\\$p$ = 0.0571} & -- & -- & -- & EMPATA \\
+P2 & \makecell[l]{Corredor,\\{}alta} & 2 & 1 & 3620 & \makecell[r]{124.14\\{}$\pm$ 2.48} & \makecell[r]{$-$19.8\,\%\\{}[$-$21.3,\,$-$18.2]\\$p$ $<$\,0.001} & -- & -- & -- & FUNCIONA \\
+P3 & \makecell[l]{Red con\\{}rotonda,\\{}nominal} & \makecell[c]{3\\{}+ rot.} & 2 & 2150 & \makecell[r]{21.48\\{}$\pm$ 0.12} & \makecell[r]{$-$1.1\,\%\\{}[$-$1.7,\,$-$0.5]\\$p$ = 0.00306} & -- & -- & -- & MEJORA \\
+P4 & \makecell[l]{Red con\\{}rotonda,\\{}alta} & \makecell[c]{3\\{}+ rot.} & 2 & 2580 & \makecell[r]{30.04\\{}$\pm$ 0.90} & \makecell[r]{$-$0.1\,\%\\{}[$-$1.4,\,1.4]\\$p$ = 0.869} & -- & -- & -- & EMPATA \\
+P5 & \makecell[l]{Malla $3 \times 3$,\\{}nominal} & 9 & 2 & 4350 & \makecell[r]{25.37\\{}$\pm$ 0.10} & \makecell[r]{+21.8\,\%\\{}[21.3,\,22.3]\\$p$ $<$\,0.001} & -- & -- & -- & FALLA \\
+P6 & \makecell[l]{Malla $3 \times 3$,\\{}alta} & 9 & 2 & 8700 & \makecell[r]{63.66\\{}$\pm$ 2.33} & \makecell[r]{+73.3\,\%\\{}[66.9,\,79.3]\\$p$ $<$\,0.001} & -- & -- & -- & FALLA \\
 \bottomrule
 \end{tabular}
-\caption[Veredicto de Actuado]{Actuado: veredicto por caso. Sem.: semáforos (rot.: más una rotonda); Carr.: carriles por sentido de la avenida; Dem.: demanda total. Retraso: media $\pm$ IC95\,\% sobre las semillas de evaluación 1001 a 1030; $\Delta$ con IC95\,\% bootstrap pareado y $p$ de Wilcoxon pareado. Controlador actuado de SUMO, fila de referencia juzgada frente al fijo tuneado.}
+\caption[Veredicto del actuado]{Actuado: veredicto por caso. Sem.: semáforos (rot.: más una rotonda); Carr.: carriles por sentido de la avenida; Dem.: demanda total. Retraso: media $\pm$ IC95\,\% sobre las semillas de evaluación 1001 a 1030; cambio (\%) con IC95\,\% bootstrap pareado y $p$ de Wilcoxon pareado. Controlador actuado de SUMO, fila de referencia juzgada frente al fijo ajustado.}
 \label{tab:veredicto-actuado}
 \end{table}

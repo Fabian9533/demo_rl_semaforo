@@ -60,7 +60,7 @@
 \node[archivo, chaflan, text width=4.4cm, anchor=north] (rou_alta) at ($(calibrar.south)+(0,-0.44)$)
   {\nodo{Demanda escalada (\texttt{.rou.xml})}{P2: $f = 2.0$; P4: $f = 1.2$}};
 \node[semillas, anchor=west] (s_tun1) at ($(calibrar.south)!0.5!(rou_alta.north)+(-1.4,0)$)
-  {tuneo: 2001--2003};
+  {ajuste: 2001--2003};
 
 % ---- columna derecha (sin subgrupo)
 \node[archivo, chaflan, text width=4.55cm, anchor=north] (tabla) at (12.34,-3.21)
@@ -82,13 +82,13 @@
   {\nodo{Barrido (\texttt{barrer\_fijo.py})}{reescribe el fijo de partida:\\ verde de avenida $\times$ transversal\\ $\times$ desfase (P5: tres esquemas)}};
 \node[entorno, text width=3.9cm, anchor=north] (sumo0) at ($(12.23,0 |- T)+(0,0.2)$)
   {\nodo{SUMO sin TraCI}{una corrida por configuración\\ y semilla}};
-\node[semillas, anchor=north east] (s_tun2) at ($(sumo0.south east)+(0,-0.68)$) {tuneo: 2001--2003};
+\node[semillas, anchor=north east] (s_tun2) at ($(sumo0.south east)+(0,-0.68)$) {ajuste: 2001--2003};
 \node[decision, anchor=north] (borde) at ($(8.1,0 |- barrido.south)+(0,-0.46)$)
   {¿Ganador en el borde\\ de un eje de verde?};
 \node[archivo, chaflan, text width=3.6cm, anchor=north] (act) at (2.28,0 |- borde.north)
   {\nodo{Actuado\\ (\texttt{<esc>\_actuado.add.xml})}{fases del programa\\ por omisión; verde 10--60 s;\\ desfase 0}};
 \node[archivo, chaflan, text width=3.6cm, anchor=north] (fijo) at ($(12.3,0 |- borde.center)+(0,-0.3)$)
-  {\nodo{Fijo tuneado\\ (\texttt{plan2/<esc>.add.xml})}{\texttt{-{}-instalar}; registro en\\ \texttt{barrido\_<esc>.csv}}};
+  {\nodo{Fijo ajustado\\ (\texttt{plan2/<esc>.add.xml})}{\texttt{-{}-instalar}; registro en\\ \texttt{barrido\_<esc>.csv}}};
 \node[nota, text width=3.3cm, anchor=north west] (n_piso) at ($(4.9,0 |- borde.south)+(0,-0.13)$)
   {el verde mínimo de 10 s\\ cuenta como piso válido};
 
@@ -109,7 +109,7 @@
 % punta de P_I1: con los 150 grados del estilo, 7 cm de ancho dan una V de 0.94 cm; con 157.6
 % grados queda en 0.70 cm, la misma de P_I2 y de los puertos verticales de U2 (0.64-0.69 cm)
 \node[puerto=u3, hacia abajo, signal pointer angle=157.6, text width=6.8cm, anchor=north] (P_I1) at (5.32,0 |- Ufondo)
-  {\itfn{1} hacia U3\\ \texttt{plan2/<esc>.sumocfg} con el fijo tuneado; actuado};
+  {\itfn{1} hacia U3\\ \texttt{plan2/<esc>.sumocfg} con el fijo ajustado; actuado};
 \node[puerto=ext, hacia abajo, text width=5.0cm, anchor=north] (P_I2) at (12.32,0 |- Ufondo)
   {\itfn{2}\\ hacia U2, U3 y U4};
 

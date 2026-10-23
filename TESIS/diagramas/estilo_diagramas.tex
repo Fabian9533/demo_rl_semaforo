@@ -45,12 +45,14 @@
 % huecos estrechos (va dentro de un nodo con align, o en una etiqueta con align=center).
 % Revision 27.09: I6 = metricas por corrida e I7 = politica publicada (antes al reves), para
 % que la arquitectura se lea I3, I4, I6, I7, I8 de arriba abajo.
+% Entrega 3 (23.10.2026, glosario de la tesis): I7 pasa de "politica publicada" a "version guardada", como la llama
+% el Cap. III (la version guardada de cada entrenamiento, con su archivo de metadatos).
 \newcommand{\nombreinterfaz}[1]{\ifcase#1\relax\or escenario del caso\or
   aproximaciones, enlaces y vecinos\or observación y recompensa\or acción\or
-  mensajes entre vecinos\or métricas por corrida\or política publicada\or veredicto\fi}
+  mensajes entre vecinos\or métricas por corrida\or versión guardada\or veredicto\fi}
 \newcommand{\nombreinterfazdos}[1]{\ifcase#1\relax\or escenario\\ del caso\or
   aproximaciones,\\ enlaces y vecinos\or observación\\ y recompensa\or acción\or
-  mensajes\\ entre vecinos\or métricas\\ por corrida\or política\\ publicada\or veredicto\fi}
+  mensajes\\ entre vecinos\or métricas\\ por corrida\or versión\\ guardada\or veredicto\fi}
 \newcommand{\itf}[1]{\textbf{I#1}}
 \newcommand{\itfn}[1]{\textbf{I#1}~\nombreinterfaz{#1}}
 \newcommand{\itfnn}[1]{\textbf{I#1}~\nombreinterfazdos{#1}}

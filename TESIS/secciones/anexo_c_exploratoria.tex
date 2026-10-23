@@ -22,9 +22,9 @@ evaluación final usaba diez semillas (1001 a 1010). Q-learning se
 entrenaba con la recompensa de colas (Ecuación~\ref{eq:recompensa}),
 una sola semilla base y entre 40 y 120 episodios, con $\varepsilon$
 multiplicado por 0.9 al terminar cada episodio hasta un piso de 0.05
-(por 0.96 en cruce2 y por 0.95 en red). Q-learning e IPPO publicaban la
+(por 0.96 en cruce2 y por 0.95 en red). Q-learning e IPPO evaluaban la
 política del último episodio, sin elegir un \textit{checkpoint} por
-validación. Y los programas fijos se tunearon en parte con semillas de
+validación. Y los programas fijos se ajustaron en parte con semillas de
 evaluación.
 % fuente: episodios y decaimiento de epsilon, columna epsilon de resultados_<esc>.csv de demo_rl
 % (cruce, corredor y corredor_alta: 40 episodios con 0.9; cruce2: 120 con 0.96; red: 100 con 0.95)
@@ -44,7 +44,7 @@ en P1 a P6, y lo que compara con esta
 fase es el signo y el orden de
 magnitud. El análisis de robustez del plan (Sección~\ref{sec:robustez})
 repite la comparación con el retraso total, que suma la espera para
-entrar a la red, y con un fijo re-barrido hasta verdes de 10~s. En P2 y
+entrar a la red, y con el fijo ajustado desde 10~s. En P2 y
 P3, dos de los casos que se citan aquí, esa comparación cambia la
 lectura, y el anexo lo indica donde corresponde.
 % fuente: evaluacion_<esc>_resumen.csv de demo_rl (fase exploratoria, timeloss_prom); resultado principal:
@@ -167,14 +167,14 @@ tiene contraparte en el Capítulo~\ref{cap:resultados}.
 \subsection*{E3: corredor de dos cruces}
 
 En el corredor cada cruce tiene su propio agente, sin comunicación
-entre ellos. Frente al fijo tuneado, que da $21.2 \pm 0.4$~s, los dos
+entre ellos. Frente al fijo ajustado, que da $21.2 \pm 0.4$~s, los dos
 agentes aumentan el retraso un $60$\,\% (intervalo $+53$ a $+67$\,\%,
 $p = 0.002$; Tablas~\ref{tab:resumen-escenarios}
 y~\ref{tab:corredor-u4}). Frente al fijo de la primera
 ronda perdían solo un $6$\,\% y reducían la espera un $13$\,\%: la
-magnitud de la derrota depende de lo bien tuneada que esté la
+magnitud de la derrota depende de lo bien ajustada que esté la
 referencia. El actuado, que tampoco coordina, empata con el fijo
-tuneado ($-1.1$\,\%, intervalo $-2.5$ a $+0.5$\,\%).
+ajustado ($-1.1$\,\%, intervalo $-2.5$ a $+0.5$\,\%).
 
 El plan de pruebas corrigió esa magnitud, pero no el signo. En P1,
 sobre el mismo corredor, con la misma recompensa de colas y el
@@ -246,18 +246,25 @@ vehículos, fue mejor que el agente tabular en todos los escenarios de
 esta fase. Cualquier resultado posterior debe compararse contra él y no
 solo contra el fijo, como hace la pregunta del plan.
 
-\subsection*{IPPO con mensajería entre vecinos}
+\subsection*{IPPO con mensajes entre vecinos}
 
 Las variantes IPPO del módulo U4 (Sección~\ref{sec:u4}) se evaluaron con
 los mismos controles y las mismas diez semillas
-(Tabla~\ref{tab:resumen-u4}). En \emph{local} cada agente ve solo sus
-detectores; en \emph{vecinos} recibe además los mensajes de los
-semáforos vecinos; \emph{spill} agrega a \emph{vecinos} el término de
-\textit{spillback} de la Ecuación~\ref{eq:recompensa-u4}, que penaliza
-la cola de un enlace de salida $\ell$ por encima de la mitad de sus
-plazas por carril, $\lfloor K_\ell/2 \rfloor$. En corredor y red,
-\emph{spill} se entrenó con una sola semilla base como control de no
-daño: una corrida que comprueba que el término no empeora el resultado.
+(Tabla~\ref{tab:resumen-u4}). En IPPO sin mensajes cada agente ve solo
+sus detectores; en IPPO con mensajes recibe además los mensajes de los
+semáforos vecinos, e IPPO con penalización de \textit{spillback} le
+agrega el término de \textit{spillback} de la
+Ecuación~\ref{eq:recompensa-u4}, que penaliza la cola de un enlace de
+salida $\ell$ por encima de la mitad de sus plazas por carril,
+$\lfloor K_\ell/2 \rfloor$. Las figuras de este anexo, generadas en esta
+fase, las llaman ``IPPO local'', ``IPPO vecinos'' e ``IPPO spill''. En
+corredor y red, IPPO con penalización de \textit{spillback} se entrenó
+con una sola semilla base como control de no daño: una corrida que
+comprueba que el término no empeora el resultado.
+% glosario (23.10.2026, pasada del glosario, tarea 3f): la prosa usa los nombres del glosario. Las tablas de esta fase
+% (tablas/resumen_u4, cruce_u4, red_u4, corredor_u4, corredor_alta_u4, red_s1 y corredor_s1) se regeneraron el
+% 23.10.2026 con los nombres nuevos; las figuras (fig_red_fases, fig_corredor_fases y fig_corredor_alta_spillback, de
+% graficar.py, 06.09) no, y conservan los rotulos IPPO local, vecinos y spill. Si se regeneran, quitar la frase
 
 Las métricas de corredor se calculan sobre los vehículos de paso, los
 que recorren la avenida de extremo a extremo (Sección~\ref{sec:u3}). Las
@@ -270,7 +277,7 @@ indicador más directo de progresión.
 \subsection*{Prueba de humo en el cruce aislado}
 
 En la prueba de humo del módulo (Sección~\ref{sec:humo}),
-IPPO local en el cruce aislado, con una sola semilla base (42) y 60
+IPPO sin mensajes en el cruce aislado, con una sola semilla base (42) y 60
 episodios, reduce el retraso un $35$\,\% frente al fijo, un $2.6$\,\%
 frente al actuado (intervalo $-3.2$ a $-2.0$\,\%) y un $31$\,\% frente
 a Q-learning (Tablas~\ref{tab:cruce-u4} y~\ref{tab:cruce-u4-deltas}).
@@ -278,7 +285,7 @@ Lo hace con un $17$\,\% más de cambios de fase que el fijo, no un
 $77$\,\% como el tabular. La comparación con Q-learning es de paquete
 completo: cambian a la vez el estado, la recompensa y el algoritmo.
 
-En este cruce la reducción de IPPO local supera la meta de
+En este cruce la reducción de IPPO sin mensajes supera la meta de
 $-25$\,\%, pero el cruce aislado no es un caso del plan y la evaluación
 sigue el protocolo de esta fase. En los casos P1 a P6 ningún modelo
 alcanza esa meta (Capítulo~\ref{cap:resultados}).
@@ -289,32 +296,32 @@ alcanza esa meta (Capítulo~\ref{cap:resultados}).
 
 \subsection*{E4-U4: red de tres cruces}
 
-En la red, la política mediana de \emph{local} queda un $1.8$\,\% por
-encima del fijo
+En la red, la política mediana de IPPO sin mensajes queda un
+$1.8$\,\% por encima del fijo
 (intervalo $+0.7$ a $+2.9$\,\%) y no es estable: dos semillas base
 terminan en 22.1 y 22.2~s y la tercera en 24.2~s. Las tres políticas de
-\emph{vecinos} (21.68, 21.74 y 21.89~s) no se distinguen del fijo ($p$
+IPPO con mensajes (21.68, 21.74 y 21.89~s) no se distinguen del fijo ($p$
 entre 0.41 y 0.85). La mediana queda a $+0.5$\,\% del fijo (intervalo
 $-0.3$ a $+1.3$\,\%) y a $+2.2$\,\% del actuado (intervalo $+0.8$ a
-$+3.5$\,\%): empata con la onda verde. Cada política de \emph{vecinos}
-es mejor que cada una de \emph{local}.
+$+3.5$\,\%): empata con la onda verde. Cada política de IPPO con
+mensajes es mejor que cada una de IPPO sin mensajes.
 
-\emph{Spill}, con una semilla base, coincide con \emph{vecinos} de la
-misma base (21.68~s): su término nunca se activa en la red y los
+IPPO con penalización de \textit{spillback}, con una semilla base, da
+lo mismo que IPPO con mensajes de la misma base (21.68~s): su término nunca se activa en la red y los
 tensores de las dos políticas son idénticos bit a bit, así que no es
 una corrida independiente. En el plan ocurre lo mismo
 (Sección~\ref{sec:spill-vecinos}).
 % fuente: texto original (git show 7bd8685:TESIS/secciones/capitulo5.tex, caso E4-U4);
 % tablas/red_fragilidad.tex (spill 42 y vecinos 42: 21.68 +/- 0.13)
 
-El plan de pruebas cambió la lectura de \emph{vecinos}. En P3, sobre la
-misma red, la política publicada de IPPO vecinos queda un $8.8$\,\% por
+El plan de pruebas cambió la lectura de IPPO con mensajes. En P3, sobre
+la misma red, su versión evaluada queda un $8.8$\,\% por
 debajo del fijo (intervalo $-9.3$ a $-8.2$\,\%) y un $7.8$\,\% por
 debajo del actuado, con veredicto FUNCIONA. Donde esta fase, con la
 política del último episodio, veía un empate con la onda verde, la
 selección por validación encuentra una política que la supera.
 
-Ese resultado es frágil entre bases. La política publicada es un
+Ese resultado es frágil entre bases. La versión evaluada es un
 \textit{checkpoint} aislado, el del episodio 40, elegido por validación
 con 19.69~s; la misma base termina el entrenamiento con 21.46~s de
 validación. Otra base llega a los mismos 19.69~s en el episodio 50 y
@@ -328,10 +335,10 @@ ella.
 % -0.1 %, p = 0.734)
 
 El análisis de robustez agrega otra lectura (Sección~\ref{sec:robustez}).
-La política publicada de IPPO vecinos en P3 da, en las treinta
-semillas, el mismo retraso que el control trivial, que cambia de fase
-en cuanto el verde mínimo lo permite. Frente a un fijo re-barrido hasta
-verdes de 10~s, su retraso total queda solo un $0.5$\,\% por debajo
+La versión evaluada de IPPO con mensajes en P3 da, en las treinta
+semillas, el mismo retraso que el ciclo mínimo, que cambia de fase
+en cuanto el verde mínimo lo permite. Frente al fijo ajustado desde
+10~s, su retraso total queda solo un $0.5$\,\% por debajo
 (intervalo $-0.8$ a $-0.1$\,\%).
 % fuente: scratchpad/explicar/auditoria/igual_trivial.txt (red, ippo_vecinos_s4042 = trivial en 30/30
 % semillas); plan2/robustez_veredicto.csv (P3, ippo_vecinos: delta_fijo -0.5 [-0.8, -0.1], p 0.0128,
@@ -339,8 +346,8 @@ verdes de 10~s, su retraso total queda solo un $0.5$\,\% por debajo
 
 En esta fase, la mensajería aportaba la progresión de la onda verde.
 Con el fijo, el $98.6$\,\% de los vehículos de paso cruza deteniéndose a lo sumo una
-vez; \emph{vecinos} lo iguala (0.985), \emph{local} queda algo por
-debajo (0.893) y el actuado (0.72) y el tabular (0.53) lo rompen. En la
+vez; IPPO con mensajes lo iguala (0.985), IPPO sin mensajes queda algo
+por debajo (0.893) y el actuado (0.72) y el tabular (0.53) lo rompen. En la
 Figura~\ref{fig:red-fases} los semáforos aprendidos mantienen la avenida
 en verde la mayor parte del ciclo y escalonan sus cambios de un cruce
 al siguiente sin que nadie les haya programado un desfase, mientras el
@@ -362,9 +369,9 @@ retraso global.
 
 \subsection*{E3-U4: corredor de dos cruces}
 
-En el corredor, \emph{local} iguala al fijo tuneado ($+0.6$\,\%,
+En el corredor, IPPO sin mensajes iguala al fijo ajustado ($+0.6$\,\%,
 $p = 0.58$) y queda un $1.7$\,\% por encima del actuado. Las tres
-políticas de \emph{vecinos} (19.84, 19.90 y 20.37~s) superan a las dos
+políticas de IPPO con mensajes (19.84, 19.90 y 20.37~s) superan a las dos
 referencias: la mediana da $-6.2$\,\% frente al fijo y $-5.1$\,\% frente
 al actuado, con $p = 0.002$ en los dos (Tabla~\ref{tab:corredor-u4}).
 Fue el primer control aprendido que superó al actuado en un escenario de
@@ -373,19 +380,19 @@ varios cruces, aunque lejos de la meta de $-25$\,\%.
 Frente al fijo de la primera ronda, estas mismas políticas mostraban
 $-38$\,\% de retraso: la diferencia entre las dos lecturas mide cuánto
 pesaba el reparto de verde de la referencia, no lo que hace el agente.
-El plan de pruebas confirma la lectura frente al fijo tuneado: en P1,
-IPPO vecinos funciona ($-6.8$\,\% frente al fijo y $-5.8$\,\% frente al
-actuado) e IPPO local empata con el fijo.
+El plan de pruebas confirma la lectura frente al fijo ajustado: en P1,
+IPPO con mensajes funciona ($-6.8$\,\% frente al fijo y $-5.8$\,\%
+frente al actuado) e IPPO sin mensajes empata con el fijo.
 % fuente: plan2/veredicto_congelado_0355.csv (P1: ippo_vecinos delta_fijo -6.8, delta_act -5.8,
 % FUNCIONA; ippo_local EMPATA)
 
-El fijo tuneado ya forma una onda verde eficaz: el $91$\,\% de los
-vehículos de paso se detiene a lo sumo una vez. \emph{Vecinos} sube esa
-fracción a 0.95 (actuado 0.73, Q-learning 0.32), baja el retraso en el
+El fijo ajustado ya forma una onda verde eficaz: el $91$\,\% de los
+vehículos de paso se detiene a lo sumo una vez. IPPO con mensajes sube
+esa fracción a 0.95 (actuado 0.73, Q-learning 0.32), baja el retraso en el
 sentido punta de 24 a 20~s y reduce la cola máxima del enlace entre
 cruces de 8 a 5.5 vehículos, abriendo la avenida en pelotón de un cruce
-al siguiente (Figura~\ref{fig:corredor-fases}). \emph{Local} llega a lo
-mismo que el fijo con detectores propios, porque con 300~m entre cruces
+al siguiente (Figura~\ref{fig:corredor-fases}). IPPO sin mensajes llega
+a lo mismo que el fijo con detectores propios, porque con 300~m entre cruces
 el pelotón que sale del primero ya es visible para el segundo en su
 propia aproximación.
 
@@ -402,20 +409,21 @@ propia aproximación.
 \subsection*{E6: corredor con demanda doble}
 
 Con la demanda del corredor multiplicada por dos (3620 vehículos en la
-hora) ningún control evita la saturación. El fijo tuneado para esta
+hora) ningún control evita la saturación. El fijo ajustado para esta
 demanda deja 154~s de retraso por vehículo, el actuado 123~s y el agente
 tabular 211~s; este es el único que deja vehículos sin terminar a los
 6000 pasos en algunas semillas (Tabla~\ref{tab:corredor_alta-u4}).
-\emph{Vecinos} y \emph{spill} se entrenaron con tres semillas base y
-\emph{local} con una. Las medianas (122.0~s en \emph{local}, 121.3~s en
-\emph{vecinos} y 122.8~s en \emph{spill}) quedan entre un $-20$ y un
+IPPO con mensajes e IPPO con penalización de \textit{spillback} se
+entrenaron con tres semillas base, e IPPO sin mensajes con una. Las
+medianas (122.0~s sin mensajes, 121.3~s con mensajes y 122.8~s con
+penalización de \textit{spillback}) quedan entre un $-20$ y un
 $-21$\,\% del fijo (las siete políticas, entre $-20$ y $-23$\,\%), y
 frente al actuado sus intervalos incluyen el cero: en esta fase lo
 igualaban.
 
 El plan de pruebas cambió esta lectura, para IPPO y para el agente
 tabular. En P2, con la política elegida por validación, las tres
-variantes IPPO superan al actuado, e IPPO vecinos queda un $4.4$\,\%
+variantes IPPO superan al actuado, e IPPO con mensajes queda un $4.4$\,\%
 por debajo de él (intervalo $-6.3$ a $-2.6$\,\%), con veredicto
 FUNCIONA. Q-learning, con la recompensa de retraso y el protocolo del
 plan, mejora al fijo un $8.8$\,\% (veredicto MEJORA) sin dejar
@@ -428,7 +436,7 @@ actuado.
 
 El análisis de robustez matiza esta lectura (Sección~\ref{sec:robustez}).
 En P2 la espera para entrar a la red es mayor que el
-\texttt{timeLoss}. La política publicada de IPPO vecinos baja el
+\texttt{timeLoss}. La versión evaluada de IPPO con mensajes baja el
 \texttt{timeLoss} un $23.3$\,\% frente al fijo, pero su espera para
 entrar sube de 240 a 282~s/veh, y con el retraso total queda un
 $1.6$\,\% por encima del fijo.
@@ -458,8 +466,9 @@ de cada variante.
 % semilla: medias de 31.1 a 32.6 veh y de 0 a 2.9 s; maximos de 34 a 37 veh en ippo_local,
 % ippo_vecinos_s42 e ippo_spill_s42|s2042|s4042); graficar.py, figura 8 (brazos IPPO = politica mediana)
 
-\emph{Spill} no reduce la cola del enlace frente a \emph{vecinos}
-(31.9 contra 31.1 vehículos en sus políticas medianas): cuando la
+IPPO con penalización de \textit{spillback} no reduce la cola del enlace
+frente a IPPO con mensajes (31.9 contra 31.1 vehículos en sus políticas
+medianas): cuando la
 mensajería ya lleva al agente la cola del enlace, la penalización es
 redundante. Con la avenida saturada en los dos sentidos no hay onda
 verde posible, y la ventaja de IPPO en este escenario es de gestión de
@@ -477,7 +486,7 @@ colas, no de coordinación de fases.
 
 \subsection*{Canal de mensajes imperfecto}
 
-La política mediana de \emph{vecinos}, entrenada con mensajes
+La política mediana de IPPO con mensajes, entrenada con mensajes
 instantáneos, se evaluó sin reentrenar con latencia y pérdida de
 mensajes (Tablas~\ref{tab:red-s1} y~\ref{tab:corredor-s1}). Es la única
 prueba de robustez al canal del documento; el plan de pruebas no la
@@ -485,7 +494,7 @@ repitió.
 
 En la red, con latencia de 5~s y pérdida del 30\,\% la política pierde
 0.8~s frente al canal perfecto y queda un $4$\,\% por detrás del fijo
-tuneado; con latencia de 10~s pierde 2.2~s y queda un $10$\,\% por
+ajustado; con latencia de 10~s pierde 2.2~s y queda un $10$\,\% por
 detrás. Con latencia de 5~s sin pérdida el retraso global incluso baja,
 a 21.19~s, pero con más cambios de fase y menos progresión, como el
 actuado.
@@ -494,7 +503,7 @@ actuado.
 
 En el corredor la política pierde 1.4~s con latencia de 5~s, 2.2~s con
 latencia de 5~s y pérdida del 30\,\% y 2.5~s con latencia de 10~s. Con
-el primer canal empata con el fijo tuneado ($+0.6$\,\%, intervalo
+el primer canal empata con el fijo ajustado ($+0.6$\,\%, intervalo
 $-1.0$ a $+2.2$\,\%); con los otros dos queda por encima de él ($+4.2$ y
 $+5.8$\,\%), y frente al actuado queda por encima en los tres ($+1.7$,
 $+5.4$ y $+7.0$\,\%). Pierde así la ventaja que tenía frente a las dos

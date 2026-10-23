@@ -21,7 +21,7 @@
 % El titulo se corre a la derecha para dejar pasar la flecha punteada de OSM hacia Red vial.
 \node[titulo=u1] (tU1) at (0.46,-0.62) {U1 · Preprocesamiento};
 \node[semillas, anchor=east] (s_tuneo) at (14.88,-0.87)
-  {tuneo: 2001--2003 (calibración de $f$ y barrido del fijo)};
+  {ajuste: 2001--2003 (calibración de $f$ y barrido del fijo)};
 % los cuatro con el mismo alto (1.5 cm, el natural del nodo archivo) y el mismo ancho (3.54 cm),
 % separados 0.2 cm. El bisel del nodo archivo suma 2 x 2.2 mm al ancho, asi que tab lleva
 % text width 2.87 cm (su linea mas larga, "enlaces y vecinos" en negrita, mide 2.56 cm).
@@ -47,7 +47,7 @@
 \node[proceso=u3, text width=4.65cm, anchor=north west] (con) at (0.37,-8.90)
   {\nodo{\texttt{consolidar.py}}{media e IC95\,\%; $\Delta$ frente\\ al fijo y al actuado}};
 \node[proceso=u3, text width=4.65cm, anchor=north west] (ver) at (0.37,-10.371)
-  {\nodo{\texttt{veredicto.py}}{base publicada, convergencia\\ y regla}};
+  {\nodo{\texttt{veredicto.py}}{versión evaluada, convergencia\\ y regla}};
 
 % ================================================================ barra de los aprendices
 % draw=extb, fill=extf (ajuste local, reportado): el mismo gris que los puertos puerto=ext de
@@ -64,7 +64,7 @@
 \node[proceso=u2, text width=3.05cm, minimum height=1.70cm, anchor=north west] (tabu) at (8.14,-4.2)
   {\nodo{Tabulares}{\texttt{rl\_corredor.py}:\\ Q-learning, SARSA\\ y \texttt{ql\_colas}}};
 \node[proceso=u2, text width=3.05cm, minimum height=1.70cm, anchor=north east] (redes) at (14.85,-4.2)
-  {\nodo{Redes neuronales}{IPPO local:\\ \texttt{rl\_ippo.py}\\ DQN: \texttt{rl\_dqn.py}}};
+  {\nodo{Redes neuronales}{IPPO sin mensajes:\\ \texttt{rl\_ippo.py}\\ DQN: \texttt{rl\_dqn.py}}};
 \node[marca=u2, anchor=east] at ($(tabu.north east)+(0.05,0)$) {T};
 \node[marca=u2, anchor=east] at ($(redes.north east)+(0.05,0)$) {D, P};
 \node[semillas, anchor=west] (s_ent) at (8.14,-6.20) {entrenamiento: $b + k$};
@@ -78,12 +78,12 @@
 % izquierdo en 8.14, como Tabulares
 \node[proceso=u4, anchor=east] (ai) at (14.85,-8.18) {agente $i$};
 \node[proceso=u4, text width=6.4cm, minimum width=6.69cm, anchor=north west] (var) at (8.14,-8.78)
-  {\nodo{Variantes con mensajes}{\texttt{rl\_ippo.py}: vecinos (observación extendida)\\ y \textit{spill} (+ término de \textit{spillback})\\ \texttt{rl\_mappo.py}: MAPPO (+ crítico central)}};
+  {\nodo{Variantes con mensajes}{\texttt{rl\_ippo.py}: IPPO con mensajes y con\\ penalización (+ término de \textit{spillback})\\ \texttt{rl\_mappo.py}: MAPPO (+ crítico central)}};
 \node[marca=u4, anchor=east] at ($(var.north east)+(0.05,0)$) {P};
 
 % ================================================================ resultados
 \node[iniciofin=ext, text width=5.9cm] (res) at (11.495,-11.136)
-  {\nodo{Resultados}{Cap.~V y Anexo~A: matriz caso $\times$ modelo;\\ tablas por modelo y por base}};
+  {\nodo{Resultados}{Cap.~V y Anexo~A: matriz caso $\times$ modelo;\\ tablas por modelo y por entrenamiento}};
 
 % ================================================================ fondos de las unidades
 \begin{scope}[on background layer]

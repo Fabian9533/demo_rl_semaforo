@@ -29,6 +29,13 @@ Cambios del 28.09.2026 (sin opciones, todo queda como antes): las opciones de ve
   Con timeLoss, los titulos son los del 25.09 (retraso = timeLoss). Una celda sin comparacion con el
   fijo todavia (P6 mientras corre su barrido) se escribe "pendiente" y el archivo lleva un comentario
   % PENDIENTE-<caso>.
+
+Cambios de la entrega 3 (23.10.2026), solo en los textos de los .tex (mismas cifras, CSV sin cambios):
+  nombres del glosario de la tesis (IPPO con mensajes, IPPO sin mensajes, IPPO con penalizacion, Q-learning
+  (colas), ciclo minimo, fijo ajustado, fijo ajustado desde 10 s en la robustez, version evaluada); notas en
+  palabras ("igual a IPPO con mensajes" e "igual al ciclo minimo" en lugar de "= vecinos" y la marca *);
+  encabezados de los casos con la red y la demanda, como la matriz de veredicto.py; y el PEN con su provisional
+  en una linea aparte de la celda, porque la tabla se salia del margen (unos 31 pt; 43 pt en la robustez).
 """
 import os
 import sys
@@ -39,10 +46,14 @@ PLAN2 = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.dirname(PLAN2))
 import veredicto as vd          # noqa: E402
 
-MODELOS = [("actuado", "Actuado"), ("trivial", "Trivial"), ("ql", "Q-learning"), ("sarsa", "SARSA"),
-           ("ql_colas", r"\texttt{ql\_colas}"), ("dqn", "DQN"), ("ippo_local", "IPPO local"),
-           ("ippo_vecinos", "IPPO vecinos"), ("ippo_spill", "IPPO spill"), ("mappo", "MAPPO")]
+# Nombres del glosario de la tesis (entrega 3, ajuste A8, 23.10.2026); los largos van en dos lineas para que la
+# primera columna no ensanche la tabla. Antes: Trivial, ql_colas, IPPO local, IPPO vecinos e IPPO spill.
+MODELOS = [("actuado", "Actuado"), ("trivial", "Ciclo mínimo"), ("ql", "Q-learning"), ("sarsa", "SARSA"),
+           ("ql_colas", r"\makecell[l]{Q-learning\\(colas)}"), ("dqn", "DQN"),
+           ("ippo_local", r"\makecell[l]{IPPO sin\\mensajes}"), ("ippo_vecinos", r"\makecell[l]{IPPO con\\mensajes}"),
+           ("ippo_spill", r"\makecell[l]{IPPO con\\penalización}"), ("mappo", "MAPPO")]
 ABREV = {"FUNCIONA": "FUN", "MEJORA": "MEJ", "EMPATA": "EMP", "FALLA": "FAL"}
+IGUAL_VECINOS = r"\makecell{igual a IPPO\\con mensajes}"     # rotulo "= vecinos" de veredicto.csv, en palabras
 TABLAS = os.path.join(os.path.dirname(PLAN2), "TESIS", "secciones", "tablas")
 
 
@@ -58,25 +69,43 @@ def delta(x):
 
 
 def veredicto_corto(v):
+    """(veredicto abreviado, igual al ciclo minimo) de un texto de veredicto.csv. Entrega 3: la igualdad con el
+    ciclo minimo ya no va como marca * sino en palabras, en una linea aparte de la celda."""
     v = v.strip()
-    marca = "*" if "(= trivial)" in v else ""
+    igual_ciclo = "(= trivial)" in v
     v = v.replace(" (= trivial)", "")
     if v in ABREV:
-        return ABREV[v] + marca
+        return ABREV[v], igual_ciclo
     if v.startswith("= vecinos"):
-        return "= vecinos"
+        return "= vecinos", False
     if v.startswith("PENDIENTE (no convergi"):
         prov = v.split("provisional:")[1].strip(" )")
-        return f"PEN ({ABREV[prov]})" + marca
+        return f"PEN ({ABREV[prov]})", igual_ciclo
     if v.startswith("PENDIENTE (falta"):
-        return "pendiente"
+        return "pendiente", False
     if v.startswith("PENDIENTE"):
-        return "sin datos"
+        return "sin datos", False
     raise ValueError(v)
 
 
+def celda_modelo(r, v, igual_ciclo):
+    """Retraso, cambio frente al fijo y veredicto abreviado de un modelo en un caso. El PEN con su provisional va
+    en su propia linea (entrega 3: con todo en la segunda linea, la tabla se salia del margen) y la igualdad con el
+    ciclo minimo, en palabras debajo."""
+    lineas = [f"{float(r['retraso']):.2f}"]
+    if v.startswith("PEN"):
+        lineas += [delta(r["delta_fijo"]), v]
+    else:
+        lineas.append(delta(r["delta_fijo"]) + " " + v)
+    if igual_ciclo:
+        lineas += ["igual al", "ciclo mínimo"]
+    return r"\makecell{" + r"\\".join(lineas) + "}"
+
+
 def cabecera():
-    return " & ".join(r"\makecell{" + c + r"\\" + e.replace("_", r"\_") + "}" for c, e in vd.CASOS)
+    """Encabezados de los casos con la red y la demanda, como en la matriz de veredicto.py (entrega 3; antes el
+    nombre del escenario, p. ej. corredor_alta)."""
+    return " & ".join(vd.encabezado_caso(c, e) for c, e in vd.CASOS)
 
 
 def sin_fijo(res):
@@ -119,52 +148,52 @@ def tabla_resumen(ver, res):
         fijo.append("--" if not r else
                     r"\makecell{" + f"{float(r['media']):.2f}" + r"\\$\pm$ " + f"{float(r['ic95']):.2f}"
                     + "}")
-    lin += [r"\makecell[l]{Fijo tuneado\\(s/veh)} & " + " & ".join(fijo) + r" \\", r"\midrule"]
-    usados = set()
+    # entrega 3: nombre del glosario; en la robustez la referencia es el fijo ajustado desde 10 s
+    etiqueta_fijo = (r"Fijo ajustado\\(s/veh)" if vd.FIJO == "fijo_2509"
+                     else r"Fijo ajustado\\desde 10~s\\(s/veh)")
+    lin += [r"\makecell[l]{" + etiqueta_fijo + r"} & " + " & ".join(fijo) + r" \\", r"\midrule"]
+    usados, hay_igual_ciclo = set(), False
     for m, nombre in MODELOS:
         celdas = []
         for caso, _ in vd.CASOS:
             r = ver.get((caso, m))
-            v = veredicto_corto(r["veredicto"]) if r else "sin datos"
+            v, igual_ciclo = veredicto_corto(r["veredicto"]) if r else ("sin datos", False)
             usados.add(v)
+            hay_igual_ciclo = hay_igual_ciclo or igual_ciclo
             if not r or not r["retraso"] or v in ("= vecinos", "pendiente") or not r["delta_fijo"]:
-                celdas.append(v)
+                celdas.append(IGUAL_VECINOS if v == "= vecinos" else v)
                 continue
-            celdas.append(r"\makecell{" + f"{float(r['retraso']):.2f}" + r"\\" + delta(r["delta_fijo"])
-                          + " " + v + "}")
+            celdas.append(celda_modelo(r, v, igual_ciclo))
         lin.append(nombre + " & " + " & ".join(celdas) + r" \\")
     sin_ql_colas = [c for c, _ in vd.CASOS
                     if (ver.get((c, "ql_colas")) or {}).get("veredicto", "") == "PENDIENTE (sin datos)"]
     if vd.METRICA == "timeloss_prom":
         inicio = (r"Resumen del plan de pruebas por "
                   r"caso y modelo, sobre las semillas de evaluación 1001 a 1030. Primera fila: retraso del "
-                  r"fijo tuneado (s/veh), media $\pm$ semiamplitud del IC95\,\%. Demás filas: retraso medio "
-                  r"del modelo (s/veh), es decir, de la política publicada de su base publicada, ")
-        ql_colas = r"\texttt{ql\_colas} (``Q-learning (colas)'' en las tablas de veredicto)"
+                  r"fijo ajustado (s/veh), media $\pm$ semiamplitud del IC95\,\%. Demás filas: retraso medio "
+                  r"del modelo (s/veh), es decir, de su versión evaluada, ")
     else:
         que = "retraso total" if vd.METRICA == "retraso_total_prom" else "retraso (timeLoss)"
         inicio = (r"Resumen del plan de pruebas por "
                   r"caso y modelo, sobre las semillas de evaluación 1001 a 1030, con el " + que + r" "
-                  r"(Ecuación~\ref{eq:retraso-total}). Primera fila: el del fijo tuneado (s/veh), "
+                  r"(Ecuación~\ref{eq:retraso-total}). Primera fila: el del " + vd.nombre_fijo() + r" (s/veh), "
                   r"media $\pm$ "
-                  r"semiamplitud del IC95\,\%. Demás filas: el del modelo (s/veh), es decir, de la política "
-                  r"publicada "
-                  r"de su base publicada, ")
-        ql_colas = r"\texttt{ql\_colas}"
+                  r"semiamplitud del IC95\,\%. Demás filas: el del modelo (s/veh), es decir, de su versión "
+                  r"evaluada, ")
+    que_igual = "retraso total" if vd.METRICA == "retraso_total_prom" else "retraso"
     largo = (inicio +
              r"y debajo $\Delta_f$ (\%) con el veredicto abreviado: FUN, funciona; MEJ, "
-             r"mejora; EMP, empata; FAL, falla. PEN (x): pendiente porque la base publicada no converge, "
-             r"con el "
-             r"veredicto provisional x. "
-             + ("" if vd.SIN_TRIVIAL else
-                r"*: la política da el mismo retraso total y la misma espera que el control trivial. ")
-             + r"= vecinos: el término de \textit{spillback} no se activa y la política es la de "
-             r"IPPO vecinos. "
+             r"mejora; EMP, empata; FAL, falla; PEN, pendiente porque el entrenamiento de la versión "
+             r"evaluada no converge, con el veredicto provisional entre paréntesis. "
+             + ("" if vd.SIN_TRIVIAL or not hay_igual_ciclo else
+                r"Igual al ciclo mínimo: la política da el mismo " + que_igual + r" y la misma espera que el "
+                r"ciclo mínimo. ")
+             + r"Igual a IPPO con mensajes: la penalización de \textit{spillback} no se activa y la política "
+             r"es la de IPPO con mensajes. "
              + ("" if "pendiente" not in usados else
-                r"Pendiente: el caso aún no tiene la comparación con el fijo tuneado. ")
+                r"Pendiente: el caso aún no tiene la comparación con el " + vd.nombre_fijo() + ". ")
              + ("" if not sin_ql_colas else
-                r"Sin datos: la ablación " + ql_colas + " no se corrió en "
-                + lista_casos(sin_ql_colas) + ". ")
+                r"Sin datos: Q-learning (colas) no se corrió en " + lista_casos(sin_ql_colas) + ". ")
              + r"Los intervalos, los valores $p$ y $\Delta_a$ están en las tablas por modelo.")
     corto, largo = titulo("Retraso y cambio frente al fijo por caso y modelo", largo)
     return comentario_pendiente(res) + "\n".join([
@@ -177,7 +206,9 @@ def tabla_resumen(ver, res):
 
 
 def tabla_metas(ver, res, modelo):
-    retraso = "Retraso por vehículo" if vd.METRICA == "timeloss_prom" else "Retraso total por vehículo"
+    # entrega 3: en dos lineas, para que la tabla quepa con los encabezados de red y demanda
+    retraso = (r"\makecell[l]{Retraso\\por vehículo}" if vd.METRICA == "timeloss_prom"
+               else r"\makecell[l]{Retraso total\\por vehículo}")
     metas = [(vd.METRICA, retraso, r"$-25$ a $-40$"),
              ("cola_prom", r"Cola promedio", r"$\leq -20$"),
              ("co2_prom", r"Emisiones de CO$_2$", r"$\leq -5$"),
@@ -192,11 +223,11 @@ def tabla_metas(ver, res, modelo):
         lin.append(nombre + " & " + meta + " & " + " & ".join(celdas) + r" \\")
     comentario = "% bases publicadas de " + modelo + ": " + ", ".join(
         f"{c} {b}" for (c, _), b in zip(vd.CASOS, bases))
-    corto, largo = titulo("Metas cuantitativas frente al fijo tuneado", (
+    corto, largo = titulo("Metas cuantitativas frente al " + vd.nombre_fijo(), (
         r"Metas cuantitativas de la tesis y "
-        r"política publicada de " + vd.NOMBRE[modelo] + r". Cambio porcentual de la media "
+        r"versión evaluada de " + vd.NOMBRE_LARGO[modelo] + r". Cambio porcentual de la media "
         r"frente al "
-        r"fijo tuneado ($\Delta$, \%) en cada caso, sobre las semillas de evaluación 1001 a 1030 y "
+        + vd.nombre_fijo() + r" ($\Delta$, \%) en cada caso, sobre las semillas de evaluación 1001 a 1030 y "
         r"pareado por semilla. Meta: la de la introducción, expresada como cambio frente al fijo; "
         r"un valor negativo es una reducción."))
     return comentario_pendiente(res) + "\n".join([

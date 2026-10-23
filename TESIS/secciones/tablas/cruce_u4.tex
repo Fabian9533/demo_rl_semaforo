@@ -6,7 +6,7 @@
 \setlength{\tabcolsep}{3pt}
 \begin{tabular}{p{3.3cm}rrrr}
 \toprule
-Métrica & \makecell{Fijo} & \makecell{Actuado} & \makecell{Q-learning} & \makecell{IPPO\\local} \\
+Métrica & \makecell{Fijo} & \makecell{Actuado} & \makecell{Q-learning} & \makecell{IPPO sin\\mensajes} \\
 \midrule
 Retraso (s/veh) & 23.19 $\pm$ 0.25 & 15.46 $\pm$ 0.18 & 21.72 $\pm$ 1.00 & 15.05 $\pm$ 0.21 \\
 Espera detenida (s/veh) & 9.63 $\pm$ 0.20 & 3.79 $\pm$ 0.05 & 7.14 $\pm$ 0.49 & 4.32 $\pm$ 0.10 \\
@@ -34,7 +34,7 @@ Cambios de fase & 131.40 $\pm$ 0.37 & 203.00 $\pm$ 2.02 & 232.70 $\pm$ 3.66 & 15
 \cmidrule(lr){3-5}\cmidrule(lr){6-8}
 Variante & (s/veh) & vs fijo & vs actuado & vs Q-learning & Espera & Paradas & Cambios \\
 \midrule
-IPPO local & 15.05 & \makecell[r]{$-$35.1\,\%\\{}[$-$36.0, $-$34.2]\\$p$ = 0.00195} & \makecell[r]{$-$2.6\,\%\\{}[$-$3.2, $-$2.0]\\$p$ = 0.00195} & \makecell[r]{$-$30.7\,\%\\{}[$-$33.0, $-$28.2]\\$p$ = 0.00195} & $-$55.2\,\% & $-$39.3\,\% & +17.1\,\% \\
+IPPO sin mensajes & 15.05 & \makecell[r]{$-$35.1\,\%\\{}[$-$36.0, $-$34.2]\\$p$ = 0.00195} & \makecell[r]{$-$2.6\,\%\\{}[$-$3.2, $-$2.0]\\$p$ = 0.00195} & \makecell[r]{$-$30.7\,\%\\{}[$-$33.0, $-$28.2]\\$p$ = 0.00195} & $-$55.2\,\% & $-$39.3\,\% & +17.1\,\% \\
 \bottomrule
 \end{tabular}
 \caption[Escenario cruce: cambio del retraso de las variantes IPPO]{Escenario cruce: cambio porcentual del retraso de cada variante IPPO (política mediana) frente al fijo, al actuado y a Q-learning, con intervalo bootstrap pareado por semilla y $p$ de Wilcoxon pareado; a la derecha, cambio frente al fijo de tres secundarias.}

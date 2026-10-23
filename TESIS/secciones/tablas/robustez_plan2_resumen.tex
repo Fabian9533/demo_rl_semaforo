@@ -6,22 +6,22 @@
 \setlength{\tabcolsep}{2.5pt}
 \begin{tabular}{lcccccc}
 \toprule
-Modelo & \makecell{P1\\corredor} & \makecell{P2\\corredor\_alta} & \makecell{P3\\red} & \makecell{P4\\red\_alta} & \makecell{P5\\malla3} & \makecell{P6\\malla3\_alta} \\
+Modelo & \makecell{P1\\Corredor\\nominal} & \makecell{P2\\Corredor\\alta} & \makecell{P3\\Red con\\rotonda\\nominal} & \makecell{P4\\Red con\\rotonda\\alta} & \makecell{P5\\Malla $3 \times 3$\\nominal} & \makecell{P6\\Malla $3 \times 3$\\alta} \\
 \midrule
-\makecell[l]{Fijo tuneado\\(s/veh)} & \makecell{21.67\\$\pm$ 0.26} & \makecell{394.27\\$\pm$ 3.67} & \makecell{20.26\\$\pm$ 0.11} & \makecell{28.57\\$\pm$ 1.11} & \makecell{21.25\\$\pm$ 0.05} & \makecell{82.19\\$\pm$ 0.16} \\
+\makecell[l]{Fijo ajustado\\desde 10~s\\(s/veh)} & \makecell{21.67\\$\pm$ 0.26} & \makecell{394.27\\$\pm$ 3.67} & \makecell{20.26\\$\pm$ 0.11} & \makecell{28.57\\$\pm$ 1.11} & \makecell{21.25\\$\pm$ 0.05} & \makecell{82.19\\$\pm$ 0.16} \\
 \midrule
 Actuado & \makecell{21.45\\$-$1.0 EMP} & \makecell{445.46\\+13.0 FAL} & \makecell{21.84\\+7.8 FAL} & \makecell{30.37\\+6.3 FAL} & \makecell{25.84\\+21.6 FAL} & \makecell{109.18\\+32.8 FAL} \\
-Trivial & \makecell{106.26\\+390.3 FAL} & \makecell{1055.41\\+167.7 FAL} & \makecell{20.17\\$-$0.5 MEJ} & \makecell{28.29\\$-$1.0 EMP} & \makecell{21.25\\0.0 EMP} & \makecell{276.72\\+236.7 FAL} \\
-Q-learning & \makecell{23.64\\+9.1 FAL} & \makecell{498.52\\+26.4 FAL} & \makecell{24.76\\+22.2 FAL} & \makecell{33.36\\+16.8 PEN (FAL)} & \makecell{30.16\\+41.9 FAL} & \makecell{92.84\\+13.0 FAL} \\
-SARSA & \makecell{24.64\\+13.7 FAL} & \makecell{474.14\\+20.3 FAL} & \makecell{24.50\\+21.0 FAL} & \makecell{33.52\\+17.4 FAL} & \makecell{29.65\\+39.5 FAL} & \makecell{90.95\\+10.7 PEN (FAL)} \\
-\texttt{ql\_colas} & \makecell{23.93\\+10.4 FAL} & \makecell{559.95\\+42.0 PEN (FAL)} & \makecell{24.16\\+19.3 FAL} & \makecell{33.34\\+16.7 FAL} & sin datos & sin datos \\
-DQN & \makecell{20.93\\$-$3.4 MEJ} & \makecell{461.12\\+17.0 FAL} & \makecell{21.68\\+7.0 FAL} & \makecell{29.37\\+2.8 FAL} & \makecell{23.62\\+11.2 PEN (FAL)} & \makecell{86.33\\+5.0 PEN (FAL)} \\
-IPPO local & \makecell{21.56\\$-$0.5 EMP} & \makecell{387.46\\$-$1.7 MEJ} & \makecell{22.57\\+11.4 FAL} & \makecell{31.25\\+9.4 FAL} & \makecell{26.70\\+25.6 FAL} & \makecell{84.68\\+3.0 FAL} \\
-IPPO vecinos & \makecell{20.22\\$-$6.7 FUN} & \makecell{400.68\\+1.6 FAL} & \makecell{20.17\\$-$0.5 MEJ*} & \makecell{29.30\\+2.6 FAL} & \makecell{21.68\\+2.0 FAL} & \makecell{83.05\\+1.1 PEN (EMP)} \\
-IPPO spill & \makecell{20.57\\$-$5.1 FUN} & \makecell{421.45\\+6.9 FAL} & = vecinos & = vecinos & = vecinos & \makecell{83.58\\+1.7 PEN (EMP)} \\
-MAPPO & \makecell{20.16\\$-$7.0 FUN} & \makecell{402.56\\+2.1 FAL} & \makecell{20.37\\+0.5 PEN (EMP)} & \makecell{29.78\\+4.3 PEN (FAL)} & \makecell{21.25\\0.0 EMP*} & \makecell{86.82\\+5.6 PEN (FAL)} \\
+Ciclo mínimo & \makecell{106.26\\+390.3 FAL} & \makecell{1055.41\\+167.7 FAL} & \makecell{20.17\\$-$0.5 MEJ} & \makecell{28.29\\$-$1.0 EMP} & \makecell{21.25\\0.0 EMP} & \makecell{276.72\\+236.7 FAL} \\
+Q-learning & \makecell{23.64\\+9.1 FAL} & \makecell{498.52\\+26.4 FAL} & \makecell{24.76\\+22.2 FAL} & \makecell{33.36\\+16.8\\PEN (FAL)} & \makecell{30.16\\+41.9 FAL} & \makecell{92.84\\+13.0 FAL} \\
+SARSA & \makecell{24.64\\+13.7 FAL} & \makecell{474.14\\+20.3 FAL} & \makecell{24.50\\+21.0 FAL} & \makecell{33.52\\+17.4 FAL} & \makecell{29.65\\+39.5 FAL} & \makecell{90.95\\+10.7\\PEN (FAL)} \\
+\makecell[l]{Q-learning\\(colas)} & \makecell{23.93\\+10.4 FAL} & \makecell{559.95\\+42.0\\PEN (FAL)} & \makecell{24.16\\+19.3 FAL} & \makecell{33.34\\+16.7 FAL} & sin datos & sin datos \\
+DQN & \makecell{20.93\\$-$3.4 MEJ} & \makecell{461.12\\+17.0 FAL} & \makecell{21.68\\+7.0 FAL} & \makecell{29.37\\+2.8 FAL} & \makecell{23.62\\+11.2\\PEN (FAL)} & \makecell{86.33\\+5.0\\PEN (FAL)} \\
+\makecell[l]{IPPO sin\\mensajes} & \makecell{21.56\\$-$0.5 EMP} & \makecell{387.46\\$-$1.7 MEJ} & \makecell{22.57\\+11.4 FAL} & \makecell{31.25\\+9.4 FAL} & \makecell{26.70\\+25.6 FAL} & \makecell{84.68\\+3.0 FAL} \\
+\makecell[l]{IPPO con\\mensajes} & \makecell{20.22\\$-$6.7 FUN} & \makecell{400.68\\+1.6 FAL} & \makecell{20.17\\$-$0.5 MEJ\\igual al\\ciclo mínimo} & \makecell{29.30\\+2.6 FAL} & \makecell{21.68\\+2.0 FAL} & \makecell{83.05\\+1.1\\PEN (EMP)} \\
+\makecell[l]{IPPO con\\penalización} & \makecell{20.57\\$-$5.1 FUN} & \makecell{421.45\\+6.9 FAL} & \makecell{igual a IPPO\\con mensajes} & \makecell{igual a IPPO\\con mensajes} & \makecell{igual a IPPO\\con mensajes} & \makecell{83.58\\+1.7\\PEN (EMP)} \\
+MAPPO & \makecell{20.16\\$-$7.0 FUN} & \makecell{402.56\\+2.1 FAL} & \makecell{20.37\\+0.5\\PEN (EMP)} & \makecell{29.78\\+4.3\\PEN (FAL)} & \makecell{21.25\\0.0 EMP\\igual al\\ciclo mínimo} & \makecell{86.82\\+5.6\\PEN (FAL)} \\
 \bottomrule
 \end{tabular}
-\caption[Robustez: retraso y cambio frente al fijo por caso y modelo]{Robustez. Resumen del plan de pruebas por caso y modelo, sobre las semillas de evaluación 1001 a 1030, con el retraso total (Ecuación~\ref{eq:retraso-total}). Primera fila: el del fijo tuneado (s/veh), media $\pm$ semiamplitud del IC95\,\%. Demás filas: el del modelo (s/veh), es decir, de la política publicada de su base publicada, y debajo $\Delta_f$ (\%) con el veredicto abreviado: FUN, funciona; MEJ, mejora; EMP, empata; FAL, falla. PEN (x): pendiente porque la base publicada no converge, con el veredicto provisional x. *: la política da el mismo retraso total y la misma espera que el control trivial. = vecinos: el término de \textit{spillback} no se activa y la política es la de IPPO vecinos. Sin datos: la ablación \texttt{ql\_colas} no se corrió en P5 ni en P6. Los intervalos, los valores $p$ y $\Delta_a$ están en las tablas por modelo.}
+\caption[Robustez: retraso y cambio frente al fijo por caso y modelo]{Robustez. Resumen del plan de pruebas por caso y modelo, sobre las semillas de evaluación 1001 a 1030, con el retraso total (Ecuación~\ref{eq:retraso-total}). Primera fila: el del fijo ajustado desde 10~s (s/veh), media $\pm$ semiamplitud del IC95\,\%. Demás filas: el del modelo (s/veh), es decir, de su versión evaluada, y debajo $\Delta_f$ (\%) con el veredicto abreviado: FUN, funciona; MEJ, mejora; EMP, empata; FAL, falla; PEN, pendiente porque el entrenamiento de la versión evaluada no converge, con el veredicto provisional entre paréntesis. Igual al ciclo mínimo: la política da el mismo retraso total y la misma espera que el ciclo mínimo. Igual a IPPO con mensajes: la penalización de \textit{spillback} no se activa y la política es la de IPPO con mensajes. Sin datos: Q-learning (colas) no se corrió en P5 ni en P6. Los intervalos, los valores $p$ y $\Delta_a$ están en las tablas por modelo.}
 \label{tab:robustez-plan2-resumen}
 \end{table}

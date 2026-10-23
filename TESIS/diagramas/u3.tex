@@ -54,7 +54,7 @@
 \node[subtitulo, anchor=north west] (stB) at ($(0.53,0 |- topB)+(0,-0.08)$) {Evaluación};
 \node[semillas, anchor=east] (seval) at (10.68,0 |- stB.center) {evaluación: 1001--1030};
 \node[archivo u3, text width=4.37cm, anchor=north] (ctrl) at ($(stB.south -| xR)+(0,-0.10)$)
-  {\nodo{Controles evaluados}{fijo tuneado y actuado (\itf{1});\\ políticas congeladas (\itf{7})}};
+  {\nodo{Controles evaluados}{fijo ajustado y actuado (\itf{1});\\ políticas congeladas (\itf{7})}};
 \node[proceso, text width=4.4cm, anchor=south] (eva) at (ctrl.south -| xL)
   {\nodo{\texttt{evaluar.py}}{un control por llamada}};
 \node[proceso, text width=4.6cm, anchor=north] (cons) at ($(ctrl.south -| xR)+(0,-0.32)$)
@@ -71,9 +71,9 @@
 \node[subtitulo, anchor=north west] (stC) at (0.53,0 |- topC) {\texttt{veredicto.py}};
 \node[decision, anchor=north] (dec1) at ($(topC -| xD)+(0,-0.31)$) {¿Datos\\ completos?};
 \node[proceso, text width=4.6cm, anchor=north] (base) at ($(dec1.center -| xR)+(0,-0.25)$)
-  {\nodo{Base publicada}{mediana de las tres bases por su\\ valor de validación elegido}};
+  {\nodo{Versión evaluada}{entrenamiento mediano de los tres\\ por su valor de validación elegido}};
 \node[proceso, text width=4.4cm, anchor=north] (regla) at ($(dec1.center -| xL)+(0,-1.11)$)
-  {\nodo{Regla de veredicto}{base publicada frente al fijo y\\ al actuado: IC95\,\% \textit{bootstrap}\\
+  {\nodo{Regla de veredicto}{versión evaluada frente al fijo y\\ al actuado: IC95\,\% \textit{bootstrap}\\
    de $\Delta$, $p < 0.05$, umbral de $-5$\,\%\\ (actuado: solo frente al fijo)}};
 \node[proceso, text width=4.6cm, anchor=north] (conv) at ($(base.south)+(0,-0.42)$)
   {\nodo{Convergencia}{último tercio de la validación:\\ meseta y estabilidad $\leq$ 5\,\%}};
@@ -150,7 +150,7 @@
 \node[etiqueta sin fondo, anchor=south east] at ($(resu.west)+(-0.12,0.03)$)
   {$\Delta$, IC95\,\% y $p$ de cada control};
 \draw[interfaz] (pi7b.west) -- (base.east);
-\draw[flujo] (base.north) |- node[etiqueta sin fondo, pos=0.75, above] {base publicada} (dec1.east);
+\draw[flujo] (base.north) |- node[etiqueta sin fondo, pos=0.75, above] {versión evaluada} (dec1.east);
 \draw[flujo] (base.south -| 6.9,0) -- node[etiqueta sin fondo, right, xshift=2.5pt] {su serie de validación}
   (conv.north -| 6.9,0);
 \draw[flujo] (dec1.south) -- node[etiqueta sin fondo, right, xshift=2.5pt] {sí} (regla.north -| dec1.south);

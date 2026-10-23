@@ -4,8 +4,8 @@
 
 Las recomendaciones que siguen se desprenden de los resultados del plan
 de pruebas (Capítulo~\ref{cap:resultados}), de su análisis de robustez
-(Sección~\ref{sec:robustez}) y del análisis exploratorio posterior que
-cierra ese capítulo (Sección~\ref{sec:exploratorio}), de la fase exploratoria que precedió al plan
+(Sección~\ref{sec:robustez}) y del diagnóstico posterior del
+entrenamiento (Anexo~G), de la fase exploratoria que precedió al plan
 (Anexo~C) y de la comparación con otros trabajos (Anexo~E). Las
 primeras son metodológicas: valen para cualquier continuación del
 trabajo, con estos escenarios o con otros. Las segundas ordenan el
@@ -14,26 +14,26 @@ trabajo siguiente.
 \subsection*{Recomendaciones metodológicas}
 
 \noindent\textbf{Barrer la referencia fija desde el verde mínimo, en
-reparto, ciclo y desfase, y comparar siempre con un control trivial.}
+reparto, ciclo y desfase, y comparar siempre con el ciclo mínimo.}
 El primer barrido de esta tesis variaba un único verde común para todas
-las aproximaciones y dio por tuneado un programa que, en el corredor,
+las aproximaciones y dio por ajustado un programa que, en el corredor,
 era 10~s peor que el mejor reparto asimétrico; contra él, la mejora de
-IPPO \emph{vecinos} quedaba sobrestimada (conclusión~3). En el plan de
+IPPO con mensajes quedaba sobrestimada (conclusión~3). En el plan de
 pruebas el barrido se amplió en cada caso hasta que el óptimo quedó en
 el interior de la malla, con el verde mínimo de 10~s como única
 frontera aceptada (Tabla~\ref{tab:plan2-fijo}). Esa regla no obligaba a
 explorar los verdes cortos de la avenida, cuya malla empezaba en 15~s
 (12~s en el corredor). El análisis de robustez la amplió hasta 10~s
-después de ver que la política publicada de IPPO \emph{vecinos} en P3
-era el control trivial que cambia de fase en cuanto la máscara lo
-permite. Ese trivial, que el plan no incluía, tiene un 8.6 y un
+después de ver que la versión evaluada de IPPO con mensajes en P3
+era el ciclo mínimo, el control que cambia de fase en cuanto la máscara
+lo permite. El ciclo mínimo, que el plan no incluía, tiene un 8.6 y un
 6.9\,\% menos de retraso total que el fijo del plan en P3 y P4, y el
 fijo barrido desde 10~s pasa a ser ahí un ciclo corto de 10~s por fase
-(conclusión~5 y Sección~\ref{sec:robustez}). En todo escenario nuevo
+(conclusión~5, Sección~\ref{sec:robustez} y Anexo~F). En todo escenario nuevo
 conviene barrer desde el verde mínimo del agente, con semillas
 distintas de las de evaluación y con la métrica del veredicto, antes de
 comparar nada con el fijo. Conviene además evaluar siempre, con las
-mismas semillas, el control trivial, y marcar las políticas que lo
+mismas semillas, el ciclo mínimo, y marcar las políticas que lo
 igualan: sin él, el resultado de P3 se lee como aprendizaje.
 % fuente: Anexo C (corredor: 25/25 con desfase de 25 s, 31.9 s, frente a 20/10 con desfase de 15 s, 21.2 s);
 % plan2/barrido_<esc>.csv del 25.09 (git 37f9680; ejes barridos en el comentario de plan2/<esc>.add.xml: avenida
@@ -47,11 +47,11 @@ requiere entrenamiento. El plan de pruebas mostró además que ninguna de
 las dos basta sola: el actuado supera al fijo con demanda doble en el
 corredor y pierde contra él en la malla, un 21.8\,\% con la demanda
 nominal y un 73.3\,\% con la doble, y el fijo solo es exigente con
-la demanda para la que se tuneó (conclusión~3). Ambas deben tener las
+la demanda para la que se ajustó (conclusión~3). Ambas deben tener las
 mismas fases y los mismos límites de verde que el agente. Conviene
 agregar Max-Pressure \citep{Varaiya2013_MaxPressure}, una referencia
 adaptativa habitual en la literatura que no necesita entrenamiento.
-Frente a un fijo sin tunear o no declarado reduce el tiempo de viaje un
+Frente a un fijo sin ajustar o no declarado reduce el tiempo de viaje un
 35.8\,\% en un trabajo \citep{Wu2021_EfficientMP} y un 48.5\,\% en otro
 \citep{Mei2024_LibSignal}, y 17 de las obras comparadas con aprendizaje
 por refuerzo se miden contra ella u otra heurística, con una mediana de
@@ -62,33 +62,33 @@ resultado frente a ese grupo de trabajos.
 % sin tunear; Max-Pressure u otra heuristica: n = 17, mediana -15.5)
 
 \noindent\textbf{Validar con la métrica del veredicto y con más
-semillas, y juzgar la convergencia alrededor de la política
-publicada.} La validación que elige el \textit{checkpoint} debe medir
+semillas, y juzgar la convergencia alrededor de la versión
+evaluada.} La validación que elige el \textit{checkpoint} debe medir
 lo mismo que el veredicto. En el plan las dos usan el
 \texttt{timeLoss}, pero si se adopta otra métrica hay que cambiar
 ambas: en el análisis de robustez, que mide el retraso total, las tres
 bases de DQN en P2 difieren en 1.6~s de validación y en 72.5~s de
-retraso total, y la publicada es la de más retraso total
+retraso total, y la de la versión evaluada es la de más retraso total
 (Tabla~\ref{tab:robustez-veredicto-bases-dqn}). Dos semillas de validación tampoco
-bastan. En P4, la base de \emph{vecinos} con la mejor validación
-(27.36~s) es la de más retraso en la evaluación (29.47~s), y la de
-MAPPO con la peor validación (28.60~s) es la de menos (28.32~s). En
-P6, dos bases de \emph{vecinos} validan por debajo del fijo en las dos
+bastan. En P4, de las tres bases de IPPO con mensajes, la de mejor
+validación (27.36~s) es la de más retraso en la evaluación (29.47~s),
+y de las de MAPPO, la de peor validación (28.60~s) es la de menos
+(28.32~s). En P6, dos bases de IPPO con mensajes validan por debajo del fijo en las dos
 semillas de validación y en la evaluación quedan un 2.2 y un 9.6\,\%
 por encima de él. El
 criterio de convergencia del plan mira además el último tercio de la
-serie de validación, pero la política publicada puede estar antes. En
-la red, las dos bases de IPPO \emph{vecinos} que funcionan publicaron
-cada una un mínimo aislado de su serie (conclusión~5), y la
+serie de validación, pero la versión evaluada puede estar antes. En
+la red, en las dos bases de IPPO con mensajes que funcionan, la versión
+guardada es un mínimo aislado de su serie (conclusión~5), y la
 Tabla~\ref{tab:veredicto-bases-ippo-vecinos} las marca como convergidas
 porque el último tercio es plano en un valor peor. Se recomienda
 validar con al menos cinco semillas y de forma pareada frente al fijo
 en esas mismas semillas, reportar junto al veredicto la distancia entre
 la validación elegida y la mediana de la serie, y exigir que el mínimo
 se repita en dos validaciones seguidas. Para la única comparación que
-la tesis quiera afirmar como principal (\emph{vecinos} frente a
-\emph{local}) convienen cinco semillas base en vez de tres: en la red,
-una de las tres bases de \emph{vecinos} empata con el fijo mientras las
+la tesis quiera afirmar como principal (IPPO con mensajes frente a IPPO
+sin mensajes) convienen cinco semillas base en vez de tres: en la red,
+una de las tres bases de IPPO con mensajes empata con el fijo mientras las
 otras dos lo superan en más del 7\,\%.
 % fuente: plan2/veredicto.csv (convergio, veredicto); tablas/veredicto_bases.tex (ippo_vecinos P4: validacion
 % 28.09/27.36/28.23, timeLoss 28.97/29.47/28.67; mappo P4: validacion 27.70/28.04/28.60, timeLoss
@@ -106,7 +106,8 @@ detecta ahora la fase de la avenida a partir de la red. En la
 observación de IPPO, la componente 22 de la Tabla~\ref{tab:obs-u4},
 que el código llama \texttt{cola\_mi\_salida}, mide la cola del enlace
 que entra desde el vecino y no la del que sale hacia él. La usan las
-políticas de IPPO \emph{vecinos} y \emph{spill}, DQN y MAPPO. Como los
+políticas de IPPO con mensajes, IPPO con penalización de
+\textit{spillback}, DQN y MAPPO. Como los
 dos sentidos de cada enlace tienen la misma longitud, su normalización
 por plazas es correcta, pero la componente no mide la cola que se quiso
 medir. Cambiar esa definición cambiaría todas esas políticas
@@ -126,7 +127,7 @@ ese factor habría sido 2.5, pero la rotonda sin semáforo se satura
 mucho antes y dejó el factor de P4 en 1.2 (conclusión~1 y
 Tabla~\ref{tab:red-alta-factor}). El corredor tiene otro cuello de
 botella: con 1.25 y 1.5 veces la demanda nominal, todos los controles
-comparados pierden frente al fijo vuelto a tunear para cada nivel entre
+comparados pierden frente al fijo vuelto a ajustar para cada nivel entre
 un 45.0 y un 146.1\,\% de \texttt{timeLoss}, probablemente por el giro
 a la izquierda permitido en el carril único de la avenida
 (conclusión~1). En corredores de un carril por sentido conviene dar al
@@ -143,9 +144,9 @@ resolver los controles que se comparan.
 red, así que no ve a los que esperan en el borde. Con demanda por
 encima de la capacidad de las entradas, un control puede bajar el
 \texttt{timeLoss} dejando crecer esa cola. En P2, el actuado y todas
-las políticas publicadas con red neuronal bajan el \texttt{timeLoss}
+las versiones evaluadas con red neuronal bajan el \texttt{timeLoss}
 del fijo entre un 19.4 y un 23.3\,\% y aumentan su espera para entrar
-entre un 11.9 y un 40.5\,\% (Sección~\ref{sec:robustez}). Conviene
+entre un 11.9 y un 40.5\,\% (Sección~\ref{sec:robustez} y Anexo~F). Conviene
 registrar siempre esa espera, incluida la de los vehículos que no
 alcanzaron a entrar al cerrar la simulación, y reportarla junto al
 \texttt{timeLoss}. En SUMO basta leer el \texttt{departDelay} del
@@ -165,7 +166,7 @@ Av.\ Paseo de la República con la Av.\ 28 de Julio se hizo con
 pasado por este protocolo; el procedimiento de importación y limpieza
 está en el Anexo~D. Conviene completarla con el mismo método de los
 casos del plan: barrido del fijo desde el verde mínimo, actuado con las
-mismas fases, control trivial, tres semillas base, evaluación sobre las
+mismas fases, ciclo mínimo, tres semillas base, evaluación sobre las
 mismas semillas y la espera para entrar medida junto al
 \texttt{timeLoss}. Su demanda debería salir de datos de tráfico
 observados (aforos o matrices origen--destino), que esta etapa no usó,
@@ -187,25 +188,26 @@ PENDIENTE, y P6 suma otras seis. La ablación con la recompensa de
 colas no se programó en P5 ni en P6, y es la única celda sin datos de
 cada uno. Las otras diez son de convergencia: en P1 a P5, Q-learning en
 P4, Q-learning con la recompensa de colas en P2, DQN en P5 y MAPPO en
-P3 y P4; en P6, SARSA, DQN, IPPO \emph{vecinos}, IPPO \emph{spill} y
-MAPPO. En P6 la falta de convergencia es la norma y no la excepción:
-de las tres bases, converge una de \emph{vecinos} y una de DQN, y
-ninguna de \emph{spill}, MAPPO y SARSA. Antes de dar por definitivo
+P3 y P4; en P6, SARSA, DQN, IPPO con mensajes, IPPO con penalización
+de \textit{spillback} y MAPPO. En P6 la falta de convergencia es la
+norma y no la excepción: de las tres bases, converge una de IPPO con
+mensajes y una de DQN, y ninguna de IPPO con penalización de
+\textit{spillback}, MAPPO y SARSA. Antes de dar por definitivo
 su veredicto provisional conviene prolongar esos entrenamientos o sumar
 bases, sin cambiar el resto del método. En P6, donde el empate de
-\emph{vecinos} descansa en una base que no convergió, conviene hacer
+IPPO con mensajes descansa en una base que no convergió, conviene hacer
 las dos cosas: más episodios que los 200 del plan y más bases. Para
-\emph{vecinos}, el análisis exploratorio posterior sugiere corregir
-antes el entrenamiento: la variante sin cambios, validada con ocho
+IPPO con mensajes, el diagnóstico posterior del entrenamiento sugiere
+corregir antes el entrenamiento: la variante sin cambios, validada con ocho
 semillas, no converge en ninguna de sus tres bases, y con la corrección que se
 recomienda más abajo convergen dos de tres en 200 episodios. DQN y MAPPO usan
 hiperparámetros fijados antes de su prueba de humo en el cruce aislado
 (MAPPO hereda los de IPPO), sin ajuste por caso. Un ajuste corto por
 caso, con las semillas de validación y no con las de evaluación, diría
-si la distancia de DQN a \emph{vecinos} (conclusión~2) es del algoritmo
-o de los hiperparámetros, y si MAPPO converge con más regularidad en las
-redes. La variante \emph{cambio}, que penaliza cada cambio de fase
-(Sección~\ref{sec:u4}), quedó formulada y sin correr.
+si la distancia de DQN a IPPO con mensajes (conclusión~2) es del
+algoritmo o de los hiperparámetros, y si MAPPO converge con más
+regularidad en las redes. La cuarta variante de IPPO, que penaliza cada
+cambio de fase (Sección~\ref{sec:u4}), quedó formulada y sin correr.
 % fuente: plan2/veredicto.csv (ql_colas P5 y P6 sin datos; convergio); rl_dqn.py (HIPER, fijados antes de
 % la prueba de humo); rl_mappo.py (los HIPER de rl_ippo sin cambios); P6: plan2/veredicto.csv (malla3_alta,
 % columna convergen: ippo_vecinos 1/3, dqn 1/3, ippo_spill 0/3, mappo 0/3, sarsa 0/3; publicadas sin converger:
@@ -217,17 +219,17 @@ redes. La variante \emph{cambio}, que penaliza cada cambio de fase
 darle un veredicto firme antes de construir P7.} En el corredor, la
 ganancia grande apareció cuando la demanda superó la capacidad y el
 fijo dejó de bastar (P2). En la malla no ocurre lo mismo. Con el doble
-de demanda (P6), ningún aprendiz del plan mejora al fijo tuneado, que ahí es un
-ciclo corto de 31~s sin desfases; IPPO \emph{vecinos} lo iguala de
+de demanda (P6), ningún aprendiz del plan mejora al fijo ajustado, que ahí es un
+ciclo corto de 31~s sin desfases; IPPO con mensajes lo iguala de
 forma provisional, y todos los aprendices superan con amplitud al
 actuado, que colapsa (conclusiones~3, 4 y~6). Además, en P6 la métrica
 no decide el resultado: la espera para entrar es de unos 45.5~s por
 vehículo con el fijo, el actuado y todas las políticas. A diferencia
 de P2, ningún control baja su retraso dejando más cola fuera de la red. Eso hace
 de P6 la prueba más exigente del plan para un método nuevo: una
-coordinación aprendida que supere ahí al fijo tuneado lo haría sin
-depender de la métrica. El análisis exploratorio posterior encontró
-una candidata, IPPO \emph{vecinos} con el entrenamiento corregido, que
+coordinación aprendida que supere ahí al fijo ajustado lo haría sin
+depender de la métrica. El diagnóstico posterior del entrenamiento
+encontró una candidata, IPPO con mensajes entrenado con la corrección, que
 supera al fijo en P6 con las dos métricas, aunque fuera del plan y con
 las reservas de la recomendación siguiente. Para usar P6 como prueba hay que cerrar antes sus cinco
 celdas sin converger, con más episodios y más bases, y validar con más
@@ -243,9 +245,9 @@ hiperparámetros debe pasar antes de escalar.
 % (V2 4042, 6001-6030: timeLoss -6.7 [-9.8, -3.7], retraso total -3.1 [-4.7, -1.7])
 
 \noindent\textbf{Llevar la corrección del entrenamiento de IPPO a los
-seis casos con el protocolo completo.} En el análisis exploratorio
-posterior, dos cambios en el entrenamiento de IPPO \emph{vecinos}
-llevaron su política de P6 de un plan casi fijo de 46~s de ciclo, con
+seis casos con el protocolo completo.} En el diagnóstico posterior del
+entrenamiento (Anexo~G), dos cambios en la forma de entrenar IPPO con
+mensajes llevaron su política de P6 de un plan casi fijo de 46~s de ciclo, con
 un 18\,\% de sincronía entre vecinos, a un ciclo mínimo de 26~s con un
 64\,\% de sincronía. El primero descuenta las recompensas por
 segundo y no por decisión al calcular la ventaja, porque una decisión
@@ -254,16 +256,16 @@ todos los semáforos que deciden en el mismo segundo exploren con un
 mismo número aleatorio: con un 3\,\% de acciones al azar, el ciclo
 mínimo empeora un 21.7\,\% en P4 si cada semáforo sortea por su cuenta
 y un 1.2\,\% si el sorteo es común. Con los dos cambios, la política
-de P6 reduce el \texttt{timeLoss} un 6.7\,\% frente al fijo tuneado y
-gana en 29 de 30 semillas de confirmación. La evidencia es
+de P6 reduce el \texttt{timeLoss} un 6.7\,\% frente al fijo ajustado y
+gana en 29 de las 30 semillas nuevas de la repetición (6001 a 6030). La evidencia es
 exploratoria: el análisis se decidió después del veredicto, usó
 semillas distintas de las del plan, solo se probó en P1, P4 y P6, y en
-P4 no supera al control trivial. Conviene aplicar la corrección a los
+P4 no supera al ciclo mínimo. Conviene aplicar la corrección a los
 seis casos con el protocolo completo: tres bases, 200 episodios,
 validación con ocho semillas, la regla de selección y convergencia del
 plan y la evaluación en las semillas 1001 a 1030, como un brazo nuevo
-declarado antes de evaluar y frente al fijo tuneado, el fijo barrido
-desde 10~s, el actuado y el trivial. MAPPO usa el mismo cálculo de la
+declarado antes de evaluar y frente al fijo ajustado, el fijo ajustado
+desde 10~s, el actuado y el ciclo mínimo. MAPPO usa el mismo cálculo de la
 ventaja y puede recibir la corrección sin otro cambio. Conviene también
 probarla con demanda aleatoria, porque un ciclo sincronizado aprendido
 con llegadas equiespaciadas puede no sostenerse cuando la demanda
@@ -276,9 +278,9 @@ la semilla analizada, y compararla con una regla simple de ciclo mínimo
 que extiende el verde cuando hay cola. Tres cambios del mismo análisis
 no ayudaron y no conviene repetirlos solos. Normalizar las colas de la
 observación no cambió el resultado en P4 (0.0\,\%, de $-1.7$ a
-$+1.6$\,\%). MAPPO con la recompensa de toda la red publicó el control
-trivial. Validar con ocho semillas sin corregir el entrenamiento no
-mejoró la política publicada ($+0.5$\,\% en P4 y $+5.0$\,\% en P6, con
+$+1.6$\,\%). En MAPPO con la recompensa de toda la red, la versión
+evaluada fue el ciclo mínimo. Validar con ocho semillas sin corregir el
+entrenamiento no mejoró la versión evaluada ($+0.5$\,\% en P4 y $+5.0$\,\% en P6, con
 intervalos que incluyen el cero).
 % fuente: plan2/exploratorio_coord/HECHOS.md; PRERREGISTRO.md (dt de 5 s o 8 s, ambar incluido; descuento
 % gamma^(dt/5)); diagnostico/b2_ruido.txt (P4: +21.7 independiente, +1.2 comun; P6: +14.7 y +2.1);
@@ -303,7 +305,7 @@ número de semáforos da para P7 unos 44~s por episodio antes de contar
 el tercer carril. Un entrenamiento de IPPO tomaría así unas 2.5~h sin
 contar las validaciones, alcanzable en una noche. P6 mostró que el
 costo crece también con la demanda: en la misma malla, el doble de
-demanda duplicó el episodio de IPPO \emph{vecinos}, de 25.0 a 49.4~s
+demanda duplicó el episodio de IPPO con mensajes, de 25.0 a 49.4~s
 en la mediana, y cada entrenamiento tomó unas 3.3~h con sus
 validaciones. Si P7 se prueba con una demanda por cruce como la
 de P6, su episodio rondaría los 88~s y un entrenamiento de IPPO unas
@@ -327,10 +329,11 @@ tabulares ya fallan con dos fases.
 \noindent\textbf{Probar el término de \textit{spillback} donde puede
 actuar.} En las dos redes y en la malla con demanda nominal el término
 nunca se activa, y en el corredor con demanda doble no mejora a
-\emph{vecinos} (conclusión~4). P6 es el primer caso de red en que la
+IPPO con mensajes (conclusión~4). P6 es el primer caso de red en que la
 cola llena los enlaces entre cruces, al menos bajo el actuado. Ahí el
-término sí se activa durante el entrenamiento, y la política de
-\emph{spill} es distinta de la de \emph{vecinos} en todas las semillas
+término sí se activa durante el entrenamiento, y la política de IPPO
+con penalización de \textit{spillback} es distinta de la de IPPO con
+mensajes en todas las semillas
 de evaluación, pero no la mejora ($+3.6$ frente a $+2.2$\,\% respecto
 del fijo), y ninguna de sus tres bases converge. Antes de descartar el
 término en P6 conviene entrenarlo más, como al resto de sus celdas
@@ -351,8 +354,8 @@ aporta algo que la mensajería no aporte.
 \noindent\textbf{Dar a la recompensa la cola que queda fuera de la
 red.} La recompensa de retraso de los aprendices, como el
 \texttt{timeLoss}, solo ve a los vehículos que ya entraron
-(Sección~\ref{sec:formulacion}). En P2, la política publicada de IPPO
-\emph{vecinos} mejora su recompensa un 19.9\,\% frente a la del fijo,
+(Sección~\ref{sec:formulacion}). En P2, la versión evaluada de IPPO con
+mensajes mejora su recompensa un 19.9\,\% frente a la del fijo,
 mientras su espera para entrar sube de 239.6 a 282.0~s por vehículo:
 parte de lo que aprende es a dejar la cola en el borde. Conviene sumar
 a la recompensa de cada cruce de borde la espera de los vehículos
@@ -365,7 +368,7 @@ la ganancia en \texttt{timeLoss} se mantiene.
 \noindent\textbf{Entrenar la coordinación con un canal imperfecto.} Las
 políticas de U4 se entrenaron con mensajes instantáneos. Evaluada con
 latencia o pérdida en la fase exploratoria, la política mediana de
-\emph{vecinos} usaba el mensaje viejo como si fuera actual: en el
+IPPO con mensajes usaba el mensaje viejo como si fuera actual: en el
 corredor el retraso subía entre 1.4 y 2.5~s, lo bastante para dejar de
 superar al actuado, y en el corredor y en la red la progresión se
 deshacía (Anexo~C). La edad del mensaje ya está en la observación;
@@ -382,9 +385,9 @@ equiespaciada, con una tasa fija en cada media hora y un solo tipo de
 comportamiento, de modo que la única variabilidad entre semillas es la
 del modelo de conducción y los intervalos de confianza subestiman la de
 un tráfico real (Sección~\ref{sec:estadistica}). El análisis de
-sensibilidad muestra además que las políticas publicadas no se
+sensibilidad muestra además que las versiones evaluadas no se
 transfieren a otra demanda: la de P1 solo supera al fijo vuelto a
-tunear con la demanda con que se entrenó (conclusión~6). SUMO permite
+ajustar con la demanda con que se entrenó (conclusión~6). SUMO permite
 acercar los escenarios a Lima sin cambiar de simulador: llegadas
 aleatorias en los flujos, un perfil de hora punta por intervalos, una
 distribución de tipos de vehículo con la mezcla de la ciudad (buses,

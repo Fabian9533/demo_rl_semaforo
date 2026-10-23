@@ -43,7 +43,7 @@
   {¿Decide el\\ agente $i$?};
 \node[proceso, text width=4.7cm, anchor=north] (cerrar) at ([yshift=-0.78cm]decide.south)
   {\nodo{Cerrar la decisión anterior}{$r_i$ = suma por segundo / 5\\
-   (\texttt{ql\_colas}: colas al decidir)\\ D, P: $\times\,0.02$; \textit{spill} (U4): $-$ término}};
+   (\texttt{ql\_colas}: colas al decidir)\\ D, P: $\times\,0.02$; $-$ penalización (U4)}};
 \node[proceso, text width=4.7cm, anchor=north] (obs) at ([yshift=-0.28cm]cerrar.south)
   {\nodo{Observar}{T: niveles de cola y fase\\ D, P: vector continuo y máscara\\
    D, U4: + \itfn{5}}};

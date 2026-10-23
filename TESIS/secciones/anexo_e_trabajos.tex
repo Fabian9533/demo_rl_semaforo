@@ -74,9 +74,9 @@ medido en el cruce y aumenta un 10.8\,\% el retraso del viaje
 En las tablas de trabajos comparados, la columna Red da el número de
 intersecciones semaforizadas de las redes evaluadas y si son reales o
 sintéticas, y la columna Sim., el simulador; \emph{campo} indica una
-medición en calles. En la referencia, un \emph{fijo sin tunear} usa
+medición en calles. En la referencia, un \emph{fijo sin ajustar} usa
 verdes iguales o arbitrarios, un \emph{fijo no declarado} es uno cuyo
-ajuste el trabajo no describe y un \emph{fijo tuneado} se ajustó por
+ajuste el trabajo no describe y un \emph{fijo ajustado} se eligió por
 barrido o por programación lineal. El \emph{plan real} es el programa
 que opera en la ciudad o el que trae el escenario, sin reoptimizar, y
 \emph{otro RL} indica que la referencia es otro aprendiz. Varias líneas
@@ -97,17 +97,17 @@ muestra en figuras o describe sin números.
 Trabajo & Red & Sim. & Algoritmo & Referencia & Métrica & Mejora (\%) \\
 \midrule
 Lioris et al. (2014) \citep{Lioris2014_MaxPressure} & 13, real & .Q & Max-Pressure \citep{Varaiya2013_MaxPressure}, sin RL
-  & fijo tuneado (LP)
+  & fijo ajustado (LP)
   & viaje
   & $-$23.6 \\
 \addlinespace[2pt]
 Genders y Razavi (2019) \citep{Genders2019_Framework} & 2, sintética & SUMO & DQN, DDPG
-  & fijo tuneado\newline fijo tuneado\newline Webster adaptativo\newline Max-Pressure
+  & fijo ajustado\newline fijo ajustado\newline Webster adaptativo\newline Max-Pressure
   & viaje\newline viaje\newline viaje\newline viaje
   & $-$8.9\newline $-$1.3 DQN\newline $+$1.4\newline $+$22.0 \\
 \addlinespace[2pt]
 LIT (2019) \citep{Zheng2019_LIT} & 1 (12 cruces) y redes de 4 a 16, reales & SUMO & LIT (DQN)
-  & fijo sin tunear\newline Webster\newline fijo sin tunear\newline Webster
+  & fijo sin ajustar\newline Webster\newline fijo sin ajustar\newline Webster
   & viaje\newline viaje\newline viaje\newline viaje
   & $-$55.5\newline $-$34.0\newline $-$65.8 redes\newline $-$37.6 redes \\
 \addlinespace[2pt]
@@ -132,12 +132,12 @@ Advanced-XLight (2022) \citep{Zhang2022_AdvancedMP} & 12 a 192, reales & CityFlo
   & $-$38.6\newline $-$8.6 \\
 \addlinespace[2pt]
 LibSignal (2024) \citep{Mei2024_LibSignal} & 1 a 16 en SUMO (196 en CityFlow), reales y sintéticas & SUMO y CityFlow & IDQN, IPPO, CoLight, MPLight y otros
-  & fijo sin tunear\newline Max-Pressure\newline Max-Pressure
+  & fijo sin ajustar\newline Max-Pressure\newline Max-Pressure
   & viaje\newline viaje\newline viaje
   & $-$55.1\newline $-$5.7\newline $+$18.5 IPPO \\
 \addlinespace[2pt]
 T-REX (2025) \citep{Nguyen2025_TREX} & 3 a 21, reales; malla de 16, sintética & SUMO & IDQN, IPPO, MPLight, FMA2C
-  & plan real\newline plan real\newline fijo sin tunear\newline Max-Pressure
+  & plan real\newline plan real\newline fijo sin ajustar\newline Max-Pressure
   & viaje\newline viaje\newline viaje\newline viaje
   & $-$17.7\newline $+$5.1 IPPO\newline $-$28.7 IDQN\newline $-$20.2 \\
 \bottomrule
@@ -176,27 +176,27 @@ Gao et al. (2017) \citep{Gao2017_DQN} & 1, sintética & SUMO & DQN
   & $-$86 máx.\newline $-$47 máx. \\
 \addlinespace[2pt]
 Mousavi et al. (2017) \citep{Mousavi2017_PGDQN} & 1, sintética & SUMO & gradiente de política y DQN (CNN)
-  & fijo sin tunear\newline otro RL
+  & fijo sin ajustar\newline otro RL
   & retraso\newline retraso
   & sin cifra\newline $-$72.8 \\
 \addlinespace[2pt]
 IntelliLight (2018) \citep{Wei2018_IntelliLight} & 1 (sintética y 24 reales, una a una) & SUMO & DQN
-  & fijo tuneado\newline SOTL
+  & fijo ajustado\newline SOTL
   & viaje\newline viaje
   & $-$40.3\newline $-$22.1 \\
 \addlinespace[2pt]
 FRAP (2019) \citep{Zheng2019_FRAP} & 1 (18 cruces con demanda real) & SUMO & FRAP (DQN)
-  & fijo tuneado\newline Webster
+  & fijo ajustado\newline Webster
   & viaje\newline viaje
   & $-$64.1\newline $-$58.1 \\
 \addlinespace[2pt]
 Liang et al. (2019) \citep{Liang2019_3DQN} & 1, sintética & SUMO & 3DQN
-  & fijo sin tunear
+  & fijo sin ajustar
   & espera
   & $-$25.7 \\
 \addlinespace[2pt]
 PressLight (2019) \citep{Wei2019_PressLight} & 3 a 16, reales; 6 a 20, sintéticas & CityFlow & DQN con presión
-  & fijo sin tunear\newline onda verde\newline Max-Pressure
+  & fijo sin ajustar\newline onda verde\newline Max-Pressure
   & viaje\newline viaje\newline viaje
   & $-$52.1\newline $-$50.6\newline $-$42.3 \\
 \addlinespace[2pt]
@@ -232,7 +232,7 @@ S2R2L (2019) \citep{Guo2019_S2R2L} & 16, sintética & SUMO & DQN descentralizado
   & $-$34.6\newline $-$19.9 \\
 \addlinespace[2pt]
 CoLight (2019) \citep{Wei2019_CoLight} & 12 a 196, reales; 36, sintética & CityFlow & DQN con atención
-  & fijo sin tunear\newline Max-Pressure
+  & fijo sin ajustar\newline Max-Pressure
   & viaje\newline viaje
   & $-$25.2\newline $-$12.7 \\
 \addlinespace[2pt]
@@ -242,7 +242,7 @@ MA2C (2020) \citep{Chu2020_MA2C} & 30, real; 25, sintética & SUMO & MA2C
   & $-$20.8\newline $-$30.9\newline $-$64.1 \\
 \addlinespace[2pt]
 MPLight (2020) \citep{Chen2020_MPLight} & 2510, real; 16, sintética & CityFlow & DQN con presión
-  & fijo sin tunear\newline Max-Pressure
+  & fijo sin ajustar\newline Max-Pressure
   & viaje\newline viaje
   & $-$47.5\newline $-$14.4 \\
 \addlinespace[2pt]
@@ -252,7 +252,7 @@ FMA2C (2020) \citep{Ma2020_FMA2C} & 30, real; 16, sintética & SUMO & MA2C jerá
   & $-$6.3 Mónaco\newline $+$10.8 malla\newline $-$55.7\newline $-$90.5 malla \\
 \addlinespace[2pt]
 AttendLight (2020) \citep{Oroojlooy2020_AttendLight} & 1 (112 cruces), reales y sintéticas & CityFlow & atención y gradiente de política
-  & fijo sin tunear\newline Max-Pressure
+  & fijo sin ajustar\newline Max-Pressure
   & viaje\newline viaje
   & $-$46\newline $-$39 \\
 \addlinespace[2pt]
@@ -262,12 +262,12 @@ EPyMARL en RESCO (2022) \citep{Ault2022_EPyMARL} & 3 a 21, reales & SUMO & nueve
   & ninguno lo supera \\
 \addlinespace[2pt]
 X-Light (2024) \citep{Jiang2024_XLight} & 8 a 25, reales y sintéticas & SUMO & PPO con \textit{transformer}
-  & fijo sin tunear\newline fijo sin tunear
+  & fijo sin ajustar\newline fijo sin ajustar
   & viaje\newline viaje
   & $-$28.8\newline $-$27.0 IPPO \\
 \addlinespace[2pt]
 CoSLight (2024) \citep{Ruan2024_CoSLight} & 8 a 29, reales y sintéticas & SUMO & selección de colaboradores
-  & fijo sin tunear\newline Max-Pressure\newline Max-Pressure\newline fijo sin tunear, red de Nanshan
+  & fijo sin ajustar\newline Max-Pressure\newline Max-Pressure\newline fijo sin ajustar, red de Nanshan
   & viaje\newline viaje\newline viaje\newline viaje
   & $-$27.3\newline $-$13.8\newline $-$5.7\newline $+$2.0 IPPO, $+$2.1 MAPPO \\
 \bottomrule
@@ -339,12 +339,12 @@ Vivacity (2021) \citep{Velasco2021_Vivacity} & 5, real & campo & RL sin detallar
   & $-$30\newline $-$45 \\
 \addlinespace[2pt]
 Trinity (2022) \citep{Chakrabarti2022} & 1 y 2, sintéticas & SUMO & DQN, A2C, PPO
-  & fijo sin tunear
+  & fijo sin ajustar
   & espera
   & sin cifra \\
 \addlinespace[2pt]
 Uniandes (2023) \citep{Chavez2023} & 4, sintética & SUMO & Q-learning, SARSA, DQN, PPO
-  & fijo sin tunear\newline fijo sin tunear
+  & fijo sin ajustar\newline fijo sin ajustar
   & espera\newline espera
   & $-$63.5\newline $-$35.8 Q-learning \\
 \addlinespace[2pt]
@@ -613,7 +613,7 @@ Revisión de 160 artículos \citep{Noaeen2022_SLR}
 Esta tesis
   & tabulares: detenidos por aproximación en 4 niveles y fase verde; DQN, IPPO y MAPPO: vector de 31 componentes (53 en la malla de P5 y P6) con cola detenida y vehículos en movimiento por aproximación, fase, tiempo en verde, verde mínimo cumplido, identificador y mensajes de los vecinos (Tabla~\ref{tab:obs-u4})
   & mantener o pasar a la siguiente fase verde, cada 5~s; verde de 10 a 60~s
-  & $-$(retraso $+$ 0.01 $\times$ espera), sumado por segundo desde la decisión anterior y dividido entre 5 (Ecuación~\ref{eq:recompensa-u4}); término de \textit{spillback} en IPPO spill; colas en la ablación
+  & $-$(retraso $+$ 0.01 $\times$ espera), sumado por segundo desde la decisión anterior y dividido entre 5 (Ecuación~\ref{eq:recompensa-u4}); término de \textit{spillback} solo en IPPO con penalización de \textit{spillback}; colas en la ablación
   & retraso por vehículo (\texttt{timeLoss}, primaria); espera detenida, colas, paradas y \textit{throughput}; en el análisis de robustez, retraso total con la espera para entrar a la red (Sección~\ref{sec:robustez}) \\
 \bottomrule
 \end{tabular}
@@ -629,16 +629,16 @@ La mejora reportada depende sobre todo de la referencia. Con una cifra
 por obra y por tipo de referencia, solo de trabajos con aprendizaje por
 refuerzo, sin informes de fabricantes y solo en retraso, espera o
 tiempo de viaje, la mediana es de $-46.0$\,\% frente a un fijo sin
-tunear o no declarado (15 obras), de $-35.7$\,\% frente a un fijo
-tuneado, un plan de Webster o el plan real (10 obras), de $-20.7$\,\%
+ajustar o no declarado (15 obras), de $-35.7$\,\% frente a un fijo
+ajustado, un plan de Webster o el plan real (10 obras), de $-20.7$\,\%
 frente al actuado (4 obras) y de $-15.5$\,\% frente a Max-Pressure u
 otra heurística adaptativa (17 obras). Buena parte de la distancia
 entre la primera categoría y la última la cubre una heurística sin
-entrenamiento: frente al mismo fijo sin tunear o no declarado, Max-Pressure ya reduce
+entrenamiento: frente al mismo fijo sin ajustar o no declarado, Max-Pressure ya reduce
 el tiempo de viaje un 35.8\,\% en un trabajo \citep{Wu2021_EfficientMP}
 y un 48.5\,\% en otro \citep{Mei2024_LibSignal}. Las cifras más bajas
 aparecen donde la referencia está mejor ajustada. Frente a un fijo de
-verde uniforme tuneado por barrido y evaluado con 32 semillas, el mejor
+verde uniforme ajustado por barrido y evaluado con 32 semillas, el mejor
 aprendiz reduce el tiempo de viaje un 8.9\,\%
 \citep{Genders2019_Framework}. Frente al plan real, IPPO aumenta el
 tiempo de viaje en el corredor de Colonia y en la región de Ingolstadt
@@ -669,7 +669,7 @@ plan en el corredor de tres cruces \citep{Ault2022_EPyMARL}.
 %   -5.7 (SUMO); Advanced-XLight -8.6; T-REX -20.2; Gao -47 (LQF, max.); IntelliLight -22.1 (SOTL);
 %   PressLight -42.3; S2R2L -19.9 (ajustado); CoLight -12.7; MA2C -20.8 (Greedy); MPLight -14.4; FMA2C
 %   +2.25 (mediana de -6.3 y +10.8); AttendLight -39; CoSLight -9.75 (mediana de -13.8 y -5.7).
-% Max-Pressure sin RL frente al fijo sin tunear: Efficient Pressure CMP3 (-35.8, mediana de 5) y LibSignal
+% Max-Pressure sin RL frente al fijo sin ajustar: Efficient Pressure CMP3 (-35.8, mediana de 5) y LibSignal
 % CMP5 (-48.5, mediana de 8 en SUMO). IPPO frente al plan real en T-REX: +50.2 (corredor de Colonia),
 % -3.3 (region de Colonia) y +5.1 (region de Ingolstadt) (ficha Nguyen2025_TREX, CMP2); en el corredor de
 % Ingolstadt, -10.9 (2a ficha Nguyen2025_TREX, CMP2). EPyMARL: Cologne Corridor, sin cifras en el trabajo.

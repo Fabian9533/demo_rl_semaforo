@@ -4,11 +4,12 @@
 \centering
 \scriptsize
 \setlength{\tabcolsep}{3pt}
+\setlength{\tabcolsep}{2pt}
 \begin{tabular}{lrrrrrrrrr}
 \toprule
- & \multicolumn{6}{c}{Retraso (s/veh)} & \multicolumn{2}{c}{IPPO vecinos vs fijo} & \makecell{IPPO vecinos\\vs actuado} \\
+ & \multicolumn{6}{c}{Retraso (s/veh)} & \multicolumn{2}{c}{\makecell{IPPO con mensajes\\vs fijo}} & \makecell{IPPO con\\mensajes\\vs actuado} \\
 \cmidrule(lr){2-7}\cmidrule(lr){8-9}
-Escenario & Fijo & Actuado & Q-learning & \makecell{IPPO\\local} & \makecell{IPPO\\vecinos} & \makecell{IPPO\\spill} & $\Delta$ [IC95\,\%] & $p$ & $\Delta$ [IC95\,\%] \\
+Escenario & Fijo & Actuado & Q-learning & \makecell{IPPO sin\\mensajes} & \makecell{IPPO con\\mensajes} & \makecell{IPPO con\\penalización} & $\Delta$ [IC95\,\%] & $p$ & $\Delta$ [IC95\,\%] \\
 \midrule
 corredor & 21.15 & 20.91 & 33.86 & 21.27 & 19.84 & 20.21 & \makecell{$-$6.2\,\%\\{}[$-$8.0, $-$4.6]} & 0.00195 & \makecell{$-$5.1\,\%\\{}[$-$6.4, $-$3.9]} \\
 red & 21.78 & 21.42 & 25.12 & 22.17 & 21.89 & 21.68 & \makecell{+0.5\,\%\\{}[$-$0.3, 1.3]} & 0.414 & \makecell{+2.2\,\%\\{}[0.8, 3.5]} \\

@@ -275,8 +275,16 @@ def tabla_resumen(escenarios):
 
 # ---------------- Modulo U4 (IPPO) ----------------
 VARIANTES = ["local", "vecinos", "spill", "cambio"]
-NOMBRE_VARIANTE = {"local": "IPPO local", "vecinos": "IPPO vecinos", "spill": "IPPO spill",
+# Nombres del glosario de la tesis (entrega 3, ajuste A8, 23.10.2026); antes IPPO local, vecinos y spill.
+# En las tablas, la forma corta "IPPO con penalización" (de spillback).
+NOMBRE_VARIANTE = {"local": "IPPO sin mensajes", "vecinos": "IPPO con mensajes", "spill": "IPPO con penalización",
                    "cambio": "IPPO cambio"}
+
+
+def encabezado(nombre):
+    """Nombre de un control en un encabezado de dos lineas: corta en el ultimo espacio ("IPPO con\\\\mensajes");
+    con dos palabras queda como antes ("IPPO\\\\local")."""
+    return r"\makecell{" + r"\\".join(nombre.rsplit(" ", 1)) + "}"
 METRICAS_U4 = METRICAS_EVAL + [
     ("retraso_corredor_punta", "Retraso de paso, sentido punta (s)"),
     ("paradas_corredor", "Paradas de paso (/veh)"),
@@ -355,7 +363,7 @@ def tabla_u4(esc):
         (r"\setlength{\tabcolsep}{2pt}" if ancha else "")
         + r"\begin{tabular}{" + ("p{2.8cm}" if ancha else "p{3.3cm}") + "r" * len(columnas) + "}",
         r"\toprule",
-        "Métrica & " + " & ".join(r"\makecell{" + nombres[b].replace(" ", r"\\") + "}" for b in columnas)
+        "Métrica & " + " & ".join(encabezado(nombres[b]) for b in columnas)
         + r" \\",
         r"\midrule"]) + "\n"
     corto = f"Escenario {nom(esc)}: evaluación de las variantes IPPO"
@@ -495,8 +503,8 @@ def tabla_s1(esc):
         r"Canal & Retraso (s/veh) & \makecell{Diferencia vs\\perfecto (s)} & "
         r"\makecell{Paso con\\$\le 1$ parada} & \makecell{Retraso de paso\\punta (s)} & Cambios \\",
         r"\midrule"]) + "\n"
-    corto = f"Escenario {nom(esc)}: IPPO vecinos con canal imperfecto"
-    largo = (f"Escenario {nom(esc)}: la política mediana de IPPO vecinos evaluada con latencia y pérdida de "
+    corto = f"Escenario {nom(esc)}: IPPO con mensajes y canal imperfecto"
+    largo = (f"Escenario {nom(esc)}: la política mediana de IPPO con mensajes evaluada con latencia y pérdida de "
              "mensajes, sin reentrenar, sobre las mismas semillas. La diferencia frente al canal "
              "perfecto es la media pareada por semilla $\\pm$ IC95\\,\\%.")
     return (abrir_tabla() + cabecera + "\n".join(lineas) + "\n" r"\bottomrule" "\n"
@@ -532,8 +540,8 @@ def tabla_ippo_episodios(esc):
                         num(f["recompensa_total_decision"]), f["cambios_fase"],
                         num(f["entropia_libre"], 3), num(f["kl_aprox"], 4),
                         num(f.get("eval_timeloss"))]) + r" \\")
-            corto = f"Escenario {nom(esc)}: entrenamiento IPPO {v}, semilla base {base}"
-            largo = (f"Escenario {nom(esc)}: entrenamiento de IPPO {v} con semilla base {base}, {n} episodios "
+            corto = f"Escenario {nom(esc)}: entrenamiento de {NOMBRE_VARIANTE[v]}, semilla base {base}"
+            largo = (f"Escenario {nom(esc)}: entrenamiento de {NOMBRE_VARIANTE[v]} con semilla base {base}, {n} episodios "
                      "(se muestran los cinco primeros y uno de cada diez; la semilla de SUMO de cada "
                      "episodio es la base más su número). $r$/dec.\\ es la recompensa de U2 a reloj "
                      "fijo; $r$ agente, la que vio el agente por decisión; la entropía se promedia "
@@ -566,14 +574,18 @@ def tabla_resumen_u4(escenarios):
         lineas.append(" & ".join(celdas) + r" \\")
     if not lineas:
         return ""
+    # entrega 3: con los nombres del glosario los encabezados son mas anchos; columnas mas juntas (2 pt, como las
+    # tablas U4 de seis controles) para que la tabla quepa en el ancho del texto
     cabecera = "\n".join([
+        r"\setlength{\tabcolsep}{2pt}",
         r"\begin{tabular}{lrrrrrrrrr}",
         r"\toprule",
-        r" & \multicolumn{6}{c}{Retraso (s/veh)} & \multicolumn{2}{c}{IPPO vecinos vs fijo} & "
-        r"\makecell{IPPO vecinos\\vs actuado} \\",
+        r" & \multicolumn{6}{c}{Retraso (s/veh)} & \multicolumn{2}{c}{\makecell{IPPO con mensajes\\vs fijo}} & "
+        r"\makecell{IPPO con\\mensajes\\vs actuado} \\",
         r"\cmidrule(lr){2-7}\cmidrule(lr){8-9}",
-        r"Escenario & Fijo & Actuado & Q-learning & \makecell{IPPO\\local} & \makecell{IPPO\\vecinos} & "
-        r"\makecell{IPPO\\spill} & $\Delta$ [IC95\,\%] & $p$ & $\Delta$ [IC95\,\%] \\",
+        r"Escenario & Fijo & Actuado & Q-learning & " + " & ".join(encabezado(NOMBRE_VARIANTE[v])
+                                                                  for v in ("local", "vecinos", "spill"))
+        + r" & $\Delta$ [IC95\,\%] & $p$ & $\Delta$ [IC95\,\%] \\",
         r"\midrule"]) + "\n"
     largo = ("Resumen del módulo U4: retraso promedio por vehículo con política congelada sobre las "
              "semillas de evaluación, comunes a todos los brazos. Cada variante IPPO es su política "

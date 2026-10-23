@@ -84,8 +84,8 @@ El control de tiempo fijo y el actuado son los dos controles de referencia contr
 cualquier mejora. El control de tiempo fijo repite el mismo programa en todos los ciclos, con duraciones independientes del tráfico
 presente. Su calidad depende del ajuste del ciclo, del reparto y, en un corredor, de los desfases
 \citep{HCM2000_or_2010}. Comparar con un programa fijo sin ajustar sobrestima la
-mejora de cualquier alternativa; por eso el método compara contra un fijo ajustado por barrido en
-cada caso, el fijo tuneado (Capítulo~\ref{cap:metodologia}).
+mejora de cualquier alternativa; por eso el método compara contra el fijo ajustado, el programa
+fijo que elige un barrido en cada caso (Capítulo~\ref{cap:metodologia}).
 
 El control actuado conserva las fases, pero adapta cada verde a lo que miden los detectores:
 prolonga la fase mientras llega un flujo continuo de vehículos y pasa a la siguiente cuando
@@ -240,7 +240,7 @@ verde o se pasa a la fase siguiente y la recompensa penaliza la congestión; su 
 formula en el Capítulo~\ref{cap:metodologia}. El MDP supone que todos los pasos pesan lo mismo en
 el descuento. Si las decisiones duran intervalos distintos, como cuando cambiar de fase consume
 además el ámbar, el problema es en rigor semi-markoviano \citep{SuttonBarto2018}; el plan de pruebas trata
-cada decisión como un paso con el mismo descuento (Capítulo~\ref{cap:implementacion}), y el análisis exploratorio posterior prueba descontar por segundo (Sección~\ref{sec:correccion-entrenamiento}).
+cada decisión como un paso con el mismo descuento (Capítulo~\ref{cap:implementacion}), y el diagnóstico posterior del entrenamiento prueba descontar por segundo (Anexo~G).
 % TODO(reestructura): verificar que SuttonBarto2018 (sec. 17.2) trate los procesos semi-markovianos; si no,
 % citar Sutton, Precup y Singh (1999), que no esta en referencias.bib.
 
@@ -548,8 +548,8 @@ $\pi_\theta(a_i \mid o_i)$, y entre todos maximizan el retorno descontado común
 Lo que ve cada semáforo (sus colas, su fase y, en U4, los mensajes de sus vecinos) es entonces una
 observación local $o_i$, no el estado de toda la red; también lo es la entrada del agente tabular,
 que el Capítulo~\ref{cap:metodologia} llama estado con la terminología del MDP. Además, en esta tesis cada
-agente recibe una recompensa local, calculada sobre sus propias aproximaciones y, en la variante
-\emph{spill}, también sobre los enlaces por los que descarga hacia sus vecinos
+agente recibe una recompensa local, calculada sobre sus propias aproximaciones y, en IPPO con
+penalización de \textit{spillback}, también sobre los enlaces por los que descarga hacia sus vecinos
 (Ecuación~\ref{eq:recompensa-u4}), y no una recompensa común: el problema no es exactamente el
 Dec-POMDP de recompensa compartida de Yu et al.
 % TODO(reestructura): citar una fuente que formalice el caso con recompensas individuales por agente (juego
@@ -589,9 +589,10 @@ del MAPPO de esta tesis se describe en el Capítulo~\ref{cap:implementacion}.
 
 Otra vía de coordinación es la comunicación explícita: cada agente recibe mensajes de sus vecinos
 y los incorpora a su observación, de modo que la política sigue siendo descentralizada pero ve
-información que su detector propio no puede medir. Es la vía de U4: en IPPO vecinos, IPPO spill,
-DQN y MAPPO la coordinación entra por la observación y, en IPPO spill, que penaliza el
-\textit{spillback}, también por la recompensa (Capítulo~\ref{cap:metodologia}).
+información que su detector propio no puede medir. Es la vía de U4: en IPPO con mensajes entre
+vecinos, IPPO con penalización de \textit{spillback}, DQN y MAPPO la coordinación entra por la
+observación y, en IPPO con penalización de \textit{spillback}, también por la recompensa
+(Capítulo~\ref{cap:metodologia}).
 % TODO(reestructura): citar una referencia de RL multiagente con comunicacion entre agentes; Yu2021_MAPPO no la
 % trata y no hay otra en referencias.bib.
 
@@ -653,9 +654,9 @@ que pueden mover unas pocas semillas con diferencias grandes; la prueba usa el s
 todas las diferencias. Por eso pueden discrepar. Si unas pocas semillas tienen diferencias grandes
 de un signo y las demás se reparten alrededor de cero, el intervalo puede excluir el cero sin que la
 prueba sea significativa; si muchas diferencias pequeñas de un signo conviven con unas pocas
-grandes del otro, puede ocurrir lo contrario. Lo primero ocurre en P5 y en P6 frente al fijo,
-con IPPO vecinos en P5 y con IPPO spill en P6, y en P2 con MAPPO frente al actuado
-(Capítulo~\ref{cap:resultados}). La regla de veredicto del Capítulo~\ref{cap:metodologia} exige
+grandes del otro, puede ocurrir lo contrario. Lo primero ocurre frente al fijo en P5 para IPPO
+con mensajes y en P6 para IPPO con penalización de \textit{spillback}, y frente al actuado en P2
+para MAPPO (Capítulo~\ref{cap:resultados}). La regla de veredicto del Capítulo~\ref{cap:metodologia} exige
 las dos condiciones.
 % fuente: plan2/veredicto_congelado_0355.csv (= plan2/veredicto.csv del resultado principal; P5 ippo_vecinos:
 % ic_fijo [0.4, 3.4], p_fijo 0.523; P2 mappo: ic_act [-4.5, -0.1], p_act 0.0687); P6: plan2/veredicto.csv

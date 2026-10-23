@@ -31,20 +31,23 @@
 \coordinate (jd) at (\xs,-3.78);                        % aqui se une el mensaje
 \node[decision=u2, anchor=north] (decide) at (\xs,-4.137) {¿Decide el\\ agente $i$?};
 \node[proceso=u2, text width=4.7cm, anchor=north] (cerrar) at (\xs,-5.85)
-  {\nodo{Cerrar la decisión anterior}{$r_i$ = suma por segundo / 5\\ (\textit{spill}: $-$ 2 $\cdot$ exceso / 5);\\ guarda $0.02\,r_i$ en la trayectoria}};
+  {\nodo{Cerrar la decisión anterior}{$r_i$ = suma por segundo / 5\\ (penalización: $-$ 2 $\cdot$ exceso / 5);\\ guarda $0.02\,r_i$ en la trayectoria}};
 \node[proceso, text width=4.7cm, anchor=north] (obs) at (\xs,-7.70)
-  {\nodo{Observar}{$o_i$ = 12 locales + id + 8 por lado;\\ $d$ = 31 (53 en P5); local: ranuras 0}};
+  {\nodo{Observar}{$o_i$ = 12 locales + id + 8 por lado;\\ $d$ = 31 (53 en P5); sin mensajes: 0}};
 \node[proceso=u2, text width=4.7cm, align=flush center, anchor=north] (elegir) at (\xs,-9.23)
   {\nodo{Elegir: mantener o cambiar}{actor compartido $\pi(a \mid o_i)$,\\ con máscara; muestrea al entrenar;\\ la más probable al evaluar}};
 \node[proceso=u2, text width=4.7cm, anchor=north] (aplicar) at (\xs,-11.08)
   {\nodo{Aplicar la acción}{0: mantener; 1: ámbar de 3 s\\ y el otro verde}};
 \node[proceso=u2, text width=4.7cm, anchor=north] (avanzar) at (\xs,-12.86)
-  {\nodo{Avanzar 1 s}{acumula la recompensa de $i$\\ (\textit{spill}: y el exceso de cola en $i \to j$)}};
+  {\nodo{Avanzar 1 s}{acumula la recompensa de $i$\\ (penalización: y el exceso en $i \to j$)}};
 \node[decision=u2, anchor=north] (fin) at (\xs,-14.39) {¿Red vacía o\\ 6000 pasos?};
 
-% marca de variante (spill) centrada sobre la esquina superior derecha
-\node[marca, anchor=center] at (cerrar.north east) {\textit{spill}};
-\node[marca, anchor=center] at (avanzar.north east) {\textit{spill}};
+% marca de variante (IPPO con penalizacion de spillback); entrega 3 (23.10.2026, glosario de la tesis): antes decia
+% "spill" y iba centrada en la esquina superior derecha. Con el nombre largo va encima del borde, en la esquina
+% izquierda: a la derecha tapaba el titulo de "Cerrar" y tocaba las etiquetas "si: cada 5 s..." y "tras todos los
+% agentes", que estan a la derecha de las flechas
+\node[marca, anchor=south west] at ($(cerrar.north west)+(-0.05,-0.05)$) {penalización};
+\node[marca, anchor=south west] at ($(avanzar.north west)+(-0.05,-0.05)$) {penalización};
 
 % ---------------------------------------------------------------- SUMO (U3), fuera del recuadro
 % misma geometria que en u2.tex (text width 2.45 cm, inner xsep 3pt, x 0.02; recuadro desde
@@ -79,7 +82,7 @@
 % puerto hacia U2: con la punta de 120 grados del estilo mediria 3.2 cm y no cabe bajo SUMO
 \node[puerto=u2, hacia izquierda, signal pointer angle=150, text width=2.3cm, anchor=east]
   (pu2) at (2.88,-17.16)
-  {\textbf{Sigue el ciclo}\\ \textbf{de U2}:\\ validación,\\ \textit{checkpoint},\\ episodio $k + 1$;\\ publicación de\\ la política (\itf{7})};
+  {\textbf{Sigue el ciclo}\\ \textbf{de U2}:\\ validación,\\ \textit{checkpoint},\\ episodio $k + 1$;\\ versión\\ guardada (\itf{7})};
 
 % ---------------------------------------------------------------- fondos
 \begin{scope}[on background layer]
@@ -102,7 +105,7 @@
 
 % reloj "si" -> mensaje; el mensaje se une a reloj -> decide sobre decide
 \draw[flujo] (reloj.east) -- (msg.west |- reloj.east);
-\node[etiqueta en grupo, anchor=south west] at (7.19,-2.76) {sí (no en\\ IPPO local)};
+\node[etiqueta en grupo, anchor=south west] at (7.19,-2.76) {sí (solo con\\ mensajes)};
 \draw[flujo] (msg.west |- jd) -- ($(jd)+(0.0105,0)$);
 
 % decide "no": por la derecha hasta avanzar (encierra criticos y trayectorias)

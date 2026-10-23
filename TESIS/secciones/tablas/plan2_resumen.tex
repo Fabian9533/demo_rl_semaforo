@@ -6,21 +6,21 @@
 \setlength{\tabcolsep}{2.5pt}
 \begin{tabular}{lcccccc}
 \toprule
-Modelo & \makecell{P1\\corredor} & \makecell{P2\\corredor\_alta} & \makecell{P3\\red} & \makecell{P4\\red\_alta} & \makecell{P5\\malla3} & \makecell{P6\\malla3\_alta} \\
+Modelo & \makecell{P1\\Corredor\\nominal} & \makecell{P2\\Corredor\\alta} & \makecell{P3\\Red con\\rotonda\\nominal} & \makecell{P4\\Red con\\rotonda\\alta} & \makecell{P5\\Malla $3 \times 3$\\nominal} & \makecell{P6\\Malla $3 \times 3$\\alta} \\
 \midrule
-\makecell[l]{Fijo tuneado\\(s/veh)} & \makecell{21.30\\$\pm$ 0.26} & \makecell{154.70\\$\pm$ 1.06} & \makecell{21.72\\$\pm$ 0.10} & \makecell{30.05\\$\pm$ 0.98} & \makecell{20.84\\$\pm$ 0.05} & \makecell{36.73\\$\pm$ 0.13} \\
+\makecell[l]{Fijo ajustado\\(s/veh)} & \makecell{21.30\\$\pm$ 0.26} & \makecell{154.70\\$\pm$ 1.06} & \makecell{21.72\\$\pm$ 0.10} & \makecell{30.05\\$\pm$ 0.98} & \makecell{20.84\\$\pm$ 0.05} & \makecell{36.73\\$\pm$ 0.13} \\
 \midrule
 Actuado & \makecell{21.07\\$-$1.1 EMP} & \makecell{124.14\\$-$19.8 FUN} & \makecell{21.48\\$-$1.1 MEJ} & \makecell{30.04\\$-$0.1 EMP} & \makecell{25.37\\+21.8 FAL} & \makecell{63.66\\+73.3 FAL} \\
-Q-learning & \makecell{23.26\\+9.2 FAL} & \makecell{141.14\\$-$8.8 MEJ} & \makecell{24.41\\+12.4 FAL} & \makecell{33.03\\+9.9 PEN (FAL)} & \makecell{29.69\\+42.5 FAL} & \makecell{47.19\\+28.5 FAL} \\
-SARSA & \makecell{24.27\\+14.0 FAL} & \makecell{164.91\\+6.6 FAL} & \makecell{24.15\\+11.2 FAL} & \makecell{33.19\\+10.4 FAL} & \makecell{29.18\\+40.0 FAL} & \makecell{45.35\\+23.5 PEN (FAL)} \\
-\texttt{ql\_colas} & \makecell{23.56\\+10.6 FAL} & \makecell{165.25\\+6.8 PEN (FAL)} & \makecell{23.81\\+9.6 FAL} & \makecell{33.00\\+9.8 FAL} & sin datos & sin datos \\
-DQN & \makecell{20.56\\$-$3.5 MEJ} & \makecell{124.66\\$-$19.4 FUN} & \makecell{21.32\\$-$1.8 MEJ} & \makecell{29.04\\$-$3.4 MEJ} & \makecell{23.15\\+11.1 PEN (FAL)} & \makecell{40.80\\+11.1 PEN (FAL)} \\
-IPPO local & \makecell{21.19\\$-$0.5 EMP} & \makecell{119.43\\$-$22.8 FUN} & \makecell{22.21\\+2.3 FAL} & \makecell{30.91\\+2.9 FAL} & \makecell{26.23\\+25.9 FAL} & \makecell{39.15\\+6.6 FAL} \\
-IPPO vecinos & \makecell{19.84\\$-$6.8 FUN} & \makecell{118.66\\$-$23.3 FUN} & \makecell{19.81\\$-$8.8 FUN} & \makecell{28.97\\$-$3.6 MEJ} & \makecell{21.21\\+1.8 EMP} & \makecell{37.54\\+2.2 PEN (EMP)} \\
-IPPO spill & \makecell{20.19\\$-$5.2 FUN} & \makecell{119.62\\$-$22.7 FUN} & = vecinos & = vecinos & = vecinos & \makecell{38.05\\+3.6 PEN (EMP)} \\
-MAPPO & \makecell{19.79\\$-$7.1 FUN} & \makecell{121.24\\$-$21.6 FUN} & \makecell{20.01\\$-$7.8 PEN (FUN)} & \makecell{29.45\\$-$2.0 PEN (MEJ)} & \makecell{20.78\\$-$0.3 EMP} & \makecell{41.32\\+12.5 PEN (FAL)} \\
+Q-learning & \makecell{23.26\\+9.2 FAL} & \makecell{141.14\\$-$8.8 MEJ} & \makecell{24.41\\+12.4 FAL} & \makecell{33.03\\+9.9\\PEN (FAL)} & \makecell{29.69\\+42.5 FAL} & \makecell{47.19\\+28.5 FAL} \\
+SARSA & \makecell{24.27\\+14.0 FAL} & \makecell{164.91\\+6.6 FAL} & \makecell{24.15\\+11.2 FAL} & \makecell{33.19\\+10.4 FAL} & \makecell{29.18\\+40.0 FAL} & \makecell{45.35\\+23.5\\PEN (FAL)} \\
+\makecell[l]{Q-learning\\(colas)} & \makecell{23.56\\+10.6 FAL} & \makecell{165.25\\+6.8\\PEN (FAL)} & \makecell{23.81\\+9.6 FAL} & \makecell{33.00\\+9.8 FAL} & sin datos & sin datos \\
+DQN & \makecell{20.56\\$-$3.5 MEJ} & \makecell{124.66\\$-$19.4 FUN} & \makecell{21.32\\$-$1.8 MEJ} & \makecell{29.04\\$-$3.4 MEJ} & \makecell{23.15\\+11.1\\PEN (FAL)} & \makecell{40.80\\+11.1\\PEN (FAL)} \\
+\makecell[l]{IPPO sin\\mensajes} & \makecell{21.19\\$-$0.5 EMP} & \makecell{119.43\\$-$22.8 FUN} & \makecell{22.21\\+2.3 FAL} & \makecell{30.91\\+2.9 FAL} & \makecell{26.23\\+25.9 FAL} & \makecell{39.15\\+6.6 FAL} \\
+\makecell[l]{IPPO con\\mensajes} & \makecell{19.84\\$-$6.8 FUN} & \makecell{118.66\\$-$23.3 FUN} & \makecell{19.81\\$-$8.8 FUN} & \makecell{28.97\\$-$3.6 MEJ} & \makecell{21.21\\+1.8 EMP} & \makecell{37.54\\+2.2\\PEN (EMP)} \\
+\makecell[l]{IPPO con\\penalización} & \makecell{20.19\\$-$5.2 FUN} & \makecell{119.62\\$-$22.7 FUN} & \makecell{igual a IPPO\\con mensajes} & \makecell{igual a IPPO\\con mensajes} & \makecell{igual a IPPO\\con mensajes} & \makecell{38.05\\+3.6\\PEN (EMP)} \\
+MAPPO & \makecell{19.79\\$-$7.1 FUN} & \makecell{121.24\\$-$21.6 FUN} & \makecell{20.01\\$-$7.8\\PEN (FUN)} & \makecell{29.45\\$-$2.0\\PEN (MEJ)} & \makecell{20.78\\$-$0.3 EMP} & \makecell{41.32\\+12.5\\PEN (FAL)} \\
 \bottomrule
 \end{tabular}
-\caption[Retraso y cambio frente al fijo por caso y modelo]{Resumen del plan de pruebas por caso y modelo, sobre las semillas de evaluación 1001 a 1030. Primera fila: retraso del fijo tuneado (s/veh), media $\pm$ semiamplitud del IC95\,\%. Demás filas: retraso medio del modelo (s/veh), es decir, de la política publicada de su base publicada, y debajo $\Delta_f$ (\%) con el veredicto abreviado: FUN, funciona; MEJ, mejora; EMP, empata; FAL, falla. PEN (x): pendiente porque la base publicada no converge, con el veredicto provisional x. = vecinos: el término de \textit{spillback} no se activa y la política es la de IPPO vecinos. Sin datos: la ablación \texttt{ql\_colas} (``Q-learning (colas)'' en las tablas de veredicto) no se corrió en P5 ni en P6. Los intervalos, los valores $p$ y $\Delta_a$ están en las tablas por modelo.}
+\caption[Retraso y cambio frente al fijo por caso y modelo]{Resumen del plan de pruebas por caso y modelo, sobre las semillas de evaluación 1001 a 1030. Primera fila: retraso del fijo ajustado (s/veh), media $\pm$ semiamplitud del IC95\,\%. Demás filas: retraso medio del modelo (s/veh), es decir, de su versión evaluada, y debajo $\Delta_f$ (\%) con el veredicto abreviado: FUN, funciona; MEJ, mejora; EMP, empata; FAL, falla; PEN, pendiente porque el entrenamiento de la versión evaluada no converge, con el veredicto provisional entre paréntesis. Igual a IPPO con mensajes: la penalización de \textit{spillback} no se activa y la política es la de IPPO con mensajes. Sin datos: Q-learning (colas) no se corrió en P5 ni en P6. Los intervalos, los valores $p$ y $\Delta_a$ están en las tablas por modelo.}
 \label{tab:plan2-resumen}
 \end{table}

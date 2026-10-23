@@ -6,7 +6,7 @@
 \setlength{\tabcolsep}{3pt}
 \setlength{\tabcolsep}{2pt}\begin{tabular}{p{2.8cm}rrrrrr}
 \toprule
-Métrica & \makecell{Fijo} & \makecell{Actuado} & \makecell{Q-learning} & \makecell{IPPO\\local} & \makecell{IPPO\\vecinos} & \makecell{IPPO\\spill} \\
+Métrica & \makecell{Fijo} & \makecell{Actuado} & \makecell{Q-learning} & \makecell{IPPO sin\\mensajes} & \makecell{IPPO con\\mensajes} & \makecell{IPPO con\\penalización} \\
 \midrule
 Retraso (s/veh) & 21.78 $\pm$ 0.22 & 21.42 $\pm$ 0.23 & 25.12 $\pm$ 0.31 & 22.17 $\pm$ 0.23 & 21.89 $\pm$ 0.28 & 21.68 $\pm$ 0.13 \\
 Espera detenida (s/veh) & 7.41 $\pm$ 0.16 & 5.45 $\pm$ 0.19 & 7.71 $\pm$ 0.15 & 7.25 $\pm$ 0.15 & 7.53 $\pm$ 0.28 & 7.38 $\pm$ 0.10 \\
@@ -44,9 +44,9 @@ Vehículos no terminados & 0 $\pm$ 0 & 0 $\pm$ 0 & 0 $\pm$ 0 & 0 $\pm$ 0 & 0 $\p
 \cmidrule(lr){3-5}\cmidrule(lr){6-8}
 Variante & (s/veh) & vs fijo & vs actuado & vs Q-learning & Espera & Paradas & Cambios \\
 \midrule
-IPPO local & 22.17 & \makecell[r]{+1.8\,\%\\{}[0.7, 2.9]\\$p$ = 0.0195} & \makecell[r]{+3.5\,\%\\{}[2.7, 4.4]\\$p$ = 0.00195} & \makecell[r]{$-$11.7\,\%\\{}[$-$12.7, $-$10.6]\\$p$ = 0.00195} & $-$2.2\,\% & +19.8\,\% & +18.9\,\% \\
-IPPO vecinos & 21.89 & \makecell[r]{+0.5\,\%\\{}[$-$0.3, 1.3]\\$p$ = 0.414} & \makecell[r]{+2.2\,\%\\{}[0.8, 3.5]\\$p$ = 0.0195} & \makecell[r]{$-$12.9\,\%\\{}[$-$14.1, $-$11.6]\\$p$ = 0.00195} & +1.6\,\% & +11.1\,\% & +16.3\,\% \\
-IPPO spill & 21.68 & \makecell[r]{$-$0.5\,\%\\{}[$-$1.7, 0.6]\\$p$ = 0.846} & \makecell[r]{+1.2\,\%\\{}[0.2, 2.1]\\$p$ = 0.0371} & \makecell[r]{$-$13.7\,\%\\{}[$-$14.7, $-$12.7]\\$p$ = 0.00195} & $-$0.5\,\% & +9.0\,\% & +14.6\,\% \\
+IPPO sin mensajes & 22.17 & \makecell[r]{+1.8\,\%\\{}[0.7, 2.9]\\$p$ = 0.0195} & \makecell[r]{+3.5\,\%\\{}[2.7, 4.4]\\$p$ = 0.00195} & \makecell[r]{$-$11.7\,\%\\{}[$-$12.7, $-$10.6]\\$p$ = 0.00195} & $-$2.2\,\% & +19.8\,\% & +18.9\,\% \\
+IPPO con mensajes & 21.89 & \makecell[r]{+0.5\,\%\\{}[$-$0.3, 1.3]\\$p$ = 0.414} & \makecell[r]{+2.2\,\%\\{}[0.8, 3.5]\\$p$ = 0.0195} & \makecell[r]{$-$12.9\,\%\\{}[$-$14.1, $-$11.6]\\$p$ = 0.00195} & +1.6\,\% & +11.1\,\% & +16.3\,\% \\
+IPPO con penalización & 21.68 & \makecell[r]{$-$0.5\,\%\\{}[$-$1.7, 0.6]\\$p$ = 0.846} & \makecell[r]{+1.2\,\%\\{}[0.2, 2.1]\\$p$ = 0.0371} & \makecell[r]{$-$13.7\,\%\\{}[$-$14.7, $-$12.7]\\$p$ = 0.00195} & $-$0.5\,\% & +9.0\,\% & +14.6\,\% \\
 \bottomrule
 \end{tabular}
 \caption[Escenario red: cambio del retraso de las variantes IPPO]{Escenario red: cambio porcentual del retraso de cada variante IPPO (política mediana) frente al fijo, al actuado y a Q-learning, con intervalo bootstrap pareado por semilla y $p$ de Wilcoxon pareado; a la derecha, cambio frente al fijo de tres secundarias.}
