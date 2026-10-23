@@ -54,15 +54,11 @@ SUMO ofrece dos vías para importar la cartografía: el asistente gráfico
 \verb|osmGet.py| seguida de su conversión con \verb|netconvert|, que da
 un control más fino sobre los filtros de importación a cambio de más
 pasos. Las dos producen un archivo \texttt{.net.xml} que después
-requiere limpieza. El asistente se ejecuta desde la carpeta de
-herramientas de SUMO:
+requiere limpieza. El asistente se ejecuta con Python desde la carpeta
+de herramientas de SUMO (\texttt{tools}).
 \end{sloppypar}
-
-{\footnotesize
-\begin{verbatim}
-python tools/osmWebWizard.py
-\end{verbatim}
-}
+% 22.10.2026 (entrega 3, sin codigo en la tesis): se quito el bloque con la orden "python tools/osmWebWizard.py";
+% sigue en el commit 5b9b7a6
 
 El asistente abre un navegador con el mapa de OSM, donde se ajusta el
 \textit{bounding box} sobre la intersección de interés. Con la opción

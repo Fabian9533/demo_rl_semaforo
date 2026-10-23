@@ -5,8 +5,7 @@ Este capítulo cuenta cómo se construyó y se ejecutó lo diseñado en el
 Capítulo~\ref{cap:metodologia}: el equipo de cómputo, los escenarios de
 SUMO y sus programas de referencia, el bucle de entrenamiento, la
 implementación de cada aprendiz, los ajustes que dejó la prueba de
-humo, la ejecución del plan de pruebas y los comandos para
-reproducirlo.
+humo, la ejecución del plan de pruebas y cómo reproducirlo.
 
 
 %----------------------------------------------------------------------
@@ -67,29 +66,11 @@ nodos da la posición de cada nodo en metros y su tipo:
 identificador de su programa, y \texttt{priority} para los demás. El
 de vías da, para cada tramo dirigido, su nodo de origen y de destino,
 el número de carriles y la velocidad máxima (en el corredor,
-13.89~m/s, es decir, 50~km/h). Un extracto de los archivos del
-corredor:
-
-{\footnotesize\begin{verbatim}
-<node id="C1" x="0" y="0" type="traffic_light" tl="semaforo_C1"/>
-<node id="W"  x="-400" y="0" type="priority"/>
-
-<edge id="W_C1"  from="W"  to="C1" numLanes="1" speed="13.89"/>
-<edge id="C1_C2" from="C1" to="C2" numLanes="1" speed="13.89"/>
-\end{verbatim}
-}
+13.89~m/s, es decir, 50~km/h).
 
 El script \texttt{build\_net.bat} reúne los comandos de
-\texttt{netconvert} de todos los escenarios. El del corredor, que en
-el script ocupa una sola línea, es:
-
-{\footnotesize\begin{verbatim}
-netconvert --node-files corredor.nod.xml --edge-files corredor.edg.xml
-           --output-file corredor.net.xml --no-turnarounds --tls.green.time 25
-\end{verbatim}
-}
-
-La opción \verb|--no-turnarounds| evita que \texttt{netconvert} agregue
+\texttt{netconvert} de todos los escenarios. En esos comandos, la
+opción \verb|--no-turnarounds| evita que \texttt{netconvert} agregue
 giros en U, y \verb|--tls.green.time| fija el verde del programa
 estático que \texttt{netconvert} escribe por omisión en la red para
 cada semáforo (25~s en corredor, 20~s en red y malla3). Ese programa
@@ -97,48 +78,33 @@ no es el fijo de referencia, pero de él sale el actuado
 (Sección~\ref{sec:referencias-fijas}). Los escenarios usan el ámbar de
 3~s que \texttt{netconvert} asigna por omisión, idéntico en todos los
 controles comparados.
-% fuente: build_net.bat; corredor.nod.xml y corredor.edg.xml (lineas copiadas tal cual)
+% fuente: build_net.bat (sus cinco ordenes de netconvert llevan --no-turnarounds y --tls.green.time);
+% corredor.nod.xml y corredor.edg.xml (numLanes 1 y speed 13.89 en todas las vias)
+% 22.10.2026 (entrega 3, sin codigo en la tesis): se quitaron el extracto de corredor.nod.xml y
+% corredor.edg.xml y la orden de netconvert del corredor; siguen en el commit 5b9b7a6
 
 \subsection{Programas de semáforos}
 
 El programa fijo de cada escenario va en un archivo adicional
 (\texttt{.add.xml}) que el \texttt{.sumocfg} carga junto con la red y
-las rutas. El del corredor (P1), sin su comentario de cabecera, es:
-
-{\footnotesize\begin{verbatim}
-<additional>
-    <tlLogic id="semaforo_C1" type="static" programID="fijo" offset="0">
-        <phase duration="10" state="GGgrrrGGgrrr"/>
-        <phase duration="3" state="yyyrrryyyrrr"/>
-        <phase duration="20" state="rrrGGgrrrGGg"/>
-        <phase duration="3" state="rrryyyrrryyy"/>
-    </tlLogic>
-    <tlLogic id="semaforo_C2" type="static" programID="fijo" offset="15">
-        <phase duration="10" state="GGgrrrGGgrrr"/>
-        <phase duration="3" state="yyyrrryyyrrr"/>
-        <phase duration="20" state="rrrGGgrrrGGg"/>
-        <phase duration="3" state="rrryyyrrryyy"/>
-    </tlLogic>
-</additional>
-\end{verbatim}
-}
-% fuente: plan2/corredor.add.xml (instalado por barrer_fijo.py; copiado sin el comentario inicial);
-% el re-barrido del 27.09.2026 (malla de avenida 10-30 s, retraso total) reinstalo el mismo programa:
-% las fases y los offsets del extracto coinciden con el archivo reinstalado
-
-El atributo \texttt{state} lleva un carácter por cada conexión del
+las rutas. Cada fase del programa tiene una duración y un estado, el
+atributo \texttt{state}, que lleva un carácter por cada conexión del
 cruce (doce en el corredor), en el orden en que las numera
 \texttt{netconvert}: primero las de la aproximación norte y luego las
 del este, el sur y el oeste. \texttt{G} y \texttt{g} indican verde con
 y sin prioridad (con \texttt{g} el vehículo cede el paso), \texttt{y}
-ámbar y \texttt{r} rojo. Así, la fase 0 da verde a la transversal
-norte--sur durante 10~s y la fase 2 a la avenida este--oeste durante
-20~s, cada una seguida de su ámbar de 3~s. El atributo
-\texttt{offset} desplaza el inicio del ciclo: los 15~s de
-\texttt{semaforo\_C2} son el desfase que coordina los dos cruces en
-una onda verde. Este programa es el ganador del barrido de P1
+ámbar y \texttt{r} rojo. En el programa del corredor (P1), la fase 0
+da verde a la transversal norte--sur durante 10~s y la fase 2 a la
+avenida este--oeste durante 20~s, cada una seguida de su ámbar de
+3~s. El atributo \texttt{offset} desplaza el inicio del ciclo: los
+15~s de \texttt{semaforo\_C2} son el desfase que coordina los dos
+cruces en una onda verde. Este programa es el ganador del barrido de P1
 (Sección~\ref{sec:referencias-fijas}), y también el del re-barrido
 del análisis de robustez (Sección~\ref{sec:remedicion}).
+% fuente: plan2/corredor.add.xml (instalado por barrer_fijo.py): en semaforo_C1 y semaforo_C2, fases de 10, 3,
+% 20 y 3 s con los estados GGgrrrGGgrrr, yyyrrryyyrrr, rrrGGgrrrGGg y rrryyyrrryyy; offset 0 y 15. El
+% re-barrido del 27.09.2026 (malla de avenida 10-30 s, retraso total) reinstalo el mismo programa
+% 22.10.2026 (entrega 3, sin codigo en la tesis): se quito el listado de ese archivo; sigue en el commit 5b9b7a6
 
 \subsection{Demanda}
 
@@ -148,31 +114,18 @@ vigencia y su tasa de llegada. SUMO calcula la ruta más corta entre
 origen y destino, de modo que no hace falta un paso previo de
 enrutamiento, y el reparto direccional de la demanda queda bajo
 control explícito, que es lo que se manipula para construir los
-periodos de punta invertida. Un extracto del corredor, con el tipo de
-vehículo que comparten todos los escenarios y el flujo de la avenida
-de oeste a este en los dos periodos:
+periodos de punta invertida.
 
-{\scriptsize\begin{verbatim}
-<routes>
-  <vType id="auto" accel="2.6" decel="4.5" sigma="0.5"
-         length="5" minGap="2.5" maxSpeed="13.89"/>
-  <!-- Periodo 1 (0-1800 s): hora punta de oeste a este a lo largo del corredor -->
-  <flow id="p1_W_E" type="auto" from="W_C1" to="C2_E"
-        begin="0" end="1800" vehsPerHour="600"/>
-  <!-- Periodo 2 (1800-3600 s): la punta se invierte, de este a oeste -->
-  <flow id="p2_W_E" type="auto" from="W_C1" to="C2_E"
-        begin="1800" end="3600" vehsPerHour="250"/>
-</routes>
-\end{verbatim}
-}
-% fuente: plan2/corredor.rou.xml (lineas copiadas, partidas en dos sin cambiar atributos; se omiten
-% los demas flujos)
-
-El tipo de vehículo es un turismo de 5~m (\texttt{length}) que se
-detiene a 2.5~m del anterior (\texttt{minGap}), con aceleración de
-2.6~m/s$^2$, deceleración de 4.5~m/s$^2$ y velocidad máxima de
-13.89~m/s. Largo y separación suman los 7.5~m con que se cuentan las
-plazas de un carril.
+El tipo de vehículo, el mismo en todos los escenarios, es un turismo
+de 5~m (\texttt{length}) que se detiene a 2.5~m del anterior
+(\texttt{minGap}), con aceleración de 2.6~m/s$^2$, deceleración de
+4.5~m/s$^2$ y velocidad máxima de 13.89~m/s. Largo y separación suman
+los 7.5~m con que se cuentan las plazas de un carril.
+% fuente: vType "auto" de plan2/corredor.rou.xml (accel 2.6, decel 4.5, sigma 0.5, length 5, minGap 2.5,
+% maxSpeed 13.89)
+% 22.10.2026 (entrega 3, sin codigo en la tesis): se quito el extracto de ese archivo (el vType y el flujo
+% p1_W_E / p2_W_E, 600 y 250 veh/h); sigue en el commit 5b9b7a6. sigma = 0.5 esta en sec:escenarios del Cap. III
+% y los flujos, en tab:demanda-flujos
 
 El atributo \verb|vehsPerHour| inserta los vehículos
 \emph{equiespaciados} en el tiempo, de modo que la secuencia de
@@ -650,8 +603,8 @@ función \texttt{correr\_episodio} de \texttt{rl\_corredor.py}; IPPO,
 DQN y MAPPO, con la de \texttt{rl\_ippo.py}, que usa el mismo reloj de
 decisión y las mismas métricas y a la que \texttt{rl\_dqn.py} y
 \texttt{rl\_mappo.py} se conectan como decisores externos. Los dos
-scripts están en el Anexo~B y su ciclo, en la
-Figura~\ref{fig:flujo-u2}.
+scripts figuran en la tabla de programas del Anexo~B, y su ciclo, en
+la Figura~\ref{fig:flujo-u2}.
 
 \subsection{Pasos del ciclo}
 
@@ -749,51 +702,9 @@ equiespaciadas (Sección~\ref{sec:construccion}). Las métricas de los episodios
 aprendizaje, con exploración y con la tabla $Q$ cambiando dentro de la
 hora; el resultado del agente se mide aparte, con la política
 congelada y las semillas de evaluación (Sección~\ref{sec:protocolo}).
-
-\subsection{Pseudocódigo del episodio tabular}
-
-El núcleo del episodio de entrenamiento, simplificado a partir de la
-función \texttt{correr\_episodio} de \texttt{rl\_corredor.py}, es el
-siguiente:
-
-{\footnotesize\begin{verbatim}
-traci.start(["sumo", "-c", CFG, "--seed", str(base + k), ...])
-for tls in SEMAFOROS:                 # primer verde sin fin: decide el agente
-    ag[tls] = nuevo_agente(tls)       # verde 0, t_verde 0, s = a = None
-while traci.simulation.getMinExpectedNumber() > 0 and pasos < 6000:
-    for tls, g in ag.items():         # reloj propio de cada agente
-        if g.ambar_restante > 0 or g.t_verde % 5 != 0:
-            continue                  # en ambar no decide; si no, cada 5 s
-        if g.t_verde == 0 and pasos > 0:
-            continue                  # la primera, a los 5 s (salvo paso 0)
-        s2 = estado(tls, g.verde)     # (b_O, b_E, b_N, b_S, phi)
-        a2 = None
-        if g.s is not None:           # cierra la decision anterior
-            r = g.r_acum / 5          # retraso acumulado, entre 5
-            g.r_acum = 0
-            q = Q[tls][g.s]
-            if sarsa:                 # elige a2 antes de actualizar
-                a2 = elegir(Q, tls, s2, eps)
-                objetivo = Q[tls][s2][a2]
-            else:                     # Q-learning
-                objetivo = max(Q[tls][s2])
-            q[g.a] += ALPHA * (r + GAMMA * objetivo - q[g.a])
-        if a2 is None:
-            a2 = elegir(Q, tls, s2, eps)   # epsilon-greedy
-        g.s, g.a = s2, a2
-        if (a2 == 1 and g.t_verde >= VERDE_MIN) or g.t_verde >= VERDE_MAX:
-            poner_ambar(tls)          # 3 s; al terminar entra el otro verde
-    traci.simulationStep()            # 1 s
-    pasos += 1
-    for tls, g in ag.items():
-        if g.s is not None:
-            g.r_acum += recompensa_paso(tls)   # retraso de este segundo
-        avanzar_reloj(g)              # t_verde + 1, o descuenta el ambar
-traci.close()
-\end{verbatim}
-}
-% fuente: rl_corredor.correr_episodio (lineas 291-379, del while a traci.close) y elegir/mejor_accion; VERDE_MIN = 10 s y
-% VERDE_MAX = 60 s en las fases de P1 a P6
+% 22.10.2026 (entrega 3, sin codigo en la tesis): se quito la subseccion "Pseudocodigo del episodio tabular"
+% (simplificado de rl_corredor.correr_episodio, l. 291-379); los pasos del ciclo de arriba y la subseccion
+% siguiente describen lo mismo. Sigue en el commit 5b9b7a6
 
 \subsection{Reloj de decisión con varios semáforos}
 
@@ -806,9 +717,9 @@ información: la única forma en que un cruce percibe a su vecino es a
 través de las colas que le llegan. La primera decisión de cada verde,
 a los 5~s (en el primer verde del episodio, ya en el paso 0), está
 siempre forzada a mantener por el verde mínimo, que en
-P1 a P6 es de 10~s en todas las fases. Como muestra el pseudocódigo, el
-tabular guarda la acción que eligió aunque la restricción impida
-ejecutarla; IPPO, DQN y MAPPO usan en cambio una máscara
+P1 a P6 es de 10~s en todas las fases. El tabular guarda la acción que
+eligió aunque la restricción impida ejecutarla; IPPO, DQN y MAPPO usan
+en cambio una máscara
 (Sección~\ref{sec:formulacion}). El módulo U4 conserva este reloj y
 añade la comunicación entre vecinos.
 % fuente: rl_corredor.py (fases_verdes: verde minimo 10 s con mas de dos conexiones en verde;
@@ -1734,31 +1645,12 @@ decidiendo sola cuando una de las dos acciones está prohibida. El
 número $u$ sale de un generador propio, \texttt{default\_rng} con la
 semilla del episodio más 104\,729, que no toca los
 generadores de Python, NumPy ni PyTorch; el resto del entrenamiento y
-la validación usan los mismos números que en el plan. El núcleo de los
-dos cambios, simplificado a partir de \texttt{correr\_episodio} y de
-\texttt{gae}, es el siguiente:
-
-{\footnotesize\begin{verbatim}
-# al iniciar el episodio (solo en entrenamiento)
-rng_expl = np.random.default_rng(seed + 104729)
-# en cada segundo con decisiones: un u comun
-u = float(rng_expl.random())          # el mismo para todos los que deciden
-p_cambiar = dist.probs[:, 1]          # politica enmascarada
-acciones = (p_cambiar > u).long()     # antes: dist.sample()
-logp = dist.log_prob(acciones)        # logp marginal de cada agente
-b["t"].append(pasos)                  # segundo de la decision
-
-# gae(): descuento por segundo
-expo = intervalos(b) / PASO_CONTROL   # dt / 5: 1 o 1.6
-for t in reversed(range(n)):
-    delta = r[t] + gamma ** expo[t] * v[t + 1] - v[t]    # antes: gamma
-    ultimo = delta + (gamma * lam) ** expo[t] * ultimo   # antes: gamma * lam
-    ventaja[t] = ultimo
-\end{verbatim}
-}
+la validación usan los mismos números que en el plan.
 % fuente: plan2/exploratorio_coord/codigo/smdp_crn.diff (correr_episodio: crn, rng_expl, u, p_cambiar, acciones,
 % logp, b["t"]; intervalos; gae con smdp=True; SEMILLA_EXPL = 104729) y rl_ippo_smdp_crn.py (docstring de gae:
 % 5 s mantener, 8 s cambiar, t_final - t en la ultima, tambien para v_final); PASO_CONTROL = 5 (rl_corredor.py)
+% 22.10.2026 (entrega 3, sin codigo en la tesis): se quito el extracto simplificado de correr_episodio y gae con los
+% dos cambios; el texto y la Ecuacion eq:gae-smdp los describen. Sigue en el commit 5b9b7a6
 
 PPO se actualiza con el logaritmo de la probabilidad de la acción de
 cada semáforo tomada por separado, como en el plan. Con los desvíos
@@ -1803,77 +1695,44 @@ validación, recompensa, hiperparámetros y versión del código). Las
 evaluaciones del barrido de demanda van a \texttt{plan2/demanda/}. La
 cola de la Sección~\ref{sec:ejecucion} corre el plan completo, con P6,
 la re-medición del análisis de robustez y el barrido de demanda. El
-factor de P6 se calcula una vez, antes de generar la lista:
+factor de P6 se calcula una vez, antes de generar la lista
+(Sección~\ref{sec:calibracion}).
 
-{\scriptsize
-\begin{verbatim}
-cd plan2
-python ../calibrar_demanda.py malla3 --nuevo malla3_alta --escribir   # factor de P6, antes de la cola
-python generar_trabajos.py        # escribe cola/trabajos.jsonl (plan, P6, re-medicion, demanda)
-python cola.py --cpus 11          # prioridades, dependencias, logs en cola/logs/
-python fijo_2509.py               # arma el brazo del fijo del plan de cada caso
-python ../consolidar.py --escenario red                    # una vez por escenario
-python ../consolidar.py --escenario red --fijo fijo_2509   # resumen frente al fijo del plan
-python ../barrido_demanda.py resumir         # barrido de demanda: resumen, tabla y figura
-cd ..
-python veredicto.py --metrica timeloss_prom --fijo fijo_2509 --sin-trivial      # resultado principal
-python sintesis_plan.py --metrica timeloss_prom --fijo fijo_2509 --sin-trivial  # numero unico y ANOVA
-cd plan2
-python tablas_cap5.py --metrica timeloss_prom --fijo fijo_2509 --sin-trivial
-\end{verbatim}
-}
-
-\noindent Las tres últimas órdenes escriben las tablas y figuras del
-resultado principal en \texttt{TESIS/}. Sin opciones, los mismos
-scripts usan el retraso total y el fijo re-barrido, que son los del
-análisis de robustez; para no sobrescribir las salidas del resultado
-principal, ese análisis se escribe con otro prefijo:
-
-{\scriptsize
-\begin{verbatim}
-cd ..
-python veredicto.py --prefijo robustez_      # robustez_veredicto.csv y robustez_*.tex (P1 a P6)
-python sintesis_plan.py --prefijo robustez_
-cd plan2
-python tablas_cap5.py --prefijo robustez_
-\end{verbatim}
-}
-
-\noindent Para los controles de referencia de un caso (P3) y un
-entrenamiento de una de sus celdas (Q-learning, base 42), los pasos
-que ejecutó la cola del plan, con el código del commit
-\texttt{37f9680}, son los siguientes. Con el código vigente, el mismo
-barrido se repite con \verb|--metrica timeloss_prom| y la malla del
-plan en \verb|--avenida| y \verb|--transversal|, como el de P6; el
-número de procesos y la carpeta temporal no cambian su resultado:
-
-{\scriptsize
-\begin{verbatim}
-cd plan2
-python preparar.py red
-python ../barrer_fijo.py red --semillas 2001-2003 --tmp tmp_barrido_red --procesos 4 --instalar
-python ../evaluar.py --escenario red --brazo fijo --semillas 1001-1030 \
-    --salida parciales/eval_red_fijo.csv
-python ../evaluar.py --escenario red --brazo actuado --semillas 1001-1030 \
-    --salida parciales/eval_red_actuado.csv
-python ../rl_corredor.py train --escenario red --algoritmo qlearning --recompensa retraso \
-    --seed 42 --episodios 200 --desde-cero
-python ../evaluar.py --escenario red --politica q_table_red_ql_s42.json --semillas 1001-1030 \
-    --salida parciales/eval_red_ql_s42.csv
-python ../consolidar.py --escenario red
-cd ..
-python veredicto.py
-\end{verbatim}
-}
+Las tablas y figuras del resultado principal y las del análisis de
+robustez salen de los mismos programas, con dos configuraciones: la del
+plan, con el retraso medio (\texttt{timeLoss}) y el fijo ajustado del
+plan (Sección~\ref{sec:ejecucion}), y la del análisis de robustez, con
+el retraso total y el fijo re-barrido desde 10~s. El análisis de
+robustez guarda sus salidas con otro nombre para no sobrescribir las del
+resultado principal (Sección~\ref{sec:remedicion}). La cola del plan en
+P1 a P5 corrió con el código del commit \texttt{37f9680}; P6, la
+re-medición y las siete evaluaciones pendientes de IPPO con penalización de
+\textit{spillback} corrieron después, con el código de la re-medición
+(Secciones~\ref{sec:remedicion} y~\ref{sec:p6-demanda}). Con el código
+vigente, el barrido del fijo de un caso del plan se repite como el de
+P6, con la métrica y la rejilla de verdes del plan
+(Sección~\ref{sec:referencias-fijas}); el número de procesos y la
+carpeta temporal del barrido no cambian su resultado.
 % fuente: git HEAD:TESIS/secciones/capitulo4.tex (Reproducibilidad, comandos del 24.09); plan2/cola/trabajos.jsonl
 % (barrido_red y barrido_malla3_alta); docstrings de veredicto.py, sintesis_plan.py, plan2/tablas_cap5.py,
 % plan2/fijo_2509.py y consolidar.py (--fijo), 28.09.2026; en el analisis de robustez el barrido de red fue
 % v21_barrido_red (--tmp tmp_v21_red --procesos 3, sin --metrica) y se agrega --brazo trivial
+% Commit por tramo: git log 37f9680~1..5b9b7a6 no tiene commits de codigo entre 37f9680 (25.09) y 9287b1c (14.10);
+% git show 37f9680:barrer_fijo.py no tiene --metrica ni FIN_SIM, que usa el barrido de P6; P6 y las siete
+% evaluaciones pendientes de spill corrieron con el codigo de la re-medicion (Secciones sec:p6-demanda y
+% sec:spill-vecinos de este capitulo)
+% 22.10.2026 (entrega 3, sin codigo en la tesis): se quitaron los tres bloques de ordenes (resultado principal,
+% robustez y el paso a paso de P3 con Q-learning base 42); siguen en el commit 5b9b7a6. 23.10.2026: las opciones de
+% linea de ordenes que quedaban en prosa (--metrica, --fijo, --sin-trivial, --prefijo, --variante y los ajustes de un
+% hilo) tambien salen del texto. PENDIENTE: pasar las ordenes al LEEME del repositorio, cuya seccion "Como se corre"
+% es del 25.09 (sin P6, fijo_2509 ni --sin-trivial)
 
-\noindent Los aprendices de aproximación de funciones se entrenan con
-\texttt{rl\_ippo.py} (opción \verb|--variante|), \texttt{rl\_dqn.py} y
-\texttt{rl\_mappo.py}, con las mismas opciones de semilla y episodios.
-El software y el equipo son los de la Tabla~\ref{tab:hw}. Cada
-entrenamiento usa un solo hilo (\texttt{torch.set\_num\_threads(1)} y
-\texttt{OMP\_NUM\_THREADS=1}), de modo que varios corren en paralelo
-sin alterar los resultados.
+Los aprendices de aproximación de funciones se entrenan con
+\texttt{rl\_ippo.py}, que corre las tres variantes de IPPO del plan,
+\texttt{rl\_dqn.py} y \texttt{rl\_mappo.py}, con las mismas semillas y
+el mismo número de episodios que los tabulares en
+\texttt{rl\_corredor.py}. El software y el equipo son los de la
+Tabla~\ref{tab:hw}. Cada entrenamiento usa un solo hilo de cálculo, de
+modo que varios corren en paralelo sin alterar los resultados.
+% fuente: rl_ippo.py (--variante local, vecinos y spill; torch.set_num_threads(1)); plan2/cola.py (entorno con
+% OMP_NUM_THREADS=1 y MKL_NUM_THREADS=1)
