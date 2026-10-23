@@ -36,6 +36,14 @@ Cambios de la entrega 3 (23.10.2026), solo en los textos de los .tex (mismas cif
   palabras ("igual a IPPO con mensajes" e "igual al ciclo minimo" en lugar de "= vecinos" y la marca *);
   encabezados de los casos con la red y la demanda, como la matriz de veredicto.py; y el PEN con su provisional
   en una linea aparte de la celda, porque la tabla se salia del margen (unos 31 pt; 43 pt en la robustez).
+  Despues de la reduccion del Anexo F (23.10.2026), con --prefijo robustez_ la ultima frase del caption de
+  tab:robustez-plan2-resumen remite a la tabla por modelo de IPPO con mensajes y a plan2/robustez_veredicto.csv
+  (remision_detalle); la version principal no cambia.
+  Verificacion de las tareas 4 y 5 (23.10.2026): el retraso de cada modelo se redondea una sola vez, desde la media
+  de evaluacion_<esc>_resumen*.csv (media_cruda). Antes se tomaba de veredicto.csv, que lo guarda con 3 decimales,
+  y al pasarlo a 2 salian 4 celdas de la robustez distintas de las tablas por modelo (DQN en P1 20.93 en vez de
+  20.94; Q-learning en P2 498.52 en vez de 498.53; Q-learning (colas) en P2 559.95 en vez de 559.94; SARSA en P3
+  24.50 en vez de 24.51). En la version principal no cambia ninguna celda.
 """
 import os
 import sys
@@ -88,11 +96,22 @@ def veredicto_corto(v):
     raise ValueError(v)
 
 
-def celda_modelo(r, v, igual_ciclo):
+def media_cruda(res_esc, modelo, r):
+    """Retraso medio sin redondear de la version evaluada de un modelo (o del actuado y del ciclo minimo), de
+    evaluacion_<esc>_resumen*.csv (res_esc, de vd.leer_resumen); si falta, el retraso de veredicto.csv. Asi la tabla
+    redondea una sola vez, como las tablas por modelo de veredicto.py (verificacion de las tareas 4 y 5, 23.10.2026)."""
+    brazo = modelo if modelo in ("actuado", "trivial") else f"{modelo}_s{r.get('base_publicada', '')}"
+    fila = res_esc.get((brazo, vd.METRICA))
+    if fila and fila.get("media") not in ("", None):
+        return float(fila["media"])
+    return float(r["retraso"])
+
+
+def celda_modelo(r, v, igual_ciclo, retraso):
     """Retraso, cambio frente al fijo y veredicto abreviado de un modelo en un caso. El PEN con su provisional va
     en su propia linea (entrega 3: con todo en la segunda linea, la tabla se salia del margen) y la igualdad con el
-    ciclo minimo, en palabras debajo."""
-    lineas = [f"{float(r['retraso']):.2f}"]
+    ciclo minimo, en palabras debajo. retraso: la media sin redondear (media_cruda)."""
+    lineas = [f"{retraso:.2f}"]
     if v.startswith("PEN"):
         lineas += [delta(r["delta_fijo"]), v]
     else:
@@ -126,6 +145,20 @@ def titulo(corto, largo):
     return f"{t}: {corto[0].lower()}{corto[1:]}", f"{t}. {largo}"
 
 
+def remision_detalle():
+    """Ultima frase del caption de tab:plan2-resumen: donde estan los intervalos, los valores p y Delta_a.
+
+    Version principal (Anexo A): en las tablas por modelo. Robustez (--prefijo robustez_): el Anexo F conserva
+    solo las tablas por modelo del ciclo minimo, que no tiene Delta_a, y de IPPO con mensajes (reduccion del
+    23.10.2026); el detalle de todos los modelos esta en plan2/robustez_veredicto.csv del repositorio.
+    """
+    if vd.PREFIJO == "robustez_":
+        return (r"Los intervalos, los valores $p$ y $\Delta_a$ de IPPO con mensajes están en la "
+                r"Tabla~\ref{" + vd.etiqueta("veredicto-ippo-vecinos") + r"}, y los de todos los modelos, en el "
+                r"repositorio del proyecto (\texttt{plan2/\allowbreak robustez\_veredicto.csv}).")
+    return r"Los intervalos, los valores $p$ y $\Delta_a$ están en las tablas por modelo."
+
+
 def escribir(nombre, texto):
     ruta = os.path.join(TABLAS, vd.PREFIJO + nombre)
     with open(ruta, "w", encoding="utf-8") as f:
@@ -155,7 +188,7 @@ def tabla_resumen(ver, res):
     usados, hay_igual_ciclo = set(), False
     for m, nombre in MODELOS:
         celdas = []
-        for caso, _ in vd.CASOS:
+        for caso, esc in vd.CASOS:
             r = ver.get((caso, m))
             v, igual_ciclo = veredicto_corto(r["veredicto"]) if r else ("sin datos", False)
             usados.add(v)
@@ -163,7 +196,7 @@ def tabla_resumen(ver, res):
             if not r or not r["retraso"] or v in ("= vecinos", "pendiente") or not r["delta_fijo"]:
                 celdas.append(IGUAL_VECINOS if v == "= vecinos" else v)
                 continue
-            celdas.append(celda_modelo(r, v, igual_ciclo))
+            celdas.append(celda_modelo(r, v, igual_ciclo, media_cruda(res[esc], m, r)))
         lin.append(nombre + " & " + " & ".join(celdas) + r" \\")
     sin_ql_colas = [c for c, _ in vd.CASOS
                     if (ver.get((c, "ql_colas")) or {}).get("veredicto", "") == "PENDIENTE (sin datos)"]
@@ -194,10 +227,15 @@ def tabla_resumen(ver, res):
                 r"Pendiente: el caso aún no tiene la comparación con el " + vd.nombre_fijo() + ". ")
              + ("" if not sin_ql_colas else
                 r"Sin datos: Q-learning (colas) no se corrió en " + lista_casos(sin_ql_colas) + ". ")
-             + r"Los intervalos, los valores $p$ y $\Delta_a$ están en las tablas por modelo.")
+             + remision_detalle())
     corto, largo = titulo("Retraso y cambio frente al fijo por caso y modelo", largo)
+    # Verificacion de las tareas 4 y 5 (23.10.2026): en la robustez la tabla flota ([!tbp]). En [H], detras de la
+    # matriz de veredicto.py, que flota, la matriz se iba al comienzo de la pagina siguiente y esta tabla, de casi una
+    # pagina, se apilaba debajo en la misma pagina: el Anexo F se salia 261 pt por abajo (Overfull \vbox). La version
+    # principal (Anexo A) sigue en [H].
+    lugar = "!tbp" if vd.PREFIJO == "robustez_" else "H"
     return comentario_pendiente(res) + "\n".join([
-        r"\begin{table}[H]", r"\setstretch{1}", r"\centering", r"\scriptsize",
+        r"\begin{table}[" + lugar + "]", r"\setstretch{1}", r"\centering", r"\scriptsize",
         r"\setlength{\tabcolsep}{2.5pt}",
         r"\begin{tabular}{l" + "c" * len(vd.CASOS) + "}", r"\toprule"] + lin + [
         r"\bottomrule", r"\end{tabular}",

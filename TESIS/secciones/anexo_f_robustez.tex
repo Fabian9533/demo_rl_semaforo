@@ -23,27 +23,33 @@
 % (remisiones, opciones de linea de ordenes dichas en palabras y frases que repetian lo ya dicho en este anexo).
 % Ninguna etiqueta despues de los titulos con asterisco; tablas, figuras y ecuaciones llevan su etiqueta despues del
 % caption y numeran F.n.
+% Reduccion del Anexo F (23.10.2026; plan del 14.10, aprobado por Fabian: de la robustez por modelo queda solo la
+% tabla de IPPO con mensajes): de las 18 tablas por modelo y de entrenamientos (F.6 a F.23) quedan tres; el detalle
+% esta en el comentario de "Tablas por modelo". El resto del anexo no cambia, salvo la remision del parrafo del ciclo
+% minimo en "Resumen en un numero y reparto de la variacion".
 
 Este anexo reúne el análisis de robustez completo: qué cambia la
 medición más estricta, el fijo ajustado desde 10~s de cada caso, la
 ejecución, los veredictos de todos los modelos con esa medición, la
 lectura por caso, el resumen en un número y el reparto de la variación,
 las comprobaciones, lo que queda en pie, el barrido de demanda en el
-corredor sin reentrenar y las tablas por modelo. Su resumen, con el
+corredor sin reentrenar y tres tablas por modelo y de entrenamientos;
+las demás están en el repositorio del proyecto. Su resumen, con el
 resultado de IPPO con mensajes en cada caso, está en la
-Sección~\ref{sec:robustez}. Se remite también a este anexo desde el
-diseño del análisis (Sección~\ref{sec:diseno-robustez}), desde su
-ejecución (Sección~\ref{sec:remedicion}), desde el efecto de la demanda
-(Sección~\ref{sec:sensibilidad-demanda}) y desde las conclusiones y las
-recomendaciones. El análisis se decidió después
+Sección~\ref{sec:robustez}. El análisis se decidió después
 del veredicto: P1 a P5 se congelaron el 25.09.2026, y P6 se cerró el
 28.09.2026 con la misma regla.
 % fuente: fechas: plan2/veredicto_congelado_0355.csv (P1-P5, 25.09) y plan2/veredicto.csv (P6, 28.09).
+% Verificacion de las tareas 4 y 5 (23.10.2026): (1) decia "y las tablas por modelo"; tras la reduccion del anexo
+% quedan tres (ciclo minimo, IPPO con mensajes y entrenamientos de Double DQN) y las demas estan en el repositorio
+% ("Tablas por modelo"); (2) sale la frase "Se remite tambien a este anexo desde el diseno del analisis
+% (sec:diseno-robustez), desde su ejecucion (sec:remedicion), desde el efecto de la demanda (sec:sensibilidad-demanda)
+% y desde las conclusiones y las recomendaciones", que era una nota de edicion
 % Pasada del glosario (23.10.2026, tarea 3f): la prosa de este anexo usa los nombres del glosario del plan del 14.10
 % (seccion 3.5) y se quito la lista de nombres anteriores que iba aqui, porque las tablas se regeneran con los nombres
-% nuevos. images/fig_robustez_mejora_caso.png se regenero el 23.10.2026 con los nombres nuevos; images/fig_plan2_demanda.png
-% (del 27.09) no, y su caption aclara los rotulos viejos que usa. Si se regenera, quitar esa ultima frase del caption.
-% La tabla tablas/demanda_corredor.tex tampoco se habia regenerado al 23.10.2026 03:30 (dice IPPO vecinos, re-barrido)
+% nuevos. images/fig_robustez_mejora_caso.png se regenero el 23.10.2026 con los nombres nuevos. images/fig_plan2_demanda.png
+% y tablas/demanda_corredor.tex se regeneraron despues, el mismo 23.10.2026, con barrido_demanda.py ya pasado a los
+% nombres del glosario; se quito la frase del caption de fig:plan2-demanda que aclaraba los rotulos viejos
 
 % Integracion (23.10.2026): aqui iban capitulo3.tex l. 1557-1563 (comienzo de 3.7.7, sec:diseno-robustez) y
 % capitulo4.tex l. 1288-1297 (comienzo de 4.7.5, sec:remedicion) del commit 7181ab8. No se repiten: todo lo que
@@ -155,10 +161,13 @@ P1 a P6.
 % despues de ver ese resultado, y la especificacion del plan no lo exigia. Por eso el re-barrido forma parte del
 % analisis de robustez y no cambia el fijo del resultado principal."), que repiten la entrada. Verificacion de la
 % fase 2 (23.10.2026): salen tambien el punto de partida del barrido (ya en "La segunda es el fijo de referencia") y
-% el hallazgo de P3 (la decision esta en la entrada y la igualdad, en "Lectura por caso")
-El barrido del plan no llegó a 10~s aunque la regla admitía el verde
-mínimo como óptimo (Sección~\ref{sec:protocolo}): ningún ganador quedó
-en el borde y la rejilla no se amplió. El retraso en función del
+% el hallazgo de P3 (la decision esta en la entrada y la igualdad, en "Lectura por caso"). Verificacion de las
+% tareas 4 y 5 (23.10.2026): la primera frase decia "El barrido del plan no llego a 10 s", que choca con P6, cuyo
+% barrido del plan si se amplio a 10 s por la regla de interioridad ("Fijo ajustado desde 10 s", mas abajo; Tabla
+% tab:robustez-fijo; conclusiones.tex, conclusion 3); se acota a P1-P5
+En P1 a P5, el barrido del plan no llegó a 10~s aunque la regla admitía
+el verde mínimo como óptimo (Sección~\ref{sec:protocolo}): ningún
+ganador quedó en el borde y la rejilla no se amplió. El retraso en función del
 programa tiene al menos dos óptimos locales, el ciclo corto
 sincronizado y un ciclo de 46~s con los cruces coordinados en onda
 verde, y el ganador del plan estaba en el segundo. La regla solo mira si
@@ -366,7 +375,11 @@ misma espera detenida que el ciclo mínimo.
 \input{secciones/tablas/robustez_veredicto_matriz}
 
 % fuente: plan2/robustez_veredicto.csv y fila fijo (retraso_total_prom) de plan2/evaluacion_<esc>_resumen.csv;
-% tabla escrita por "python tablas_cap5.py --prefijo robustez_" desde plan2/ (con los seis casos)
+% tabla escrita por "python tablas_cap5.py --prefijo robustez_" desde plan2/ (con los seis casos). Verificacion de
+% las tareas 4 y 5 (23.10.2026): flota ([!tbp]); en [H], detras de la matriz, que flota, las dos quedaban en la misma
+% pagina y el anexo se salia 261 pt por abajo. El retraso de cada modelo se redondea una sola vez, desde la media de
+% evaluacion_<esc>_resumen.csv, como en las tablas por modelo (antes DQN en P1 daba 20.93 aqui y 20.94 en la Tabla
+% tab:robustez-veredicto-bases-dqn)
 \input{secciones/tablas/robustez_plan2_resumen}
 
 Con la medición estricta, ningún aprendiz funciona fuera de P1. En P1
@@ -541,8 +554,8 @@ el caso el $23.1$\,\%.
 % parrafo que la presenta; antes iba bajo el titulo y, en [H], no cabia en la pagina y dejaba en blanco casi la mitad
 \input{secciones/tablas/robustez_numero_unico}
 
-La Tabla~\ref{tab:robustez-veredicto-trivial}, con las demás tablas por
-modelo de la medición más estricta, da el veredicto del ciclo mínimo
+La Tabla~\ref{tab:robustez-veredicto-trivial}, al final de este anexo,
+da el veredicto del ciclo mínimo
 frente al fijo ajustado desde 10~s. Falla en los dos corredores ($+390.3$ y
 $+167.7$\,\%), mejora al fijo en P3 ($-0.5$\,\%), empata en P4 y P5,
 y vuelve a fallar por mucho en P6 ($+236.7$\,\%). En P5 es el mismo
@@ -551,6 +564,8 @@ programa que el fijo.
 % vez, en "Tablas por modelo", al final de este anexo, para no duplicar tab:robustez-veredicto-trivial
 % Entrega 3, fase 2: antes decia "en el Anexo A con las demas tablas por modelo"; desde la integracion del 23.10.2026
 % el bloque de tablas por modelo esta al final de este anexo
+% Reduccion del Anexo F (23.10.2026): antes decia "con las demas tablas por modelo de la medicion mas estricta"; de
+% esas tablas quedan al final del anexo solo la del ciclo minimo y la de IPPO con mensajes
 
 \subsection*{Comprobaciones}
 
@@ -661,10 +676,15 @@ resumen está en la Sección~\ref{sec:sensibilidad-demanda}.
 \begin{figure}[!tbp]
 \centering
 \includegraphics[width=\textwidth]{fig_plan2_demanda.png}
-\caption[Barrido de demanda en el corredor: cambio por control]{Barrido de demanda en la red de P1: cambio porcentual de cada control frente al fijo ajustado desde 10~s para ese nivel de demanda, en retraso total (panel superior) y en \texttt{timeLoss} (panel inferior), sobre las semillas de evaluación 1001 a 1030. Filas: el plan fijo de P1 sin volver a ajustar, el actuado y las versiones evaluadas de IPPO con mensajes entrenadas con $\times$1.0 (P1) y con $\times$2.0 (P2), sin reentrenar. Columnas: factor que multiplica toda la demanda de P1, y el perfil variable. Color: rojo, más retraso que ese fijo; azul, menos; la intensidad crece con el tamaño del cambio. La figura usa los nombres anteriores: ``fijo re-barrido'' es el fijo ajustado desde 10~s; ``sin retunear'', sin volver a ajustar, e ``IPPO vecinos'', IPPO con mensajes.}
+\caption[Barrido de demanda en el corredor: cambio por control]{Barrido de demanda en la red de P1: cambio porcentual de cada control frente al fijo ajustado desde 10~s para ese nivel de demanda, en retraso total (panel superior) y en \texttt{timeLoss} (panel inferior), sobre las semillas de evaluación 1001 a 1030. Filas: el plan fijo de P1 sin volver a ajustar, el actuado y las versiones evaluadas de IPPO con mensajes entrenadas con $\times$1.0 (P1) y con $\times$2.0 (P2), sin reentrenar. Columnas: factor que multiplica toda la demanda de P1, y el perfil variable. Color: rojo, más retraso que ese fijo; azul, menos; la intensidad crece con el tamaño del cambio.}
 \label{fig:plan2-demanda}
 \end{figure}
 % fuente: figura escrita por barrido_demanda.py resumir desde plan2/demanda/resumen_demanda.csv
+% Integracion de las tareas 4 y 5 (23.10.2026): barrido_demanda.py se paso a los nombres del glosario y la figura se
+% regenero (rotulos "Fijo de P1 sin reajustar" e "IPPO con mensajes entrenado con x1.0 (P1)" / "x2.0 (P2)"; titulos
+% "frente al fijo ajustado desde 10 s"; mismos datos). Por eso se quito la ultima frase del caption, que decia: "La
+% figura usa los nombres anteriores: fijo re-barrido es el fijo ajustado desde 10 s; sin retunear, sin volver a
+% ajustar, e IPPO vecinos, IPPO con mensajes."
 
 La política de P1 solo gana con la demanda con que se entrenó. En
 \texttt{timeLoss}, con $\times$1.0 reduce el retraso un $6.8$\,\%, y
@@ -681,7 +701,7 @@ entrenada con la avenida saturada no sirve con poca demanda.
 % fijo_p1); plan2/barrido_corredor_f050.csv (ganador 10/10 0/0) y plan2/barrido_corredor_f075.csv (12/10 0/0)
 
 En retraso total, que suma la espera para entrar a la red, la ganancia
-con demanda alta casi desaparece. Con $\times$1.75 a $\times$2.25, la
+con demanda alta baja mucho o se vuelve pérdida. Con $\times$1.75 a $\times$2.25, la
 política de P2 pasa a $-3.6$, $+1.6$ y $+10.0$\,\%, y el actuado, que
 en \texttt{timeLoss} ganaba entre un $12.2$ y un $24.6$\,\%, pierde
 entre un $4.3$ y un $15.4$\,\%. Con el perfil variable, que pasa de
@@ -694,7 +714,10 @@ controles adaptativos no se sostiene cuando se cuenta la espera para
 entrar. Con $\times$1.0 o menos la espera para entrar es pequeña y las
 dos métricas dan casi lo mismo.
 % fuente: plan2/demanda/resumen_demanda.csv (delta_retraso_total_prom y delta_timeloss_prom de actuado e
-% ippo_vecinos_s2042 en corredor_f175, f200 y f225; corredor_var: delta_retraso_total_prom de +20.62 a +46.41)
+% ippo_vecinos_s2042 en corredor_f175, f200 y f225; corredor_var: delta_retraso_total_prom de +20.62 a +46.41).
+% Verificacion de las tareas 4 y 5 (23.10.2026): decia "la ganancia con demanda alta casi desaparece", pero con x2.0
+% y x2.25 la politica de P2 pierde de forma significativa (ippo_vecinos_s2042, delta_retraso_total_prom +1.63 [0.64,
+% 2.56], p 0.00219, y +10.04 [8.61, 11.43], p 1.86e-09); con x1.75 gana un 3.64 % (p 3.24e-06)
 
 Entre $\times$1.25 y $\times$1.5 colapsan todos los controles salvo el
 fijo ajustado desde 10~s, que en esos niveles pasa a 25/10~s, con desfase de
@@ -709,15 +732,17 @@ diagnóstico, con diez semillas y fuera del protocolo del plan, el
 colapso desaparecía al convertir esos giros en movimientos rectos. Esa
 comprobación no forma parte de los resultados registrados del plan, y
 la explicación queda como probable. El barrido mide hasta dónde se
-sostiene una política fuera de su demanda de entrenamiento, no si el
-método funciona con otra demanda, lo que exigiría entrenar en cada
-nivel, y usa un único escenario base
-(Sección~\ref{sec:analisis-complementarios}).
+sostiene una política fuera de su demanda de entrenamiento, y usa un
+único escenario base (Sección~\ref{sec:analisis-complementarios}). No
+mide si el método funciona con otra demanda, lo que exige entrenar en
+cada nivel, como en los niveles de la Tabla~\ref{tab:efecto-demanda}.
 % fuente: plan2/demanda/resumen_demanda.csv (corredor_f125 y corredor_f150, delta_timeloss_prom: fijo_p1 +93.79 y
 % +122.13, actuado +79.34 y +45.01, ippo_vecinos_s4042 +71.65 y +61.88, ippo_vecinos_s2042 +146.09 y +64.27);
 % plan2/barrido_corredor_f125.csv (25/10 0/25) y plan2/barrido_corredor_f150.csv (25/10 0/0). La comprobacion
 % con los giros convertidos en rectos (diagnostico del 27.09.2026) no tiene archivo en el repositorio: para
-% citarla como resultado hay que repetirla con el protocolo del plan.
+% citarla como resultado hay que repetirla con el protocolo del plan. Verificacion de las tareas 4 y 5 (23.10.2026):
+% decia "lo que exigiria entrenar en cada nivel" sin decir que eso ya se hizo; ahora remite a los niveles con el
+% modelo entrenado en cada uno (capitulo5.tex, sec:efecto-demanda, Tabla tab:efecto-demanda)
 
 \subsection*{Tablas por modelo}
 
@@ -728,24 +753,95 @@ nivel, y usa un único escenario base
 % en la entrada y en "Que cambia". El segundo parrafo (l. 160-186) no se pega, porque repite "Lectura por caso"; su
 % unica cifra que no esta en el texto de este anexo, el retraso de insercion del trivial en P6 (99 s/veh), esta en la
 % fuente del parrafo de P6 de "Lectura por caso" (99.185 en plan2/evaluacion_malla3_alta_resumen.csv).
-Las Tablas~\ref{tab:robustez-veredicto-actuado}
-a~\ref{tab:robustez-veredicto-bases-mappo} repiten las del Anexo~A en P1
-a P6 con la medición del análisis de robustez
-(más arriba, en ``Qué cambia'').
+% Reduccion del Anexo F (23.10.2026; plan del 14.10, aprobado por Fabian: de la robustez por modelo queda solo la
+% tabla de IPPO con mensajes). Este bloque tenia 18 tablas (F.6 a F.23, unas 18 paginas con 25-45 % en blanco): las
+% 10 por modelo y las 8 de entrenamientos. Quedan tres: (1) la del ciclo minimo, que se usa en la lectura de P3 y en
+% el parrafo del ciclo minimo de "Resumen en un numero y reparto de la variacion"; (2) la de IPPO con mensajes; (3) la
+% de entrenamientos de Double DQN, solo porque recomendaciones.tex (l. 72) cita tab:robustez-veredicto-bases-dqn y
+% ese archivo no es de esta tarea. Si esa remision pasa a texto, la tercera se puede quitar. Salen las tablas por
+% modelo del actuado, Q-learning, SARSA, Q-learning (colas), Double DQN, IPPO sin mensajes, IPPO con penalizacion de
+% spillback y MAPPO, y las otras siete de entrenamientos. Ninguna de sus etiquetas se citaba fuera de este anexo
+% (grep de tab:robustez-veredicto-* en TESIS/**/*.tex, 23.10.2026); la frase que las presentaba ("Las Tablas
+% tab:robustez-veredicto-actuado a tab:robustez-veredicto-bases-mappo repiten las del Anexo A en P1 a P6 con la
+% medicion del analisis de robustez") pasa a la que sigue. Los .tex generados siguen en tablas/ y "python
+% veredicto.py --prefijo robustez_" los sigue escribiendo; el texto remite a robustez_veredicto_bases.tex, asi que
+% ese archivo no se debe borrar. Verificacion de las tareas 4 y 5 (23.10.2026): sale el inciso "a la que remiten las
+% recomendaciones" de la frase de la tabla de DQN, que era una nota de edicion; el motivo queda en este comentario.
+\begin{sloppypar}
+La Tabla~\ref{tab:robustez-veredicto-trivial} da el veredicto del
+ciclo mínimo y la Tabla~\ref{tab:robustez-veredicto-ippo-vecinos}, el
+de IPPO con mensajes, en P1 a P6 y con la medición del análisis de
+robustez (más arriba, en ``Qué cambia''). La
+Tabla~\ref{tab:robustez-veredicto-bases-dqn} da los tres entrenamientos
+de Double DQN en cada caso. Las demás tablas por modelo y de
+entrenamientos no se incluyen. El
+veredicto de cada modelo en cada caso, con sus intervalos, sus valores~$p$,
+el cambio frente al actuado y cuántos de los tres entrenamientos
+convergen, está en el repositorio del proyecto (Anexo~B), en
+\texttt{plan2/\allowbreak robustez\_veredicto.csv} y
+\texttt{plan2/\allowbreak robustez\_veredicto.md}, y las tablas de
+entrenamientos de todos los modelos, en
+\texttt{TESIS/\allowbreak secciones/\allowbreak tablas/\allowbreak robustez\_veredicto\_bases.tex}.
+\end{sloppypar}
 % fuente: hechos_v21.md; plan2/robustez_veredicto.csv (28.09.2026 09:15, P1-P6; en P1-P5 igual a
 % plan2/veredicto_v21_respaldo.csv); P6: hechos_2509.md (fijo_2509 = fijo re-barrido = 36.726 s/veh de
 % timeLoss) y cabecera de plan2/malla3_alta.add.xml (avenida 10-35 s, transversal 10-25 s);
 % plan2/barrido_malla3_alta.csv (72 filas; el menor timeloss_prom, 36.91, y el menor retraso_total_prom,
 % 82.63, son la misma fila: avenida 15 s, transversal 10 s, desfases cero);
 % se regeneran con "python veredicto.py --prefijo robustez_" desde demo_rl/
-\input{secciones/tablas/robustez_veredicto_actuado}
+% fuente de lo que hay en el repositorio: plan2/robustez_veredicto.csv (una fila por caso y modelo, 60 filas, con
+% delta_fijo, ic_fijo, p_fijo, delta_act, ic_act, p_act, convergio y convergen, k de 3) y plan2/robustez_veredicto.md
+% (la matriz y una tabla por modelo: actuado, ciclo minimo y los ocho aprendices); los dos los escribe veredicto.py
+% --prefijo robustez_ (28.09.2026; nombres internos sin cambios). Las tablas de entrenamientos (validacion elegida,
+% retraso y cambio de cada base) no estan en esos dos archivos: estan en tablas/robustez_veredicto_bases.tex
+% (veredicto.py; datos de plan2/evaluacion_<esc>_resumen.csv y de los meta de cada base)
 \input{secciones/tablas/robustez_veredicto_trivial}
-\input{secciones/tablas/robustez_veredicto_ql}
-\input{secciones/tablas/robustez_veredicto_sarsa}
-\input{secciones/tablas/robustez_veredicto_ql_colas}
-\input{secciones/tablas/robustez_veredicto_dqn}
-\input{secciones/tablas/robustez_veredicto_ippo_local}
 \input{secciones/tablas/robustez_veredicto_ippo_vecinos}
-\input{secciones/tablas/robustez_veredicto_ippo_spill}
-\input{secciones/tablas/robustez_veredicto_mappo}
-\input{secciones/tablas/robustez_veredicto_bases}
+
+% Tabla de entrenamientos de Double DQN: copia literal del bloque de DQN de tablas/robustez_veredicto_bases.tex (l.
+% 111-148 del archivo escrito por "python veredicto.py --prefijo robustez_"; sin cambios desde el commit b9c4e91). Ese
+% archivo trae las ocho tablas de entrenamientos en una sola inclusion, y esta es la unica que se cita fuera del anexo
+% (recomendaciones.tex, l. 72), por eso se copia sola. Si veredicto.py vuelve a escribir ese archivo, hay que copiar
+% de nuevo el bloque; si la remision de recomendaciones.tex pasa a texto, esta tabla se puede quitar.
+% fuente: plan2/evaluacion_<esc>_resumen.csv (filas dqn_s42, dqn_s2042 y dqn_s4042, metrica retraso_total_prom:
+% media, ic95, delta_pct, delta_ic95 y p_wilcoxon) y plan2/politica_<esc>_dqn_s<base>.json (val_elegido y
+% ep_elegido; convergencia: veredicto.convergencia sobre val_serie). P2 revisado el 23.10.2026: retraso 411.456,
+% 388.6143 y 461.124 s/veh (rango 72.51) y validacion 123.24 (ep 190), 121.655 (ep 200) y 122.485 (ep 50)
+\begin{table}[H]
+\setstretch{1}
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{lllrlrrr}
+\toprule
+Caso & Red y demanda & \makecell{Semilla del\\entrenamiento} & \makecell{Validación\\elegida\\(s/veh)} & \makecell{Conver-\\gió} & \makecell{Retraso\\evaluación\\(s/veh)} & \makecell{Cambio frente\\al fijo [IC95\,\%]} & $p$ \\
+\midrule
+P1 & \makecell[l]{Corredor,\\{}nominal} & 42 & \makecell[r]{20.54\\{}(ep 120)} & sí & \makecell[r]{21.16\\{}$\pm$ 0.12} & \makecell[r]{$-$2.4\,\%\\{}[$-$3.5,\,$-$1.2]} & 0.00124 \\
+P1 & \makecell[l]{Corredor,\\{}nominal} & 2042 & \makecell[r]{20.13\\{}(ep 190)} & sí & \makecell[r]{20.67\\{}$\pm$ 0.13} & \makecell[r]{$-$4.6\,\%\\{}[$-$5.6,\,$-$3.6]} & $<$\,0.001 \\
+P1 & \makecell[l]{Corredor,\\{}nominal} & \makecell[l]{4042\\{}(evaluada)} & \makecell[r]{20.32\\{}(ep 180)} & sí & \makecell[r]{20.94\\{}$\pm$ 0.16} & \makecell[r]{$-$3.4\,\%\\{}[$-$4.8,\,$-$2.2]} & $<$\,0.001 \\
+ & & \makecell[l]{rango entre\\{}los tres} & & & 0.49 & & \\
+P2 & \makecell[l]{Corredor,\\{}alta} & 42 & \makecell[r]{123.24\\{}(ep 190)} & sí & \makecell[r]{411.46\\{}$\pm$ 5.45} & \makecell[r]{+4.4\,\%\\{}[2.8,\,5.9]} & $<$\,0.001 \\
+P2 & \makecell[l]{Corredor,\\{}alta} & 2042 & \makecell[r]{121.66\\{}(ep 200)} & sí & \makecell[r]{388.61\\{}$\pm$ 6.06} & \makecell[r]{$-$1.4\,\%\\{}[$-$2.9,\,0.1]} & 0.0732 \\
+P2 & \makecell[l]{Corredor,\\{}alta} & \makecell[l]{4042\\{}(evaluada)} & \makecell[r]{122.48\\{}(ep 50)} & sí & \makecell[r]{461.12\\{}$\pm$ 5.70} & \makecell[r]{+17.0\,\%\\{}[15.4,\,18.5]} & $<$\,0.001 \\
+ & & \makecell[l]{rango entre\\{}los tres} & & & 72.51 & & \\
+P3 & \makecell[l]{Red con rotonda,\\{}nominal} & 42 & \makecell[r]{21.12\\{}(ep 100)} & sí & \makecell[r]{21.85\\{}$\pm$ 0.10} & \makecell[r]{+7.8\,\%\\{}[7.2,\,8.5]} & $<$\,0.001 \\
+P3 & \makecell[l]{Red con rotonda,\\{}nominal} & 2042 & \makecell[r]{20.86\\{}(ep 190)} & sí & \makecell[r]{21.44\\{}$\pm$ 0.13} & \makecell[r]{+5.8\,\%\\{}[5.2,\,6.5]} & $<$\,0.001 \\
+P3 & \makecell[l]{Red con rotonda,\\{}nominal} & \makecell[l]{4042\\{}(evaluada)} & \makecell[r]{20.91\\{}(ep 200)} & sí & \makecell[r]{21.68\\{}$\pm$ 0.10} & \makecell[r]{+7.0\,\%\\{}[6.4,\,7.6]} & $<$\,0.001 \\
+ & & \makecell[l]{rango entre\\{}los tres} & & & 0.41 & & \\
+P4 & \makecell[l]{Red con rotonda,\\{}alta} & 42 & \makecell[r]{28.18\\{}(ep 80)} & sí & \makecell[r]{29.33\\{}$\pm$ 1.02} & \makecell[r]{+2.7\,\%\\{}[0.9,\,4.5]} & 0.00761 \\
+P4 & \makecell[l]{Red con rotonda,\\{}alta} & 2042 & \makecell[r]{28.78\\{}(ep 170)} & no & \makecell[r]{29.29\\{}$\pm$ 1.06} & \makecell[r]{+2.5\,\%\\{}[1.0,\,4.2]} & 0.00662 \\
+P4 & \makecell[l]{Red con rotonda,\\{}alta} & \makecell[l]{4042\\{}(evaluada)} & \makecell[r]{28.43\\{}(ep 200)} & sí & \makecell[r]{29.37\\{}$\pm$ 1.02} & \makecell[r]{+2.8\,\%\\{}[1.1,\,4.6]} & 0.0019 \\
+ & & \makecell[l]{rango entre\\{}los tres} & & & 0.08 & & \\
+P5 & \makecell[l]{Malla $3 \times 3$,\\{}nominal} & 42 & \makecell[r]{23.20\\{}(ep 170)} & sí & \makecell[r]{23.42\\{}$\pm$ 0.11} & \makecell[r]{+10.2\,\%\\{}[9.7,\,10.8]} & $<$\,0.001 \\
+P5 & \makecell[l]{Malla $3 \times 3$,\\{}nominal} & 2042 & \makecell[r]{22.89\\{}(ep 160)} & sí & \makecell[r]{23.03\\{}$\pm$ 0.13} & \makecell[r]{+8.4\,\%\\{}[7.8,\,9.1]} & $<$\,0.001 \\
+P5 & \makecell[l]{Malla $3 \times 3$,\\{}nominal} & \makecell[l]{4042\\{}(evaluada)} & \makecell[r]{23.04\\{}(ep 190)} & no & \makecell[r]{23.62\\{}$\pm$ 0.09} & \makecell[r]{+11.2\,\%\\{}[10.7,\,11.6]} & $<$\,0.001 \\
+ & & \makecell[l]{rango entre\\{}los tres} & & & 0.58 & & \\
+P6 & \makecell[l]{Malla $3 \times 3$,\\{}alta} & 42 & \makecell[r]{37.85\\{}(ep 160)} & no & \makecell[r]{84.79\\{}$\pm$ 1.12} & \makecell[r]{+3.2\,\%\\{}[2.0,\,4.5]} & $<$\,0.001 \\
+P6 & \makecell[l]{Malla $3 \times 3$,\\{}alta} & \makecell[l]{2042\\{}(evaluada)} & \makecell[r]{37.23\\{}(ep 130)} & no & \makecell[r]{86.33\\{}$\pm$ 1.18} & \makecell[r]{+5.0\,\%\\{}[3.7,\,6.5]} & $<$\,0.001 \\
+P6 & \makecell[l]{Malla $3 \times 3$,\\{}alta} & 4042 & \makecell[r]{36.85\\{}(ep 160)} & sí & \makecell[r]{83.38\\{}$\pm$ 0.63} & \makecell[r]{+1.4\,\%\\{}[0.9,\,2.1]} & $<$\,0.001 \\
+ & & \makecell[l]{rango entre\\{}los tres} & & & 2.94 & & \\
+\bottomrule
+\end{tabular}
+\caption[Robustez: entrenamientos de DQN]{Robustez. DQN: los tres entrenamientos de cada caso. La validación elegida es la media del timeLoss en las semillas 999 y 1999 de la versión guardada que se elige en cada entrenamiento; el retraso y el cambio frente al fijo, sobre las semillas 1001 a 1030. El entrenamiento marcado (evaluada) es el mediano por validación y da la versión evaluada. El rango entre los tres se compara con el IC95\,\% de una sola política.}
+\label{tab:robustez-veredicto-bases-dqn}
+\end{table}
