@@ -617,3 +617,59 @@ NO hacer antes de defender: llegadas aleatorias (rehace todos los numeros).
   todo es sintético con demanda invertida. Corregir alcance o traer el cruce.
 - Herramientas declaradas vs. reales: el documento nombra pandas, PyTorch, Docker
   y Gym; el código usa csv y TraCI directo, sin GPU.
+
+## ENTREGA 3 (22-25.10.2026)
+
+Cambios que pidió el asesor en la reunión del 14.10; entrega el domingo 25.10. La tesis manda, esto es nota.
+Rama `entrega3`: base 5b9b7a6 (versión rápida del 14.10), respaldo 9287b1c (estado del 28.09, punta de
+`main`). Un commit por tarea del pedido: 620fb9d sin código (tarea 1); 175f283 lógica del plan y demanda
+nominal y alta, Cap. III (2); 1a10720 definiciones y regla de veredicto con números junto a la tabla de
+resultados (3); b9c4e91 un solo nombre por cosa (3f); b1b0e0c figura de cambio por caso con bandas de
+veredicto, `sintesis_plan.py` (4); ddff17e Cap. V del plan a la conclusión, robustez al Anexo F
+(`anexo_f_robustez.tex`) y diagnóstico del entrenamiento al Anexo G (`anexo_g_diagnostico.tex`) (6); f20ecfb
+`notas/razones_posibles.md`, hipótesis sin confirmar que no van a la tesis (7); 7181ab8 `notas/precision.md`,
+borrador (8); corridas de la tarea 5: 72a9d05 escenarios y cola, be2c2a1 resultados, 1873eac análisis
+(`curvas_demanda.py`). El cierre de 4 y 5 (nombres del glosario en `barrido_demanda.py` y `graficar.py`, con
+su tabla y sus figuras) va en el commit siguiente.
+
+- Niveles de demanda: escenarios `dem_<red>_t<veh/h>` (`escenarios_plan2.NIVELES_DEMANDA2`): corredor 905,
+  1358 y 2715; `red` 905, 1358, 1810, 2715 y 3620; `malla3` 1810, 2715, 3620 y 6525 veh/h. Toda la demanda
+  de la red × f, cada periodo con el total exacto (`barrido_demanda.py preparar2`). Con P1-P6 son 5, 7 y 6
+  puntos por red; 1810, 2715 y 3620 son comunes a las tres. Protocolo del plan: fijo ajustado por barrido en
+  cada nivel (regla del 25.09), actuado, ciclo mínimo e IPPO con mensajes (bases 42/2042/4042, 200
+  episodios); evaluación 1001-1030 (trabajos `dem2_*` de `plan2/generar_trabajos.py`).
+- Salidas: en `plan2/`, `dem_<esc>.*` (el `.add.xml` es el fijo ganador), `barrido_dem_<esc>.csv`,
+  `resultados_dem_*`, `politica_dem_*` y `evaluacion_dem_<esc>.csv|_resumen.csv`; en `plan2/demanda2/`, los
+  parciales `eval_dem_<esc>_<brazo>.csv` y `resumen_demanda2.csv`. `python curvas_demanda.py` (desde demo_rl)
+  escribe `resumen_demanda2.csv`, `TESIS/secciones/tablas/demanda2.tex` (solo el tabular; table [!tbp] con
+  \footnotesize y tabcolsep de 3 pt) y `TESIS/images/fig_demanda_bandas.pdf|png`. `plan2/demanda/` es otra
+  cosa: el barrido del corredor ×0.5-×2.25 del 27.09 (`barrido_demanda.py resumir`, Anexo F).
+- El veredicto de los niveles `dem_` lo calcula `curvas_demanda.py`, no `veredicto.py` (que solo ve P1-P6),
+  con las funciones de veredicto.py, timeloss_prom y el fijo ajustado de cada nivel como referencia; P1-P6
+  salen de `plan2/veredicto.csv` (corrida principal). Cifras de un decimal: de `resumen_demanda2.csv` o
+  `demanda2.tex`, nunca redondeando `evaluacion_dem_<esc>_resumen.csv` (doble redondeo). La versión oficial
+  usó `--veredicto` con la copia de veredicto.py de 1a10720; ddff17e solo le cambió la escritura de tablas.
+  Si cambia veredicto.csv, volver a correr curvas_demanda.py.
+- Nombres del glosario (Cap. III): IPPO con mensajes (antes IPPO vecinos), IPPO sin mensajes (IPPO local),
+  IPPO con penalización de spillback (IPPO spill; en tablas "IPPO con penalización"), fijo ajustado (fijo
+  tuneado), fijo ajustado desde 10 s (fijo re-barrido, robustez), ciclo mínimo (trivial), versión evaluada
+  (política publicada). Los identificadores del código y de los CSV no cambian; las secciones anteriores de
+  este archivo usan los nombres viejos.
+- La tesis ya no imprime código: el Anexo B es una tabla de programas con la dirección del repositorio (falta
+  el hash del commit final, `% PENDIENTE`, hasta que Fabian haga push). `TESIS/codigo/` ya no se usa: no hay
+  que recopiar scripts ahí ni cuidar el ancho de 110 caracteres.
+- Datos falsos del resumen de la reunión (ajustes A1-A9; no pasarlos a la tesis): A1 el actuado es el control
+  nativo de SUMO por detectores (alarga el verde mientras llegan vehículos, 10-60 s), no "tiempos ajustados a
+  mano"; el fijo ajustado sale del barrido con 2001-2003. A2 el fijo no es "20 s": P1 20/10 s, ciclo 36,
+  desfases 0/15; P2 25/15, 46, 0/25; P3 25/15, 46, 0/23/0; P4 30/10, 46, 0/20/0; P5 25/15, 46, ajedrez 0/23;
+  P6 15/10, 31, todo 0. A3 nominal = base de cada red (1810, 2150, 4350 veh/h); alta = ×2.0 en corredor y
+  malla (3620, 8700) y ×1.2 en la red con rotonda (2580; desde ×1.3 se satura la rotonda). A4 P1 y P2 no
+  comparten fijo: el retraso del fijo sube de 21.30 a 154.70 s/veh sobre todo porque la demanda se duplica.
+  A5 P3/P4 no tenían la demanda de P1/P2 (por eso los niveles comunes); con el mismo total, la carga por calle
+  es distinta. A6 P6 sí se corrió (28.09): PENDIENTE, converge 1 de 3 entrenamientos, provisional EMPATA.
+  A7 "media simétrica" = media geométrica; "empate estabilizado" viene de la nota (a) de la tabla de
+  resultados del Cap. V (Tabla 5.2 en el PDF de la reunión; hoy Tabla 5.3, con notas en palabras) y "A y B"
+  son sus notas (a) y (b). A8 el modelo
+  es IPPO (la transcripción dice IPO, HIPO, lipo o RL). A9 "precisión 0.9 = 10 % de error" no aplica: son
+  políticas de RL, no clasificadores; lo comparable es la variación entre los 3 entrenamientos. Los criterios
+  de veredicto no cambian.
