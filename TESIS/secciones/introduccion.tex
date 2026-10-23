@@ -29,17 +29,22 @@ Mientras el cruce real de Lima no está listo para simular, la pregunta se estud
     \item Reducción del retraso promedio por vehículo (\texttt{timeLoss} de SUMO) en \textbf{25--40\%}. Es la meta principal y se mide con la métrica primaria de la tesis.
     \item Disminución de la longitud promedio de colas en \textbf{$\geq$20\%}.
     \item Incremento del \textit{throughput} en \textbf{$\geq$10\%}. Solo es evaluable en los casos cuya demanda supera la capacidad de la intersección.
-    \item Reducción de emisiones (CO\textsubscript{2}) en \textbf{$\geq$5\%} (estimación SUMO).
 \end{itemize}
-% TODO(reestructura): el documento no dice de dónde salen las metas (25-40 % de retraso, 20 % de colas, 10 % de throughput, 5 % de CO2); falta la fuente o el criterio que las fijó. Como contexto, el Capítulo I cita reducciones de 35.79 a 63.49 % del tiempo de espera (Chavez2023) y de hasta 36.34 % del tiempo de viaje (UAQ2024).
+% TODO(reestructura): el documento no dice de dónde salen las metas (25-40 % de retraso, 20 % de colas, 10 % de throughput); falta la fuente o el criterio que las fijó. Como contexto, el Capítulo I cita reducciones de 35.79 a 63.49 % del tiempo de espera (Chavez2023) y de hasta 36.34 % del tiempo de viaje (UAQ2024).
+% Reestructura del 14.10.2026: se retiro la meta de -5 % de CO2 (decision de Fabian del 13.10: la metrica no se uso
+% en el analisis); la Tabla tab:metas del Cap. V lo declara en su nota.
 
-Estas metas son el objetivo del trabajo completo, no el resultado alcanzado en esta etapa. La regla de veredicto del Capítulo~\ref{cap:metodologia} usa un umbral menor, una reducción del 5\,\%, que separa una diferencia estadísticamente clara pero pequeña de una que justifica cambiar de controlador; las metas son más exigentes y se contrastan aparte. El Capítulo~\ref{cap:resultados} contrasta las cuatro metas con IPPO con mensajes entre vecinos, el único aprendiz con veredicto firme en P1 a P5 que no falla en ninguno; en P6 su veredicto queda pendiente porque su política no convergió. Para los demás modelos reporta el cambio del retraso frente al fijo.
+La regla de veredicto del Capítulo~\ref{cap:metodologia} usa un umbral menor, una reducción del 5\,\%, que separa una diferencia estadísticamente clara pero pequeña de una mejora clara; las metas son más exigentes y se contrastan aparte, en el Capítulo~\ref{cap:resultados}.
 % fuente: plan2/veredicto.csv (ippo_vecinos: FUNCIONA, FUNCIONA, FUNCIONA, MEJORA, EMPATA en P1-P5;
 % P6 PENDIENTE, 1/3 bases convergen, provisional EMPATA); ningun aprendiz tiene veredicto firme sin FALLA en los seis
 
 \introsection{Arquitectura modular propuesta (visión general)}
 
 El sistema se organiza en cuatro unidades: U1, preprocesamiento (construcción de la red y la demanda de SUMO); U2, aprendizaje por refuerzo (agentes y entrenamiento sobre TraCI, la interfaz que permite controlar SUMO desde Python); U3, simulación y medición en SUMO; y U4, coordinación distribuida. U1 alimenta a U3 con la red y las rutas; U3 expone estados y métricas vía TraCI, y U2 decide las acciones (mantener la fase verde o pasar a la siguiente) que se aplican en U3. En U4 cada agente intercambia mensajes con sus intersecciones vecinas (fase actual, tiempo en esa fase, vehículos que descargan hacia el vecino, colas en la aproximación y en el enlace compartido) y amplía su estado con ellos para coordinar ondas verdes y evitar el \textit{spillback}. El aporte de la coordinación se mide con dos variantes de IPPO que solo difieren en los mensajes, IPPO local e IPPO vecinos, con la misma red neuronal y la misma recompensa. El Capítulo~\ref{cap:metodologia} describe cada unidad en detalle; la Figura~\ref{fig:arquitectura} muestra cómo se conectan.
+
+\textbf{Aporte propio y trabajo computacional.} SUMO, TraCI, \texttt{netconvert} y el control actuado son herramientas de terceros. Lo propio es lo que se construyó sobre ellas: los seis escenarios y el barrido que ajusta el fijo de cada caso (U1); la formulación del control y los cinco algoritmos de aprendizaje, programados desde cero en Python y PyTorch, sin bibliotecas de aprendizaje por refuerzo (U2); el protocolo de evaluación, con semillas separadas, intervalos de confianza, pruebas pareadas y un veredicto automático (U3), y el canal de mensajes entre vecinos con la observación extendida y la penalización de \textit{spillback} (U4). En total se corrieron 138 entrenamientos de 200 episodios, es decir, 27\,600 episodios de una hora de tráfico simulado, que suman unas 144 horas de CPU solo en entrenamiento, más la evaluación de cada control con 30 semillas en cada caso, en un procesador de escritorio sin GPU (Tabla~\ref{tab:hw}).
+% fuente: 138 archivos plan2/resultados_<esc>_<alg>_s<base>.csv (sin los v21), 27 600 filas (episodios); suma de la
+% columna segundos = 143.6 h (medido el 13.10.2026); equipo en tab:hw (Cap. IV)
 
 \introsection{Objetivos de investigación}
 
@@ -49,7 +54,7 @@ El sistema se organiza en cuatro unidades: U1, preprocesamiento (construcción d
 \begin{itemize}
     \item (U1) Recopilar y preprocesar datos de tráfico y convertirlos a formato SUMO (\texttt{.net.xml}, \texttt{.rou.xml}).
     \item (U2) Diseñar estados, acciones y recompensas para agentes de RL que controlen fases semafóricas; implementar y comparar \textbf{Q-learning, SARSA, DQN y PPO}.
-    \item (U3) Validar en SUMO tomando como métrica primaria el retraso por vehículo (\texttt{timeLoss}) y como secundarias la espera detenida, las colas promedio y máxima, las paradas por vehículo, el \textit{throughput} y las emisiones, siempre contra los controles de referencia de tiempo fijo y actuado.
+    \item (U3) Validar en SUMO tomando como métrica primaria el retraso por vehículo (\texttt{timeLoss}) y como secundarias la espera detenida, las colas promedio y máxima, las paradas por vehículo y el \textit{throughput}, siempre contra los controles de referencia de tiempo fijo y actuado.
     \item \textbf{(U4) Implementar \textit{coordinación distribuida} entre semáforos:} añadir una \textbf{capa de mensajería} entre agentes vecinos (fase actual, colas/salidas previstas), un \textbf{estado extendido} que incorpore información de vecinos y una \textbf{recompensa con penalización por \textit{spillback}}. Evaluar variantes multiagente (IPPO/MAPPO) y su impacto a nivel de \textit{corredor}.
     \item Proponer buenas prácticas para reproducibilidad: semillas separadas para entrenamiento y evaluación, evaluación con la política congelada, intervalos de confianza al 95\% y pruebas de significancia pareadas.
 \end{itemize}
@@ -64,7 +69,7 @@ En U4, IPPO vecinos, IPPO spill (IPPO vecinos con la penalización por \textit{s
 
 \introsection{Justificación}
 
-\textbf{Social y económica:} reducción de tiempos de viaje y variabilidad, mayor productividad y menor gasto de combustible. \textbf{Ambiental:} menor número de paradas y de tiempos de ralentí, con potencial disminución de CO\textsubscript{2} y NOx. \textbf{Académica y tecnológica:} comparación sistemática de control semafórico por RL frente a semaforización fija tuneada y actuada, con un protocolo de semillas, intervalos de confianza y pruebas de significancia que la literatura revisada no aplica \citep{Chavez2023,Chakrabarti2022}, sobre un \textit{pipeline} abierto y reproducible orientado a un caso limeño.
+\textbf{Social y económica:} reducción de tiempos de viaje y variabilidad, mayor productividad y menor gasto de combustible. \textbf{Académica y tecnológica:} comparación sistemática de control semafórico por RL frente a semaforización fija tuneada y actuada, con un protocolo de semillas, intervalos de confianza y pruebas de significancia que la literatura revisada no aplica \citep{Chavez2023,Chakrabarti2022}, sobre un \textit{pipeline} abierto y reproducible orientado a un caso limeño.
 
 \introsection{Alcance y limitaciones / restricciones}
 
@@ -99,7 +104,7 @@ En U4, IPPO vecinos, IPPO spill (IPPO vecinos con la penalización por \textit{s
 
 \introsection{Métricas de evaluación}
 
-La métrica primaria es el retraso promedio por vehículo, medido con el atributo \texttt{timeLoss} de SUMO. Las secundarias son la espera detenida, la longitud de cola promedio y máxima, las paradas por vehículo, el \textit{throughput} y las emisiones estimadas de CO\textsubscript{2} y NOx; en los casos de varios semáforos se agregan el retraso de extremo a extremo, la progresión de los vehículos de paso y el \textit{spillback} en los enlaces entre cruces. El Capítulo~\ref{cap:teoria} define estas métricas y el Capítulo~\ref{cap:metodologia} describe cómo se miden.
+La métrica primaria es el retraso promedio por vehículo, medido con el atributo \texttt{timeLoss} de SUMO. Las secundarias son la espera detenida, la longitud de cola promedio y máxima, las paradas por vehículo y el \textit{throughput}; en los casos de varios semáforos se agregan el retraso de extremo a extremo, la progresión de los vehículos de paso y el \textit{spillback} en los enlaces entre cruces. El Capítulo~\ref{cap:teoria} define estas métricas y el Capítulo~\ref{cap:metodologia} describe cómo se miden.
 
 Cada corrida mide además los retornos de las tres recompensas del trabajo (de retraso, de colas y con penalización de \textit{spillback}), es decir, la suma de cada una a lo largo del episodio. Sirven de diagnóstico, porque dicen si un aprendiz optimizó lo que se le pidió, pero no entran en el veredicto.
 

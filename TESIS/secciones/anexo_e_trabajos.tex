@@ -614,7 +614,7 @@ Esta tesis
   & tabulares: detenidos por aproximación en 4 niveles y fase verde; DQN, IPPO y MAPPO: vector de 31 componentes (53 en la malla de P5 y P6) con cola detenida y vehículos en movimiento por aproximación, fase, tiempo en verde, verde mínimo cumplido, identificador y mensajes de los vecinos (Tabla~\ref{tab:obs-u4})
   & mantener o pasar a la siguiente fase verde, cada 5~s; verde de 10 a 60~s
   & $-$(retraso $+$ 0.01 $\times$ espera), sumado por segundo desde la decisión anterior y dividido entre 5 (Ecuación~\ref{eq:recompensa-u4}); término de \textit{spillback} en IPPO spill; colas en la ablación
-  & retraso por vehículo (\texttt{timeLoss}, primaria); espera detenida, colas, paradas, \textit{throughput}, CO$_2$ y NO$_x$; en el análisis de robustez, retraso total con la espera para entrar a la red (Sección~\ref{sec:robustez}) \\
+  & retraso por vehículo (\texttt{timeLoss}, primaria); espera detenida, colas, paradas y \textit{throughput}; en el análisis de robustez, retraso total con la espera para entrar a la red (Sección~\ref{sec:robustez}) \\
 \bottomrule
 \end{tabular}
 \caption[Formulación de los trabajos con aprendizaje por refuerzo (continuación)]{Continuación de la Tabla~\ref{tab:trabajos-entradas}. La fila de la revisión da la frecuencia de cada elemento en los estudios que revisa, en porcentaje; la última fila describe esta tesis.}

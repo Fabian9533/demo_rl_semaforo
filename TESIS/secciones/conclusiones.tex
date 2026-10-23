@@ -1,28 +1,80 @@
 \customchapter{CONCLUSIONES}
 
-Esta etapa del trabajo implementó las cuatro unidades de la arquitectura
-propuesta y las evaluó con el plan de pruebas de la
-Sección~\ref{sec:plan2}. Se desarrollaron seis de sus siete casos, P1
-a P6, con el fijo tuneado de cada caso, el actuado y ocho aprendices
-(Tabla~\ref{tab:plan2-modelos}), todos con el mismo protocolo y las
-mismas métricas de salida. Los resultados de P1 a P5 se congelaron
-primero; P6 se cerró después, con la misma regla. Un
-veredicto prefijado (FUNCIONA, MEJORA, EMPATA, FALLA o PENDIENTE) resume
-cada celda a partir del retraso de la política publicada, medido con el
-\texttt{timeLoss}, frente al fijo tuneado y frente al actuado
-(Tabla~\ref{tab:veredicto-matriz}). La métrica, la referencia y la regla
-son las del plan registrado antes de evaluar. Doce de las cuarenta y
-ocho celdas de aprendices de P1 a P6 quedan PENDIENTE: diez porque la
-base publicada no cumple el criterio de convergencia y dos por falta de
-datos. Seis de las doce son de P6. Una re-medición posterior, con otra
-métrica y otro barrido del
-fijo, se presenta como análisis de robustez
-(Sección~\ref{sec:robustez}). Un análisis exploratorio posterior, al
-final del Capítulo~\ref{cap:resultados} (Sección~\ref{sec:exploratorio}), prueba una corrección del
-entrenamiento de IPPO \emph{vecinos}. Ninguno de los dos reemplaza un
-veredicto; la conclusión~6 resume lo que muestran. Las conclusiones siguen el orden de
-los objetivos específicos: una por cada unidad, de U1 a U4, una sobre
-la reproducibilidad y una sobre el alcance del proyecto.
+\textbf{Respuesta en breve.} Se construyó y se evaluó en SUMO un control
+de semáforos con aprendizaje por refuerzo en el que cada semáforo recibe
+mensajes de sus vecinos, programado desde cero. Con una regla fijada
+antes de evaluar y 30 semillas, reduce el retraso por vehículo frente al
+fijo ajustado en el corredor y en la red con rotonda, empata con él en
+la malla y tiene menos retraso que el actuado en los seis casos:
+$-6.83$\,\% frente al fijo y $-14.35$\,\% frente al actuado, resumido en
+un número (Tabla~\ref{tab:resultado-principal}). Fuera del corredor con
+demanda alta, donde IPPO sin mensajes también funciona, lo que separa
+funcionar de fallar es la información del vecino. La mejora es menor que
+la que suele publicarse porque la referencia está bien ajustada.
+
+El resultado tiene cuatro límites:
+\begin{itemize}
+  \item No alcanza en ningún caso la meta de reducir el retraso entre un
+    25 y un 40\,\% (Tabla~\ref{tab:metas}).
+  \item Con una medición más estricta, decidida después del veredicto,
+    solo el corredor con demanda nominal conserva una ventaja clara
+    frente al fijo y el resumen en un número queda en $-0.03$\,\%; frente
+    al actuado se mantiene ($-11.45$\,\%). Con llegadas regulares, un
+    fijo bien ajustado es casi óptimo (Sección~\ref{sec:robustez}).
+  \item En la red con rotonda y en la malla con demanda nominal, la
+    política aprendida es el ciclo mínimo (en la malla, en 24 de las 30
+    semillas), no una coordinación nueva. P6
+    es provisional porque su entrenamiento no se estabilizó; una
+    corrección posterior, fuera del veredicto, lo mejora
+    (Sección~\ref{sec:exploratorio}).
+  \item Se probó en escenarios sintéticos, con mensajes instantáneos y
+    con la misma demanda con que se entrenó cada política; no en Lima,
+    con un canal imperfecto ni con otra demanda.
+\end{itemize}
+En suma: las herramientas funcionan, la información del vecino separa
+funcionar de fallar en casi todos los casos y el tamaño de cualquier
+mejora depende de contra qué referencia y con qué métrica se mide.
+
+Por objetivo:
+\begin{itemize}
+  \item \textbf{Objetivo general, cumplido en parte.} El modelo se
+    diseñó, se entrenó y se validó en SUMO, y reduce el retraso frente
+    al fijo ajustado en cuatro de seis casos y frente al actuado en los
+    seis, pero en escenarios sintéticos. El cruce de Paseo de la
+    República con 28 de Julio solo se importó.
+  \item \textbf{U1, preprocesamiento, cumplido en parte.} Se
+    construyeron seis escenarios (tres redes, cada una con demanda
+    nominal y alta) y el fijo ajustado de cada uno, con demanda
+    declarada y sin datos de tráfico observados.
+  \item \textbf{U2, aprendizaje por refuerzo, cumplido.} La formulación
+    y los cinco algoritmos se programaron desde cero. Q-learning y SARSA
+    pierden contra el fijo en todos los casos con demanda nominal, y
+    cambiar la recompensa no lo corrige.
+  \item \textbf{U3, simulación y medición, cumplido.} Cada modelo se
+    midió contra el fijo ajustado y contra el actuado con 30 semillas, y
+    hicieron falta las dos referencias. Las métricas secundarias se
+    midieron en todos los casos (Anexo~A) y no deciden el veredicto.
+  \item \textbf{U4, coordinación distribuida, cumplido en parte.} Salvo
+    en el corredor con demanda alta, los mensajes entre vecinos separan
+    funcionar de fallar; la penalización
+    de \textit{spillback} y el crítico central no añaden mejora. Los
+    mensajes no incluyen salidas previstas.
+  \item \textbf{Reproducibilidad, cumplido.} Las semillas separadas, la
+    política congelada, los tres entrenamientos por modelo y las pruebas
+    pareadas permiten regenerar cada cifra, y fueron también lo que
+    mostró que la referencia mueve la cifra y que en P3 la política es
+    el ciclo mínimo.
+\end{itemize}
+
+Las conclusiones numeradas que siguen desarrollan cada punto en el
+orden de los objetivos específicos: una por cada unidad, de U1 a U4,
+una sobre la reproducibilidad y una sobre el alcance del proyecto. Las
+seis usan el veredicto pre-registrado (\texttt{timeLoss} y fijo del
+25.09; P1 a P5 congelados el 25.09 y P6 cerrado el 28.09 con la misma
+regla); doce de las cuarenta y ocho combinaciones de aprendiz y caso
+quedan PENDIENTE, seis de ellas en P6. En las conclusiones numeradas,
+como en las tablas generadas, IPPO con mensajes se llama IPPO
+\emph{vecinos} y el fijo ajustado, fijo tuneado.
 % fuente: plan2/veredicto.csv y plan2/veredicto.md (veredicto.py --metrica timeloss_prom --fijo fijo_2509
 % --sin-trivial; P1-P5 iguales en las 45 celdas y en todas las columnas a plan2/veredicto_congelado_0355.csv,
 % congelado el 25.09.2026 a las 03:55; regla y metrica: plan2/ESPEC.md); celdas sin veredicto firme en P1-P5:
@@ -176,14 +228,13 @@ medirse contra las dos.
 % delta_retraso_total_prom el orden es el mismo en todos los niveles)
 
 En las métricas secundarias, la política publicada de IPPO
-\emph{vecinos} cumple la meta de colas ($\geq 20$\,\%) en P3 y P5, y
-la de CO$_2$ ($\geq 5$\,\%) solo en P2, mientras en P3 y P5 las
-emisiones suben. La de \textit{throughput} ($+10$\,\%) solo es
+\emph{vecinos} cumple la meta de colas ($\geq 20$\,\%) en P3 y P5,
+donde el ciclo mínimo logra lo mismo o más. La de \textit{throughput} ($+10$\,\%) solo es
 evaluable en P2 y P6, donde la demanda supera lo que la red sirve en la
 hora, y no se cumple en ninguno: el cambio es de $+0.2$\,\% en P2 y de
 $-0.5$\,\% en P6 (Tabla~\ref{tab:plan2-metas}). En P6 la política
 publicada no cumple ninguna meta secundaria: su cola media sube un
-47.5\,\% y su CO$_2$ baja un 4.2\,\%, por debajo del 5\,\% de la meta.
+47.5\,\%.
 % fuente: tablas/plan2_metas.tex (plan2/tablas_cap5.py --metrica timeloss_prom --fijo fijo_2509 --sin-trivial;
 % ippo_vecinos publicada: P3 cola -41.31, P5 cola -28.98; P2 co2 -12.26; P3 co2 +1.90, P5 co2 +5.15; throughput
 % en P2 ippo_vecinos_s2042 +0.16 %); P6: plan2/evaluacion_malla3_alta_resumen_fijo_2509.csv (ippo_vecinos_s42:
@@ -191,9 +242,13 @@ publicada no cumple ninguna meta secundaria: su cola media sube un
 % con el redondeo de tablas/plan2_metas.tex: +47.5, -4.2 y -0.5; throughput del fijo 8181.5 veh con 8700 veh/h
 % de demanda)
 
-\noindent\textbf{4. IPPO con mensajería entre vecinos es el único modelo
-con veredicto firme en P1 a P5 que no falla en ninguno, empata de forma
-provisional en P6 y supera al actuado en los seis casos. Lo que separa funcionar de fallar es la
+\noindent\textbf{4. Con el veredicto pre-registrado, IPPO con mensajes
+entre vecinos no falla en ninguno de los casos P1 a P5, todos con
+veredicto firme; empata de forma provisional en P6 y supera al actuado
+en los seis casos. Ningún otro modelo tiene un registro mejor: los que
+comparten su actor y sus mensajes obtienen el mismo veredicto en los
+casos en que el de ellos es firme. Fuera del corredor con demanda alta,
+lo que separa funcionar de fallar es la
 información del vecino; ni el término de \textit{spillback} ni el
 crítico centralizado añaden algo medible.} Frente al fijo tuneado, IPPO
 \emph{vecinos} reduce el retraso un 6.8\,\% en P1, un 23.3\,\% en P2 y

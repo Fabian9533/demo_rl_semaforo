@@ -7,6 +7,20 @@
 \renewcommand{\thetable}{A.\arabic{table}}
 \renewcommand{\theHtable}{A.\arabic{table}}
 
+Las cinco primeras tablas acompañan al resultado principal del
+Capítulo~\ref{cap:resultados} (Tabla~\ref{tab:resultado-principal}):
+el retraso y el cambio frente al fijo ajustado de todos los modelos, el
+resumen en un número de cada modelo y el veredicto detallado del
+actuado, de Q-learning y de IPPO con mensajes (IPPO vecinos).
+% Reestructura del 14.10.2026: estas tablas estaban en las secciones "Resultado global" y "Lectura por caso"
+% del Cap. V; se generan igual (veredicto.py, plan2/tablas_cap5.py y sintesis_plan.py con --metrica timeloss_prom
+% --fijo fijo_2509 --sin-trivial)
+\input{secciones/tablas/plan2_resumen}
+\input{secciones/tablas/plan2_numero_unico}
+\input{secciones/tablas/veredicto_actuado}
+\input{secciones/tablas/veredicto_ql}
+\input{secciones/tablas/veredicto_ippo_vecinos}
+
 Las tablas de este anexo completan las del
 Capítulo~\ref{cap:resultados}: aquí quedan las tablas de bases de todos
 los modelos, las de veredicto de los modelos que el capítulo no

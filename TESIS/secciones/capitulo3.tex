@@ -174,38 +174,12 @@ siempre el eje este--oeste y la transversal, el norte--sur; en la
 malla los dos ejes tienen dos carriles por sentido y la convención se
 mantiene.
 
-\begin{table}[H]
-\setstretch{1}
-\centering
-\footnotesize
-\setlength{\tabcolsep}{3pt}
-\begin{tabular}{l>{\raggedright\arraybackslash}p{2.0cm}>{\raggedright\arraybackslash}p{3.1cm}>{\raggedright\arraybackslash}p{1.3cm}>{\raggedright\arraybackslash}p{1.2cm}>{\raggedright\arraybackslash}p{3.3cm}r}
-\toprule
-Caso & Escenario & Geometría & Semáforos & \makecell[l]{Carriles\\por\\sentido} & Demanda del periodo punta (veh/h) & \makecell{Vehículos\\en la hora} \\
-\midrule
-P1 & corredor & dos cruces separados 300~m sobre una avenida este--oeste & 2 & 1 & avenida 600 en el sentido punta y 250 en el contrario; transversales 180; giros 60 & 1810 \\
-P2 & corredor\_alta & la red de P1 & 2 & 1 & la de P1 por 2.0: avenida 1200 y 500; transversales 360; giros 120 & 3620 \\
-P3 & red & rotonda sin semáforo más tres cruces separados 300~m sobre una avenida & 3 + rotonda & 2 & avenida 650 y 250; transversales 150; rotonda 80 a 150; giros 60 & 2150 \\
-P4 & red\_alta & la red de P3 & 3 + rotonda & 2 & la de P3 por 1.2: avenida 780 y 300; transversales 180; rotonda 96 a 180; giros 72 & 2580 \\
-P5 & malla3 & malla de 3 $\times$ 3 cruces separados 300~m & 9 (3 $\times$ 3) & 2 en los dos ejes & por fila 600 y 250; por columna 180 por sentido; 12 giros de 60 & 4350 \\
-P6 & malla3\_alta & la red de P5 & 9 (3 $\times$ 3) & 2 en los dos ejes & la de P5 por 2.0: por fila 1200 y 500; por columna 360 por sentido; 12 giros de 120 & 8700 \\
-\bottomrule
-\end{tabular}
-% vehiculos que SUMO genera en P6: 8700 en las 30 semillas de evaluacion (vehiculos + no_insertados en
-% plan2/parciales/eval_malla3_alta_actuado.csv y eval_malla3_alta_trivial.csv; la demanda es la misma para
-% todos los brazos); coincide con la suma de los flujos, por eso el caption no lo menciona
-\caption[Casos del plan de pruebas]{Casos del plan de pruebas y sus escenarios. Carriles por
-sentido en la avenida. La demanda del segundo periodo es la del primero con la punta invertida.
-Vehículos en la hora: suma de los flujos declarados; por el redondeo de las llegadas
-equiespaciadas SUMO genera 2152 en red y 2582 en red\_alta.}
-\label{tab:escenarios}\label{tab:plan2-casos}
-\end{table}
-% fuente: flujos del primer periodo en corredor.rou.xml, corredor_alta.rou.xml, red.rou.xml,
-% plan2/red_alta.rou.xml, malla3.rou.xml y malla3_alta.rou.xml; vehiculos en la hora: suma de
-% vehsPerHour por la duracion de cada flow en cada .rou.xml (P1-P6 tambien en la columna demanda_veh_h de
-% plan2/veredicto.csv; P6: 8700, dos periodos de 30 min con 8700 veh/h); vehiculos
-% generados P1-P5: columna vehiculos del brazo fijo en plan2/evaluacion_<esc>_resumen.csv (1810, 3620,
-% 2152, 2582, 4350)
+Los parámetros de cada caso (red, demanda, semáforos y carriles) y el
+desglose de la demanda por tipo de flujo están en el plan de pruebas,
+Tablas~\ref{tab:plan2-casos} y~\ref{tab:demanda-flujos}
+(Sección~\ref{sec:plan2}).
+% Reestructura del 14.10.2026: la tabla de casos que estaba aqui paso a 3.7.1 con sus etiquetas
+% (tab:escenarios y tab:plan2-casos) y su celda de demanda se desglosa en tab:demanda-flujos.
 
 P7 (una red de cuatro por cuatro cruces, con tres carriles por sentido
 y fase de giro protegido) queda definido como trabajo siguiente:
@@ -730,8 +704,8 @@ Esta sección describe de dónde sale cada métrica de la
 Sección~\ref{sec:teoria-metricas}; todas se calculan con las mismas
 salidas de SUMO para todos los controles. La métrica primaria es el
 retraso por vehículo (\texttt{timeLoss}), la magnitud que la tesis se
-propone reducir; la espera detenida, las colas, las paradas, el
-\textit{throughput} y las emisiones son secundarias. La espera para
+propone reducir; la espera detenida, las colas, las paradas y el
+\textit{throughput} son secundarias. La espera para
 entrar a la red y el retraso total (Ecuación~\ref{eq:retraso-total}),
 que la suma al \texttt{timeLoss}, se miden para el análisis de
 robustez. La Figura~\ref{fig:flujo-u3} sigue las corridas
@@ -766,14 +740,10 @@ número de paradas (\texttt{waitingCount}, veces que la velocidad bajó
 de 0.1~m/s) y el instante de llegada. El \textit{throughput} es el
 número de vehículos que completan su viaje antes de los 3600~s. Los
 promedios por vehículo incluyen a los que no terminaron al cerrar la
-simulación. Con el
-dispositivo de emisiones activado
-(\verb|--device.emissions.probability 1|) cada viaje incluye además
-sus emisiones acumuladas; se reportan CO$_2$ en gramos y NO$_x$ en
-miligramos por vehículo, con la clase de emisión por defecto de SUMO
-(HBEFA3, turismo a gasolina Euro~4) \citep{SUMO_Emissions}. Activar el
-dispositivo no altera la dinámica ni la secuencia aleatoria de la
-simulación: las métricas con y sin él coinciden.
+simulación. Las corridas activan el dispositivo de emisiones de SUMO
+(\verb|--device.emissions.probability 1|), pero sus salidas no se usan
+en el análisis; activarlo no altera la dinámica ni la secuencia
+aleatoria de la simulación: las métricas con y sin él coinciden.
 % fuente: rl_corredor.py (--tripinfo-output.write-unfinished true); comun.leer_tripinfo
 
 SUMO cuenta el \texttt{timeLoss} desde que el vehículo entra a la red.
@@ -895,13 +865,79 @@ la regla de selección según el modelo, y parte de los programas fijos
 se había tuneado con semillas de evaluación. El plan de pruebas corrige
 esas diferencias y reemplaza sus conclusiones.
 
-\subsection{Pregunta de cada prueba}
+\subsection{Casos y parámetros fijados antes de entrenar}
+
+El plan combina tres redes de tamaño creciente con dos niveles de
+demanda (Tabla~\ref{tab:plan2-casos}): un corredor de dos semáforos, una
+red de tres semáforos con una rotonda sin semáforo y una malla de nueve,
+cada una con demanda nominal y alta. La demanda alta hace el papel de la
+hora punta, sin calibración con aforos de Lima. Todos los parámetros de
+la tabla se fijaron antes de entrenar; ninguno trae resultados.
+
+% fuente: flujos del primer periodo en corredor.rou.xml, corredor_alta.rou.xml, red.rou.xml,
+% plan2/red_alta.rou.xml, malla3.rou.xml y malla3_alta.rou.xml; vehiculos en la hora: suma de
+% vehsPerHour por la duracion de cada flow (P1-P6 tambien en la columna demanda_veh_h de plan2/veredicto.csv);
+% calles y carriles: aristas no internas de plan2/corredor.net.xml, red.net.xml y malla3.net.xml
+\begin{table}[H]
+\setstretch{1}
+\centering
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{l>{\raggedright\arraybackslash}p{1.7cm}>{\raggedright\arraybackslash}p{1.4cm}rccc>{\raggedright\arraybackslash}p{3.6cm}}
+\toprule
+Caso & Red & Demanda & \makecell{Vehículos\\por hora} & \makecell{Semáforos\\(= agentes)} & Calles & \makecell{Carriles\\por sentido} & Qué pone a prueba \\
+\midrule
+P1 & Corredor & Nominal & 1810 & 2 & 3 & 1 & La pregunta común, en la red más simple \\
+P2 & Corredor & Alta ($\times 2.0$) & 3620 & 2 & 3 & 1 & Si sigue funcionando cuando la demanda supera la capacidad de un carril \\
+P3 & Red con rotonda & Nominal & 2150 & 3 & 5 & 2 & Si funciona con más carriles y con un elemento que no controla (la rotonda) \\
+P4 & Red con rotonda & Alta ($\times 1.2$) & 2580 & 3 & 5 & 2 & Lo mismo con un 20\,\% más de demanda, el límite que impone la rotonda \\
+P5 & Malla $3 \times 3$ & Nominal & 4350 & 9 & 6 & 2 & Si el método escala a una red con hasta cuatro vecinos por cruce \\
+P6 & Malla $3 \times 3$ & Alta ($\times 2.0$) & 8700 & 9 & 6 & 2 & Si supera a un fijo coordinado cuando la demanda supera la capacidad de la red \\
+\bottomrule
+\end{tabular}
+\caption[Casos del plan de pruebas]{Casos del plan de pruebas: parámetros fijados antes de entrenar. Los cruces están separados 300~m. Carriles por sentido en la avenida (en la malla, en los dos ejes). En cada caso hay un agente por semáforo, 3 entrenamientos de 200 episodios por modelo y evaluación con las semillas 1001 a 1030 (Sección~\ref{sec:protocolo}).}
+\label{tab:escenarios}\label{tab:plan2-casos}
+\end{table}
+
+La Tabla~\ref{tab:demanda-flujos} desglosa la demanda de cada red por
+tipo de flujo, con su subtotal, para que la columna sume a la vista. A
+los 30~min el sentido dominante y el contrario intercambian sus flujos;
+los giros y los flujos de la rotonda cambian de origen y destino, y el
+total de cada mitad no cambia. Las llegadas son a intervalos regulares.
+
+% fuente: atributo vehsPerHour de los flow con begin="0" en plan2/corredor.rou.xml (10 flujos), red.rou.xml (12) y
+% malla3.rou.xml (24); segunda mitad, flujos con begin="1800", que suman lo mismo; totales de 3620, 2580 y 8700 en
+% corredor_alta.rou.xml, red_alta.rou.xml y malla3_alta.rou.xml
+\begin{table}[H]
+\setstretch{1}
+\centering
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{>{\raggedright\arraybackslash}p{4.4cm}>{\raggedright\arraybackslash}p{2.6cm}>{\raggedright\arraybackslash}p{2.8cm}>{\raggedright\arraybackslash}p{3.6cm}}
+\toprule
+Tipo de flujo (veh/h, primera media hora) & Corredor (P1) & Red con rotonda (P3) & Malla $3 \times 3$ (P5) \\
+\midrule
+Avenida, sentido dominante & $1 \times 600 = 600$ & $1 \times 650 = 650$ & $3 \times 600 = 1800$ (uno por fila) \\
+Avenida, sentido contrario & $1 \times 250 = 250$ & $1 \times 250 = 250$ & $3 \times 250 = 750$ \\
+Calles transversales & $4 \times 180 = 720$ & $6 \times 150 = 900$ & $6 \times 180 = 1080$ (dos sentidos por columna) \\
+Rotonda (entra uno y sale otro) & --- & $150 + 80 = 230$ & --- \\
+Giros entre avenida y transversal & $4 \times 60 = 240$ & $2 \times 60 = 120$ & $12 \times 60 = 720$ \\
+\midrule
+\textbf{Total} & \textbf{1810} & \textbf{2150} & \textbf{4350} \\
+Caso con demanda alta (cada flujo por el factor) & P2: $\times 2.0 = 3620$ & P4: $\times 1.2 = 2580$ & P6: $\times 2.0 = 8700$ \\
+\bottomrule
+\end{tabular}
+\caption[Demanda por tipo de flujo]{Demanda de cada red por tipo de flujo en la primera media hora: número de flujos por su tasa en vehículos por hora. En la segunda media hora se invierte el sentido dominante de la avenida.}
+\label{tab:demanda-flujos}
+\end{table}
 
 La pregunta es la misma en todas las celdas de la matriz caso por
 modelo, donde una celda es un modelo en un caso: \emph{¿el modelo
 reduce el retraso por vehículo frente al tiempo fijo tuneado en ese
 caso, y no queda por detrás del actuado?} La regla de la
-Sección~\ref{sec:veredicto} convierte esa pregunta en un veredicto.
+Sección~\ref{sec:veredicto} convierte esa pregunta en un veredicto. El
+resultado que el plan espera en cada caso es FUNCIONA; antes de correr
+no hubo predicciones numéricas por caso.
 
 Cada caso agrega una dificultad a la anterior. P1 y P2 comparan un
 corredor de dos semáforos con demanda nominal y con demanda doble, y

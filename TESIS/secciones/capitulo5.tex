@@ -1,427 +1,372 @@
 \chapter{RESULTADOS}
 \label{cap:resultados}
 
-Este capítulo reporta los resultados del plan de pruebas de la
-Sección~\ref{sec:plan2}: los casos P1 a P6 de la
-Tabla~\ref{tab:plan2-casos}, con los modelos de la
-Tabla~\ref{tab:plan2-modelos}, el protocolo de la
-Sección~\ref{sec:protocolo} y la regla de veredicto de la
-Sección~\ref{sec:veredicto}. El resultado principal es el veredicto
-pre-registrado, con el \texttt{timeLoss} como métrica primaria y el
-fijo tuneado con el primer barrido. El de P1 a P5 se congeló
-primero. P6 se cerró después con la misma regla: su
-fijo se barrió con el mismo criterio, se evaluó con las mismas semillas
-y su columna entró en todas las tablas. Las tablas de veredicto las
-genera \texttt{veredicto.py} con esos datos, y las tablas de resumen y
-las figuras del capítulo se leen de los mismos archivos. La
-Sección~\ref{sec:robustez}, al final del capítulo, repite el análisis
-de P1 a P6 con una métrica más estricta, un fijo re-barrido desde el
-verde mínimo y un control trivial; es un análisis de robustez y no
-reemplaza ningún veredicto. La Sección~\ref{sec:exploratorio}, también
-posterior al veredicto y con otras semillas, prueba dos correcciones
-del entrenamiento de IPPO vecinos. Los resultados de la fase exploratoria que
-precedió al plan están en el Anexo~C, y las tablas completas del plan,
-con las tres bases de cada modelo, en el Anexo~A.
-% fuente: plan2/veredicto_congelado_0355.csv y .md (copia de plan2/veredicto.csv y .md a las 03:55). Las tablas
-% del capitulo se regeneran con "python veredicto.py --metrica timeloss_prom --fijo fijo_2509 --sin-trivial"
-% (y lo mismo con sintesis_plan.py y plan2/tablas_cap5.py); el brazo fijo_2509 (plan2/fijo_2509.py) es el fijo
-% del 25.09 (commit 37f9680) y plan2/veredicto.csv coincide con el congelado en las 45 celdas de P1 a P5.
-% P6: fijo de plan2/malla3_alta.add.xml (barrer_fijo.py --metrica timeloss_prom, "OK barrido_malla3_alta" a las
-% 08:41 del 28.09.2026 en plan2/cola/cola.out, luego eval_malla3_alta_fijo); tablas regeneradas con P6 a las 09:14-09:15 del 28.09.2026
+% Reestructura del 14.10.2026 (asesoria del 09.10): apertura didactica, plan, resultado principal y
+% lo esperado frente a lo obtenido. Cifras: plan2/veredicto.csv (veredicto pre-registrado del 25.09,
+% metrica timeLoss, fijo del 25.09 = brazo fijo_2509), plan2/sintesis_numero_unico.csv,
+% plan2/evaluacion_<esc>_resumen_fijo_2509.csv y plan2/robustez_veredicto.csv. El detalle que antes
+% estaba en "Resultado global" y "Lectura por caso" (Tablas plan2_resumen, plan2_numero_unico y
+% veredicto por modelo) paso al Anexo A.
 
-En todo el capítulo, salvo en las Secciones~\ref{sec:robustez}
-y~\ref{sec:exploratorio}, el
-retraso es el \texttt{timeLoss} medio por vehículo
-(Sección~\ref{sec:u3}), el fijo tuneado es el programa de tiempo fijo
-ajustado por barrido en cada caso (Sección~\ref{sec:referencias-fijas})
-y el actuado, el control actuado nativo de SUMO con las mismas fases.
-$\Delta_f$ y $\Delta_a$ son el cambio porcentual del retraso medio de
-un modelo frente al fijo tuneado y frente al actuado del mismo caso
-(Ecuación~\ref{eq:delta}), pareado por semilla sobre las semillas de
-evaluación 1001 a 1030; un valor negativo es una mejora. Cada cambio
-se acompaña de su intervalo de confianza al 95\,\% por
-\textit{bootstrap} pareado y del valor $p$ de la prueba de Wilcoxon
-pareada (Sección~\ref{sec:estadistica}).
+Este capítulo responde la pregunta de la tesis, que es la misma en los
+seis casos del plan que se ejecutaron: ¿el control aprendido reduce el retraso por
+vehículo frente al programa de tiempo fijo ajustado para ese caso, sin
+quedar por detrás del control actuado?
+
+La respuesta corta es esta. Con la regla fijada antes de evaluar, IPPO
+con mensajes entre vecinos reduce el retraso frente al fijo ajustado en
+el corredor y en la red con rotonda, entre un 3.6 y un 23.3\,\% (casos
+P1 a P4); empata con él en la malla de nueve semáforos (P5, y de forma
+provisional P6), y tiene menos retraso que el actuado en los seis casos.
+Resumido en un número, el cambio es de $-6.83$\,\% frente al fijo y de
+$-14.35$\,\% frente al actuado, lejos de la meta de reducir el retraso
+entre un 25 y un 40\,\%. El capítulo mide además dos salvedades, con
+comprobaciones que se decidieron después del veredicto. En la red con
+rotonda y demanda nominal, la política aprendida da el mismo retraso que
+el ciclo más corto posible, que el barrido del fijo no había probado. Y
+con una medición más estricta la ventaja frente al fijo solo se mantiene
+con claridad en el corredor con demanda nominal; la ventaja frente al
+actuado se mantiene.
+% fuente: plan2/veredicto.csv (ippo_vecinos: delta_fijo -6.8, -23.3, -8.8, -3.6, +1.8, +2.2; delta_act de
+% -3.6 a -41.0); plan2/sintesis_numero_unico.csv (-6.83 y -14.35); P3 igual al ciclo minimo (trivial,
+% -8.78 % frente al fijo en plan2/evaluacion_red_resumen_fijo_2509.csv); plan2/robustez_veredicto.csv
+% (P1 -6.7 FUNCIONA; P3 -0.5 "MEJORA (= trivial)"; P2, P4, P5 y P6 entre +1.1 y +2.6) y
+% plan2/robustez_sintesis_numero_unico.csv (-11.45 frente al actuado)
+
+\textbf{Qué se compara.} El retraso es el tiempo que cada vehículo
+pierde frente a un viaje a velocidad libre (el \texttt{timeLoss} de
+SUMO), promediado sobre los vehículos de la hora simulada. El fijo
+ajustado es el mejor programa de tiempo fijo que encontró, para cada
+caso, un barrido de verdes y desfases hecho antes de evaluar
+(Sección~\ref{sec:referencias-fijas}); en las tablas generadas y en las
+secciones de detalle aparece como ``fijo tuneado''. El actuado es el
+control de SUMO que alarga el verde mientras sus detectores ven
+vehículos. Son las dos referencias habituales en ingeniería de
+tránsito, y un control nuevo tiene que superar a las dos.
+
+En IPPO con mensajes (``IPPO vecinos'' en las tablas generadas), cada
+semáforo es un agente que cada 5~s decide si mantiene el verde o pasa a
+la fase siguiente, con lo que ve en sus accesos y lo que le informan
+sus vecinos: la fase en que están, el tiempo que llevan en ella y sus
+colas. Dos controles dicen si una mejora viene de la coordinación. IPPO
+sin mensajes (``IPPO local''), que está en el plan desde el principio,
+usa la misma red neuronal y la misma recompensa, pero no recibe nada de
+los vecinos: si el modelo con mensajes gana y este no, la diferencia la
+pone la información del vecino. El ciclo mínimo, que se agregó después
+del veredicto (Sección~\ref{sec:robustez}, donde se llama ``trivial''),
+es un programa fijo que da a cada fase los 10~s del verde mínimo: si la
+política aprendida da lo mismo que él, la mejora no es una coordinación
+nueva, sino un ciclo corto que el barrido del fijo no había probado. Los
+demás modelos (Q-learning, SARSA, Double DQN y MAPPO) dicen qué aporta
+el algoritmo.
+
+\textbf{Cómo se lee el capítulo.} En cuatro pasos. Primero, la
+Tabla~\ref{tab:plan-resultados} recuerda el plan: tres redes (un
+corredor de dos semáforos, una red de tres semáforos con una rotonda y
+una malla de nueve), cada una con demanda nominal y alta; los casos
+impares tienen la nominal y los pares, la alta, y todos los parámetros
+se fijaron antes de entrenar. Segundo, la
+Tabla~\ref{tab:resultado-principal} da el resultado de IPPO con
+mensajes en cada caso frente a las dos referencias, y la
+Tabla~\ref{tab:metas} lo compara con las metas. Tercero, la
+Sección~\ref{sec:esperado-obtenido} compara caso por caso lo que el plan
+esperaba con lo obtenido y, cuando no coinciden, mide de dónde viene la
+diferencia. Cuarto, las secciones siguientes dan el detalle que sostiene
+esas tablas: qué aporta cada modelo (Sección~\ref{sec:lectura-modelo}),
+cómo aprendieron (Sección~\ref{sec:convergencia}), de qué depende el
+resultado (Sección~\ref{sec:alcance}), cómo se compara con otros
+trabajos (Sección~\ref{sec:comparacion-literatura}) y si se sostiene con
+una medición más estricta (Sección~\ref{sec:robustez}). La última
+sección (\ref{sec:exploratorio}) es un diagnóstico posterior del
+entrenamiento, fuera del veredicto.
+
+Cada sección responde a un objetivo. El plan muestra los escenarios de
+U1. El resultado principal y la comparación con otros trabajos
+responden al objetivo general; lo esperado frente a lo obtenido, a U3 y
+al plan de pruebas; la lectura por modelo, a U2 y U4; el alcance, a U1
+y al impacto de U4 a nivel de corredor, y la robustez, a U3 y a la
+reproducibilidad.
+
+\textbf{Cómo se leen las cifras.} Un cambio es el porcentaje en que
+varía el retraso medio de un control frente a una referencia, sobre las
+mismas 30 semillas de evaluación (1001 a 1030), que ningún modelo vio al
+entrenar; un valor negativo indica menos retraso. Cada cambio tiene un
+intervalo de confianza al 95\,\% por \textit{bootstrap} pareado y el
+valor $p$ de la prueba de Wilcoxon pareada
+(Sección~\ref{sec:estadistica}). La recompensa es la señal que cada
+agente aprende a maximizar: la suma, segundo a segundo, de los vehículos
+retrasados en sus accesos, con signo negativo (un vehículo detenido
+cuenta 1, y uno que avanza a media velocidad, 0.5). Un cambio positivo
+de la recompensa indica que el agente aprendió lo que se le pidió, pero
+no decide el veredicto.
+
+\textbf{Regla de veredicto.} La regla
+(Sección~\ref{sec:veredicto}) se fijó antes de correr el plan: P1 a P5
+se congelaron el 25.09 y P6 se cerró el 28.09 con la misma regla. Exige
+que el intervalo de confianza al 95\,\% y la prueba de Wilcoxon
+coincidan, y da a cada modelo, en cada caso, uno de cinco veredictos:
+\begin{itemize}
+  \item FUNCIONA, si reduce el retraso al menos un 5\,\% sin perder
+    contra el actuado;
+  \item MEJORA, si lo reduce menos o pierde contra el actuado;
+  \item EMPATA, si el intervalo y la prueba no muestran juntos una
+    diferencia;
+  \item FALLA, si lo aumenta;
+  \item PENDIENTE, si el entrenamiento no se estabilizó; en ese caso se
+    da una lectura provisional.
+\end{itemize}
+El 5\,\% separa una mejora clara (FUNCIONA) de una mejora significativa
+pero pequeña (MEJORA); el empate lo deciden el intervalo y la prueba.
+Tampoco es la meta, que se contrasta aparte en la Tabla~\ref{tab:metas}.
+
+\textbf{Criterio de análisis.} Cada caso se analiza con cinco
+preguntas, en este orden. Las tres primeras salen de la regla y la
+quinta de los pares de modelos, todo fijado antes de correr; las
+comprobaciones de la cuarta se decidieron después del veredicto.
+\begin{enumerate}
+  \item ¿Reduce el retraso frente al fijo ajustado, y en cuánto? Es el
+    veredicto.
+  \item ¿Queda por delante del actuado?
+  \item ¿El veredicto es firme, o el entrenamiento no se estabilizó?
+  \item ¿Es lo que el plan esperaba? Si no, ¿de dónde viene la
+    diferencia? Se revisa, en este orden, la referencia (si el ciclo
+    mínimo o un fijo ajustado desde 10~s dan lo mismo), la métrica (si
+    la ganancia se paga con espera para entrar a la red), la demanda (si
+    el caso satura o la política se entrenó con otra) y el entrenamiento
+    (si se estabilizó).
+  \item ¿A qué pieza se debe? Se compara con el modelo que solo difiere
+    en ella.
+\end{enumerate}
 
 %----------------------------------------------------------------------
-\section{Resultado global}
+\section{El plan de pruebas}
+\label{sec:plan-resultados}
+
+Esta sección responde a U1: qué escenarios se construyeron y con qué
+parámetros. La Tabla~\ref{tab:plan-resultados} repite el plan de la
+Sección~\ref{sec:plan2} para que el capítulo se lea solo. Ningún
+parámetro de la tabla se eligió después de ver un resultado.
+
+% fuente: Tabla tab:plan2-casos (Cap. III); columnas semaforos, carriles y demanda_veh_h de plan2/veredicto.csv;
+% calles y carriles: aristas no internas de plan2/corredor.net.xml, red.net.xml y malla3.net.xml
+\begin{table}[H]
+\setstretch{1}
+\centering
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{l>{\raggedright\arraybackslash}p{1.7cm}>{\raggedright\arraybackslash}p{1.4cm}rccc>{\raggedright\arraybackslash}p{3.6cm}}
+\toprule
+Caso & Red & Demanda & \makecell{Vehículos\\por hora} & \makecell{Semáforos\\(= agentes)} & Calles & \makecell{Carriles\\por sentido} & Qué pone a prueba \\
+\midrule
+P1 & Corredor & Nominal & 1810 & 2 & 3 & 1 & La pregunta común, en la red más simple \\
+P2 & Corredor & Alta ($\times 2.0$) & 3620 & 2 & 3 & 1 & Si sigue funcionando cuando la demanda supera la capacidad de un carril \\
+P3 & Red con rotonda & Nominal & 2150 & 3 & 5 & 2 & Si funciona con más carriles y con un elemento que no controla (la rotonda) \\
+P4 & Red con rotonda & Alta ($\times 1.2$) & 2580 & 3 & 5 & 2 & Lo mismo con un 20\,\% más de demanda, el límite que impone la rotonda \\
+P5 & Malla $3 \times 3$ & Nominal & 4350 & 9 & 6 & 2 & Si el método escala a una red con hasta cuatro vecinos por cruce \\
+P6 & Malla $3 \times 3$ & Alta ($\times 2.0$) & 8700 & 9 & 6 & 2 & Si supera a un fijo coordinado cuando la demanda supera la capacidad de la red \\
+\bottomrule
+\end{tabular}
+\caption[Plan de pruebas]{Plan de pruebas: parámetros de cada caso, fijados antes de entrenar. Tres redes, cada una con demanda nominal y alta. Carriles por sentido en la avenida (en la malla, en los dos ejes). El desglose de la demanda por tipo de flujo está en la Tabla~\ref{tab:demanda-flujos}.}
+\label{tab:plan-resultados}
+\end{table}
+
+Común a los seis casos:
+\begin{itemize}
+  \item \textbf{Agentes:} uno por semáforo. Cada 5~s mantiene el verde
+    o pasa a la fase siguiente, con un verde de 10 a 60~s y un ámbar
+    de 3~s.
+  \item \textbf{Demanda:} una hora en dos mitades de 30~min; a los
+    30~min se invierte el sentido dominante de la avenida. Las llegadas
+    son a intervalos regulares. La demanda alta hace el papel de la hora
+    punta, sin calibración con aforos de Lima.
+  \item \textbf{Episodios:} 200 por entrenamiento, cada uno de una hora
+    de tráfico, y 3 entrenamientos por modelo.
+  \item \textbf{Semillas:} entrenamiento con 42, 2042 y 4042, más el
+    número de episodio; validación cada 10 episodios con 999 y 1999;
+    evaluación con 1001 a 1030, las mismas para todos los controles;
+    ajuste del fijo y de la demanda alta con 2001 a 2003.
+  \item \textbf{Controles:} el fijo ajustado y el actuado (referencias)
+    y 8 modelos que aprenden (7 en la malla: la variante con recompensa
+    de colas no se corrió en P5 ni en P6).
+  \item \textbf{Resultado esperado en cada caso:} FUNCIONA, que es la
+    pregunta común. Antes de correr no hubo predicciones numéricas por
+    caso.
+\end{itemize}
+
+%----------------------------------------------------------------------
+\section{Resultado principal y metas}
 \label{sec:resultados-plan2}
 \label{sec:resultados-global}
+\label{sec:resultado-principal}
 
-Esta sección da el veredicto de cada modelo en cada caso, compara los
-resultados con las metas cuantitativas que fija la introducción y
-resume cada modelo en un solo número.
+Esta sección responde al objetivo general. La
+Tabla~\ref{tab:resultado-principal} es el resultado de la tesis: el
+retraso de IPPO con mensajes en cada caso frente al fijo ajustado y al
+actuado, con el cambio de su recompensa y el veredicto.
 
-\subsection{Veredicto por caso y modelo}
+% fuente: plan2/veredicto.csv, filas ippo_vecinos (retraso, delta_fijo, delta_act, delta_recompensa, convergio,
+% veredicto) y actuado (retraso); retraso del fijo: brazo fijo_2509, metrica timeloss_prom, columna media de
+% plan2/evaluacion_<esc>_resumen_fijo_2509.csv (21.2967, 154.7013, 21.7187, 30.0517, 20.8387, 36.726);
+% resumen en un numero: plan2/sintesis_numero_unico.csv (ippo_vecinos frente a fijo_2509 y al actuado)
+\begin{table}[!tbp]
+\setstretch{1}
+\centering
+\footnotesize
+\setlength{\tabcolsep}{2pt}
+\begin{tabular}{l>{\raggedright\arraybackslash}p{2.1cm}rrrrrrl}
+\toprule
+ & & & \multicolumn{2}{c}{Retraso (s/veh)} & \multicolumn{2}{c}{\makecell{Cambio frente\\al (\%)}} & \makecell{Cambio de\\la recompensa} & \\
+\cmidrule(lr){4-5}\cmidrule(lr){6-7}
+Caso & Red y demanda & Veh/h & Fijo & \makecell{IPPO con\\mensajes} & fijo & actuado & (\%, + = mejor) & Veredicto \\
+\midrule
+P1 & Corredor, nominal & 1810 & 21.30 & 19.84 & $-6.8$ & $-5.8$ & $+7.0$ & FUNCIONA \\
+P2 & Corredor, alta & 3620 & 154.70 & 118.66 & $-23.3$ & $-4.4$ & $+19.9$ & FUNCIONA \\
+P3 & Red con rotonda, nominal & 2150 & 21.72 & 19.81 & $-8.8$ & $-7.8$ & $+15.6$ & FUNCIONA \\
+P4 & Red con rotonda, alta & 2580 & 30.05 & 28.97 & $-3.6$ & $-3.6$ & $+9.2$ & MEJORA \\
+P5 & Malla $3 \times 3$, nominal & 4350 & 20.84 & 21.21 & $+1.8$ & $-16.4$ & $+7.3$ & EMPATA \\
+P6 & Malla $3 \times 3$, alta & 8700 & 36.73 & 37.54 & $+2.2$ & $-41.0$ & $-7.8$ & PENDIENTE$^{\mathrm{a}}$ \\
+\midrule
+\multicolumn{3}{l}{\makecell[l]{Resumen en un\\número, P1 a P6$^{\mathrm{b}}$}} & & & $-6.83$ & $-14.35$ & & \\
+\bottomrule
+\end{tabular}
+\caption[Resultado principal]{Resultado principal: retraso de IPPO con mensajes frente al fijo ajustado y al actuado en cada caso, sobre las semillas de evaluación 1001 a 1030. Un cambio negativo del retraso es una mejora. (a) Veredicto provisional: empate; se estabiliza 1 de los 3 entrenamientos. (b) Media geométrica de los seis cocientes, con intervalo de $-7.53$ a $-6.12$\,\% frente al fijo y de $-15.08$ a $-13.64$\,\% frente al actuado.}
+\label{tab:resultado-principal}
+\end{table}
 
-La Tabla~\ref{tab:veredicto-matriz} da el veredicto de cada modelo en
-cada caso. La Tabla~\ref{tab:plan2-resumen}, con los mismos datos,
-agrega el retraso del fijo tuneado en cada caso, el retraso y el
-$\Delta_f$ de cada modelo y el veredicto provisional de las celdas
-pendientes.
+El retraso del actuado en los seis casos es de 21.07, 124.14, 21.48,
+30.04, 25.37 y 63.66~s/veh. En P5 el veredicto es un empate aunque el
+intervalo ($+0.4$ a $+3.4$\,\%) no toca el cero, porque la prueba de
+Wilcoxon no muestra diferencia ($p = 0.523$). El resumen en un número
+depende sobre todo de P2: sin ese caso queda en $-3.14$\,\% frente al
+fijo. Sin P6, sobre P1 a P5, queda en $-8.55$\,\% frente al fijo y en
+$-7.72$\,\% frente al actuado, porque el actuado colapsa en P6.
+% fuente: plan2/veredicto.csv (actuado: retraso; ippo_vecinos P5: ic_fijo [0.4, 3.4], p_fijo 0.523);
+% plan2/sintesis_numero_unico.csv (ippo_vecinos: sin_P2 -3.14; sin_P6 -8.55 frente al fijo y -7.72 frente al actuado)
+
+Ningún otro modelo tiene un registro mejor. IPPO con penalización de
+\textit{spillback} y MAPPO, que comparten su actor y sus mensajes,
+obtienen el mismo veredicto en los casos en que el suyo es firme;
+Double DQN queda por detrás; IPPO sin mensajes funciona solo en P2 y
+falla en P3 a P6, y Q-learning y SARSA fallan en todos los casos con
+demanda nominal. La Tabla~\ref{tab:veredicto-matriz} da el veredicto de
+todos los modelos, y el Anexo~A, sus retrasos, sus cambios y el resumen
+en un número de cada uno.
+% fuente: plan2/veredicto.csv (columna veredicto de ippo_spill, mappo, dqn, ippo_local, ql y sarsa)
 
 % fuente: plan2/veredicto.csv (igual a plan2/veredicto_congelado_0355.csv en P1-P5); se regenera con
 % "python veredicto.py --metrica timeloss_prom --fijo fijo_2509 --sin-trivial" desde demo_rl/
 \input{secciones/tablas/veredicto_matriz}
 
-% fuente: plan2/veredicto.csv (columnas retraso, delta_fijo y veredicto) y fila fijo_2509 (timeloss_prom: media
-% e ic95) de plan2/evaluacion_<esc>_resumen_fijo_2509.csv. Tabla escrita por plan2/tablas_cap5.py (--metrica
-% timeloss_prom --fijo fijo_2509 --sin-trivial), que solo lee y formatea esos archivos; en P1-P5 coincide
-% celda a celda con la tabla del 25.09 (git HEAD:TESIS/secciones/capitulo5.tex)
-\input{secciones/tablas/plan2_resumen}
-
-En P1 a P5 quedan seis celdas PENDIENTE. En cinco, la base publicada
-no cumple el criterio de convergencia y el veredicto es provisional:
-Q-learning en P4, la ablación \texttt{ql\_colas} en P2, DQN en P5 y
-MAPPO en P3 y P4 (Sección~\ref{sec:convergencia}). La sexta es
-\texttt{ql\_colas} en P5, que no se corrió, como tampoco en P6. IPPO
-spill aparece como ``= vecinos'' en P3, P4 y P5: en esos casos su
-término de \textit{spillback} nunca se activa y su política es
-idéntica a la de IPPO vecinos (Sección~\ref{sec:spill-vecinos}); las
-evaluaciones de spill que faltaban al congelar el veredicto se completaron después y lo
-confirman (Sección~\ref{sec:lectura-caso}). P6 tiene otras seis celdas
-PENDIENTE. En cinco la base publicada no converge: SARSA, DQN, IPPO
-vecinos, IPPO spill y MAPPO. La sexta es \texttt{ql\_colas}, sin datos.
-En P6 el término de \textit{spillback} sí se activa, y spill tiene su
-propio veredicto.
-% fuente: plan2/veredicto_congelado_0355.csv y .md (columnas bases, convergio y veredicto); P6: plan2/veredicto.csv
-% (malla3_alta: convergio "no" en sarsa, dqn, ippo_vecinos, ippo_spill y mappo; ql_colas "PENDIENTE (sin datos)");
-% spill en P6: parciales de evaluacion de ippo_spill e ippo_vecinos, 0/30 semillas identicas en las tres bases
-% (hechos_2509.py)
-
-IPPO vecinos es el único aprendiz con veredicto firme en los cinco
-casos de P1 a P5 que no falla en ninguno. Funciona en P1, P2 y P3,
-mejora en P4, donde la ganancia queda por debajo del umbral del 5\,\%,
-y empata en P5 con el fijo tuneado de la malla, que coordina los
-semáforos con desfases en ajedrez. En P6 su veredicto es provisional,
-un empate. Además supera al actuado en los seis casos. IPPO spill y
-MAPPO comparten con IPPO vecinos la arquitectura del actor y la
-observación con mensajes; spill cambia además la recompensa y MAPPO el
-crítico, y cada uno entrena su propia política. Los dos tienen el mismo
-veredicto que IPPO vecinos en todos los casos en que el suyo es firme.
-DQN, con la misma observación, funciona solo en P2 y mejora en P1, P3
-y P4. IPPO local, sin mensajes, funciona solo en P2, el caso saturado,
-y falla en P3, P4, P5 y P6.
-
-Los tres aprendices tabulares no funcionan en ningún caso. SARSA falla
-en los cinco casos de P1 a P5 y tiene una falla provisional en P6;
-Q-learning solo mejora al fijo en P2, sin alcanzar al actuado, y la
-ablación \texttt{ql\_colas} falla en todos los casos con veredicto
-firme. El actuado, que no aprende, funciona solo en P2, empata en P1 y
-P4, apenas mejora en P3 y falla en P5 y P6. En P5 queda un $21.8$\,\%
-por encima del fijo tuneado, y en P6, un $73.3$\,\%.
-
-En P6, la malla con la demanda doble, ningún aprendiz del plan mejora
-al fijo tuneado. Con veredicto firme fallan Q-learning e IPPO local. Con
-veredicto provisional, IPPO vecinos e IPPO spill empatan, y MAPPO, DQN
-y SARSA fallan. Todos los aprendices, en cambio, superan ampliamente al
-actuado, que colapsa: su $\Delta_a$ va de $-25.9$\,\% (Q-learning) a
-$-41.0$\,\% (IPPO vecinos). Solo el análisis exploratorio posterior
-de la Sección~\ref{sec:exploratorio}, fuera del plan, encuentra una
-variante del entrenamiento que mejora al fijo en P6.
-% fuente: plan2/veredicto_congelado_0355.csv (veredicto, delta_fijo, delta_act, p_act); P6: plan2/veredicto.csv
-% (malla3_alta: veredicto, delta_fijo y delta_act; actuado +73.3, ql -25.9 y ippo_vecinos -41.0 frente al actuado)
-
-\subsection{Metas cuantitativas}
-
-La introducción fija cuatro metas frente al fijo tuneado: reducir el
-retraso por vehículo entre un 25 y un 40\,\%, reducir la cola promedio
-al menos un 20\,\% y las emisiones de CO$_2$ al menos un 5\,\%, y
-aumentar el \textit{throughput} al menos un 10\,\%. La
-Tabla~\ref{tab:plan2-metas} las contrasta con la política publicada de
-IPPO vecinos, el único aprendiz con veredicto firme en los cinco casos
-de P1 a P5 que no falla en ninguno. Para la meta de retraso, los $\Delta_f$ de
-todos los modelos están en la Tabla~\ref{tab:plan2-resumen}; las metas
-de colas, emisiones y \textit{throughput} solo se contrastan para IPPO
-vecinos.
-
-% fuente: plan2/evaluacion_<esc>_resumen_fijo_2509.csv, brazo ippo_vecinos_s<base> con la base publicada de
-% plan2/veredicto_congelado_0355.csv (P1 4042, P2 2042, P3 4042, P4 42, P5 2042), columna delta_pct de las
-% metricas timeloss_prom, cola_prom, co2_prom y throughput, con un decimal como en veredicto.py (0.0 cuando
-% el valor redondeado es cero: throughput +0.02 en P3 y -0.02 en P5). Tabla escrita por plan2/tablas_cap5.py;
-% en P1-P5 coincide celda a celda con la del 25.09 (git HEAD:TESIS/secciones/capitulo5.tex)
-\input{secciones/tablas/plan2_metas}
-
-Ningún modelo alcanza la meta de retraso en ningún caso
-(Tabla~\ref{tab:plan2-resumen}). El más cercano es IPPO vecinos en P2,
-donde el fijo está saturado, con $-23.3$\,\%; en los demás casos su
-cambio va de $-8.8$ a $+2.2$\,\%. La meta de colas se cumple en P3
-($-41.3$\,\%) y en P5 ($-29.0$\,\%), y en P6 la cola promedio sube un
-$47.5$\,\%. La de CO$_2$ solo se cumple en P2 ($-12.3$\,\%); en P6 las
-emisiones bajan un 4.2\,\%, cerca de la meta, mientras en P3 y P5
-suben un 1.9 y un 5.2\,\%. La de \textit{throughput} no se cumple en
-ninguno, con cambios entre $-0.5$ y $+0.2$\,\%. Esa métrica discrimina
-entre controles solo en P2 y en P6, los casos en que la demanda supera
-la capacidad (Sección~\ref{sec:estadistica}). En P6 el fijo sirve
-8181 vehículos en la hora, IPPO vecinos un 0.5\,\% menos y el actuado
-un 3.0\,\% menos.
-% fuente: Tabla tab:plan2-metas; throughput solo discrimina en los casos de estres: Cap. III, metricas de
-% salida y estadistica; P6: plan2/evaluacion_malla3_alta_resumen_fijo_2509.csv (throughput: fijo_2509 8181.47,
-% ippo_vecinos_s42 delta_pct -0.45 p 0.00113, actuado -2.99; cola_prom +47.51; co2_prom -4.25)
-
-\subsection{Resumen en un número}
-
-La Tabla~\ref{tab:plan2-numero-unico} resume cada modelo en todos los
-casos con la media geométrica de la
-Ecuación~\ref{eq:media-geometrica}, frente al fijo y frente al
-actuado, y repite el índice frente al fijo dejando fuera un caso cada
-vez (Sección~\ref{sec:analisis-complementarios}). Cubre los seis
-casos, P1 a P6.
-
-% fuente: python sintesis_plan.py --metrica timeloss_prom --fijo fijo_2509 --sin-trivial (desde demo_rl/)
-% -> plan2/sintesis_numero_unico.csv
-\input{secciones/tablas/plan2_numero_unico}
-
-IPPO vecinos tiene el mejor índice: reduce el retraso un $6.83$\,\%
-frente al fijo tuneado (intervalo de $-7.53$ a $-6.12$\,\%) y un
-$14.35$\,\% frente al actuado (de $-15.08$ a $-13.64$\,\%). MAPPO le
-sigue, con $-4.94$ y $-12.61$\,\%. El índice depende sobre todo de P2,
-el corredor con la demanda doble: sin ese caso, IPPO vecinos pasa a
-$-3.14$\,\% frente al fijo y MAPPO a $-1.20$\,\%. P6 lo mueve en el
-otro sentido. Sin P6, es decir, sobre P1 a P5, los dos vuelven a los
-valores del veredicto congelado: $-8.55$ y $-8.09$\,\% frente al fijo, y $-7.72$ y
-$-7.26$\,\% frente al actuado. Frente al fijo, P6 reduce la ventaja,
-porque ningún aprendiz del plan lo mejora en ese caso; frente al actuado, la
-casi duplica, porque el actuado colapsa en P6. DQN reduce el retraso
-un $1.55$\,\% frente al fijo y un $9.49$\,\% frente al actuado ($-3.90$
-y $-3.02$\,\% sobre P1 a P5). IPPO local queda un $1.35$\,\% por
-encima del fijo (intervalo de $+0.92$ a $+1.78$\,\%) y un $6.83$\,\%
-por debajo del actuado. Q-learning y SARSA quedan por detrás, con
-$+14.50$ y $+17.11$\,\% frente al fijo. El actuado queda un
-$8.78$\,\% por encima del fijo sobre los seis casos, y un $15.60$\,\%
-sin P2, donde mejora al fijo un $19.8$\,\%. Sobre P1 a P5 quedaba un
-$0.90$\,\% por debajo. La Sección~\ref{sec:robustez}
-muestra cuánto cambia este índice con una medición más estricta.
-% fuente: plan2/sintesis_numero_unico.csv (delta_geo, ic_lo, ic_hi y sin_P<k> de cada modelo frente a fijo_2509 y
-% al actuado; ippo_vecinos -6.83 [-7.53, -6.12] y -14.35 [-15.08, -13.64], sin_P2 -3.14, sin_P6 -8.55 y -7.72;
-% mappo -4.94 y -12.61, sin_P2 -1.2, sin_P6 -8.09 y -7.26; dqn -1.55 y -9.49, sin_P6 -3.9 y -3.02; ippo_local
-% 1.35 [0.92, 1.78] y -6.83; ql 14.5; sarsa 17.11; actuado 8.78, sin_P6 -0.9, sin_P2 15.6 = P1, P3-P6); actuado en P2:
-% plan2/veredicto_congelado_0355.csv (-19.8)
-
-%----------------------------------------------------------------------
-\section{Lectura por caso}
-\label{sec:lectura-caso}
-
-Esta sección recoge, caso por caso, lo que las tablas de resumen no
-muestran. Las Tablas~\ref{tab:veredicto-actuado}, \ref{tab:veredicto-ql}
-y~\ref{tab:veredicto-ippo-vecinos} dan todas las columnas de la regla
-para el actuado, Q-learning e IPPO vecinos: intervalos, valores $p$,
-$\Delta_a$, cambio de la recompensa propia y convergencia. Las de SARSA
-(Tabla~\ref{tab:veredicto-sarsa}), \texttt{ql\_colas}
-(Tabla~\ref{tab:veredicto-ql-colas}), DQN
-(Tabla~\ref{tab:veredicto-dqn}), MAPPO
-(Tabla~\ref{tab:veredicto-mappo}), IPPO local
-(Tabla~\ref{tab:veredicto-ippo-local}) e IPPO spill
-(Tabla~\ref{tab:veredicto-ippo-spill}), y las de las tres bases de cada
-modelo, están en el Anexo~A.
-
-% fuente: plan2/veredicto.csv; se regeneran con "python veredicto.py --metrica timeloss_prom --fijo fijo_2509
-% --sin-trivial" desde demo_rl/
-\input{secciones/tablas/veredicto_actuado}
-\input{secciones/tablas/veredicto_ql}
-\input{secciones/tablas/veredicto_ippo_vecinos}
-
-La Figura~\ref{fig:plan2-mejora-caso} resume la lectura por caso de los
-dos modelos con el mejor número único, IPPO vecinos y MAPPO: su
-$\Delta_f$ en cada caso, con su intervalo, junto a los semáforos, los
-carriles por sentido de la avenida y la demanda del caso. IPPO vecinos
-reduce el retraso entre un 3.6 y un 8.8\,\% en P1, P3 y P4, con dos o
-tres semáforos en fila, un $23.3$\,\% en P2, el corredor con la demanda
-doble, y empata en P5, la malla de nueve semáforos. En P6, la misma
-malla con la demanda doble, queda en $+2.2$\,\% con un intervalo que
-incluye el cero, y MAPPO sube a $+12.5$\,\%; las dos bases publicadas
-de P6 no convergen. Ninguno de los dos alcanza la meta de $-25$\,\%.
-% fuente: plan2/veredicto.csv (delta_fijo de ippo_vecinos y mappo; P6: ippo_vecinos +2.2 [-1.4, 6.2], mappo +12.5,
-% convergio "no"); semaforos, carriles y demanda: Tabla
-% tab:plan2-casos (Cap. III) y la cabecera de cada plan2/<esc>.rou.xml, leidos por sintesis_plan.py
-
-\begin{figure}[H]
+% fuente: tab:plan2-casos (Cap. III) y la cabecera de cada plan2/<esc>.rou.xml, leidos por sintesis_plan.py
+\begin{figure}[!tbp]
 \centering
 \includegraphics[width=\textwidth]{fig_plan2_mejora_caso.png}
-\caption[Cambio del retraso frente al fijo por caso]{Cambio del retraso (\texttt{timeLoss}) frente al fijo tuneado ($\Delta_f$, \%) de las políticas publicadas de IPPO vecinos (azul) y MAPPO (naranja) en cada caso, sobre las semillas de evaluación 1001 a 1030. Cada punto es el cambio pareado por semilla, con su valor rotulado al lado; la barra vertical es su IC95\,\% por \textit{bootstrap} pareado. Punto relleno: la base publicada converge; círculo hueco: no converge y el veredicto es provisional. Línea roja discontinua: meta de la tesis, $-25$\,\%. Bajo cada caso, su número de semáforos, los carriles por sentido de la avenida y la demanda total (veh/h); P3 y P4 tienen además una rotonda sin semáforo. En P6 ninguna de las dos bases publicadas converge. Un valor negativo indica menos retraso que el fijo.}
+\caption[Cambio del retraso frente al fijo por caso]{Cambio del retraso (\texttt{timeLoss}) frente al fijo ajustado (\%) de las versiones evaluadas de IPPO con mensajes (IPPO vecinos, azul) y MAPPO (naranja) en cada caso, sobre las semillas de evaluación 1001 a 1030. Cada punto es el cambio pareado por semilla, con su valor rotulado al lado; la barra vertical es su intervalo de confianza al 95\,\% por \textit{bootstrap} pareado. Punto relleno: el entrenamiento se estabilizó; círculo hueco: no se estabilizó y el veredicto es provisional. Línea roja discontinua: meta de la tesis, $-25$\,\%. Bajo cada caso, su número de semáforos, los carriles por sentido de la avenida y la demanda total (veh/h); P3 y P4 tienen además una rotonda sin semáforo. Un valor negativo indica menos retraso que el fijo.}
 \label{fig:plan2-mejora-caso}
 \end{figure}
 % fuente: figura escrita por sintesis_plan.py (funcion figura, --metrica timeloss_prom --fijo fijo_2509
 % --sin-trivial) desde plan2/veredicto.csv (delta_fijo, ic_fijo, convergio); regenerada con P6 el 28.09.2026
 
-\noindent\textbf{P1, corredor.} El actuado empata con el fijo tuneado:
-$\Delta_f = -1.1$\,\%, con un intervalo de $-2.1$ a $+0.1$\,\% que
-incluye el cero y $p = 0.057$. Funcionan solo los tres modelos con el
-actor de IPPO y mensajes entre vecinos: IPPO vecinos, IPPO spill y
-MAPPO, que da el menor retraso del caso, a 0.06~s de IPPO vecinos. DQN,
-con la misma observación, mejora al fijo por debajo del umbral del
-5\,\%; IPPO local, sin mensajes, empata con él, y los tres tabulares
-fallan. El término de \textit{spillback} de IPPO spill solo actúa en los
-tres o cuatro primeros episodios de cada base, cuando la exploración
-llena el enlace entre los dos cruces.
-% fuente: plan2/veredicto_congelado_0355.csv (delta_fijo, ic_fijo, p_fijo, retraso);
-% episodios con ret_spill distinto de ret_retraso: plan2/resultados_corredor_ippo_spill_s*.csv
-% (episodios 1-4 en s42 y s2042, 1-3 en s4042)
+La Tabla~\ref{tab:metas} contrasta el resultado con las metas de la
+introducción. La de retraso no se cumple en ningún caso: el más cercano
+es P2 ($-23.3$\,\%), donde el fijo está saturado. La de colas se cumple
+en P3 y P5, pero ahí el ciclo mínimo logra lo mismo o más. La de
+\textit{throughput} no se cumple en ninguno: con demanda nominal el
+fijo, el actuado y los modelos atienden prácticamente a los mismos
+vehículos, y esa métrica solo distingue entre controles en P2 y P6.
 
-\noindent\textbf{P2, corredor con demanda doble.} La demanda supera la
-capacidad del carril. En esa situación el actuado y los aprendices con
-red neuronal ganan al fijo tuneado, con $\Delta_f$ entre $-19.4$ y
-$-23.3$\,\%, y los tabulares no: Q-learning solo lo mejora, SARSA falla
-y \texttt{ql\_colas} queda pendiente con falla provisional. Entre los
-controles que ganan, además del retraso, cambian el
-\textit{throughput} (vehículos que terminan su viaje en la hora) y el
-tiempo de \textit{spillback} (segundos en que la cola de un carril de
-enlace ocupa al menos el 90\,\% de sus plazas). El actuado sirve 2850
-vehículos frente a 2922 del fijo ($-2.4$\,\%) y acumula 87~s de
-\textit{spillback}; IPPO vecinos sirve 2926, casi los mismos que el
-fijo ($+0.2$\,\%, $p = 0.12$), con 1.8~s de \textit{spillback}, y DQN,
-2879 ($-1.4$\,\%), con 3.6~s. Frente al actuado ganan las tres variantes
-IPPO; la ventaja de MAPPO ($\Delta_a = -2.3$\,\%) no es significativa
-($p = 0.07$), y DQN empata con él ($\Delta_a = +0.4$\,\%, $p = 0.44$).
-Con la demanda por encima de la capacidad, parte de los vehículos
-espera para entrar a la red, y esa espera no entra en el
-\texttt{timeLoss}. La Sección~\ref{sec:robustez} la mide y muestra que,
-en este caso, la ganancia de esos controles en \texttt{timeLoss} va
-acompañada de más espera para entrar.
-% fuente: plan2/evaluacion_corredor_alta_resumen.csv (throughput, spillback_seg);
-% plan2/veredicto_congelado_0355.csv (delta_fijo, delta_act, p_act); definicion del tiempo de
-% spillback: Cap. II (metricas); espera para entrar: plan2/evaluacion_corredor_alta_resumen.csv
-% (retraso_insercion_prom)
-
-\noindent\textbf{P3, red de tres semáforos.} El actuado apenas mejora
-al fijo tuneado ($\Delta_f = -1.1$\,\%, $p = 0.003$). Los aprendices
-sin mensajes fallan, DQN mejora apenas e IPPO vecinos funciona; además
-del retraso, IPPO vecinos baja la espera detenida de 7.40~s (fijo) a
-4.41~s. P3 es también el caso de mayor dispersión entre las bases de
-IPPO vecinos
-(Tabla~\ref{tab:veredicto-bases-ippo-vecinos}): las dos no publicadas
-dan 20.03~s ($-7.8$\,\%) y 21.70~s, esta última un empate con el fijo
-($-0.1$\,\%, $p = 0.73$). La política publicada es un
-\textit{checkpoint} temprano, del episodio 40; la
-Sección~\ref{sec:convergencia} muestra qué pasa con esa base en el
-resto del entrenamiento. El programa trivial, con cada verde en el
-mínimo de 10~s y sin desfases, que la malla del barrido del fijo no
-incluía, da en las treinta semillas el mismo resultado que esa política
-(Sección~\ref{sec:robustez}). MAPPO queda cerca de IPPO vecinos, pero su
-base publicada no converge y su veredicto queda pendiente.
-% fuente: plan2/evaluacion_red_resumen.csv (timeloss_prom y espera_prom de fijo e
-% ippo_vecinos_s4042; ippo_vecinos_s42 y s2042); plan2/veredicto_congelado_0355.csv;
-% ep_elegido de plan2/politica_red_vecinos_s4042.json; igualdad con el trivial: plan2/evaluacion_red.csv
-% (ippo_vecinos_s4042 y trivial, 30 de 30 semillas) y marca "(= trivial)" de plan2/robustez_veredicto.csv;
-% malla del barrido del 25.09 (avenida 15-35 s): comentario de plan2/red.add.xml en el commit 37f9680
-
-\noindent\textbf{P4, red con demanda alta.} La demanda de P4 es 1.2
-veces la de P3, y no el 2.5 que daba el criterio usado en
-corredor\_alta, porque la rotonda sin semáforo se satura antes que los
-cruces (Sección~\ref{sec:calibracion} y
-Tabla~\ref{tab:red-alta-factor}). Con esa demanda los márgenes son
-estrechos: el actuado empata con el fijo tuneado ($-0.1$\,\%,
-$p = 0.87$) y ningún modelo lo mejora en un 5\,\% con su base
-publicada. IPPO vecinos, DQN y MAPPO quedan entre $-2.0$ y $-3.6$\,\%, e IPPO local, SARSA y
-\texttt{ql\_colas} fallan. IPPO vecinos y DQN quedan prácticamente
-iguales, y DQN es el más regular entre bases del caso, con sus tres
-bases entre $-3.4$ y $-3.6$\,\%, mientras las otras dos bases de IPPO
-vecinos dan $-4.6$ y $-1.9$\,\%. Las otras dos bases de MAPPO, con
-$-5.8$ y $-4.3$\,\%, quedan por delante de la publicada, pero solo una
-de las tres converge.
-% fuente: cabecera de plan2/red_alta.rou.xml (factor); plan2/evaluacion_red_alta_resumen.csv
-% (bases de ippo_vecinos, dqn y mappo: mappo_s4042 -5.77 %, mappo_s42 -4.32 %);
-% plan2/veredicto_congelado_0355.csv (convergen)
-
-\noindent\textbf{P5, malla de nueve semáforos.} El fijo tuneado de P5
-coordina los nueve semáforos con desfases en ajedrez, el esquema que
-domina el barrido (Sección~\ref{sec:referencias-fijas}). Contra esa
-referencia fallan todos los controles evaluados sin mensajes, incluido
-el actuado; Q-learning, SARSA e IPPO local quedan además por detrás del
-actuado. DQN, que sí recibe mensajes, queda entre esos controles y el
-fijo, con un veredicto provisional. IPPO vecinos y MAPPO empatan con el
-fijo. MAPPO queda en $\Delta_f = -0.3$\,\% ($p = 0.09$), con sus tres
-bases entre $-0.3$ y $+0.5$\,\%. En IPPO vecinos, el intervalo
-\textit{bootstrap} de $\Delta_f$ (de $+0.4$ a $+3.4$\,\%) no incluye el
-cero, pero la prueba de Wilcoxon no es significativa ($p = 0.52$), y la
-regla exige las dos condiciones (Sección~\ref{sec:veredicto}). La diferencia se
-concentra en pocas semillas: en 24 de las 30 queda entre $-1.5$ y
-$+1.2$\,\%, y en las otras seis sube a entre $+4.3$ y $+11.8$\,\%.
-Frente al actuado, IPPO vecinos reduce el retraso un $16.4$\,\% y MAPPO
-un $18.1$\,\%, y los dos bajan la espera detenida de 7.45~s (fijo) a
-4.97 y 4.49~s.
-% fuente: plan2/barrido_malla3.csv del commit 37f9680 (ganador 25/15 ajedrez); plan2/evaluacion_malla3_resumen.csv
-% (timeloss_prom, espera_prom); plan2/veredicto_congelado_0355.csv; diferencia por semilla:
-% timeloss_prom de ippo_vecinos_s2042 y fijo en plan2/evaluacion_malla3.csv del commit 37f9680
-
-\noindent\textbf{IPPO spill en P3, P4 y P5.} En estos tres casos el
-veredicto ``= vecinos'' se apoya en que el término de
-\textit{spillback} no se activa en ningún entrenamiento, de modo que
-spill recibe la misma recompensa que vecinos y su política es idéntica
-bit a bit (Sección~\ref{sec:spill-vecinos}). Al congelar el veredicto
-faltaban siete evaluaciones de spill en esos casos: la de la base 4042
-en P3 y las de las tres bases en P4 y P5. Se completaron después, con
-las mismas semillas 1001 a 1030, y en las tres bases de los tres casos
-spill da, en las treinta semillas, las mismas métricas que IPPO
-vecinos; solo difiere su recompensa propia, que no es una métrica de
-tráfico. En P1, P2 y P6, donde el término sí actúa, ninguna semilla
-coincide.
-% fuente: plan2/parciales/eval_<esc>_ippo_spill_s<base>.csv frente a eval_<esc>_ippo_vecinos_s<base>.csv
-% (red, red_alta y malla3: 30/30 semillas identicas en todas las metricas salvo ret_spill en las tres bases;
-% corredor, corredor_alta y malla3_alta: 0/30), comparacion del 28.09.2026 (hechos_2509.py); evaluaciones que faltaban al
-% 25.09: Cap. IV, sec:remedicion (siete evaluaciones de spill)
-
-\noindent\textbf{P6, malla con demanda alta.} P6 repite la malla de P5
-con toda la demanda multiplicada por el factor calibrado en la
-Sección~\ref{sec:calibracion}, con el que las colas llenan los enlaces
-entre cruces bajo el actuado y una parte grande del retraso ocurre
-fuera de la red (Tabla~\ref{tab:malla3-alta-factor}). Es el caso que
-responde si la coordinación aprendida supera a un fijo coordinado
-cuando la demanda supera la capacidad de la red
-(Sección~\ref{sec:plan2}), y el único de la malla en que el término de
-\textit{spillback} puede activarse.
-
-Su fijo tuneado sigue la misma regla que el de los otros casos:
-\texttt{timeLoss} como criterio, semillas de tuneo 2001 a 2003, verde
-de avenida desde 15~s, transversal desde 10~s y los tres esquemas de
-desfase de P5 (Sección~\ref{sec:referencias-fijas}). El ganador quedó
-en el borde de la malla de verdes, con 15~s de avenida, y la regla de
-interioridad extendió la avenida hasta 10~s, con 72 configuraciones en
-total. Gana un ciclo corto sin desfases: 15~s de avenida, 10~s de
-transversal y un ciclo de 31~s, con 36.91~s/veh (desviación estándar
-de 0.40) en las semillas de tuneo. Con los mismos verdes, el esquema
-en ajedrez que dominaba en P5 da 44.97~s/veh, y con 10~s en las dos
-fases el mejor programa sube a 139.45~s/veh. El mismo ganador es
-también el mejor por retraso total (82.63~s/veh), así que en P6 el fijo
-tuneado y el re-barrido de la Sección~\ref{sec:robustez} coinciden.
-
-Con las semillas 1001 a 1030, el fijo da 36.73~s/veh y el actuado,
-63.66~s/veh: un $73.3$\,\% más, una falla. Ningún aprendiz del plan
-mejora al fijo. IPPO vecinos queda en 37.54~s/veh, con $\Delta_f = +2.2$\,\%
-(de $-1.4$ a $+6.2$\,\%) y $p = 0.567$, un empate; su base publicada
-no converge, y solo una de sus tres bases lo hace, así que el veredicto
-es provisional. Las otras dos bases dan $+13.0$ y $+9.6$\,\%. IPPO
-spill queda en $+3.6$\,\% ($p = 0.114$), también con un empate
-provisional. MAPPO ($+12.5$\,\%, $p < 0.001$) y DQN ($+11.1$\,\%)
-fallan de forma provisional, ninguno con su base publicada convergida.
-IPPO local, con sus tres bases convergidas, falla con $+6.6$\,\% (de
-$+5.5$ a $+7.8$\,\%). Q-learning falla con $+28.5$\,\% y SARSA, de
-forma provisional, con $+23.5$\,\%. Frente al actuado, en cambio, todos
-los aprendices ganan con holgura: IPPO vecinos reduce el retraso un
-$41.0$\,\% e IPPO local un $38.5$\,\%.
-
-La espera para entrar a la red es de unos 45.5~s/veh con el fijo, el
-actuado y todas las políticas publicadas (45.46 con el fijo, 45.52 con
-el actuado y 45.51 con IPPO vecinos), y ningún vehículo queda sin
-entrar. Es un cuello de inserción
-común que ninguno de esos controles cambia, de modo que en P6, a diferencia de
-P2, la métrica no altera el veredicto (Sección~\ref{sec:robustez}).
-Dentro de la red el actuado deja crecer las colas hasta llenar los
-enlaces: su cola promedio triplica la del fijo (74.2 frente a 24.1
-vehículos) y acumula 163.8~s de \textit{spillback}, que no aparece con
-el fijo ni con la política de IPPO vecinos. Esa política
-tampoco iguala al fijo en todo: frente a él reduce las paradas por
-vehículo un $23.3$\,\%, pero su espera detenida sube un $55.6$\,\% y
-su cola promedio, un $47.5$\,\%.
-% fuente: plan2/malla3_alta.add.xml (comentario de barrer_fijo.py: malla 10-35 x 10-25 x cero/ajedrez/onda_eo, 72
-% configuraciones, ganador 15/10 cero, timeLoss 36.91 sd 0.4, retraso total 82.63); plan2/barrido_malla3_alta.csv
-% (15/10 ajedrez 44.97; mejor 10/10: ajedrez 139.45; orden por retraso_total_prom: 15/10 cero primero);
-% plan2/veredicto.csv (malla3_alta: retraso, delta_fijo, ic_fijo, p_fijo, delta_act, convergio, convergen,
-% veredicto); bases de ippo_vecinos: plan2/evaluacion_malla3_alta_resumen_fijo_2509.csv (s2042 +13.03, s4042
-% +9.57); retraso_insercion_prom, no_insertados, spillback_seg, paradas_prom, espera_prom y cola_prom de fijo_2509,
-% actuado e ippo_vecinos_s42 en plan2/evaluacion_malla3_alta_resumen_fijo_2509.csv
+% fuente: plan2/evaluacion_<esc>_resumen_fijo_2509.csv, columna delta_pct: ippo_vecinos de la version evaluada
+% (s4042, s2042, s4042, s42, s2042, s42) en timeloss_prom, cola_prom y throughput (igual a tablas/plan2_metas.tex);
+% trivial en cola_prom (red -41.31; malla3 -34.65 en el CSV, -34.655 desde plan2/evaluacion_malla3.csv);
+% co2_prom de ippo_vecinos_s2042 (-12.26) y del actuado (-10.3) en corredor_alta
+\begin{table}[H]
+\setstretch{1}
+\centering
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{>{\raggedright\arraybackslash}p{2.2cm}>{\raggedright\arraybackslash}p{1.8cm}>{\raggedright\arraybackslash}p{4.6cm}>{\raggedright\arraybackslash}p{5.0cm}}
+\toprule
+Meta & Valor fijado & IPPO con mensajes en P1, P2, P3, P4, P5 y P6 (\%) & ¿Se cumple? \\
+\midrule
+Retraso por vehículo & $-25$ a $-40$\,\% & $-6.8$, $-23.3$, $-8.8$, $-3.6$, $+1.8$, $+2.2$ & En ningún caso \\
+Cola promedio & $-20$\,\% o más & $-9.1$, $-5.0$, $-41.3$, $-16.6$, $-29.0$, $+47.5$ & Solo en P3 y P5, donde el ciclo mínimo logra lo mismo o más ($-41.3$ y $-34.7$\,\%) \\
+\textit{Throughput} & $+10$\,\% o más & $-0.1$, $+0.2$, $0.0$, $+0.2$, $0.0$, $-0.5$ & En ningún caso \\
+\bottomrule
+\end{tabular}
+\caption[Metas frente al fijo ajustado]{Metas de la tesis frente al fijo ajustado, con la versión evaluada de IPPO con mensajes en cada caso. La propuesta incluía también una meta de $-5$\,\% de emisiones de CO$_2$, que se retiró porque esa métrica no se usó en el análisis; con IPPO con mensajes se cumplía solo en P2 ($-12.3$\,\%), donde el actuado también la cumple ($-10.3$\,\%).}
+\label{tab:metas}
+\label{tab:plan2-metas}
+\end{table}
 
 %----------------------------------------------------------------------
+\section{Lo esperado frente a lo obtenido}
+\label{sec:esperado-obtenido}
+\label{sec:lectura-caso}
+
+Esta sección responde a U3 y al plan de pruebas: qué casos no salieron
+como se esperaba y de dónde viene la diferencia, medida. Lo esperado es
+la pregunta de cada caso (Sección~\ref{sec:plan2}), con FUNCIONA como
+hipótesis común. La Tabla~\ref{tab:esperado-obtenido} aplica a cada
+caso las preguntas 1 y 4 del criterio de análisis; las preguntas 2 y 3
+están en la Tabla~\ref{tab:resultado-principal}, y la 5, en la
+Sección~\ref{sec:lectura-modelo}.
+
+% fuente: plan2/veredicto.csv (ippo_vecinos); trivial en plan2/evaluacion_<esc>_resumen_fijo_2509.csv (timeloss_prom:
+% corredor +385.2, red -8.78, red_alta -6.99); P3 igual al trivial en 30/30 semillas (plan2/evaluacion_red.csv);
+% P5: ippo_vecinos_s2042 igual al trivial en 24/30 semillas (plan2/evaluacion_malla3.csv); P6: convergio 1/3
+\begin{table}[!tbp]
+\setstretch{1}
+\centering
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{l>{\raggedright\arraybackslash}p{3.7cm}>{\raggedright\arraybackslash}p{2.3cm}>{\raggedright\arraybackslash}p{1.9cm}>{\raggedright\arraybackslash}p{4.6cm}}
+\toprule
+Caso & Pregunta del plan & Obtenido & ¿Salió como se esperaba? & Origen de la diferencia (comprobación posterior al veredicto) \\
+\midrule
+P1 & La pregunta común, en la red más simple & $-6.8$\,\%, FUNCIONA & Sí & Ninguno: el ciclo mínimo aumenta el retraso un 385\,\% \\
+P2 & ¿Sigue funcionando con demanda por encima de la capacidad de un carril? & $-23.3$\,\%, FUNCIONA & Sí, con la métrica del plan & La métrica: la ganancia se paga con espera para entrar a la red \\
+P3 & ¿Funciona con más carriles y con un elemento que no controla? & $-8.8$\,\%, FUNCIONA & Solo en apariencia & La referencia: la política es el ciclo mínimo, que el barrido del fijo no probó \\
+P4 & ¿Y con un 20\,\% más de demanda? & $-3.6$\,\%, MEJORA & En parte & La referencia: el ciclo mínimo baja más ($-7.0$\,\%) \\
+P5 & ¿Escala a una malla con hasta cuatro vecinos por cruce? & $+1.8$\,\%, EMPATA & No & La referencia: el fijo ya coordina la malla; la política es el ciclo mínimo en 24 de 30 semillas \\
+P6 & ¿Supera a un fijo coordinado cuando la demanda supera la capacidad de la red? & $+2.2$\,\%, PENDIENTE & No & El entrenamiento: se estabiliza 1 de los 3 entrenamientos \\
+\bottomrule
+\end{tabular}
+\caption[Lo esperado frente a lo obtenido]{Lo esperado frente a lo obtenido con IPPO con mensajes, caso por caso. Lo esperado es la pregunta de cada caso, con FUNCIONA como hipótesis común. Las comprobaciones de la última columna se decidieron después del veredicto; el ciclo mínimo se agregó al ver la política de P3.}
+\label{tab:esperado-obtenido}
+\end{table}
+
+Una frase por caso completa la tabla:
+\begin{itemize}
+  \item \textbf{P1} es el único caso que pasa las cuatro primeras
+    preguntas sin reparos, y la mejora la ponen los mensajes: sin ellos,
+    el mismo modelo empata con el fijo ($-0.5$\,\%).
+  \item \textbf{P2:} la espera para entrar a la red sube de 239.6~s/veh
+    con el fijo a 282.0 con el modelo, y ni el retraso ni la recompensa
+    la ven. Sumada, el modelo queda un 1.6\,\% por encima del fijo
+    (Sección~\ref{sec:robustez}).
+  \item \textbf{P3:} la política da el mismo retraso que el ciclo
+    mínimo en las 30 semillas, y el barrido del fijo empezaba en 15~s.
+  \item \textbf{P4:} la política mejora poco ($-3.6$\,\%) y el ciclo
+    mínimo baja más ($-7.0$\,\%).
+  \item \textbf{P5:} el fijo coordina la malla con desfases alternados
+    (0 y 23~s). En las 24 semillas en que la política iguala al ciclo
+    mínimo queda entre $-1.5$ y $+1.2$\,\% frente al fijo; en las otras
+    6, entre $+4.3$ y $+11.8$\,\%.
+  \item \textbf{P6:} la versión elegida validó 34.80~s con dos semillas
+    y da 37.54~s/veh en la evaluación (fijo: 36.73).
+\end{itemize}
+Un diagnóstico posterior, fuera del veredicto
+(Sección~\ref{sec:exploratorio}), atribuye el plan largo de P4 y la
+inestabilidad de P6 a cómo se descuenta la recompensa y a que cada
+semáforo explora por su cuenta. Corregidas las dos cosas, en P6 la
+política baja el retraso un 6.7\,\% frente al fijo en semillas nuevas
+(6001 a 6030), y en P4 solo iguala al ciclo mínimo.
+% fuente: plan2/veredicto.csv (ippo_local P1 -0.5 EMPATA); P2: retraso total y espera para entrar en
+% plan2/robustez_veredicto.csv y plan2/evaluacion_corredor_alta.csv (239.6 y 282.0 s/veh); P3: barrido del fijo
+% del 25.09 desde 15 s (Cap. IV, programas de referencia); P5: plan2/evaluacion_malla3.csv por semilla; P6:
+% val_elegido 34.805 (media de 34.48 y 35.13); diagnostico posterior: plan2/exploratorio_coord/SINTESIS.md
+% (V2 en P6, 6001-6030: -6.7 % [-9.8, -3.7]; V5 en P4: +0.0 % [-0.3, +0.4] frente al trivial)
+
 \section{Lectura por modelo}
 \label{sec:lectura-modelo}
 
@@ -1085,7 +1030,7 @@ desfases, es decir, el trivial. Con esos programas, el
 20.84 a 20.78 ($-0.3$\,\%, $p = 0.09$). En P6 el barrido del fijo ya
 llegó a 10~s de avenida por la regla de interioridad, y su ganador,
 15~s de avenida y 10~s de transversal sin desfases, es también el
-mejor por retraso total (Sección~\ref{sec:lectura-caso}); el fijo de
+mejor por retraso total (Sección~\ref{sec:referencias-fijas}); el fijo de
 la re-medición es el mismo. Las políticas, las bases publicadas y los
 \textit{checkpoints} son los del veredicto pre-registrado, y en P6, los del cierre de ese
 caso.

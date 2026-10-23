@@ -145,7 +145,6 @@ Cola promedio y máxima & detenidos sumados sobre las aproximaciones semaforizad
   segundo y máximo instantáneo (veh) & TraCI \\
 \textit{Throughput} & vehículos que completan su recorrido dentro de la hora simulada &
   \texttt{tripinfo} \\
-Emisiones & CO$_2$ (g/veh) y NO$_x$ (mg/veh) acumulados en el viaje & dispositivo de emisiones \\
 No terminados & viajes sin llegada al cerrar la simulación & \texttt{tripinfo} \\
 No insertados & vehículos que al cerrar la simulación seguían esperando entrar a la red (veh) &
   resumen de estadísticas \\
@@ -174,8 +173,7 @@ Capítulo~\ref{cap:metodologia}.}
 El retraso es la métrica primaria e incluye frenadas, detenciones y aceleraciones. La espera
 detenida es una parte del retraso, no su equivalente: un control puede reducirla y aumentar las
 paradas sin mejorar el retraso. Retraso, colas y paradas son medidas habituales en la evaluación
-de controles de tráfico \citep{FHWA_Toolbox_Definitions,FHWA_Timing_Manual_Chapter3}; las
-emisiones las estima el modelo de emisiones de SUMO \citep{SUMO_Emissions}. El
+de controles de tráfico \citep{FHWA_Toolbox_Definitions,FHWA_Timing_Manual_Chapter3}. El
 \textit{throughput}, los no terminados y los no insertados solo discriminan entre controles cuando
 la demanda supera la capacidad (Sección~\ref{sec:teoria-control}).
 
