@@ -174,10 +174,13 @@ siempre el eje este--oeste y la transversal, el norte--sur; en la
 malla los dos ejes tienen dos carriles por sentido y la convención se
 mantiene.
 
-Los parámetros de cada caso (red, demanda, semáforos y carriles) y el
-desglose de la demanda por tipo de flujo están en el plan de pruebas,
-Tablas~\ref{tab:plan2-casos} y~\ref{tab:demanda-flujos}
-(Sección~\ref{sec:plan2}).
+Los parámetros de cada caso (red, demanda, semáforos, calles y
+carriles), la definición de la demanda nominal y de la alta y su
+desglose por tipo de flujo están en el plan de pruebas
+(Sección~\ref{sec:plan-casos}, Tablas~\ref{tab:plan2-casos}
+y~\ref{tab:demanda-flujos}). Los niveles de demanda que se agregaron
+para comparar las tres redes con la misma demanda total están en la
+Sección~\ref{sec:plan-demanda}.
 % Reestructura del 14.10.2026: la tabla de casos que estaba aqui paso a 3.7.1 con sus etiquetas
 % (tab:escenarios y tab:plan2-casos) y su celda de demanda se desglosa en tab:demanda-flujos.
 
@@ -578,8 +581,10 @@ desfase entre cruces; SUMO crea los detectores
 % fuente: comun.archivo_actuado (fases del programa estatico de la red, minDur 10, maxDur 60,
 % offset="0", "SUMO crea solos los detectores"); plan2/corredor_actuado.add.xml
 
-El control trivial es un control de cordura, no una referencia que se
-quiera superar, y solo entra en el análisis de robustez. Es el
+El control trivial, que la Sección~\ref{sec:plan-demanda} llama ciclo
+mínimo, es un control de cordura, no una referencia que se quiera
+superar. Entra en el análisis de robustez y se evalúa también en los
+niveles de demanda adicionales (Sección~\ref{sec:plan-demanda}). Es el
 programa fijo del caso con cada verde en el verde mínimo de los
 aprendices, 10~s (5~s en una fase de giro protegido, que ningún caso
 del plan tiene), el mismo ámbar y todos los desfases en cero. Equivale
@@ -596,7 +601,9 @@ y cómo se genera, en la Sección~\ref{sec:programa-trivial}.
 % fuente: comun.archivo_trivial (programa "fijo" del .sumocfg con cada verde en verde_min, 10 s, o
 % verde_min_giro, 5 s, si la fase da verde a dos movimientos o menos, que en el plan no ocurre; offset="0";
 % programID "trivial"); plan2/<esc>_trivial.add.xml de los seis casos: solo fases de 10 s y de 3 s;
-% rl_corredor.py, modo trivial; evaluar.py --brazo trivial; veredicto.REFERENCIAS
+% rl_corredor.py, modo trivial; evaluar.py --brazo trivial; veredicto.REFERENCIAS. Niveles de demanda adicionales:
+% plan2/generar_trabajos.agregar_demanda2 (dem2_eval_<esc>_trivial). 23.10.2026: antes decia "solo entra en el
+% analisis de robustez", que la Seccion sec:plan-demanda (entrega 3) dejo de cumplir
 
 \begin{table}[H]
 \setstretch{1}
@@ -845,59 +852,176 @@ el desfase que emerge entre cruces.
 \label{sec:plan}
 \label{sec:plan2}
 
-El plan de pruebas aplica un mismo método en todas las configuraciones
-y mide las mismas salidas en todas ellas. Cada caso fija un escenario
-(red y demanda); en cada caso se entrenan y evalúan los mismos modelos
-con el mismo protocolo, y un veredicto prefijado dice si el modelo
-funciona en ese caso.
+El plan de pruebas aplica el mismo método en seis casos y mide en todos
+las mismas salidas. Cada caso fija un escenario (red y demanda); en cada
+caso se entrenan y evalúan los mismos modelos con el mismo protocolo, y
+una regla fijada antes de correr dice si el modelo funciona en ese caso.
+El veredicto de P1 a P5 se cerró el 25.09.2026, y el de P6, el
+28.09.2026, con la misma regla. La sección presenta primero los casos y
+la lógica que los ordena (Sección~\ref{sec:plan-casos}) y los niveles de
+demanda que se agregaron después para ver cómo cambia la mejora con la
+demanda (Sección~\ref{sec:plan-demanda}). Siguen el protocolo común, la
+forma de medir un cambio, la regla de veredicto y los análisis que
+quedan fuera de ella.
+% fuente: fechas del veredicto: capitulo5.tex (apertura, "Regla de veredicto": P1 a P5 se congelaron el 25.09 y
+% P6 se cerro el 28.09 con la misma regla); plan2/veredicto_congelado_0355.csv (P1-P5) y plan2/veredicto.csv (P6)
+% Entrega 3 (22.10.2026): el detalle de la fase exploratoria (semillas, episodios, recompensa y regla de
+% publicacion de cada modelo) sale de aqui; esta en el Anexo C (anexo_c_exploratoria.tex, l. 20-36).
 
-Antes de este plan hubo una fase exploratoria, con su propia
-numeración de casos (Anexo~C). En ella el Q-learning se entrenaba con
-una sola semilla base, entre 40 y 120 episodios y con la recompensa de
-colas; IPPO, con tres semillas base de 200 episodios y la recompensa de
-retraso. En los dos casos se publicaba la política del último episodio,
-y la evaluación usaba diez semillas (1001 a 1010), con una validación
-intermedia en la semilla 999. Esa fase mostró que el Q-learning con
-recompensa de colas quedaba por detrás del actuado y que la última
-política no siempre era la mejor. Sus casos, sin embargo, no eran
-comparables entre sí: cambiaban el número de episodios, la recompensa y
-la regla de selección según el modelo, y parte de los programas fijos
-se había tuneado con semillas de evaluación. El plan de pruebas corrige
-esas diferencias y reemplaza sus conclusiones.
+Antes de este plan hubo una fase exploratoria, con su propia numeración
+de casos (Anexo~C). Esa fase mostró que el Q-learning con recompensa de
+colas quedaba por detrás del actuado y que la última política no siempre
+era la mejor, pero sus casos no eran comparables entre sí: cambiaban el
+número de episodios, la recompensa y la regla de selección según el
+modelo, y parte de los programas fijos se había ajustado con semillas de
+evaluación. El plan corrige esas diferencias y reemplaza sus
+conclusiones.
 
 \subsection{Casos y parámetros fijados antes de entrenar}
+\label{sec:plan-casos}
 
-El plan combina tres redes de tamaño creciente con dos niveles de
-demanda (Tabla~\ref{tab:plan2-casos}): un corredor de dos semáforos, una
-red de tres semáforos con una rotonda sin semáforo y una malla de nueve,
-cada una con demanda nominal y alta. La demanda alta hace el papel de la
-hora punta, sin calibración con aforos de Lima. Todos los parámetros de
-la tabla se fijaron antes de entrenar; ninguno trae resultados.
+En todos los casos se mide lo mismo: el retraso promedio por vehículo,
+en segundos por vehículo (el \texttt{timeLoss} de SUMO,
+Sección~\ref{sec:u3}), de cada modelo frente a dos referencias. Una es
+el fijo ajustado del caso, el programa de tiempo fijo elegido por un
+barrido de verdes y desfases (Sección~\ref{sec:protocolo}); la otra es
+el actuado, el control nativo de SUMO que alarga el verde mientras sus
+detectores ven llegar vehículos, entre 10 y 60~s
+(Sección~\ref{sec:modelos}). En las Secciones~\ref{sec:modelos}
+y~\ref{sec:protocolo} y en las tablas generadas, el fijo ajustado
+aparece como ``fijo tuneado''. La pregunta es la misma en todas las
+celdas de la matriz caso por modelo, donde una celda es un modelo en un
+caso: \emph{¿el modelo reduce el retraso por vehículo frente al fijo
+ajustado de ese caso, y no queda por detrás del actuado?} Es la pregunta
+de investigación de la tesis, aplicada a un caso. La regla de la
+Sección~\ref{sec:veredicto} convierte esa pregunta en un veredicto. El
+resultado que el plan espera en cada caso es FUNCIONA; antes de correr
+no hubo predicciones numéricas por caso.
+% glosario (23.10.2026, verificacion de la fase 1): "fijo ajustado" aparece aqui por primera vez en el Cap. III; la
+% equivalencia con "fijo tuneado" se quita cuando la pasada del glosario llegue a sec:modelos, sec:protocolo y a los
+% scripts que escriben las tablas
 
-% fuente: flujos del primer periodo en corredor.rou.xml, corredor_alta.rou.xml, red.rou.xml,
-% plan2/red_alta.rou.xml, malla3.rou.xml y malla3_alta.rou.xml; vehiculos en la hora: suma de
-% vehsPerHour por la duracion de cada flow (P1-P6 tambien en la columna demanda_veh_h de plan2/veredicto.csv);
-% calles y carriles: aristas no internas de plan2/corredor.net.xml, red.net.xml y malla3.net.xml
+Los casos siguen un criterio de complejidad creciente. Hay tres redes:
+un corredor de dos semáforos, una red de tres semáforos con una rotonda
+sin semáforo y una malla de nueve semáforos. Cada red forma un par de
+casos, uno con demanda nominal y otro con demanda alta: P1 y P2 en el
+corredor, P3 y P4 en la red con rotonda y P5 y P6 en la malla
+(Tabla~\ref{tab:plan2-casos}). Dentro de cada par solo cambia la
+demanda; la red, los semáforos, las calles, los carriles y el protocolo
+son los mismos, y el programa del fijo ajustado se elige de nuevo, con
+la misma regla, para la demanda de cada caso. Así, cada par mide el efecto de la
+demanda en una misma red. Todos los parámetros de la tabla se fijaron
+antes de entrenar; ninguno trae resultados.
+% Entrega 3 (22.10.2026, reunion del 14.10): logica del plan (pares y complejidad creciente), objetivo de cada
+% caso y tabla de comparaciones; se quito "si funciona con mas carriles": con este diseno el efecto de los
+% carriles no se puede aislar.
+
+% fuente: secciones/tablas/plan_pruebas.tex (la misma tabla que repite capitulo5.tex): flujos de
+% plan2/<esc>.rou.xml, columna demanda_veh_h de plan2/veredicto.csv y aristas no internas de los .net.xml
 \begin{table}[H]
 \setstretch{1}
 \centering
 \footnotesize
 \setlength{\tabcolsep}{3pt}
-\begin{tabular}{l>{\raggedright\arraybackslash}p{1.7cm}>{\raggedright\arraybackslash}p{1.4cm}rccc>{\raggedright\arraybackslash}p{3.6cm}}
-\toprule
-Caso & Red & Demanda & \makecell{Vehículos\\por hora} & \makecell{Semáforos\\(= agentes)} & Calles & \makecell{Carriles\\por sentido} & Qué pone a prueba \\
-\midrule
-P1 & Corredor & Nominal & 1810 & 2 & 3 & 1 & La pregunta común, en la red más simple \\
-P2 & Corredor & Alta ($\times 2.0$) & 3620 & 2 & 3 & 1 & Si sigue funcionando cuando la demanda supera la capacidad de un carril \\
-P3 & Red con rotonda & Nominal & 2150 & 3 & 5 & 2 & Si funciona con más carriles y con un elemento que no controla (la rotonda) \\
-P4 & Red con rotonda & Alta ($\times 1.2$) & 2580 & 3 & 5 & 2 & Lo mismo con un 20\,\% más de demanda, el límite que impone la rotonda \\
-P5 & Malla $3 \times 3$ & Nominal & 4350 & 9 & 6 & 2 & Si el método escala a una red con hasta cuatro vecinos por cruce \\
-P6 & Malla $3 \times 3$ & Alta ($\times 2.0$) & 8700 & 9 & 6 & 2 & Si supera a un fijo coordinado cuando la demanda supera la capacidad de la red \\
-\bottomrule
-\end{tabular}
-\caption[Casos del plan de pruebas]{Casos del plan de pruebas: parámetros fijados antes de entrenar. Los cruces están separados 300~m. Carriles por sentido en la avenida (en la malla, en los dos ejes). En cada caso hay un agente por semáforo, 3 entrenamientos de 200 episodios por modelo y evaluación con las semillas 1001 a 1030 (Sección~\ref{sec:protocolo}).}
+\input{secciones/tablas/plan_pruebas}
+\caption[Casos del plan de pruebas]{Casos del plan de pruebas: parámetros fijados antes de entrenar. Demanda: vehículos por hora en toda la red; la base es la demanda nominal de la red, y la alta, la base con cada flujo multiplicado por un factor. Calles: la avenida y las transversales; en la red con rotonda, también la calle norte--sur de la rotonda, y en la malla, sus tres filas y tres columnas. Carriles por sentido en la avenida (en la malla, en los dos ejes). Los cruces están separados 300~m. En cada caso hay un agente por semáforo, 3 entrenamientos de 200 episodios por modelo y evaluación con las semillas 1001 a 1030 (Sección~\ref{sec:protocolo}).}
 \label{tab:escenarios}\label{tab:plan2-casos}
 \end{table}
+
+\noindent\textbf{Qué responde cada par.} Además de la pregunta común,
+cada par responde una pregunta propia, que resume la última columna de
+la Tabla~\ref{tab:plan2-casos}:
+\begin{itemize}
+  \item P1 y P2, el corredor: es la unidad mínima donde importa la
+    coordinación entre semáforos vecinos, dos semáforos que comparten un
+    tramo de avenida, y el par prueba la pregunta común en esa red. En P2
+    la demanda de la avenida supera la capacidad de su carril.
+  \item P3 y P4, la red con rotonda: la rotonda no tiene semáforo y
+    ningún agente la controla, así que el par prueba si el modelo
+    funciona cuando una parte de la red no se controla con semáforos. P4
+    sube la demanda un 20\,\%, el mayor aumento que no satura la
+    rotonda.
+  \item P5 y P6, la malla: cada cruce tiene vecinos en los dos ejes,
+    hasta cuatro, y la demanda es mucho mayor; el par prueba si el
+    método escala a una red así. En P6, con el actuado, las colas llenan
+    los enlaces entre cruces.
+\end{itemize}
+% fuente: P2: capitulo4.tex, sec:calibracion (1200 veh/h en el sentido dominante, por encima de la capacidad de un
+% carril con la mitad del ciclo en verde); P4: misma seccion y Tabla tab:red-alta-factor; P6: Tabla
+% tab:malla3-alta-factor (f = 2.0: cola de 37 vehiculos en los enlaces en las tres semillas, con el actuado);
+% vecinos: Seccion sec:u4 (corredor C1-C2; red C1-C2 y C2-C3, la rotonda no participa; malla de dos a cuatro)
+
+\noindent\textbf{Qué permite concluir cada comparación.} Un efecto solo
+se puede atribuir a un parámetro cuando los casos comparados difieren
+solo en él. La Tabla~\ref{tab:plan-comparaciones} aplica esa regla a las
+comparaciones del plan. La cumplen la comparación dentro de un par,
+donde solo cambia la demanda, y la de dos modelos que, en un mismo caso,
+solo difieren en un elemento. La comparación entre pares no la cumple:
+cambian a la vez la red, los semáforos, las calles, los carriles y la
+demanda. En particular, el efecto de los carriles no se puede aislar con
+este diseño.
+
+% fuente: Tabla tab:plan2-casos (red, semaforos, calles, carriles y demanda de cada caso); Seccion sec:modelos y
+% Tabla tab:plan2-modelos (parejas de modelos que difieren en un solo elemento); niveles comunes de demanda:
+% Seccion sec:plan-demanda. 23.10.2026: flota ([!tbp]); en [H] no cabia al final de la pagina y dejaba en blanco
+% casi un tercio del bloque de texto
+\begin{table}[!tbp]
+\setstretch{1}
+\centering
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{>{\raggedright\arraybackslash}p{3.3cm}>{\raggedright\arraybackslash}p{4.1cm}>{\raggedright\arraybackslash}p{6.6cm}}
+\toprule
+Comparación & Qué cambia & Qué se puede concluir \\
+\midrule
+Dentro de cada par: P1 con P2, P3 con P4 y P5 con P6 & Solo la demanda; el programa del fijo ajustado se elige para cada caso & El efecto de la demanda en esa red. Con dos niveles se ve si el resultado cambia, pero no si sigue una tendencia; para eso se agregan los niveles de la Sección~\ref{sec:plan-demanda} \\
+\midrule
+Entre pares: corredor, red con rotonda y malla & A la vez la red, los semáforos, las calles, los carriles y la demanda & Si el modelo sigue funcionando en una red más compleja. El efecto no se puede atribuir a uno solo de esos parámetros; en particular, el efecto de los carriles no se puede aislar con este diseño \\
+\midrule
+Entre redes con la misma demanda total: 1810, 2715 y 3620~veh/h (Sección~\ref{sec:plan-demanda}) & La red, los semáforos, las calles y los carriles; el total es el mismo, pero la carga por calle no & Si el resultado cambia de una red a otra con la misma demanda total, sin poder separar el efecto de la red, el de la carga por calle y el de los carriles \\
+\midrule
+Entre dos modelos que solo difieren en un elemento, en un mismo caso (Tabla~\ref{tab:plan2-modelos}) & Ese elemento: los mensajes, el algoritmo, la recompensa o el crítico & El aporte de ese elemento (Sección~\ref{sec:modelos}) \\
+\bottomrule
+\end{tabular}
+\caption[Comparaciones del plan de pruebas]{Comparaciones que permite el plan de pruebas: qué cambia entre los casos o los modelos comparados y qué se puede concluir de cada una.}
+\label{tab:plan-comparaciones}
+\end{table}
+
+\noindent\textbf{Demanda nominal y demanda alta.} La demanda nominal de
+cada red es su demanda base, con factor 1: 1810~veh/h en el corredor,
+2150 en la red con rotonda y 4350 en la malla. La demanda alta es la
+misma demanda con cada flujo multiplicado por un factor: 2.0 en el
+corredor (3620~veh/h) y en la malla (8700~veh/h), y 1.2 en la red con
+rotonda (2580~veh/h). La demanda alta es, por tanto, el doble de la
+nominal solo en el corredor y en la malla. El factor se eligió antes de
+entrenar y con la misma regla en las tres redes: subir la demanda hasta
+saturar los semáforos, sin que colapse un elemento que no se controla.
+Saturar quiere decir que, con el actuado, la cola detenida de algún
+carril de un enlace entre semáforos llega al 90\,\% de sus plazas (el
+umbral de \textit{spillback}) en al menos dos de las tres semillas de
+ajuste. En el corredor y en la malla la regla da 2.0. En la red con
+rotonda daría 2.5, pero la rotonda, que no tiene semáforo, se satura
+desde 1.3; por eso se toma 1.2, el mayor factor que no la satura. La
+calibración de los tres factores está en la Sección~\ref{sec:calibracion}
+(Tablas~\ref{tab:red-alta-factor} y~\ref{tab:malla3-alta-factor}).
+% fuente: plan2/veredicto.csv (demanda_veh_h: 1810, 3620, 2150, 2580, 4350, 8700); capitulo4.tex, sec:calibracion
+% (criterio: menor f de los candidatos con spillback en al menos 2 de las 3 semillas 2001-2003 bajo el actuado;
+% P2: 1.3 en ninguna, 1.5 en una y 2.0 en las tres; P4: el criterio da 2.5 y los ramales de la rotonda se llenan
+% desde 1.3, se toma 1.2; P6: 1.5 en ninguna y 2.0 en las tres); cabeceras de plan2/corredor_alta.rou.xml,
+% red_alta.rou.xml y malla3_alta.rou.xml
+
+Los flujos de cada red (de 600 a 650~veh/h en el sentido dominante de
+la avenida, de 150 a 180~veh/h por sentido en las transversales y
+60~veh/h en cada giro) se declararon al construir los escenarios y no
+salen de aforos de Lima. La demanda alta hace el papel de la hora punta,
+también sin calibración con aforos. \textbf{[PENDIENTE: justificar estos
+flujos con aforos observados en una ciudad.]}
+% PENDIENTE: justificar la demanda con aforos observados. Pedido de la reunion del 14.10.2026 (punto 2d): las
+% demandas deben ser valores que se observen en una ciudad. Revisado el 22.10.2026: ni la tesis, ni
+% TESIS/referencias.bib, ni literatura/ justifican los 600-650 veh/h de la avenida, los 150-180 de las
+% transversales ni los 1810 veh/h del corredor con datos observados o con una fuente.
+% fuente: vehsPerHour de los flow con begin="0" en plan2/corredor.rou.xml (600, 180 y 60), red.rou.xml (650, 150
+% y 60) y malla3.rou.xml (600, 180 y 60); introduccion.tex, Alcance (la demanda se define por flujos declarados)
 
 La Tabla~\ref{tab:demanda-flujos} desglosa la demanda de cada red por
 tipo de flujo, con su subtotal, para que la columna sume a la vista. A
@@ -920,38 +1044,129 @@ Tipo de flujo (veh/h, primera media hora) & Corredor (P1) & Red con rotonda (P3)
 Avenida, sentido dominante & $1 \times 600 = 600$ & $1 \times 650 = 650$ & $3 \times 600 = 1800$ (uno por fila) \\
 Avenida, sentido contrario & $1 \times 250 = 250$ & $1 \times 250 = 250$ & $3 \times 250 = 750$ \\
 Calles transversales & $4 \times 180 = 720$ & $6 \times 150 = 900$ & $6 \times 180 = 1080$ (dos sentidos por columna) \\
-Rotonda (entra uno y sale otro) & --- & $150 + 80 = 230$ & --- \\
+Calle de la rotonda (un flujo entra por ella y otro sale) & --- & $150 + 80 = 230$ & --- \\
 Giros entre avenida y transversal & $4 \times 60 = 240$ & $2 \times 60 = 120$ & $12 \times 60 = 720$ \\
 \midrule
 \textbf{Total} & \textbf{1810} & \textbf{2150} & \textbf{4350} \\
 Caso con demanda alta (cada flujo por el factor) & P2: $\times 2.0 = 3620$ & P4: $\times 1.2 = 2580$ & P6: $\times 2.0 = 8700$ \\
 \bottomrule
 \end{tabular}
-\caption[Demanda por tipo de flujo]{Demanda de cada red por tipo de flujo en la primera media hora: número de flujos por su tasa en vehículos por hora. En la segunda media hora se invierte el sentido dominante de la avenida.}
+\caption[Demanda por tipo de flujo]{Demanda de cada red por tipo de flujo en la primera media hora: número de flujos por su tasa en vehículos por hora. En la red con rotonda, 150~veh/h entran por el sur de la calle de la rotonda y salen por el extremo este de la avenida, y 80 entran por el extremo oeste de la avenida y salen por el norte de esa calle. En la segunda media hora se invierte el sentido dominante de la avenida.}
 \label{tab:demanda-flujos}
 \end{table}
+% fuente (flujos de la rotonda): plan2/red.rou.xml, p1_SR_E (from SR_RS, to C3_E, 150 veh/h) y p1_W_NR (from W_RW,
+% to RN_NR, 80 veh/h); en la segunda mitad, p2_NR_W (150) y p2_E_SR (80). 23.10.2026: antes la fila decia
+% "Rotonda (entra uno y sale otro)"
 
-La pregunta es la misma en todas las celdas de la matriz caso por
-modelo, donde una celda es un modelo en un caso: \emph{¿el modelo
-reduce el retraso por vehículo frente al tiempo fijo tuneado en ese
-caso, y no queda por detrás del actuado?} La regla de la
-Sección~\ref{sec:veredicto} convierte esa pregunta en un veredicto. El
-resultado que el plan espera en cada caso es FUNCIONA; antes de correr
-no hubo predicciones numéricas por caso.
+\subsection{Niveles de demanda adicionales}
+\label{sec:plan-demanda}
 
-Cada caso agrega una dificultad a la anterior. P1 y P2 comparan un
-corredor de dos semáforos con demanda nominal y con demanda doble, y
-responden si el modelo sigue funcionando cuando la demanda supera la
-capacidad de un carril. P3 y P4 repiten la comparación en la red de
-tres semáforos, dos carriles por sentido y una rotonda sin semáforo,
-con la demanda nominal y con una un 20\,\% mayor (el límite que impone
-la rotonda), y responden si funciona con más carriles y con un elemento
-que no controla. P5 pasa a una malla de nueve semáforos en la que los
-cruces tienen vecinos en los dos ejes, hasta cuatro, y responde si el
-método escala a una red. P6 repite esa malla con toda la demanda
-multiplicada por 2.0, con la que, bajo el actuado, las colas llenan los
-enlaces entre cruces, y responde si la coordinación aprendida supera a
-un fijo coordinado cuando la demanda supera la capacidad de la red.
+Con dos niveles de demanda por red no se puede afirmar cómo cambia la
+mejora con la demanda. Además, P3 y P4 no tienen la misma demanda que
+P1 y P2, así que tampoco se pueden comparar las redes con la misma
+demanda total. Para responder las dos cosas, el plan se amplía con
+niveles de demanda adicionales en las tres redes
+(Tabla~\ref{tab:plan-demanda-niveles}). Cada nivel usa la red y los
+flujos del caso nominal de su red, con toda la demanda multiplicada por
+un factor $f$. Los niveles sirven para dos cosas:
+\begin{itemize}
+  \item confirmar si la mejora frente al fijo ajustado cambia con la
+    demanda dentro de cada red, con al menos cinco puntos por red;
+  \item comparar las tres redes con la misma demanda total. Los niveles
+    comunes son 1810, 2715 y 3620~veh/h: la demanda de P1, la de P2 y el
+    punto medio entre las dos.
+\end{itemize}
+Estos niveles se agregaron después del veredicto de P1 a P6 y no
+cambian ninguno de esos veredictos.
+
+% fuente: escenarios_plan2.NIVELES_DEMANDA2 (22.10.2026): niveles en veh/h y f = nivel / demanda base, con la base
+% de plan2/veredicto.csv (demanda_veh_h de P1, P3 y P5): 905/1810 = 0.5, 1357.5/1810 = 0.75, 2715/1810 = 1.5;
+% 905/2150 = 0.421, 1357.5/2150 = 0.631, 1810/2150 = 0.842, 2715/2150 = 1.263, 3620/2150 = 1.684; 1810/4350 =
+% 0.416, 2715/4350 = 0.624, 3620/4350 = 0.832, 6525/4350 = 1.5; en la tabla, con dos decimales
+\begin{table}[H]
+\setstretch{1}
+\centering
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{>{\raggedright\arraybackslash}p{2.5cm}>{\raggedright\arraybackslash}p{6.0cm}>{\raggedright\arraybackslash}p{3.8cm}c}
+\toprule
+Red (demanda base) & Niveles de demanda (veh/h); entre paréntesis, el caso del plan & Factor $f$ de los niveles nuevos & \makecell{Puntos\\por red} \\
+\midrule
+Corredor (1810) & 905, 1358, 1810~(P1), 2715 y 3620~(P2) & 0.5, 0.75 y 1.5 & 5 \\
+Red con rotonda (2150) & 905, 1358, 1810, 2150~(P3), 2580~(P4), 2715 y 3620 & 0.42, 0.63, 0.84, 1.26 y 1.68 & 7 \\
+Malla $3 \times 3$ (4350) & 1810, 2715, 3620, 4350~(P5), 6525 y 8700~(P6) & 0.42, 0.62, 0.83 y 1.5 & 6 \\
+\bottomrule
+\end{tabular}
+\caption[Niveles de demanda adicionales]{Niveles de demanda de cada red: los dos casos del plan y los niveles nuevos, que usan la red y los flujos del caso nominal con toda la demanda multiplicada por un factor $f$ (el nivel dividido entre la demanda base). Los niveles de 1810, 2715 y 3620~veh/h son comunes a las tres redes.}
+\label{tab:plan-demanda-niveles}
+\end{table}
+
+Cada nivel se corre con el protocolo del plan
+(Sección~\ref{sec:protocolo}). El fijo ajustado se vuelve a barrer para
+ese nivel con la misma regla que en los casos del plan: gana el programa
+de menor retraso medio (\texttt{timeLoss}) en las semillas 2001 a 2003,
+sobre la rejilla de verdes del caso nominal de la red si el nivel queda
+por debajo de su demanda base, o del caso alto si queda por encima, y la
+rejilla se amplía si el ganador queda en su borde. Se evalúan además el
+actuado y el ciclo mínimo, el control trivial de la
+Sección~\ref{sec:modelos}, que da a cada fase los 10~s del verde mínimo.
+
+Solo se entrena IPPO con mensajes (IPPO vecinos en la
+Tabla~\ref{tab:plan2-modelos}), el modelo que se juzga, con el
+procedimiento de la Sección~\ref{sec:protocolo}: tres entrenamientos de
+200 episodios (semillas base 42, 2042 y 4042), con una validación cada
+10 episodios en las semillas 999 y 1999. Se evalúa la versión elegida
+por esa validación en el entrenamiento mediano, la que esa sección
+llama política publicada, con las semillas 1001 a 1030 y la misma regla
+de veredicto (Sección~\ref{sec:veredicto}). A diferencia del barrido de
+demanda en el corredor (Sección~\ref{sec:analisis-complementarios}), que
+evalúa sin reentrenar las políticas de P1 y P2 y ajusta el fijo con la
+regla del análisis de robustez, aquí el modelo se entrena en cada nivel
+y el fijo se ajusta con la regla del plan, así que cada nivel tiene su
+propio veredicto.
+% fuente: escenarios_plan2.NIVELES_DEMANDA2 (escenarios dem_<red>_t<veh/h> y caso cuya rejilla de barrido hereda:
+% el nominal por debajo de la demanda base y el alto por encima); plan2/generar_trabajos.agregar_demanda2 (barrido
+% con --metrica timeloss_prom, semillas 2001-2003 y la rejilla del 25.09, MALLAS_2509, con la extension automatica
+% de barrer_fijo.py; IPPO vecinos con bases 42, 2042 y 4042, 200 episodios y validacion con 999 y 1999 cada 10;
+% evaluacion de fijo, actuado, trivial e ippo_vecinos con las semillas 1001-1030; parciales en plan2/demanda2/).
+% Barrido de demanda del corredor: plan2/cola/trabajos.jsonl (dem_barrido_corredor_f* sin --metrica, es decir,
+% retraso total y rejilla desde 10 s, la regla del analisis de robustez; dem2_barrido_* con --metrica timeloss_prom
+% y la rejilla del 25.09) y el parrafo "Barrido de demanda en el corredor" de la Seccion
+% sec:analisis-complementarios (23.10.2026, verificacion: el fijo tambien se ajusta en cada nivel del corredor)
+
+Dos salvedades acompañan a estos niveles. La primera es la rotonda: sin
+semáforo, se satura desde 1.3 veces la demanda base de su red
+(Tabla~\ref{tab:red-alta-factor}). El nivel de 3620~veh/h ($f = 1.68$)
+queda por encima de ese límite, y el de 2715~veh/h ($f = 1.26$), justo
+por debajo, entre 1.2, que no la satura, y 1.3, que con el actuado la
+satura en dos de las tres semillas de ajuste. En esos dos niveles la
+rotonda está saturada o cerca de saturarse, y el resultado incluye su
+efecto, que ningún semáforo controla.
+% fuente: Tabla tab:red-alta-factor (capitulo4.tex): ramales de la rotonda con cola >= 32 de 36 plazas en 0 de 3
+% semillas con f = 1.2 y en 2 de 3 con f = 1.3
+
+La segunda es la carga por calle. Con la misma demanda total, la carga
+por calle no es la misma en las tres redes, porque la red con rotonda y
+la malla reparten ese total entre más calles y más carriles
+(Tabla~\ref{tab:demanda-flujos}). Por ejemplo, con 3620~veh/h el flujo
+de la avenida en el sentido dominante es de 1200~veh/h en un carril en
+el corredor ($600 \times 2$), de unos 1100~veh/h en dos carriles en la
+red con rotonda ($650 \times 3620/2150$) y de unos 500~veh/h en dos
+carriles en cada fila de la malla ($600 \times 3620/4350$); por carril,
+1200, unos 550 y unos 250~veh/h. La comparación entre redes con la misma
+demanda total dice si el resultado cambia de una red a otra, pero no
+permite separar el efecto de la red, el de la carga por calle y el de
+los carriles.
+% fuente: flujo p1_W_E de plan2/corredor.rou.xml (600) y de red.rou.xml (650) y p1_W*_E* de malla3.rou.xml (600 por
+% fila), por el factor del nivel de 3620 veh/h: 600 x 2 = 1200; 650 x 3620/2150 = 1094.4; 600 x 3620/4350 = 499.3
+% (barrido_demanda.rou_escalado_total redondea cada flujo a entero sin cambiar el total de cada periodo); por
+% carril: 1200 / 1, 1094.4 / 2 = 547.2 y 499.3 / 2 = 249.7; carriles de la avenida: aristas de plan2/corredor.net.xml
+% (1), red.net.xml (2) y malla3.net.xml (2)
+
+Los resultados de estos niveles se reportarán en el
+Capítulo~\ref{cap:resultados}, con el mismo formato que los de P1 a P6.
+\textbf{[PENDIENTE: resultados de los niveles de demanda adicionales,
+plan2/demanda2/.]}
 
 \subsection{Protocolo común}
 \label{sec:protocolo}

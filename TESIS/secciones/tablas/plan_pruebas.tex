@@ -1,0 +1,22 @@
+% Tabla del plan de pruebas (entrega 3, 22.10.2026). Solo el entorno tabular: el table, el caption y la
+% etiqueta los pone el .tex que la incluye con \input{secciones/tablas/plan_pruebas}: capitulo3.tex
+% (tab:escenarios y tab:plan2-casos) y capitulo5.tex (tab:plan-resultados). No lleva \label para no
+% duplicar etiquetas. Demanda: una sola columna (antes "Demanda" y "Vehiculos por hora" decian lo mismo).
+% fuente: plan2/veredicto.csv, columnas caso, semaforos, carriles y demanda_veh_h (P1 2/1/1810, P2 2/1/3620,
+% P3 3/2/2150, P4 3/2/2580, P5 9/2/4350, P6 9/2/8700); factores 2.0, 1.2 y 2.0: cabeceras de
+% plan2/corredor_alta.rou.xml, red_alta.rou.xml y malla3_alta.rou.xml (3620 = 1810 x 2, 2580 = 2150 x 1.2,
+% 8700 = 4350 x 2); calles y carriles: aristas no internas de plan2/corredor.net.xml (avenida y 2 transversales,
+% todo en 1 carril), red.net.xml (avenida en 2 carriles, 3 transversales y la calle de la rotonda en 1) y
+% malla3.net.xml (3 filas y 3 columnas, 2 carriles en todo)
+\begin{tabular}{l>{\raggedright\arraybackslash}p{1.4cm}>{\raggedright\arraybackslash}p{2.75cm}ccc>{\raggedright\arraybackslash}p{3.9cm}}
+\toprule
+Caso & Red & Demanda (veh/h) & \makecell{Semáforos\\(= agentes)} & Calles & \makecell{Carriles por\\sentido en\\la avenida} & Qué mide \\
+\midrule
+P1 & Corredor & 1810 (base) & 2 & 3 & 1 & La pregunta común en la red más simple con semáforos vecinos \\
+P2 & Corredor & 3620 (base~$\times$~2) & 2 & 3 & 1 & Lo mismo cuando la demanda de la avenida supera la capacidad de su carril \\
+P3 & Red con rotonda & 2150 (base) & 3 & 5 & 2 & Si funciona cuando una parte de la red, la rotonda, no se controla con semáforos \\
+P4 & Red con rotonda & 2580 (base~$\times$~1.2) & 3 & 5 & 2 & Lo mismo con un 20\,\% más de demanda, el mayor aumento que no satura la rotonda \\
+P5 & Malla $3 \times 3$ & 4350 (base) & 9 & 6 & 2 & Si el método escala a una red con vecinos en los dos ejes, hasta cuatro por cruce \\
+P6 & Malla $3 \times 3$ & 8700 (base~$\times$~2) & 9 & 6 & 2 & Lo mismo con el doble de demanda; con el actuado, las colas llenan los enlaces entre cruces \\
+\bottomrule
+\end{tabular}
