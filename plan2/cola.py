@@ -101,10 +101,32 @@ def cumple(req, hechos):
     return os.path.exists(os.path.join(RAIZ, req))
 
 
+def seco():
+    """25.10.2026: lo que lanzaria la cola, sin lanzar nada. Pendiente = ni hecho ni fallido."""
+    trabajos, orden = leer_trabajos()
+    hechos, fallidos, _ = leer_estado()
+    pendientes = [t for tid, t in trabajos.items() if tid not in hechos and tid not in fallidos]
+    pendientes.sort(key=lambda t: (t.get("prioridad", 5), orden[t["id"]]))
+    prefijos = {}
+    for t in pendientes:
+        p = t["id"].split("_", 1)[0]
+        prefijos[p] = prefijos.get(p, 0) + 1
+    print(f"{len(trabajos)} trabajos: {len(hechos & set(trabajos))} hechos, "
+          f"{len(set(fallidos) & set(trabajos))} fallidos, {len(pendientes)} pendientes {prefijos}")
+    for t in pendientes:
+        listo = all(cumple(r, hechos) for r in t.get("requiere", []))
+        print(f"  prio {t.get('prioridad', 5)}  cpus {t.get('cpus', 1)}  {'listo ' if listo else 'espera'}  {t['id']}")
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--cpus", type=int, default=11)
+    ap.add_argument("--seco", action="store_true",
+                    help="prueba en seco: lista lo pendiente (por prefijo y en orden de lanzamiento) y sale")
     args = ap.parse_args()
+    if args.seco:
+        seco()
+        return
     os.makedirs(LOGS, exist_ok=True)
     hechos, fallidos, tiempos = leer_estado()
     corriendo = {}          # id -> (proceso, inicio, cpus, archivo_log)

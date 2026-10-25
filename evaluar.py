@@ -158,9 +158,9 @@ def comparar(vals, ref, sufijo=""):
             "cliff" + sufijo: round(cliff(vals, ref), 2)}
 
 
-def guardar_vehiculos(esc, nombre, tripinfo):
+def guardar_vehiculos(esc, nombre, tripinfo, carpeta=""):
     vehiculos = comun.vehiculos_tripinfo(tripinfo)
-    with open(f"vehiculos_{esc}_{nombre}.csv", "w", newline="") as f:
+    with open(os.path.join(carpeta, f"vehiculos_{esc}_{nombre}.csv"), "w", newline="") as f:
         w = csv.DictWriter(f, fieldnames=list(vehiculos[0].keys()))
         w.writeheader()
         w.writerows(vehiculos)
@@ -218,6 +218,8 @@ def brazo_profundo(esc, ruta, latencia, perdida):
     if alg == "ippo":
         politica, meta = rl_ippo.Politica.cargar(ruta)
         modelo = "ippo_" + meta["variante"]
+        if meta.get("etiqueta"):        # 25.10.2026: correcciones del diagnostico (rl_ippo.py --etiqueta)
+            modelo += "_" + meta["etiqueta"]
 
         def correr(semilla, tripinfo, serie):
             return rl_ippo.correr_episodio("demo", politica, False, 0, semilla, tripinfo=tripinfo,
@@ -272,7 +274,12 @@ def main_v2(args):
     print(f"Evaluando {brazo} (modelo {modelo}) en {esc}, {len(semillas)} semillas "
           f"{semillas[0]}-{semillas[-1]} -> {salida}", flush=True)
 
-    tripinfo_primera = f"tripinfo_eval_{esc}_{brazo}_{os.getpid()}.xml"
+    # --extras (25.10.2026): tripinfo, vehiculos_, serie_ y fases_ de la primera semilla van a esa carpeta y
+    # no pisan los de otra evaluacion del mismo brazo con otras semillas; sin la opcion, a la carpeta actual
+    extras = args.extras or ""
+    if extras:
+        os.makedirs(extras, exist_ok=True)
+    tripinfo_primera = os.path.join(extras, f"tripinfo_eval_{esc}_{brazo}_{os.getpid()}.xml")
     temporal = salida + ".tmp"
     with open(temporal, "w", newline="") as f:
         w = csv.DictWriter(f, fieldnames=ID_V2 + METRICAS_V2, extrasaction="ignore")
@@ -281,11 +288,11 @@ def main_v2(args):
             random.seed(semilla)      # el desempate de acciones de las Q-tables usa random
             primera = i == 0
             tripinfo = tripinfo_primera if primera else tripinfo_primera.replace(".xml", f"_s{semilla}.xml")
-            serie = f"serie_{esc}_{brazo}_s{semilla}.csv" if primera else None
+            serie = os.path.join(extras, f"serie_{esc}_{brazo}_s{semilla}.csv") if primera else None
             t0 = time.time()
             res = correr(semilla, tripinfo, serie)
             if primera:
-                guardar_vehiculos(esc, brazo, tripinfo)
+                guardar_vehiculos(esc, brazo, tripinfo, extras)
             else:
                 comun.borrar_tripinfo(tripinfo)
             w.writerow({"brazo": brazo, "modelo": modelo, "base": base, "semilla": semilla,
@@ -308,6 +315,8 @@ def main():
                     help="plan v2: brazo de referencia")
     ap.add_argument("--politica", default=None, help="plan v2: q_table_<tag>.json o politica_*.pt")
     ap.add_argument("--salida", default=None, help="plan v2: CSV parcial (parciales/eval_<esc>_<brazo>.csv)")
+    ap.add_argument("--extras", default=None,
+                    help="plan v2: carpeta del tripinfo, vehiculos_, serie_ y fases_ de la primera semilla")
     ap.add_argument("--brazos", default="baseline,actuado,demo",
                     help="modo antiguo: controles de rl_semaforo/rl_corredor a correr (vacio para ninguno)")
     ap.add_argument("--ippo", default="", help="modo antiguo: politicas IPPO (.pt) separadas por coma")

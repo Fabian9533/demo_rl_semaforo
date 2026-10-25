@@ -18,6 +18,8 @@ mismo protocolo, el brazo trivial y las prioridades de P5.
 prioridades (0-6, lo mas largo primero). Todos los trabajos anteriores ya estan hechos; regenerar este
 archivo los deja con los mismos ids y comandos (el barrido de P6 se escribe con la regla del 25.09 con
 que se corrio), asi que la cola solo lanza los dem2_*.
+25.10.2026: diagnostico de la curva del corredor (agregar_diag_corredor, ids diag_*): correcciones V2, INS
+y V2+INS de IPPO con mensajes en los cinco niveles del corredor, con sus prioridades (0-3).
 """
 import os
 import sys
@@ -198,6 +200,63 @@ def agregar_demanda2(agregar):
                 f"python ../consolidar.py --escenario {esc} --parciales demanda2", evals)
 
 
+# 25.10.2026: diagnostico de la curva del corredor (diag_corredor/PRERREGISTRO.md). Por nivel: escenario,
+# base de la version evaluada actual de IPPO con mensajes y escenario del fijo ajustado desde 10 s (barrido
+# del 27.09 con los mismos flujos; None = el fijo vigente del escenario, igual al del 25.09).
+NIVELES_DIAG = [("corredor_alta", 2042, None), ("dem_corredor_t2715", 2042, "corredor_f150"),
+                ("corredor", 4042, None), ("dem_corredor_t1358", 42, "corredor_f075"),
+                ("dem_corredor_t905", 4042, "corredor_f050")]          # lo mas largo primero
+VARIANTES_DIAG = {"v2": "--v2", "ins": "--recompensa-insercion", "v2ins": "--v2 --recompensa-insercion"}
+# Enmienda del 25.10.2026 (PRERREGISTRO.md): las tres variantes eligen el checkpoint por el retraso total
+CRITERIO_DIAG = "--criterio-val total"
+SEMILLAS_DIAG = {"1001": "1001-1030", "6001": "6001-6030"}     # comparables con la curva y confirmacion
+
+
+def agregar_diag_corredor(agregar):
+    """Diagnostico del corredor (25.10.2026), ids diag_*, todo con cpus=1:
+      diag_train_<esc>_ippo_vecinos_<v>_s<b>   IPPO con mensajes con la correccion v (v2, ins, v2ins), bases
+                            42, 2042 y 4042, con los argumentos de train_<celda>_ippo_vecinos_s<b> mas las
+                            opciones de la variante, --etiqueta v (salidas con _<v> en el nombre) y
+                            --criterio-val total (checkpoint por retraso total; enmienda del prerregistro)
+      diag_eval_<esc>_ippo_vecinos_<v>_s<b>_<1001|6001>   esas politicas en 1001-1030 y en 6001-6030
+      diag_eval_<esc>_<brazo>_6001   confirmacion de las referencias y de la version evaluada actual en
+                            6001-6030: fijo (regla del 25.09), fijo10 (fijo ajustado desde 10 s; en P1 y P2 es
+                            el mismo fijo y no se repite), trivial (ciclo minimo), actuado e ippo_vecinos_s<b>
+                            de las tres bases actuales. En 1001-1030 ya estan en demanda/, demanda2/ y parciales/.
+    Salidas en diag_corredor/eval/eval_<esc>_<brazo>_<1001|6001>.csv; el tripinfo, vehiculos_, serie_ y fases_
+    de la primera semilla en diag_corredor/eval/extras_<1001|6001>/ (evaluar.py --extras), sin pisar nada.
+    Prioridad: 0 entrenamientos de corredor_alta (los mas largos), 1 los demas (de mas a menos largo),
+    2 evaluaciones 1001-1030 de las variantes, 3 confirmacion 6001-6030."""
+    evaluar = "python ../evaluar.py --escenario {e} --semillas {s} --salida diag_corredor/eval/{n}.csv " \
+              "--extras diag_corredor/eval/extras_{k} "
+    for esc, _, _ in NIVELES_DIAG:
+        for v, opciones in VARIANTES_DIAG.items():
+            for b in BASES:
+                agregar(f"diag_train_{esc}_ippo_vecinos_{v}_s{b}", 0 if esc == "corredor_alta" else 1,
+                        ALGS["ippo_vecinos"][0].format(e=esc, b=b, n=EPISODIOS)
+                        + f" {opciones} --etiqueta {v} {CRITERIO_DIAG}",
+                        [])
+    for k, prio in (("1001", 2), ("6001", 3)):
+        for esc, _, _ in NIVELES_DIAG:
+            for v in VARIANTES_DIAG:
+                for b in BASES:
+                    brazo = f"ippo_vecinos_{v}_s{b}"
+                    agregar(f"diag_eval_{esc}_{brazo}_{k}", prio,
+                            evaluar.format(e=esc, s=SEMILLAS_DIAG[k], n=f"eval_{esc}_{brazo}_{k}", k=k)
+                            + f"--politica politica_{esc}_vecinos_{v}_s{b}.pt",
+                            [f"trabajo:diag_train_{esc}_ippo_vecinos_{v}_s{b}"])
+    k = "6001"
+    for esc, _, fijo10 in NIVELES_DIAG:
+        refs = [("fijo", esc, "--brazo fijo")]
+        if fijo10:
+            refs.append(("fijo10", fijo10, "--brazo fijo"))
+        refs += [("trivial", esc, "--brazo trivial"), ("actuado", esc, "--brazo actuado")]
+        refs += [(f"ippo_vecinos_s{b}", esc, f"--politica politica_{esc}_vecinos_s{b}.pt") for b in BASES]
+        for brazo, esc_eval, opcion in refs:
+            agregar(f"diag_eval_{esc}_{brazo}_{k}", 3,
+                    evaluar.format(e=esc_eval, s=SEMILLAS_DIAG[k], n=f"eval_{esc}_{brazo}_{k}", k=k) + opcion, [])
+
+
 def main():
     trabajos = []
 
@@ -239,6 +298,7 @@ def main():
     agregar_v21(trabajos, agregar)
     agregar_demanda(agregar)
     agregar_demanda2(agregar)
+    agregar_diag_corredor(agregar)
     ruta = os.path.join(os.path.dirname(os.path.abspath(__file__)), "cola", "trabajos.jsonl")
     with open(ruta, "w", encoding="utf-8") as f:
         for t in trabajos:

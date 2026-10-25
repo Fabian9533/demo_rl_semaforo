@@ -43,6 +43,26 @@ Cambios del plan de pruebas v2 (plan2/ESPEC.md):
   - El CSV de entrenamiento se reescribe desde cero; tripinfo unico por corrida.
   - Ganchos para decisores externos (rl_dqn.py, rl_mappo.py), sin cambiar los numeros de IPPO.
 
+Correcciones del diagnostico del corredor (25.10.2026, plan2/diag_corredor/PRERREGISTRO.md). Apagadas
+por defecto: sin ellas el entrenamiento da los mismos numeros que antes.
+  --v2   (H3) los dos cambios de la variante V2 del Anexo G (plan2/exploratorio_coord/codigo/smdp_crn.diff):
+         descuento por segundo en gae(), gamma^(dt/5) y (gamma*lam)^(dt/5) con dt el intervalo real de
+         cada decision, y exploracion comun: un solo numero aleatorio u por segundo para todos los que
+         deciden (a = 1 si p_cambiar > u; generador propio default_rng(semilla del episodio + 104729)).
+         Solo en train; la evaluacion (argmax) no cambia.
+  --recompensa-insercion   (H2, INS) cada segundo se suman al retraso del agente, con el peso de un
+         vehiculo detenido (W1), los vehiculos que esperan para entrar a la red por las aristas de entrada
+         de sus accesos (traci.simulation.getPendingVehicles; cada vehiculo se asigna por el flujo de
+         origen del .rou.xml). Columna ins_espera del CSV: esa suma en vehiculo-segundos.
+  --etiqueta X   se agrega a la variante en todos los nombres (resultados_<esc>_ippo_vecinos_X_s<b>.csv,
+         politica_<esc>_vecinos_X_s<b>.pt, checkpoints); evaluar.py llama al brazo ippo_vecinos_X_s<b>.
+  --criterio-val total   el checkpoint publicado (y val_elegido, con el que se elige la base mediana) se
+         elige por el retraso total en la validacion (timeLoss + espera para entrar, retraso_total_prom)
+         en vez del timeLoss. Por defecto timeloss, como siempre. La validacion registra las dos metricas
+         en todos los casos: val_<s> y val (timeLoss, igual que antes) y, al final del CSV, val_total_<s> y
+         val_total; en el meta, val_serie (timeLoss) y val_total_serie, y ep_elegido_timeloss y
+         ep_elegido_total con lo que habria elegido cada criterio.
+
 Interfaz para decisores externos (correr_episodio):
   correr_episodio(modo, politica, gui, delay, seed, tripinfo=None, serie=None, latencia=0,
                   perdida=0.0, variante="vecinos", buffer=None, decidir=None,
@@ -149,6 +169,7 @@ HIPER = {"gamma": 0.95, "lam": 0.95, "clip": 0.2, "epocas": 10, "minibatch": 64,
          "lr": 1e-3, "ent": 0.01, "valor": 0.5, "grad": 0.5}
 EDAD_MAX = 30                  # edad de mensaje que satura la observacion (s)
 RECOMPENSA = {"local": "retraso", "vecinos": "retraso", "spill": "spill", "cambio": "cambio"}
+SEMILLA_EXPL = 104729          # --v2: rng de la exploracion comun = default_rng(semilla del episodio + esto)
 CAMPOS_IPPO = ["variante", "base", "episodio", "semilla", "lr", "segundos", "vehiculos",
                "espera_prom", "timeloss_prom", "cola_prom", "cola_max",
                "recompensa", "recompensa_decision", "recompensa_total_decision",
@@ -161,7 +182,10 @@ CAMPOS_IPPO = ["variante", "base", "episodio", "semilla", "lr", "segundos", "veh
                "perdida_politica", "perdida_valor", "entropia_libre", "kl_aprox", "clipfrac",
                "eval_timeloss", "eval_espera",
                "ret_retraso", "ret_colas", "ret_spill", "val_999", "val_1999", "val",
-               "algoritmo", "recompensa_tipo"]
+               "algoritmo", "recompensa_tipo",
+               # 25.10.2026 (diagnostico del corredor): al final, para no mover las columnas de antes
+               "etiqueta", "ins_espera", "ins_total", "expl_minoritaria", "dt_medio", "frac_dt8",
+               "val_total_999", "val_total_1999", "val_total"]
 
 # Se rellena con preparar(escenario)
 C = {}
@@ -187,8 +211,46 @@ def preparar(escenario):
         "plazas": {l: comun.plazas_carril(net, l) for l in e["enlaces"]},
         "fase_av": {},          # se calcula con TraCI en el primer episodio
         "lados": lados, "n_id": n_id, "dim_obs": 12 + n_id + 8 * len(lados),
+        "ins_flujo": origen_flujos(e["cfg"], e["semaforos"]),
     })
     return C
+
+
+def origen_flujos(cfg, semaforos):
+    """--recompensa-insercion: {id de flujo (o vehiculo): semaforo cuyo acceso alimenta}, leido del
+    .rou.xml del escenario. La arista de salida de cada flujo (from, o la primera de su ruta) es un
+    acceso de un semaforo en los escenarios con semaforos en el borde (corredor, red, malla3); si no lo
+    es, el flujo queda en None y sus pendientes solo cuentan en ins_total."""
+    import xml.etree.ElementTree as ET
+    de_arista = {a: tls for tls, lista in semaforos.items() for a in lista}
+    rutas = ET.parse(cfg).getroot().find("input/route-files")
+    res = {}
+    if rutas is None:
+        return res
+    carpeta = os.path.dirname(cfg)
+    for archivo in rutas.get("value").split(","):
+        raiz = ET.parse(os.path.join(carpeta, archivo.strip())).getroot()
+        for el in raiz:
+            if el.tag not in ("flow", "trip", "vehicle"):
+                continue
+            arista = el.get("from")
+            ruta = el.find("route")
+            if arista is None and ruta is not None:
+                arista = ruta.get("edges").split()[0]
+            res[el.get("id")] = de_arista.get(arista)
+    return res
+
+
+def pendientes_por_agente():
+    """Vehiculos que esperan para entrar a la red en este segundo: ({semaforo: n}, total). El id de un
+    vehiculo de un flujo es <flujo>.<k>; se asigna al semaforo de la arista de salida del flujo."""
+    por_agente, total = {}, 0
+    for vid in traci.simulation.getPendingVehicles():
+        total += 1
+        tls = C["ins_flujo"].get(vid, C["ins_flujo"].get(vid.rsplit(".", 1)[0]))
+        if tls is not None:
+            por_agente[tls] = por_agente.get(tls, 0) + 1
+    return por_agente, total
 
 
 def nombres_features():
@@ -439,11 +501,13 @@ def exceso_enlaces(medidor):
 # ---------------- Episodio ----------------
 def correr_episodio(modo, politica, gui, delay, seed, tripinfo=None, serie=None,
                     latencia=0, perdida=0.0, variante="vecinos", buffer=None,
-                    decidir=None, transicion=None, con_estado=False):
+                    decidir=None, transicion=None, con_estado=False, v2=False, ins=False):
     """Una hora simulada con los agentes IPPO. modo train (muestrea acciones y llena buffer)
     o demo (argmax). Devuelve las mismas metricas que rl_corredor.correr_episodio mas las
     de U4 y los retornos ret_*. El reloj de decision es el de rl_corredor.py. decidir,
-    transicion y con_estado son la interfaz para decisores externos (docstring del modulo)."""
+    transicion y con_estado son la interfaz para decisores externos (docstring del modulo).
+    v2: exploracion comun en train (--v2); ins: suma a la recompensa los vehiculos que esperan
+    para entrar (--recompensa-insercion). Apagados, nada cambia."""
     assert decidir is None or buffer is None, "buffer es solo para la politica IPPO"
     esc = C["escenario"]
     con_vecinos = variante != "local"
@@ -461,6 +525,10 @@ def correr_episodio(modo, politica, gui, delay, seed, tripinfo=None, serie=None,
     suscribir()
     medidor = comun.MedidorEnlaces(C["net"], C["enlaces"])
     canal = Canal(latencia, perdida, seed)
+    crn = v2 and modo == "train" and decidir is None
+    rng_expl = np.random.default_rng(seed + SEMILLA_EXPL) if crn else None
+    minoritarias = 0               # decisiones libres de train con a != argmax
+    ins_espera, ins_total = 0, 0   # vehiculo-segundos esperando para entrar (asignados, todos)
 
     rc.SEMAFOROS = C["semaforos"]          # fases_verdes usa el programa activo del semaforo
     agentes = {}
@@ -482,7 +550,7 @@ def correr_episodio(modo, politica, gui, delay, seed, tripinfo=None, serie=None,
     if buffer is not None:
         for tls in orden:
             buffer[tls] = {"obs": [], "mascara": [], "accion": [], "logp": [], "valor": [],
-                           "recompensa": [], "v_final": 0.0}
+                           "recompensa": [], "v_final": 0.0, "t": [], "t_final": 0}
 
     pasos = 0
     cola_acum = 0.0
@@ -573,7 +641,16 @@ def correr_episodio(modo, politica, gui, delay, seed, tripinfo=None, serie=None,
                 with torch.no_grad():
                     logits, valores = politica(torch.from_numpy(obs))
                     logits = Politica.enmascarar(logits, torch.from_numpy(masc))
-                    if modo == "train":
+                    if crn:
+                        # Exploracion comun (V2): un solo u por segundo, el mismo para todos los que
+                        # deciden; a = 1 si p_cambiar > u. La marginal de cada agente es su politica
+                        # y las acciones conjuntas quedan correlacionadas.
+                        dist = torch.distributions.Categorical(logits=logits)
+                        u = float(rng_expl.random())
+                        acciones = (dist.probs[:, 1] > u).long()
+                        logp = dist.log_prob(acciones)
+                        assert all(masc[k, int(acciones[k])] > 0 for k in range(len(deciden)))
+                    elif modo == "train":
                         dist = torch.distributions.Categorical(logits=logits)
                         acciones = dist.sample()
                         logp = dist.log_prob(acciones)
@@ -589,6 +666,8 @@ def correr_episodio(modo, politica, gui, delay, seed, tripinfo=None, serie=None,
                 a = int(acciones[k])
                 if masc[k].sum() > 1:
                     decisiones_libres += 1
+                    if modo == "train" and decidir is None and a != int(logits[k].argmax()):
+                        minoritarias += 1
                 if buffer is not None:
                     b = buffer[tls]
                     b["obs"].append(obs[k])
@@ -596,6 +675,7 @@ def correr_episodio(modo, politica, gui, delay, seed, tripinfo=None, serie=None,
                     b["accion"].append(a)
                     b["logp"].append(float(logp[k]))
                     b["valor"].append(float(valores[k]))
+                    b["t"].append(pasos)
                 if transicion is not None:
                     ag["ultima"] = (obs[k], a, extras[k])
                 ag["pendiente"] = True
@@ -613,10 +693,17 @@ def correr_episodio(modo, politica, gui, delay, seed, tripinfo=None, serie=None,
         cola_acum += sum(colas)
         cola_max = max(cola_max, sum(colas))
         medidor.paso(pasos)
+        if ins:
+            pend, n_pend = pendientes_por_agente()
+            ins_total += n_pend
         for tls, ag in agentes.items():
             r_paso = recompensa_paso(tls, lect)
             ret_retraso += r_paso
             ret_colas += recompensa_base(tls, lect)
+            if ins:
+                # INS: cada vehiculo que espera para entrar por un acceso de tls pesa como uno detenido
+                ins_espera += pend.get(tls, 0)
+                r_paso -= W1 * pend.get(tls, 0)
             if ag["pendiente"] is not None:
                 ag["r_acum"] += r_paso
                 if variante == "spill":
@@ -648,6 +735,7 @@ def correr_episodio(modo, politica, gui, delay, seed, tripinfo=None, serie=None,
         ag = agentes[tls]
         r = cerrar_pendiente(tls, ag)
         if buffer is not None:
+            buffer[tls]["t_final"] = pasos
             if vaciada:
                 buffer[tls]["v_final"] = 0.0
             else:
@@ -681,14 +769,28 @@ def correr_episodio(modo, politica, gui, delay, seed, tripinfo=None, serie=None,
         "ret_retraso": round(ret_retraso, 2),
         "ret_colas": round(ret_colas, 2),
         "ret_spill": round(ret_retraso - W3 * exceso, 2),
+        "expl_minoritaria": round(minoritarias / max(1, decisiones_libres), 4),
     })
+    if ins:
+        res.update({"ins_espera": ins_espera, "ins_total": ins_total})
     res.update(medidor.resumen())
     return res
 
 
 # ---------------- PPO ----------------
-def gae(buffer, gamma, lam):
-    """Ventajas y retornos por agente; devuelve el lote concatenado."""
+def intervalos(b):
+    """dt de cada decision del buffer de un agente: t de la siguiente decision (o t_final) - t."""
+    n = len(b["recompensa"])
+    t_sig = b["t"][1:n] + [b["t_final"]]
+    dt = np.array(t_sig, dtype=np.float64) - np.array(b["t"][:n], dtype=np.float64)
+    assert len(dt) == n and (dt > 0).all(), dt
+    return dt
+
+
+def gae(buffer, gamma, lam, smdp=False):
+    """Ventajas y retornos por agente; devuelve el lote concatenado. smdp=True (--v2): descuento
+    por segundo, gamma^(dt/5) y (gamma*lam)^(dt/5) con dt el intervalo real de cada decision
+    (5 s mantener, 8 s cambiar, t_final - t en la ultima, tambien para v_final)."""
     obs, masc, acc, logp, adv, ret = [], [], [], [], [], []
     for tls, b in buffer.items():
         n = len(b["recompensa"])
@@ -697,10 +799,17 @@ def gae(buffer, gamma, lam):
         valores = b["valor"] + [b["v_final"]]
         ventaja = np.zeros(n, dtype=np.float32)
         ultimo = 0.0
-        for t in reversed(range(n)):
-            delta = b["recompensa"][t] + gamma * valores[t + 1] - valores[t]
-            ultimo = delta + gamma * lam * ultimo
-            ventaja[t] = ultimo
+        if smdp:
+            expo = intervalos(b) / PASO_CONTROL
+            for t in reversed(range(n)):
+                delta = b["recompensa"][t] + gamma ** expo[t] * valores[t + 1] - valores[t]
+                ultimo = delta + (gamma * lam) ** expo[t] * ultimo
+                ventaja[t] = ultimo
+        else:
+            for t in reversed(range(n)):
+                delta = b["recompensa"][t] + gamma * valores[t + 1] - valores[t]
+                ultimo = delta + gamma * lam * ultimo
+                ventaja[t] = ultimo
         obs.extend(b["obs"][:n])
         masc.extend(b["mascara"][:n])
         acc.extend(b["accion"][:n])
@@ -757,7 +866,8 @@ def actualizar(politica, opt, lote, hiper, rng):
 def validar(politica, semillas, variante, tripinfo, decidir=None):
     """Politica congelada (argmax, modo demo) en cada semilla de validacion. Guarda y restaura
     el RNG de random, numpy y torch: el entrenamiento da el mismo CSV con o sin validacion.
-    Devuelve {"val_<s>": timeLoss medio, ..., "val": media, "eval_timeloss": el de la primera
+    Devuelve {"val_<s>": timeLoss medio, ..., "val": media, "val_total_<s>": retraso total medio
+    (timeLoss + espera para entrar), ..., "val_total": media, "eval_timeloss": el de la primera
     semilla, "eval_espera": su espera}."""
     estados = (random.getstate(), np.random.get_state(), torch.get_rng_state())
     fila = {}
@@ -765,9 +875,11 @@ def validar(politica, semillas, variante, tripinfo, decidir=None):
         res = correr_episodio("demo", politica, False, 0, s, tripinfo=tripinfo, variante=variante,
                               decidir=decidir)
         fila[f"val_{s}"] = res["timeloss_prom"]
+        fila[f"val_total_{s}"] = res["retraso_total_prom"]
         if k == 0:
             fila["eval_timeloss"], fila["eval_espera"] = res["timeloss_prom"], res["espera_prom"]
     fila["val"] = round(float(np.mean([fila[f"val_{s}"] for s in semillas])), 3)
+    fila["val_total"] = round(float(np.mean([fila[f"val_total_{s}"] for s in semillas])), 3)
     random.setstate(estados[0])
     np.random.set_state(estados[1])
     torch.set_rng_state(estados[2])
@@ -811,8 +923,22 @@ def hash_git():
 
 def meta_base(args, val_seeds):
     """Meta comun de checkpoints y politica publicada."""
+    v2 = getattr(args, "v2", False)
+    ins = getattr(args, "recompensa_insercion", False)
+    criterio = getattr(args, "criterio_val", "timeloss")
+    opciones = {"v2": v2, "recompensa_insercion": ins, "etiqueta": getattr(args, "etiqueta", "") or "",
+                "criterio_val": criterio}
     return {"escenario": C["escenario"], "variante": args.variante, "algoritmo": "ippo",
-            "recompensa": RECOMPENSA[args.variante], "base": args.seed, "episodios": args.episodios,
+            "recompensa": RECOMPENSA[args.variante] + ("+insercion" if ins else ""),
+            "etiqueta": opciones["etiqueta"], "opciones": opciones,
+            "descuento": "por segundo: gamma^(dt/5)" if v2 else "por decision",
+            "exploracion": (f"comun: un u por segundo, default_rng(semilla + {SEMILLA_EXPL})" if v2
+                            else "independiente (dist.sample)"),
+            "recompensa_insercion": ("W1 x vehiculos que esperan para entrar por las aristas de entrada de "
+                                     "los accesos del agente, cada segundo" if ins else "no"),
+            "criterio_validacion": ("retraso total (timeLoss + espera para entrar), media de val_total_<s>"
+                                    if criterio == "total" else "timeLoss, media de val_<s>"),
+            "base": args.seed, "episodios": args.episodios,
             "dim_obs": C["dim_obs"], "n_id": C["n_id"], "lados": list(C["lados"]),
             "ocultas": OCULTAS, "hiper": HIPER, "w1": W1, "w2": W2, "w3": W3, "w4": W4,
             "escala_r": ESCALA_R, "fase_av": C["fase_av"], "vecinos": C["vecinos"], "cap": C["cap"],
@@ -842,7 +968,16 @@ def main():
     ap.add_argument("--serie", action="store_true")
     ap.add_argument("--gui", action="store_true")
     ap.add_argument("--delay", type=int, default=30)
+    ap.add_argument("--v2", action="store_true",
+                    help="correccion V2 (Anexo G): descuento por segundo y exploracion comun (solo train)")
+    ap.add_argument("--recompensa-insercion", action="store_true",
+                    help="correccion INS: la recompensa cuenta los vehiculos que esperan para entrar")
+    ap.add_argument("--etiqueta", default="",
+                    help="se agrega a la variante en los nombres de salida (p. ej. v2, ins, v2ins)")
+    ap.add_argument("--criterio-val", choices=["timeloss", "total"], default="timeloss",
+                    help="metrica de validacion con la que se elige el checkpoint publicado")
     args = ap.parse_args()
+    assert re.fullmatch(r"[a-z0-9]*", args.etiqueta), "--etiqueta: solo minusculas y digitos"
     for cambio in [c for c in args.hiper.split(",") if c]:
         clave, valor = cambio.split("=")
         HIPER[clave] = type(HIPER[clave])(float(valor)) if clave in ("epocas", "minibatch") else float(valor)
@@ -865,16 +1000,18 @@ def main():
     val_seeds = [int(s) for s in args.val_seeds.split(",") if s.strip()]
     politica = Politica(C["dim_obs"])
     opt = torch.optim.Adam(politica.parameters(), lr=HIPER["lr"], eps=1e-5)
-    etiqueta = f"{esc}_ippo_{args.variante}_s{args.seed}"
+    nombre_var = args.variante + (f"_{args.etiqueta}" if args.etiqueta else "")
+    etiqueta = f"{esc}_ippo_{nombre_var}_s{args.seed}"
     limpiar_checkpoints(etiqueta)
     ruta_csv = args.csv or f"resultados_{etiqueta}.csv"
     salida = open(ruta_csv, "w", newline="")          # se reescribe: la cola puede reintentar
     escritor = csv.DictWriter(salida, fieldnames=CAMPOS_IPPO, extrasaction="ignore")
     escritor.writeheader()
-    print(f"IPPO {args.variante} en {esc}: {args.episodios} episodios, semilla base {args.seed}, "
-          f"dim_obs {C['dim_obs']}, {sum(p.numel() for p in politica.parameters())} parametros")
+    print(f"IPPO {nombre_var} en {esc}: {args.episodios} episodios, semilla base {args.seed}, "
+          f"dim_obs {C['dim_obs']}, {sum(p.numel() for p in politica.parameters())} parametros"
+          + (f", v2={args.v2} ins={args.recompensa_insercion}" if args.v2 or args.recompensa_insercion else ""))
     meta = meta_base(args, val_seeds)
-    val_serie = []
+    val_serie, val_total_serie = [], []      # [ep, val_<s1>, val_<s2>, val] en timeLoss y en retraso total
     for ep in range(1, args.episodios + 1):
         lr = HIPER["lr"] * (1 - (ep - 1) / args.episodios)
         for g in opt.param_groups:
@@ -883,31 +1020,42 @@ def main():
         t0 = time.time()
         res = correr_episodio("train", politica, args.gui, args.delay, args.seed + ep,
                               tripinfo=f"tripinfo_{etiqueta}_train.xml", variante=args.variante,
-                              buffer=buffer)
-        lote = gae(buffer, HIPER["gamma"], HIPER["lam"])
+                              buffer=buffer, v2=args.v2, ins=args.recompensa_insercion)
+        lote = gae(buffer, HIPER["gamma"], HIPER["lam"], smdp=args.v2)
+        dts = np.concatenate([intervalos(b) for b in buffer.values() if b["recompensa"]])
+        res.update({"dt_medio": round(float(dts.mean()), 3), "frac_dt8": round(float((dts == 8).mean()), 4)})
         diag = actualizar(politica, opt, lote, HIPER, rng)
         fila = {"variante": args.variante, "base": args.seed, "episodio": ep, "semilla": args.seed + ep,
                 "lr": f"{lr:.2e}", "segundos": round(time.time() - t0, 1), **res, **diag,
-                "algoritmo": "ippo", "recompensa_tipo": RECOMPENSA[args.variante]}
+                "algoritmo": "ippo", "recompensa_tipo": meta["recompensa"], "etiqueta": args.etiqueta}
         if val_seeds and args.eval_cada and (ep % args.eval_cada == 0 or ep == args.episodios):
             fila.update(validar(politica, val_seeds, args.variante, f"tripinfo_{etiqueta}_val.xml"))
             val_serie.append([ep] + [fila[f"val_{s}"] for s in val_seeds] + [fila["val"]])
+            val_total_serie.append([ep] + [fila[f"val_total_{s}"] for s in val_seeds] + [fila["val_total"]])
             politica.guardar(ruta_checkpoint(etiqueta, ep),
                              {**meta, "ep_checkpoint": ep, "val_checkpoint": fila["val"],
-                              **{f"val_{s}": fila[f"val_{s}"] for s in val_seeds}})
+                              **{f"val_{s}": fila[f"val_{s}"] for s in val_seeds},
+                              "val_total_checkpoint": fila["val_total"],
+                              **{f"val_total_{s}": fila[f"val_total_{s}"] for s in val_seeds}})
         escritor.writerow(fila)
         salida.flush()
         print(f"Ep {ep:3d}  timeLoss={res['timeloss_prom']:6.2f}  espera={res['espera_prom']:5.2f}  "
               f"r/dec={res['recompensa_decision']:6.2f}  cambios={res['cambios_fase']:4d}  "
               f"kl={diag['kl_aprox']:.4f} ent={diag['entropia_libre']:.3f}  {fila['segundos']}s"
-              + (f"  val={fila['val']:.2f}" if "val" in fila else ""), flush=True)
+              + (f"  ins={res['ins_espera']}" if args.recompensa_insercion else "")
+              + (f"  minor={res['expl_minoritaria']:.3f} dt={res['dt_medio']:.2f}" if args.v2 else "")
+              + (f"  val={fila['val']:.2f} total={fila['val_total']:.2f}" if "val" in fila else ""),
+              flush=True)
     salida.close()
 
-    ruta = f"politica_{esc}_{args.variante}_s{args.seed}.pt"
+    ruta = f"politica_{esc}_{nombre_var}_s{args.seed}.pt"
     if val_serie:
-        elegida = elegir_checkpoint(val_serie)
+        # val_elegido queda en la metrica del criterio: con ella se elige la base mediana
+        por_timeloss, por_total = elegir_checkpoint(val_serie), elegir_checkpoint(val_total_serie)
+        elegida = por_total if args.criterio_val == "total" else por_timeloss
         meta.update({"ep_elegido": elegida[0], "val_elegido": elegida[-1], "val_serie": val_serie,
-                     "eval_999_final": val_serie[-1][1]})
+                     "eval_999_final": val_serie[-1][1], "val_total_serie": val_total_serie,
+                     "ep_elegido_timeloss": por_timeloss[0], "ep_elegido_total": por_total[0]})
         shutil.copyfile(ruta_checkpoint(etiqueta, elegida[0]), ruta)
         with open(ruta.replace(".pt", ".json"), "w", encoding="utf-8") as f:
             json.dump(meta, f, indent=1, ensure_ascii=False)
@@ -915,7 +1063,8 @@ def main():
         meta.update({"ep_elegido": args.episodios, "val_elegido": None, "val_serie": [],
                      "eval_999_final": None})
         politica.guardar(ruta, meta)
-    print(f"Politica guardada en {ruta} (episodio {meta['ep_elegido']}, val {meta['val_elegido']})")
+    print(f"Politica guardada en {ruta} (episodio {meta['ep_elegido']}, val {meta['val_elegido']}, "
+          f"criterio {args.criterio_val})")
 
 
 if __name__ == "__main__":

@@ -1,0 +1,58 @@
+Compuerta de reproduccion (25.10.2026, codigo sin commit sobre 5196edb; corridas en una copia de plan2/ fuera del repo)
+
+(a) opciones apagadas, corredor base 42, 200 episodios cortado a los 9: frente a plan2/resultados_corredor_ippo_vecinos_s42.csv (sin la columna segundos)
+9 filas, 48 columnas comunes comparadas, 0 diferencias
+
+(a') opciones apagadas, primer episodio de la base de la version evaluada en cada nivel (--episodios 1; sin segundos ni validacion)
+dem_corredor_t905 s4042: 1 filas, 43 columnas comunes comparadas, 0 diferencias
+dem_corredor_t1358 s42: 1 filas, 43 columnas comunes comparadas, 0 diferencias
+corredor s4042: 1 filas, 43 columnas comunes comparadas, 0 diferencias
+dem_corredor_t2715 s2042: 1 filas, 43 columnas comunes comparadas, 0 diferencias
+corredor_alta s2042: 1 filas, 43 columnas comunes comparadas, 0 diferencias
+
+(b) --v2 --etiqueta v2 frente a plan2/exploratorio_coord/codigo/rl_ippo_smdp_crn.py --variante smdp_crn, corredor base 42, 9 episodios (sin segundos ni variante)
+9 filas, 50 columnas comunes comparadas, 0 diferencias
+
+(c) prueba unitaria de INS: prueba_ins_<esc>.txt
+prueba_ins_corredor.txt: 3 de 3 OK
+prueba_ins_corredor_alta.txt: 3 de 3 OK
+prueba_ins_dem_corredor_t1358.txt: 3 de 3 OK
+prueba_ins_dem_corredor_t2715.txt: 3 de 3 OK
+prueba_ins_dem_corredor_t905.txt: 3 de 3 OK
+
+(d) un episodio (--episodios 1, con validacion y politica publicada) de cada variante en cada nivel
+d_corredor_alta_ins: 0 errores | Ep   1  timeLoss=204.01  espera=79.96  r/dec=-25.63  cambios= 681  kl=0.0092 ent=0.680  37.9s  ins=2198720  val=173.09
+d_corredor_alta_off: 0 errores | Ep   1  timeLoss=204.01  espera=79.96  r/dec=-25.63  cambios= 681  kl=0.0101 ent=0.679  30.1s  val=173.09
+d_corredor_alta_v2: 0 errores | Ep   1  timeLoss=197.19  espera=74.42  r/dec=-24.11  cambios= 685  kl=0.0052 ent=0.685  26.1s  minor=0.475 dt=6.03  val=328.80
+d_corredor_alta_v2ins: 0 errores | Ep   1  timeLoss=197.19  espera=74.42  r/dec=-24.11  cambios= 685  kl=0.0051 ent=0.686  36.4s  ins=2084107  minor=0.475 dt=6.03  val=221.76
+d_corredor_ins: 0 errores | Ep   1  timeLoss= 82.44  espera=34.77  r/dec= -8.43  cambios= 455  kl=0.0091 ent=0.679  19.5s  ins=5545  val=88.69
+d_corredor_off: 0 errores | Ep   1  timeLoss= 82.44  espera=34.77  r/dec= -8.43  cambios= 455  kl=0.0086 ent=0.680  15.6s  val=88.69
+d_corredor_v2: 0 errores | Ep   1  timeLoss= 75.55  espera=33.30  r/dec= -7.83  cambios= 463  kl=0.0107 ent=0.677  15.7s  minor=0.487 dt=5.98  val=117.31
+d_corredor_v2ins: 0 errores | Ep   1  timeLoss= 75.55  espera=33.30  r/dec= -7.83  cambios= 463  kl=0.0101 ent=0.678  15.9s  ins=14436  minor=0.487 dt=5.98  val=117.31
+d_dem_corredor_t1358_ins: 0 errores | Ep   1  timeLoss= 28.34  espera=12.17  r/dec= -2.61  cambios= 422  kl=0.0105 ent=0.677  20.5s  ins=347  val=31.39
+d_dem_corredor_t1358_off: 0 errores | Ep   1  timeLoss= 28.34  espera=12.17  r/dec= -2.61  cambios= 422  kl=0.0106 ent=0.677  15.5s  val=31.39
+d_dem_corredor_t1358_v2: 0 errores | Ep   1  timeLoss= 28.22  espera=12.13  r/dec= -2.63  cambios= 404  kl=0.0086 ent=0.681  11.3s  minor=0.493 dt=5.97  val=27.59
+d_dem_corredor_t1358_v2ins: 0 errores | Ep   1  timeLoss= 28.22  espera=12.13  r/dec= -2.63  cambios= 404  kl=0.0085 ent=0.681  12.2s  ins=349  minor=0.493 dt=5.97  val=22.97
+d_dem_corredor_t2715_ins: 0 errores | Ep   1  timeLoss=174.75  espera=66.39  r/dec=-18.44  cambios= 617  kl=0.0057 ent=0.685  27.3s  ins=621024  val=171.93
+d_dem_corredor_t2715_off: 0 errores | Ep   1  timeLoss=174.75  espera=66.39  r/dec=-18.44  cambios= 617  kl=0.0059 ent=0.685  26.5s  val=176.81
+d_dem_corredor_t2715_v2: 0 errores | Ep   1  timeLoss=168.97  espera=62.19  r/dec=-17.75  cambios= 606  kl=0.0085 ent=0.680  24.0s  minor=0.470 dt=6.03  val=343.84
+d_dem_corredor_t2715_v2ins: 0 errores | Ep   1  timeLoss=168.97  espera=62.19  r/dec=-17.75  cambios= 606  kl=0.0059 ent=0.684  24.9s  ins=605923  minor=0.470 dt=6.03  val=343.84
+d_dem_corredor_t905_ins: 0 errores | Ep   1  timeLoss= 21.99  espera= 9.06  r/dec= -1.24  cambios= 411  kl=0.0125 ent=0.675  17.3s  ins=284  val=20.82
+d_dem_corredor_t905_off: 0 errores | Ep   1  timeLoss= 21.99  espera= 9.06  r/dec= -1.24  cambios= 411  kl=0.0124 ent=0.675  13.2s  val=20.82
+d_dem_corredor_t905_v2: 0 errores | Ep   1  timeLoss= 22.62  espera= 9.05  r/dec= -1.24  cambios= 407  kl=0.0100 ent=0.679  12.0s  minor=0.495 dt=5.99  val=15.46
+d_dem_corredor_t905_v2ins: 0 errores | Ep   1  timeLoss= 22.62  espera= 9.05  r/dec= -1.24  cambios= 407  kl=0.0099 ent=0.679  12.1s  ins=284  minor=0.495 dt=5.99  val=15.46
+
+evaluar.py con una politica con etiqueta (1 semilla): ippo_vecinos_v2ins_s4042,ippo_vecinos_v2ins,4042,1001
+evaluar.py con una politica de antes: ippo_vecinos_s4042,ippo_vecinos,4042,1001,20.1,6.45; en parciales/: ippo_vecinos_s4042,ippo_vecinos,4042,1001,20.1,6.45
+
+Repeticion tras la verificacion (25.10.2026, 13:40; criterio de validacion, enmienda 1 del PRERREGISTRO.md; copia nueva de plan2/ fuera del repo)
+(a) opciones apagadas, corredor base 42, 200 episodios cortado a los 10 (incluye la validacion del ep 10) frente a plan2/resultados_corredor_ippo_vecinos_s42.csv (sin segundos)
+10 filas, 48 columnas comunes comparadas, 0 diferencias (val_999, val_1999 y val del ep 10 iguales: val=20.95)
+columnas nuevas al final del CSV en el ep 10: val_total_999=21.38 val_total_1999=21.26 val_total=21.32
+(e) --recompensa-insercion --etiqueta ins --criterio-val total, dem_corredor_t2715 base 2042, 3 episodios con validacion en cada uno
+val_serie (timeLoss) [[1, 175.52, 168.33, 171.925], [2, 239.72, 237.79, 238.755], [3, 195.9, 191.71, 193.805]]
+val_total_serie [[1, 374.25, 364.67, 369.46], [2, 314.33, 435.35, 374.84], [3, 398.47, 390.62, 394.545]]
+meta: criterio_validacion = retraso total; ep_elegido 1, val_elegido 369.46 (en retraso total), ep_elegido_timeloss 1, ep_elegido_total 1;
+politica publicada identica byte a byte al checkpoint del ep elegido; checkpoints con val_total_checkpoint y val_total_<s>
+elegir_checkpoint con series que discrepan: timeLoss -> ep 20, retraso total -> ep 30 (empate 10/30: el mas tardio)
+cola.py --seco tras regenerar trabajos.jsonl: 794 trabajos: 626 hechos, 0 fallidos, 168 pendientes {'diag': 168}; 45 entrenamientos con --criterio-val total; las 626 lineas anteriores sin cambios

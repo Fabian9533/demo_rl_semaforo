@@ -53,3 +53,20 @@ cumple, se reporta lo que sí se corrigió y lo que queda abierto.
   diseño), para las variantes nuevas, la versión evaluada actual, el fijo de la regla del 25.09, el fijo ajustado desde
   10 s, el ciclo mínimo y el actuado.
 - Comprobaciones de SUMO: teletransportes, sensibilidad del fijo y del ciclo mínimo al paso de 0.5 s, determinismo.
+
+## Enmienda 1 (25.10.2026, 13:35, antes de lanzar los entrenamientos)
+
+Criterio de validación de las variantes nuevas. El protocolo del plan elige el checkpoint publicado y la base mediana
+por el timeLoss medio en 999 y 1999. Ese es justo el criterio que no ve a los vehículos que esperan para entrar: con
+él, la selección de INS favorecería al checkpoint que menos atiende las entradas, en contra de H2 y de la métrica
+principal de este análisis. Por eso:
+
+- V2, INS y V2+INS eligen el checkpoint publicado y la base mediana por el retraso total medio en 999 y 1999
+  (rl_ippo.py --criterio-val total; val_elegido queda en esa métrica). Las tres usan el mismo criterio, para que entre
+  ellas solo cambie el entrenamiento.
+- La validación registra las dos métricas en todos los casos (val y val_total en el CSV; val_serie y val_total_serie
+  en el meta) y el meta guarda el episodio que habría elegido cada criterio (ep_elegido_timeloss y ep_elegido_total).
+- La versión evaluada actual se eligió por timeLoss y no se vuelve a elegir. En las comparaciones con ella, el cambio
+  incluye el del criterio. En 905, 1358 y P1 la espera para entrar es de 0.4-0.6 s y casi igual en todos los
+  controles, así que ahí el efecto es pequeño. En 2715 y P2 se informa, por variante y base, si los dos criterios
+  eligen el mismo episodio.

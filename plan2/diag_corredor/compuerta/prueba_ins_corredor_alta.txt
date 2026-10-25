@@ -1,0 +1,7 @@
+corredor_alta: 20 flujos, sin semaforo: []
+ins_total = 989390 veh-s; departDelay del tripinfo = 989590.00 (3620 viajes) + espera de 0 no insertados = 0.00 -> 989590.00; diferencia -200.00 (-0.0552 por vehiculo)
+ins_espera (asignados) = 989390; retraso_insercion_prom = 273.37
+por vehiculo: 3620 de 3620 con departDelay - 1 < pendiente <= departDelay; fuera de rango: []; pendientes sin viaje en el tripinfo: 0 (no insertados al cerrar: 0)
+1 suma de pendientes = espera para entrar: OK
+2 todos asignados: OK
+3 la simulacion no cambia con el conteo: OK
