@@ -56,3 +56,18 @@ meta: criterio_validacion = retraso total; ep_elegido 1, val_elegido 369.46 (en 
 politica publicada identica byte a byte al checkpoint del ep elegido; checkpoints con val_total_checkpoint y val_total_<s>
 elegir_checkpoint con series que discrepan: timeLoss -> ep 20, retraso total -> ep 30 (empate 10/30: el mas tardio)
 cola.py --seco tras regenerar trabajos.jsonl: 794 trabajos: 626 hechos, 0 fallidos, 168 pendientes {'diag': 168}; 45 entrenamientos con --criterio-val total; las 626 lineas anteriores sin cambios
+
+Enmienda 2 (25.10.2026, 16:20; rl_ippo.py --obs-insercion y evaluar.py, codigo sin commit sobre a751fd9; salidas con
+etiquetas de prueba gatea/gateb/gatec en plan2/, borradas despues; nada real se piso)
+(a) opciones de la ronda 1 sin la nueva: --v2 --recompensa-insercion, dem_corredor_t2715 base 2042, --episodios 1, frente a
+    resultados_dem_corredor_t2715_ippo_vecinos_v2ins_s2042.csv (sin segundos, etiqueta ni validacion)
+1 filas, 50 columnas comunes comparadas, 0 diferencias
+(b) sin opciones, corredor base 42, --episodios 1, frente a plan2/resultados_corredor_ippo_vecinos_s42.csv (sin segundos, etiqueta ni validacion)
+1 filas, 45 columnas comunes comparadas, 0 diferencias
+(c) evaluar.py con una politica de la ronda 1 (politica_dem_corredor_t2715_vecinos_v2ins_s2042.pt, semilla 1001) frente a
+    diag_corredor/eval/eval_dem_corredor_t2715_ippo_vecinos_v2ins_s2042_1001.csv: 34 columnas, 0 diferencias
+(d) --v2 --recompensa-insercion --obs-insercion, dem_corredor_t2715 base 2042, 2 episodios con validacion en cada uno: dim_obs 35
+    (31 + 4), 13123 parametros, meta con opciones.obs_insercion = true y features ... pend_o, pend_e, pend_n, pend_s; politica
+    publicada; evaluar.py la carga y la corre (semilla 1001: total 417.07, igual al de la corrida directa).
+    Entradas nuevas en esa corrida (politica del episodio 1): C1 ve W_C1 (max 0.51), N1_C1 y S1_C1; C2 ve E_C2 (max 0.84,
+    media 0.37), N2_C2 y S2_C2; los accesos internos C2_C1 y C1_C2 quedan en 0, como debe ser.

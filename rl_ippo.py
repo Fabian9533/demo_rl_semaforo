@@ -62,6 +62,11 @@ por defecto: sin ellas el entrenamiento da los mismos numeros que antes.
          en todos los casos: val_<s> y val (timeLoss, igual que antes) y, al final del CSV, val_total_<s> y
          val_total; en el meta, val_serie (timeLoss) y val_total_serie, y ep_elegido_timeloss y
          ep_elegido_total con lo que habria elegido cada criterio.
+  --obs-insercion   (Enmienda 2 del prerregistro, INS observable) cuatro entradas mas al final de la
+         observacion, una por acceso (o, e, n, s): n / (n + plazas del acceso), con n los vehiculos que esperan
+         para entrar por esa arista (0.5 = una aproximacion llena esperando afuera). Va en el meta
+         (opciones.obs_insercion, dim_obs) y evaluar.py la activa al cargar la politica. Apagada, la
+         observacion y los numeros no cambian.
 
 Interfaz para decisores externos (correr_episodio):
   correr_episodio(modo, politica, gui, delay, seed, tripinfo=None, serie=None, latencia=0,
@@ -212,8 +217,40 @@ def preparar(escenario):
         "fase_av": {},          # se calcula con TraCI en el primer episodio
         "lados": lados, "n_id": n_id, "dim_obs": 12 + n_id + 8 * len(lados),
         "ins_flujo": origen_flujos(e["cfg"], e["semaforos"]),
+        # --obs-insercion (configurar_obs_insercion): apagada por defecto
+        "dim_base": 12 + n_id + 8 * len(lados), "obs_ins": False,
+        "ins_salida": salidas_flujos(e["cfg"]), "pend_arista": {},
     })
     return C
+
+
+def configurar_obs_insercion(activa):
+    """--obs-insercion: agrega (o quita) las cuatro entradas de vehiculos que esperan para entrar al final
+    de la observacion. Se llama despues de preparar(); evaluar.py la llama con el valor del meta."""
+    C["obs_ins"] = bool(activa)
+    C["dim_obs"] = C["dim_base"] + (4 if activa else 0)
+
+
+def salidas_flujos(cfg):
+    """--obs-insercion: {id de flujo (o vehiculo): arista de salida (from, o la primera de su ruta)}, leido
+    del .rou.xml del escenario, igual que en origen_flujos."""
+    import xml.etree.ElementTree as ET
+    rutas = ET.parse(cfg).getroot().find("input/route-files")
+    res = {}
+    if rutas is None:
+        return res
+    carpeta = os.path.dirname(cfg)
+    for archivo in rutas.get("value").split(","):
+        raiz = ET.parse(os.path.join(carpeta, archivo.strip())).getroot()
+        for el in raiz:
+            if el.tag not in ("flow", "trip", "vehicle"):
+                continue
+            arista = el.get("from")
+            ruta = el.find("route")
+            if arista is None and ruta is not None:
+                arista = ruta.get("edges").split()[0]
+            res[el.get("id")] = arista
+    return res
 
 
 def origen_flujos(cfg, semaforos):
@@ -243,13 +280,20 @@ def origen_flujos(cfg, semaforos):
 
 def pendientes_por_agente():
     """Vehiculos que esperan para entrar a la red en este segundo: ({semaforo: n}, total). El id de un
-    vehiculo de un flujo es <flujo>.<k>; se asigna al semaforo de la arista de salida del flujo."""
+    vehiculo de un flujo es <flujo>.<k>; se asigna al semaforo de la arista de salida del flujo.
+    Con --obs-insercion deja ademas en C["pend_arista"] la cuenta por arista de salida (la lee observar)."""
     por_agente, total = {}, 0
+    por_arista = {}
     for vid in traci.simulation.getPendingVehicles():
         total += 1
         tls = C["ins_flujo"].get(vid, C["ins_flujo"].get(vid.rsplit(".", 1)[0]))
         if tls is not None:
             por_agente[tls] = por_agente.get(tls, 0) + 1
+        if C["obs_ins"]:
+            a = C["ins_salida"].get(vid, C["ins_salida"].get(vid.rsplit(".", 1)[0]))
+            por_arista[a] = por_arista.get(a, 0) + 1
+    if C["obs_ins"]:
+        C["pend_arista"] = por_arista
     return por_agente, total
 
 
@@ -261,7 +305,8 @@ def nombres_features():
              "fase_0", "fase_1", "t_verde", "puede_cambiar"] + ids
             + [f"{lado}_{f}" for lado in C["lados"]
                for f in ("presente", "verde_hacia_mi", "ambar", "t_fase", "outflow",
-                         "cola_alimentadora", "cola_mi_salida", "edad")])
+                         "cola_alimentadora", "cola_mi_salida", "edad")]
+            + (["pend_o", "pend_e", "pend_n", "pend_s"] if C["obs_ins"] else []))
 
 
 def fase_avenida(tls, aprox, verdes):
@@ -421,6 +466,11 @@ def observar(tls, ag, lect, canal, t, con_vecinos):
     obs[10] = min(1.0, ag["t_verde"] / VERDE_MAX)
     obs[11] = 1.0 if ag["t_verde"] >= minimo_verde(ag) else 0.0
     obs[12 + C["indice"][tls]] = 1.0
+    if C["obs_ins"]:
+        # --obs-insercion: vehiculos que esperan para entrar por cada acceso, n / (n + plazas)
+        for k, a in enumerate(aprox):
+            n = C["pend_arista"].get(a, 0)
+            obs[C["dim_base"] + k] = n / (n + C["cap"][a])
     if not con_vecinos:
         return obs
     for r, lado in enumerate(C["lados"]):
@@ -529,6 +579,7 @@ def correr_episodio(modo, politica, gui, delay, seed, tripinfo=None, serie=None,
     rng_expl = np.random.default_rng(seed + SEMILLA_EXPL) if crn else None
     minoritarias = 0               # decisiones libres de train con a != argmax
     ins_espera, ins_total = 0, 0   # vehiculo-segundos esperando para entrar (asignados, todos)
+    C["pend_arista"] = {}          # --obs-insercion: nada del episodio anterior en la primera decision
 
     rc.SEMAFOROS = C["semaforos"]          # fases_verdes usa el programa activo del semaforo
     agentes = {}
@@ -693,7 +744,7 @@ def correr_episodio(modo, politica, gui, delay, seed, tripinfo=None, serie=None,
         cola_acum += sum(colas)
         cola_max = max(cola_max, sum(colas))
         medidor.paso(pasos)
-        if ins:
+        if ins or C["obs_ins"]:
             pend, n_pend = pendientes_por_agente()
             ins_total += n_pend
         for tls, ag in agentes.items():
@@ -928,6 +979,8 @@ def meta_base(args, val_seeds):
     criterio = getattr(args, "criterio_val", "timeloss")
     opciones = {"v2": v2, "recompensa_insercion": ins, "etiqueta": getattr(args, "etiqueta", "") or "",
                 "criterio_val": criterio}
+    if C["obs_ins"]:            # solo si esta activa: los meta de antes no cambian
+        opciones["obs_insercion"] = True
     return {"escenario": C["escenario"], "variante": args.variante, "algoritmo": "ippo",
             "recompensa": RECOMPENSA[args.variante] + ("+insercion" if ins else ""),
             "etiqueta": opciones["etiqueta"], "opciones": opciones,
@@ -976,6 +1029,8 @@ def main():
                     help="se agrega a la variante en los nombres de salida (p. ej. v2, ins, v2ins)")
     ap.add_argument("--criterio-val", choices=["timeloss", "total"], default="timeloss",
                     help="metrica de validacion con la que se elige el checkpoint publicado")
+    ap.add_argument("--obs-insercion", action="store_true",
+                    help="Enmienda 2: la observacion incluye los vehiculos que esperan para entrar por cada acceso")
     args = ap.parse_args()
     assert re.fullmatch(r"[a-z0-9]*", args.etiqueta), "--etiqueta: solo minusculas y digitos"
     for cambio in [c for c in args.hiper.split(",") if c]:
@@ -983,11 +1038,13 @@ def main():
         HIPER[clave] = type(HIPER[clave])(float(valor)) if clave in ("epocas", "minibatch") else float(valor)
 
     preparar(args.escenario)
+    configurar_obs_insercion(args.obs_insercion)
     esc = args.escenario
     rng = sembrar(args.seed)
 
     if args.modo == "demo":
         politica, meta = Politica.cargar(args.politica)
+        configurar_obs_insercion(meta.get("opciones", {}).get("obs_insercion", False))
         assert meta["dim_obs"] == C["dim_obs"], \
             f"la politica espera {meta['dim_obs']} entradas y {esc} da {C['dim_obs']}"
         variante = meta["variante"]
@@ -1009,7 +1066,8 @@ def main():
     escritor.writeheader()
     print(f"IPPO {nombre_var} en {esc}: {args.episodios} episodios, semilla base {args.seed}, "
           f"dim_obs {C['dim_obs']}, {sum(p.numel() for p in politica.parameters())} parametros"
-          + (f", v2={args.v2} ins={args.recompensa_insercion}" if args.v2 or args.recompensa_insercion else ""))
+          + (f", v2={args.v2} ins={args.recompensa_insercion}" if args.v2 or args.recompensa_insercion else "")
+          + (", obs_insercion" if C["obs_ins"] else ""))
     meta = meta_base(args, val_seeds)
     val_serie, val_total_serie = [], []      # [ep, val_<s1>, val_<s2>, val] en timeLoss y en retraso total
     for ep in range(1, args.episodios + 1):

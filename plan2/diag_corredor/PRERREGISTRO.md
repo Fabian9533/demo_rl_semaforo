@@ -70,3 +70,44 @@ principal de este análisis. Por eso:
   incluye el del criterio. En 905, 1358 y P1 la espera para entrar es de 0.4-0.6 s y casi igual en todos los
   controles, así que ahí el efecto es pequeño. En 2715 y P2 se informa, por variante y base, si los dos criterios
   eligen el mismo episodio.
+
+## Enmienda 2 (25.10.2026, 16:30): segunda ronda, escrita con los resultados de la primera a la vista
+
+Esta es una prueba nueva, no una repetición de H2. Se escribe y se registra en git antes de entrenar la variante
+nueva. Se informa pase o no pase.
+
+**Resultado de la primera ronda** (`pruebas.txt`, semillas 1001-1030 y 6001-6030): H3 y H4 pasan; H2 y el criterio
+no pasan. En 2715 y P2, INS y V2+INS dejan más espera para entrar que la versión actual. V2 sola no corrige 2715.
+
+**Por qué falló INS** (registros de entrenamiento, sin simular de nuevo):
+
+- Lo que INS cobra no está en la observación. La cola de cada acceso entra como detenidos/plazas recortado a 1, así
+  que un acceso lleno se ve igual con 0 que con 50 vehículos esperando afuera.
+- El crítico no puede predecirlo. En los episodios 181-200, la pérdida de valor es 3.5-4.6 (INS) y 2.8-4.4
+  (V2+INS) frente a 0.17-0.21 (V2) en 2715, unas 20 veces más. En P2 es 64-75 y 31-87 frente a 0.27-0.28, unas 250
+  veces más.
+- El término pesa más que el resto de la recompensa: por decisión, −35 a −43 con INS frente a −22 con V2 en 2715,
+  y −183 a −209 frente a −51 a −54 en P2.
+
+**H5 (observabilidad).** INS falló porque el agente no ve lo que se le cobra. Corrección V2+INS+obs: V2+INS más
+cuatro entradas al final de la observación, una por acceso. Cada una vale n/(n + plazas del acceso), donde n es el
+número de vehículos que esperan para entrar por esa arista (`rl_ippo.py --obs-insercion`). Lo demás no cambia
+respecto de V2+INS: recompensa y pesos, red, hiperparámetros, criterio de validación por retraso total, bases 42,
+2042 y 4042, 200 episodios, cinco niveles, evaluación en 1001-1030 y confirmación en 6001-6030.
+
+**Predicciones** (mismas pruebas que antes: cambio pareado, IC95 bootstrap pareado, p de Wilcoxon):
+
+- (a) En 2715 y en P2, V2+INS+obs tiene menos espera para entrar y menos retraso total que V2+INS (IC entero bajo
+  cero en las cuatro comparaciones).
+- (b) Criterio de causa raíz corregida, el mismo de arriba, aplicado a V2+INS+obs: ningún nivel queda peor que el
+  fijo ajustado desde 10 s en retraso total (IC entero sobre cero y p < 0.05), y P1 sigue mejorando (IC entero bajo
+  cero).
+- Comprobación descriptiva, sin prueba: la pérdida de valor media de los episodios 181-200 de V2+INS+obs es menor
+  que la de V2+INS en 2715 y P2.
+
+**Lectura.**
+
+- Si (a) y (b) se cumplen, la causa de 2715 es la recompensa que no ve la entrada más la falta de esa información
+  en la observación.
+- Si (a) se cumple y (b) no, la observabilidad explica la falla de INS pero no basta para 2715.
+- Si (a) no se cumple, H5 no se sostiene y la causa de 2715 sigue abierta.
