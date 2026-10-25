@@ -127,3 +127,41 @@ mide con retornos sin normalizar; con la misma recompensa (V2+INS frente a V2+IN
 Lo mismo pasa con el encabezado del pre-registro (13:05): el commit que lo registra, 5196edb, es de las 13:00:27. Y
 en "Lo que ya muestran los datos existentes", los cambios de fase (373 y 527) son por corrida, no por hora (la columna
 cambios_fase cuenta toda la corrida; por hora son unos 363 en comportamiento.md).
+
+## Enmienda 3 (25.10.2026, 18:20): por que 2715 veh/h, escrita antes de correr el contrafactual y los entrenamientos
+
+Tercera ronda, con las dos primeras a la vista. Se registra en git antes de lanzar sus trabajos (ids diag3_*). Se
+informa pase o no pase.
+
+**Lo que ya muestran los datos** (comp_movimientos.csv, semillas 1001-1005; demanda de dem_corredor_t2715.rou.xml):
+
+- Los dos periodos de 30 min son la imagen girada 180 grados uno del otro en flujos de avenida (900 y 375 veh/h) y
+  transversales (270 por sentido), con una sola diferencia: los cuatro giros (90 veh/h cada uno) son todos a la
+  derecha en el periodo 1 y todos a la izquierda en el periodo 2. Los giros a la izquierda tienen verde sin
+  prioridad (estado g) y todas las calles tienen un carril: el que espera un hueco para girar detiene a los de atras.
+- En 905, 1358 y 1810 veh/h los dos periodos dan casi lo mismo en todos los controles. En 2715 el retraso total del
+  periodo 2 sube en todos: fijo 38.4 -> 70.3 s/veh, IPPO con mensajes 29.3 -> 118.9, actuado 28.6 -> 272.2. En el
+  periodo 1 IPPO y el actuado le ganan al fijo; en el 2 pierden. En 3620 (P2) pasa lo mismo.
+
+**H6 (giros a la izquierda).** La desventaja de IPPO con mensajes en 2715 viene de los giros a la izquierda
+permitidos del periodo 2: los controles que responden a las colas (IPPO y el actuado) colapsan con ellos y el fijo
+no. Contrafactual: dem_corredor_t2715_der, igual a dem_corredor_t2715 pero con los giros del periodo 2 a la derecha
+(los del periodo 1), con el mismo volumen; el periodo 2 queda como la imagen girada del periodo 1. Cambia, por
+fuerza, que tramo transversal lleva los 90 veh/h de giro. Predicciones (retraso total, cambio pareado, IC95 bootstrap
+pareado, en 1001-1030 y en 6001-6030, como antes):
+
+- (a) Sin reentrenar: en dem_corredor_t2715_der, la version evaluada de V2 en 2715 (base 42) tiene menos retraso
+  total que el fijo de 2715 (25/10 s, desfases 0/0, el mismo plan), con IC entero bajo cero. En el escenario original
+  es +33.6 %.
+- (b) Entrenado en el contrafactual: V2 entrenado en dem_corredor_t2715_der (3 bases, 200 episodios, criterio de
+  validacion por retraso total, base mediana) tiene menos retraso total que el fijo ajustado de
+  dem_corredor_t2715_der (barrer_fijo.py con la regla vigente: malla desde 10 s, retraso total, semillas
+  2001-2003), con IC entero bajo cero.
+- Sin prueba: el actuado y la version actual en el contrafactual, y el retraso de cada periodo y movimiento.
+
+**H7 (horizonte), la alternativa.** El descuento (gamma 0.95 por decision de 5 s, unos 100 s) no alcanza a ver lo que
+cuesta una cola en la entrada. Prediccion: en dem_corredor_t2715 original, V2 con gamma 0.99 (3 bases, lo demas como
+V2) tiene menos retraso total que V2, con IC entero bajo cero.
+
+**Lectura.** Si (a) y (b) se cumplen, la causa de 2715 son los giros a la izquierda permitidos en accesos de un
+carril. Si ademas H7 se cumple, el horizonte suma. Si (a) o (b) no se cumplen, los giros no bastan para explicar 2715.

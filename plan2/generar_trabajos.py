@@ -129,7 +129,8 @@ def agregar_demanda(agregar):
     import escenarios_plan2
     agregar("dem_preparar", 1, "python ../barrido_demanda.py preparar", ["trabajo:v21_barrido_corredor"])
     niveles = [e for e in escenarios_plan2.DERIVADOS
-               if not e.endswith("_p1") and e not in escenarios_plan2.NIVELES_DEMANDA2]
+               if not e.endswith("_p1") and e not in escenarios_plan2.NIVELES_DEMANDA2
+               and e not in getattr(escenarios_plan2, "CONTRAFACTUALES", {})]
     politicas = {"ippo_vecinos_s4042": "politica_corredor_vecinos_s4042.pt",
                  "ippo_vecinos_s2042": "politica_corredor_alta_vecinos_s2042.pt"}
     for esc in niveles:
@@ -260,6 +261,54 @@ def agregar_diag_corredor(agregar):
                     evaluar.format(e=esc_eval, s=SEMILLAS_DIAG[k], n=f"eval_{esc}_{brazo}_{k}", k=k) + opcion, [])
 
 
+def agregar_diag_corredor3(agregar):
+    """Enmienda 3 del diagnostico del corredor (25.10.2026): por que 2715 veh/h. Ids diag3_*, todo con cpus=1.
+      D = dem_corredor_t2715_der (giros del periodo 2 a la derecha), O = dem_corredor_t2715 (original).
+      H6a, sin reentrenar, en D: fijo de 2715 (el mismo plan 25/10, copiado en D.add.xml), actuado, version actual
+          (politica_dem_corredor_t2715_vecinos_s2042.pt) y V2 de 2715 (politica_dem_corredor_t2715_vecinos_v2_s42.pt).
+      Fijo ajustado de D: barrer_fijo.py con la regla vigente (--instalar reescribe D.add.xml), despues de evaluar
+          el plan copiado; luego se evalua el ganador.
+      H6b: V2 entrenado en D (bases 42, 2042 y 4042) y sus evaluaciones.
+      H7: V2 con gamma 0.99 en O (--hiper gamma=0.99, --etiqueta v2g99) y sus evaluaciones.
+    Salidas en diag_corredor/eval3/eval_<d|o>_<brazo>_<1001|6001>.csv, con los extras de la primera semilla.
+    Prioridad: 0 entrenamientos, 1 barrido, 2 evaluaciones 1001-1030, 3 confirmacion 6001-6030."""
+    d, o = "dem_corredor_t2715_der", "dem_corredor_t2715"
+    evaluar = "python ../evaluar.py --escenario {e} --semillas {s} --salida diag_corredor/eval3/{n}.csv " \
+              "--extras diag_corredor/eval3/extras_{k} "
+    entrenar = "python ../rl_ippo.py train --escenario {e} --variante vecinos --seed {b} --episodios 200 --v2 " \
+               "--criterio-val total --etiqueta {t}"
+    for b in BASES:
+        agregar(f"diag3_train_d_v2_s{b}", 0, entrenar.format(e=d, b=b, t="v2"), [])
+        agregar(f"diag3_train_o_v2g99_s{b}", 0, entrenar.format(e=o, b=b, t="v2g99") + " --hiper gamma=0.99", [])
+    prio = {"1001": 2, "6001": 3}
+    for k in ("1001", "6001"):
+        s = SEMILLAS_DIAG[k]
+        agregar(f"diag3_eval_d_fijo2715_{k}", prio[k],
+                evaluar.format(e=d, s=s, n=f"eval_d_fijo2715_{k}", k=k) + "--brazo fijo", [])
+        agregar(f"diag3_eval_d_actuado_{k}", prio[k],
+                evaluar.format(e=d, s=s, n=f"eval_d_actuado_{k}", k=k) + "--brazo actuado", [])
+        for brazo, pol in (("ippo_actual", "politica_dem_corredor_t2715_vecinos_s2042.pt"),
+                           ("ippo_v2", "politica_dem_corredor_t2715_vecinos_v2_s42.pt")):
+            agregar(f"diag3_eval_d_{brazo}_{k}", prio[k],
+                    evaluar.format(e=d, s=s, n=f"eval_d_{brazo}_{k}", k=k) + f"--politica {pol}", [])
+        agregar(f"diag3_eval_d_fijo_{k}", prio[k],
+                evaluar.format(e=d, s=s, n=f"eval_d_fijo_{k}", k=k) + "--brazo fijo", ["trabajo:diag3_barrido_d"])
+        for b in BASES:
+            agregar(f"diag3_eval_d_ippo_v2d_s{b}_{k}", prio[k],
+                    evaluar.format(e=d, s=s, n=f"eval_d_ippo_v2d_s{b}_{k}", k=k)
+                    + f"--politica politica_{d}_vecinos_v2_s{b}.pt",
+                    [f"trabajo:diag3_train_d_v2_s{b}", "trabajo:diag3_barrido_d"])
+            agregar(f"diag3_eval_o_ippo_v2g99_s{b}_{k}", prio[k],
+                    evaluar.format(e=o, s=s, n=f"eval_o_ippo_v2g99_s{b}_{k}", k=k)
+                    + f"--politica politica_{o}_vecinos_v2g99_s{b}.pt", [f"trabajo:diag3_train_o_v2g99_s{b}"])
+    # --instalar reescribe D.add.xml: el barrido espera a todo lo que carga D antes (las evaluaciones del plan
+    # copiado, del actuado y de las politicas de 2715, y los entrenamientos en D), y lo que viene despues lo espera
+    antes = [f"trabajo:diag3_eval_d_{a}_{k}" for a in ("fijo2715", "actuado", "ippo_actual", "ippo_v2")
+             for k in ("1001", "6001")] + [f"trabajo:diag3_train_d_v2_s{b}" for b in BASES]
+    agregar("diag3_barrido_d", 1, f"python ../barrer_fijo.py {d} --semillas 2001-2003 --tmp tmp_barrido_d3 "
+            "--procesos 4 --instalar", antes)
+
+
 def main():
     trabajos = []
 
@@ -302,7 +351,8 @@ def main():
     agregar_demanda(agregar)
     agregar_demanda2(agregar)
     agregar_diag_corredor(agregar)
-    ruta = os.path.join(os.path.dirname(os.path.abspath(__file__)), "cola", "trabajos.jsonl")
+    agregar_diag_corredor3(agregar)
+    ruta =os.path.join(os.path.dirname(os.path.abspath(__file__)), "cola", "trabajos.jsonl")
     with open(ruta, "w", encoding="utf-8") as f:
         for t in trabajos:
             f.write(json.dumps(t, ensure_ascii=False) + "\n")

@@ -138,3 +138,12 @@ _NIVELES2 = [("corredor", 905, 0.5, "corredor"), ("corredor", 1358, 0.75, "corre
 NIVELES_DEMANDA2 = {f"dem_{b}_t{n}": (b, f, n, caso) for b, n, f, caso in _NIVELES2}
 for _esc, (_base, _, _, _caso) in NIVELES_DEMANDA2.items():
     DERIVADOS[_esc] = (_base, f"{_esc}.sumocfg", _caso)
+
+
+# ---------------- Contrafactual del diagnostico del corredor (25.10.2026, Enmienda 3) ----------------
+# 2715 veh/h con los giros del periodo 2 a la derecha (los del periodo 1) en vez de a la izquierda: el periodo 2
+# queda como la imagen girada 180 grados del periodo 1 (plan2/diag_corredor/PRERREGISTRO.md, Enmienda 3). Se
+# registra como derivado (red, semaforos y vecinos del corredor) y queda fuera del barrido de demanda de
+# generar_trabajos.agregar_demanda.
+CONTRAFACTUALES = {"dem_corredor_t2715_der": ("corredor", "dem_corredor_t2715_der.sumocfg", "corredor_alta")}
+DERIVADOS.update(CONTRAFACTUALES)
