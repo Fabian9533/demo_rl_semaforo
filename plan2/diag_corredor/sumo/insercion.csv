@@ -1,0 +1,19 @@
+caso,paso,semilla,veh,veh_h,intervalo_s,perdida_arranque_s
+insercion departSpeed 0 (corredor),1,1001,201,1206,,
+insercion departSpeed 0 (corredor),1,1002,200,1200,,
+insercion departSpeed 0 (corredor),1,1003,200,1200,,
+insercion departSpeed max,1,1001,249,1494,,
+insercion departSpeed max,1,1002,253,1518,,
+insercion departSpeed max,1,1003,252,1512,,
+descarga de cola en verde (veh 5 a 30),1,1001,152,1870,1.925,3.0
+descarga de cola en verde (veh 5 a 30),1,1002,151,1856,1.94,3.3
+descarga de cola en verde (veh 5 a 30),1,1003,149,1781,2.021,3.5
+insercion departSpeed 0 (corredor),0.5,1001,225,1350,,
+insercion departSpeed 0 (corredor),0.5,1002,225,1350,,
+insercion departSpeed 0 (corredor),0.5,1003,226,1356,,
+insercion departSpeed max,0.5,1001,291,1746,,
+insercion departSpeed max,0.5,1002,292,1752,,
+insercion departSpeed max,0.5,1003,292,1752,,
+descarga de cola en verde (veh 5 a 30),0.5,1001,169,2014,1.787,3.6
+descarga de cola en verde (veh 5 a 30),0.5,1002,170,2058,1.75,3.7
+descarga de cola en verde (veh 5 a 30),0.5,1003,168,1957,1.839,3.8

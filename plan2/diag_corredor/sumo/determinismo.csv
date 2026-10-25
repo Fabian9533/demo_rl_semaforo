@@ -1,0 +1,7 @@
+nivel,escenario,control,variante,semilla,timeloss_prom,retraso_total_prom,retraso_insercion_prom,no_insertados,no_terminados,vehiculos,throughput,cambios_fase,vehi_loaded,vehi_inserted,vehi_running,vehi_waiting,tele_total,tele_jam,tele_yield,tele_wrongLane,safe_collisions,safe_emergencyStops,safe_emergencyBraking,vehi_departDelay,vehi_departDelayWaiting,vehi_timeLoss,perf_end,sha_tripinfo,segundos,igual_eval,repeticion
+1358,dem_corredor_t1358,ippo,base,1001,18.93,19.51,0.58,0,0,1366,1329,368,1366,1366,0,0,0,0,0,0,0,0,0,0.58,0.00,18.93,3691.00,1678c1e02c8d3515,3.0,1,1
+1358,dem_corredor_t1358,ippo,base,1002,18.95,19.53,0.58,0,0,1366,1332,376,1366,1366,0,0,0,0,0,0,0,0,0,0.58,0.00,18.95,3702.00,8fc6a0e5d809b221,2.9,1,1
+1358,dem_corredor_t1358,ippo,base,1003,19.1,19.68,0.58,0,0,1366,1331,370,1366,1366,0,0,0,0,0,0,0,0,0,0.58,0.00,19.10,3697.00,55ad662ca2dcc2bb,2.8,1,1
+1358,dem_corredor_t1358,ippo,base,1001,18.93,19.51,0.58,0,0,1366,1329,368,1366,1366,0,0,0,0,0,0,0,0,0,0.58,0.00,18.93,3691.00,1678c1e02c8d3515,2.8,1,2
+1358,dem_corredor_t1358,ippo,base,1002,18.95,19.53,0.58,0,0,1366,1332,376,1366,1366,0,0,0,0,0,0,0,0,0,0.58,0.00,18.95,3702.00,8fc6a0e5d809b221,2.9,1,2
+1358,dem_corredor_t1358,ippo,base,1003,19.1,19.68,0.58,0,0,1366,1331,370,1366,1366,0,0,0,0,0,0,0,0,0,0.58,0.00,19.10,3697.00,55ad662ca2dcc2bb,3.0,1,2

@@ -1,0 +1,134 @@
+
+== 1. Teletransportes y bloqueos (semillas 1001-1005; medias por corrida)
+nivel control  variante  tele  jam  choques  fren_emerg  paradas_emerg  esperan_al_cerrar  no_term  espera_entrar  timeLoss  total  igual_eval
+2715  actuado  base     0.0   0.0     0.0        0.0           0.0               0.0      0.0         71.82     78.59 150.41  5/5
+2715  actuado  chk      0.0   0.0     0.0        0.0           0.0               0.0      0.0         71.82     78.59 150.41  5/5
+2715  actuado  tt300    0.0   0.0     0.0        0.0           0.0               0.0      0.0         71.82     78.59 150.41  5/5
+2715  fijo     base     0.0   0.0     0.0        0.0           0.0               0.0      0.0          3.77     50.59  54.36  5/5
+2715  fijo     chk      0.0   0.0     0.0        0.0           0.0               0.0      0.0          3.77     50.59  54.36  5/5
+2715  fijo     tt300    0.0   0.0     0.0        0.0           0.0               0.0      0.0          3.77     50.59  54.36  5/5
+2715  ippo     base     0.0   0.0     0.0        0.0           0.0               0.0      0.0         16.84     57.25  74.09  5/5
+2715  ippo     chk      0.0   0.0     0.0        0.0           0.0               0.0      0.0         16.84     57.25  74.09  5/5
+2715  ippo     tt300    0.0   0.0     0.0        0.0           0.0               0.0      0.0         16.84     57.25  74.09  5/5
+2715  trivial  base     0.0   0.0     0.0        0.0           0.0               0.0      0.0        291.34    196.19 487.53  5/5
+2715  trivial  chk      0.0   0.0     1.0        0.0           0.0               0.0      0.0        291.34    196.19 487.53  5/5
+2715  trivial  tt300    0.0   0.0     0.0        0.0           0.0               0.0      0.0        291.34    196.19 487.53  5/5
+P2    actuado  base     0.0   0.0     0.0        0.0           0.0               0.0      0.0        317.96    120.81 438.77  5/5
+P2    actuado  chk      0.0   0.0     0.2        0.0           0.0               0.0      0.0        317.96    120.81 438.77  5/5
+P2    actuado  tt300    0.0   0.0     0.0        0.0           0.0               0.0      0.0        317.96    120.81 438.77  5/5
+P2    fijo     base     0.0   0.0     0.0        0.0           0.0               0.0      0.0        238.61    153.85 392.46  5/5
+P2    fijo     chk      0.0   0.0     0.6        0.0           0.0               0.0      0.0        238.61    153.85 392.46  5/5
+P2    fijo     tt300    0.0   0.0     0.0        0.0           0.0               0.0      0.0        238.61    153.85 392.46  5/5
+P2    ippo     base     0.0   0.0     0.0        0.0           0.0               0.0      0.0        280.47    118.38 398.85  5/5
+P2    ippo     chk      0.0   0.0     0.0        0.0           0.0               0.0      0.0        280.47    118.38 398.85  5/5
+P2    ippo     tt300    0.4   0.0     0.0        0.0           0.0               0.0      0.0        280.79    118.35 399.14  4/5
+P2    trivial  base     0.0   0.0     0.0        0.0           0.0             230.4    131.0        654.90    281.10 1043.62  5/5
+P2    trivial  chk      0.0   0.0     2.0        0.0           0.0             230.4    131.0        654.90    281.10 1043.62  5/5
+P2    trivial  tt300    0.0   0.0     0.0        0.0           0.0             230.4    131.0        654.90    281.10 1043.62  5/5
+
+Cambio del retraso total con time-to-teleport 300 frente a la evaluacion (base), %:
+  2715  actuado  tt300 +0.00 % (timeLoss +0.00 %)  chk identico a base: True
+  2715  fijo     tt300 +0.00 % (timeLoss +0.00 %)  chk identico a base: True
+  2715  ippo     tt300 +0.00 % (timeLoss +0.00 %)  chk identico a base: True
+  2715  trivial  tt300 +0.00 % (timeLoss +0.00 %)  chk identico a base: True
+  P2    actuado  tt300 +0.00 % (timeLoss +0.00 %)  chk identico a base: True
+  P2    fijo     tt300 +0.00 % (timeLoss +0.00 %)  chk identico a base: True
+  P2    ippo     tt300 +0.07 % (timeLoss -0.03 %)  chk identico a base: True
+  P2    trivial  tt300 +0.00 % (timeLoss +0.00 %)  chk identico a base: True
+
+== 1b. Entrada a velocidad maxima (--default.departspeed max) frente a la evaluacion (semillas 1001-1005)
+-- 2715
+   retraso_insercion_prom 
+                         evaluacion: fijo    3.77 ippo   16.84 actuado   71.82 trivial  291.34 | IPPO-fijo +13.07 [+4.34, +21.80] (+346.9 %)
+                         vmax: fijo    0.30 ippo   17.60 actuado   68.39 trivial  289.34 | IPPO-fijo +17.30 [+11.51, +23.09] (+5766.0 %)
+   timeloss_prom          
+                         evaluacion: fijo   50.59 ippo   57.25 actuado   78.59 trivial  196.19 | IPPO-fijo +6.66 [-6.57, +19.90] (+13.2 %)
+                         vmax: fijo   44.45 ippo   56.50 actuado   75.64 trivial  199.74 | IPPO-fijo +12.05 [+7.92, +16.18] (+27.1 %)
+   retraso_total_prom     
+                         evaluacion: fijo   54.36 ippo   74.09 actuado  150.41 trivial  487.53 | IPPO-fijo +19.73 [-1.59, +41.06] (+36.3 %)
+                         vmax: fijo   44.76 ippo   74.09 actuado  144.03 trivial  489.07 | IPPO-fijo +29.34 [+19.67, +39.01] (+65.6 %)
+-- P2
+   retraso_insercion_prom 
+                         evaluacion: fijo  238.61 ippo  280.47 actuado  317.96 trivial  654.90 | IPPO-fijo +41.85 [+24.14, +59.56] (+17.5 %)
+                         vmax: fijo  233.01 ippo  280.20 actuado  309.18 trivial  662.94 | IPPO-fijo +47.19 [+34.92, +59.46] (+20.3 %)
+   timeloss_prom          
+                         evaluacion: fijo  153.85 ippo  118.38 actuado  120.81 trivial  281.10 | IPPO-fijo -35.47 [-39.41, -31.53] (-23.1 %)
+                         vmax: fijo  151.62 ippo  123.70 actuado  126.20 trivial  284.68 | IPPO-fijo -27.92 [-33.09, -22.76] (-18.4 %)
+   retraso_total_prom     
+                         evaluacion: fijo  392.46 ippo  398.85 actuado  438.77 trivial 1043.62 | IPPO-fijo +6.39 [-14.24, +27.01] (+1.6 %)
+                         vmax: fijo  384.63 ippo  403.90 actuado  435.38 trivial 1051.35 | IPPO-fijo +19.27 [+1.89, +36.64] (+5.0 %)
+
+== 2. Paso de simulacion (sumo directo, semillas 1001-1010)
+-- 1358
+   timeloss_prom        paso 1  : fijo   18.21  actuado   18.06  trivial   18.74   orden: actuado < fijo < trivial
+   timeloss_prom        paso 0.5: fijo   16.07  actuado   15.79  trivial   15.78   orden: trivial < actuado < fijo
+      fijo     cambio 0.5 s vs 1 s: -11.8 %
+      actuado  cambio 0.5 s vs 1 s: -12.6 %
+      trivial  cambio 0.5 s vs 1 s: -15.8 %
+      orden igual: False
+      fijo - actuado  (pareado, IC95 t): paso 1:   +0.15 s [-0.15, +0.46]   paso 0.5:   +0.28 s [+0.03, +0.54]
+      fijo - trivial  (pareado, IC95 t): paso 1:   -0.53 s [-0.90, -0.16]   paso 0.5:   +0.30 s [+0.16, +0.43]
+      actuado - trivial  (pareado, IC95 t): paso 1:   -0.68 s [-1.16, -0.21]   paso 0.5:   +0.01 s [-0.22, +0.24]
+   retraso_total_prom   paso 1  : fijo   18.79  actuado   18.64  trivial   19.32   orden: actuado < fijo < trivial
+   retraso_total_prom   paso 0.5: fijo   16.49  actuado   16.20  trivial   16.18   orden: trivial < actuado < fijo
+      fijo     cambio 0.5 s vs 1 s: -12.3 %
+      actuado  cambio 0.5 s vs 1 s: -13.1 %
+      trivial  cambio 0.5 s vs 1 s: -16.2 %
+      orden igual: False
+      fijo - actuado  (pareado, IC95 t): paso 1:   +0.15 s [-0.15, +0.46]   paso 0.5:   +0.29 s [+0.04, +0.54]
+      fijo - trivial  (pareado, IC95 t): paso 1:   -0.53 s [-0.90, -0.16]   paso 0.5:   +0.30 s [+0.17, +0.44]
+      actuado - trivial  (pareado, IC95 t): paso 1:   -0.68 s [-1.16, -0.21]   paso 0.5:   +0.01 s [-0.22, +0.24]
+   paso 1 igual a la evaluacion con TraCI: 30/30   teletransportes paso 0.5: 0
+-- P1
+   timeloss_prom        paso 1  : fijo   21.15  actuado   20.91  trivial  105.17   orden: actuado < fijo < trivial
+   timeloss_prom        paso 0.5: fijo   17.89  actuado   18.57  trivial   50.32   orden: fijo < actuado < trivial
+      fijo     cambio 0.5 s vs 1 s: -15.4 %
+      actuado  cambio 0.5 s vs 1 s: -11.2 %
+      trivial  cambio 0.5 s vs 1 s: -52.2 %
+      orden igual: False
+      fijo - actuado  (pareado, IC95 t): paso 1:   +0.24 s [-0.15, +0.63]   paso 0.5:   -0.68 s [-0.99, -0.37]
+      fijo - trivial  (pareado, IC95 t): paso 1:  -84.02 s [-87.70, -80.34]   paso 0.5:  -32.44 s [-35.60, -29.27]
+      actuado - trivial  (pareado, IC95 t): paso 1:  -84.26 s [-88.00, -80.52]   paso 0.5:  -31.76 s [-34.87, -28.64]
+   retraso_total_prom   paso 1  : fijo   21.53  actuado   21.29  trivial  108.55   orden: actuado < fijo < trivial
+   retraso_total_prom   paso 0.5: fijo   18.20  actuado   18.88  trivial   50.63   orden: fijo < actuado < trivial
+      fijo     cambio 0.5 s vs 1 s: -15.5 %
+      actuado  cambio 0.5 s vs 1 s: -11.3 %
+      trivial  cambio 0.5 s vs 1 s: -53.4 %
+      orden igual: False
+      fijo - actuado  (pareado, IC95 t): paso 1:   +0.24 s [-0.15, +0.63]   paso 0.5:   -0.68 s [-0.99, -0.37]
+      fijo - trivial  (pareado, IC95 t): paso 1:  -87.02 s [-91.06, -82.98]   paso 0.5:  -32.44 s [-35.60, -29.28]
+      actuado - trivial  (pareado, IC95 t): paso 1:  -87.27 s [-91.33, -83.20]   paso 0.5:  -31.76 s [-34.87, -28.65]
+   paso 1 igual a la evaluacion con TraCI: 30/30   teletransportes paso 0.5: 0
+-- 2715
+   timeloss_prom        paso 1  : fijo   52.40  actuado   80.79  trivial  195.73   orden: fijo < actuado < trivial
+   timeloss_prom        paso 0.5: fijo   37.22  actuado   49.36  trivial  152.81   orden: fijo < actuado < trivial
+      fijo     cambio 0.5 s vs 1 s: -29.0 %
+      actuado  cambio 0.5 s vs 1 s: -38.9 %
+      trivial  cambio 0.5 s vs 1 s: -21.9 %
+      orden igual: True
+      fijo - actuado  (pareado, IC95 t): paso 1:  -28.39 s [-38.21, -18.57]   paso 0.5:  -12.14 s [-14.27, -10.01]
+      fijo - trivial  (pareado, IC95 t): paso 1: -143.33 s [-149.93, -136.72]   paso 0.5: -115.59 s [-116.98, -114.21]
+      actuado - trivial  (pareado, IC95 t): paso 1: -114.93 s [-121.77, -108.10]   paso 0.5: -103.45 s [-105.38, -101.52]
+   retraso_total_prom   paso 1  : fijo   55.38  actuado  156.42  trivial  485.38   orden: fijo < actuado < trivial
+   retraso_total_prom   paso 0.5: fijo   37.67  actuado   53.71  trivial  333.67   orden: fijo < actuado < trivial
+      fijo     cambio 0.5 s vs 1 s: -32.0 %
+      actuado  cambio 0.5 s vs 1 s: -65.7 %
+      trivial  cambio 0.5 s vs 1 s: -31.3 %
+      orden igual: True
+      fijo - actuado  (pareado, IC95 t): paso 1: -101.04 s [-116.39, -85.69]   paso 0.5:  -16.04 s [-19.86, -12.23]
+      fijo - trivial  (pareado, IC95 t): paso 1: -429.99 s [-440.85, -419.14]   paso 0.5: -296.00 s [-299.29, -292.71]
+      actuado - trivial  (pareado, IC95 t): paso 1: -328.95 s [-342.11, -315.80]   paso 0.5: -279.96 s [-284.37, -275.54]
+   paso 1 igual a la evaluacion con TraCI: 30/30   teletransportes paso 0.5: 0
+
+== 3. Determinismo (IPPO 1358, s42)
+  semilla 1001: rep1 total=19.51 rep2 total=19.51 sha 1678c1e02c8d3515 / 1678c1e02c8d3515  identicas: True  igual al CSV de la evaluacion: 1/1
+  semilla 1002: rep1 total=19.53 rep2 total=19.53 sha 8fc6a0e5d809b221 / 8fc6a0e5d809b221  identicas: True  igual al CSV de la evaluacion: 1/1
+  semilla 1003: rep1 total=19.68 rep2 total=19.68 sha 55ad662ca2dcc2bb / 55ad662ca2dcc2bb  identicas: True  igual al CSV de la evaluacion: 1/1
+
+== 4. Capacidad de insercion de W_C1 y flujo de saturacion de la linea de C1 (3 semillas)
+  insercion departSpeed 0 (corredor)       paso 1  :   1202 veh/h
+  insercion departSpeed 0 (corredor)       paso 0.5:   1352 veh/h
+  insercion departSpeed max                paso 1  :   1508 veh/h
+  insercion departSpeed max                paso 0.5:   1750 veh/h
+  descarga de cola en verde (veh 5 a 30)   paso 1  :   1836 veh/h
+  descarga de cola en verde (veh 5 a 30)   paso 0.5:   2010 veh/h
