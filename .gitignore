@@ -28,3 +28,8 @@ plan2/cola/estado.json.tmp
 # Diagramas TikZ (27.09.2026): el PDF que usa la tesis es TESIS/images/diag_*.pdf; aqui solo intermedios
 TESIS/diagramas/*.pdf
 TESIS/diagramas/previa/
+
+# Diagnostico del corredor (25.10.2026): tripinfo de la primera semilla de cada evaluacion (se regeneran con
+# evaluar.py --extras) y salidas del modo prueba de analisis.py
+plan2/diag_corredor/eval/extras_*/tripinfo_*.xml
+plan2/diag_corredor/prueba/
