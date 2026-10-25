@@ -35,7 +35,17 @@ remite también a este anexo desde el resumen de su diseño, al final de
 la Sección~\ref{sec:diseno-robustez}, desde el de las correcciones en el
 Capítulo~\ref{cap:implementacion}, desde lo que el plan no permite
 afirmar, en el Capítulo~\ref{cap:resultados}, y desde las conclusiones
-y las recomendaciones.
+y las recomendaciones. Al final, en ``Diagnóstico de la curva del
+corredor'', está el detalle de otro análisis posterior al veredicto,
+resumido en la Sección~\ref{sec:diag-corredor}, con su propio
+pre-registro. Ese análisis usa las semillas de evaluación del plan,
+1001 a 1030, y confirma con 6001 a 6030. Lo que sigue, hasta la
+subsección ``Límites'' inclusive, se refiere solo al diagnóstico del
+entrenamiento.
+% Diagnostico del corredor (25.10.2026): se agregan las frases anteriores, porque el parrafo siguiente dice que
+% las semillas 1001 a 1030 no se simularon, y el diagnostico del corredor si las usa (PRERREGISTRO.md: evaluacion
+% 1001-1030 y confirmacion 6001-6030). Verificacion 25.10.2026: decia "sus propias semillas" y "hasta Limites",
+% ambiguo porque el diagnostico del corredor tiene tambien un parrafo "Limites"
 
 Este anexo es posterior al veredicto pre-registrado y
 no lo modifica. Se hizo después de cerrar P6, y usa semillas de
@@ -452,3 +462,313 @@ completo, en los seis casos, queda como trabajo siguiente.
 % fuente: conf_p6/salidas/juicio_conf_p6.txt (retraso total V2 4042 -3.1 % [-4.7, -1.7]; retraso de insercion
 % 45.49-45.65 s/veh salvo el trivial 95.51; 0 no insertados); sintesis/extra_robustez.txt (P4: insercion 0.336 s/veh,
 % V5 retraso total -6.6 % [-8.5, -4.6]); tanda2/juicio_tanda2.txt (convergencia); HECHOS.md seccion 8
+
+\subsection*{Diagnóstico de la curva del corredor}
+% Diagnostico del corredor (25.10.2026, rama diagnostico-corredor, commit 43596e4): detalle de la Seccion
+% sec:diag-corredor. Fuentes en plan2/diag_corredor/: PRERREGISTRO.md y prerregistro.sha256, descomposicion.txt,
+% comportamiento.md, sumo.md (datos en sumo/*.csv), compuerta/compuerta.txt y compuerta/prueba_ins_<esc>.txt. Los
+% resultados de V2, INS y V2+INS y las pruebas de H1-H4 llegan con la cola diag_ (plan2/cola/trabajos.jsonl, salida en
+% plan2/diag_corredor/eval/) y van marcados [PENDIENTE]. Sin etiqueta despues del titulo con asterisco (regla de este
+% anexo); las tablas numeran G.n
+
+Este apartado da el detalle del diagnóstico resumido en la
+Sección~\ref{sec:diag-corredor}. Como el resto del anexo, es un
+análisis posterior al veredicto, fuera del veredicto pre-registrado, y
+no cambia ningún veredicto del plan ni de los niveles de demanda. La
+pregunta es por qué, en el corredor, el cambio de IPPO con mensajes
+frente al fijo ajustado no sigue una tendencia con la demanda ($-5.6$,
+$+5.4$, $-6.8$, $+6.6$ y $-23.3$\,\% con 905, 1358, 1810, 2715 y
+3620~veh/h), si eso es un problema del modelo, de la comparación o de
+SUMO, y si se corrige. A diferencia del diagnóstico del entrenamiento,
+este sí usa las semillas de evaluación 1001 a 1030, para que sus cifras
+se puedan comparar con la curva de la Tabla~\ref{tab:efecto-demanda}, y
+confirma con las semillas 6001 a 6030, que su diseño no había usado.
+% fuente: plan2/diag_corredor/PRERREGISTRO.md (pregunta; estatus; diseno: evaluacion 1001-1030 y confirmacion
+% 6001-6030, "nunca usadas en este diseno"); cambios por nivel: plan2/demanda2/resumen_demanda2.csv (cambio_fijo)
+
+\noindent\textbf{Pre-registro.} El diseño se escribió el 25.10.2026, a
+las 13:05, antes de implementar las correcciones y de entrenar, y su
+huella sha256 está guardada aparte. Parte de lo que ya mostraban los
+datos, sin simular nada nuevo. En 905~veh/h, frente al fijo ajustado
+desde 10~s, que ahí es el ciclo mínimo, IPPO con mensajes queda en
+$+0.1$\,\%. En 1358~veh/h el fijo ya es un ciclo corto (12/10~s), e
+IPPO con mensajes cambia de fase 373 veces por hora frente a 527 del
+fijo. En 2715~veh/h y P2, su espera para entrar a la red es de 18.4
+frente a 3.1~s/veh y de 282 frente a 240~s/veh. Con eso plantea cuatro
+hipótesis (Tabla~\ref{tab:diag-hipotesis}).
+% fuente: plan2/diag_corredor/PRERREGISTRO.md (encabezado y "Lo que ya muestran los datos existentes", de
+% diag_corredor.py, 25.10 12:50); prerregistro.sha256 (2af77443...6852)
+
+\begin{table}[H]
+\setstretch{1}
+\centering
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{>{\raggedright\arraybackslash}p{2.0cm}>{\raggedright\arraybackslash}p{4.0cm}>{\raggedright\arraybackslash}p{1.8cm}>{\raggedright\arraybackslash}p{5.9cm}}
+\toprule
+Hipótesis & Qué propone & Corrección & Predicción \\
+\midrule
+H1 (referencia) & La mejora de 905~veh/h viene de la referencia & Ninguna & Ya mostrada; solo se reporta. La referencia principal pasa a ser el fijo ajustado desde 10~s, y la métrica principal, el retraso total \\
+H2 (recompensa) & La recompensa solo mide el retraso dentro de la red y no ve a los vehículos que esperan para entrar; cerca de la saturación la política deja que la entrada se llene & INS & En 2715~veh/h y P2, menos espera para entrar y menos retraso total que la versión evaluada actual (IC95 del cambio entero bajo cero) \\
+H3 (objetivo de entrenamiento) & El descuento por decisión y la exploración independiente favorecen verdes largos & V2 & En 1358~veh/h, más cambios de fase por hora (IC95 entero sobre cero) y menos \texttt{timeLoss} (IC95 entero bajo cero) que la versión evaluada actual \\
+H4 (sin regresión) & Las dos correcciones juntas no dañan el caso que ya funciona & V2+INS & En P1, sigue reduciendo el retraso total frente al fijo ajustado desde 10~s (IC95 entero bajo cero) \\
+\bottomrule
+\end{tabular}
+\caption[Diagnóstico del corredor: hipótesis]{Diagnóstico del corredor, posterior al veredicto: hipótesis del pre-registro, corrección que prueba cada una y predicción. La versión evaluada actual es la de IPPO con mensajes en la Tabla~\ref{tab:efecto-demanda}.}
+\label{tab:diag-hipotesis}
+\end{table}
+% fuente: plan2/diag_corredor/PRERREGISTRO.md ("Hipotesis y predicciones"; H4 no tiene enunciado propio en el
+% pre-registro: "Que propone" resume su nombre, sin regresion)
+
+El criterio de causa raíz corregida se fijó sobre V2+INS, con el
+retraso total frente al fijo ajustado desde 10~s: ningún nivel del
+corredor debe quedar peor que el fijo con IC95 entero sobre cero y $p$
+de Wilcoxon menor que 0.05, y P1 debe seguir mejorando. Si no se
+cumple, se informa lo que sí se corrigió y lo que queda abierto. El
+protocolo es el del plan: tres entrenamientos por variante y nivel, con
+las semillas 42, 2042 y 4042 y 200 episodios, validación cada 10
+episodios con las semillas 999 y 1999, y versión evaluada igual al
+entrenamiento mediano por la validación. Son 45 entrenamientos, tres
+variantes en cinco niveles. La observación, la red neuronal, los
+hiperparámetros, la red, la demanda y el resto del protocolo no
+cambian. Se evalúan las tres variantes, la versión evaluada actual, el
+fijo ajustado de la Tabla~\ref{tab:efecto-demanda}, el fijo ajustado
+desde 10~s, el ciclo mínimo y el actuado.
+% fuente: plan2/diag_corredor/PRERREGISTRO.md ("Criterio de causa raiz corregida" y "Diseno"); plan2/cola/
+% trabajos.jsonl (45 trabajos diag_train y 123 diag_eval)
+
+La Enmienda~1 se escribió a las 13:35 del mismo día, antes de lanzar
+los entrenamientos. El protocolo del plan elige la versión guardada y
+el entrenamiento mediano por el \texttt{timeLoss} medio en las semillas
+999 y 1999, justo el criterio que no ve a los vehículos que esperan
+para entrar: con él, la selección de INS favorecería a la versión que
+menos atiende las entradas. Por eso V2, INS y V2+INS eligen las dos
+cosas por el retraso total medio en esas semillas, las tres con el
+mismo criterio, para que entre ellas solo cambie el entrenamiento. La
+validación registra las dos métricas y el episodio que habría elegido
+cada criterio. La versión evaluada actual se eligió por
+\texttt{timeLoss} y no se vuelve a elegir, así que en las comparaciones
+con ella el cambio incluye también el del criterio. En 905, 1358 y
+1810~veh/h la espera para entrar es de 0.4 a 0.6~s/veh y casi igual en
+todos los controles, y ahí ese efecto es pequeño; en 2715~veh/h y P2 se
+informa, por variante y entrenamiento, si los dos criterios eligen el
+mismo episodio.
+% fuente: plan2/diag_corredor/PRERREGISTRO.md ("Enmienda 1"); compuerta/compuerta.txt, repeticion (e) (meta con
+% ep_elegido_timeloss y ep_elegido_total; politica publicada identica al checkpoint elegido)
+
+\noindent\textbf{Las dos correcciones.} V2 es la variante de ``Las dos
+correcciones'', más arriba: descuento por segundo
+(Ecuación~\ref{eq:gae-smdp}) y exploración común. Aquí se implementó
+como una opción del código de entrenamiento del plan, apagada por
+defecto. Antes de lanzar se comprobaron dos cosas. Con las opciones
+apagadas, el código da los mismos números que el plan: los primeros 10
+episodios del corredor con la semilla 42 y el primer episodio del
+entrenamiento de cada versión evaluada no difieren en ninguna columna.
+Con V2 encendida, nueve episodios del corredor dan lo mismo que el
+código de V2 de este anexo, en las 50 columnas comparadas.
+% fuente: plan2/diag_corredor/compuerta/compuerta.txt ((a) y repeticion: 10 filas, 48 columnas, 0 diferencias; (a')
+% primer episodio de dem_corredor_t905 s4042, t1358 s42, corredor s4042, t2715 s2042 y corredor_alta s2042, 43
+% columnas, 0 diferencias; (b) --v2 frente a rl_ippo_smdp_crn.py, 9 filas, 50 columnas, 0 diferencias); opcion --v2
+% de rl_ippo.py (docstring, "Correcciones del diagnostico del corredor")
+
+INS cambia solo la recompensa. A la recompensa de cada agente de la
+Ecuación~\ref{eq:recompensa-u4} le resta, cada segundo, los vehículos
+que esperan para entrar a la red por las aristas de entrada de sus
+accesos, con el peso $w_1$ de un vehículo detenido:
+\begin{equation}
+  r_i^{\mathrm{INS}} = r_i - \frac{1}{5}\sum_{t \in \mathcal{T}_i} w_1\, p_i(t),
+  \label{eq:recompensa-ins}
+\end{equation}
+donde $p_i(t)$ es el número de vehículos que en el segundo $t$ esperan
+para entrar por un acceso del agente $i$. Cada vehículo se asigna al
+semáforo cuyo acceso alimenta el flujo del que sale; en los cinco
+niveles los 20 flujos salen de un acceso de un semáforo, así que
+ninguno queda sin asignar. Como la recompensa solo se usa al entrenar,
+INS no actúa en la evaluación. Una prueba, corrida con la semilla 1001
+en los cinco niveles, comprueba que la suma de $p_i(t)$ es, salvo menos
+de 1~s por vehículo, la espera para entrar que mide SUMO
+(Tabla~\ref{tab:diag-ins}): vehículo por vehículo, los segundos
+pendientes quedan entre \texttt{departDelay}~$-\,1$ y
+\texttt{departDelay}. La diferencia viene de que SUMO inserta en pasos
+enteros: el vehículo que quiere salir a los 14.4~s y entra a los 15~s
+tiene 0.6~s de \texttt{departDelay} sin haber quedado pendiente al
+cerrar ningún paso. En 905, 1358 y 1810~veh/h esa diferencia es una
+parte grande de una espera que es de 0.4 a 0.6~s/veh: INS ve el 85, el
+44 y el 85\,\% de la espera para entrar. En 2715~veh/h y P2, donde se
+pone a prueba, ve el 98 y el 100\,\%. La prueba comprueba además que
+todos los pendientes quedan asignados y que contar los pendientes no
+cambia la simulación.
+% Verificacion 25.10.2026: decia que la suma "coincide"; en 1358 es 349 frente a 791.40 (44 %). Porcentajes:
+% 286/335.20, 349/791.40, 579/679.00, 29702/30237.44 y 989390/989590.00 (compuerta/prueba_ins_<esc>.txt)
+% fuente: rl_ippo.py (docstring de --recompensa-insercion; pendientes_por_agente; r_paso -= W1 * pend.get(tls, 0);
+% r = r_acum / PASO_CONTROL, PASO_CONTROL = 5); plan2/diag_corredor/prueba_ins.py (docstring: tres comprobaciones y
+% por que hay redondeo); compuerta/prueba_ins_<esc>.txt ("20 flujos, sin semaforo: []"; 3 de 3 OK en los cinco)
+
+% fuente: plan2/diag_corredor/compuerta/prueba_ins_dem_corredor_t905.txt, prueba_ins_dem_corredor_t1358.txt,
+% prueba_ins_corredor.txt, prueba_ins_dem_corredor_t2715.txt y prueba_ins_corredor_alta.txt (ins_total, departDelay
+% del tripinfo, viajes, diferencia por vehiculo; 0 no insertados en los cinco; semilla 1001 por defecto de prueba_ins.py)
+\begin{table}[H]
+\setstretch{1}
+\centering
+\footnotesize
+\begin{tabular}{lrrrrc}
+\toprule
+\makecell[l]{Nivel\\(veh/h)} & Viajes & \makecell{Suma de\\pendientes (veh$\cdot$s)} & \makecell{Suma de\\\texttt{departDelay} (s)} & \makecell{Diferencia\\(s/veh)} & \makecell{Las tres\\comprobaciones} \\
+\midrule
+905 & 906 & 286 & 335.20 & $-0.054$ & sí \\
+1358 & 1366 & 349 & 791.40 & $-0.324$ & sí \\
+1810 (P1) & 1810 & 579 & 679.00 & $-0.055$ & sí \\
+2715 & 2724 & 29\,702 & 30\,237.44 & $-0.197$ & sí \\
+3620 (P2) & 3620 & 989\,390 & 989\,590.00 & $-0.055$ & sí \\
+\bottomrule
+\end{tabular}
+\caption[Diagnóstico del corredor: prueba de INS]{Diagnóstico del corredor, posterior al veredicto: prueba de la corrección INS con la política congelada de IPPO con mensajes y la semilla 1001. Suma de pendientes: vehículos que esperan para entrar, sumados segundo a segundo. Suma de \texttt{departDelay}: la espera para entrar del registro de viajes; en ningún nivel quedan vehículos sin insertar. Las tres comprobaciones: la suma coincide salvo menos de 1~s por vehículo y cada vehículo queda en rango, todos los pendientes quedan asignados a un semáforo y el conteo no cambia la simulación.}
+\label{tab:diag-ins}
+\end{table}
+
+\noindent\textbf{Comprobaciones de SUMO.} Se corrieron sobre una copia
+de solo lectura del código previo a las correcciones, con SUMO 1.25.0.
+Todos los controles usan el mismo archivo de configuración de cada
+escenario, con paso de 1~s y los teletransportes por bloqueo
+desactivados, y los mismos valores por defecto de SUMO para choques e
+inserción: las rutas no fijan la velocidad, el carril ni la posición
+de salida, así que los vehículos entran detenidos al inicio de la
+primera arista.
+% fuente: plan2/diag_corredor/sumo.md (encabezado: copia del commit 5196edb, SUMO 1.25.0; seccion 1: step-length 1,
+% time-to-teleport -1, departSpeed 0, departLane first, departPos base)
+
+En 2715~veh/h y P2, con las semillas 1001 a 1005 y los cuatro
+controles, no hay teletransportes ni vehículos perdidos. Al activar la
+detección de choques dentro de los cruces aparecen de 0 a 5 por
+corrida, solo en las referencias, y los registros de viaje quedan
+idénticos en las 40 corridas. Con el tiempo de teletransporte por
+defecto de SUMO, 300~s, solo una corrida de IPPO con mensajes en P2
+tiene dos teletransportes, de vehículos que esperan más de 300~s un
+hueco en la calle con prioridad, y su retraso total cambia un
+0.07\,\%. Los únicos vehículos sin terminar son los del ciclo mínimo en
+P2, que ya estaban registrados. Dos repeticiones de IPPO con mensajes
+en 1358~veh/h, con las semillas 1001 a 1003, dan los mismos registros
+vehículo a vehículo, iguales a los de la evaluación. En la
+documentación y el código de SUMO, el \texttt{timeLoss} se cuenta desde
+que el vehículo entra a la red y \texttt{departDelay} es la espera para
+entrar. La misma documentación recomienda, para comparar simulaciones,
+sumar a cada viaje su espera para entrar e incluir a los que no
+entraron, que es la construcción del retraso total con
+\texttt{timeLoss} en vez de la duración del viaje. Recalculado con las
+estadísticas de SUMO da lo mismo: 388.62~s/veh en P2 y 45.07 con
+2715~veh/h, en la semilla 1001.
+% fuente: plan2/diag_corredor/sumo.md, seccion 2 (base, chk y tt300; 40 de 40 reproducen el CSV de la evaluacion;
+% tripinfo identicos con check-junctions; teletransportes yield de IPPO P2 semilla 1005, retraso total +0.07 %,
+% timeLoss -0.03 %; ciclo minimo P2: 131 en la red y 230 fuera al tope de 6000 s), seccion 4 (determinismo) y
+% seccion 5 (definiciones: MSVehicle::updateTimeLoss, MSBaseVehicle::getDepartDelay, StatisticOutput "Fair
+% Traveltime comparison"; 388.62 y 45.07 s/veh); datos en sumo/teletransportes.csv, determinismo.csv y definiciones.csv
+
+La inserción sí pone un límite propio del modelo. Con paso de 1~s y
+entrada detenida, una arista de entrada de un carril admite como
+máximo 1202~veh/h, mientras la línea de detención descarga
+1836~veh/h. En P2 las dos entradas de la avenida piden 1320~veh/h
+durante media hora, lo que deja una espera para entrar mínima de unos
+34~s/veh con cualquier control; con 2715~veh/h piden 990~veh/h y no hay
+piso, pero una cola que llega a la entrada se vacía a solo 212~veh/h.
+Para separar lo que se debe a la inserción, los cuatro controles se
+corrieron otra vez con los vehículos entrando a la velocidad máxima
+segura y el mismo paso, lo que también permite probar IPPO con mensajes
+(Tabla~\ref{tab:diag-salida}). Así el fijo casi no deja vehículos
+esperando con 2715~veh/h (0.30~s/veh) e IPPO con mensajes sí
+(17.60~s/veh), y su desventaja en retraso total crece en los dos
+niveles.
+% fuente: plan2/diag_corredor/sumo.md ("Respuesta corta" punto 1: 1202 y 1836 veh/h, 1320 veh/h en P2, piso de unos
+% 34 s/veh, 990 veh/h y 1202 - 990 = 212 veh/h en 2715; seccion 2, "Entrada a velocidad maxima"); datos en
+% sumo/insercion.csv y sumo/salida_vmax.csv
+
+% fuente: plan2/diag_corredor/sumo.md, seccion 2, tabla "Entrada a velocidad maxima" (--default.departspeed max,
+% paso 1 s, semillas 1001-1005; IPPO - fijo en s/veh con IC95 t de 4 gl); datos en sumo/salida_vmax.csv
+\begin{table}[H]
+\setstretch{1}
+\centering
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{llrrrr}
+\toprule
+& & \multicolumn{2}{c}{Como en la evaluación} & \multicolumn{2}{c}{Entrada a velocidad máxima} \\
+\cmidrule(lr){3-4}\cmidrule(lr){5-6}
+Nivel & Métrica & Fijo / IPPO & IPPO $-$ fijo & Fijo / IPPO & IPPO $-$ fijo \\
+\midrule
+2715 & \makecell[l]{Espera para\\entrar} & 3.77 / 16.84 & \makecell[r]{$+13.07$\\{[}$+4.34$, $+21.80${]}} & 0.30 / 17.60 & \makecell[r]{$+17.30$\\{[}$+11.51$, $+23.09${]}} \\
+2715 & Retraso total & 54.36 / 74.09 & \makecell[r]{$+19.73$\\{[}$-1.59$, $+41.06${]}} & 44.76 / 74.09 & \makecell[r]{$+29.34$\\{[}$+19.67$, $+39.01${]}} \\
+P2 & \makecell[l]{Espera para\\entrar} & 238.61 / 280.47 & \makecell[r]{$+41.85$\\{[}$+24.14$, $+59.56${]}} & 233.01 / 280.20 & \makecell[r]{$+47.19$\\{[}$+34.92$, $+59.46${]}} \\
+P2 & \texttt{timeLoss} & 153.85 / 118.38 & \makecell[r]{$-35.47$\\{[}$-39.41$, $-31.53${]}} & 151.62 / 123.70 & \makecell[r]{$-27.92$\\{[}$-33.09$, $-22.76${]}} \\
+P2 & Retraso total & 392.46 / 398.85 & \makecell[r]{$+6.39$\\{[}$-14.24$, $+27.01${]}} & 384.63 / 403.90 & \makecell[r]{$+19.27$\\{[}$+1.89$, $+36.64${]}} \\
+\bottomrule
+\end{tabular}
+\caption[Diagnóstico del corredor: inserción a velocidad máxima]{Diagnóstico del corredor, posterior al veredicto: efecto de la inserción. Medias en s/veh del fijo ajustado y de la versión evaluada de IPPO con mensajes, y su diferencia pareada con el IC95 por $t$ entre corchetes, sobre las semillas 1001 a 1005. Como en la evaluación: los vehículos entran detenidos. Entrada a velocidad máxima: entran a la velocidad máxima segura, con el mismo paso de 1~s.}
+\label{tab:diag-salida}
+\end{table}
+
+En SUMO el paso de simulación es también el tiempo de reacción del
+conductor. Con 0.5~s, la inserción en una entrada libre sube de 1202 a
+1352~veh/h y la descarga de una cola en verde, de 1836 a 2010~veh/h.
+Con ese paso se corrieron el fijo, el actuado y el ciclo mínimo en
+1358~veh/h, P1 y 2715~veh/h, con las semillas 1001 a 1010; con 1~s
+esas corridas reproducen la evaluación en las 90. Los retrasos bajan
+entre un 11 y un 66\,\%, y el orden entre los controles se invierte en
+1358~veh/h y en P1 (Tabla~\ref{tab:diag-paso}). IPPO con mensajes no se
+puede correr con 0.5~s: su código cuenta cada paso como un segundo,
+así que decidiría cada 2.5~s, con verdes de 5 a 30~s, y sería otro
+controlador, entrenado para otro reloj. Queda entonces como límite, y
+no como resultado: en demanda baja, las diferencias de $\pm 5$\,\% de
+IPPO con mensajes son del mismo tamaño que las que este supuesto
+invierte entre las referencias, así que su signo no debe
+generalizarse. El supuesto es el mismo para todos los controles y para
+todo lo entrenado y barrido en la tesis.
+% Verificacion 25.10.2026: antes decia que esas diferencias "dependen" del paso; IPPO no se corrio con 0.5 s y 905
+% no entro en la prueba, asi que es una inferencia
+% fuente: plan2/diag_corredor/sumo.md, seccion 3 (tabla de paso: cambios de -11.2 a -65.7 %; 90 de 90 reproducen la
+% evaluacion con 1 s; mecanismo, modo insercion: 1202/1352 y 1836/2010 veh/h; IPPO no se prueba con 0.5 s,
+% rl_ippo.py:538-642 y rl_corredor.py:114-117) y "Que significa para el diagnostico"; datos en sumo/paso.csv e
+% insercion.csv
+
+% fuente: plan2/diag_corredor/sumo.md, seccion 3 ("Se mantiene el orden?": diferencias pareadas de retraso total en
+% s/veh con IC95 t de 9 gl, semillas 1001-1010); datos en sumo/paso.csv. Actuado - ciclo minimo en 1358:
+% sumo/resumen.txt, retraso_total_prom (-0.68 [-1.16, -0.21] con 1 s, +0.01 [-0.22, +0.24] con 0.5 s). Verificacion
+% 25.10.2026: la fila decia fijo - actuado con "No", pero ese par mantiene el signo (+0.15 y +0.29); la inversion de
+% 1358 esta en fijo - ciclo minimo y en actuado - ciclo minimo
+\begin{table}[H]
+\setstretch{1}
+\centering
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{llrrl}
+\toprule
+Nivel & Diferencia & Paso de 1~s & Paso de 0.5~s & ¿Mismo orden? \\
+\midrule
+1358 & Fijo $-$ ciclo mínimo & $-0.53$ [$-0.90$, $-0.16$] & $+0.30$ [$+0.17$, $+0.44$] & No \\
+1358 & Actuado $-$ ciclo mínimo & $-0.68$ [$-1.16$, $-0.21$] & $+0.01$ [$-0.22$, $+0.24$] & No \\
+P1 & Fijo $-$ actuado & $+0.24$ [$-0.15$, $+0.63$] & $-0.68$ [$-0.99$, $-0.37$] & No \\
+2715 & Fijo $-$ actuado & $-101.0$ [$-116.4$, $-85.7$] & $-16.0$ [$-19.9$, $-12.2$] & Sí \\
+\bottomrule
+\end{tabular}
+\caption[Diagnóstico del corredor: paso de simulación]{Diagnóstico del corredor, posterior al veredicto: sensibilidad al paso de simulación. Diferencia pareada del retraso total (s/veh) entre dos referencias, con el IC95 por $t$ entre corchetes, sobre las semillas 1001 a 1010. Con 1~s, en 1358~veh/h el orden es actuado, fijo y ciclo mínimo; con 0.5~s, ciclo mínimo y actuado casi empatados y el fijo detrás. En P1 el ciclo mínimo queda último con los dos pasos.}
+\label{tab:diag-paso}
+\end{table}
+
+\noindent\textbf{Resultados de las correcciones.}
+\textbf{[PENDIENTE: resultado de V2, INS y V2+INS en los cinco niveles, en 1001 a 1030 y 6001 a 6030, frente al fijo ajustado desde 10~s y a la versión evaluada actual, en retraso total y en \texttt{timeLoss}, con su tabla y su figura]}
+
+\noindent\textbf{Pruebas de las hipótesis.}
+\textbf{[PENDIENTE: H2 en 2715~veh/h y P2, H3 en 1358~veh/h y H4 en P1, con el IC95 por \textit{bootstrap} pareado y la prueba de Wilcoxon; criterio de causa raíz corregida; por variante y entrenamiento, si los dos criterios de validación eligen el mismo episodio en 2715~veh/h y P2]}
+
+\noindent\textbf{Límites.} El análisis es post hoc: se decidió después
+de ver la curva de la Tabla~\ref{tab:efecto-demanda}. Lo que hace cada
+control se midió con cinco semillas y con una sola versión evaluada por
+nivel. La relación entre los detenidos y las decisiones de IPPO con
+mensajes describe lo que hace la política, no la regla que sigue,
+porque la política observa más cosas que los detenidos. Que no haya
+teletransportes en la evaluación es un dato de la configuración, que
+los desactiva, y no prueba que no haya atascos; por eso se repitió con
+el tiempo de teletransporte por defecto. La demanda es determinista,
+así que las semillas solo cambian el comportamiento de los conductores,
+y todo vale para el conductor de SUMO con un tiempo de reacción de 1~s.
+% fuente: plan2/diag_corredor/comportamiento.md ("Datos y metodo": semillas 1001-1005 y una version evaluada por
+% nivel; "Comprobaciones": 0 teletransportes por time-to-teleport -1; "Archivos": la huella de decision no es la
+% regla); sumo.md (seccion 2, tt300; "Que significa para el diagnostico"); demanda determinista: Limites de este anexo

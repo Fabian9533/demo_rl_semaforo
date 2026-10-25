@@ -936,6 +936,236 @@ figura:
 % cerraba esta seccion, paso despues de "Lo que muestran los pares del plan", para que la seccion termine con los
 % niveles nuevos, que responden su pregunta
 
+\subsection{Por qué el corredor no sigue una tendencia}
+\label{sec:diag-corredor}
+% Diagnostico del corredor (25.10.2026, rama diagnostico-corredor, commit 43596e4): responde la pregunta del profesor
+% sobre la curva del corredor (es un fallo del modelo o de SUMO?). Todo sale de plan2/diag_corredor/: PRERREGISTRO.md
+% (hipotesis H1-H4 y Enmienda 1), descomposicion.txt (cuatro referencias y dos metricas por nivel), comportamiento.md
+% (que hace cada control, semillas 1001-1005) y sumo.md (comprobaciones del simulador). Los resultados de las
+% correcciones V2, INS y V2+INS llegan con la cola diag_ (plan2/cola/trabajos.jsonl: 45 entrenamientos y 123
+% evaluaciones, salida en plan2/diag_corredor/eval/); hasta entonces van marcados [PENDIENTE]. Las etiquetas
+% tab:diag-corredor y fig:diag-corredor quedan reservadas para esos resultados y no se citan todavia
+
+En el corredor, el resultado frente al fijo ajustado alterna entre
+FUNCIONA y FALLA a medida que crece la demanda
+(Tabla~\ref{tab:efecto-demanda}). ¿Es un fallo del modelo o de SUMO?
+Para responderlo se hizo un diagnóstico posterior al veredicto, fuera
+del veredicto pre-registrado, como el del Anexo~G. Tiene su propio
+pre-registro, escrito antes de corregir y de entrenar nada, y no cambia
+ningún veredicto de la Tabla~\ref{tab:efecto-demanda}. Cambia la
+lectura en dos puntos. La referencia es el fijo ajustado desde 10~s de
+cada nivel, el del barrido de demanda del Anexo~F; en 1358~veh/h, P1,
+2715~veh/h y P2 es el mismo programa que el fijo ajustado de la tabla.
+Y además del \texttt{timeLoss} se mira el retraso total
+(Ecuación~\ref{eq:retraso-total}), que suma la espera para entrar a la
+red. El detalle está al final del Anexo~G.
+% fuente: plan2/diag_corredor/PRERREGISTRO.md (25.10.2026 13:05; H1: referencia principal el fijo ajustado desde
+% 10 s y metrica principal el retraso total); plan2/diag_corredor/descomposicion.txt (fijo y fijo10 con las mismas
+% cifras en 1358, P1, 2715 y P2); fijo de cada nivel desde 10 s: anexo_f_robustez.tex, "Barrido de demanda en el
+% corredor, sin reentrenar" (plan2/barrido_corredor_f050.csv, f075 y f150)
+
+\noindent\textbf{Descomposición por nivel.} La
+Tabla~\ref{tab:diag-descomposicion} pone, nivel por nivel, lo que dice
+la tesis junto a lo que muestra el diagnóstico. En 905~veh/h la mejora
+viene de la referencia. El fijo ajustado de ese nivel (20~s de avenida
+y 10 de transversal, con un ciclo de 36~s) sale de una rejilla que
+empezaba en 12~s, y el fijo ajustado desde 10~s es ahí el ciclo
+mínimo, con 10~s por fase. Frente a él, IPPO con mensajes queda en
+$+0.1$\,\% (IC95 de $-0.8$ a $+1.0$\,\%). En 2715~veh/h y en P2 la
+métrica cambia el tamaño de la diferencia. La espera para entrar a la
+red de IPPO con mensajes es de 18.4~s/veh frente a 3.1 del fijo con
+2715~veh/h, y de 282.0 frente a 239.6 en P2. Con el retraso total, el
+cambio pasa a $+32.9$ y $+1.6$\,\%: en 2715~veh/h la desventaja, que ya
+existía con el \texttt{timeLoss}, se agranda, y en P2 la mejora grande
+desaparece. En 1358~veh/h y en P1 ni la referencia ni la
+métrica mueven el resultado: la diferencia entre FALLA y FUNCIONA está
+en lo que hace la política frente a cada fijo.
+% fuente: plan2/diag_corredor/descomposicion.txt (905: IPPO vs fijo desde 10 s +0.1 % en las dos metricas; espera
+% para entrar 18.39 y 3.05 en 2715 y 282.02 y 239.57 en P2; retraso total +32.9 y +1.6 %); IC de 905:
+% plan2/demanda2/resumen_demanda2.csv (cambio frente al trivial +0.1 [-0.8, 1.0], p 0.902; en 905 el fijo desde
+% 10 s da las mismas cifras que el trivial en descomposicion.txt); programa del fijo de 905: resumen_demanda2.csv
+% (20/10 s, ciclo 36 s, desfases 0/15 s; malla sin extender) y PRERREGISTRO.md (malla desde 12 s)
+
+% fuente: plan2/diag_corredor/descomposicion.txt (timeLoss y retraso total de IPPO frente a "fijo desde 10 s";
+% espera_entrar de ippo y fijo10; columna de la tesis: plan2/demanda2/resumen_demanda2.csv, cambio_fijo y veredicto).
+% "FALLA con las dos" en 2715: timeLoss en la tesis; retraso total, +32.9 [+22.5, +44.2] con la regla del plan
+% (plan2/diag_corredor/analisis.py, resultados.csv, control actual frente a fijo10)
+\begin{table}[!tbp]
+\setstretch{1}
+\centering
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{lrrrr>{\raggedright\arraybackslash}p{3.9cm}}
+\toprule
+& \makecell{Tesis: frente al\\fijo ajustado} & \multicolumn{2}{c}{\makecell{Frente al fijo\\desde 10~s (\%)}} & \makecell{Espera para\\entrar (s/veh)} & \\
+\cmidrule(lr){2-2}\cmidrule(lr){3-4}\cmidrule(lr){5-5}
+\makecell[l]{Nivel\\(veh/h)} & \makecell{\texttt{timeLoss} (\%)\\y veredicto} & \texttt{timeLoss} & \makecell{Retraso\\total} & \makecell{IPPO /\\fijo} & Qué cambia la lectura \\
+\midrule
+905 & $-5.6$, FUNCIONA & $+0.1$ & $+0.1$ & 0.4 / 0.4 & La referencia: el fijo desde 10~s es el ciclo mínimo \\
+1358 & $+5.4$, FALLA & $+5.4$ & $+5.2$ & 0.6 / 0.6 & Nada: es el mismo fijo (12/10~s) \\
+1810 (P1) & $-6.8$, FUNCIONA & $-6.8$ & $-6.7$ & 0.4 / 0.4 & Nada: es el mismo fijo (20/10~s) \\
+2715 & $+6.6$, FALLA & $+6.6$ & $+32.9$ & 18.4 / 3.1 & La métrica agranda la desventaja (FALLA con las dos) \\
+3620 (P2) & $-23.3$, FUNCIONA & $-23.3$ & $+1.6$ & 282.0 / 239.6 & La métrica: con la espera para entrar, la mejora desaparece \\
+\bottomrule
+\end{tabular}
+\caption[Diagnóstico del corredor: referencia y métrica]{Diagnóstico del corredor, posterior al veredicto: cambio de IPPO con mensajes según la referencia y la métrica, sobre las semillas de evaluación 1001 a 1030. Tesis: el cambio y el veredicto de la Tabla~\ref{tab:efecto-demanda}. Fijo desde 10~s: el fijo ajustado desde 10~s de cada nivel. Retraso total: \texttt{timeLoss} más espera para entrar a la red. Espera para entrar: media por vehículo de IPPO con mensajes y del fijo ajustado desde 10~s. Un valor negativo es una mejora.}
+\label{tab:diag-descomposicion}
+\end{table}
+
+\noindent\textbf{Qué hace la política en cada nivel.} Para verlo se
+registró, segundo a segundo, la fase de cada semáforo y los vehículos
+detenidos en cada acceso, con las semillas 1001 a 1005. Las 115 corridas
+dan exactamente las cifras de la evaluación con la misma semilla. Lo
+que muestran:
+\begin{itemize}
+  \item \textbf{Hasta 1810~veh/h, un plan casi fijo.} En 905, 1358 y
+    1810~veh/h IPPO con mensajes aplica casi el mismo plan, aunque cada
+    nivel tiene su propio entrenamiento. La transversal recibe siempre
+    el mínimo de 10~s, la avenida 20 o 25~s (el 78, el 95 y el 86\,\% de
+    sus verdes) y el ciclo es de 41~s. El fijo ajustado, en cambio,
+    pasa de un ciclo de 26~s (905, el fijo desde 10~s) a 28~s (1358) y
+    a 36~s (P1). El reloj de decisión de IPPO, con un verde mínimo de
+    10~s y una decisión cada 5~s, solo permite verdes de 10, 15,
+    20\ldots~s: el 12/10 del fijo de 1358~veh/h no está a su alcance,
+    aunque el 10/10 del ciclo mínimo sí lo está.
+  \item \textbf{1358~veh/h.} Frente al 12/10 del fijo, IPPO con
+    mensajes gana en la avenida, con desfases de 20 a 21~s y una banda
+    verde de 0.9 en los dos sentidos (fijo: desfase 0 y banda de 0.5),
+    y pierde en la transversal, que espera un rojo de 31~s en vez de
+    18~s. El retraso por vehículo baja de 20.8 a 16.9~s en la avenida y
+    sube de 14.5 a 22.2~s en la transversal. El neto es de $+1.05$~s
+    por vehículo.
+  \item \textbf{905~veh/h.} IPPO con mensajes no hace el ciclo mínimo
+    (25~s de avenida en mediana, ciclo de 41~s), pero da casi el mismo
+    retraso total (15.93 frente a 15.90~s/veh) con otro reparto: peor
+    en la avenida y mejor en la transversal y en los giros.
+  \item \textbf{P1: banda verde.} Los desfases de IPPO con mensajes,
+    18~s de oeste a este y 21~s de este a oeste, quedan cerca de los
+    22~s de viaje libre entre cruces, y su banda en la punta es de 0.87
+    y 0.85. El fijo, con un ciclo de 36~s, favorece el sentido este a
+    oeste (0.95) a costa del otro (0.65). La mejora está en la punta de
+    oeste a este, y la avenida pone el 80\,\% de ella.
+  \item \textbf{2715~veh/h y P2: la entrada E\_C2.} La espera para
+    entrar crece en una sola entrada, la de la avenida por el este, y
+    solo en la segunda media hora, cuando la punta va de este a oeste.
+    Con 2715~veh/h su espera media es de 89.7~s con IPPO con mensajes y
+    de 17.8~s con el fijo. El verde transversal del cruce C2 sube a una
+    mediana de 20~s (fijo: 10), y con 5 o más detenidos en la avenida
+    IPPO con mensajes extiende la transversal en el 67\,\% de las
+    decisiones. En la primera media hora es mejor que el fijo (29.3
+    frente a 38.4~s de retraso total). En P2 la espera en E\_C2 es de
+    964~s frente a 395~s; el verde transversal sube a 30~s en C1 y a
+    35~s en C2 (fijo: 15~s), y la banda de este a oeste baja a 0.26
+    (fijo: 0.96). A cambio, IPPO con mensajes reduce la espera en la
+    entrada oeste de la avenida y en las transversales.
+\end{itemize}
+Estas mediciones describen lo que hace la política, no por qué lo
+hace. Que el plan casi fijo venga del objetivo de entrenamiento y que
+la entrada se llene porque la recompensa no ve la espera para entrar
+son las hipótesis que prueban las correcciones de más abajo.
+% fuente: plan2/diag_corredor/comportamiento.md ("Datos y metodo": 115 corridas que reproducen la evaluacion;
+% resumen por nivel; respuestas a-d; "Lo que muestran los datos, en conjunto"), con comp_verdes.csv,
+% comp_ciclo.csv, comp_sincronia.csv, comp_decisiones.csv (100 % de los verdes transversales cortan en la primera
+% decision posible hasta 1810; 78, 95 y 86 % de verdes de avenida de 20 o 25 s; extension del 67 % en 2715),
+% comp_aporte.csv y comp_movimientos.csv (1358: avenida 16.9 vs 20.8, transversal 22.2 vs 14.5, neto +1.05 s/veh;
+% 905: 15.93 vs 15.90; P1: la avenida aporta -1.04 de -1.31 s/veh) y comp_entrada.csv (E_C2, periodo 2: 89.7 vs
+% 17.8 s en 2715 y 964 vs 395 s en P2). Rojo de la transversal en 1358: 25 + 3 + 3 = 31 s frente a 12 + 3 + 3 = 18 s
+% (comportamiento.md, conjunto 1). Las causas no se afirman: comportamiento.md, encabezado y conjunto 2 (la medicion
+% es compatible con H2 pero no la prueba)
+
+\noindent\textbf{Lo que se descartó de SUMO.} El simulador no
+introduce errores que expliquen la curva. En los cuatro controles de
+2715~veh/h y P2, con las semillas 1001 a 1005, no hay teletransportes
+ni choques que cambien un solo registro de viaje. Con el tiempo de
+teletransporte por defecto de SUMO, 300~s, aparecen solo dos, en una
+corrida de IPPO con mensajes en P2, y su retraso total cambia un
+0.07\,\%. La simulación es determinista: dos repeticiones dan los
+mismos registros vehículo a vehículo, iguales a los de la evaluación.
+El \texttt{timeLoss} y la espera para entrar son los que define SUMO
+en su documentación y en su código. Hay, eso sí, un rasgo del modelo
+que conviene declarar: con un paso de 1~s y los vehículos entrando
+detenidos, una entrada de un carril admite como máximo 1202~veh/h. En
+P2 eso deja una espera para entrar mínima de unos 34~s/veh con
+cualquier control. Aun así, la espera de más de IPPO con mensajes no es
+un efecto de la inserción. Con los vehículos entrando a la velocidad
+máxima, su espera para entrar de más frente al fijo con 2715~veh/h
+pasa de $+13.1$ a $+17.3$~s/veh (IC95 de $+11.5$ a $+23.1$, cinco
+semillas), y su desventaja en retraso total, de $+19.7$ a
+$+29.3$~s/veh.
+% fuente: plan2/diag_corredor/sumo.md, secciones 2 (base, chk y tt300: 0 teletransportes, tripinfo identicos en
+% 40/40 con check-junctions, 2 teletransportes yield de IPPO P2 semilla 1005 con +0.07 % de retraso total), 4
+% (determinismo, IPPO 1358, semillas 1001-1003, sha256 iguales y iguales al CSV de la evaluacion), 5 (definiciones),
+% "Respuesta corta" punto 1 (1202 veh/h; piso de unos 34 s/veh en P2) y tabla de entrada a velocidad maxima (2715,
+% IPPO - fijo: espera para entrar +13.07 -> +17.30 [+11.51, +23.09], retraso total +19.73 -> +29.34, IC t con
+% 4 gl); datos en plan2/diag_corredor/sumo/*.csv
+% Verificacion 25.10.2026: antes daba +29.3 como "la espera de mas"; esa cifra es del retraso total
+
+\noindent\textbf{Salvedad del paso de simulación.} En SUMO el paso de
+simulación es también el tiempo de reacción del conductor. Con 0.5~s
+en vez de 1~s la red gana capacidad, los retrasos de los programas
+fijos, del actuado y del ciclo mínimo bajan entre un 11 y un 66\,\%, y
+el orden entre ellos se invierte en 1358~veh/h y en P1, donde las
+diferencias son menores que 1~s/veh. Con 2715~veh/h el orden se
+mantiene. IPPO con mensajes no se puede probar así, porque su reloj
+cuenta cada paso como un segundo: con 0.5~s sería otro controlador.
+La comparación de la tesis es interna al mismo modelo, con el mismo
+paso para todos los controles, y sigue siendo válida. Queda un límite
+de alcance. En demanda baja, las diferencias de IPPO con mensajes, de
+$\pm 5$\,\% en 905 y 1358~veh/h, son del mismo tamaño que las que este
+supuesto invierte entre las referencias. Como IPPO con mensajes no se
+pudo probar con otro paso, el signo de esas diferencias vale para el
+conductor de SUMO con reacción de 1~s y no debe generalizarse.
+% fuente: plan2/diag_corredor/sumo.md, seccion 3 (paso 0.5 s, semillas 1001-1010: cambios de -11.2 a -65.7 %;
+% inversion del orden en 1358 y P1 con diferencias pareadas significativas; 2715 mantiene el orden; IPPO no se prueba
+% con 0.5 s, rl_ippo.py:538-642) y "Que significa para el diagnostico" (limite del alcance en demanda baja).
+% Verificacion 25.10.2026: es una inferencia, no una medicion (IPPO no se corrio con 0.5 s y 905 no entro en la prueba
+% del paso); por eso va como limite
+
+\noindent\textbf{Correcciones.} El pre-registro propone dos
+correcciones del entrenamiento, que se prueban por separado y juntas.
+V2 es la del Anexo~G: descuento por segundo y exploración común, para
+ver si en 1358~veh/h la política deja el plan casi fijo. Con INS, la
+recompensa de cada semáforo cuenta también los vehículos que esperan
+para entrar por sus accesos, con el mismo peso que un vehículo
+detenido, para ver si en
+2715~veh/h y en P2 deja de llenar la entrada. Cada variante se entrena
+tres veces en los cinco niveles con el protocolo del plan, y su versión
+evaluada se elige por el retraso total en la validación. Se evalúan en
+las semillas 1001 a 1030 y se confirman en 6001 a 6030.
+\textbf{[PENDIENTE: resultado de V2, INS y V2+INS, Tabla y Figura]}
+% fuente: plan2/diag_corredor/PRERREGISTRO.md (H2: INS; H3: V2; H4: V2+INS sin regresion en P1; diseno; Enmienda 1:
+% eleccion por el retraso total); cola diag_ en plan2/cola/trabajos.jsonl (45 entrenamientos y 123 evaluaciones)
+
+\noindent\textbf{Respuesta, con lo medido hasta ahora.} La falta de
+tendencia no sale de un fallo de SUMO, y no desaparece al corregir la
+comparación. Con el fijo ajustado desde 10~s y el retraso total, el
+cambio de IPPO con mensajes en los cinco niveles es de $+0.1$, $+5.2$,
+$-6.7$, $+32.9$ y $+1.6$\,\%; con la regla del plan, empata, falla,
+funciona, falla y falla. Las dos elecciones de la comparación explican
+solo una parte. La referencia explica 905~veh/h: el barrido del fijo de
+ese nivel no probó el ciclo mínimo. La métrica explica por qué P2
+parecía una mejora grande: el \texttt{timeLoss} no ve la espera para
+entrar. Lo demás viene de lo que hace la política. En 1358~veh/h y P1
+aplica casi el mismo plan, mientras el fijo ajustado cambia: frente a
+un fijo de ciclo largo gana por la banda verde, y frente a uno de ciclo
+corto pierde en la transversal. Con 2715~veh/h y en P2 deja que se
+llene la entrada este de la avenida en la segunda media hora; con
+2715~veh/h ya perdía con el \texttt{timeLoss}, y la espera para entrar
+agranda la desventaja. En demanda baja, además, el signo de diferencias
+tan chicas vale para el conductor de SUMO con reacción de 1~s. Si todo
+eso se corrige cambiando el entrenamiento es lo que dirán V2, INS y
+V2+INS.
+\textbf{[PENDIENTE: lectura final con las correcciones]}
+% fuente: descomposicion.txt (905 y 2715/P2; retraso total frente al fijo desde 10 s: +0.1, +5.2, -6.7, +32.9 y
+% +1.6 %), comportamiento.md (conjunto 1 y 2) y sumo.md ("Respuesta corta" y "Que significa para el diagnostico").
+% Veredictos con la regla del plan (veredicto.veredicto), version actual frente al fijo desde 10 s en retraso total,
+% 1001-1030: plan2/diag_corredor/analisis.py, filas control = actual y referencia = fijo10 de resultados.csv (salen
+% igual en el modo prueba, porque la version actual y las referencias son datos reales): 905 +0.1 [-0.8, +1.0]
+% p 0.902 EMPATA; 1358 +5.2 [+4.3, +6.1] FALLA; P1 -6.7 [-7.8, -5.7] FUNCIONA; 2715 +32.9 [+22.5, +44.2] FALLA; P2
+% +1.6 [+0.6, +2.6] p 0.0022 FALLA.
+% Verificacion 25.10.2026: antes atribuia 2715 y P2 a la metrica; con la referencia y la metrica corregidas la curva
+% sigue sin tendencia, y en 2715 ya fallaba con timeLoss (+6.6 %)
+
 %----------------------------------------------------------------------
 \section{Qué aporta cada pieza}
 \label{sec:piezas}
