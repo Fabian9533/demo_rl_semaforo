@@ -1,0 +1,45 @@
+
+=== Corredor 905 veh/h
+  IPPO vs [timeLoss]: fijo 25.09 -5.6% | fijo desde 10 s +0.1% | ciclo min +0.1% | actuado -1.4%
+  IPPO vs [retraso total]: fijo 25.09 -5.5% | fijo desde 10 s +0.1% | ciclo min +0.1% | actuado -1.4%
+    ippo    timeLoss   15.58  total   15.95  espera_entrar   0.37  cambios_fase  387.0  no_term   0.0
+    fijo    timeLoss   16.50  total   16.87  espera_entrar   0.37  cambios_fase  409.4  no_term   0.0
+    fijo10  timeLoss   15.56  total   15.93  espera_entrar   0.37  cambios_fase  566.3  no_term   0.0
+    triv    timeLoss   15.56  total   15.93  espera_entrar   0.37  cambios_fase  566.3  no_term   0.0
+    act     timeLoss   15.80  total   16.17  espera_entrar   0.37  cambios_fase  537.0  no_term   0.0
+
+=== Corredor 1358 veh/h
+  IPPO vs [timeLoss]: fijo 25.09 +5.4% | fijo desde 10 s +5.4% | ciclo min +1.7% | actuado +5.6%
+  IPPO vs [retraso total]: fijo 25.09 +5.2% | fijo desde 10 s +5.2% | ciclo min +1.6% | actuado +5.4%
+    ippo    timeLoss   19.10  total   19.68  espera_entrar   0.58  cambios_fase  372.7  no_term   0.0
+    fijo    timeLoss   18.12  total   18.70  espera_entrar   0.58  cambios_fase  526.5  no_term   0.0
+    fijo10  timeLoss   18.12  total   18.70  espera_entrar   0.58  cambios_fase  526.5  no_term   0.0
+    triv    timeLoss   18.78  total   19.36  espera_entrar   0.58  cambios_fase  568.2  no_term   0.0
+    act     timeLoss   18.09  total   18.67  espera_entrar   0.58  cambios_fase  523.1  no_term   0.0
+
+=== Corredor 1810 P1 veh/h
+  IPPO vs [timeLoss]: fijo 25.09 -6.8% | fijo desde 10 s -6.8% | ciclo min -80.8% | actuado -5.8%
+  IPPO vs [retraso total]: fijo 25.09 -6.7% | fijo desde 10 s -6.7% | ciclo min -81.0% | actuado -5.7%
+    ippo    timeLoss   19.84  total   20.22  espera_entrar   0.37  cambios_fase  384.2  no_term   0.0
+    fijo    timeLoss   21.30  total   21.67  espera_entrar   0.37  cambios_fase  410.5  no_term   0.0
+    fijo10  timeLoss   21.30  total   21.67  espera_entrar   0.37  cambios_fase  410.5  no_term   0.0
+    triv    timeLoss  103.33  total  106.26  espera_entrar   2.93  cambios_fase  639.9  no_term   0.0
+    act     timeLoss   21.07  total   21.45  espera_entrar   0.37  cambios_fase  457.7  no_term   0.0
+
+=== Corredor 2715 veh/h
+  IPPO vs [timeLoss]: fijo 25.09 +6.6% | fijo desde 10 s +6.6% | ciclo min -70.7% | actuado -26.5%
+  IPPO vs [retraso total]: fijo 25.09 +32.9% | fijo desde 10 s +32.9% | ciclo min -84.4% | actuado -49.5%
+    ippo    timeLoss   58.04  total   76.43  espera_entrar  18.39  cambios_fase  344.3  no_term   0.0
+    fijo    timeLoss   54.45  total   57.50  espera_entrar   3.05  cambios_fase  377.3  no_term   0.0
+    fijo10  timeLoss   54.45  total   57.50  espera_entrar   3.05  cambios_fase  377.3  no_term   0.0
+    triv    timeLoss  198.00  total  490.65  espera_entrar 292.65  cambios_fase  849.9  no_term   0.0
+    act     timeLoss   78.96  total  151.43  espera_entrar  72.47  cambios_fase  264.7  no_term   0.0
+
+=== Corredor 3620 P2 veh/h
+  IPPO vs [timeLoss]: fijo 25.09 -23.3% | fijo desde 10 s -23.3% | ciclo min -58.5% | actuado -4.4%
+  IPPO vs [retraso total]: fijo 25.09 +1.6% | fijo desde 10 s +1.6% | ciclo min -62.0% | actuado -10.1%
+    ippo    timeLoss  118.66  total  400.68  espera_entrar 282.02  cambios_fase  299.3  no_term   0.0
+    fijo    timeLoss  154.70  total  394.27  espera_entrar 239.57  cambios_fase  447.0  no_term   0.0
+    fijo10  timeLoss  154.70  total  394.27  espera_entrar 239.57  cambios_fase  447.0  no_term   0.0
+    triv    timeLoss  286.24  total 1055.41  espera_entrar 662.98  cambios_fase  922.0  no_term 130.6
+    act     timeLoss  124.14  total  445.46  espera_entrar 321.32  cambios_fase  261.9  no_term   0.0
