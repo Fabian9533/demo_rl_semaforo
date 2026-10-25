@@ -803,6 +803,23 @@ def tabla_pruebas_tex(R, prueba):
         lineas.append(" & ".join([nombre, NOMBRE_METRICA[clave], "bajo 0" if sentido == "bajo" else "sobre 0",
                                   tex_signo(c[f"cambio_{clave}"]) if c else "--",
                                   tex_ic(c[f"ic_{clave}"]) if c else "--"] + cumple) + r" \\")
+    # Enmienda 3 (por que 2715): las filas salen de resultados3.csv (analisis3.py), si ya existe
+    ruta3 = os.path.join(DIR, "resultados3.csv")
+    if os.path.exists(ruta3):
+        with open(ruta3, newline="", encoding="utf-8") as f:
+            filas3 = [r for r in csv.DictReader(f) if r["prueba"] in ("H6a", "H6b", "H7")]
+        titulos = {"H6a": r"Sin giros a la izquierda: V2 de 2715 (sin reentrenar) frente al fijo",
+                   "H6b": r"Sin giros a la izquierda: V2 entrenado ahí frente a su fijo ajustado",
+                   "H7": r"V2 con $\gamma = 0.99$ frente a V2"}
+        for h in ("H6a", "H6b", "H7"):
+            r = {x["semillas"]: x for x in filas3 if x["prueba"] == h}
+            if "1001-1030" not in r:
+                continue
+            a = r["1001-1030"]
+            cumple = [("sí" if r[s]["cumple"] == "si" else "no") if s in r else "--" for s in ("1001-1030", "6001-6030")]
+            lineas += [r"\addlinespace", rf"\multicolumn{{7}}{{l}}{{\textbf{{{h}.}} {titulos[h]}}} \\",
+                       " & ".join(["2715", "retraso total", "bajo 0", tex_signo(float(a["cambio"])),
+                                   tex_ic((float(a["ic_lo"]), float(a["ic_hi"])))] + cumple) + r" \\"]
     lineas += [r"\bottomrule", r"\end{tabular}"]
     return "\n".join(lineas) + "\n"
 
