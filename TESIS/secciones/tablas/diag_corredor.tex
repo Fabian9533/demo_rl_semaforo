@@ -1,0 +1,22 @@
+% Generado por plan2/diag_corredor/analisis.py. No editar a mano.
+% Diagnóstico del corredor (PRERREGISTRO.md): solo el tabular; el table, el caption y la etiqueta van en el
+% capítulo. Fuente: plan2/diag_corredor/resultados.csv, semillas 1001-1030, referencia fijo10 (fijo ajustado
+% desde 10 s), columnas media_ref_total, cambio_total y veredicto_total. Veredicto: la regla del plan
+% (veredicto.veredicto: -5 %, IC entero bajo cero y p < 0.05, sin perder contra el actuado) sobre el retraso
+% total, con PENDIENTE (provisional) si la versión evaluada no se estabilizó en su criterio de validación.
+% Cada celda: cambio (%) y veredicto; el IC95 y el p están en resultados.csv y pruebas.txt (con cinco
+% controles, el IC en la celda no cabe en 15 cm). Necesita booktabs y makecell; el table lleva
+% \footnotesize y \setlength{\tabcolsep}{3pt} (ancho medido por analisis.py en su salida de consola).
+\begin{tabular}{lrccccc}
+\toprule
+ & & \multicolumn{5}{c}{Cambio del retraso total frente al fijo desde 10 s (\%)} \\
+\cmidrule(lr){3-7}
+\makecell[tl]{Demanda\\(veh/h)} & \makecell[tr]{Fijo\\desde 10 s\\(s/veh)} & \makecell{Versión\\actual} & V2 & INS & V2+INS & \makecell{V2+INS\\+obs} \\
+\midrule
+905 & 15.93 & \makecell[t]{$+0.1$\\{}EMPATA} & \makecell[t]{$-2.9$\\{}MEJORA} & \makecell[t]{$-2.0$\\{}MEJORA} & \makecell[t]{$-1.7$\\{}MEJORA} & \makecell[t]{$+0.2$\\{}EMPATA} \\[3pt]
+1358 & 18.70 & \makecell[t]{$+5.2$\\{}FALLA} & \makecell[t]{$-2.3$\\{}MEJORA} & \makecell[t]{$+4.9$\\{}FALLA} & \makecell[t]{$+0.4$\\{}EMPATA} & \makecell[t]{$-2.5$\\{}PENDIENTE\\{}(provisional:\\{}MEJORA)} \\[3pt]
+1810 (P1) & 21.67 & \makecell[t]{$-6.7$\\{}FUNCIONA} & \makecell[t]{$-7.4$\\{}FUNCIONA} & \makecell[t]{$-7.7$\\{}FUNCIONA} & \makecell[t]{$-6.0$\\{}FUNCIONA} & \makecell[t]{$-7.5$\\{}FUNCIONA} \\[3pt]
+2715 & 57.50 & \makecell[t]{$+32.9$\\{}FALLA} & \makecell[t]{$+33.6$\\{}FALLA} & \makecell[t]{$+51.5$\\{}FALLA} & \makecell[t]{$+57.9$\\{}PENDIENTE\\{}(provisional:\\{}FALLA)} & \makecell[t]{$+36.7$\\{}PENDIENTE\\{}(provisional:\\{}FALLA)} \\[3pt]
+3620 (P2) & 394.27 & \makecell[t]{$+1.6$\\{}FALLA} & \makecell[t]{$-10.8$\\{}FUNCIONA} & \makecell[t]{$+22.8$\\{}PENDIENTE\\{}(provisional:\\{}FALLA)} & \makecell[t]{$+20.2$\\{}PENDIENTE\\{}(provisional:\\{}FALLA)} & \makecell[t]{$-8.9$\\{}PENDIENTE\\{}(provisional:\\{}FUNCIONA)} \\
+\bottomrule
+\end{tabular}

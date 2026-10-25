@@ -467,9 +467,9 @@ completo, en los seis casos, queda como trabajo siguiente.
 % Diagnostico del corredor (25.10.2026, rama diagnostico-corredor, commit 43596e4): detalle de la Seccion
 % sec:diag-corredor. Fuentes en plan2/diag_corredor/: PRERREGISTRO.md y prerregistro.sha256, descomposicion.txt,
 % comportamiento.md, sumo.md (datos en sumo/*.csv), compuerta/compuerta.txt y compuerta/prueba_ins_<esc>.txt. Los
-% resultados de V2, INS y V2+INS y las pruebas de H1-H4 llegan con la cola diag_ (plan2/cola/trabajos.jsonl, salida en
-% plan2/diag_corredor/eval/) y van marcados [PENDIENTE]. Sin etiqueta despues del titulo con asterisco (regla de este
-% anexo); las tablas numeran G.n
+% resultados de V2, INS, V2+INS y V2+INS+obs (Enmienda 2) y las pruebas de H2-H5 salen de analisis.py (pruebas.txt,
+% resultados.csv y tablas/diag_pruebas.tex), con las evaluaciones de plan2/diag_corredor/eval/. Sin etiqueta despues
+% del titulo con asterisco (regla de este anexo); las tablas numeran G.n
 
 Este apartado da el detalle del diagnóstico resumido en la
 Sección~\ref{sec:diag-corredor}. Como el resto del anexo, es un
@@ -486,18 +486,21 @@ confirma con las semillas 6001 a 6030, que su diseño no había usado.
 % fuente: plan2/diag_corredor/PRERREGISTRO.md (pregunta; estatus; diseno: evaluacion 1001-1030 y confirmacion
 % 6001-6030, "nunca usadas en este diseno"); cambios por nivel: plan2/demanda2/resumen_demanda2.csv (cambio_fijo)
 
-\noindent\textbf{Pre-registro.} El diseño se escribió el 25.10.2026, a
-las 13:05, antes de implementar las correcciones y de entrenar, y su
-huella sha256 está guardada aparte. Parte de lo que ya mostraban los
+\noindent\textbf{Pre-registro.} El diseño se registró en el
+repositorio el 25.10.2026, a las 13:00, antes de implementar las
+correcciones y de entrenar, y su huella sha256 está guardada aparte.
+Parte de lo que ya mostraban los
 datos, sin simular nada nuevo. En 905~veh/h, frente al fijo ajustado
 desde 10~s, que ahí es el ciclo mínimo, IPPO con mensajes queda en
 $+0.1$\,\%. En 1358~veh/h el fijo ya es un ciclo corto (12/10~s), e
-IPPO con mensajes cambia de fase 373 veces por hora frente a 527 del
+IPPO con mensajes cambia de fase 373 veces por corrida frente a 527 del
 fijo. En 2715~veh/h y P2, su espera para entrar a la red es de 18.4
 frente a 3.1~s/veh y de 282 frente a 240~s/veh. Con eso plantea cuatro
 hipótesis (Tabla~\ref{tab:diag-hipotesis}).
 % fuente: plan2/diag_corredor/PRERREGISTRO.md (encabezado y "Lo que ya muestran los datos existentes", de
-% diag_corredor.py, 25.10 12:50); prerregistro.sha256 (2af77443...6852)
+% diag_corredor.py, 25.10 12:50); prerregistro.sha256 (2af77443...6852). Hora: commit 5196edb de las 13:00:27 (el
+% encabezado del pre-registro dice 13:05, una hora aproximada; nota al final de PRERREGISTRO.md). "Por corrida": la
+% columna cambios_fase cuenta toda la corrida (372.7 y 526.5); el pre-registro decia "por hora"
 
 \begin{table}[H]
 \setstretch{1}
@@ -752,14 +755,142 @@ P1 & Fijo $-$ actuado & $+0.24$ [$-0.15$, $+0.63$] & $-0.68$ [$-0.99$, $-0.37$] 
 \label{tab:diag-paso}
 \end{table}
 
-\noindent\textbf{Resultados de las correcciones.}
-\textbf{[PENDIENTE: resultado de V2, INS y V2+INS en los cinco niveles, en 1001 a 1030 y 6001 a 6030, frente al fijo ajustado desde 10~s y a la versión evaluada actual, en retraso total y en \texttt{timeLoss}, con su tabla y su figura]}
+\noindent\textbf{Resultados de las correcciones.} La
+Tabla~\ref{tab:diag-corredor} da el cambio de cada variante frente al
+fijo ajustado desde 10~s, y la Tabla~\ref{tab:diag-pruebas}, las
+pruebas de las hipótesis, con su IC95 por \textit{bootstrap} pareado.
+Las semillas 6001 a 6030 confirman las cuatro pruebas de la primera
+ronda y dan, para V2, los mismos veredictos en los cinco niveles.
+\begin{itemize}
+  \item \textbf{V2 (H3 se cumple).} En 1358~veh/h cambia de fase 500
+    veces por corrida frente a 373 de la versión actual (el fijo, 527),
+    y su \texttt{timeLoss} baja de 19.10 a 17.68~s/veh (el fijo,
+    18.12). Mejora además 905~veh/h ($-2.9$\,\%, MEJORA) y P2
+    ($-10.8$\,\%, FUNCIONA), y mantiene P1. Con 2715~veh/h sigue en
+    FALLA ($+33.6$\,\%): su espera para entrar es de 19.35~s/veh frente
+    a 3.05 del fijo.
+  \item \textbf{INS (H2 no se cumple).} Con 2715~veh/h y en P2 deja
+    más espera para entrar y más retraso total que la versión actual, en
+    los dos juegos de semillas.
+  \item \textbf{V2+INS (H4 se cumple; el criterio, no).} En P1 sigue
+    reduciendo el retraso total ($-6.0$\,\%), pero con 2715~veh/h y en
+    P2 queda peor que el fijo ($+57.9$ y $+20.2$\,\%, con IC95 entero
+    sobre cero y $p < 0.001$). Los dos entrenamientos evaluados no se
+    estabilizaron, así que su veredicto es PENDIENTE, con FALLA como
+    provisional.
+\end{itemize}
+Sobre la Enmienda~1: con 2715~veh/h y en P2, los dos criterios de
+validación eligen el mismo episodio en 8 de los 18 entrenamientos de
+las tres variantes (en 4 de los 6 de V2, en 2 de INS y en 2 de V2+INS).
+% fuente: plan2/diag_corredor/pruebas.txt (analisis.py, 25.10.2026 16:15): H3 (cambios de fase 372.7 -> 500.4,
+% timeLoss 19.10 -> 17.68; medias: fijo 526.5 cambios y 18.12 s/veh); V2 frente a fijo10 en resultados.csv (905 -2.9
+% MEJORA, P1 -7.4 FUNCIONA, 2715 +33.6 FALLA, P2 -10.8 FUNCIONA; 6001-6030: MEJORA, MEJORA, FUNCIONA, FALLA,
+% FUNCIONA); espera para entrar 2715: V2 19.35, fijo 3.05; criterio (V2+INS: 2715 +57.9 % [+45.0, +71.9] p 5.6e-09,
+% P2 +20.2 % [+18.7, +21.6] p 1.9e-09; bases evaluadas 42 y 4042, "NO se estabilizo"); criterio de validacion:
+% 2715 mismo episodio en 5 de 9 (V2 1, INS 2, V2+INS 2), P2 en 3 de 9 (V2 3, INS 0, V2+INS 0)
 
-\noindent\textbf{Pruebas de las hipótesis.}
-\textbf{[PENDIENTE: H2 en 2715~veh/h y P2, H3 en 1358~veh/h y H4 en P1, con el IC95 por \textit{bootstrap} pareado y la prueba de Wilcoxon; criterio de causa raíz corregida; por variante y entrenamiento, si los dos criterios de validación eligen el mismo episodio en 2715~veh/h y P2]}
+\noindent\textbf{Por qué falló INS.} El código y los registros de
+entrenamiento muestran tres cosas. Lo que INS cobra no está en la
+observación: esta solo cuenta los vehículos que ya están en cada
+acceso, como detenidos sobre plazas hasta 1, así que un acceso lleno se
+ve igual con 0 que con 50 vehículos esperando afuera. El crítico no lo
+predice bien: en los episodios 181 a 200 su pérdida es de 2.8 a 4.6 con
+INS y V2+INS con 2715~veh/h, y de 31 a 87 en P2 (con V2, de 0.17 a 0.21
+y de 0.27 a 0.28; la pérdida se mide sobre retornos sin normalizar, así
+que parte de esa diferencia es la escala de la recompensa). Y el
+término pesa: por decisión vale de $-10$ a $-14$ con 2715~veh/h, frente
+a un resto de la recompensa de $-24$ a $-31$, y de $-129$ a $-150$ en
+P2, frente a un resto de $-54$ a $-65$. Un crítico que no explica la recompensa da a la
+política ventajas poco informativas, lo que es compatible con que las
+versiones evaluadas de INS y V2+INS terminen con más espera para entrar
+que la de V2, aunque solo ellas la cobran.
+% fuente: resultados_<esc>_ippo_vecinos_<v>_s<b>.csv de plan2/ (perdida_valor y recompensa_total_decision, media de
+% los episodios 181-200 por base); rl_ippo.observar (obs[k] = min(1, detenidos / cap)); PRERREGISTRO.md, Enmienda 2
+% ("Por que fallo INS"); espera para entrar en la evaluacion, 1001-1030: 2715 INS 25.11 y V2+INS 24.84 frente a V2
+% 19.35; P2 INS 333.83 y V2+INS 329.51 frente a V2 225.78 (pruebas.txt, MEDIAS POR CONTROL)
+
+\noindent\textbf{Segunda ronda (Enmienda~2).} Se escribió con los
+resultados de la primera ronda a la vista y se registró en el
+repositorio a las 16:26 del mismo día, antes de lanzar los
+entrenamientos (16:27). Es una prueba nueva, no
+una repetición de H2. Propone H5: INS falló porque el agente no ve lo
+que se le cobra. La corrección, V2+INS+obs, agrega a la observación de
+V2+INS cuatro entradas, una por acceso, que valen $n/(n + c)$, donde $n$
+es el número de vehículos que esperan para entrar por esa arista y $c$
+las plazas del acceso: 0.5 equivale a una aproximación llena esperando
+afuera. Todo lo demás es igual a V2+INS, con los mismos cinco niveles,
+bases, episodios, criterio de validación y semillas. Las predicciones
+son dos: (a)~con 2715~veh/h y en P2, V2+INS+obs deja menos espera para
+entrar y menos retraso total que V2+INS (IC95 entero bajo cero), y
+(b)~cumple el criterio de causa raíz corregida. La compuerta se repitió:
+con la opción apagada, un episodio da los mismos números que antes (0
+diferencias en 50 y en 45 columnas) y la evaluación de una política de
+la primera ronda no cambia (0 diferencias en 34 columnas). Encendida,
+el semáforo C1 ve sus entradas oeste, norte y sur, y el C2, las suyas
+este, norte y sur; los dos accesos internos del corredor quedan en 0.
+% fuente: plan2/diag_corredor/PRERREGISTRO.md ("Enmienda 2"; su encabezado dice 16:30, pero el commit que la registra,
+% 7cbcdd7, es de las 16:26:54, y los entrenamientos empezaron a las 16:27:13 segun cola_enm2.log); rl_ippo.py
+% (--obs-insercion: configurar_obs_insercion, salidas_flujos, observar); compuerta/compuerta.txt ("Enmienda 2": (a) 1
+% fila, 50 columnas, 0 diferencias; (b) 45 columnas; (c) 34 columnas; (d) dim_obs 35, C1 ve W_C1, N1_C1 y S1_C1, C2
+% ve E_C2, N2_C2 y S2_C2, C2_C1 y C1_C2 en 0)
+
+\noindent\textbf{Resultado de la segunda ronda.} H5 se cumple en los
+dos niveles y en los dos juegos de semillas
+(Tabla~\ref{tab:diag-pruebas}). Frente a V2+INS, V2+INS+obs deja un
+18\,\% menos de espera para entrar con 2715~veh/h y un 32\,\% menos en
+P2, y un 13 y un 24\,\% menos de retraso total. La pérdida del crítico
+en los episodios 181 a 200 baja a 0.40--0.44 con 2715~veh/h y a
+0.52--0.60 en P2, frente a 2.8--4.4 y 31--87 de V2+INS y 0.17--0.21 y
+0.27--0.28 de V2. El criterio de causa raíz
+corregida, en cambio, tampoco se cumple con V2+INS+obs, solo por
+2715~veh/h: ahí queda un 36.7\,\% por encima del fijo (IC95 de $+25.2$
+a $+49.6$\,\%). En los otros cuatro niveles no queda peor que el fijo
+($+0.2$, $-2.5$, $-7.5$ y $-8.9$\,\%). Fuera del pre-registro, frente
+a V2 no tiene menos retraso total de forma significativa en ningún
+nivel, con las semillas 1001 a 1030: con 2715~veh/h la diferencia es de
+$+2.3$\,\% (IC95 de $-4.0$ a $+8.8$), y en 905~veh/h y P2 tiene un 3.2
+y un 2.2\,\% más. Como preveía la Enmienda~2 para este caso, no ver la
+espera para entrar explica por qué INS falló, pero no la desventaja con
+2715~veh/h. Cuando la política la ve y la paga, su espera para entrar
+queda como la de V2 (con 2715~veh/h no se distingue y en P2 es entre un
+1.5 y un 3\,\% menor), y con esa demanda ninguna versión entrenada llega
+al fijo, aunque el plan de este, 25/10~s, está al alcance de su reloj
+de decisión.
+% fuente: plan2/diag_corredor/pruebas.txt (analisis.py, 25.10.2026 17:32; cola de la Enmienda 2 terminada a las
+% 17:30, 45 de 45 sin fallos, cola_enm2.log): H5 PASA en 1001-1030 y 6001-6030 (2715 espera -18.4 % [-32.8, -2.4] y
+% -21.9 %, total -13.4 % [-18.7, -7.8] y -14.1 %; P2 espera -32.5 % [-33.7, -31.2] y -32.5 %, total -24.1 %
+% [-25.2, -23.0] y -24.3 %); COMPROBACION DESCRIPTIVA (perdida de valor 181-200: 2715 0.40, 0.44, 0.43; P2 0.53,
+% 0.60, 0.52; V2 0.17-0.21 y 0.27-0.28); criterio 2 (905 +0.2 EMPATA, 1358 -2.5 PENDIENTE, P1 -7.5 FUNCIONA, 2715
+% +36.7 [+25.2, +49.6] PENDIENTE, P2 -8.9 PENDIENTE; NO PASA, peor en 2715). V2+INS+obs frente a V2: evaluar.comparar
+% sobre las bases evaluadas (diag_corredor/eval/eval_<esc>_ippo_vecinos_v2inso_s<b>_<k>.csv y _v2_s<b>_<k>.csv),
+% ningun IC entero bajo cero en los dos juegos; 2715 +2.3 [-4.0, +8.8], 905 +3.2 [+2.3, +4.1] (1001-1030). Plan del
+% fijo de 2715: comportamiento.md (25/10 s, ciclo 41). Espera para entrar de V2+INS+obs frente a V2: 2715 +4.7 %
+% [-13.8, +25.9] (1001-1030) y +3.5 % [-11.0, +19.7] (6001-6030); P2 -1.5 % [-3.3, +0.3] y -2.9 % [-5.1, -0.8].
+% P2, retraso total: +2.2 % [+0.7, +3.7] (1001-1030) y +0.9 % [-0.9, +2.6] (6001-6030). Verificacion 25.10.2026
+% (agente verificador, 230 cifras): 33 % -> 32 % (exacto -32.496 %); "no tiene menos retraso en ningun nivel" ->
+% "de forma significativa" (en 1358 y P1 la media es apenas menor, sin significacion)
+
+\noindent\textbf{Pruebas de las hipótesis.} La
+Tabla~\ref{tab:diag-pruebas} reúne las pruebas de H2 a H5. Cada una
+mira si el IC95 del cambio queda entero del lado que predice el
+pre-registro, en cada juego de semillas.
+% fuente: TESIS/secciones/tablas/diag_pruebas.tex, generada por plan2/diag_corredor/analisis.py (resultados.csv; la
+% columna de cada juego sale de la misma condicion que pruebas.txt); ancho medido por analisis.py
+\begin{table}[H]
+\setstretch{1}
+\centering
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\input{secciones/tablas/diag_pruebas}
+\caption[Diagnóstico del corredor: pruebas de las hipótesis]{Diagnóstico del corredor, posterior al veredicto: pruebas de las hipótesis H2 a H5 del pre-registro. Cambio pareado del control frente a su referencia e IC95 por \textit{bootstrap} pareado, sobre las semillas 1001 a 1030. IC que se espera: el pre-registro pide el IC95 entero bajo cero o sobre cero. ¿Cumple?: si se cumple en las semillas 1001 a 1030 y en las de confirmación, 6001 a 6030. H5 es de la segunda ronda (Enmienda~2).}
+\label{tab:diag-pruebas}
+\end{table}
 
 \noindent\textbf{Límites.} El análisis es post hoc: se decidió después
-de ver la curva de la Tabla~\ref{tab:efecto-demanda}. Lo que hace cada
+de ver la curva de la Tabla~\ref{tab:efecto-demanda}, y la segunda
+ronda, después de ver la primera. Cada variante tiene tres
+entrenamientos por nivel, y algunas versiones evaluadas no se
+estabilizaron. Las variantes se probaron solo en el corredor. Lo que hace cada
 control se midió con cinco semillas y con una sola versión evaluada por
 nivel. La relación entre los detenidos y las decisiones de IPPO con
 mensajes describe lo que hace la política, no la regla que sigue,

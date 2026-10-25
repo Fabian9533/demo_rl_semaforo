@@ -37,7 +37,13 @@ El resultado tiene cuatro límites:
     corredor alterna entre FUNCIONA y FALLA (falla con 1358 y
     2715~veh/h), en la red con rotonda no hay diferencia significativa
     con 2715 y 3620~veh/h y en la malla no hay mejora en ningún nivel
-    (Sección~\ref{sec:efecto-demanda}).
+    (Sección~\ref{sec:efecto-demanda}). Un diagnóstico posterior muestra
+    que la alternancia del corredor no viene de SUMO; con el
+    entrenamiento corregido solo queda la falla de 2715~veh/h, cuya causa
+    sigue abierta (Sección~\ref{sec:diag-corredor}).
+% Diagnostico del corredor (25.10.2026, rama diagnostico-corredor): plan2/diag_corredor/pruebas.txt y resultados.csv
+% (V2 frente al fijo desde 10 s en retraso total, 1001-1030: -2.9, -2.3, -7.4, +33.6 y -10.8 %; solo 2715 FALLA, los
+% mismos veredictos en 6001-6030); causas por nivel: Seccion sec:diag-corredor, "Respuesta"
 % fuente: plan2/demanda2/resumen_demanda2.csv (corredor: FUNCIONA en 905, 1810 y 3620 y FALLA en 1358 y 2715 veh/h;
 % red con rotonda: 2715 +0.9, IC [-0.5, 2.4], p 0.28, y 3620 -0.1, IC [-0.4, 0.1], p 0.276; malla 3x3: cambio_fijo
 % de +0.7 a +2.2 en sus seis niveles, sin FUNCIONA ni MEJORA). Entrega 3, tareas 4 y 5 (23.10.2026): se agrega el

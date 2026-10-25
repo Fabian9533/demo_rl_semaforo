@@ -111,3 +111,19 @@ respecto de V2+INS: recompensa y pesos, red, hiperparámetros, criterio de valid
   en la observación.
 - Si (a) se cumple y (b) no, la observabilidad explica la falla de INS pero no basta para 2715.
 - Si (a) no se cumple, H5 no se sostiene y la causa de 2715 sigue abierta.
+
+## Nota sobre la hora de la Enmienda 2 (25.10.2026, 17:55)
+
+El encabezado de la Enmienda 2 dice 16:30, pero es una hora aproximada escrita a mano. El commit que la registra
+(7cbcdd7) es de las 16:26:54, y los entrenamientos de la segunda ronda empezaron a las 16:27:13
+(`diag_corredor/eval/cola_enm2.log`). El encabezado se deja como estaba.
+
+Tambien en "Por que fallo INS", dos precisiones: "el termino pesa mas que el resto de la recompensa" vale para P2; con
+2715 veh/h el termino es menor que el resto (la recompensa por decision pasa de -22 a entre -35 y -43). Y las razones
+de "unas 20 veces" y "unas 250 veces" comparan con V2, que tiene otra escala de recompensa, sobre una perdida que se
+mide con retornos sin normalizar; con la misma recompensa (V2+INS frente a V2+INS+obs) la razon resulto de unas 9 y
+110 veces (pruebas.txt, comprobacion descriptiva).
+
+Lo mismo pasa con el encabezado del pre-registro (13:05): el commit que lo registra, 5196edb, es de las 13:00:27. Y
+en "Lo que ya muestran los datos existentes", los cambios de fase (373 y 527) son por corrida, no por hora (la columna
+cambios_fase cuenta toda la corrida; por hora son unos 363 en comportamiento.md).

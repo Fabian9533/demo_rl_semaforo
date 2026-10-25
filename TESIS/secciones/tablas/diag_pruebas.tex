@@ -1,0 +1,31 @@
+% Generado por plan2/diag_corredor/analisis.py. No editar a mano.
+% Pruebas H2-H5 del prerregistro (PRERREGISTRO.md, Enmiendas 1 y 2): cambio pareado e IC95 bootstrap pareado
+% en 1001-1030 y si cumple la prediccion (IC entero bajo o sobre cero) en 1001-1030 y en 6001-6030.
+% Fuente: plan2/diag_corredor/resultados.csv. Necesita booktabs y makecell; el table lleva \footnotesize
+% y \setlength{\tabcolsep}{3pt}.
+\begin{tabular}{llcrccc}
+\toprule
+ & & & & & \multicolumn{2}{c}{¿Cumple?} \\
+\cmidrule(lr){6-7}
+Nivel & Métrica & \makecell{IC que\\se espera} & \makecell[tr]{Cambio\\(\%)} & IC95 (\%) & 1001-1030 & 6001-6030 \\
+\midrule
+\multicolumn{7}{l}{\textbf{H2.} INS frente a la versión actual} \\
+2715 & espera para entrar & bajo 0 & $+36.6$ & [$+16.4$, $+60.8$] & no & no \\
+2715 & retraso total & bajo 0 & $+14.0$ & [$+8.1$, $+20.3$] & no & no \\
+3620 (P2) & espera para entrar & bajo 0 & $+18.4$ & [$+16.4$, $+20.4$] & no & no \\
+3620 (P2) & retraso total & bajo 0 & $+20.9$ & [$+19.0$, $+22.8$] & no & no \\
+\addlinespace
+\multicolumn{7}{l}{\textbf{H3.} V2 frente a la versión actual} \\
+1358 & cambios de fase & sobre 0 & $+34.3$ & [$+33.2$, $+35.3$] & sí & sí \\
+1358 & timeLoss & bajo 0 & $-7.4$ & [$-8.5$, $-6.3$] & sí & sí \\
+\addlinespace
+\multicolumn{7}{l}{\textbf{H4.} V2+INS frente al fijo ajustado desde 10 s} \\
+1810 (P1) & retraso total & bajo 0 & $-6.0$ & [$-7.2$, $-4.8$] & sí & sí \\
+\addlinespace
+\multicolumn{7}{l}{\textbf{H5.} V2+INS+obs frente a V2+INS} \\
+2715 & espera para entrar & bajo 0 & $-18.4$ & [$-32.8$, $-2.4$] & sí & sí \\
+2715 & retraso total & bajo 0 & $-13.4$ & [$-18.7$, $-7.8$] & sí & sí \\
+3620 (P2) & espera para entrar & bajo 0 & $-32.5$ & [$-33.7$, $-31.2$] & sí & sí \\
+3620 (P2) & retraso total & bajo 0 & $-24.1$ & [$-25.2$, $-23.0$] & sí & sí \\
+\bottomrule
+\end{tabular}

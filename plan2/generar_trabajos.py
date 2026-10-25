@@ -20,7 +20,7 @@ archivo los deja con los mismos ids y comandos (el barrido de P6 se escribe con 
 que se corrio), asi que la cola solo lanza los dem2_*.
 25.10.2026: diagnostico de la curva del corredor (agregar_diag_corredor, ids diag_*): correcciones V2, INS
 y V2+INS de IPPO con mensajes en los cinco niveles del corredor, con sus prioridades (0-3). Enmienda 2
-(16:30): variante v2inso (V2+INS con los vehiculos que esperan para entrar en la observacion), mismos ids.
+(commit 7cbcdd7, 16:26): variante v2inso (V2+INS con los vehiculos que esperan para entrar en la observacion), mismos ids.
 """
 import os
 import sys
@@ -208,7 +208,7 @@ NIVELES_DIAG = [("corredor_alta", 2042, None), ("dem_corredor_t2715", 2042, "cor
                 ("corredor", 4042, None), ("dem_corredor_t1358", 42, "corredor_f075"),
                 ("dem_corredor_t905", 4042, "corredor_f050")]          # lo mas largo primero
 VARIANTES_DIAG = {"v2": "--v2", "ins": "--recompensa-insercion", "v2ins": "--v2 --recompensa-insercion",
-                  # Enmienda 2 (25.10.2026, 16:30): INS observable, segunda ronda
+                  # Enmienda 2 (25.10.2026, commit 7cbcdd7 de las 16:26): INS observable, segunda ronda
                   "v2inso": "--v2 --recompensa-insercion --obs-insercion"}
 # Enmienda del 25.10.2026 (PRERREGISTRO.md): las tres variantes eligen el checkpoint por el retraso total
 CRITERIO_DIAG = "--criterio-val total"
