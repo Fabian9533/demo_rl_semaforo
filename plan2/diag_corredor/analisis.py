@@ -5,12 +5,14 @@ Cuando termine la cola (ids diag_*, plan2/cola/; lanzada el 25.10.2026 a las 13:
   1. Comprobar que no quedan trabajos diag_ pendientes ni fallidos (plan2/cola/estado.json o cola.log).
   2. Desde demo_rl/plan2 (o desde cualquier carpeta; las rutas salen de la ubicacion de este archivo):
        python diag_corredor/analisis.py
-     Exige los 45 metas de las variantes y las evaluaciones que usa: la base mediana de cada variante en los
+     Exige los 60 metas de las variantes (45 de la primera ronda y 15 de la Enmienda 2) y las evaluaciones que usa: la base mediana de cada variante en los
      dos juegos de semillas, y las referencias y la version actual en 6001-6030. Si falta algo, lo lista y sale
      con codigo 1 sin escribir nada. Si esta todo, escribe:
        plan2/diag_corredor/resultados.csv      una fila por nivel, juego de semillas, control y referencia
-       plan2/diag_corredor/pruebas.txt         H1-H4 y el criterio de causa raiz, con PASA o NO PASA y cifras
+       plan2/diag_corredor/pruebas.txt         H1-H5 y el criterio de causa raiz (con V2+INS y con V2+INS+obs),
+                                               con PASA o NO PASA y cifras
        TESIS/secciones/tablas/diag_corredor.tex   solo el tabular (retraso total frente al fijo desde 10 s)
+       TESIS/secciones/tablas/diag_pruebas.tex    solo el tabular de las pruebas H2-H5 (Anexo G)
        TESIS/images/fig_diag_corredor.pdf y .png
      Tarda menos de un minuto (10 000 remuestreos por comparacion, unas 300 comparaciones).
 
@@ -23,7 +25,7 @@ Modo prueba (para probar el script antes de que termine la cola):
   descomposicion.txt (cambios de un decimal y medias de dos decimales) y lo informa en pruebas.txt.
 
 Entradas (todas en plan2/):
-  politica_<esc>_vecinos_<v>_s<b>.json    meta de cada entrenamiento de las variantes (v = v2, ins, v2ins):
+  politica_<esc>_vecinos_<v>_s<b>.json    meta de cada entrenamiento de las variantes (v2, ins, v2ins, v2inso):
                                           val_elegido (en retraso total por la enmienda), ep_elegido,
                                           val_total_serie, ep_elegido_timeloss y ep_elegido_total
   politica_<esc>_vecinos_s<b>.json        meta de la version actual (val_elegido en timeLoss)
@@ -54,6 +56,10 @@ Reglas (las del plan y las del prerregistro, sin cambios):
     cero y p < 0.05, y P1 mejora como en H4). Como pide el prerregistro, H2-H4 miran solo el IC; el p se informa.
     Se evaluan en los dos juegos de semillas por separado: 1001-1030 (comparable con la curva) y 6001-6030
     (confirmacion).
+  - Enmienda 2 (segunda ronda, variante v2inso = V2+INS+obs, cola lanzada a las 16:27 con el commit 7cbcdd7): H5
+    (V2+INS+obs frente a V2+INS en 2715 y P2: espera para entrar y retraso total, IC entero bajo cero), el mismo
+    criterio de causa raiz con V2+INS+obs y, sin prueba, la perdida de valor media de los episodios 181-200 de
+    las dos variantes en 2715 y P2 (columna perdida_valor de los CSV de entrenamiento).
 """
 import os
 import re
@@ -94,12 +100,14 @@ NIVELES = [("905", "905", 905, ""), ("1358", "1358", 1358, ""), ("P1", "1810 (P1
 ESC = {"905": "dem_corredor_t905", "1358": "dem_corredor_t1358", "P1": "corredor",
        "2715": "dem_corredor_t2715", "P2": "corredor_alta"}
 DIAG = {esc: (base, fijo10) for esc, base, fijo10 in gt.NIVELES_DIAG}
-VARIANTES = list(gt.VARIANTES_DIAG)                       # ["v2", "ins", "v2ins"]
+VARIANTES = list(gt.VARIANTES_DIAG)                       # ["v2", "ins", "v2ins", "v2inso"]
 CONTROLES = ["actual"] + VARIANTES
-NOMBRE = {"actual": "versión actual", "v2": "V2", "ins": "INS", "v2ins": "V2+INS"}
+NOMBRE = {"actual": "versión actual", "v2": "V2", "ins": "INS", "v2ins": "V2+INS", "v2inso": "V2+INS+obs"}
 REFERENCIAS = ["fijo", "fijo10", "trivial", "actuado", "actual"]
 NOMBRE_REF = {"fijo": "fijo de la regla del 25.09", "fijo10": "fijo ajustado desde 10 s",
-              "trivial": "ciclo mínimo", "actuado": "actuado", "actual": "versión actual"}
+              "trivial": "ciclo mínimo", "actuado": "actuado", "actual": "versión actual", "v2ins": "V2+INS"}
+# Enmienda 2: comparaciones entre variantes (control: referencia), ademas de las REFERENCIAS
+ENTRE_VARIANTES = {"v2inso": "v2ins"}
 METRICAS = [("timeloss", "timeloss_prom", "timeLoss"), ("total", "retraso_total_prom", "retraso total"),
             ("espera_entrar", "retraso_insercion_prom", "espera para entrar"),
             ("cambios_fase", "cambios_fase", "cambios de fase")]
@@ -338,6 +346,9 @@ def calcular(prueba):
                     if ref == control or refs.get(ref) is None:
                         continue
                     comps[ref] = comparar(d, refs[ref])
+                otra = ENTRE_VARIANTES.get(control)
+                if otra and datos[otra][0] is not None:
+                    comps[otra] = comparar(d, datos[otra][0])
                 for ref, c in comps.items():
                     ver = ""
                     if ref in ("fijo", "fijo10"):
@@ -487,16 +498,16 @@ def bloque_hipotesis(R, titulo, enunciado, conds, juegos):
     return lineas, res
 
 
-def bloque_criterio(R, juegos):
-    lineas = ["CRITERIO DE CAUSA RAÍZ CORREGIDA",
-              "  V2+INS frente al fijo ajustado desde 10 s, retraso total: ningún nivel peor con IC entero sobre cero",
-              "  y p < 0.05, y P1 sigue mejorando (IC entero bajo cero, como H4)."]
+def bloque_criterio(R, juegos, control="v2ins", titulo="CRITERIO DE CAUSA RAÍZ CORREGIDA"):
+    lineas = [titulo,
+              f"  {NOMBRE[control]} frente al fijo ajustado desde 10 s, retraso total: ningún nivel peor con IC entero",
+              "  sobre cero y p < 0.05, y P1 sigue mejorando (IC entero bajo cero, como H4)."]
     res = {}
     for k in juegos:
         lineas.append(f"  Semillas {NOMBRE_SEMILLAS[k]}:")
         peores, sin = [], False
         for nivel, _, _, _ in NIVELES:
-            c = R.get((nivel, k, "v2ins", "fijo10"))
+            c = R.get((nivel, k, control, "fijo10"))
             if c is None or c.get("ic_total") is None:
                 lineas.append(f"    {nivel:5s} sin datos")
                 sin = True
@@ -510,7 +521,7 @@ def bloque_criterio(R, juegos):
             lineas.append(f"    {nivel:5s} {c['media_ref_total']:8.2f} -> {c['media_total']:8.2f} s/veh  "
                           f"{txt_pct(c['cambio_total']):>9s} {txt_ic(c['ic_total']):>16s}  p={txt_p(c['p_total']):7s} "
                           f"{'PEOR que el fijo' if peor else 'no peor'}  ({vd.palabra(c['veredicto'])}){sust}")
-        p1, _ = condicion(R, "P1", k, "v2ins", "fijo10", "total", "bajo")
+        p1, _ = condicion(R, "P1", k, control, "fijo10", "total", "bajo")
         if sin or p1 is None:
             res[k] = "SIN DATOS"
         else:
@@ -569,6 +580,26 @@ def bloque_criterios_validacion(prueba):
     return lineas
 
 
+def bloque_perdida_valor():
+    """Enmienda 2, sin prueba: perdida de valor (critico) media de los episodios 181-200 por base, V2+INS y
+    V2+INS+obs en 2715 y P2, de los CSV de entrenamiento (con V2 como referencia de escala)."""
+    lineas = ["COMPROBACIÓN DESCRIPTIVA (Enmienda 2): pérdida de valor media de los episodios 181-200, por base"]
+    for nivel in ("2715", "P2"):
+        for control in ("v2", "v2ins", "v2inso"):
+            partes = []
+            for b in BASES:
+                ruta = ruta_entrenamiento(nivel, control, b)
+                if not os.path.exists(ruta):
+                    partes.append(f"s{b} --")
+                    continue
+                with open(ruta, newline="", encoding="utf-8") as f:
+                    filas = [r for r in csv.DictReader(f) if 181 <= int(r["episodio"]) <= 200]
+                partes.append(f"s{b} {media(float(r['perdida_valor']) for r in filas):.2f}" if len(filas) == 20
+                              else f"s{b} -- ({len(filas)} de 20 episodios)")
+            lineas.append(f"  {nivel:5s} {NOMBRE[control]:11s} " + ", ".join(partes))
+    return lineas
+
+
 def bloque_versiones(versiones):
     lineas = ["VERSIÓN EVALUADA DE CADA CONTROL (base mediana por val_elegido)"]
     for nivel, _, _, _ in NIVELES:
@@ -607,7 +638,7 @@ def bloque_medias(medias, juegos):
 
 def texto_pruebas(R, medias, versiones, prueba, sustituidos, comprob):
     juegos = [k for k in SEMILLAS if any(key[1] == k for key in R)]
-    lineas = ["Diagnóstico de la curva del corredor: respuesta al prerregistro (PRERREGISTRO.md, Enmienda 1)",
+    lineas = ["Diagnóstico de la curva del corredor: respuesta al prerregistro (PRERREGISTRO.md, Enmiendas 1 y 2)",
               "Generado por plan2/diag_corredor/analisis.py. No editar a mano.", ""]
     if prueba:
         lineas += ["*** MODO PRUEBA: no son los resultados del diagnóstico. ***"]
@@ -620,7 +651,7 @@ def texto_pruebas(R, medias, versiones, prueba, sustituidos, comprob):
         lineas.append("")
     lineas += ["Referencia principal: fijo ajustado desde 10 s. Métrica principal: retraso total (timeLoss + espera",
                "para entrar). Cambio pareado por semilla, IC95 por bootstrap pareado (10 000 remuestreos) y p de",
-               "Wilcoxon pareado (evaluar.comparar). H2-H4 miran solo el IC, como dice el prerregistro.",
+               "Wilcoxon pareado (evaluar.comparar). H2-H5 miran solo el IC, como dice el prerregistro.",
                "El IC llega redondeado a 0.1 (evaluar.comparar), y 'IC entero bajo/sobre cero' se lee sobre ese valor,",
                "como en veredicto.py: un extremo real entre -0.05 y +0.05 queda en 0.0 y no cuenta. Esas líneas",
                "llevan la marca [extremo del IC en 0.0 por el redondeo].", ""]
@@ -642,7 +673,17 @@ def texto_pruebas(R, medias, versiones, prueba, sustituidos, comprob):
     lineas += l + [""]
     l, resumen["Criterio"] = bloque_criterio(R, juegos)
     lineas += l + [""]
-    lineas += ["RESUMEN"] + [f"  {h:9s} " + "; ".join(f"{r[k]} en {NOMBRE_SEMILLAS[k]}" for k in juegos)
+    lineas += ["ENMIENDA 2 (segunda ronda, escrita con la primera a la vista y antes de entrenar V2+INS+obs)", ""]
+    l, resumen["H5"] = bloque_hipotesis(
+        R, "H5 (observabilidad)", "V2+INS+obs frente a V2+INS en 2715 y P2: (a) espera para entrar y (b) retraso "
+        "total, IC entero bajo cero.",
+        [(n, "v2inso", "v2ins", c, "bajo") for n in ("2715", "P2") for c in ("espera_entrar", "total")], juegos)
+    lineas += l + [""]
+    l, resumen["Criterio 2"] = bloque_criterio(R, juegos, "v2inso",
+                                               "CRITERIO DE CAUSA RAÍZ CORREGIDA CON V2+INS+obs (Enmienda 2)")
+    lineas += l + [""]
+    lineas += bloque_perdida_valor() + [""]
+    lineas += ["RESUMEN"] + [f"  {h:10s} " + "; ".join(f"{r[k]} en {NOMBRE_SEMILLAS[k]}" for k in juegos)
                              for h, r in resumen.items()] + [""]
     lineas += bloque_criterios_validacion(prueba) + [""]
     lineas += bloque_versiones(versiones) + [""]
@@ -690,18 +731,20 @@ def tabla_tex(R, prueba):
         "% desde 10 s), columnas media_ref_total, cambio_total y veredicto_total. Veredicto: la regla del plan",
         "% (veredicto.veredicto: -5 %, IC entero bajo cero y p < 0.05, sin perder contra el actuado) sobre el retraso",
         "% total, con PENDIENTE (provisional) si la versión evaluada no se estabilizó en su criterio de validación.",
-        "% Cada celda: cambio (%), IC95 bootstrap pareado y veredicto. Necesita booktabs y makecell; el table lleva",
-        "% \\footnotesize y \\setlength{\\tabcolsep}{4pt} (ancho medido por analisis.py en su salida de consola).",
+        "% Cada celda: cambio (%) y veredicto; el IC95 y el p están en resultados.csv y pruebas.txt (con cinco",
+        "% controles, el IC en la celda no cabe en 15 cm). Necesita booktabs y makecell; el table lleva",
+        "% \\footnotesize y \\setlength{\\tabcolsep}{3pt} (ancho medido por analisis.py en su salida de consola).",
     ]
     if prueba:
         lineas.append("% MODO PRUEBA: las variantes que faltan son la versión actual. No usar en la tesis.")
+    cabecera = {"actual": r"\makecell{Versión\\actual}", "v2inso": r"\makecell{V2+INS\\+obs}"}
     lineas += [
         r"\begin{tabular}{lr" + "c" * len(CONTROLES) + "}",
         r"\toprule",
         r" & & \multicolumn{" + str(len(CONTROLES)) + r"}{c}{Cambio del retraso total frente al fijo desde 10 s (\%)} \\",
         rf"\cmidrule(lr){{3-{2 + len(CONTROLES)}}}",
-        r"\makecell[tl]{Demanda\\(veh/h)} & \makecell[tr]{Fijo desde\\10 s (s/veh)} & "
-        r"\makecell{Versión\\actual} & V2 & INS & V2+INS \\",
+        r"\makecell[tl]{Demanda\\(veh/h)} & \makecell[tr]{Fijo\\desde 10 s\\(s/veh)} & "
+        + " & ".join(cabecera.get(c, NOMBRE[c]) for c in CONTROLES) + r" \\",
         r"\midrule",
     ]
     for i, (nivel, nombre, _, _) in enumerate(NIVELES):
@@ -712,8 +755,8 @@ def tabla_tex(R, prueba):
                 partes.append("--")
                 continue
             ref = c["media_ref_total"]
-            # \\{} y no \\ solo: la linea del IC empieza con [ y se leeria como el espacio opcional de \\
-            partes.append(r"\makecell[t]{" + r"\\{}".join([tex_signo(c["cambio_total"]), tex_ic(c["ic_total"])]
+            # \\{} y no \\ solo: una linea que empiece con [ se leeria como el espacio opcional de \\
+            partes.append(r"\makecell[t]{" + r"\\{}".join([tex_signo(c["cambio_total"])]
                                                           + tex_veredicto(c["veredicto"])) + "}")
         celdas = [nombre, "--" if ref is None else f"{ref:.2f}"] + partes
         lineas.append(" & ".join(celdas) + r" \\" + (r"[3pt]" if i < len(NIVELES) - 1 else ""))
@@ -721,8 +764,51 @@ def tabla_tex(R, prueba):
     return "\n".join(lineas) + "\n"
 
 
+# (hipotesis, nivel, control, referencia, metrica, sentido) de las pruebas del prerregistro, en orden
+PRUEBAS_TEX = ([("H2", n, "ins", "actual", c, "bajo") for n in ("2715", "P2") for c in ("espera_entrar", "total")]
+               + [("H3", "1358", "v2", "actual", "cambios_fase", "sobre"), ("H3", "1358", "v2", "actual", "timeloss", "bajo"),
+                  ("H4", "P1", "v2ins", "fijo10", "total", "bajo")]
+               + [("H5", n, "v2inso", "v2ins", c, "bajo") for n in ("2715", "P2") for c in ("espera_entrar", "total")])
+
+
+def tabla_pruebas_tex(R, prueba):
+    """Tabular de las pruebas H2-H5 (Anexo G): cambio e IC95 en 1001-1030 y si cumple en los dos juegos."""
+    lineas = [
+        "% Generado por plan2/diag_corredor/analisis.py. No editar a mano.",
+        "% Pruebas H2-H5 del prerregistro (PRERREGISTRO.md, Enmiendas 1 y 2): cambio pareado e IC95 bootstrap pareado",
+        "% en 1001-1030 y si cumple la prediccion (IC entero bajo o sobre cero) en 1001-1030 y en 6001-6030.",
+        "% Fuente: plan2/diag_corredor/resultados.csv. Necesita booktabs y makecell; el table lleva \\footnotesize",
+        "% y \\setlength{\\tabcolsep}{3pt}.",
+    ]
+    if prueba:
+        lineas.append("% MODO PRUEBA: las variantes que faltan son la versión actual. No usar en la tesis.")
+    lineas += [r"\begin{tabular}{llcrccc}", r"\toprule",
+               r" & & & & & \multicolumn{2}{c}{¿Cumple?} \\", r"\cmidrule(lr){6-7}",
+               r"Nivel & Métrica & \makecell{IC que\\se espera} & \makecell[tr]{Cambio\\(\%)} & IC95 (\%) & "
+               r"1001-1030 & 6001-6030 \\", r"\midrule"]
+    anterior = None
+    for h, nivel, control, ref, clave, sentido in PRUEBAS_TEX:
+        c = R.get((nivel, "1001", control, ref))
+        cumple = []
+        for k in SEMILLAS:
+            ck, _ = condicion(R, nivel, k, control, ref, clave, sentido)
+            cumple.append("--" if ck is None else ("sí" if ck else "no"))
+        nombre = [n for k_, n, _, _ in NIVELES if k_ == nivel][0]
+        if h != anterior:
+            if anterior is not None:
+                lineas.append(r"\addlinespace")
+            ref_txt = {"actual": "a la", "fijo10": "al"}.get(ref, "a") + " " + NOMBRE_REF[ref]
+            lineas.append(rf"\multicolumn{{7}}{{l}}{{\textbf{{{h}.}} {NOMBRE[control]} frente {ref_txt}}} \\")
+        anterior = h
+        lineas.append(" & ".join([nombre, NOMBRE_METRICA[clave], "bajo 0" if sentido == "bajo" else "sobre 0",
+                                  tex_signo(c[f"cambio_{clave}"]) if c else "--",
+                                  tex_ic(c[f"ic_{clave}"]) if c else "--"] + cumple) + r" \\")
+    lineas += [r"\bottomrule", r"\end{tabular}"]
+    return "\n".join(lineas) + "\n"
+
+
 def medir_tabla(tex):
-    """Ancho del tabular con pdflatex (12 pt, footnotesize, tabcolsep 4pt), en cm; None si no hay LaTeX."""
+    """Ancho del tabular con pdflatex (12 pt, footnotesize, tabcolsep 3pt), en cm; None si no hay LaTeX."""
     import shutil
     import subprocess
     import tempfile
@@ -730,7 +816,7 @@ def medir_tabla(tex):
         return None
     doc = (r"\documentclass[12pt]{report}\usepackage[utf8]{inputenc}\usepackage[T1]{fontenc}"
            r"\usepackage{booktabs,makecell}\newsavebox\caja\begin{document}"
-           r"\begin{lrbox}{\caja}\footnotesize\setlength{\tabcolsep}{4pt}" + tex +
+           r"\begin{lrbox}{\caja}\footnotesize\setlength{\tabcolsep}{3pt}" + tex +
            r"\end{lrbox}\typeout{ANCHO=\the\wd\caja}\end{document}")
     with tempfile.TemporaryDirectory() as tmp:
         with open(os.path.join(tmp, "t.tex"), "w", encoding="utf-8") as f:
@@ -750,11 +836,11 @@ def medir_tabla(tex):
 # variantes en los tres primeros colores categoricos (validados con validate_palette.js), con una forma cada una.
 FONDO, TINTA, TINTA2, APAGADO = "#fcfcfb", "#0b0b0b", "#52514e", "#898781"
 VERDE, ROJO = "#0ca30c", "#d03b3b"
-COLOR = {"actual": TINTA2, "v2": "#2a78d6", "ins": "#eb6834", "v2ins": "#1baf7a"}
-FORMA = {"actual": "o", "v2": "s", "ins": "^", "v2ins": "D"}
-TAM = {"actual": 6.6, "v2": 6.0, "ins": 7.0, "v2ins": 5.6}
-LINEA = {"actual": (0, (4, 2)), "v2": "-", "ins": "-", "v2ins": "-"}
-SEPARA = {"actual": 0.955, "v2": 0.985, "ins": 1.015, "v2ins": 1.045}   # en x (escala log) para no taparse
+COLOR = {"actual": TINTA2, "v2": "#2a78d6", "ins": "#eb6834", "v2ins": "#1baf7a", "v2inso": "#8f4fd6"}
+FORMA = {"actual": "o", "v2": "s", "ins": "^", "v2ins": "D", "v2inso": "v"}
+TAM = {"actual": 6.6, "v2": 6.0, "ins": 7.0, "v2ins": 5.6, "v2inso": 7.0}
+LINEA = {"actual": (0, (4, 2)), "v2": "-", "ins": "-", "v2ins": "-", "v2inso": "-"}
+SEPARA = {"actual": 0.95, "v2": 0.975, "ins": 1.0, "v2ins": 1.025, "v2inso": 1.05}   # en x (escala log)
 UMBRAL = vd.UMBRAL_DELTA                                                 # -5 %
 MENOS = "−"
 
@@ -866,7 +952,7 @@ def figura(R, ruta, prueba):
                          title="Banda: rango del cambio", handlelength=1.4, handleheight=1.6, labelspacing=0.6,
                          frameon=False, borderaxespad=0.0, **comun)
         ax.add_artist(ley2)
-        ley3 = ax.legend(handles=por_control, ncol=4, loc="lower left", bbox_to_anchor=(-0.01, 1.0),
+        ley3 = ax.legend(handles=por_control, ncol=min(5, len(por_control)), loc="lower left", bbox_to_anchor=(-0.01, 1.0),
                          title="IPPO con mensajes: color y forma", handlelength=2.4, columnspacing=1.4,
                          frameon=False, borderaxespad=0.2, **comun)
         leyendas = [ley1, ley2, ley3]
@@ -909,19 +995,24 @@ def main():
     comprob = comprobar_descomposicion(R, medias, versiones)
     texto, resumen = texto_pruebas(R, medias, versiones, args.prueba, sustituidos, comprob)
     tex = tabla_tex(R, args.prueba)
+    tex_pruebas = tabla_pruebas_tex(R, args.prueba)
     if args.prueba:
         salida = os.path.join(DIR, "prueba")
         rutas = {"csv": os.path.join(salida, "resultados.csv"), "txt": os.path.join(salida, "pruebas.txt"),
-                 "tex": os.path.join(salida, "diag_corredor.tex"), "fig": os.path.join(salida, "fig_diag_corredor.png")}
+                 "tex": os.path.join(salida, "diag_corredor.tex"), "tex_pruebas": os.path.join(salida, "diag_pruebas.tex"),
+                 "fig": os.path.join(salida, "fig_diag_corredor.png")}
     else:
+        tablas = os.path.join(RAIZ, "TESIS", "secciones", "tablas")
         rutas = {"csv": os.path.join(DIR, "resultados.csv"), "txt": os.path.join(DIR, "pruebas.txt"),
-                 "tex": os.path.join(RAIZ, "TESIS", "secciones", "tablas", "diag_corredor.tex"),
+                 "tex": os.path.join(tablas, "diag_corredor.tex"), "tex_pruebas": os.path.join(tablas, "diag_pruebas.tex"),
                  "fig": os.path.join(RAIZ, "TESIS", "images", "fig_diag_corredor.png")}
     escribir_csv(rutas["csv"], filas)
     escribir(rutas["txt"], texto)
     escribir(rutas["tex"], tex)
+    escribir(rutas["tex_pruebas"], tex_pruebas)
     figura(R, rutas["fig"], args.prueba)
     ancho = medir_tabla(tex)
+    ancho_pruebas = medir_tabla(tex_pruebas)
     print()
     if args.prueba:
         print(f"MODO PRUEBA: {len(faltan)} archivos faltan; sustituidos: {len(sustituidos)} controles")
@@ -931,8 +1022,9 @@ def main():
     print(f"Comprobacion con descomposicion.txt: {ok} de {total} cifras iguales")
     for d in diferencias:
         print("  DIFERENCIA:", d)
-    print("Ancho del tabular:", "sin LaTeX para medirlo" if ancho is None else
-          f"{ancho:.1f} cm ({'cabe' if ancho <= 15 else 'NO cabe'} en 15 cm)")
+    for nombre, a in (("Ancho del tabular", ancho), ("Ancho del tabular de pruebas", ancho_pruebas)):
+        print(f"{nombre}:", "sin LaTeX para medirlo" if a is None else
+              f"{a:.1f} cm ({'cabe' if a <= 15 else 'NO cabe'} en 15 cm)")
     for a in avisos:
         print("  AVISO:", a)
     return 0

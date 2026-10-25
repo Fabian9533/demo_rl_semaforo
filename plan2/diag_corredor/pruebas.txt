@@ -1,0 +1,268 @@
+Diagnóstico de la curva del corredor: respuesta al prerregistro (PRERREGISTRO.md, Enmiendas 1 y 2)
+Generado por plan2/diag_corredor/analisis.py. No editar a mano.
+
+Referencia principal: fijo ajustado desde 10 s. Métrica principal: retraso total (timeLoss + espera
+para entrar). Cambio pareado por semilla, IC95 por bootstrap pareado (10 000 remuestreos) y p de
+Wilcoxon pareado (evaluar.comparar). H2-H5 miran solo el IC, como dice el prerregistro.
+El IC llega redondeado a 0.1 (evaluar.comparar), y 'IC entero bajo/sobre cero' se lee sobre ese valor,
+como en veredicto.py: un extremo real entre -0.05 y +0.05 queda en 0.0 y no cuenta. Esas líneas
+llevan la marca [extremo del IC en 0.0 por el redondeo].
+
+H1 (referencia). Se reporta; no tiene prueba. Versión actual frente a las dos reglas del fijo:
+  Semillas 1001-1030:
+    905   fijo de la regla del 25.09 -5.6 % (timeLoss), -5.5 % (total); fijo ajustado desde 10 s +0.1 % (timeLoss), +0.1 % (total); ciclo mínimo +0.1 % (timeLoss), +0.1 % (total)
+    1358  fijo de la regla del 25.09 +5.4 % (timeLoss), +5.2 % (total); fijo ajustado desde 10 s +5.4 % (timeLoss), +5.2 % (total); ciclo mínimo +1.7 % (timeLoss), +1.6 % (total)
+    P1    fijo de la regla del 25.09 -6.8 % (timeLoss), -6.7 % (total); fijo ajustado desde 10 s -6.8 % (timeLoss), -6.7 % (total); ciclo mínimo -80.8 % (timeLoss), -81.0 % (total)
+    2715  fijo de la regla del 25.09 +6.6 % (timeLoss), +32.9 % (total); fijo ajustado desde 10 s +6.6 % (timeLoss), +32.9 % (total); ciclo mínimo -70.7 % (timeLoss), -84.4 % (total)
+    P2    fijo de la regla del 25.09 -23.3 % (timeLoss), +1.6 % (total); fijo ajustado desde 10 s -23.3 % (timeLoss), +1.6 % (total); ciclo mínimo -58.5 % (timeLoss), -62.0 % (total)
+  Semillas 6001-6030:
+    905   fijo de la regla del 25.09 -4.9 % (timeLoss), -4.8 % (total); fijo ajustado desde 10 s -0.1 % (timeLoss), -0.1 % (total); ciclo mínimo -0.1 % (timeLoss), -0.1 % (total)
+    1358  fijo de la regla del 25.09 +4.5 % (timeLoss), +4.3 % (total); fijo ajustado desde 10 s +4.5 % (timeLoss), +4.3 % (total); ciclo mínimo +0.7 % (timeLoss), +0.7 % (total)
+    P1    fijo de la regla del 25.09 -4.9 % (timeLoss), -4.8 % (total); fijo ajustado desde 10 s -4.9 % (timeLoss), -4.8 % (total); ciclo mínimo -80.6 % (timeLoss), -80.7 % (total)
+    2715  fijo de la regla del 25.09 +9.9 % (timeLoss), +41.7 % (total); fijo ajustado desde 10 s +9.9 % (timeLoss), +41.7 % (total); ciclo mínimo -70.5 % (timeLoss), -84.1 % (total)
+    P2    fijo de la regla del 25.09 -23.1 % (timeLoss), +0.6 % (total); fijo ajustado desde 10 s -23.1 % (timeLoss), +0.6 % (total); ciclo mínimo -61.1 % (timeLoss), -63.9 % (total)
+
+H2 (recompensa)
+  INS frente a la versión actual en 2715 y P2: (a) espera para entrar y (b) retraso total, IC entero bajo cero.
+  Semillas 1001-1030 (referencia -> control, cambio, IC95 bootstrap pareado, p de Wilcoxon):
+    2715  espera para entrar     18.39 ->    25.11 s/veh    +36.6 %   [+16.4, +60.8]  p=0.00095 no cumple
+    2715  retraso total          76.43 ->    87.12 s/veh    +14.0 %    [+8.1, +20.3]  p=5.6e-05 no cumple
+    P2    espera para entrar    282.02 ->   333.83 s/veh    +18.4 %   [+16.4, +20.4]  p=1.9e-09 no cumple
+    P2    retraso total         400.68 ->   484.32 s/veh    +20.9 %   [+19.0, +22.8]  p=1.9e-09 no cumple
+    => NO PASA
+  Semillas 6001-6030 (referencia -> control, cambio, IC95 bootstrap pareado, p de Wilcoxon):
+    2715  espera para entrar     19.23 ->    26.10 s/veh    +35.8 %   [+17.6, +57.2]  p=0.00038 no cumple
+    2715  retraso total          77.75 ->    88.31 s/veh    +13.6 %    [+7.6, +19.9]  p=9.9e-05 no cumple
+    P2    espera para entrar    276.25 ->   342.24 s/veh    +23.9 %   [+21.5, +26.4]  p=1.9e-09 no cumple
+    P2    retraso total         394.10 ->   495.59 s/veh    +25.8 %   [+23.4, +28.2]  p=1.9e-09 no cumple
+    => NO PASA
+  Resultado: NO PASA en 1001-1030; NO PASA en 6001-6030
+
+H3 (objetivo de entrenamiento)
+  V2 frente a la versión actual en 1358: (a) cambios de fase, IC entero sobre cero; (b) timeLoss, IC entero bajo cero.
+  Semillas 1001-1030 (referencia -> control, cambio, IC95 bootstrap pareado, p de Wilcoxon):
+    1358  cambios de fase        372.7 ->    500.4    +34.3 %   [+33.2, +35.3]  p=1.7e-06 cumple
+    1358  timeLoss               19.10 ->    17.68 s/veh     -7.4 %     [-8.5, -6.3]  p=3.7e-09 cumple
+    => PASA
+  Semillas 6001-6030 (referencia -> control, cambio, IC95 bootstrap pareado, p de Wilcoxon):
+    1358  cambios de fase        373.0 ->    499.2    +33.8 %   [+32.7, +35.0]  p=1.7e-06 cumple
+    1358  timeLoss               18.99 ->    17.61 s/veh     -7.3 %     [-8.1, -6.5]  p=1.7e-06 cumple
+    => PASA
+  Resultado: PASA en 1001-1030; PASA en 6001-6030
+
+H4 (sin regresión)
+  V2+INS frente al fijo ajustado desde 10 s en P1, retraso total, IC entero bajo cero.
+  Semillas 1001-1030 (referencia -> control, cambio, IC95 bootstrap pareado, p de Wilcoxon):
+    P1    retraso total          21.67 ->    20.38 s/veh     -6.0 %     [-7.2, -4.8]  p=1.9e-06 cumple
+    => PASA
+  Semillas 6001-6030 (referencia -> control, cambio, IC95 bootstrap pareado, p de Wilcoxon):
+    P1    retraso total          21.30 ->    20.23 s/veh     -5.0 %     [-5.7, -4.3]  p=1.7e-06 cumple
+    => PASA
+  Resultado: PASA en 1001-1030; PASA en 6001-6030
+
+CRITERIO DE CAUSA RAÍZ CORREGIDA
+  V2+INS frente al fijo ajustado desde 10 s, retraso total: ningún nivel peor con IC entero
+  sobre cero y p < 0.05, y P1 sigue mejorando (IC entero bajo cero, como H4).
+  Semillas 1001-1030:
+    905      15.93 ->    15.66 s/veh     -1.7 %     [-2.3, -1.1]  p=8.2e-05 no peor  (MEJORA)
+    1358     18.70 ->    18.77 s/veh     +0.4 %     [-0.4, +1.2]  p=0.45    no peor  (EMPATA)
+    P1       21.67 ->    20.38 s/veh     -6.0 %     [-7.2, -4.8]  p=1.9e-06 no peor  (FUNCIONA)
+    2715     57.50 ->    90.78 s/veh    +57.9 %   [+45.0, +71.9]  p=5.6e-09 PEOR que el fijo  (PENDIENTE)
+    P2      394.27 ->   473.73 s/veh    +20.2 %   [+18.7, +21.6]  p=1.9e-09 PEOR que el fijo  (PENDIENTE)
+    => NO PASA (peor en 2715, P2)
+  Semillas 6001-6030:
+    905      15.96 ->    15.74 s/veh     -1.4 %     [-2.0, -0.8]  p=0.00063 no peor  (MEJORA)
+    1358     18.76 ->    18.68 s/veh     -0.4 %     [-1.2, +0.4]  p=0.18    no peor  (EMPATA)
+    P1       21.30 ->    20.23 s/veh     -5.0 %     [-5.7, -4.3]  p=1.7e-06 no peor  (FUNCIONA)
+    2715     54.86 ->    89.81 s/veh    +63.7 %   [+53.2, +74.3]  p=1.9e-09 PEOR que el fijo  (PENDIENTE)
+    P2      391.71 ->   473.11 s/veh    +20.8 %   [+19.2, +22.3]  p=1.9e-09 PEOR que el fijo  (PENDIENTE)
+    => NO PASA (peor en 2715, P2)
+  Resultado: NO PASA en 1001-1030; NO PASA en 6001-6030
+
+ENMIENDA 2 (segunda ronda, escrita con la primera a la vista y antes de entrenar V2+INS+obs)
+
+H5 (observabilidad)
+  V2+INS+obs frente a V2+INS en 2715 y P2: (a) espera para entrar y (b) retraso total, IC entero bajo cero.
+  Semillas 1001-1030 (referencia -> control, cambio, IC95 bootstrap pareado, p de Wilcoxon):
+    2715  espera para entrar     24.84 ->    20.26 s/veh    -18.4 %    [-32.8, -2.4]  p=0.029   cumple
+    2715  retraso total          90.78 ->    78.61 s/veh    -13.4 %    [-18.7, -7.8]  p=0.00023 cumple
+    P2    espera para entrar    329.51 ->   222.43 s/veh    -32.5 %   [-33.7, -31.2]  p=1.9e-09 cumple
+    P2    retraso total         473.73 ->   359.36 s/veh    -24.1 %   [-25.2, -23.0]  p=1.9e-09 cumple
+    => PASA
+  Semillas 6001-6030 (referencia -> control, cambio, IC95 bootstrap pareado, p de Wilcoxon):
+    2715  espera para entrar     24.56 ->    19.19 s/veh    -21.9 %    [-32.4, -9.5]  p=0.0013  cumple
+    2715  retraso total          89.81 ->    77.12 s/veh    -14.1 %    [-18.3, -9.7]  p=8e-06   cumple
+    P2    espera para entrar    328.55 ->   221.84 s/veh    -32.5 %   [-33.8, -31.2]  p=1.9e-09 cumple
+    P2    retraso total         473.11 ->   358.34 s/veh    -24.3 %   [-25.4, -23.1]  p=1.9e-09 cumple
+    => PASA
+  Resultado: PASA en 1001-1030; PASA en 6001-6030
+
+CRITERIO DE CAUSA RAÍZ CORREGIDA CON V2+INS+obs (Enmienda 2)
+  V2+INS+obs frente al fijo ajustado desde 10 s, retraso total: ningún nivel peor con IC entero
+  sobre cero y p < 0.05, y P1 sigue mejorando (IC entero bajo cero, como H4).
+  Semillas 1001-1030:
+    905      15.93 ->    15.96 s/veh     +0.2 %     [-0.5, +0.8]  p=0.47    no peor  (EMPATA)
+    1358     18.70 ->    18.23 s/veh     -2.5 %     [-3.2, -1.8]  p=9.3e-06 no peor  (PENDIENTE)
+    P1       21.67 ->    20.05 s/veh     -7.5 %     [-8.6, -6.3]  p=1.9e-06 no peor  (FUNCIONA)
+    2715     57.50 ->    78.61 s/veh    +36.7 %   [+25.2, +49.6]  p=8e-06   PEOR que el fijo  (PENDIENTE)
+    P2      394.27 ->   359.36 s/veh     -8.9 %    [-10.3, -7.5]  p=1.7e-06 no peor  (PENDIENTE)
+    => NO PASA (peor en 2715)
+  Semillas 6001-6030:
+    905      15.96 ->    16.01 s/veh     +0.3 %     [-0.5, +1.1]  p=0.47    no peor  (EMPATA)
+    1358     18.76 ->    18.16 s/veh     -3.2 %     [-4.1, -2.3]  p=1.5e-05 no peor  (PENDIENTE)
+    P1       21.30 ->    19.93 s/veh     -6.4 %     [-7.4, -5.5]  p=1.9e-09 no peor  (FUNCIONA)
+    2715     54.86 ->    77.12 s/veh    +40.6 %   [+33.0, +48.4]  p=3.7e-09 PEOR que el fijo  (PENDIENTE)
+    P2      391.71 ->   358.34 s/veh     -8.5 %     [-9.7, -7.4]  p=1.9e-09 no peor  (PENDIENTE)
+    => NO PASA (peor en 2715)
+  Resultado: NO PASA en 1001-1030; NO PASA en 6001-6030
+
+COMPROBACIÓN DESCRIPTIVA (Enmienda 2): pérdida de valor media de los episodios 181-200, por base
+  2715  V2          s42 0.21, s2042 0.17, s4042 0.18
+  2715  V2+INS      s42 4.36, s2042 2.81, s4042 3.83
+  2715  V2+INS+obs  s42 0.40, s2042 0.44, s4042 0.43
+  P2    V2          s42 0.28, s2042 0.27, s4042 0.27
+  P2    V2+INS      s42 62.21, s2042 30.52, s4042 86.64
+  P2    V2+INS+obs  s42 0.53, s2042 0.60, s4042 0.52
+
+RESUMEN
+  H2         NO PASA en 1001-1030; NO PASA en 6001-6030
+  H3         PASA en 1001-1030; PASA en 6001-6030
+  H4         PASA en 1001-1030; PASA en 6001-6030
+  Criterio   NO PASA en 1001-1030; NO PASA en 6001-6030
+  H5         PASA en 1001-1030; PASA en 6001-6030
+  Criterio 2 NO PASA en 1001-1030; NO PASA en 6001-6030
+
+CRITERIO DE VALIDACIÓN (Enmienda 1): episodio elegido por timeLoss y por retraso total, 2715 y P2
+  2715  V2      timeLoss/total: s42 150/200 (distinto); s2042 130/130 (mismo); s4042 150/170 (distinto)
+  2715  INS     timeLoss/total: s42 140/140 (mismo); s2042 190/160 (distinto); s4042 200/200 (mismo)
+  2715  V2+INS  timeLoss/total: s42 90/90 (mismo); s2042 170/40 (distinto); s4042 80/80 (mismo)
+  2715  V2+INS+obs timeLoss/total: s42 190/190 (mismo); s2042 60/60 (mismo); s4042 170/170 (mismo)
+  P2    V2      timeLoss/total: s42 160/160 (mismo); s2042 200/200 (mismo); s4042 110/110 (mismo)
+  P2    INS     timeLoss/total: s42 200/150 (distinto); s2042 200/100 (distinto); s4042 130/90 (distinto)
+  P2    V2+INS  timeLoss/total: s42 190/40 (distinto); s2042 110/70 (distinto); s4042 120/160 (distinto)
+  P2    V2+INS+obs timeLoss/total: s42 50/60 (distinto); s2042 200/200 (mismo); s4042 160/200 (distinto)
+  La versión actual se eligió por timeLoss y su meta no trae val_total_serie: en las comparaciones
+  con ella el cambio incluye el del criterio.
+
+VERSIÓN EVALUADA DE CADA CONTROL (base mediana por val_elegido)
+  905   versión actual  base  4042  criterio timeloss val s42 15.03, s2042 14.95, s4042 14.95; episodio 180; se estabilizó (meseta +1.1 %, estabilidad 0.4 %)
+  905   V2              base  2042  criterio total    val s42 15.16, s2042 15.20, s4042 15.40; episodio 90; se estabilizó (meseta -4.5 %, estabilidad 0.0 %)
+  905   INS             base  4042  criterio total    val s42 15.40, s2042 15.24, s4042 15.34; episodio 160; se estabilizó (meseta +0.8 %, estabilidad 1.1 %)
+  905   V2+INS          base  2042  criterio total    val s42 15.14, s2042 15.30, s4042 15.40; episodio 180; se estabilizó (meseta +0.5 %, estabilidad 0.8 %)
+  905   V2+INS+obs      base  2042  criterio total    val s42 15.19, s2042 15.41, s4042 15.67; episodio 150; se estabilizó (meseta +1.3 %, estabilidad 1.0 %)
+  1358  versión actual  base    42  criterio timeloss val s42 18.45, s2042 18.81, s4042 18.25; episodio 90; se estabilizó (meseta +0.0 %, estabilidad 0.0 %)
+  1358  V2              base    42  criterio total    val s42 17.98, s2042 17.77, s4042 18.04; episodio 170; se estabilizó (meseta -2.2 %, estabilidad 1.2 %)
+  1358  INS             base  4042  criterio total    val s42 19.28, s2042 18.84, s4042 18.96; episodio 50; se estabilizó (meseta +1.3 %, estabilidad 0.9 %)
+  1358  V2+INS          base  4042  criterio total    val s42 18.31, s2042 17.41, s4042 18.26; episodio 190; se estabilizó (meseta -0.6 %, estabilidad 0.0 %)
+  1358  V2+INS+obs      base  4042  criterio total    val s42 17.71, s2042 18.70, s4042 17.86; episodio 200; NO se estabilizó (meseta -6.6 %, estabilidad 0.0 %)
+  P1    versión actual  base  4042  criterio timeloss val s42 19.54, s2042 19.71, s4042 19.55; episodio 190; se estabilizó (meseta +0.9 %, estabilidad 0.7 %)
+  P1    V2              base    42  criterio total    val s42 19.98, s2042 20.25, s4042 19.93; episodio 180; se estabilizó (meseta -3.7 %, estabilidad 0.0 %)
+  P1    INS             base    42  criterio total    val s42 20.07, s2042 20.09, s4042 19.94; episodio 150; se estabilizó (meseta +0.9 %, estabilidad 0.7 %)
+  P1    V2+INS          base  2042  criterio total    val s42 20.27, s2042 19.82, s4042 19.77; episodio 120; se estabilizó (meseta -1.8 %, estabilidad 0.0 %)
+  P1    V2+INS+obs      base    42  criterio total    val s42 19.73, s2042 19.43, s4042 20.03; episodio 170; se estabilizó (meseta +1.1 %, estabilidad 1.7 %)
+  2715  versión actual  base  2042  criterio timeloss val s42 57.20, s2042 55.78, s4042 55.37; episodio 180; se estabilizó (meseta -3.7 %, estabilidad 1.2 %)
+  2715  V2              base    42  criterio total    val s42 70.11, s2042 74.20, s4042 69.58; episodio 200; se estabilizó (meseta -4.6 %, estabilidad 0.0 %)
+  2715  INS             base  2042  criterio total    val s42 101.01, s2042 89.85, s4042 76.75; episodio 160; se estabilizó (meseta -0.4 %, estabilidad 2.3 %)
+  2715  V2+INS          base    42  criterio total    val s42 79.76, s2042 77.66, s4042 84.47; episodio 90; NO se estabilizó (meseta -1.7 %, estabilidad 8.4 %)
+  2715  V2+INS+obs      base  2042  criterio total    val s42 69.86, s2042 70.84, s4042 75.44; episodio 60; NO se estabilizó (meseta -16.2 %, estabilidad 0.0 %)
+  P2    versión actual  base  2042  criterio timeloss val s42 116.50, s2042 116.52, s4042 117.88; episodio 120; se estabilizó (meseta +4.3 %, estabilidad 3.5 %)
+  P2    V2              base    42  criterio total    val s42 351.27, s2042 353.84, s4042 340.07; episodio 160; se estabilizó (meseta +1.0 %, estabilidad 3.8 %)
+  P2    INS             base  2042  criterio total    val s42 453.65, s2042 460.43, s4042 522.87; episodio 100; NO se estabilizó (meseta -16.9 %, estabilidad 0.0 %)
+  P2    V2+INS          base  4042  criterio total    val s42 480.01, s2042 511.74, s4042 492.23; episodio 160; NO se estabilizó (meseta +2.7 %, estabilidad 10.1 %)
+  P2    V2+INS+obs      base    42  criterio total    val s42 368.94, s2042 379.74, s4042 355.22; episodio 60; NO se estabilizó (meseta -12.9 %, estabilidad 0.0 %)
+
+MEDIAS POR CONTROL (s/veh; cambios de fase por corrida, suma de los dos semáforos)
+  Semillas 1001-1030:
+    905   versión actual              timeLoss   15.58  total   15.95  espera para entrar   0.37  cambios de fase  387.0
+    905   V2                          timeLoss   15.10  total   15.47  espera para entrar   0.37  cambios de fase  394.3
+    905   INS                         timeLoss   15.24  total   15.61  espera para entrar   0.37  cambios de fase  391.4
+    905   V2+INS                      timeLoss   15.29  total   15.66  espera para entrar   0.37  cambios de fase  408.5
+    905   V2+INS+obs                  timeLoss   15.59  total   15.96  espera para entrar   0.37  cambios de fase  405.6
+    905   fijo de la regla del 25.09  timeLoss   16.50  total   16.87  espera para entrar   0.37  cambios de fase  409.4
+    905   fijo ajustado desde 10 s    timeLoss   15.56  total   15.93  espera para entrar   0.37  cambios de fase  566.3
+    905   ciclo mínimo                timeLoss   15.56  total   15.93  espera para entrar   0.37  cambios de fase  566.3
+    905   actuado                     timeLoss   15.80  total   16.17  espera para entrar   0.37  cambios de fase  537.0
+    1358  versión actual              timeLoss   19.10  total   19.68  espera para entrar   0.58  cambios de fase  372.7
+    1358  V2                          timeLoss   17.68  total   18.26  espera para entrar   0.58  cambios de fase  500.4
+    1358  INS                         timeLoss   19.04  total   19.62  espera para entrar   0.58  cambios de fase  364.7
+    1358  V2+INS                      timeLoss   18.19  total   18.77  espera para entrar   0.58  cambios de fase  531.6
+    1358  V2+INS+obs                  timeLoss   17.65  total   18.23  espera para entrar   0.58  cambios de fase  522.8
+    1358  fijo de la regla del 25.09  timeLoss   18.12  total   18.70  espera para entrar   0.58  cambios de fase  526.5
+    1358  fijo ajustado desde 10 s    timeLoss   18.12  total   18.70  espera para entrar   0.58  cambios de fase  526.5
+    1358  ciclo mínimo                timeLoss   18.78  total   19.36  espera para entrar   0.58  cambios de fase  568.2
+    1358  actuado                     timeLoss   18.09  total   18.67  espera para entrar   0.58  cambios de fase  523.1
+    P1    versión actual              timeLoss   19.84  total   20.22  espera para entrar   0.37  cambios de fase  384.2
+    P1    V2                          timeLoss   19.70  total   20.07  espera para entrar   0.37  cambios de fase  384.7
+    P1    INS                         timeLoss   19.64  total   20.01  espera para entrar   0.37  cambios de fase  381.9
+    P1    V2+INS                      timeLoss   20.01  total   20.38  espera para entrar   0.37  cambios de fase  381.9
+    P1    V2+INS+obs                  timeLoss   19.68  total   20.05  espera para entrar   0.37  cambios de fase  387.4
+    P1    fijo de la regla del 25.09  timeLoss   21.30  total   21.67  espera para entrar   0.37  cambios de fase  410.5
+    P1    fijo ajustado desde 10 s    timeLoss   21.30  total   21.67  espera para entrar   0.37  cambios de fase  410.5
+    P1    ciclo mínimo                timeLoss  103.33  total  106.26  espera para entrar   2.93  cambios de fase  639.9
+    P1    actuado                     timeLoss   21.07  total   21.45  espera para entrar   0.37  cambios de fase  457.7
+    2715  versión actual              timeLoss   58.04  total   76.43  espera para entrar  18.39  cambios de fase  344.3
+    2715  V2                          timeLoss   57.49  total   76.83  espera para entrar  19.35  cambios de fase  389.5
+    2715  INS                         timeLoss   62.01  total   87.12  espera para entrar  25.11  cambios de fase  341.6
+    2715  V2+INS                      timeLoss   65.94  total   90.78  espera para entrar  24.84  cambios de fase  392.9
+    2715  V2+INS+obs                  timeLoss   58.35  total   78.61  espera para entrar  20.26  cambios de fase  383.5
+    2715  fijo de la regla del 25.09  timeLoss   54.45  total   57.50  espera para entrar   3.05  cambios de fase  377.3
+    2715  fijo ajustado desde 10 s    timeLoss   54.45  total   57.50  espera para entrar   3.05  cambios de fase  377.3
+    2715  ciclo mínimo                timeLoss  198.00  total  490.65  espera para entrar 292.65  cambios de fase  849.9
+    2715  actuado                     timeLoss   78.96  total  151.43  espera para entrar  72.47  cambios de fase  264.7
+    P2    versión actual              timeLoss  118.66  total  400.68  espera para entrar 282.02  cambios de fase  299.3
+    P2    V2                          timeLoss  125.93  total  351.71  espera para entrar 225.78  cambios de fase  440.0
+    P2    INS                         timeLoss  150.49  total  484.32  espera para entrar 333.83  cambios de fase  259.7
+    P2    V2+INS                      timeLoss  144.22  total  473.73  espera para entrar 329.51  cambios de fase  496.2
+    P2    V2+INS+obs                  timeLoss  136.93  total  359.36  espera para entrar 222.43  cambios de fase  380.7
+    P2    fijo de la regla del 25.09  timeLoss  154.70  total  394.27  espera para entrar 239.57  cambios de fase  447.0
+    P2    fijo ajustado desde 10 s    timeLoss  154.70  total  394.27  espera para entrar 239.57  cambios de fase  447.0
+    P2    ciclo mínimo                timeLoss  286.24  total 1055.41  espera para entrar 662.98  cambios de fase  922.0
+    P2    actuado                     timeLoss  124.14  total  445.46  espera para entrar 321.32  cambios de fase  261.9
+  Semillas 6001-6030:
+    905   versión actual              timeLoss   15.57  total   15.94  espera para entrar   0.37  cambios de fase  386.1
+    905   V2                          timeLoss   15.07  total   15.44  espera para entrar   0.37  cambios de fase  395.3
+    905   INS                         timeLoss   15.43  total   15.80  espera para entrar   0.37  cambios de fase  393.2
+    905   V2+INS                      timeLoss   15.37  total   15.74  espera para entrar   0.37  cambios de fase  407.6
+    905   V2+INS+obs                  timeLoss   15.64  total   16.01  espera para entrar   0.37  cambios de fase  406.1
+    905   fijo de la regla del 25.09  timeLoss   16.38  total   16.75  espera para entrar   0.37  cambios de fase  409.4
+    905   fijo ajustado desde 10 s    timeLoss   15.59  total   15.96  espera para entrar   0.37  cambios de fase  566.9
+    905   ciclo mínimo                timeLoss   15.59  total   15.96  espera para entrar   0.37  cambios de fase  566.9
+    905   actuado                     timeLoss   15.86  total   16.23  espera para entrar   0.37  cambios de fase  538.1
+    1358  versión actual              timeLoss   18.99  total   19.57  espera para entrar   0.58  cambios de fase  373.0
+    1358  V2                          timeLoss   17.61  total   18.18  espera para entrar   0.58  cambios de fase  499.2
+    1358  INS                         timeLoss   18.99  total   19.57  espera para entrar   0.58  cambios de fase  364.5
+    1358  V2+INS                      timeLoss   18.10  total   18.68  espera para entrar   0.58  cambios de fase  524.5
+    1358  V2+INS+obs                  timeLoss   17.58  total   18.16  espera para entrar   0.58  cambios de fase  519.6
+    1358  fijo de la regla del 25.09  timeLoss   18.18  total   18.76  espera para entrar   0.58  cambios de fase  526.5
+    1358  fijo ajustado desde 10 s    timeLoss   18.18  total   18.76  espera para entrar   0.58  cambios de fase  526.5
+    1358  ciclo mínimo                timeLoss   18.86  total   19.43  espera para entrar   0.58  cambios de fase  567.9
+    1358  actuado                     timeLoss   17.95  total   18.53  espera para entrar   0.58  cambios de fase  521.6
+    P1    versión actual              timeLoss   19.90  total   20.28  espera para entrar   0.37  cambios de fase  383.9
+    P1    V2                          timeLoss   19.75  total   20.12  espera para entrar   0.37  cambios de fase  385.2
+    P1    INS                         timeLoss   19.83  total   20.20  espera para entrar   0.37  cambios de fase  382.4
+    P1    V2+INS                      timeLoss   19.86  total   20.23  espera para entrar   0.37  cambios de fase  382.5
+    P1    V2+INS+obs                  timeLoss   19.55  total   19.93  espera para entrar   0.37  cambios de fase  387.6
+    P1    fijo de la regla del 25.09  timeLoss   20.93  total   21.30  espera para entrar   0.37  cambios de fase  410.3
+    P1    fijo ajustado desde 10 s    timeLoss   20.93  total   21.30  espera para entrar   0.37  cambios de fase  410.3
+    P1    ciclo mínimo                timeLoss  102.34  total  105.18  espera para entrar   2.84  cambios de fase  639.0
+    P1    actuado                     timeLoss   20.91  total   21.29  espera para entrar   0.37  cambios de fase  458.2
+    2715  versión actual              timeLoss   58.53  total   77.75  espera para entrar  19.23  cambios de fase  344.8
+    2715  V2                          timeLoss   57.39  total   75.94  espera para entrar  18.55  cambios de fase  389.2
+    2715  INS                         timeLoss   62.21  total   88.31  espera para entrar  26.10  cambios de fase  342.3
+    2715  V2+INS                      timeLoss   65.25  total   89.81  espera para entrar  24.56  cambios de fase  391.9
+    2715  V2+INS+obs                  timeLoss   57.92  total   77.12  espera para entrar  19.19  cambios de fase  381.4
+    2715  fijo de la regla del 25.09  timeLoss   53.25  total   54.86  espera para entrar   1.61  cambios de fase  376.4
+    2715  fijo ajustado desde 10 s    timeLoss   53.25  total   54.86  espera para entrar   1.61  cambios de fase  376.4
+    2715  ciclo mínimo                timeLoss  198.70  total  489.65  espera para entrar 290.95  cambios de fase  849.1
+    2715  actuado                     timeLoss   75.50  total  147.84  espera para entrar  72.34  cambios de fase  264.5
+    P2    versión actual              timeLoss  117.85  total  394.10  espera para entrar 276.25  cambios de fase  299.6
+    P2    V2                          timeLoss  126.63  total  355.09  espera para entrar 228.45  cambios de fase  441.5
+    P2    INS                         timeLoss  153.34  total  495.59  espera para entrar 342.24  cambios de fase  260.6
+    P2    V2+INS                      timeLoss  144.56  total  473.11  espera para entrar 328.55  cambios de fase  496.3
+    P2    V2+INS+obs                  timeLoss  136.50  total  358.34  espera para entrar 221.84  cambios de fase  382.3
+    P2    fijo de la regla del 25.09  timeLoss  153.30  total  391.71  espera para entrar 238.41  cambios de fase  446.7
+    P2    fijo ajustado desde 10 s    timeLoss  153.30  total  391.71  espera para entrar 238.41  cambios de fase  446.7
+    P2    ciclo mínimo                timeLoss  303.18  total 1092.04  espera para entrar 646.20  cambios de fase  922.0
+    P2    actuado                     timeLoss  127.24  total  444.21  espera para entrar 316.98  cambios de fase  262.0
+
+COMPROBACIÓN: la versión actual en 1001-1030 frente a descomposicion.txt: 140 de 140 cifras iguales
