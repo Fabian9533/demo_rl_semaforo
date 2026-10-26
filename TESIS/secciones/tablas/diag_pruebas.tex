@@ -1,8 +1,8 @@
 % Generado por plan2/diag_corredor/analisis.py. No editar a mano.
-% Pruebas H2-H5 del prerregistro (PRERREGISTRO.md, Enmiendas 1 y 2): cambio pareado e IC95 bootstrap pareado
+% Pruebas H2-H7 del prerregistro (PRERREGISTRO.md, Enmiendas 1 a 3): cambio pareado e IC95 bootstrap pareado
 % en 1001-1030 y si cumple la prediccion (IC entero bajo o sobre cero) en 1001-1030 y en 6001-6030.
-% Fuente: plan2/diag_corredor/resultados.csv. Necesita booktabs y makecell; el table lleva \footnotesize
-% y \setlength{\tabcolsep}{3pt}.
+% Fuente: plan2/diag_corredor/resultados.csv (H2-H5) y resultados3.csv (H6a, H6b y H7, de analisis3.py).
+% Necesita booktabs y makecell; el table lleva \footnotesize y \setlength{\tabcolsep}{3pt}.
 \begin{tabular}{llcrccc}
 \toprule
  & & & & & \multicolumn{2}{c}{¿Cumple?} \\
@@ -27,5 +27,14 @@ Nivel & Métrica & \makecell{IC que\\se espera} & \makecell[tr]{Cambio\\(\%)} & 
 2715 & retraso total & bajo 0 & $-13.4$ & [$-18.7$, $-7.8$] & sí & sí \\
 3620 (P2) & espera para entrar & bajo 0 & $-32.5$ & [$-33.7$, $-31.2$] & sí & sí \\
 3620 (P2) & retraso total & bajo 0 & $-24.1$ & [$-25.2$, $-23.0$] & sí & sí \\
+\addlinespace
+\multicolumn{7}{l}{\textbf{H6a.} Sin giros a la izquierda: V2 de 2715 (sin reentrenar) frente al fijo de 2715} \\
+2715 sin giros & retraso total & bajo 0 & $-6.9$ & [$-9.9$, $-4.1$] & sí & sí \\
+\addlinespace
+\multicolumn{7}{l}{\textbf{H6b.} Sin giros a la izquierda: V2 entrenado ahí frente a su fijo ajustado desde 10~s} \\
+2715 sin giros & retraso total & bajo 0 & $+1.3$ & [$+0.5$, $+2.0$] & no & no \\
+\addlinespace
+\multicolumn{7}{l}{\textbf{H7.} V2 con $\gamma = 0.99$ frente a V2} \\
+2715 & retraso total & bajo 0 & $+16.1$ & [$+9.0$, $+23.6$] & no & no \\
 \bottomrule
 \end{tabular}

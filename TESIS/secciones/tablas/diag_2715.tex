@@ -1,0 +1,19 @@
+% Generado por plan2/diag_corredor/analisis3.py. No editar a mano.
+% Enmienda 3: los mismos controles y politicas en dem_corredor_t2715 (con los giros a la izquierda del periodo 2)
+% y en dem_corredor_t2715_der (sin ellos), semillas 1001-1030; cambio pareado frente al fijo de 2715 (25/10 s) en
+% cada escenario, con IC95 bootstrap pareado. Necesita booktabs y makecell; el table lleva \footnotesize.
+\begin{tabular}{lrrrr}
+\toprule
+ & \multicolumn{2}{c}{Con los giros a la izquierda} & \multicolumn{2}{c}{Sin ellos} \\
+\cmidrule(lr){2-3}\cmidrule(lr){4-5}
+Control & \makecell[r]{Retraso total\\(s/veh)} & \makecell[r]{Frente al\\fijo (\%)} & \makecell[r]{Retraso total\\(s/veh)} & \makecell[r]{Frente al\\fijo (\%)} \\
+\midrule
+Fijo de 2715 (25/10~s) & 57.50 & -- & 42.54 & -- \\
+Actuado & 151.43 & \makecell[r]{$+163.3$\\{}[$+143.3$, $+185.3$]} & 28.75 & \makecell[r]{$-32.4$\\{}[$-33.4$, $-31.4$]} \\
+Versión actual & 76.43 & \makecell[r]{$+32.9$\\{}[$+22.5$, $+44.2$]} & 34.61 & \makecell[r]{$-18.6$\\{}[$-20.8$, $-16.6$]} \\
+V2 & 76.83 & \makecell[r]{$+33.6$\\{}[$+23.0$, $+44.9$]} & 39.59 & \makecell[r]{$-6.9$\\{}[$-9.9$, $-4.1$]} \\
+\addlinespace
+Fijo ajustado sin los giros & -- & -- & 29.22 & \makecell[r]{$-31.3$\\{}[$-32.4$, $-30.1$]} \\
+V2 entrenado sin los giros & -- & -- & 29.59 & \makecell[r]{$-30.4$\\{}[$-31.6$, $-29.2$]} \\
+\bottomrule
+\end{tabular}

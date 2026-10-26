@@ -38,12 +38,19 @@ El resultado tiene cuatro límites:
     2715~veh/h), en la red con rotonda no hay diferencia significativa
     con 2715 y 3620~veh/h y en la malla no hay mejora en ningún nivel
     (Sección~\ref{sec:efecto-demanda}). Un diagnóstico posterior muestra
-    que la alternancia del corredor no viene de SUMO; con el
-    entrenamiento corregido solo queda la falla de 2715~veh/h, cuya causa
-    sigue abierta (Sección~\ref{sec:diag-corredor}).
+    que esa alternancia no es un error de SUMO, sino de cómo se midió y
+    de cómo se entrenó el modelo: con la medición más estricta y una
+    corrección del entrenamiento, solo falla 2715~veh/h, donde pesan
+    mucho, aunque no lo explican todo, los autos que esperan para girar
+    a la izquierda en calles de un carril
+    (Sección~\ref{sec:diag-corredor}).
 % Diagnostico del corredor (25.10.2026, rama diagnostico-corredor): plan2/diag_corredor/pruebas.txt y resultados.csv
 % (V2 frente al fijo desde 10 s en retraso total, 1001-1030: -2.9, -2.3, -7.4, +33.6 y -10.8 %; solo 2715 FALLA, los
-% mismos veredictos en 6001-6030); causas por nivel: Seccion sec:diag-corredor, "Respuesta"
+% mismos veredictos en 6001-6030); causas por nivel: Seccion sec:diag-corredor (Tabla tab:diag-resumen y "Por que
+% 2715 veh/h"); 2715: plan2/diag_corredor/pruebas3.txt (Enmienda 3; sin los giros a la izquierda del periodo 2,
+% V2 entrenado ahi frente a su fijo ajustado desde 10 s +1.3 %, FALLA, frente a +33.6 % con ellos; la lectura del
+% pre-registro es que los giros no bastan para explicar 2715: "pesan mucho, aunque no lo explican todo").
+% Verificacion 25.10.2026: antes decia "viene sobre todo de los giros a la izquierda permitidos"
 % fuente: plan2/demanda2/resumen_demanda2.csv (corredor: FUNCIONA en 905, 1810 y 3620 y FALLA en 1358 y 2715 veh/h;
 % red con rotonda: 2715 +0.9, IC [-0.5, 2.4], p 0.28, y 3620 -0.1, IC [-0.4, 0.1], p 0.276; malla 3x3: cambio_fijo
 % de +0.7 a +2.2 en sus seis niveles, sin FUNCIONA ni MEJORA). Entrega 3, tareas 4 y 5 (23.10.2026): se agrega el
