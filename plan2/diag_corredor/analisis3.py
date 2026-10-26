@@ -89,7 +89,7 @@ def escribir_tabla(datos, comp):
     """TESIS/secciones/tablas/diag_2715.tex (solo el tabular): los mismos controles en 2715 con y sin los giros a la
     izquierda del periodo 2, retraso total medio (1001-1030) y cambio frente al fijo de 2715 en su escenario."""
     filas_tex = [("Fijo de 2715 (25/10~s)", "fijo", "fijo2715"), ("Actuado", "actuado", "actuado"),
-                 ("Versión evaluada", "ippo_actual", "ippo_actual"), ("V2", "ippo_v2", "ippo_v2")]
+                 ("Versión actual", "ippo_actual", "ippo_actual"), ("V2", "ippo_v2", "ippo_v2")]
     lineas = ["% Generado por plan2/diag_corredor/analisis3.py. No editar a mano.",
               "% Enmienda 3: los mismos controles y politicas en dem_corredor_t2715 (con los giros a la izquierda del periodo 2)",
               "% y en dem_corredor_t2715_der (sin ellos), semillas 1001-1030; cambio pareado frente al fijo de 2715 (25/10 s) en",

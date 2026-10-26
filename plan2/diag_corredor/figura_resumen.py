@@ -20,7 +20,7 @@ sys.path.insert(0, DIR)
 import analisis as an                                     # noqa: E402
 
 CONTROLES = ["actual", "v2"]
-NOMBRE = {"actual": "Versión evaluada", "v2": "Entrenamiento corregido"}
+NOMBRE = {"actual": "Entrenamiento del plan", "v2": "Entrenamiento corregido"}
 
 
 def puntos():
@@ -94,14 +94,15 @@ def figura(ruta):
         # 2715 sin los giros a la izquierda (entrenado y comparado en el contrafactual): estrella y flecha desde el punto real
         x_v2 = 2715 * separa["v2"]
         y_v2 = next(p[1] for p in pts["v2"] if p[0] == 2715)
-        x_cf = 2715 * 1.12
+        x_cf = 2715 * 1.06
         ax.annotate("", xy=(x_cf, cf), xytext=(x_v2, y_v2),
                     arrowprops=dict(arrowstyle="-|>", color=an.COLOR["v2"], lw=1.1, ls=(0, (3, 2)), shrinkA=6, shrinkB=7),
                     zorder=4)
         ax.plot([x_cf, x_cf], list(cf_ic), color=an.COLOR["v2"], lw=1.0, zorder=4)
         ax.plot(x_cf, cf, "*", ms=13, mfc=an.COLOR["v2"], mec=FONDO, mew=0.8, zorder=6)
-        ax.text(x_cf / 1.045, cf - 2.2, "sin los giros a la\nizquierda", fontsize=7.2, color=an.COLOR["v2"],
-                va="top", ha="right", zorder=6)
+        # rotulo corto a la izquierda de la estrella (la leyenda ya dice que es el escenario sin giros a la izquierda)
+        ax.text(x_cf / 1.035, cf + 0.4, f"{cf:+.1f} %, FALLA".replace("-", an.MENOS),
+                fontsize=7.2, color=an.COLOR["v2"], va="bottom", ha="right", zorder=6)
         niveles = [veh for _, _, veh, _ in an.NIVELES]
         ax.set_xlim(800, 4300)
         ax.xaxis.set_major_locator(FixedLocator(niveles))
@@ -132,12 +133,13 @@ def figura(ruta):
                    mew=0.6, label="MEJORA", **dict(punto, ms=7.8)),
             Line2D([], [], marker="o", mfc=FONDO, mec=TINTA2, mew=1.4, label="EMPATA", **punto),
             Line2D([], [], marker="|", ms=10, mew=1.0, color=TINTA2, ls="", label="IC95 %")]
+        # rotulos de las bandas como los de la Figura 5.3 (curvas_demanda.py)
         por_banda = [
             Patch(facecolor=banda_roja, edgecolor="#e1e0d9", lw=0.6, label="Más retraso que el fijo:\nFALLA si es significativo"),
             Patch(facecolor=banda_pequena, edgecolor="#e1e0d9", lw=0.6,
-                  label=f"Entre {an.MENOS}5 y 0 %:\nMEJORA si es significativa"),
+                  label=f"Mejora pequeña, entre {an.MENOS}5\ny 0 %: MEJORA si es\nsignificativa"),
             Patch(facecolor=banda_clara, edgecolor="#e1e0d9", lw=0.6,
-                  label=f"{an.MENOS}5 % o menos: FUNCIONA si\nes significativa y no pierde\ncontra el actuado")]
+                  label=f"Mejora clara, de {an.MENOS}5 % o más\nnegativo: FUNCIONA si es\nsignificativa y no pierde\ncontra el actuado")]
         ley1 = ax.legend(handles=por_veredicto, loc="upper left", bbox_to_anchor=(1.01, 1.0), title="Veredicto: relleno",
                          handlelength=1.4, labelspacing=0.4, frameon=False, borderaxespad=0.0, **comun)
         ax.add_artist(ley1)

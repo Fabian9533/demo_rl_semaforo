@@ -772,13 +772,13 @@ PRUEBAS_TEX = ([("H2", n, "ins", "actual", c, "bajo") for n in ("2715", "P2") fo
 
 
 def tabla_pruebas_tex(R, prueba):
-    """Tabular de las pruebas H2-H5 (Anexo G): cambio e IC95 en 1001-1030 y si cumple en los dos juegos."""
+    """Tabular de las pruebas H2-H7 (Anexo G): cambio e IC95 en 1001-1030 y si cumple en los dos juegos."""
     lineas = [
         "% Generado por plan2/diag_corredor/analisis.py. No editar a mano.",
-        "% Pruebas H2-H5 del prerregistro (PRERREGISTRO.md, Enmiendas 1 y 2): cambio pareado e IC95 bootstrap pareado",
+        "% Pruebas H2-H7 del prerregistro (PRERREGISTRO.md, Enmiendas 1 a 3): cambio pareado e IC95 bootstrap pareado",
         "% en 1001-1030 y si cumple la prediccion (IC entero bajo o sobre cero) en 1001-1030 y en 6001-6030.",
-        "% Fuente: plan2/diag_corredor/resultados.csv. Necesita booktabs y makecell; el table lleva \\footnotesize",
-        "% y \\setlength{\\tabcolsep}{3pt}.",
+        "% Fuente: plan2/diag_corredor/resultados.csv (H2-H5) y resultados3.csv (H6a, H6b y H7, de analisis3.py).",
+        "% Necesita booktabs y makecell; el table lleva \\footnotesize y \\setlength{\\tabcolsep}{3pt}.",
     ]
     if prueba:
         lineas.append("% MODO PRUEBA: las variantes que faltan son la versión actual. No usar en la tesis.")
@@ -808,9 +808,10 @@ def tabla_pruebas_tex(R, prueba):
     if os.path.exists(ruta3):
         with open(ruta3, newline="", encoding="utf-8") as f:
             filas3 = [r for r in csv.DictReader(f) if r["prueba"] in ("H6a", "H6b", "H7")]
-        titulos = {"H6a": r"Sin giros a la izquierda: V2 de 2715 (sin reentrenar) frente al fijo",
-                   "H6b": r"Sin giros a la izquierda: V2 entrenado ahí frente a su fijo ajustado",
+        titulos = {"H6a": r"Sin giros a la izquierda: V2 de 2715 (sin reentrenar) frente al fijo de 2715",
+                   "H6b": r"Sin giros a la izquierda: V2 entrenado ahí frente a su fijo ajustado desde 10~s",
                    "H7": r"V2 con $\gamma = 0.99$ frente a V2"}
+        nivel_h = {"H6a": "2715 sin giros", "H6b": "2715 sin giros", "H7": "2715"}
         for h in ("H6a", "H6b", "H7"):
             r = {x["semillas"]: x for x in filas3 if x["prueba"] == h}
             if "1001-1030" not in r:
@@ -818,7 +819,7 @@ def tabla_pruebas_tex(R, prueba):
             a = r["1001-1030"]
             cumple = [("sí" if r[s]["cumple"] == "si" else "no") if s in r else "--" for s in ("1001-1030", "6001-6030")]
             lineas += [r"\addlinespace", rf"\multicolumn{{7}}{{l}}{{\textbf{{{h}.}} {titulos[h]}}} \\",
-                       " & ".join(["2715", "retraso total", "bajo 0", tex_signo(float(a["cambio"])),
+                       " & ".join([nivel_h[h], "retraso total", "bajo 0", tex_signo(float(a["cambio"])),
                                    tex_ic((float(a["ic_lo"]), float(a["ic_hi"])))] + cumple) + r" \\"]
     lineas += [r"\bottomrule", r"\end{tabular}"]
     return "\n".join(lineas) + "\n"
