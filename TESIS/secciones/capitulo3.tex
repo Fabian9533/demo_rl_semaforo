@@ -1060,10 +1060,18 @@ los giros y los flujos de la rotonda cambian de origen y destino, y el
 total de cada mitad no cambia. Las llegadas son a intervalos regulares.
 En el corredor, ese cambio hace que los cuatro giros sean a la derecha
 en la primera media hora y a la izquierda en la segunda
-(Figura~\ref{fig:corredor-periodos}).
+(Figura~\ref{fig:corredor-periodos}). Un giro a la derecha no cruza el
+tránsito de frente y tiene verde con prioridad, así que no espera. Un
+giro a la izquierda tiene verde sin prioridad: el que gira espera un
+hueco en el tránsito de frente y, como las calles del corredor tienen un
+solo carril, mientras espera detiene a los que vienen detrás
+(Figura~\ref{fig:giro-izquierda}).
 % fuente: plan2/corredor.rou.xml (periodo 1: giros S1->E, E->N1, W->S2 y N2->W, a la derecha; periodo 2: S2->W,
 % W->N1, E->S1 y N1->E, a la izquierda); en la red con rotonda y en la malla no se reviso el sentido de los giros por
-% periodo, por eso solo se dice del corredor
+% periodo, por eso solo se dice del corredor. Tipo de verde: estado G de la derecha y g de la izquierda en
+% corredor.add.xml (GGg por acceso); un carril por sentido: corredor.net.xml. Que el que espera para girar a la
+% izquierda detiene su carril lo midio el diagnostico (plan2/diag_corredor/bloqueo.md: 0 cruces de otros vehiculos
+% de su acceso en 10 806 s de verde con uno esperando dentro del cruce, 40 corridas; Anexo G)
 
 % fuente: atributo vehsPerHour de los flow con begin="0" en plan2/corredor.rou.xml (10 flujos), red.rou.xml (12) y
 % malla3.rou.xml (24); segunda mitad, flujos con begin="1800", que suman lo mismo; totales de 3620, 2580 y 8700 en
@@ -1095,14 +1103,34 @@ Caso con demanda alta (cada flujo por el factor) & P2: $\times 2.0 = 3620$ & P4:
 % "Rotonda (entra uno y sale otro)"
 
 % fuente: TESIS/images/fig_corredor_periodos.pdf, generada por plan2/figuras_redes.py desde plan2/corredor.net.xml y
-% corredor.rou.xml (flujos con begin 0 y 1800; el tipo de cada giro sale de la direccion de la conexion en el
-% .net.xml; el grosor de los rectos es proporcional a vehsPerHour: 600 la punta, 250 el contrario y 180 cada
-% transversal en P1)
+% corredor.rou.xml (flujos con begin 0 y 1800). Cada cifra suma la tasa de los flujos que hacen ese movimiento en
+% ese cruce, por su camino mas corto (el unico del corredor); el tipo de cada movimiento sale de la direccion de la
+% conexion en el .net.xml (r, s, l). P1: en C1, recto al este 660 (W->E 600 + W->S2 60), recto al oeste 310
+% (E->W 250 + N2->W 60), derecha E->N1 60 y S1->E 60; en C2, recto al este 660 (W->E 600 + S1->E 60), recto al oeste
+% 310 (E->W 250 + E->N1 60), derecha W->S2 60 y N2->W 60. P2: en C1, recto al oeste 660 (E->W 600 + S2->W 60), recto
+% al este 250, izquierda W->N1, E->S1 y N1->E (60 cada una); en C2, recto al oeste 660 (E->W 600 + E->S1 60), recto
+% al este 310 (W->E 250 + N1->E 60), izquierda S2->W 60; transversales 180. 25.10.2026, 21:30: antes era una vista
+% del corredor a escala con los giros superpuestos (Fabian: "no se logra entender con claridad que pasa en ese tipo
+% de cruces")
 \begin{figure}[!tbp]
 \centering
 \includegraphics[width=0.92\textwidth]{fig_corredor_periodos.pdf}
-\caption[Corredor: los movimientos de cada media hora]{El corredor en cada media hora, con los flujos de sus archivos de SUMO. Arriba, la primera media hora: la punta de la avenida va de oeste a este y los cuatro giros (60~veh/h cada uno en P1) son a la derecha. Abajo, la segunda: la punta va de este a oeste y los cuatro giros son a la izquierda, tres de ellos en C1, con verde sin prioridad: el que gira cede el paso al tránsito de frente y, como las calles tienen un carril, mientras espera detiene a los que vienen detrás. El grosor de las líneas rectas crece con la demanda; cada giro se dibuja solo en el cruce donde gira. Los niveles de demanda adicionales usan los mismos flujos multiplicados por un factor.}
+\caption[Corredor: los movimientos de cada media hora]{Los movimientos de los dos cruces del corredor en cada media hora, con los flujos de sus archivos de SUMO. Arriba, la primera media hora: la punta de la avenida va de oeste a este y los cuatro giros son a la derecha, dos en cada cruce. Abajo, la segunda: la punta va de este a oeste y los cuatro giros son a la izquierda, tres de ellos en C1. Cada cifra es la demanda de un movimiento en P1, en vehículos por hora, y suma los flujos que lo hacen: el recto de la punta lleva 660, los 600 de la avenida más los 60 de un giro que dobla en el otro cruce. El grosor de las líneas rectas crece con la demanda, y el triángulo marca los accesos donde el que gira a la izquierda cede el paso. La distancia entre C1 y C2 no está a escala (en la red es de 300~m). Los niveles de demanda adicionales usan los mismos flujos multiplicados por un factor.}
 \label{fig:corredor-periodos}
+\end{figure}
+
+% fuente: TESIS/images/fig_giro_izquierda.pdf, generada por plan2/figuras_redes.py; es un esquema de C1 con los
+% movimientos que llegan desde C2 (arista C2_C1: derecha a C1_N1 y recto con estado G, izquierda a C1_S1 con g, en
+% corredor.net.xml y corredor.add.xml). Lo que muestra lo midio el diagnostico (plan2/diag_corredor/bloqueo.md y
+% mecanismo_2715.md): el que gira a la izquierda espera dentro del cruce, con 0.93 m de su cola sobre el carril; en
+% los segundos de verde con uno asi no cruzo ningun otro vehiculo de su acceso (0 en 10 806 s, 40 corridas); el
+% acceso opuesto estaba en marcha en el 92-100 % de esos segundos; sale en un hueco o al terminar el verde (con el
+% fijo, del 77 al 97 % al terminar el verde, giros_liberacion_2715.csv)
+\begin{figure}[!tbp]
+\centering
+\includegraphics[width=0.95\textwidth]{fig_giro_izquierda.pdf}
+\caption[Corredor: un giro a la derecha y uno a la izquierda]{Qué pasa en un giro según su sentido, dibujado en C1 con los giros que llegan desde C2. Arriba, la primera media hora: el giro a la derecha no cruza el tránsito de frente y tiene verde con prioridad, así que no espera. Abajo, la segunda: el que gira a la izquierda cede el paso al tránsito de frente; espera dentro del cruce y, como la calle tiene un solo carril, detiene a los que vienen detrás, aunque vayan recto y tengan verde. Así lo simula SUMO: en el diagnóstico del Anexo~G, mientras un vehículo esperaba dentro del cruce para girar a la izquierda, no cruzó ningún otro de su acceso. El dibujo es esquemático.}
+\label{fig:giro-izquierda}
 \end{figure}
 
 \subsection{Niveles de demanda adicionales}

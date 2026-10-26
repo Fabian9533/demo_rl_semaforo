@@ -7,8 +7,15 @@ Desde plan2/:
 Escribe en TESIS/images/:
   fig_redes.pdf/.png              las tres redes (corredor, red con rotonda, malla 3x3), con el sentido de cada carril y
                                   los semaforos, y un cruce ampliado con los movimientos permitidos y su tipo de verde
-  fig_corredor_periodos.pdf/.png  el corredor en cada media hora: la punta de la avenida, las transversales y los
-                                  cuatro giros (a la derecha en la primera, a la izquierda en la segunda)
+  fig_corredor_periodos.pdf/.png  los movimientos de los dos cruces del corredor en cada media hora, con la demanda
+                                  de cada uno en P1 (los cuatro giros, a la derecha en la primera y a la izquierda en
+                                  la segunda) y el ceda el paso de los giros a la izquierda
+  fig_giro_izquierda.pdf/.png     esquema con autos de un giro a la derecha y uno a la izquierda en C1: el que gira a
+                                  la izquierda espera dentro del cruce y detiene su carril (lo midio
+                                  diag_corredor/bloqueo.md)
+
+25.10.2026, 21:30: fig_corredor_periodos dejo de ser una vista del corredor a escala con los giros superpuestos
+(Fabian: "no se logra entender con claridad que pasa en ese tipo de cruces"); se agrego fig_giro_izquierda.
 
 Que sale de SUMO: la posicion de los cruces y la topologia (nodos y aristas del .net.xml, con sumolib), el numero de
 carriles de cada arista y su orden (el 0 es el de la derecha), los movimientos de cada carril (conexiones r/s/l), el
@@ -19,13 +26,16 @@ usa la geometria real de SUMO.
 """
 import os
 import math
+import textwrap
 import xml.etree.ElementTree as ET
 
 import sumolib
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-from matplotlib.patches import Polygon, FancyArrowPatch, Circle, Wedge
+import matplotlib.transforms as mtransforms
+import matplotlib.patheffects as pe
+from matplotlib.patches import Polygon, FancyArrowPatch, FancyBboxPatch, Circle, Wedge, Patch
 from matplotlib.lines import Line2D
 
 AQUI = os.path.dirname(os.path.abspath(__file__))
@@ -248,16 +258,17 @@ def dibujar_cruce(ax, net_f, add_f, nodo_id, radio, desde=None, frente=None):
         puntos = [a] + forma + [b]
         ls = "-" if prioridad else TRAZO_IZQ
         if desde is not None:
-            # en la vista de un solo acceso, las flechas llegan mas lejos para que se lea el destino
+            # en la vista de un solo acceso, las flechas llegan mas lejos para que se lea el destino; las del acceso
+            # salen juntas de cerca de la linea de detencion (comparten el carril) y el transito de frente, del borde
             b, _ = punto_desde_inicio(lout.getShape(), radio * 0.42)
-            puntos = [punto_desde_fin(lin.getShape(), radio * 0.55)[0]] + forma + [b]
+            puntos = [punto_desde_fin(lin.getShape(), radio * 0.8 if de_frente else 3.0)[0]] + forma + [b]
         ax.plot([p[0] for p in puntos[:-1]], [p[1] for p in puntos[:-1]], color=color, lw=1.8, ls=ls, zorder=4,
                 solid_capstyle="round")
         flecha(ax, puntos[-2], puntos[-1], color, escala=11, lw=1.8, ls=ls, z=4)
         if desde is not None and de_frente:
-            # el rotulo del transito de frente, sobre su linea y dentro del recuadro
-            (sx, sy) = puntos[0]
-            ax.text(sx, sy + 1.6, "tránsito de frente", fontsize=7.0, color=color, ha="right", va="bottom", zorder=6)
+            # el rotulo del transito de frente, sobre su linea, entre el cruce y el borde del recuadro
+            ax.text(cx + 6.0, puntos[0][1] + 1.4, "tránsito de frente", fontsize=7.0, color=color, ha="left",
+                    va="bottom", zorder=6)
         elif desde is not None:
             texto = rotulos[d]
             bx, by = puntos[-1]
@@ -267,7 +278,8 @@ def dibujar_cruce(ax, net_f, add_f, nodo_id, radio, desde=None, frente=None):
             ha = "left" if ux > 0.5 else ("right" if ux < -0.5 else "center")
             va = "bottom" if uy > 0.5 else ("top" if uy < -0.5 else "center")
             ax.text(bx + ux * 1.8, by + uy * 1.8, texto, fontsize=7.0, color=color, ha=ha, va=va, zorder=6)
-    ax.add_patch(Circle((cx, cy), 1.6, facecolor=VERDE, edgecolor=FONDO, lw=0.7, zorder=5))
+    # el semaforo, en una esquina del cruce, para que no tape los giros
+    ax.add_patch(Circle((cx - 7.0, cy - 7.0), 1.6, facecolor=VERDE, edgecolor=FONDO, lw=0.7, zorder=5))
     ax.set_xlim(cx - radio, cx + radio)
     ax.set_ylim(cy - radio, cy + radio)
     ax.set_aspect("equal")
@@ -304,7 +316,92 @@ def figura_redes():
     print("Escrito", salida)
 
 
-# ---------------- corredor por media hora (esquema) ----------------
+# ---------------- esquema de cruces con un carril por sentido ----------------
+# Unidades: el ancho de un carril. Cada brazo tiene un carril que llega al cruce y otro que sale; se circula por la
+# derecha. c es el centro del cruce, d el vector unitario del centro hacia el extremo del brazo y s la distancia al
+# centro; el borde del cruce, con la linea de detencion, esta en s = h (h = 1: el cuadrado donde se cortan las dos
+# calles; h > 1: un cruce mas amplio con las esquinas redondeadas, como el de SUMO, que llega a 7.2 m del centro).
+
+def brazo(nodo, vecino):
+    """Vector del cruce hacia un nodo vecino, redondeado a los ejes (el corredor esta alineado con ellos)."""
+    (x0, y0), (x1, y1) = nodo.getCoord(), vecino.getCoord()
+    L = math.hypot(x1 - x0, y1 - y0)
+    return (round((x1 - x0) / L), round((y1 - y0) / L))
+
+
+def p_entrada(c, d, s):
+    """Punto del carril que llega al cruce c por el brazo d."""
+    return (c[0] + d[0] * s - d[1] * 0.5, c[1] + d[1] * s + d[0] * 0.5)
+
+
+def p_salida(c, d, s):
+    """Punto del carril que sale del cruce c por el brazo d."""
+    return (c[0] + d[0] * s + d[1] * 0.5, c[1] + d[1] * s - d[0] * 0.5)
+
+
+def bezier(a, c, b, n=40):
+    return [((1 - t) ** 2 * a[0] + 2 * t * (1 - t) * c[0] + t * t * b[0],
+             (1 - t) ** 2 * a[1] + 2 * t * (1 - t) * c[1] + t * t * b[1]) for t in (k / n for k in range(n + 1))]
+
+
+def trayecto(c, d1, d2, s_ini, s_fin, h=1.0):
+    """Puntos del movimiento que entra al cruce c por el brazo d1 y sale por el d2: por el carril que llega desde
+    s_ini hasta la linea de detencion, recto o en curva hasta el carril que sale, y por este hasta s_fin."""
+    a, b = p_entrada(c, d1, h), p_salida(c, d2, h)
+    if d1[0] + d2[0] == 0 and d1[1] + d2[1] == 0:
+        medio = [a, b]
+    else:
+        esquina = (b[0], a[1]) if d1[1] == 0 else (a[0], b[1])
+        medio = bezier(a, esquina, b)
+    return [p_entrada(c, d1, s_ini)] + medio + [p_salida(c, d2, s_fin)]
+
+
+def arcos_esquinas(c, h, n=10):
+    """Las cuatro esquinas redondeadas de un cruce de semilado h, en orden antihorario desde la inferior derecha."""
+    r = h - 1.0
+    res = []
+    for (ox, oy), a0, a1 in (((h, -h), 180, 90), ((h, h), 270, 180), ((-h, h), 360, 270), ((-h, -h), 90, 0)):
+        res.append([(c[0] + ox + r * math.cos(math.radians(a0 + (a1 - a0) * k / n)),
+                     c[1] + oy + r * math.sin(math.radians(a0 + (a1 - a0) * k / n))) for k in range(n + 1)])
+    return res
+
+
+def calle_esquema(ax, c, brazos, rotulos=None, fs=7.2, h=1.0):
+    """El cruce c y sus brazos ({d: largo}): calzada, bordes, linea central, linea de detencion de cada carril que
+    llega y los rotulos de los extremos ({d: texto})."""
+    x, y = c
+    if h > 1.0:
+        arcos = arcos_esquinas(c, h)
+        ax.add_patch(Polygon([p for arco in arcos for p in arco], closed=True, facecolor=CALLE, edgecolor="none",
+                             zorder=1))
+        for arco in arcos:
+            ax.plot([p[0] for p in arco], [p[1] for p in arco], color=BORDE, lw=0.8, zorder=1.1)
+    else:
+        ax.add_patch(Polygon([(x - 1, y - 1), (x + 1, y - 1), (x + 1, y + 1), (x - 1, y + 1)], closed=True,
+                             facecolor=CALLE, edgecolor="none", zorder=1))
+    for d, L in brazos.items():
+        p, q = (x + d[0] * h, y + d[1] * h), (x + d[0] * L, y + d[1] * L)
+        ax.add_patch(Polygon(rectangulo(p, q, 2.0), closed=True, facecolor=CALLE, edgecolor="none", zorder=1))
+        for lado in (-1, 1):
+            ax.plot([p[0] - d[1] * lado, q[0] - d[1] * lado], [p[1] + d[0] * lado, q[1] + d[0] * lado], color=BORDE,
+                    lw=0.8, zorder=1.1, solid_capstyle="butt")
+        ax.plot([p[0], q[0]], [p[1], q[1]], color=BORDE, lw=0.7, ls=(0, (3, 2.5)), zorder=1.1)
+        ax.plot([p[0], p[0] - d[1]], [p[1], p[1] + d[0]], color=TINTA2, lw=1.5, zorder=1.2, solid_capstyle="butt")
+        if rotulos and d in rotulos:
+            ha = "left" if d[0] > 0 else ("right" if d[0] < 0 else "center")
+            va = "bottom" if d[1] > 0 else ("top" if d[1] < 0 else "center")
+            ax.text(x + d[0] * (L + 0.3), y + d[1] * (L + 0.3), rotulos[d], fontsize=fs, color=TINTA, ha=ha, va=va,
+                    zorder=6)
+
+
+def ceda(ax, centro, r=0.27, z=7):
+    """Senal de ceda el paso: triangulo invertido."""
+    x, y = centro
+    ax.add_patch(Polygon([(x - r, y + 0.58 * r), (x + r, y + 0.58 * r), (x, y - 1.15 * r)], closed=True,
+                         facecolor=FONDO, edgecolor=NARANJA, lw=1.3, zorder=z, joinstyle="round"))
+
+
+# ---------------- el corredor en cada media hora: los movimientos de cada cruce ----------------
 
 def flujos_corredor(rou):
     """[(periodo, desde, hasta, veh/h)] de corredor.rou.xml."""
@@ -315,76 +412,222 @@ def flujos_corredor(rou):
     return res
 
 
+def movimientos_por_cruce(net, flujos):
+    """{(periodo, cruce): {(arista que llega, arista que sale): [direccion, veh/h]}}: cada flujo suma su tasa en cada
+    cruce de su camino (el mas corto, que en el corredor es el unico)."""
+    res = {}
+    for (p, desde, hasta, v) in flujos:
+        camino = net.getShortestPath(net.getEdge(desde), net.getEdge(hasta))[0]
+        for a, b in zip(camino[:-1], camino[1:]):
+            cons = a.getOutgoing().get(b, [])
+            mov = res.setdefault((p, a.getToNode().getID()), {}).setdefault(
+                (a, b), [cons[0].getDirection() if cons else "s", 0.0])
+            mov[1] += v
+    return res
+
+
 def figura_periodos():
     net = sumolib.net.readNet(os.path.join(AQUI, "corredor.net.xml"))
-    flujos = flujos_corredor("corredor.rou.xml")
-    coord = {n.getID(): n.getCoord() for n in net.getNodes()}
-    vmax = max(v for _, _, _, v in flujos)
-    W = 22.0                                           # ancho de carril dibujado (m)
-    titulos = {1: "Primera media hora: punta de oeste a este;\nlos cuatro giros, a la derecha",
-               2: "Segunda media hora: punta de este a oeste;\nlos cuatro giros, a la izquierda (ceden el paso)"}
-    fig, ejes = plt.subplots(2, 1, figsize=(6.4, 6.0), facecolor=FONDO, gridspec_kw={"hspace": 0.16})
-
-    def tramo(arista, desde_m, hasta_m):
-        """Segmento de una arista entre dos distancias desde su nodo de origen, en su carril (lado derecho)."""
-        (x0, y0), (x1, y1) = coord[arista.getFromNode().getID()], coord[arista.getToNode().getID()]
-        L = math.hypot(x1 - x0, y1 - y0)
-        ux, uy = (x1 - x0) / L, (y1 - y0) / L
-        nx, ny = uy, -ux
-        off = 0.5 * W
-        a = (x0 + ux * desde_m + nx * off, y0 + uy * desde_m + ny * off)
-        b = (x0 + ux * hasta_m + nx * off, y0 + uy * hasta_m + ny * off)
-        return a, b, L
-
+    movs = movimientos_por_cruce(net, flujos_corredor("corredor.rou.xml"))
+    vref = max(v for m in movs.values() for (dr, v) in m.values() if dr == "s")
+    H = 1.7                                          # semilado del cruce dibujado
+    SEP, LARGO_AV, LARGO_TR = 9.4, 4.4, 3.7          # C1-C2 dibujado (en la red, 300 m) y brazos de los extremos
+    centros = {"C1": (0.0, 0.0), "C2": (SEP, 0.0)}
+    nombres = {"W": "Oeste", "E": "Este"}
+    titulos = {1: "Primera media hora: la punta va de oeste a este y los cuatro giros son a la derecha",
+               2: "Segunda media hora: la punta va de este a oeste y los cuatro giros son a la izquierda"}
+    orden = {"s": 0, "r": 1, "l": 2}
+    fig, ejes = plt.subplots(2, 1, figsize=(6.4, 5.5), facecolor=FONDO, gridspec_kw={"hspace": 0.10})
     for ax, periodo in zip(ejes, (1, 2)):
-        dibujar_red(ax, net, W, "", rotulo_tls=True, flechas=False)
-        ax.set_title(titulos[periodo].replace(chr(10), " "), fontsize=8.2, color=TINTA, loc="left", pad=3)
-        rectos, giros = [], []
-        for (p, desde, hasta, v) in flujos:
-            if p != periodo:
-                continue
-            camino = net.getShortestPath(net.getEdge(desde), net.getEdge(hasta))[0]
-            dirs = []
-            for a, b in zip(camino[:-1], camino[1:]):
-                cons = a.getOutgoing().get(b, [])
-                dirs.append(cons[0].getDirection() if cons else "s")
-            k_giro = [k for k, d in enumerate(dirs) if d in ("l", "r")]
-            if not k_giro:
-                rectos.append((camino, v))
-            else:
-                giros.append((camino, k_giro[0], dirs[k_giro[0]], v))
-        # rectos: gris, a lo largo de todo el recorrido, con el grosor segun la demanda
-        for camino, v in rectos:
-            puntos = []
-            for k, arista in enumerate(camino):
-                _, _, L = tramo(arista, 0, 0)
-                ini = 0.62 * L if k == 0 else 1.2 * W
-                fin = 0.38 * L if k == len(camino) - 1 else L - 1.2 * W
-                a, b, _ = tramo(arista, ini, fin)
-                puntos += [a, b]
-            ancho = 0.8 + 3.0 * v / vmax
-            ax.plot([q[0] for q in puntos[:-1]], [q[1] for q in puntos[:-1]], color=APAGADO, lw=ancho, zorder=3.5,
-                    solid_capstyle="butt", alpha=0.8)
-            flecha(ax, puntos[-2], puntos[-1], APAGADO, escala=4 + 2.4 * ancho, lw=ancho, z=3.5, alpha=0.8)
-        # giros: solo en el cruce donde giran, en color
-        for camino, k, d, v in giros:
-            e1, e2 = camino[k], camino[k + 1]
-            _, _, L1 = tramo(e1, 0, 0)
-            a, b, _ = tramo(e1, L1 - 4.2 * W, L1 - 1.2 * W)
-            c, e, _ = tramo(e2, 1.2 * W, 4.2 * W)
-            color, ls = (NARANJA, TRAZO_IZQ) if d == "l" else (AZUL, "-")
-            ax.plot([a[0], b[0], c[0]], [a[1], b[1], c[1]], color=color, lw=1.9, ls=ls, zorder=5,
-                    solid_capstyle="round")
-            flecha(ax, c, e, color, escala=10, lw=1.9, ls=ls, z=5)
-        ax.set_xlim(130, 970)
-        ax.set_ylim(215, 585)
-    leyenda = [Line2D([], [], color=APAGADO, lw=3.4, label="Recto (más grueso, más demanda)"),
-               Line2D([], [], color=AZUL, lw=1.6, label="Giro a la derecha"),
-               Line2D([], [], color=NARANJA, lw=1.6, ls=TRAZO_IZQ, label="Giro a la izquierda: cede el paso"),
-               Line2D([], [], marker="o", ls="", ms=6, mfc=VERDE, mec=FONDO, label="Semáforo")]
-    fig.legend(handles=leyenda, loc="lower center", ncol=2, fontsize=7.2, frameon=False, bbox_to_anchor=(0.5, -0.02),
+        for nid, c in centros.items():
+            nodo = net.getNode(nid)
+            brazos, rotulos = {}, {}
+            for e in list(nodo.getIncoming()) + list(nodo.getOutgoing()):
+                otro = e.getFromNode() if e.getToNode() == nodo else e.getToNode()
+                d = brazo(nodo, otro)
+                if otro.getID() in centros:
+                    brazos[d] = SEP / 2                  # cada cruce dibuja la mitad del tramo entre los dos
+                else:
+                    brazos[d] = LARGO_AV if d[1] == 0 else LARGO_TR
+                    rotulos[d] = nombres.get(otro.getID(), otro.getID())
+            calle_esquema(ax, c, brazos, rotulos, fs=7.8, h=H)
+            ax.text(c[0] + (-H - 1.1 if nid == "C1" else H + 1.1), c[1] + H + 1.1, nid, fontsize=8.6, color=TINTA,
+                    ha="center", va="center", fontweight="bold", zorder=6)
+            for (a, b), (dr, v) in sorted(movs[(periodo, nid)].items(), key=lambda kv: orden.get(kv[1][0], 3)):
+                d1, d2 = brazo(nodo, a.getFromNode()), brazo(nodo, b.getToNode())
+                # los rectos vienen por su carril; los giros salen de la linea de detencion de ese mismo carril
+                if dr == "s":
+                    s_ini, s_fin = H + 0.7, min(H + 2.0, brazos[d2] - 0.35)
+                    lw, color, ls = 0.9 + 3.4 * v / vref, APAGADO, "-"
+                else:
+                    s_ini, s_fin = H, min(H + 0.9, brazos[d2] - 0.35)
+                    lw, color, ls = 1.9, (AZUL if dr == "r" else NARANJA), ("-" if dr == "r" else TRAZO_IZQ)
+                pts = trayecto(c, d1, d2, s_ini, s_fin, h=H)
+                z = 3 + orden.get(dr, 0)
+                halo = [] if dr == "s" else [pe.Stroke(linewidth=lw + 2.2, foreground=CALLE), pe.Normal()]
+                ax.plot([p[0] for p in pts[:-1]], [p[1] for p in pts[:-1]], color=color, lw=lw, ls=ls, zorder=z,
+                        solid_capstyle="butt", solid_joinstyle="round", path_effects=halo)
+                flecha(ax, pts[-2], pts[-1], color, escala=5 + 2.0 * lw, lw=lw, ls=ls, z=z)
+                # la cifra, al costado de la punta y fuera de la calzada
+                x, y = pts[-1]
+                ax.text(x + d2[1] * 0.95, y - d2[0] * 0.95, f"{v:.0f}", fontsize=7.6, ha="center", va="center",
+                        color=TINTA2 if dr == "s" else color, zorder=6)
+                if dr == "l":
+                    # ceda el paso al costado del carril donde empieza el giro, junto a la linea de detencion
+                    x, y = p_entrada(c, d1, H + 0.35)
+                    ceda(ax, (x - d1[1] * 0.95, y + d1[0] * 0.95))
+        ax.set_xlim(-LARGO_AV - 1.5, SEP + LARGO_AV + 1.5)
+        ax.set_ylim(-LARGO_TR - 0.75, LARGO_TR + 0.75)
+        ax.set_aspect("equal")
+        ax.axis("off")
+        ax.set_title(titulos[periodo], fontsize=8.8, color=TINTA, loc="left", pad=2)
+    leyenda = [Line2D([], [], color=APAGADO, lw=3.4, label="Recto: el grosor crece con la demanda"),
+               Line2D([], [], color=AZUL, lw=1.9, label="Giro a la derecha: verde con prioridad"),
+               Line2D([], [], color=NARANJA, lw=1.9, ls=TRAZO_IZQ, label="Giro a la izquierda: verde sin prioridad"),
+               Line2D([], [], marker="v", ls="", ms=7.5, mfc=FONDO, mec=NARANJA, mew=1.3,
+                      label="Ceda el paso: espera un hueco en el tránsito de frente")]
+    fig.legend(handles=leyenda, loc="lower center", ncol=2, fontsize=7.8, frameon=False, bbox_to_anchor=(0.5, -0.03),
                handlelength=2.4, columnspacing=1.6, labelcolor=TINTA)
+    fig.text(0.5, -0.06, "Cifras: vehículos por hora de cada movimiento en P1. Todas las calles tienen un carril por "
+             "sentido.", fontsize=7.6, color=TINTA2, ha="center", va="top")
     salida = os.path.join(IMAGENES, "fig_corredor_periodos.png")
+    fig.savefig(salida, dpi=220, bbox_inches="tight", facecolor=FONDO)
+    fig.savefig(os.path.splitext(salida)[0] + ".pdf", bbox_inches="tight", facecolor=FONDO, metadata={"CreationDate": None})
+    plt.close(fig)
+    print("Escrito", salida)
+
+
+# ---------------- que pasa en un giro a la izquierda (esquema con autos) ----------------
+
+def auto(ax, centro, angulo, color, largo=1.45, ancho=0.64, z=6):
+    """Un auto visto desde arriba, con el parabrisas adelante (angulo en grados; 0 = hacia el este). Devuelve el
+    punto del frente y la direccion."""
+    tr = mtransforms.Affine2D().rotate_deg(angulo).translate(centro[0], centro[1]) + ax.transData
+    cuerpo = FancyBboxPatch((-largo / 2, -ancho / 2), largo, ancho, boxstyle="round,pad=0,rounding_size=0.16",
+                            facecolor=color, edgecolor="none", zorder=z)
+    vidrio = FancyBboxPatch((largo * 0.1, -ancho * 0.33), largo * 0.17, ancho * 0.66,
+                            boxstyle="round,pad=0,rounding_size=0.05", facecolor=FONDO, edgecolor="none", alpha=0.8,
+                            zorder=z + 0.1)
+    for parche in (cuerpo, vidrio):
+        parche.set_transform(tr)
+        ax.add_patch(parche)
+    u = (math.cos(math.radians(angulo)), math.sin(math.radians(angulo)))
+    return (centro[0] + u[0] * largo / 2, centro[1] + u[1] * largo / 2), u
+
+
+def en_marcha(ax, frente, u, color, z=6):
+    """Flecha corta delante de un auto que avanza."""
+    flecha(ax, (frente[0] + u[0] * 0.12, frente[1] + u[1] * 0.12), (frente[0] + u[0] * 0.7, frente[1] + u[1] * 0.7),
+           color, escala=6.5, lw=1.0, z=z)
+
+
+def semaforo_verde(ax, x, y, z=6):
+    """Cabeza de semaforo con la luz verde encendida."""
+    ax.add_patch(FancyBboxPatch((x - 0.17, y - 0.44), 0.34, 0.88, boxstyle="round,pad=0,rounding_size=0.07",
+                                facecolor=TINTA2, edgecolor="none", zorder=z))
+    for k in range(3):
+        ax.add_patch(Circle((x, y + 0.27 - 0.27 * k), 0.09, facecolor=VERDE if k == 2 else "#7d7b75",
+                            edgecolor="none", zorder=z + 0.1))
+
+
+def marca(ax, x, y, n, z=9, fs=7.6):
+    """Numero de un paso, en un circulo."""
+    ax.text(x, y, str(n), fontsize=fs, color=FONDO, ha="center", va="center", fontweight="bold", zorder=z,
+            bbox=dict(boxstyle="circle,pad=0.22", facecolor=TINTA, edgecolor="none"))
+
+
+def guia(ax, a, b, z=8):
+    ax.plot([a[0], b[0]], [a[1], b[1]], color=TINTA2, lw=0.7, zorder=z)
+
+
+def figura_giro_izquierda():
+    """El giro de este a norte en C1 (primera media hora) frente al de este a sur (segunda), con autos."""
+    C = (0.0, 0.0)
+    brazos = {(-1, 0): 3.2, (1, 0): 9.4, (0, 1): 2.8, (0, -1): 2.8}
+    rotulos = {(-1, 0): "Oeste", (1, 0): "C2", (0, 1): "N1", (0, -1): "S1"}
+    FRENTE, FILA = TINTA2, "#a9a69e"
+    escenas = [
+        ("Primera media hora: giro a la derecha, de este a norte en C1",
+         ["Gira a la derecha: no cruza el tránsito de frente y tiene verde con prioridad, así que no espera.",
+          "Los de atrás siguen."]),
+        ("Segunda media hora: giro a la izquierda, de este a sur en C1",
+         ["El primero de la fila va a girar a la izquierda. Entra al cruce y espera un hueco.",
+          "El tránsito de frente tiene prioridad y sigue pasando.",
+          "Los de atrás van recto, pero no pueden pasarlo: la calle tiene un solo carril. Quedan detenidos con el "
+          "semáforo en verde.",
+          "Gira cuando hay un hueco o cuando termina el verde. Si gira al terminar el verde, los de atrás esperan el "
+          "verde siguiente."]),
+    ]
+    fig = plt.figure(figsize=(6.4, 5.1), facecolor=FONDO)
+    gs = fig.add_gridspec(2, 2, width_ratios=[1.95, 1.1], height_ratios=[1.0, 1.3], hspace=0.22,
+                          wspace=0.04)
+    for fila, (titulo, textos) in enumerate(escenas):
+        ax = fig.add_subplot(gs[fila, 0])
+        calle_esquema(ax, C, brazos, rotulos, fs=7.8)
+        semaforo_verde(ax, -1.95, 1.75)
+        if fila == 0:
+            # el que gira a la derecha: no cruza a nadie y sigue
+            frente, u = auto(ax, (0.78, 0.86), 128, AZUL)
+            camino = bezier((frente[0] + u[0] * 0.1, frente[1] + u[1] * 0.1), (0.5, 1.75), (0.5, 2.05)) + [(0.5, 2.5)]
+            ax.plot([p[0] for p in camino[:-1]], [p[1] for p in camino[:-1]], color=AZUL, lw=1.5, zorder=5)
+            flecha(ax, camino[-2], camino[-1], AZUL, escala=9, lw=1.5, z=5)
+            for x in (-2.4, 0.3, 3.4):                          # transito de frente, en marcha
+                f, v = auto(ax, (x, -0.5), 0, FRENTE)
+                en_marcha(ax, f, v, FRENTE)
+            for x in (2.6, 4.5, 6.4):                           # los de atras, tambien en marcha
+                f, v = auto(ax, (x, 0.5), 180, FILA)
+                en_marcha(ax, f, v, APAGADO)
+            marca(ax, 1.85, 1.75, 1)
+            guia(ax, (1.6, 1.62), (1.12, 1.15))
+            marca(ax, 4.5, 1.5, 2)
+            guia(ax, (4.5, 1.22), (4.5, 0.86))
+        else:
+            # el que gira a la izquierda: detenido dentro del cruce, con la cola todavia sobre su carril
+            frente, u = auto(ax, (0.55, 0.36), 192, NARANJA)
+            camino = bezier((frente[0] + u[0] * 0.1, frente[1] + u[1] * 0.1), (-0.5, 0.05), (-0.5, -1.0)) + [(-0.5, -2.2)]
+            ax.plot([p[0] for p in camino[:-1]], [p[1] for p in camino[:-1]], color=NARANJA, lw=1.5, ls=TRAZO_IZQ,
+                    zorder=5)
+            flecha(ax, camino[-2], camino[-1], NARANJA, escala=9, lw=1.5, ls=TRAZO_IZQ, z=5)
+            ceda(ax, (-1.45, 1.8))                              # junto al semaforo: con verde, el giro cede el paso
+            for x in (-1.75, 0.45, 3.1):                        # transito de frente, en marcha: no deja hueco
+                f, v = auto(ax, (x, -0.5), 0, FRENTE)
+                en_marcha(ax, f, v, FRENTE)
+            for x in (2.15, 3.9, 5.65, 7.4):                     # los de atras, detenidos
+                auto(ax, (x, 0.5), 180, FILA)
+            # llave sobre la fila detenida
+            ax.plot([1.45, 1.45, 8.1, 8.1], [1.13, 1.3, 1.3, 1.13], color=TINTA2, lw=0.8, zorder=8)
+            marca(ax, 0.45, 1.55, 1)
+            guia(ax, (0.45, 1.27), (0.5, 0.72))
+            marca(ax, 3.1, -1.55, 2)
+            guia(ax, (3.1, -1.27), (3.1, -0.86))
+            marca(ax, 4.78, 1.62, 3)
+            marca(ax, -1.65, -2.2, 4)
+            guia(ax, (-1.37, -2.2), (-0.62, -2.2))
+        ax.set_xlim(-4.85, 10.45)
+        ax.set_ylim(-3.45, 3.75)
+        ax.set_aspect("equal")
+        ax.set_anchor("N")                                  # arriba de su celda, a la altura de los pasos
+        ax.axis("off")
+        ax.set_title(titulo, fontsize=8.8, color=TINTA, loc="left", pad=2)
+        # los pasos, a la derecha del dibujo y desde su borde superior; el paso de linea va en pulgadas para que sea
+        # el mismo en las dos filas, que tienen distinta altura
+        ax_t = fig.add_subplot(gs[fila, 1])
+        ax_t.set_xlim(0, 1)
+        ax_t.set_ylim(0, 1)
+        ax_t.axis("off")
+        alto = ax_t.get_position().height * fig.get_figheight()
+        linea = 7.9 / 72 * 1.25 / alto
+        y = 1.0 - 0.06 / alto
+        for k, texto in enumerate(textos, 1):
+            lineas = textwrap.wrap(texto, 37)
+            marca(ax_t, 0.05, y - 0.45 * linea, k, fs=7.6)
+            ax_t.text(0.13, y, "\n".join(lineas), fontsize=7.9, color=TINTA, ha="left", va="top", linespacing=1.25)
+            y -= linea * len(lineas) + 0.09 / alto
+    leyenda = [Patch(facecolor=NARANJA, label="Gira a la izquierda"), Patch(facecolor=AZUL, label="Gira a la derecha"),
+               Patch(facecolor=FRENTE, label="Tránsito de frente"), Patch(facecolor=FILA, label="Detrás del que gira: van recto")]
+    fig.legend(handles=leyenda, loc="lower center", ncol=4, fontsize=7.6, frameon=False, bbox_to_anchor=(0.5, -0.03),
+               handlelength=1.6, handleheight=0.9, columnspacing=1.6, labelcolor=TINTA)
+    salida = os.path.join(IMAGENES, "fig_giro_izquierda.png")
     fig.savefig(salida, dpi=220, bbox_inches="tight", facecolor=FONDO)
     fig.savefig(os.path.splitext(salida)[0] + ".pdf", bbox_inches="tight", facecolor=FONDO, metadata={"CreationDate": None})
     plt.close(fig)
@@ -394,3 +637,4 @@ def figura_periodos():
 if __name__ == "__main__":
     figura_redes()
     figura_periodos()
+    figura_giro_izquierda()
