@@ -260,7 +260,14 @@ de P6 reduce el \texttt{timeLoss} un 6.7\,\% frente al fijo ajustado y
 gana en 29 de las 30 semillas nuevas de la repetición (6001 a 6030). La evidencia es
 exploratoria: el análisis se decidió después del veredicto, usó
 semillas distintas de las del plan, solo se probó en P1, P4 y P6, y en
-P4 no supera al ciclo mínimo. Conviene aplicar la corrección a los
+P4 no supera al ciclo mínimo. Un segundo diagnóstico, también posterior
+al veredicto, probó la misma corrección en los cinco niveles del
+corredor con las semillas del plan: con la medición más estricta, solo
+falla con 2715~veh/h (Sección~\ref{sec:diag-corredor}).
+% fuente: plan2/diag_corredor/resultados.csv (control v2, referencia fijo10, semillas 1001-1030: MEJORA en 905 y
+% 1358, FUNCIONA en P1 y P2, FALLA en 2715); agregado en la verificacion del 25.10.2026, porque la frase anterior
+% quedo desactualizada con el diagnostico del corredor
+Conviene aplicar la corrección a los
 seis casos con el protocolo completo: tres bases, 200 episodios,
 validación con ocho semillas, la regla de selección y convergencia del
 plan y la evaluación en las semillas 1001 a 1030, como un brazo nuevo

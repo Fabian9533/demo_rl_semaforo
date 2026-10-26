@@ -165,3 +165,9 @@ V2) tiene menos retraso total que V2, con IC entero bajo cero.
 
 **Lectura.** Si (a) y (b) se cumplen, la causa de 2715 son los giros a la izquierda permitidos en accesos de un
 carril. Si ademas H7 se cumple, el horizonte suma. Si (a) o (b) no se cumplen, los giros no bastan para explicar 2715.
+
+## Nota sobre diag_corredor.py (25.10.2026)
+
+«Lo que ya muestran los datos existentes» cita diag_corredor.py, pero ningún commit tiene un script con ese nombre.
+Las cifras de esa sección son las de descomposicion.txt, que escribe descomposicion.py; los dos se registraron con
+este pre-registro en el commit 5196edb. El encabezado se deja como estaba.

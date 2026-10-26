@@ -19,7 +19,8 @@ arista de entrada en el escenario original **O** (`dem_corredor_t2715`) y en el 
   - Las dos políticas se entrenaron en O. En D se juegan sin reentrenar.
 - **Datos.** En cada corrida quedan el tripinfo completo (con `departDelay`), las estadísticas de SUMO, la fase de cada
   semáforo por segundo y los detenidos por acceso cada segundo. Están fuera del repositorio (137 MB), en
-  `C:/Users/GAMER/AppData/Local/Temp/claude/c--Users-GAMER-Documents-demo-rl-semaforo/de7717ed-cbad-4afb-8e8f-03cbdcefb7fa/scratchpad/periodos/datos`.
+  `C:/Users/GAMER/Documents/demo_rl_semaforo/datos_diagnostico_corredor_2026-10-25/periodos/datos` (copiados el 25.10.2026 desde la carpeta temporal
+  de la sesión).
 - **Definiciones.**
   - Periodo: por la salida pedida (`depart − departDelay`); 1 si es antes de 1800 s, 2 si es desde 1800 s. Coincide con
     el prefijo del flujo (`p1_`, `p2_`) en las 80 corridas, y cada periodo tiene 1362 vehículos en todas.
@@ -90,8 +91,10 @@ arista de entrada en el escenario original **O** (`dem_corredor_t2715`) y en el 
   o lo atienden más seguido (V2: verdes de avenida más cortos). Así, la fracción de verde de la avenida en C2 baja de
   0.714 a 0.58-0.67 justo cuando pasa la punta E→O. La demanda que cruza C2 hacia el oeste en ese periodo es de
   990 veh/h (E→W 900 + E→S1 90, `dem_corredor_t2715.rou.xml`).
-  - Lo inferido es que ese verde ya no alcanza para la demanda. Por eso la cola crece durante el periodo y termina
-    como espera para entrar en E_C2.
+  - Lo inferido era que ese verde ya no alcanza para la demanda. La verificación lo corrigió (nota al final de
+    `mecanismo_2715.md`): con IPPO actual y con V2 el cuello es el giro E→S1 en C1; C1 sirve unos 418 vehículos hacia
+    el oeste por cada 1800 s con los dos, y dar más verde a E_C2 no lo cambia (V2 le da 86 s más que IPPO y sirve lo
+    mismo; `bloqueo.csv`, 5 semillas). La cola crece durante el periodo y termina como espera para entrar en E_C2.
   - El fijo sostiene los 25 s de avenida, y lo pagan los accesos bloqueados.
   - En D, sin giros a la izquierda en el periodo 2, los adaptativos no recortan el verde de avenida (0.70-0.72 en
     C2) y le ganan al fijo en la hora.
@@ -99,9 +102,10 @@ arista de entrada en el escenario original **O** (`dem_corredor_t2715`) y en el 
 - **Por qué solo en 2715.** En `comp_movimientos.csv` (semillas 1001-1005, medido por `comportamiento.py`), el
   cociente P2/P1 de IPPO, del fijo y del actuado va de 0.95 a 1.15 en 905, 1358 y 1810 veh/h. En 2715 va de 1.83 a
   9.51 y en 3620 de 2.75 a 4.94.
-  - Lo inferido es que con menos demanda la punta tiene holgura en C2, y quitarle verde a la avenida cuesta poco.
-  - En 2715, el periodo 2 de O ya está al borde con el fijo (2 de 10 semillas forman cola para entrar), así que
-    quitarle verde a la avenida lo hace pasar de la capacidad.
+  - Lo inferido es que con menos demanda la punta tiene holgura, y el bloqueo de los giros cuesta poco.
+  - En 2715, el periodo 2 de O ya está al borde con el fijo (2 de 10 semillas forman cola para entrar), así que el
+    bloqueo E→S1 en C1, que IPPO y V2 sufren unas tres veces más que el fijo, lo hace pasar de la capacidad (corregido
+    según la verificación: no es el verde quitado a la avenida en C2).
   - En 3620 todos los controles están saturados.
   - Para los otros niveles no se midió aquí el reparto del verde ni las colas.
 - **Límites.**

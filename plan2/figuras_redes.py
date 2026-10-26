@@ -14,7 +14,7 @@ Escribe en TESIS/images/:
                                   la izquierda espera dentro del cruce y detiene su carril (lo midio
                                   diag_corredor/bloqueo.md)
 
-25.10.2026, 21:30: fig_corredor_periodos dejo de ser una vista del corredor a escala con los giros superpuestos
+25.10.2026 (commit fe70e7d, 21:12): fig_corredor_periodos dejo de ser una vista del corredor a escala con los giros superpuestos
 (Fabian: "no se logra entender con claridad que pasa en ese tipo de cruces"); se agrego fig_giro_izquierda.
 
 Que sale de SUMO: la posicion de los cruces y la topologia (nodos y aristas del .net.xml, con sumolib), el numero de

@@ -45,7 +45,7 @@ d_dem_corredor_t905_v2ins: 0 errores | Ep   1  timeLoss= 22.62  espera= 9.05  r/
 evaluar.py con una politica con etiqueta (1 semilla): ippo_vecinos_v2ins_s4042,ippo_vecinos_v2ins,4042,1001
 evaluar.py con una politica de antes: ippo_vecinos_s4042,ippo_vecinos,4042,1001,20.1,6.45; en parciales/: ippo_vecinos_s4042,ippo_vecinos,4042,1001,20.1,6.45
 
-Repeticion tras la verificacion (25.10.2026, 13:40; criterio de validacion, enmienda 1 del PRERREGISTRO.md; copia nueva de plan2/ fuera del repo)
+Repeticion tras la verificacion (25.10.2026, hacia las 13:38, commit 7abdd33; criterio de validacion, enmienda 1 del PRERREGISTRO.md; copia nueva de plan2/ fuera del repo)
 (a) opciones apagadas, corredor base 42, 200 episodios cortado a los 10 (incluye la validacion del ep 10) frente a plan2/resultados_corredor_ippo_vecinos_s42.csv (sin segundos)
 10 filas, 48 columnas comunes comparadas, 0 diferencias (val_999, val_1999 y val del ep 10 iguales: val=20.95)
 columnas nuevas al final del CSV en el ep 10: val_total_999=21.38 val_total_1999=21.26 val_total=21.32

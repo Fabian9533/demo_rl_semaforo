@@ -3,8 +3,9 @@ analisis3.py - Responde la Enmienda 3 del diagnostico del corredor (PRERREGISTRO
 
 Cuando termine la cola diag3_ (plan2/cola/; lanzada el 25.10.2026 a las 18:20 con el commit 50a9c6b), desde plan2/:
     python diag_corredor/analisis3.py
-Escribe plan2/diag_corredor/pruebas3.txt y resultados3.csv. Si falta una evaluacion o un meta, lo lista y sale con
-codigo 1 sin escribir nada.
+Escribe plan2/diag_corredor/pruebas3.txt y resultados3.csv, y la tabla TESIS/secciones/tablas/diag_2715.tex (Anexo G).
+Si falta una evaluacion o un meta, lo lista y sale con codigo 1 sin escribir nada. Despues se corre analisis.py, que
+agrega las filas H6a, H6b y H7 a diag_pruebas.tex a partir de resultados3.csv.
 
 Escenarios: O = dem_corredor_t2715 (original), D = dem_corredor_t2715_der (giros del periodo 2 a la derecha).
 Pruebas (retraso total, cambio pareado por semilla, IC95 bootstrap pareado y p de Wilcoxon con evaluar.comparar,

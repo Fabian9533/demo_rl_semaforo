@@ -1105,13 +1105,13 @@ Caso con demanda alta (cada flujo por el factor) & P2: $\times 2.0 = 3620$ & P4:
 % fuente: TESIS/images/fig_corredor_periodos.pdf, generada por plan2/figuras_redes.py desde plan2/corredor.net.xml y
 % corredor.rou.xml (flujos con begin 0 y 1800). Cada cifra suma la tasa de los flujos que hacen ese movimiento en
 % ese cruce, por su camino mas corto (el unico del corredor); el tipo de cada movimiento sale de la direccion de la
-% conexion en el .net.xml (r, s, l). P1: en C1, recto al este 660 (W->E 600 + W->S2 60), recto al oeste 310
-% (E->W 250 + N2->W 60), derecha E->N1 60 y S1->E 60; en C2, recto al este 660 (W->E 600 + S1->E 60), recto al oeste
-% 310 (E->W 250 + E->N1 60), derecha W->S2 60 y N2->W 60. P2: en C1, recto al oeste 660 (E->W 600 + S2->W 60), recto
-% al este 250, izquierda W->N1, E->S1 y N1->E (60 cada una); en C2, recto al oeste 660 (E->W 600 + E->S1 60), recto
-% al este 310 (W->E 250 + N1->E 60), izquierda S2->W 60; transversales 180. 25.10.2026, 21:30: antes era una vista
-% del corredor a escala con los giros superpuestos (Fabian: "no se logra entender con claridad que pasa en ese tipo
-% de cruces")
+% conexion en el .net.xml (r, s, l). Todas las cifras son demanda de P1. Primera media hora: en C1, recto al este 660
+% (W->E 600 + W->S2 60), recto al oeste 310 (E->W 250 + N2->W 60), derecha E->N1 60 y S1->E 60; en C2, recto al este
+% 660 (W->E 600 + S1->E 60), recto al oeste 310 (E->W 250 + E->N1 60), derecha W->S2 60 y N2->W 60. Segunda media
+% hora: en C1, recto al oeste 660 (E->W 600 + S2->W 60), recto al este 250, izquierda W->N1, E->S1 y N1->E (60 cada
+% una); en C2, recto al oeste 660 (E->W 600 + E->S1 60), recto al este 310 (W->E 250 + N1->E 60), izquierda S2->W 60;
+% transversales 180. 25.10.2026 (commit fe70e7d, 21:12): antes era una vista del corredor a escala con los giros
+% superpuestos (Fabian: "no se logra entender con claridad que pasa en ese tipo de cruces")
 \begin{figure}[!tbp]
 \centering
 \includegraphics[width=0.92\textwidth]{fig_corredor_periodos.pdf}

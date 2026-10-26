@@ -37,13 +37,13 @@ El resultado tiene cuatro límites:
     corredor alterna entre FUNCIONA y FALLA (falla con 1358 y
     2715~veh/h), en la red con rotonda no hay diferencia significativa
     con 2715 y 3620~veh/h y en la malla no hay mejora en ningún nivel
-    (Sección~\ref{sec:efecto-demanda}). Un diagnóstico posterior muestra
-    que esa alternancia no es un error de SUMO, sino de cómo se midió y
-    de cómo se entrenó el modelo: con la medición más estricta y una
-    corrección del entrenamiento, solo falla 2715~veh/h, donde pesan
-    mucho, aunque no lo explican todo, los autos que esperan para girar
-    a la izquierda en calles de un carril
-    (Sección~\ref{sec:diag-corredor}).
+    (Sección~\ref{sec:efecto-demanda}). Un diagnóstico posterior, que no
+    cambia ningún veredicto, muestra que esa alternancia no es un error
+    de SUMO, sino de cómo se midió y de cómo se entrenó el modelo. Con
+    la medición más estricta y la misma corrección del entrenamiento que
+    mejora P6, solo falla 2715~veh/h. Ahí pesan mucho, aunque no lo
+    explican todo, los autos que esperan para girar a la izquierda en
+    calles de un carril (Sección~\ref{sec:diag-corredor}).
 % Diagnostico del corredor (25.10.2026, rama diagnostico-corredor): plan2/diag_corredor/pruebas.txt y resultados.csv
 % (V2 frente al fijo desde 10 s en retraso total, 1001-1030: -2.9, -2.3, -7.4, +33.6 y -10.8 %; solo 2715 FALLA, los
 % mismos veredictos en 6001-6030); causas por nivel: Seccion sec:diag-corredor (Tabla tab:diag-resumen y "Por que
@@ -491,7 +491,9 @@ los niveles de demanda adicionales, con el modelo entrenado en cada uno,
 hay indicios de que en el corredor la mejora no crece de forma regular
 con la demanda (el resultado alterna entre FUNCIONA y FALLA) y de que en
 la red con rotonda baja por encima de unos 2150~veh/h; en la malla no
-hay mejora en ningún nivel, de 1810 a 8700~veh/h. Con la misma demanda
+hay mejora en ningún nivel, de 1810 a 8700~veh/h. En el corredor, cada
+nivel de demanda tiene una causa distinta (Sección~\ref{sec:diag-corredor}).
+Con la misma demanda
 total (1810, 2715 y 3620~veh/h), hay indicios de que el resultado
 cambia de una red a otra, sin un orden que se repita
 (Sección~\ref{sec:efecto-demanda}). Entre una red y otra cambian a la
@@ -659,7 +661,9 @@ de $-9.8$ a $-3.7$\,\% en la repetición con 30 semillas nuevas (6001 a
 se suma la espera para entrar a la red; en P4 solo reproduce el
 ciclo mínimo. Ese análisis se decidió después del veredicto, se
 probó solo en P1, P4 y P6 y con demanda determinista, y no cambia
-ningún veredicto ni el alcance de esta conclusión.
+ningún veredicto ni el alcance de esta conclusión. Un segundo
+diagnóstico, también posterior al veredicto, probó la misma corrección
+en los cinco niveles del corredor (Sección~\ref{sec:diag-corredor}).
 % fuente: plan2/exploratorio_coord/HECHOS.md (secciones 4, 5.2 y 8); conf_p6/salidas/juicio_conf_p6.txt
 % (V2 base 4042, 6001-6030: timeLoss -6.7 [-9.8, -3.7], 29/30; retraso total -3.1 [-4.7, -1.7]);
 % sintesis/analizar_fases_p6.txt (ciclo 26 s, sincronia 63.6 %, semilla 999); tanda2/juicio_tanda2.txt

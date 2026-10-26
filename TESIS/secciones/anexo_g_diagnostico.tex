@@ -542,9 +542,10 @@ dato más: en 1358~veh/h el fijo ya es un ciclo corto (12/10~s), e IPPO
 con mensajes cambia de fase 373 veces por corrida frente a 527 del
 fijo. Con eso plantea cuatro hipótesis
 (Tabla~\ref{tab:diag-hipotesis}).
-% fuente: plan2/diag_corredor/PRERREGISTRO.md (encabezado y "Lo que ya muestran los datos existentes", de
-% diag_corredor.py, 25.10 12:50); prerregistro.sha256 (2af77443...6852). Hora: commit 5196edb de las 13:00:27 (el
-% encabezado del pre-registro dice 13:05, una hora aproximada; nota al final de PRERREGISTRO.md). "Por corrida": la
+% fuente: plan2/diag_corredor/PRERREGISTRO.md (encabezado y "Lo que ya muestran los datos existentes", que cita
+% diag_corredor.py, 25.10 12:50: ningun commit tiene ese script; las mismas cifras estan en descomposicion.txt, de
+% descomposicion.py, commit 5196edb); prerregistro.sha256 (2af77443...6852). Hora: commit 5196edb de las 13:00:27
+% (el encabezado del pre-registro dice 13:05, una hora aproximada; nota antes de la Enmienda 3 en PRERREGISTRO.md). "Por corrida": la
 % columna cambios_fase cuenta toda la corrida (372.7 y 526.5); el pre-registro decia "por hora"
 
 \begin{table}[H]
@@ -558,11 +559,11 @@ Hipótesis & Qué propone & Corrección & Predicción \\
 \midrule
 H1 (referencia) & La mejora de 905~veh/h viene de la referencia & Ninguna & Ya mostrada; solo se reporta. La referencia principal pasa a ser el fijo ajustado desde 10~s, y la métrica principal, el retraso total \\
 H2 (recompensa) & La recompensa solo mide el retraso dentro de la red y no ve a los vehículos que esperan para entrar; cerca de la saturación la política deja que la entrada se llene & INS & En 2715~veh/h y P2, menos espera para entrar y menos retraso total que la versión evaluada actual (IC95 del cambio entero bajo cero) \\
-H3 (objetivo de entrenamiento) & El descuento por decisión y la exploración independiente favorecen verdes largos & V2 & En 1358~veh/h, más cambios de fase por hora (IC95 entero sobre cero) y menos \texttt{timeLoss} (IC95 entero bajo cero) que la versión evaluada actual \\
+H3 (objetivo de entrenamiento) & El descuento por decisión y la exploración independiente favorecen verdes largos & V2 & En 1358~veh/h, más cambios de fase por corrida (IC95 entero sobre cero) y menos \texttt{timeLoss} (IC95 entero bajo cero) que la versión evaluada actual \\
 H4 (sin regresión) & Las dos correcciones juntas no dañan el caso que ya funciona & V2+INS & En P1, sigue reduciendo el retraso total frente al fijo ajustado desde 10~s (IC95 entero bajo cero) \\
 \bottomrule
 \end{tabular}
-\caption[Diagnóstico del corredor: hipótesis]{Diagnóstico del corredor, posterior al veredicto: hipótesis del pre-registro, corrección que prueba cada una y predicción. La versión evaluada actual es la de IPPO con mensajes en la Tabla~\ref{tab:efecto-demanda}.}
+\caption[Diagnóstico del corredor: hipótesis]{Diagnóstico del corredor, posterior al veredicto: hipótesis del pre-registro, corrección que prueba cada una y predicción. La versión evaluada actual es la de IPPO con mensajes en la Tabla~\ref{tab:efecto-demanda}. Los cambios de fase de H3 se cuentan en toda la corrida, como los cuenta la evaluación; el pre-registro decía ``por hora''.}
 \label{tab:diag-hipotesis}
 \end{table}
 % fuente: plan2/diag_corredor/PRERREGISTRO.md ("Hipotesis y predicciones"; H4 no tiene enunciado propio en el
@@ -611,7 +612,8 @@ como una opción del código de entrenamiento del plan, apagada por
 defecto. Antes de lanzar se comprobaron dos cosas. Con las opciones
 apagadas, el código da los mismos números que el plan: los primeros 10
 episodios del corredor con la semilla 42 y el primer episodio del
-entrenamiento de cada versión evaluada no difieren en ninguna columna.
+entrenamiento de cada versión evaluada no difieren en ninguna de las
+columnas comparadas.
 Con V2 encendida, nueve episodios del corredor dan lo mismo que el
 código de V2 de este anexo, en las 50 columnas comparadas.
 % fuente: plan2/diag_corredor/compuerta/compuerta.txt ((a) y repeticion: 10 filas, 48 columnas, 0 diferencias; (a')
@@ -1107,7 +1109,8 @@ pre-registro, en cada juego de semillas.
 de ver la curva de la Tabla~\ref{tab:efecto-demanda}, y cada ronda,
 después de ver la anterior. Cada variante tiene tres entrenamientos por
 nivel, y algunas versiones evaluadas no se estabilizaron. Las variantes
-se probaron solo en el corredor. El escenario sin giros a la izquierda
+de este diagnóstico se probaron solo en el corredor; V2 ya se había
+probado en P4 y P6, con otra validación. El escenario sin giros a la izquierda
 cambia también qué tramo transversal lleva esos giros, y en H6a las
 políticas se evalúan en un escenario en el que no se entrenaron. Lo que hace cada
 control se midió con cinco semillas y con una sola versión evaluada por

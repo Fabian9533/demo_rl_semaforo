@@ -168,10 +168,14 @@ En el fijo, la peor semilla (1002, 86.63 s/veh) es la que tuvo más tiempo la ca
    - Esto pasa solo donde hay giros a la izquierda: 0 s en P1 y en D.
 
 2. **MEDIDO. Los giros a la izquierda le cuestan muy distinto a cada control.**
-   - Retraso total del P2, O menos D (mismo periodo y volúmenes, cambia solo el sentido de los cuatro giros):
-     fijo +25.7, V2 +68.0, IPPO actual +77.3 y actuado +244.1 s/veh (`bloqueo_periodos.csv`).
-   - Sin esos giros (D), IPPO actual le gana al fijo en la hora: 35.41 frente a 41.53 s/veh; con 30 semillas,
-     34.61 frente a 42.54 (`eval3/eval_d_*_1001.csv`).
+   - Retraso total del P2, O menos D (mismo periodo y volúmenes; D cambia los cuatro giros a la izquierda por cuatro a
+     la derecha, no solo su sentido: ver el punto 9 de «Lo que contradice o no cierra» de `mecanismo_2715.md`): fijo
+     +25.7, V2 +68.0, IPPO actual +77.3 y actuado +244.1 s/veh (`bloqueo_periodos.csv`, 5 semillas; el del fijo lo
+     decide la semilla 1002: 8.2 / 93.1 / 4.5 / 6.2 / 16.3). Con las 10 semillas de `periodos.csv`: +26.4, +73.4,
+     +81.4 y +255.1.
+   - Sin esos giros (D), IPPO actual le gana al mismo fijo 25/10 en la hora: 35.41 frente a 41.53 s/veh; con 30
+     semillas, 34.61 frente a 42.54 (`eval3/eval_d_*_1001.csv`). Frente al fijo ajustado de D (35/15, desfases 0/30;
+     29.22 s/veh) queda +18.5 % (34.61 frente a 29.22; medias de `pruebas3.txt`).
    - Con ellos (O), pierde: 74.09 frente a 54.36; con 30 semillas, 76.43 frente a 57.50.
    - En P1, que no tiene giros a la izquierda y es igual en O y en D, IPPO gana: 29.3 frente a 38.4 s/veh.
 
@@ -181,33 +185,43 @@ En el fijo, la peor semilla (1002, 86.63 s/veh) es la que tuvo más tiempo la ca
    - Descarga de C2_C1 con cola: 0.44, 0.38, 0.38 y 0.26 veh/s; en D, 0.44-0.47.
    - Entre corridas, esos segundos siguen al retraso del P2 con ρ = 0.92, y a la cola de C2_C1 que llega a C2 con
      ρ = 0.79.
-   - El giro W->N1 bloquea más segundos (14-38 % del verde de W_C1), pero no se asocia con el retraso
-     (ρ = −0.44, p = 0.10).
+   - El giro W->N1 bloquea más segundos (14-38 % del verde de W_C1), pero más bloqueo de W_C1 va, si acaso, con
+     menos retraso (ρ = −0.44, p = 0.10, no significativo); en las 45 corridas de la verificación, va con menos
+     bloqueo E->S1 (ρ = −0.76), solo una correlación.
 
-4. **MEDIDO. IPPO actual alarga la transversal de C2 mientras la cabeza de S2_C2 espera para girar (S2->W).**
+4. **MEDIDO. IPPO actual alarga la transversal de C2 mientras la cabeza de S2_C2 espera para girar (S2->W).** Es una
+   asociación, no una causa medida (Límites).
    - Sus verdes transversales de C2 en P2 duran 20.4 s de media, frente a 11.8 s en D y 10 s del fijo.
    - Los verdes con la cabeza bloqueada duran 23.8 s (20.4 por corrida); los que no, 15.0 s (12.8 por corrida).
    - En las decisiones, termina el verde en el 9.9 % de las 111 con la cabeza bloqueada, en el 38.8 % de las
      400 sin ella y en el 73.8 % de las 263 de D.
    - En C1 no lo hace: el 100 % de sus verdes transversales duran 10 s.
 
-5. **MEDIDO; la cuenta del reparto es aritmética sobre lo medido. El costo de IPPO actual sale sobre todo del
-   verde que le quita a E_C2.**
+5. **MEDIDO el reparto del verde. Corregido por la verificación: el costo de IPPO actual no sale del verde que le
+   quita a E_C2.** El cuello es el giro E->S1 en C1 (conclusión 3): con IPPO actual y con V2, C1 sirve unos 418
+   vehículos hacia el oeste por cada 1800 s, y dar más verde a E_C2 no lo cambia. Lo que sigue es el reparto
+   medido; la cuenta de los 79 vehículos es aritmética, no una causa.
    - En P2, la transversal de C2 recibe 674 s de verde, frente a 456 s en D (+218 s), y E_C2 recibe 928 s,
      frente a 1113 s (−185 s).
    - E_C2 descarga casi igual por segundo de verde (0.416 frente a 0.427 veh/s), así que cruza 386 de sus 495
      vehículos del P2, frente a 475 en D.
-   - De ese déficit de 88 vehículos, unos 79 salen del verde que falta (185 s × 0.427).
+   - La cuenta 185 s × 0.427 veh/s da 79 de esos 88 vehículos. Es una identidad contable frente a D, donde C1 no
+     limita, no una causa: V2 le da a E_C2 86 s más de verde que IPPO actual y sirve lo mismo (393 frente a 392
+     vehículos en el P2, contando los que cruzan en ámbar o rojo).
    - E_C2 tiene 19.1 vehículos esperando para entrar de media (máx. 71.8; fijo 3.9 y 14.4; D 0.15 y 1). Los
      vehículos del P2 que entran por E_C2 esperan 89.7 s (D 0.5 s, fijo 17.8 s).
 
-6. **MEDIDO. V2 pierde lo mismo que IPPO actual, pero por el derrame desde C1.**
+6. **MEDIDO; INFERIDO el cuello común. V2 pierde lo mismo que IPPO actual, por el mismo cuello: el giro E->S1 en C1 y
+   su derrame hasta C2**
+   (corregido por la verificación: no son dos mecanismos distintos).
    - No alarga ninguna transversal: termina el verde en el 100 % de sus decisiones, con o sin bloqueo.
    - La cola de C2_C1 llega a C2 durante 262 s por corrida (fijo 78 s; D 58 s).
    - E_C2 pasa 136.8 s de su verde con esa cola en la entrada. En esos segundos descarga 0.17 veh/s, y 0.41 en
      el resto.
-   - En la hora, E_C2 descarga 0.377 veh/s frente a 0.439 en D y cruza 382 vehículos frente a 465.
-   - De ese déficit de 83 vehículos, unos 63 salen de la descarga más lenta y 21 del verde que falta (−48 s).
+   - En el periodo 2, E_C2 descarga 0.377 veh/s frente a 0.439 en D y cruza 382 vehículos frente a 465.
+   - De ese déficit de 83 vehículos, la cuenta da unos 63 por la descarga más lenta y 21 por el verde que falta
+     (−48 s). Como en la conclusión 5, es aritmética: con IPPO actual y con V2, C1 sirve lo mismo (418 y 419 vehículos
+     en el P2).
 
 7. **MEDIDO; INFERIDO en el porqué. El actuado colapsa por el mismo mecanismo, amplificado.**
    - Mientras hay bloqueo, sus verdes llegan al máximo.
@@ -225,8 +239,10 @@ En el fijo, la peor semilla (1002, 86.63 s/veh) es la que tuvo más tiempo la ca
    - W_C1 no está saturado en P2: en los cuatro controles cruza unos 235 vehículos en verde, frente a una
      demanda de 233. INFERIDO: por eso ese bloqueo no se propaga.
    - No está medido por qué el giro E->S1 se bloquea tres veces menos con el fijo que con IPPO o V2. El
-     volumen opuesto servido es el mismo en todos. Una hipótesis sin probar es el momento en que llega el
-     pelotón E->W a C1 respecto de la descarga de W_C1: desfases 0/0 en el fijo, progresión en IPPO.
+     volumen opuesto servido es el mismo en todos. No son los desfases 0/0: con desfases de 10, 20, 25 y 30 s en
+     C2, el fijo resiste igual ese bloqueo (2.8-3.3 % del verde, frente a 4.3 % con 0/0; nota de verificación de
+     `mecanismo_2715.md`). Que el fijo bloquee más W_C1 y eso le abra huecos a E->S1 es solo una correlación
+     (ρ = −0.76 en las 45 corridas de la verificación).
 
 9. **MEDIDO. El P1 no tiene derrame ni bloqueo por giros.**
    - La cola de C1_C2 llega a C1 durante 0.4 s por corrida como máximo, en todos los controles y escenarios.
@@ -237,11 +253,14 @@ En el fijo, la peor semilla (1002, 86.63 s/veh) es la que tuvo más tiempo la ca
 
 10. **INFERIDO. Respuesta a "¿por qué 2715?" desde esta medición.**
     - La desventaja de IPPO en 2715 aparece con los giros a la izquierda permitidos del P2, en accesos de un
-      carril. Sin ellos, IPPO gana.
-    - Los controles que responden a las colas convierten esos bloqueos en verde mal usado: IPPO alarga una
-      transversal bloqueada y el actuado alarga todo.
-    - Además, todos los adaptativos sufren más el bloqueo E->S1 en C1, que retiene la punta y la derrama hasta
-      la entrada E_C2. Esa espera para entrar no entra en el timeLoss.
+      carril. Sin ellos, IPPO gana frente al mismo fijo 25/10 (H6a), pero V2 entrenado sin ellos no le gana al fijo
+      ajustado de ese escenario (+1.3 %, H6b no pasa): los giros no bastan para explicar 2715 (lectura
+      prerregistrada de la Enmienda 3).
+    - Con los tres adaptativos el cuello es el bloqueo E->S1 en C1 (IPPO actual 13 %, V2 12 % y actuado 37 % del
+      verde, frente a 4 % con el fijo), que retiene la punta y la derrama hasta la entrada E_C2. Esa espera para entrar
+      no entra en el timeLoss.
+    - Además, IPPO actual alarga una transversal bloqueada y el actuado alarga todo. En IPPO es una asociación, no una
+      causa medida (conclusión 4), y el verde que le quita a E_C2 no explica su costo (conclusión 5).
     - No se midió aquí por qué no pasa en 905-1810 veh/h. Una posibilidad es que, con flujos opuestos más
       ligeros, el hueco aparece antes. Queda como hipótesis.
 
@@ -269,5 +288,22 @@ En el fijo, la peor semilla (1002, 86.63 s/veh) es la que tuvo más tiempo la ca
   - `bloqueo_verdes.csv` y `bloqueo_decisiones.csv`.
   - `bloqueo_derrame.csv`, `bloqueo_periodos.csv` y `bloqueo_control.csv`.
 - Datos por segundo (`seg_*.csv.gz`), métricas (`met_*.json`) y tripinfo de las 40 corridas, 73 MB:
-  `C:/Users/GAMER/AppData/Local/Temp/claude/c--Users-GAMER-Documents-demo-rl-semaforo/de7717ed-cbad-4afb-8e8f-03cbdcefb7fa/scratchpad/bloqueo/datos/`.
-  Es una carpeta temporal de la sesión: si hace falta conservarla, hay que copiarla.
+  `C:/Users/GAMER/Documents/demo_rl_semaforo/datos_diagnostico_corredor_2026-10-25/bloqueo/datos/` (copiados el 25.10.2026 desde la carpeta
+  temporal de la sesión). En `C:/Users/GAMER/Documents/demo_rl_semaforo/datos_diagnostico_corredor_2026-10-25/bloqueo/` está también
+  `fijo_25_10_d00.add.xml`, el fijo 25/10 con desfases 0/0 que se usó en O y en D.
+
+## Nota de verificación (25.10.2026)
+
+Las conclusiones 2, 3, 4, 5, 6, 8 y 10 se corrigieron según la verificación de `mecanismo_2715.md` (nota al final
+de ese archivo): con IPPO actual y con V2 el cuello es el mismo, el giro E->S1 en C1 (una inferencia sobre lo
+medido); que IPPO alargue la transversal bloqueada es una asociación; las cuentas del verde que falta en E_C2 son
+aritméticas, no causas; con desfases de 10 a 30 s el fijo resiste igual el bloqueo E->S1, así que no son los
+desfases 0/0; y el bloqueo de W_C1 va, si acaso, con menos bloqueo E->S1 (ρ = −0.76 en 45 corridas). «En la hora,
+E_C2 descarga 0.377» era del periodo 2. Los costos por periodo de 5 semillas (+25.7, +68.0, +77.3 y +244.1 s/veh),
+en los que el del fijo lo decide la semilla 1002, con 10 semillas son +26.4, +73.4, +81.4 y +255.1. D cambia los
+cuatro giros a la izquierda por cuatro a la derecha, no solo su sentido. Además, en las conclusiones 2 y 10, «sin
+ellos, IPPO gana» quedó limitado al mismo fijo 25/10: frente al fijo ajustado de D, IPPO actual queda +18.5 % y V2
+entrenado en D +1.3 % (H6b no pasa), así que los giros no bastan. En W_C1, «no se asocia con el retraso» pasó a
+«va, si acaso, con menos retraso». En «Archivos y cómo reproducir», los datos por segundo se copiaron de la carpeta
+temporal de la sesión a `C:/Users/GAMER/Documents/demo_rl_semaforo/datos_diagnostico_corredor_2026-10-25/bloqueo/datos/`, y se dice dónde está
+`fijo_25_10_d00.add.xml`.

@@ -12,7 +12,9 @@ Cuando termine la cola (ids diag_*, plan2/cola/; lanzada el 25.10.2026 a las 13:
        plan2/diag_corredor/pruebas.txt         H1-H5 y el criterio de causa raiz (con V2+INS y con V2+INS+obs),
                                                con PASA o NO PASA y cifras
        TESIS/secciones/tablas/diag_corredor.tex   solo el tabular (retraso total frente al fijo desde 10 s)
-       TESIS/secciones/tablas/diag_pruebas.tex    solo el tabular de las pruebas H2-H5 (Anexo G)
+       TESIS/secciones/tablas/diag_pruebas.tex    solo el tabular de las pruebas H2-H5 y, si ya existe
+                                               resultados3.csv (de analisis3.py), tambien H6a, H6b y H7 (Anexo G);
+                                               por eso, despues de la Enmienda 3, se corre primero analisis3.py
        TESIS/images/fig_diag_corredor.pdf y .png
      Tarda menos de un minuto (10 000 remuestreos por comparacion, unas 300 comparaciones).
 

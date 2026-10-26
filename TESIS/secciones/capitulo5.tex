@@ -975,8 +975,19 @@ columna es IPPO con mensajes con el entrenamiento del plan, y la
 última, con el entrenamiento corregido (la variante V2 del Anexo~G),
 que cambia dos detalles de cómo aprende: mide el tiempo en segundos y
 no en decisiones, y cuando prueba una acción distinta durante el
-entrenamiento, los dos semáforos la prueban a la vez. Así, de una
-columna a la siguiente cambia una sola cosa.
+entrenamiento, los dos semáforos la prueban a la vez. Además, la
+versión evaluada del entrenamiento corregido se eligió por el retraso
+total, y la del plan, por el retraso dentro de la red; salvo en
+2715~veh/h y en P2, los dos criterios eligen la misma versión.
+% Verificacion del 25.10.2026: decia "Asi, de una columna a la siguiente cambia una sola cosa", pero entre las
+% dos ultimas columnas tambien cambia el criterio con que se eligio la version evaluada (Enmienda 1: V2 por retraso
+% total, la version actual por timeLoss; resultados.csv, columna criterio_val), y entre la segunda y la penultima
+% cambia la metrica y, en 905, tambien la referencia. Mismo episodio con los dos criterios: plan2/politica_<esc>_
+% vecinos_v2_s<b>.json (ep_elegido_timeloss = ep_elegido_total en las 3 bases de 905, 1358, P1 y P2; en 2715
+% difiere en la base 42, 150 y 200, y en la 4042, 150 y 170). La version evaluada es la base mediana segun el mismo
+% criterio (veredicto.base_mediana): coincide en 905 (2042/90), 1358 (42/170) y P1 (42/180); en 2715 sale 4042/150
+% por timeLoss y 42/200 por retraso total, y en P2, 2042/200 por timeLoss y 42/160 por retraso total (con 2042,
+% V2 en P2 quedaria en -8.8 % en vez de -10.8 % frente al fijo desde 10 s; eval_corredor_alta_ippo_vecinos_v2_s2042)
 % fuente: plan2/diag_corredor/PRERREGISTRO.md (pre-registro y Enmiendas 1 a 3); resultados.csv (analisis.py) y
 % pruebas3.txt (analisis3.py). Version corta del 25.10.2026 (criterios de claridad del profesor, pedida por
 % Fabian), revisada con un verificador (claridad, cifras y coherencia): el detalle (descomposicion,
@@ -1033,8 +1044,9 @@ tiene hasta un 15\,\% más de retraso con el fijo, el actuado e IPPO con
 mensajes. Con 2715~veh/h tiene un 83\,\% más con el fijo y mucho más con
 los controles adaptativos: con IPPO con mensajes, el retraso pasa de 29
 a 119~s/veh, y con el actuado, de 29 a 272.
-% mecanismo (como bloquean los giros, por control): plan2/diag_corredor/bloqueo.md y mecanismo_2715.md; su
-% verificacion no habia terminado al cerrar esta version, asi que no se cita en el texto
+% mecanismo (como bloquean los giros, por control): plan2/diag_corredor/bloqueo.md y mecanismo_2715.md,
+% verificados el 25.10.2026 (nota al final de mecanismo_2715.md, commit 182ae58); aqui solo se cita, con la
+% Figura 3.8, lo verificado: el que espera para girar a la izquierda detiene su carril
 Para medir el peso de los giros se repitió el nivel con los de la
 segunda mitad a la derecha, con el mismo protocolo de cada nivel. El
 entrenamiento corregido, entrenado en ese escenario, queda un
@@ -1083,13 +1095,19 @@ repiten también los resultados negativos.
 
 \noindent\textbf{En suma.} La curva no sigue una tendencia porque cada
 nivel tiene una causa distinta, y ninguna es un error de SUMO. El
-entrenamiento corregido es una variante nueva, probada solo en el
-corredor, y no cambia ningún veredicto del plan. Una salvedad: en 905 y
-1358~veh/h las diferencias son tan pequeñas que, si el conductor
-simulado reaccionara en otro tiempo, podrían cambiar de signo; eso no
-se pudo probar con IPPO con mensajes (Anexo~G).
-% fuente: sumo.md, seccion 3 (con paso de 0.5 s el orden entre las referencias se invierte en 1358 y P1; IPPO no
-% se puede correr con otro paso) y anexo_g_diagnostico.tex (parrafo del paso de simulacion)
+entrenamiento corregido es una variante posterior al veredicto y no
+cambia ningún veredicto. Una salvedad: en 905 y 1358~veh/h las
+diferencias son tan pequeñas que podrían cambiar de signo con otro
+tiempo de reacción del conductor simulado. Con medio segundo en vez de
+uno, el fijo, el actuado y el ciclo mínimo ya cambian de orden en
+1358~veh/h y en P1, en diferencias de menos de 1~s/veh. Con IPPO con
+mensajes esa prueba no se pudo hacer (Anexo~G).
+% fuente: sumo.md, seccion 3 (con paso de 0.5 s el orden entre fijo, actuado y ciclo minimo se invierte en 1358 y
+% P1, con diferencias de menos de 1 s/veh; en 1358 cambia la posicion del ciclo minimo y en P1 la del fijo frente al
+% actuado; IPPO no se puede correr con otro paso) y anexo_g_diagnostico.tex (parrafo del paso de simulacion).
+% Verificacion del 25.10.2026: decia "variante nueva, probada solo en el corredor", pero es la V2 del
+% Anexo G, que ya se habia probado en P4 y P6 (Tabla G.2); antes no decia en que niveles se probo el paso de 0.5 s;
+% 905 no se probo y queda como inferencia
 
 %----------------------------------------------------------------------
 \section{Qué aporta cada pieza}
@@ -1474,9 +1492,10 @@ diagnóstico posterior al veredicto (Sección~\ref{sec:diag-corredor})
 muestra que esa alternancia no es un error de SUMO: viene de la
 referencia (905~veh/h), del entrenamiento (1358~veh/h), de la métrica
 (P2) y, en parte, de los giros a la izquierda en calles de un carril
-(2715~veh/h). Con el entrenamiento corregido, IPPO con mensajes tiene
-menos retraso total que el fijo ajustado desde 10~s en todos los
-niveles del corredor menos en 2715~veh/h. Con la
+(2715~veh/h). Con el entrenamiento corregido, una variante posterior al
+veredicto, IPPO con mensajes tiene menos retraso total que el fijo
+ajustado desde 10~s en todos los niveles del corredor menos en
+2715~veh/h. Con la
 misma demanda total, hay indicios de que el resultado cambia de una red
 a otra sin un orden que se repita, aunque esa comparación no separa el
 efecto de la red, el de la carga por calle y el de los carriles. No
