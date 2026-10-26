@@ -926,7 +926,22 @@ demanda; la red, los semáforos, las calles, los carriles y el protocolo
 son los mismos, y el programa del fijo ajustado se elige de nuevo, con
 la misma regla, para la demanda de cada caso. Así, cada par mide el efecto de la
 demanda en una misma red. Todos los parámetros de la tabla se fijaron
-antes de entrenar; ninguno trae resultados.
+antes de entrenar; ninguno trae resultados. La Figura~\ref{fig:redes}
+muestra las tres redes, con el sentido de cada carril, y un cruce
+ampliado con los movimientos que permite cada semáforo.
+
+% fuente: TESIS/images/fig_redes.pdf, generada por plan2/figuras_redes.py desde plan2/corredor.net.xml, red.net.xml y
+% malla3.net.xml (posicion de los cruces, aristas, numero y orden de carriles, conexiones r/s/l) y el programa fijo de
+% corredor.add.xml, red.add.xml y malla3.add.xml (estado G de recto y derecha, g de izquierda, en todos los
+% semaforos). Carriles: corredor, 1 por sentido en todas las calles; red con rotonda, 2 en la avenida y 1 en las
+% transversales y en la rotonda; malla, 2 en todas; en las calles de 2 carriles, el derecho sirve recto y derecha y
+% el izquierdo, recto e izquierda (conexiones por carril del .net.xml)
+\begin{figure}[!tbp]
+\centering
+\includegraphics[width=\textwidth]{fig_redes.pdf}
+\caption[Las tres redes del plan]{Las tres redes del plan, dibujadas desde sus archivos de SUMO. Cada flecha gris marca el sentido de un carril y cada círculo verde, un semáforo. El corredor tiene un carril por sentido en todas sus calles; la red con rotonda, dos en la avenida y uno en las transversales y en la rotonda, que no tiene semáforo y se recorre en sentido antihorario; la malla, dos en todas sus calles. Los carriles se dibujan más anchos que en la red, donde miden 3.2~m y los cruces están a 300~m, para que se vean los dos sentidos. Abajo a la derecha, un cruce del corredor con su geometría real: desde el acceso oeste se puede seguir recto o girar a la derecha con verde con prioridad, o girar a la izquierda con verde sin prioridad, cediendo el paso al tránsito de frente. Todos los semáforos de las tres redes permiten los mismos movimientos con el mismo tipo de verde; en las calles de dos carriles, el carril derecho sirve recto y a la derecha, y el izquierdo, recto y a la izquierda.}
+\label{fig:redes}
+\end{figure}
 % Entrega 3 (22.10.2026, reunion del 14.10): logica del plan (pares y complejidad creciente), objetivo de cada
 % caso y tabla de comparaciones; se quito "si funciona con mas carriles": con este diseno el efecto de los
 % carriles no se puede aislar.
@@ -1043,6 +1058,12 @@ tipo de flujo, con su subtotal, para que la columna sume a la vista. A
 los 30~min el sentido dominante y el contrario intercambian sus flujos;
 los giros y los flujos de la rotonda cambian de origen y destino, y el
 total de cada mitad no cambia. Las llegadas son a intervalos regulares.
+En el corredor, ese cambio hace que los cuatro giros sean a la derecha
+en la primera media hora y a la izquierda en la segunda
+(Figura~\ref{fig:corredor-periodos}).
+% fuente: plan2/corredor.rou.xml (periodo 1: giros S1->E, E->N1, W->S2 y N2->W, a la derecha; periodo 2: S2->W,
+% W->N1, E->S1 y N1->E, a la izquierda); en la red con rotonda y en la malla no se reviso el sentido de los giros por
+% periodo, por eso solo se dice del corredor
 
 % fuente: atributo vehsPerHour de los flow con begin="0" en plan2/corredor.rou.xml (10 flujos), red.rou.xml (12) y
 % malla3.rou.xml (24); segunda mitad, flujos con begin="1800", que suman lo mismo; totales de 3620, 2580 y 8700 en
@@ -1072,6 +1093,17 @@ Caso con demanda alta (cada flujo por el factor) & P2: $\times 2.0 = 3620$ & P4:
 % fuente (flujos de la rotonda): plan2/red.rou.xml, p1_SR_E (from SR_RS, to C3_E, 150 veh/h) y p1_W_NR (from W_RW,
 % to RN_NR, 80 veh/h); en la segunda mitad, p2_NR_W (150) y p2_E_SR (80). 23.10.2026: antes la fila decia
 % "Rotonda (entra uno y sale otro)"
+
+% fuente: TESIS/images/fig_corredor_periodos.pdf, generada por plan2/figuras_redes.py desde plan2/corredor.net.xml y
+% corredor.rou.xml (flujos con begin 0 y 1800; el tipo de cada giro sale de la direccion de la conexion en el
+% .net.xml; el grosor de los rectos es proporcional a vehsPerHour: 600 la punta, 250 el contrario y 180 cada
+% transversal en P1)
+\begin{figure}[!tbp]
+\centering
+\includegraphics[width=0.92\textwidth]{fig_corredor_periodos.pdf}
+\caption[Corredor: los movimientos de cada media hora]{El corredor en cada media hora, con los flujos de sus archivos de SUMO. Arriba, la primera media hora: la punta de la avenida va de oeste a este y los cuatro giros (60~veh/h cada uno en P1) son a la derecha. Abajo, la segunda: la punta va de este a oeste y los cuatro giros son a la izquierda, tres de ellos en C1, con verde sin prioridad: el que gira cede el paso al tránsito de frente y, como las calles tienen un carril, mientras espera detiene a los que vienen detrás. El grosor de las líneas rectas crece con la demanda; cada giro se dibuja solo en el cruce donde gira. Los niveles de demanda adicionales usan los mismos flujos multiplicados por un factor.}
+\label{fig:corredor-periodos}
+\end{figure}
 
 \subsection{Niveles de demanda adicionales}
 \label{sec:plan-demanda}
