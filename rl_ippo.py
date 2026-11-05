@@ -68,6 +68,27 @@ por defecto: sin ellas el entrenamiento da los mismos numeros que antes.
          (opciones.obs_insercion, dim_obs) y evaluar.py la activa al cargar la politica. Apagada, la
          observacion y los numeros no cambian.
 
+Plan 3 (05.11.2026; plan3/doc/PLAN3.md 1.1 y 1.2, DECISIONES B13, B15 y B22). Todo apagado por defecto: sin estas
+opciones salen el mismo CSV (salvo la columna segundos, que es tiempo de reloj), los mismos checkpoints y la misma
+politica publicada que antes. Contrato de --guardar-estado, --hasta-ep y --reanudar: plan3/doc/informe_ent1.md.
+  --solo-descuento, --solo-exploracion   ablacion de V2: solo el descuento por segundo o solo la exploracion
+         comun. Las dos juntas son --v2 (mismo entrenamiento y mismo meta).
+  --lr-horizonte N --lr-piso F   lr = lr0 * max(F, 1 - (ep - 1) / N); por defecto N = --episodios y F = 0, la
+         formula de siempre. Con N = 200 y F = 0.1, los episodios 1-181 son los de una corrida de 200 sin piso.
+  --registro-extendido   columnas al final del CSV: val_<s> y val_total_<s> de las semillas de validacion que no
+         tienen columna fija, var_explicada (del critico antes de actualizar), frac_forzadas (decisiones con una
+         sola accion legal), msg_edad (edad media del mensaje al decidir, s) y ent_coef (coeficiente de entropia).
+  --guardar-estado   en cada checkpoint, en el corte de --hasta-ep y en el ultimo episodio escribe aparte
+         checkpoints/<tag>_epNNN.estado.pt: pesos, Adam con su contador, random, numpy global, torch, el default_rng
+         de sembrar, las series de validacion, el CSV hasta NNN, la tasa de cada episodio y el sha256 de los
+         checkpoints. El .pt de la politica no cambia (Politica.cargar sigue con weights_only=True).
+  --hasta-ep K   corta despues del episodio K: guarda el estado y sale con codigo 0 sin publicar la politica.
+  --reanudar ESTADO|auto   sigue exacto desde un estado. Misma etiqueta: conserva los checkpoints y las filas del
+         CSV <= NNN y borra lo > NNN de un intento caido. Etiqueta nueva: copia los checkpoints y estados <= NNN,
+         las filas del CSV <= NNN (con la etiqueta nueva) y las series de validacion, y anota reanudado_de en el
+         meta. auto: el estado de mayor NNN de la propia etiqueta; sin estados empieza de cero; si la corrida ya
+         publico, sale con codigo 0 sin tocar nada.
+
 Interfaz para decisores externos (correr_episodio):
   correr_episodio(modo, politica, gui, delay, seed, tripinfo=None, serie=None, latencia=0,
                   perdida=0.0, variante="vecinos", buffer=None, decidir=None,
@@ -91,6 +112,7 @@ Interfaz para decisores externos (correr_episodio):
   C["indice"]. Funciones reutilizables: preparar, observar, mascara, Politica, validar,
   limpiar_checkpoints, ruta_checkpoint, elegir_checkpoint, sembrar, hash_git.
 """
+import io
 import os
 import re
 import csv
@@ -100,6 +122,7 @@ import json
 import time
 import random
 import shutil
+import hashlib
 import argparse
 import subprocess
 
@@ -191,6 +214,11 @@ CAMPOS_IPPO = ["variante", "base", "episodio", "semilla", "lr", "segundos", "veh
                # 25.10.2026 (diagnostico del corredor): al final, para no mover las columnas de antes
                "etiqueta", "ins_espera", "ins_total", "expl_minoritaria", "dt_medio", "frac_dt8",
                "val_total_999", "val_total_1999", "val_total"]
+# Plan 3, --registro-extendido: van despues de CAMPOS_IPPO y de val_<s>/val_total_<s> de las demas semillas de
+# validacion. Una columna nueva entra solo con la opcion que la produce: asi el CSV de una corrida no cambia de
+# columnas entre versiones del codigo y un tramo reanudado escribe las mismas que el primero.
+CAMPOS_EXTENDIDOS = ["var_explicada", "frac_forzadas", "msg_edad", "ent_coef"]
+VERSION_ESTADO = 1             # formato de checkpoints/<tag>_epNNN.estado.pt (--guardar-estado)
 
 # Se rellena con preparar(escenario)
 C = {}
@@ -556,8 +584,10 @@ def correr_episodio(modo, politica, gui, delay, seed, tripinfo=None, serie=None,
     o demo (argmax). Devuelve las mismas metricas que rl_corredor.correr_episodio mas las
     de U4 y los retornos ret_*. El reloj de decision es el de rl_corredor.py. decidir,
     transicion y con_estado son la interfaz para decisores externos (docstring del modulo).
-    v2: exploracion comun en train (--v2); ins: suma a la recompensa los vehiculos que esperan
-    para entrar (--recompensa-insercion). Apagados, nada cambia."""
+    v2: exploracion comun en train (--v2 o --solo-exploracion); ins: suma a la recompensa los
+    vehiculos que esperan para entrar (--recompensa-insercion). Apagados, nada cambia.
+    Con buffer (entrenamiento IPPO) devuelve ademas frac_forzadas y msg_edad (--registro-extendido);
+    contarlas no cambia ningun numero."""
     assert decidir is None or buffer is None, "buffer es solo para la politica IPPO"
     esc = C["escenario"]
     con_vecinos = variante != "local"
@@ -610,6 +640,7 @@ def correr_episodio(modo, politica, gui, delay, seed, tripinfo=None, serie=None,
     r_agente, n_agente = 0.0, 0        # lo que ven los agentes (con terminos), sin escalar
     ret_retraso, ret_colas, exceso = 0.0, 0.0, 0.0     # retornos por segundo (ESPEC seccion 5)
     decisiones_libres = 0
+    tomadas, edades = 0, []            # con buffer: decisiones y edad del mensaje al decidir (registro extendido)
     spill_activaciones, spill_suma = 0, 0.0
     cambios = 0
     filas_serie, filas_fases = [], []
@@ -680,6 +711,13 @@ def correr_episodio(modo, politica, gui, delay, seed, tripinfo=None, serie=None,
             r_cerradas = {tls: cerrar_pendiente(tls, agentes[tls]) for tls in deciden}
             obs = np.stack([observar(tls, agentes[tls], lect, canal, pasos, con_vecinos) for tls in deciden])
             masc = np.array([mascara(agentes[tls]) for tls in deciden], dtype=np.float32)
+            if buffer is not None:
+                tomadas += len(deciden)
+                if con_vecinos:            # edad del mensaje que observar() acaba de leer de cada vecino
+                    for tls in deciden:
+                        for vec in C["vecinos"][tls].values():
+                            if vec is not None and (vec[0], tls) in canal.ultimo:
+                                edades.append(pasos - canal.ultimo[(vec[0], tls)][0])
             estado = estado_global({t: obs[k] for k, t in enumerate(deciden)}) if con_estado else None
             if transicion is not None:
                 for k, tls in enumerate(deciden):
@@ -824,6 +862,10 @@ def correr_episodio(modo, politica, gui, delay, seed, tripinfo=None, serie=None,
     })
     if ins:
         res.update({"ins_espera": ins_espera, "ins_total": ins_total})
+    if buffer is not None:
+        # decisiones con una sola accion legal (verde minimo o maximo) y edad media del mensaje al decidir (s)
+        res.update({"frac_forzadas": round((tomadas - decisiones_libres) / max(1, tomadas), 4),
+                    "msg_edad": round(float(np.mean(edades)), 3) if edades else ""})
     res.update(medidor.resumen())
     return res
 
@@ -872,6 +914,17 @@ def gae(buffer, gamma, lam, smdp=False):
     return (torch.from_numpy(np.stack(obs)), torch.from_numpy(np.stack(masc)),
             torch.tensor(acc), torch.tensor(logp, dtype=torch.float32),
             torch.from_numpy(adv), torch.tensor(ret, dtype=torch.float32))
+
+
+def varianza_explicada(buffer, ret):
+    """--registro-extendido: 1 - Var(retorno - V) / Var(retorno) en el lote, con V el valor que el critico dio al
+    decidir (antes de actualizar, como stable-baselines3) y ret el retorno de gae(), en el mismo orden. 1: predice
+    el retorno; 0: no mejor que su media."""
+    v = np.concatenate([np.asarray(b["valor"][:len(b["recompensa"])], dtype=np.float64)
+                        for b in buffer.values() if b["recompensa"]])
+    r = ret.numpy().astype(np.float64)
+    var = float(r.var())
+    return round(1.0 - float((r - v).var()) / var, 4) if var > 0 else ""
 
 
 def actualizar(politica, opt, lote, hiper, rng):
@@ -941,13 +994,26 @@ def ruta_checkpoint(tag, ep, ext=".pt"):
     return os.path.join("checkpoints", f"{tag}_ep{ep:03d}{ext}")
 
 
-def limpiar_checkpoints(tag):
-    """Borra los checkpoints de una corrida anterior con el mismo tag (y crea la carpeta)."""
+def archivos_etiqueta(tag, carpeta="checkpoints"):
+    """{episodio: [rutas]} de los checkpoints (.pt), sus .json y sus estados (.estado.pt, o .tmp de uno a medio
+    escribir) del tag en la carpeta."""
+    patron = re.compile(re.escape(tag) + r"_ep(\d{3,})\.(pt|json|estado\.pt|estado\.pt\.tmp)$")
+    res = {}
+    for ruta in glob.glob(os.path.join(carpeta, f"{tag}_ep*")):
+        m = patron.match(os.path.basename(ruta))
+        if m:
+            res.setdefault(int(m.group(1)), []).append(ruta)
+    return res
+
+
+def limpiar_checkpoints(tag, desde=0):
+    """Borra los checkpoints, sus .json y sus estados de una corrida anterior con el mismo tag cuyo episodio pase
+    de desde (0: todos), y crea la carpeta. Al reanudar se llama con desde = el episodio de partida."""
     os.makedirs("checkpoints", exist_ok=True)
-    patron = re.compile(re.escape(tag) + r"_ep\d{3}\.(pt|json)$")
-    for ruta in glob.glob(os.path.join("checkpoints", f"{tag}_ep*")):
-        if patron.match(os.path.basename(ruta)):
-            os.remove(ruta)
+    for ep, rutas in archivos_etiqueta(tag).items():
+        if ep > desde:
+            for ruta in rutas:
+                os.remove(ruta)
 
 
 def elegir_checkpoint(val_serie):
@@ -972,20 +1038,35 @@ def hash_git():
         return ""
 
 
+def correcciones_v2(args):
+    """(descuento por segundo, exploracion comun) de esta corrida: --v2 son las dos; --solo-descuento y
+    --solo-exploracion, una cada una (ablacion del plan 3)."""
+    v2 = getattr(args, "v2", False)
+    return (v2 or getattr(args, "solo_descuento", False), v2 or getattr(args, "solo_exploracion", False))
+
+
 def meta_base(args, val_seeds):
     """Meta comun de checkpoints y politica publicada."""
-    v2 = getattr(args, "v2", False)
+    descuento, exploracion = correcciones_v2(args)
     ins = getattr(args, "recompensa_insercion", False)
     criterio = getattr(args, "criterio_val", "timeloss")
-    opciones = {"v2": v2, "recompensa_insercion": ins, "etiqueta": getattr(args, "etiqueta", "") or "",
-                "criterio_val": criterio}
+    opciones = {"v2": descuento and exploracion, "recompensa_insercion": ins,
+                "etiqueta": getattr(args, "etiqueta", "") or "", "criterio_val": criterio}
     if C["obs_ins"]:            # solo si esta activa: los meta de antes no cambian
         opciones["obs_insercion"] = True
+    # plan3: igual, solo si estan activas (la tasa, si no es la de siempre)
+    if descuento != exploracion:
+        opciones["solo_descuento" if descuento else "solo_exploracion"] = True
+    horizonte, piso = getattr(args, "lr_horizonte", None), getattr(args, "lr_piso", 0.0)
+    if horizonte and horizonte != args.episodios:
+        opciones["lr_horizonte"] = horizonte
+    if piso:
+        opciones["lr_piso"] = piso
     return {"escenario": C["escenario"], "variante": args.variante, "algoritmo": "ippo",
             "recompensa": RECOMPENSA[args.variante] + ("+insercion" if ins else ""),
             "etiqueta": opciones["etiqueta"], "opciones": opciones,
-            "descuento": "por segundo: gamma^(dt/5)" if v2 else "por decision",
-            "exploracion": (f"comun: un u por segundo, default_rng(semilla + {SEMILLA_EXPL})" if v2
+            "descuento": "por segundo: gamma^(dt/5)" if descuento else "por decision",
+            "exploracion": (f"comun: un u por segundo, default_rng(semilla + {SEMILLA_EXPL})" if exploracion
                             else "independiente (dist.sample)"),
             "recompensa_insercion": ("W1 x vehiculos que esperan para entrar por las aristas de entrada de "
                                      "los accesos del agente, cada segundo" if ins else "no"),
@@ -1000,6 +1081,294 @@ def meta_base(args, val_seeds):
             "val_seeds": val_seeds, "eval_seed": val_seeds[0] if val_seeds else None,
             "torch": torch.__version__, "python": sys.version.split()[0], "sumo": "1.25.0",
             "git": hash_git(), "features": nombres_features()}
+
+
+# ---------------- Plan 3: tasa, registro extendido y reanudacion ----------------
+def tasa(ep, horizonte, piso=0.0):
+    """lr del episodio ep (--lr-horizonte, --lr-piso): lineal de HIPER["lr"] a 0 en `horizonte` episodios, sin bajar
+    de piso * HIPER["lr"]. Con horizonte = --episodios y piso 0 da, bit a bit, la formula de siempre."""
+    return HIPER["lr"] * max(piso, 1 - (ep - 1) / horizonte)
+
+
+def campos_csv(val_seeds, extendido=False):
+    """Columnas del CSV de entrenamiento: CAMPOS_IPPO y, con --registro-extendido, al final val_<s> y val_total_<s>
+    de las semillas de validacion que no tienen columna fija, y CAMPOS_EXTENDIDOS."""
+    if not extendido:
+        return list(CAMPOS_IPPO)
+    por_semilla = [f"val_{s}" for s in val_seeds] + [f"val_total_{s}" for s in val_seeds]
+    return CAMPOS_IPPO + [c for c in por_semilla if c not in CAMPOS_IPPO] + CAMPOS_EXTENDIDOS
+
+
+def linea_csv(campos, fila=None):
+    """Texto de una fila del CSV de entrenamiento (de la cabecera si fila es None), el mismo que csv.DictWriter
+    escribe en el archivo. El estado guarda estas lineas y una reanudacion las vuelve a escribir tal cual."""
+    buf = io.StringIO()
+    escritor = csv.DictWriter(buf, fieldnames=campos, extrasaction="ignore")
+    if fila is None:
+        escritor.writeheader()
+    else:
+        escritor.writerow(fila)
+    return buf.getvalue()
+
+
+def meta_checkpoint(meta, ep, val, val_seeds):
+    """Meta del checkpoint del episodio ep: el de la corrida mas su validacion (val trae val_<s>, val,
+    val_total_<s> y val_total)."""
+    return {**meta, "ep_checkpoint": ep, "val_checkpoint": val["val"],
+            **{f"val_{s}": val[f"val_{s}"] for s in val_seeds},
+            "val_total_checkpoint": val["val_total"],
+            **{f"val_total_{s}": val[f"val_total_{s}"] for s in val_seeds}}
+
+
+def sha256(ruta):
+    with open(ruta, "rb") as f:
+        return hashlib.sha256(f.read()).hexdigest()
+
+
+def reemplazar(tmp, destino, intentos=20):
+    """os.replace con reintentos: en Windows falla mientras otro proceso (respaldo, antivirus) tiene abierto el
+    destino."""
+    for k in range(intentos):
+        try:
+            os.replace(tmp, destino)
+            return
+        except PermissionError:
+            if k == intentos - 1:
+                raise
+            time.sleep(0.5)
+
+
+def config_reanudacion(args, val_seeds):
+    """Lo que debe ser igual entre un estado y la corrida que lo reanuda para que siga exacta la misma corrida. No
+    entran las opciones que solo cambian nombres, cortes, validaciones o la eleccion final (--episodios,
+    --eval-cada, --etiqueta, --criterio-val, --csv, --hasta-ep, --guardar-estado, --registro-extendido); la tasa se
+    compara aparte, episodio por episodio. Una opcion nueva entra aqui solo si esta activa: asi un estado escrito
+    antes de que existiera sigue valiendo con ella apagada."""
+    descuento, exploracion = correcciones_v2(args)
+    return {"escenario": C["escenario"], "variante": args.variante, "base": args.seed, "dim_obs": C["dim_obs"],
+            "hiper": dict(HIPER), "descuento": descuento, "exploracion": exploracion,
+            "recompensa_insercion": args.recompensa_insercion, "obs_insercion": C["obs_ins"],
+            "val_seeds": list(val_seeds)}
+
+
+def estado_generadores(rng):
+    """random, numpy global, torch y el default_rng de sembrar (baraja los minilotes), en tipos que torch.load lee
+    con weights_only=True."""
+    version, interno, gauss = random.getstate()
+    nombre, claves, pos, tiene_gauss, gauss_np = np.random.get_state()
+    return {"random": [version, list(interno), gauss],
+            "numpy": [nombre, [int(x) for x in claves], int(pos), int(tiene_gauss), float(gauss_np)],
+            "torch": torch.get_rng_state(), "rng": rng.bit_generator.state}
+
+
+def restaurar_generadores(gen, rng):
+    version, interno, gauss = gen["random"]
+    random.setstate((version, tuple(interno), gauss))
+    nombre, claves, pos, tiene_gauss, gauss_np = gen["numpy"]
+    np.random.set_state((nombre, np.array(claves, dtype=np.uint32), pos, tiene_gauss, gauss_np))
+    torch.set_rng_state(gen["torch"])
+    rng.bit_generator.state = gen["rng"]
+
+
+def nueva_corrida(campos):
+    """Lo que el bucle de entrenamiento lleva de un episodio al siguiente, ademas de pesos, Adam y generadores: lo
+    que --guardar-estado guarda y --reanudar restaura."""
+    return {"val_serie": [], "val_total_serie": [],   # [ep, val_<s1>, ..., media] en timeLoss y en retraso total
+            "lineas": [linea_csv(campos)],            # el CSV como esta en el archivo: cabecera y una por episodio
+            "lr": [],                                 # tasa usada en cada episodio
+            "archivos": {},                           # {nombre: sha256} de los checkpoints (con --guardar-estado)
+            "origen": [],                             # [{"corrida": tag, "episodio": k}] si sigue a otra etiqueta
+            "previas": {}}                            # filas > partida de un intento anterior (B22, para comparar)
+
+
+def guardar_estado(ruta, ep, etiqueta, args, val_seeds, corrida, politica, opt, rng, ruta_csv, git):
+    """--guardar-estado: todo lo necesario para seguir exacto despues del episodio ep. Se escribe al final del
+    episodio, despues del checkpoint y de la fila del CSV, en un .tmp que se renombra: si el estado existe, todo lo
+    <= ep esta completo."""
+    estado = {"version": VERSION_ESTADO, "episodio": ep, "tag": etiqueta, "etiqueta": args.etiqueta,
+              "config": config_reanudacion(args, val_seeds), "episodios": args.episodios,
+              "eval_cada": args.eval_cada, "ruta_csv": ruta_csv, "csv": "".join(corrida["lineas"]),
+              "lr": list(corrida["lr"]), "val_serie": corrida["val_serie"],
+              "val_total_serie": corrida["val_total_serie"], "archivos": dict(corrida["archivos"]),
+              "origen": corrida["origen"], "fase_av": dict(C["fase_av"]),
+              "politica": politica.state_dict(), "opt": opt.state_dict(), "generadores": estado_generadores(rng),
+              "git": git, "torch": str(torch.__version__), "python": sys.version.split()[0]}
+    torch.save(estado, ruta + ".tmp")
+    reemplazar(ruta + ".tmp", ruta)
+
+
+def cargar_estado(ruta):
+    if not os.path.exists(ruta):
+        raise SystemExit(f"--reanudar: no existe {ruta}")
+    estado = torch.load(ruta, weights_only=True)
+    if estado.get("version") != VERSION_ESTADO:
+        raise SystemExit(f"--reanudar: {ruta} es de la version {estado.get('version')} del estado "
+                         f"(este codigo lee la {VERSION_ESTADO})")
+    m = re.search(r"_ep(\d{3,})\.estado\.pt$", os.path.basename(ruta))
+    if m and int(m.group(1)) != estado["episodio"]:
+        raise SystemExit(f"--reanudar: {ruta} guarda el episodio {estado['episodio']}")
+    return estado
+
+
+def ultimo_estado(tag):
+    """--reanudar auto: ruta del estado de mayor episodio del tag en checkpoints/, o None."""
+    estados = {ep: r for ep, rutas in archivos_etiqueta(tag).items() for r in rutas if r.endswith(".estado.pt")}
+    return estados[max(estados)] if estados else None
+
+
+def comprobar_estado(estado, args, val_seeds, horizonte):
+    """El estado debe ser de esta misma corrida: la misma configuracion y la misma tasa en cada episodio hasta el
+    de partida. Si no, sale con el motivo: seguir daria una corrida que no es ninguna de las dos."""
+    viejo, nuevo = estado["config"], config_reanudacion(args, val_seeds)
+    distintas = sorted(c for c in set(viejo) | set(nuevo) if viejo.get(c) != nuevo.get(c))
+    if distintas:
+        raise SystemExit(f"--reanudar: el estado es de otra configuracion ({', '.join(distintas)})")
+    k = estado["episodio"]
+    if k > args.episodios:
+        raise SystemExit(f"--reanudar: el estado esta en el episodio {k} y --episodios es {args.episodios}")
+    if len(estado["lr"]) != k:
+        raise SystemExit(f"--reanudar: el estado no trae la tasa de los {k} episodios")
+    esperada = [tasa(e, horizonte, args.lr_piso) for e in range(1, k + 1)]
+    distinto = next((e for e in range(1, k + 1) if esperada[e - 1] != estado["lr"][e - 1]), None)
+    if distinto is not None:
+        raise SystemExit(f"--reanudar: en el episodio {distinto} la tasa de esta corrida es "
+                         f"{esperada[distinto - 1]!r} y la del estado {estado['lr'][distinto - 1]!r} (revisa "
+                         "--episodios, --lr-horizonte y --lr-piso)")
+
+
+def ya_terminada(estado, etiqueta, ruta_csv, ruta_politica, criterio):
+    """La corrida ya llego al final y publico: el CSV en disco es el del estado del ultimo episodio y la politica
+    publicada es el checkpoint que eligen sus series con este criterio (sin validacion, los pesos del estado)."""
+    try:
+        with open(ruta_csv, newline="") as f:
+            if f.read() != estado["csv"]:
+                return False
+        with open(ruta_politica.replace(".pt", ".json"), encoding="utf-8") as f:
+            meta = json.load(f)
+        if meta.get("val_serie") != estado["val_serie"] or \
+                meta.get("val_total_serie", []) != estado["val_total_serie"]:
+            return False
+        if estado["val_serie"]:
+            serie = estado["val_total_serie"] if criterio == "total" else estado["val_serie"]
+            return meta["ep_elegido"] == elegir_checkpoint(serie)[0] and \
+                sha256(ruta_politica) == sha256(ruta_checkpoint(etiqueta, meta["ep_elegido"]))
+        publicada = torch.load(ruta_politica, weights_only=True)
+        return all(torch.equal(publicada[c], v) for c, v in estado["politica"].items())
+    except Exception:          # falta o esta rota alguna pieza: no termino, se publica de nuevo
+        return False
+
+
+def lineas_csv_estado(texto, campos, etiqueta=None):
+    """Las lineas del CSV que guarda un estado, para las columnas de esta corrida. Con las mismas columnas (y la
+    misma etiqueta) salen tal cual. Si esta corrida agrega columnas, quedan vacias en esas filas (el estado no las
+    tenia); si el estado tiene una columna que esta corrida no escribe, sale con error para no perderla. Con
+    etiqueta, la columna etiqueta pasa a la de esta corrida (reanudacion con etiqueta nueva)."""
+    lineas = [linea + "\r\n" for linea in texto.split("\r\n")[:-1]]
+    cabecera = next(csv.reader(lineas[:1]))
+    if cabecera == campos and etiqueta is None:
+        return lineas
+    perdidas = [c for c in cabecera if c not in campos]
+    if perdidas:
+        raise SystemExit(f"--reanudar: el CSV del estado tiene columnas que esta corrida no escribe "
+                         f"({perdidas[:4]}): usa las mismas --val-seeds y el mismo --registro-extendido")
+    nuevas = [c for c in campos if c not in cabecera]
+    if nuevas:
+        print(f"AVISO: las filas copiadas del estado quedan sin {nuevas[:4]}{'...' if len(nuevas) > 4 else ''}")
+    salida = [linea_csv(campos)]
+    for fila in csv.DictReader(io.StringIO(texto, newline="")):
+        if etiqueta is not None:
+            fila["etiqueta"] = etiqueta
+        salida.append(linea_csv(campos, fila))
+    return salida
+
+
+def reanudar(estado, ruta_estado, etiqueta, args, val_seeds, campos, meta, ruta_csv, politica, opt, rng):
+    """--reanudar: deja los archivos de la etiqueta como los habria dejado una corrida seguida al terminar el
+    episodio de partida k, restaura pesos, Adam, generadores y series, y devuelve la corrida para seguir en k + 1.
+      Misma etiqueta: verifica (sha256) los checkpoints <= k y borra los checkpoints y estados > k de un intento
+      caido.
+      Etiqueta nueva: borra lo que hubiera de la etiqueta nueva y copia los checkpoints y estados <= k de la de
+      origen (verificados; el .pt byte a byte, el .json con el meta de esta corrida); las filas del CSV <= k pasan
+      con la etiqueta nueva y meta["reanudado_de"] anota de donde viene.
+      En los dos casos guarda las filas > k que haya en el CSV de esta corrida (un intento anterior) para
+      compararlas con las que se rehacen (B22)."""
+    k = estado["episodio"]
+    misma = estado["tag"] == etiqueta
+    carpeta = os.path.dirname(ruta_estado) or "."
+    en_su_lugar = misma and os.path.normcase(os.path.abspath(carpeta)) == \
+        os.path.normcase(os.path.abspath("checkpoints"))
+    corrida = nueva_corrida(campos)
+    corrida.update({"val_serie": estado["val_serie"], "val_total_serie": estado["val_total_serie"],
+                    "lr": list(estado["lr"]),
+                    "origen": estado["origen"] + ([] if misma else [{"corrida": estado["tag"], "episodio": k}])})
+    C["fase_av"].update(estado["fase_av"])     # el meta lo comparte: sin episodios por correr quedaria vacio
+    if corrida["origen"]:
+        meta["reanudado_de"] = corrida["origen"]
+
+    def nombre(tag, ep, ext=".pt"):
+        return os.path.basename(ruta_checkpoint(tag, ep, ext))
+
+    # primero todo lo que puede fallar, sin tocar ningun archivo
+    faltan = [nombre(estado["tag"], f[0], ext) for f in estado["val_serie"] for ext in (".pt", ".json")
+              if nombre(estado["tag"], f[0], ext) not in estado["archivos"]]
+    if faltan:
+        raise SystemExit(f"--reanudar: el estado no anota el sha256 de {faltan[:2]}")
+    for archivo, h in estado["archivos"].items():
+        ruta = os.path.join(carpeta, archivo)
+        if not os.path.exists(ruta) or sha256(ruta) != h:
+            raise SystemExit(f"--reanudar: {ruta} falta o no es el que escribio la corrida del estado")
+    corrida["lineas"] = lineas_csv_estado(estado["csv"], campos, None if misma else args.etiqueta)
+    if os.path.exists(ruta_csv):          # CSV de un intento anterior de esta misma llamada (B22)
+        with open(ruta_csv, newline="") as f:
+            for fila in csv.DictReader(f):
+                if None not in fila and None not in fila.values() and fila["episodio"].isdigit() \
+                        and int(fila["episodio"]) > k:
+                    corrida["previas"][int(fila["episodio"])] = fila
+    # despues, los archivos de la etiqueta
+    if en_su_lugar:
+        limpiar_checkpoints(etiqueta, desde=k)
+        corrida["archivos"] = dict(estado["archivos"])
+    else:
+        limpiar_checkpoints(etiqueta, desde=k if misma else 0)
+        for f, t in zip(estado["val_serie"], estado["val_total_serie"]):
+            ep = f[0]
+            destino = ruta_checkpoint(etiqueta, ep)
+            shutil.copyfile(os.path.join(carpeta, nombre(estado["tag"], ep)), destino)
+            if misma:
+                shutil.copyfile(os.path.join(carpeta, nombre(estado["tag"], ep, ".json")),
+                                destino.replace(".pt", ".json"))
+            else:
+                val = {"val": f[-1], "val_total": t[-1], **{f"val_{s}": f[1 + i] for i, s in enumerate(val_seeds)},
+                       **{f"val_total_{s}": t[1 + i] for i, s in enumerate(val_seeds)}}
+                with open(destino.replace(".pt", ".json"), "w", encoding="utf-8") as g:
+                    json.dump(meta_checkpoint(meta, ep, val, val_seeds), g, indent=1, ensure_ascii=False)
+            for ext in (".pt", ".json"):
+                corrida["archivos"][nombre(etiqueta, ep, ext)] = sha256(ruta_checkpoint(etiqueta, ep, ext))
+        for ep, rutas in archivos_etiqueta(estado["tag"], carpeta).items():
+            for ruta in rutas:
+                if ep <= k and ruta.endswith(".estado.pt"):
+                    shutil.copyfile(ruta, ruta_checkpoint(etiqueta, ep, ".estado.pt"))
+    politica.load_state_dict(estado["politica"])
+    opt.load_state_dict(estado["opt"])
+    restaurar_generadores(estado["generadores"], rng)
+    return corrida
+
+
+def comparar_intento(previas, lineas):
+    """B22: los episodios rehechos al reanudar deben repetir los del intento anterior (salvo la columna
+    segundos)."""
+    nuevas = {int(f["episodio"]): f for f in csv.DictReader(io.StringIO("".join(lineas), newline=""))}
+    comunes = sorted(set(previas) & set(nuevas))
+    if not comunes:
+        return
+    distintos = {k: [c for c, v in nuevas[k].items() if c != "segundos" and c in previas[k] and previas[k][c] != v]
+                 for k in comunes}
+    distintos = {k: cols for k, cols in distintos.items() if cols}
+    for k, cols in sorted(distintos.items()):
+        print(f"AVISO: el episodio {k} no repite el intento anterior ({', '.join(cols[:6])})")
+    if not distintos:
+        print(f"Reanudacion: los episodios {comunes[0]}-{comunes[-1]} repiten el intento anterior "
+              f"({len(comunes)} filas, sin la columna segundos)")
 
 
 # ---------------- Main ----------------
@@ -1031,8 +1400,35 @@ def main():
                     help="metrica de validacion con la que se elige el checkpoint publicado")
     ap.add_argument("--obs-insercion", action="store_true",
                     help="Enmienda 2: la observacion incluye los vehiculos que esperan para entrar por cada acceso")
+    # plan3 (05.11.2026): todas apagadas por defecto
+    ap.add_argument("--solo-descuento", action="store_true",
+                    help="ablacion de V2: solo el descuento por segundo (con --solo-exploracion es --v2)")
+    ap.add_argument("--solo-exploracion", action="store_true",
+                    help="ablacion de V2: solo la exploracion comun (con --solo-descuento es --v2)")
+    ap.add_argument("--lr-horizonte", type=int, default=None,
+                    help="episodios en que el lr baja linealmente a 0 (por defecto --episodios)")
+    ap.add_argument("--lr-piso", type=float, default=0.0, help="fraccion minima del lr inicial (por defecto 0)")
+    ap.add_argument("--registro-extendido", action="store_true",
+                    help="al final del CSV: val_<s> y val_total_<s> de todas las semillas, var_explicada, "
+                         "frac_forzadas, msg_edad y ent_coef")
+    ap.add_argument("--guardar-estado", action="store_true",
+                    help="checkpoints/<tag>_epNNN.estado.pt en cada checkpoint, en el corte y al final")
+    ap.add_argument("--reanudar", default=None, metavar="ESTADO|auto",
+                    help="sigue exacto desde un estado; auto: el ultimo de esta etiqueta (sin estados, de cero)")
+    ap.add_argument("--hasta-ep", type=int, default=None,
+                    help="corta despues de este episodio: guarda el estado y sale con 0 sin publicar la politica")
     args = ap.parse_args()
     assert re.fullmatch(r"[a-z0-9]*", args.etiqueta), "--etiqueta: solo minusculas y digitos"
+    if args.v2 and (args.solo_descuento or args.solo_exploracion):
+        ap.error("--v2 ya trae el descuento por segundo y la exploracion comun")
+    if args.hasta_ep is not None and not 1 <= args.hasta_ep <= args.episodios:
+        ap.error("--hasta-ep va de 1 a --episodios")
+    if (args.hasta_ep is not None or args.reanudar == "auto") and not args.guardar_estado:
+        ap.error("--hasta-ep y --reanudar auto necesitan --guardar-estado")
+    if args.lr_horizonte is not None and args.lr_horizonte < 1:
+        ap.error("--lr-horizonte va desde 1")
+    if not 0.0 <= args.lr_piso < 1.0:
+        ap.error("--lr-piso va de 0 a 1 (fraccion del lr inicial)")
     for cambio in [c for c in args.hiper.split(",") if c]:
         clave, valor = cambio.split("=")
         HIPER[clave] = type(HIPER[clave])(float(valor)) if clave in ("epocas", "minibatch") else float(valor)
@@ -1059,54 +1455,107 @@ def main():
     opt = torch.optim.Adam(politica.parameters(), lr=HIPER["lr"], eps=1e-5)
     nombre_var = args.variante + (f"_{args.etiqueta}" if args.etiqueta else "")
     etiqueta = f"{esc}_ippo_{nombre_var}_s{args.seed}"
-    limpiar_checkpoints(etiqueta)
     ruta_csv = args.csv or f"resultados_{etiqueta}.csv"
+    ruta = f"politica_{esc}_{nombre_var}_s{args.seed}.pt"
+    descuento, exploracion = correcciones_v2(args)
+    horizonte = args.lr_horizonte or args.episodios
+    fin = args.hasta_ep or args.episodios           # ultimo episodio de esta llamada (un tramo si hay --hasta-ep)
+    campos = campos_csv(val_seeds, args.registro_extendido)
+    meta = meta_base(args, val_seeds)
+    # --reanudar: ruta explicita (misma etiqueta o nueva) o auto (el estado mas avanzado de esta etiqueta)
+    ruta_estado = ultimo_estado(etiqueta) if args.reanudar == "auto" else args.reanudar
+    if args.reanudar == "auto" and ruta_estado is None:
+        print(f"--reanudar auto: {etiqueta} no tiene estados; empieza de cero")
+    estado = cargar_estado(ruta_estado) if ruta_estado else None
+    if estado is not None:
+        comprobar_estado(estado, args, val_seeds, horizonte)
+        k = estado["episodio"]
+        if k > fin:                 # solo con --hasta-ep: un tramo posterior ya paso de aqui
+            if args.reanudar != "auto":
+                raise SystemExit(f"--reanudar: el estado esta en el episodio {k}, despues de --hasta-ep {fin}")
+            print(f"Nada que hacer: {ruta_estado} ya pasa del episodio {fin} (--hasta-ep)")
+            return
+        if k == fin and estado["tag"] == etiqueta and \
+                (fin < args.episodios or ya_terminada(estado, etiqueta, ruta_csv, ruta, args.criterio_val)):
+            print(f"Nada que hacer: {etiqueta} ya llego al episodio {k}"
+                  + (f" (--hasta-ep {fin})" if fin < args.episodios else f" y publico {ruta}"))
+            return
+        corrida = reanudar(estado, ruta_estado, etiqueta, args, val_seeds, campos, meta, ruta_csv,
+                           politica, opt, rng)
+    else:
+        limpiar_checkpoints(etiqueta)
+        corrida = nueva_corrida(campos)
+    inicio = estado["episodio"] + 1 if estado is not None else 1
+    val_serie, val_total_serie = corrida["val_serie"], corrida["val_total_serie"]
     salida = open(ruta_csv, "w", newline="")          # se reescribe: la cola puede reintentar
-    escritor = csv.DictWriter(salida, fieldnames=CAMPOS_IPPO, extrasaction="ignore")
-    escritor.writeheader()
+    salida.write("".join(corrida["lineas"]))          # cabecera (y, al reanudar, las filas <= partida)
+    salida.flush()
     print(f"IPPO {nombre_var} en {esc}: {args.episodios} episodios, semilla base {args.seed}, "
           f"dim_obs {C['dim_obs']}, {sum(p.numel() for p in politica.parameters())} parametros"
-          + (f", v2={args.v2} ins={args.recompensa_insercion}" if args.v2 or args.recompensa_insercion else "")
+          + (f", v2={descuento and exploracion} ins={args.recompensa_insercion}"
+             if (descuento and exploracion) or args.recompensa_insercion else "")
+          + (f", solo el {'descuento' if descuento else 'exploracion comun'} de V2"
+             if descuento != exploracion else "")
           + (", obs_insercion" if C["obs_ins"] else ""))
-    meta = meta_base(args, val_seeds)
-    val_serie, val_total_serie = [], []      # [ep, val_<s1>, val_<s2>, val] en timeLoss y en retraso total
-    for ep in range(1, args.episodios + 1):
-        lr = HIPER["lr"] * (1 - (ep - 1) / args.episodios)
+    if estado is not None:
+        print(f"Reanuda desde {ruta_estado} (episodio {estado['episodio']}, "
+              + ("misma etiqueta" if estado["tag"] == etiqueta else f"etiqueta nueva; copia lo de {estado['tag']}")
+              + f"); sigue del {inicio} al {fin}", flush=True)
+        if estado["git"] != meta["git"]:
+            print(f"AVISO: el estado es del commit {estado['git']} y esta corrida corre en {meta['git']}")
+    for ep in range(inicio, fin + 1):
+        lr = tasa(ep, horizonte, args.lr_piso)
         for g in opt.param_groups:
             g["lr"] = lr
+        corrida["lr"].append(lr)
+        hiper_ep = HIPER            # hiperparametros de este episodio (Etapa 3: calendario de entropia)
         buffer = {}
         t0 = time.time()
         res = correr_episodio("train", politica, args.gui, args.delay, args.seed + ep,
                               tripinfo=f"tripinfo_{etiqueta}_train.xml", variante=args.variante,
-                              buffer=buffer, v2=args.v2, ins=args.recompensa_insercion)
-        lote = gae(buffer, HIPER["gamma"], HIPER["lam"], smdp=args.v2)
+                              buffer=buffer, v2=exploracion, ins=args.recompensa_insercion)
+        lote = gae(buffer, HIPER["gamma"], HIPER["lam"], smdp=descuento)
         dts = np.concatenate([intervalos(b) for b in buffer.values() if b["recompensa"]])
         res.update({"dt_medio": round(float(dts.mean()), 3), "frac_dt8": round(float((dts == 8).mean()), 4)})
-        diag = actualizar(politica, opt, lote, HIPER, rng)
+        if args.registro_extendido:
+            res.update({"var_explicada": varianza_explicada(buffer, lote[5]), "ent_coef": hiper_ep["ent"]})
+        diag = actualizar(politica, opt, lote, hiper_ep, rng)
         fila = {"variante": args.variante, "base": args.seed, "episodio": ep, "semilla": args.seed + ep,
                 "lr": f"{lr:.2e}", "segundos": round(time.time() - t0, 1), **res, **diag,
                 "algoritmo": "ippo", "recompensa_tipo": meta["recompensa"], "etiqueta": args.etiqueta}
-        if val_seeds and args.eval_cada and (ep % args.eval_cada == 0 or ep == args.episodios):
+        checkpoint = bool(val_seeds and args.eval_cada and (ep % args.eval_cada == 0 or ep == args.episodios))
+        if checkpoint:
             fila.update(validar(politica, val_seeds, args.variante, f"tripinfo_{etiqueta}_val.xml"))
             val_serie.append([ep] + [fila[f"val_{s}"] for s in val_seeds] + [fila["val"]])
             val_total_serie.append([ep] + [fila[f"val_total_{s}"] for s in val_seeds] + [fila["val_total"]])
-            politica.guardar(ruta_checkpoint(etiqueta, ep),
-                             {**meta, "ep_checkpoint": ep, "val_checkpoint": fila["val"],
-                              **{f"val_{s}": fila[f"val_{s}"] for s in val_seeds},
-                              "val_total_checkpoint": fila["val_total"],
-                              **{f"val_total_{s}": fila[f"val_total_{s}"] for s in val_seeds}})
-        escritor.writerow(fila)
+            politica.guardar(ruta_checkpoint(etiqueta, ep), meta_checkpoint(meta, ep, fila, val_seeds))
+            if args.guardar_estado:
+                for ext in (".pt", ".json"):
+                    corrida["archivos"][os.path.basename(ruta_checkpoint(etiqueta, ep, ext))] = \
+                        sha256(ruta_checkpoint(etiqueta, ep, ext))
+        linea = linea_csv(campos, fila)
+        salida.write(linea)
         salida.flush()
+        corrida["lineas"].append(linea)
         print(f"Ep {ep:3d}  timeLoss={res['timeloss_prom']:6.2f}  espera={res['espera_prom']:5.2f}  "
               f"r/dec={res['recompensa_decision']:6.2f}  cambios={res['cambios_fase']:4d}  "
               f"kl={diag['kl_aprox']:.4f} ent={diag['entropia_libre']:.3f}  {fila['segundos']}s"
               + (f"  ins={res['ins_espera']}" if args.recompensa_insercion else "")
-              + (f"  minor={res['expl_minoritaria']:.3f} dt={res['dt_medio']:.2f}" if args.v2 else "")
+              + (f"  minor={res['expl_minoritaria']:.3f} dt={res['dt_medio']:.2f}"
+                 if descuento or exploracion else "")
               + (f"  val={fila['val']:.2f} total={fila['val_total']:.2f}" if "val" in fila else ""),
               flush=True)
+        if args.guardar_estado and (checkpoint or ep == fin):
+            guardar_estado(ruta_checkpoint(etiqueta, ep, ".estado.pt"), ep, etiqueta, args, val_seeds, corrida,
+                           politica, opt, rng, ruta_csv, meta["git"])
     salida.close()
+    comparar_intento(corrida["previas"], corrida["lineas"])
+    if fin < args.episodios:
+        print(f"CORTE: {fin} de {args.episodios} episodios; estado en "
+              f"{ruta_checkpoint(etiqueta, fin, '.estado.pt')}. La politica se publica al llegar a --episodios.",
+              flush=True)
+        return
 
-    ruta = f"politica_{esc}_{nombre_var}_s{args.seed}.pt"
     if val_serie:
         # val_elegido queda en la metrica del criterio: con ella se elige la base mediana
         por_timeloss, por_total = elegir_checkpoint(val_serie), elegir_checkpoint(val_total_serie)
