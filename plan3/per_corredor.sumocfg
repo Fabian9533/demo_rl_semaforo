@@ -1,0 +1,19 @@
+<configuration>
+    <!-- per_corredor (plan 3; lo escribe demanda_estocastica.py preparar3): corredor.sumocfg con la demanda de per_corredor.rou.xml; la red y el programa fijo son los del caso. -->
+    <input>
+        <net-file value="corredor.net.xml" />
+        <route-files value="per_corredor.rou.xml" />
+        <additional-files value="corredor.add.xml" />
+    </input>
+    <time>
+        <begin value="0" />
+        <step-length value="1" />
+    </time>
+    <processing>
+        <time-to-teleport value="-1" />
+    </processing>
+    <report>
+        <no-step-log value="true" />
+        <no-warnings value="true" />
+    </report>
+</configuration>
