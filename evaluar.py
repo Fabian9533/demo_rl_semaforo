@@ -280,19 +280,26 @@ def brazo_profundo(esc, ruta, latencia, perdida):
         modelo = alg
         if hasattr(mod, "cargar"):
             politica, meta = mod.cargar(ruta)
+            if rl_ippo.opciones_que_actuan(meta):       # rl_<alg> juega con su propia observacion: no las aplica
+                raise SystemExit(f"{ruta}: {alg} no juega con las opciones de su meta "
+                                 f"{rl_ippo.opciones_que_actuan(meta)}")
 
             def correr(semilla, tripinfo, serie):
                 return mod.correr_episodio("demo", politica, False, 0, semilla, tripinfo=tripinfo,
                                            serie=serie, **canal)
         else:
-            # MAPPO guardado como Politica de rl_ippo: se juega su actor con la variante del meta
+            # MAPPO guardado como Politica de rl_ippo: se juega su actor con la variante y las opciones del meta
             politica, meta = rl_ippo.Politica.cargar(ruta)
             variante = meta.get("variante", "vecinos")
 
             def correr(semilla, tripinfo, serie):
-                return rl_ippo.correr_episodio("demo", politica, False, 0, semilla, tripinfo=tripinfo,
-                                               serie=serie, latencia=latencia, perdida=perdida,
-                                               variante=variante)
+                rl_ippo.configurar_desde_meta(meta)
+                try:
+                    return rl_ippo.correr_episodio("demo", politica, False, 0, semilla, tripinfo=tripinfo,
+                                                   serie=serie, latencia=latencia, perdida=perdida,
+                                                   variante=variante)
+                finally:
+                    rl_ippo.configurar_desde_meta({})
     else:
         raise SystemExit(f"{ruta}: algoritmo desconocido en el meta: {alg}")
     if meta.get("escenario", esc) != esc:
@@ -432,18 +439,24 @@ def main():
                   f"espera={res['espera_prom']:6.2f}  paradas={res['paradas_prom']:.2f}", flush=True)
     for nombre, politica, meta in ippo:
         import rl_ippo
-        for i, semilla in enumerate(semillas):
-            random.seed(semilla)
-            tripinfo = f"tripinfo_{esc}_eval_ippo.xml"
-            serie = f"serie_{esc}_{nombre}_s{semilla}.csv" if i == 0 else None
-            res = rl_ippo.correr_episodio("demo", politica, False, 0, semilla, tripinfo=tripinfo,
-                                          serie=serie, latencia=args.latencia, perdida=args.perdida,
-                                          variante=meta["variante"])
-            if i == 0:
-                guardar_vehiculos(esc, nombre, tripinfo)
-            filas.append({"brazo": nombre, "semilla": semilla, **{m: res.get(m, "") for m in METRICAS}})
-            print(f"{nombre:16s} semilla {semilla}: timeLoss={res['timeloss_prom']:6.2f}  "
-                  f"espera={res['espera_prom']:6.2f}  paradas={res['paradas_prom']:.2f}", flush=True)
+        # plan3: cada politica juega con la observacion, el reloj y los mensajes con que se entreno (como
+        # brazo_profundo); con las opciones de siempre, nada cambia
+        rl_ippo.configurar_desde_meta(meta)
+        try:
+            for i, semilla in enumerate(semillas):
+                random.seed(semilla)
+                tripinfo = f"tripinfo_{esc}_eval_ippo.xml"
+                serie = f"serie_{esc}_{nombre}_s{semilla}.csv" if i == 0 else None
+                res = rl_ippo.correr_episodio("demo", politica, False, 0, semilla, tripinfo=tripinfo,
+                                              serie=serie, latencia=args.latencia, perdida=args.perdida,
+                                              variante=meta["variante"])
+                if i == 0:
+                    guardar_vehiculos(esc, nombre, tripinfo)
+                filas.append({"brazo": nombre, "semilla": semilla, **{m: res.get(m, "") for m in METRICAS}})
+                print(f"{nombre:16s} semilla {semilla}: timeLoss={res['timeloss_prom']:6.2f}  "
+                      f"espera={res['espera_prom']:6.2f}  paradas={res['paradas_prom']:.2f}", flush=True)
+        finally:
+            rl_ippo.configurar_desde_meta({})
 
     # Conservar del archivo anterior los brazos que no se corrieron ahora
     ruta = f"evaluacion_{esc}.csv"

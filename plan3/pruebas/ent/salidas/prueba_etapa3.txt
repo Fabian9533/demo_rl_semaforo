@@ -1,13 +1,13 @@
 Etapa 3 de rl_ippo.py (PLAN3 3.1-3.4) y colas en cero (a3)
-05.11.2026 11:53; python 3.14.6, torch 2.14.0+cpu
+05.11.2026 15:22; python 3.14.6, torch 2.14.0+cpu
 
 1. --obs-cercana 75: los E2 no cambian la simulacion, costo por episodio y marca de giro en 2715
 [OK] las corridas terminan: 23 de 23
 [OK] t2715_424301: misma simulacion con y sin E2 (todas las metricas y los 2724 viajes): dimension 31 -> 49; distintas: []
 [OK] p6_424301: misma simulacion con y sin E2 (todas las metricas y los 8700 viajes): dimension 53 -> 73; distintas: []
 [OK] la espera del primero leida solo con alguien en la zona = leida en todos los carriles: 0 distintas de 133872 lecturas (2715 y P6)
-[OK] costo_t2715: costo por episodio <= x1.35 (mediana de 3 parejas alternadas): sin [4.6, 4.6, 4.5] s, con [5.8, 5.8, 5.9] s, razones [1.26, 1.28, 1.31]
-[OK] costo_p6: costo por episodio <= x1.35 (mediana de 3 parejas alternadas): sin [20.6, 20.5, 22.3] s, con [26.8, 27.5, 30.0] s, razones [1.3, 1.34, 1.34]
+[OK] costo_t2715: costo por episodio <= x1.35 (mediana de 3 parejas alternadas): sin [4.7, 4.8, 4.7] s, con [6.0, 6.0, 6.0] s, razones [1.26, 1.26, 1.28]
+[FALLA] costo_p6: costo por episodio <= x1.35 (mediana de 3 parejas alternadas): sin [19.3, 21.1, 20.7] s, con [28.4, 28.8, 29.0] s, razones [1.47, 1.37, 1.4]
    Marca giro_izq en 2715 (V2 del diagnostico, base 42), periodo 2: % de los segundos de verde del acceso | % de sus decisiones
    424301: C2_C1  16.2 |  12.7 % | W_C1  21.4 |  20.1 % | S2_C2   4.7 |   4.3 %
    424302: C2_C1   7.2 |   6.6 % | W_C1  10.2 |  14.3 % | S2_C2   2.9 |   2.8 %
@@ -61,4 +61,4 @@ Etapa 3 de rl_ippo.py (PLAN3 3.1-3.4) y colas en cero (a3)
 [OK] evaluar.py juega la politica de dimension 49 igual que su validacion (semilla por semilla): 424301: timeLoss 105.81 | 105.81, total 106.18 | 106.18; 424302: timeLoss 104.61 | 104.61, total 104.99 | 104.99
 [OK] evaluar3.py --colas-cero la juega (brazo ..._colas0): brazo ippo_vecinos_p3prbe3_s7_colas0, timeLoss 93.61
 
-Resultado: todo OK
+Resultado: 1 FALLAS

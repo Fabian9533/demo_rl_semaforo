@@ -1,5 +1,5 @@
 Pruebas 1 y 2 (tarea 1.1): identidad con el tag y opciones que no cambian numeros; ablacion de V2. P1, base 7, 10 episodios, validacion cada 5 en 424301,424302
-05.11.2026 12:03; python 3.14.6, torch 2.14.0+cpu
+05.11.2026 15:06; python 3.14.6, torch 2.14.0+cpu
 
 [OK] corrida tag_ippo (tag: --escenario corredor --seed 7 --episodios 10 --eval-cada 5 --val-seeds 424301,424302): codigo 0
 [OK] corrida tag_v2 (tag: --escenario corredor --seed 7 --episodios 10 --eval-cada 5 --val-seeds 424301,424302 --v2 --criterio-val total --etiqueta p3prbv2): codigo 0

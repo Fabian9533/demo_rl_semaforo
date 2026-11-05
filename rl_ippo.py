@@ -263,6 +263,12 @@ SEMILLA_ESCALA = 15485863      # --escala-demanda: generador del factor = defaul
 CERCA_MAX_ESPERA = 120.0       # --obs-cercana: espera del primero que satura la entrada (s)
 BETA_NORM = 0.99999            # --norm-valor: beta por defecto de las medias moviles (ValueNorm de MAPPO)
 COLAS_CERO = False             # a3 (configurar_colas_cero): fuera de C, porque preparar() vacia C
+ESCALA_MIN, ESCALA_MAX = 0.1, 4.0   # --escala-demanda y --val-escalas: factores de demanda admitidos
+# Opciones del meta que cambian como juega una politica (observacion, reloj y mensajes) y su valor de siempre:
+# evaluar.py y revalidar_c0.py las aplican con configurar_desde_meta; demo avisa si la linea de comandos dice otra cosa
+OPCIONES_QUE_ACTUAN = {"obs_insercion": False, "obs_cercana": 0.0, "paso_decision": PASO_CONTROL,
+                       "msg_cada_paso": False}
+DIAG_PPO = ("perdida_politica", "perdida_valor", "entropia_libre", "kl_aprox", "clipfrac")
 
 # Se rellena con preparar(escenario)
 C = {}
@@ -382,6 +388,13 @@ def configurar_desde_meta(meta):
     C["paso_decision"] = int(op.get("paso_decision", PASO_CONTROL))
 
 
+def opciones_que_actuan(meta):
+    """Las opciones del meta que cambian como juega la politica (OPCIONES_QUE_ACTUAN) y no tienen su valor de
+    siempre, {nombre: valor}. Un programa que juega politicas sin configurar_desde_meta debe negarse si hay alguna."""
+    op = (meta or {}).get("opciones", {})
+    return {c: op[c] for c, defecto in OPCIONES_QUE_ACTUAN.items() if c in op and op[c] != defecto}
+
+
 def configurar_colas_cero(activo):
     """a3 (evaluar3.py --colas-cero): al jugar, todas las entradas de colas (vehiculos detenidos) de la observacion
     valen cero: cola_o..cola_s, las que mandan los vecinos (<lado>_cola_alimentadora y <lado>_cola_mi_salida) y, con
@@ -413,6 +426,7 @@ class NormValor:
 
     def actualizar(self, x):
         x = np.asarray(x, dtype=np.float64)
+        assert x.size > 0, "NormValor.actualizar con un lote vacio (el episodio sin transiciones no actualiza)"
         self.m1 = self.beta * self.m1 + (1 - self.beta) * float(x.mean())
         self.m2 = self.beta * self.m2 + (1 - self.beta) * float((x ** 2).mean())
         self.peso = self.beta * self.peso + (1 - self.beta)
@@ -1233,9 +1247,12 @@ def validar(politica, semillas, variante, tripinfo, decidir=None, escalas=None):
     Con escalas (--val-escalas), cada semilla en cada nivel de demanda (--scale e): por semilla y nivel
     val_<s>_x<e> y val_total_<s>_x<e>; por nivel, val_x<e> y val_total_x<e> (medias de las semillas,
     con 3 decimales); y val y val_total = la media geometrica de los niveles (no depende de la escala de
-    cada nivel)."""
+    cada nivel). eval_timeloss y eval_espera son entonces los de la primera semilla en el nivel 1 (la demanda
+    del escenario), o None si ese nivel no esta (meta: eval_nivel)."""
     estados = (random.getstate(), np.random.get_state(), torch.get_rng_state())
     fila = {}
+    if escalas:
+        fila["eval_timeloss"] = fila["eval_espera"] = None
     for j, e in enumerate(escalas or [None]):
         x = "" if e is None else sufijo_escala(e)
         for k, s in enumerate(semillas):
@@ -1243,7 +1260,7 @@ def validar(politica, semillas, variante, tripinfo, decidir=None, escalas=None):
                                   decidir=decidir, escala=e)
             fila[f"val_{s}{x}"] = res["timeloss_prom"]
             fila[f"val_total_{s}{x}"] = res["retraso_total_prom"]
-            if j == 0 and k == 0:
+            if k == 0 and (e is None or float(e) == 1.0):
                 fila["eval_timeloss"], fila["eval_espera"] = res["timeloss_prom"], res["espera_prom"]
         fila[f"val{x}"] = round(float(np.mean([fila[f"val_{s}{x}"] for s in semillas])), 3)
         fila[f"val_total{x}"] = round(float(np.mean([fila[f"val_total_{s}{x}"] for s in semillas])), 3)
@@ -1448,6 +1465,9 @@ def meta_checkpoint(meta, ep, val, val_seeds, escalas=None, tramos=()):
              **{f"val_{s}": val[f"val_{s}"] for s in val_seeds},
              "val_total_checkpoint": val["val_total"],
              **{f"val_total_{s}": val[f"val_total_{s}"] for s in val_seeds}}
+    if C.get("vnorm") is not None:      # --norm-valor: la escala del critico de este checkpoint (media, desv y estado)
+        media, desv = C["vnorm"].media_desv()
+        m.update({"vn_media": round(media, 4), "vn_desv": round(desv, 4), "vn_estado": C["vnorm"].estado()})
     distintos = procedencia(tramos, ep)
     if distintos:
         m["tramos"] = distintos
@@ -2008,10 +2028,13 @@ def validar_args(argv):
     if not 0.0 <= args.lr_piso < 1.0:
         ap.error("--lr-piso va de 0 a 1 (fraccion del lr inicial)")
     descuento_v2 = correcciones_v2(args)[0]
-    if args.sin_forzadas and not descuento_v2:
+    if args.paso_decision < 1:
+        ap.error("--paso-decision va desde 1")
+    # las reglas del entrenamiento: en demo, la observacion, el reloj y los mensajes salen del meta de la politica
+    if args.modo == "train" and args.sin_forzadas and not descuento_v2:
         ap.error("--sin-forzadas exige el descuento por segundo de V2 (--v2 o --solo-descuento)")
-    if args.paso_decision < 1 or (args.paso_decision != PASO_CONTROL and not descuento_v2):
-        ap.error("--paso-decision va desde 1 y, si no es 5, exige el descuento por segundo de V2")
+    if args.modo == "train" and args.paso_decision != PASO_CONTROL and not descuento_v2:
+        ap.error("--paso-decision distinto de 5 exige el descuento por segundo de V2")
     if args.obs_cercana < 0:
         ap.error("--obs-cercana es un largo en metros (0 = apagada)")
     if args.norm_beta is not None and not (args.norm_valor and 0.0 < args.norm_beta < 1.0):
@@ -2024,8 +2047,8 @@ def validar_args(argv):
             valores = [float(x) for x in texto.split(",") if x.strip()]
         except ValueError:
             ap.error(f"{opcion}: numeros separados por coma")
-        if not valores or any(v <= 0 for v in valores):
-            ap.error(f"{opcion}: factores de demanda positivos")
+        if not valores or any(not ESCALA_MIN <= v <= ESCALA_MAX for v in valores):
+            ap.error(f"{opcion}: factores de demanda entre {ESCALA_MIN:g} y {ESCALA_MAX:g}")
         return valores
 
     args.escalas_demanda = lista_escalas(args.escala_demanda, "--escala-demanda") if args.escala_demanda else None
@@ -2035,6 +2058,31 @@ def validar_args(argv):
     if args.curriculo and (args.curriculo < 0 or not args.escalas_demanda):
         ap.error("--curriculo va con --escala-demanda y es un numero de episodios")
     args.escalas_val = lista_escalas(args.val_escalas, "--val-escalas") if args.val_escalas else None
+    if args.escalas_val:
+        sufijos = [sufijo_escala(e) for e in args.escalas_val]
+        if len(set(sufijos)) != len(sufijos):
+            ap.error(f"--val-escalas: niveles repetidos ({', '.join(s[2:] for s in sufijos)})")
+        if args.eval_cada == 0 or not [s for s in args.val_seeds.split(",") if s.strip()]:
+            ap.error("--val-escalas necesita validacion: --eval-cada > 0 y --val-seeds")
+    if args.modo == "train":
+        # Combinaciones que ningun trabajo del prerregistro usa (revision del 05.11): mejor un error que una corrida
+        # que nadie va a leer. En demo mandan las opciones del meta (y un AVISO si la linea de comandos dice otra cosa).
+        etapa3 = [o for o, activa in (("--obs-cercana", args.obs_cercana > 0), ("--norm-valor", args.norm_valor),
+                                       ("--sin-forzadas", args.sin_forzadas), ("--msg-cada-paso", args.msg_cada_paso),
+                                       ("--ent-final", args.ent_final is not None),
+                                       ("--paso-decision", args.paso_decision != PASO_CONTROL)) if activa]
+        if args.paso_decision != PASO_CONTROL and not args.sin_forzadas:
+            ap.error("--paso-decision distinto de 5 va con --sin-forzadas (H14: antes del verde minimo las decisiones "
+                     "son forzadas y no deben entrar al lote)")
+        if args.obs_cercana and args.obs_insercion:
+            ap.error("--obs-cercana no va con --obs-insercion (ningun trabajo del plan las junta)")
+        if etapa3 and args.variante == "local":
+            ap.error(f"{', '.join(etapa3)}: no van con --variante local (los trabajos de la Etapa 3 son de vecinos)")
+        # B16: la politica por red usa --norm-valor (con su --norm-beta); el resto de la Etapa 3 no va con la escala
+        otras = [o for o in etapa3 if o != "--norm-valor"]
+        if otras and (args.escalas_demanda or args.escalas_val):
+            ap.error(f"{', '.join(otras)}: no van con --escala-demanda ni --val-escalas (la politica por red, B16, "
+                     "solo suma --norm-valor)")
     cambios = {}
     for cambio in [c for c in args.hiper.split(",") if c]:
         clave, igual, valor = cambio.partition("=")
@@ -2107,7 +2155,18 @@ def main():
 
     if args.modo == "demo":
         politica, meta = Politica.cargar(args.politica)
-        configurar_desde_meta(meta)          # la observacion, el reloj y los mensajes con que se entreno
+        # la observacion, el reloj y los mensajes con que se entreno mandan; si la linea de comandos pedia otra cosa,
+        # se avisa (no se juega con opciones distintas de las del entrenamiento)
+        pedidas = {"obs_insercion": args.obs_insercion, "obs_cercana": float(args.obs_cercana or 0),
+                   "paso_decision": args.paso_decision, "msg_cada_paso": args.msg_cada_paso}
+        del_meta = {c: (meta.get("opciones", {}).get(c, d) if c != "obs_cercana"
+                        else float(meta.get("opciones", {}).get(c, d) or 0)) for c, d in OPCIONES_QUE_ACTUAN.items()}
+        distintas = [f"{c}={pedidas[c]!r} (meta: {del_meta[c]!r})" for c in OPCIONES_QUE_ACTUAN
+                     if pedidas[c] != del_meta[c]]
+        if distintas:
+            print(f"AVISO: demo juega {args.politica} con las opciones de su meta; la linea de comandos pedia "
+                  f"{'; '.join(distintas)}", flush=True)
+        configurar_desde_meta(meta)
         C["sin_forzadas"], C["vnorm"] = False, None
         assert meta["dim_obs"] == C["dim_obs"], \
             f"la politica espera {meta['dim_obs']} entradas y {esc} da {C['dim_obs']}"
@@ -2220,22 +2279,35 @@ def main():
         res = correr_episodio("train", politica, args.gui, args.delay, args.seed + ep,
                               tripinfo=f"tripinfo_{etiqueta}_train.xml", variante=args.variante,
                               buffer=buffer, v2=exploracion, ins=args.recompensa_insercion, escala=escala)
-        lote = gae(buffer, HIPER["gamma"], HIPER["lam"], smdp=descuento)
-        dts = np.concatenate([intervalos(b) for b in buffer.values() if b["recompensa"]])
-        res.update({"dt_medio": round(float(dts.mean()), 3), "frac_dt8": round(float((dts == 8).mean()), 4)})
+        vacio = not any(b["recompensa"] for b in buffer.values())
         if args.registro_extendido:
-            res.update({"var_explicada": varianza_explicada(buffer, lote[5]), "ent_coef": hiper_ep["ent"]})
+            res["ent_coef"] = hiper_ep["ent"]
             if escala is not None:
                 res["escala"] = escala
-        if C["vnorm"] is not None:
-            # --norm-valor: las medias toman los retornos de este lote; el critico aprende el normalizado
-            retornos = lote[5].numpy()
-            C["vnorm"].actualizar(retornos)
-            lote = lote[:5] + (torch.from_numpy(np.asarray(C["vnorm"].normalizar(retornos), dtype=np.float32)),)
+        if vacio:
+            # ninguna transicion en el lote (p. ej. todas forzadas con --sin-forzadas): no hay que actualizar; las
+            # columnas de la actualizacion quedan vacias y los generadores no se tocan
+            print(f"AVISO: el episodio {ep} no dejo transiciones en el lote; no se actualiza la politica", flush=True)
+            res.update({"dt_medio": "", "frac_dt8": ""})
             if args.registro_extendido:
-                m, d = C["vnorm"].media_desv()
-                res.update({"vn_media": round(m, 4), "vn_desv": round(d, 4)})
-        diag = actualizar(politica, opt, lote, hiper_ep, rng)
+                res["var_explicada"] = ""
+            diag = dict.fromkeys(DIAG_PPO, "")
+        else:
+            lote = gae(buffer, HIPER["gamma"], HIPER["lam"], smdp=descuento)
+            dts = np.concatenate([intervalos(b) for b in buffer.values() if b["recompensa"]])
+            res.update({"dt_medio": round(float(dts.mean()), 3), "frac_dt8": round(float((dts == 8).mean()), 4)})
+            if args.registro_extendido:
+                res["var_explicada"] = varianza_explicada(buffer, lote[5])
+            if C["vnorm"] is not None:
+                # --norm-valor: las medias toman los retornos de este lote; el critico aprende el normalizado
+                retornos = lote[5].numpy()
+                C["vnorm"].actualizar(retornos)
+                lote = lote[:5] + (torch.from_numpy(np.asarray(C["vnorm"].normalizar(retornos),
+                                                               dtype=np.float32)),)
+                if args.registro_extendido:
+                    m, d = C["vnorm"].media_desv()
+                    res.update({"vn_media": round(m, 4), "vn_desv": round(d, 4)})
+            diag = actualizar(politica, opt, lote, hiper_ep, rng)
         fila = {"variante": args.variante, "base": args.seed, "episodio": ep, "semilla": args.seed + ep,
                 "lr": f"{lr:.2e}", "segundos": round(time.time() - t0, 1), **res, **diag,
                 "algoritmo": "ippo", "recompensa_tipo": meta["recompensa"], "etiqueta": args.etiqueta}
@@ -2265,10 +2337,11 @@ def main():
             rehecho(corrida, ep, linea, etiqueta)
         print(f"Ep {ep:3d}  timeLoss={res['timeloss_prom']:6.2f}  espera={res['espera_prom']:5.2f}  "
               f"r/dec={res['recompensa_decision']:6.2f}  cambios={res['cambios_fase']:4d}  "
-              f"kl={diag['kl_aprox']:.4f} ent={diag['entropia_libre']:.3f}  {fila['segundos']}s"
+              + (f"kl={diag['kl_aprox']:.4f} ent={diag['entropia_libre']:.3f}" if not vacio else "sin lote")
+              + f"  {fila['segundos']}s"
               + (f"  ins={res['ins_espera']}" if args.recompensa_insercion else "")
               + (f"  minor={res['expl_minoritaria']:.3f} dt={res['dt_medio']:.2f}"
-                 if descuento or exploracion else "")
+                 if (descuento or exploracion) and not vacio else "")
               + (f"  val={fila['val']:.2f} total={fila['val_total']:.2f}" if "val" in fila else ""),
               flush=True)
         if args.guardar_estado and (checkpoint or ep == fin):
@@ -2290,9 +2363,23 @@ def main():
         # val_elegido queda en la metrica del criterio: con ella se elige la base mediana
         por_timeloss, por_total = elegir_checkpoint(val_serie), elegir_checkpoint(val_total_serie)
         elegida = por_total if args.criterio_val == "total" else por_timeloss
+        eval_final = val_serie[-1][1]
+        if args.escalas_val:
+            # con niveles, val_serie trae medias por nivel: eval_999_final es la primera semilla en el nivel 1 del
+            # ultimo checkpoint (como eval_timeloss), o None si no se valida en el nivel 1
+            with open(ruta_checkpoint(etiqueta, val_serie[-1][0], ".json"), encoding="utf-8") as f:
+                ultimo = json.load(f)
+            nivel = 1.0 if any(float(e) == 1.0 for e in args.escalas_val) else None
+            eval_final = ultimo.get(f"val_{val_seeds[0]}{sufijo_escala(1)}") if nivel else None
         meta.update({"ep_elegido": elegida[0], "val_elegido": elegida[-1], "val_serie": val_serie,
-                     "eval_999_final": val_serie[-1][1], "val_total_serie": val_total_serie,
+                     "eval_999_final": eval_final, "val_total_serie": val_total_serie,
                      "ep_elegido_timeloss": por_timeloss[0], "ep_elegido_total": por_total[0]})
+        if args.escalas_val:
+            meta["eval_nivel"] = nivel          # el nivel de demanda de eval_timeloss, eval_espera y eval_999_final
+        if C["vnorm"] is not None:          # --norm-valor: la escala del critico del checkpoint publicado
+            with open(ruta_checkpoint(etiqueta, elegida[0], ".json"), encoding="utf-8") as f:
+                elegido = json.load(f)
+            meta.update({c: elegido[c] for c in ("vn_media", "vn_desv", "vn_estado") if c in elegido})
         if distintos:
             meta["tramos"] = distintos
         if corrida["reanudaciones"]:
@@ -2304,6 +2391,9 @@ def main():
     else:
         meta.update({"ep_elegido": args.episodios, "val_elegido": None, "val_serie": [],
                      "eval_999_final": None})
+        if C["vnorm"] is not None:          # sin validacion se publican los pesos del final: su escala del critico
+            media, desv = C["vnorm"].media_desv()
+            meta.update({"vn_media": round(media, 4), "vn_desv": round(desv, 4), "vn_estado": C["vnorm"].estado()})
         if distintos:
             meta["tramos"] = distintos
         if corrida["reanudaciones"]:
