@@ -166,6 +166,11 @@ def tensores(ruta):
     return torch.load(ruta, weights_only=True)
 
 
+def tensores_estado(ruta):
+    """Un .estado.pt entero (dict), como lo lee rl_ippo."""
+    return torch.load(ruta, weights_only=True)
+
+
 def comparar_pt(a, b):
     """(iguales, texto): torch.equal en todos los tensores del state_dict y las mismas claves."""
     x, y = tensores(a), tensores(b)
