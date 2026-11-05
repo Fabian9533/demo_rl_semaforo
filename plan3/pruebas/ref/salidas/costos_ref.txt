@@ -1,0 +1,62 @@
+Corridas y h-proceso por celda (estimacion; regiones de la fina segun la gruesa entregada)
+celda                   llegadas   regiones gruesa  fina desfases desempate fragil mult5 franja actuado reglas | h-p fino  mult5 franja actuado reglas  total
+corredor                regulares     1     510   243     27      70     60   211    48     84     84 |    0.52  0.12  0.03   0.06   0.11   0.84
+corredor_alta           regulares     1     357   405     27      70     60   211    48     84     84 |    2.34  0.54  0.12   0.16   0.27   3.43
+red                     regulares     1    1413   135    243      70     60   859    48     84     84 |    2.64  1.18  0.07   0.11   0.17   4.16
+red_alta                regulares     1    1413   135    243      70     60   859    48     84     84 |    3.19  1.43  0.08   0.12   0.20   5.02
+malla3                  regulares     3     216  1044      0      70     60   139    48     84     84 |    4.26  0.43  0.15   0.32   0.46   5.61
+malla3_alta             regulares     1     216   324      0      70     60   139    48     84     84 |    3.49  0.72  0.25   0.55   1.00   6.01
+dem_corredor_t2715_der  regulares     1     417   405     27      70     60   211    48     84     84 |    1.50  0.32  0.07   0.16   0.27   2.32
+P6e                     regulares     1     216   324      0      70     60   139    48     84     84 |    3.49  0.72  0.25   0.55   1.00   6.01
+dem_corredor_t905       regulares     2     447   432     54      70     60     0     0     90      0 |    0.36  0.00  0.00   0.07   0.00   0.43
+dem_corredor_t1358      regulares     1     510   189     27      70     60     0     0     90      0 |    0.39  0.00  0.00   0.07   0.00   0.46
+dem_corredor_t2715      regulares     1     300   243     27      70     60     0     0     90      0 |    1.43  0.00  0.00   0.17   0.00   1.60
+dem_red_t905            regulares     3    1632  1053    729      70     60     0     0     90      0 |    2.92  0.00  0.00   0.12   0.00   3.04
+dem_red_t1358           regulares     1    1215   243    243      70     60     0     0     90      0 |    2.01  0.00  0.00   0.12   0.00   2.13
+dem_red_t1810           regulares     2    1215   648    486      70     60     0     0     90      0 |    3.06  0.00  0.00   0.12   0.00   3.18
+dem_red_t2715           regulares     2    1215   648    486      70     60     0     0     90      0 |    4.77  0.00  0.00   0.12   0.00   4.89
+dem_red_t3620           regulares     1    1215   405    243      70     60     0     0     90      0 |    5.95  0.00  0.00   0.13   0.00   6.09
+dem_malla3_t1810        regulares     2     180   864      0      70     60     0     0     90      0 |    1.80  0.00  0.00   0.34   0.00   2.14
+dem_malla3_t2715        regulares     2     180   864      0      70     60     0     0     90      0 |    2.16  0.00  0.00   0.34   0.00   2.50
+dem_malla3_t3620        regulares     2     180   864      0      70     60     0     0     90      0 |    2.52  0.00  0.00   0.34   0.00   2.86
+dem_malla3_t6525        regulares     1     180   540      0      70     60     0     0     90      0 |    3.54  0.00  0.00   0.59   0.00   4.13
+corredor                aleatorias    1    1700   810     90     200      0   470   270    333    420 |    1.71  0.29  0.17   0.27   0.60   3.03
+corredor_alta           aleatorias    1    1190  1350     90     200      0   470   270    333    420 |    7.71  1.28  0.74   0.67   1.46  11.86
+red                     aleatorias    1    4710   450    810     200      0  2630   270    333    420 |    9.07  3.86  0.40   0.48   0.90  14.70
+red_alta                aleatorias    1    4710   450    810     200      0  2630   270    333    420 |   10.96  4.67  0.48   0.53   1.06  17.70
+malla3                  aleatorias    3     720  3480      0     200      0   230   270    333    420 |   14.41  0.75  0.88   1.36   2.46  19.87
+malla3_alta             aleatorias    1     720  1080      0     200      0   230   270    333    420 |   11.14  1.28  1.50   2.32   5.33  21.58
+
+Total (P1-P6 regulares y aleatorias, 13 niveles con D): 156 h-proceso (~13.0 h de reloj con 12 procesos)
+No incluye: el perfil (barrido con --bloque 600 en P1 y P3: como la celda aleatoria; bloques 30 corridas), ni las evaluaciones en T1/T2.
+
+h-proceso por trabajo (un proceso; los barridos largos se parten con --trozo; el paso del actuado es 1/6 de su columna y su final el resto):
+celda                   llegadas    gruesa  fina  desf  desemp fragil mult5 franja actuado reglas
+corredor                regulares    0.29  0.14  0.02   0.04   0.03  0.12   0.03    0.06   0.11
+corredor_alta           regulares    0.91  1.03  0.07   0.18   0.15  0.54   0.12    0.16   0.27
+red                     regulares    1.94  0.19  0.33   0.10   0.08  1.18   0.07    0.11   0.17
+red_alta                regulares    2.34  0.22  0.40   0.12   0.10  1.43   0.08    0.12   0.20
+malla3                  regulares    0.66  3.20  0.00   0.21   0.18  0.43   0.15    0.32   0.46
+malla3_alta             regulares    1.12  1.69  0.00   0.36   0.31  0.72   0.25    0.55   1.00
+dem_corredor_t2715_der  regulares    0.64  0.62  0.04   0.11   0.09  0.32   0.07    0.16   0.27
+P6e                     regulares    1.12  1.69  0.00   0.36   0.31  0.72   0.25    0.55   1.00
+dem_corredor_t905       regulares    0.15  0.15  0.02   0.02   0.02  0.00   0.00    0.07   0.00
+dem_corredor_t1358      regulares    0.23  0.09  0.01   0.03   0.03  0.00   0.00    0.07   0.00
+dem_corredor_t2715      regulares    0.61  0.50  0.06   0.14   0.12  0.00   0.00    0.17   0.00
+dem_red_t905            regulares    1.34  0.87  0.60   0.06   0.05  0.00   0.00    0.12   0.00
+dem_red_t1358           regulares    1.33  0.27  0.27   0.08   0.07  0.00   0.00    0.12   0.00
+dem_red_t1810           regulares    1.50  0.80  0.60   0.09   0.07  0.00   0.00    0.12   0.00
+dem_red_t2715           regulares    2.34  1.25  0.93   0.13   0.12  0.00   0.00    0.12   0.00
+dem_red_t3620           regulares    3.63  1.21  0.73   0.21   0.18  0.00   0.00    0.13   0.00
+dem_malla3_t1810        regulares    0.28  1.32  0.00   0.11   0.09  0.00   0.00    0.34   0.00
+dem_malla3_t2715        regulares    0.33  1.59  0.00   0.13   0.11  0.00   0.00    0.34   0.00
+dem_malla3_t3620        regulares    0.39  1.85  0.00   0.15   0.13  0.00   0.00    0.34   0.00
+dem_malla3_t6525        regulares    0.75  2.25  0.00   0.29   0.25  0.00   0.00    0.59   0.00
+corredor                aleatorias   1.04  0.50  0.06   0.12   0.00  0.29   0.17    0.27   0.60
+corredor_alta           aleatorias   3.24  3.68  0.25   0.54   0.00  1.28   0.74    0.67   1.46
+red                     aleatorias   6.92  0.66  1.19   0.29   0.00  3.86   0.40    0.48   0.90
+red_alta                aleatorias   8.36  0.80  1.44   0.36   0.00  4.67   0.48    0.53   1.06
+malla3                  aleatorias   2.36 11.40  0.00   0.66   0.00  0.75   0.88    1.36   2.46
+malla3_alta             aleatorias   4.01  6.02  0.00   1.11   0.00  1.28   1.50    2.32   5.33
+
+RESULTADO: PASA
