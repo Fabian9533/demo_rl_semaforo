@@ -1,0 +1,19 @@
+<configuration>
+    <!-- poi_red_alta (plan 3; lo escribe demanda_estocastica.py preparar3): red_alta.sumocfg con la demanda de poi_red_alta.rou.xml; la red y el programa fijo son los del caso. -->
+    <input>
+        <net-file value="red.net.xml" />
+        <route-files value="poi_red_alta.rou.xml" />
+        <additional-files value="red_alta.add.xml" />
+    </input>
+    <time>
+        <begin value="0" />
+        <step-length value="1" />
+    </time>
+    <processing>
+        <time-to-teleport value="-1" />
+    </processing>
+    <report>
+        <no-step-log value="true" />
+        <no-warnings value="true" />
+    </report>
+</configuration>

@@ -1,0 +1,75 @@
+3. Numeros aleatorios comunes con departLane=best, semillas 424301 y 424302 (frente al fijo por TraCI): ids, salida pedida, speedFactor y tipo
+  ok    poi_corredor     424301: 1777 vehiculos; actuado =, trivial =, ippo =, sumo =
+  ok    poi_corredor     424301: el fijo por sumo puro (como barrer_fijo) da el mismo tripinfo que por TraCI, vehiculo por vehiculo y con sus emisiones
+  ok    poi_corredor     424302: 1742 vehiculos; actuado =, trivial =, ippo =, sumo =
+  ok    poi_corredor     424302: el fijo por sumo puro (como barrer_fijo) da el mismo tripinfo que por TraCI, vehiculo por vehiculo y con sus emisiones
+  ok    poi_corredor_alta 424301: 3620 vehiculos; actuado =, trivial =, ippo =, sumo =
+  ok    poi_corredor_alta 424301: el fijo por sumo puro (como barrer_fijo) da el mismo tripinfo que por TraCI, vehiculo por vehiculo y con sus emisiones
+  ok    poi_corredor_alta 424302: 3558 vehiculos; actuado =, trivial =, ippo =, sumo =
+  ok    poi_corredor_alta 424302: el fijo por sumo puro (como barrer_fijo) da el mismo tripinfo que por TraCI, vehiculo por vehiculo y con sus emisiones
+  ok    poi_red          424301: 2134 vehiculos; actuado =, trivial =, ippo =, sumo =
+  ok    poi_red          424301: el fijo por sumo puro (como barrer_fijo) da el mismo tripinfo que por TraCI, vehiculo por vehiculo y con sus emisiones
+  ok    poi_red          424302: 2064 vehiculos; actuado =, trivial =, ippo =, sumo =
+  ok    poi_red          424302: el fijo por sumo puro (como barrer_fijo) da el mismo tripinfo que por TraCI, vehiculo por vehiculo y con sus emisiones
+  ok    poi_red_alta     424301: 2564 vehiculos; actuado =, trivial =, ippo =, sumo =
+  ok    poi_red_alta     424301: el fijo por sumo puro (como barrer_fijo) da el mismo tripinfo que por TraCI, vehiculo por vehiculo y con sus emisiones
+  ok    poi_red_alta     424302: 2500 vehiculos; actuado =, trivial =, ippo =, sumo =
+  ok    poi_red_alta     424302: el fijo por sumo puro (como barrer_fijo) da el mismo tripinfo que por TraCI, vehiculo por vehiculo y con sus emisiones
+  ok    poi_malla3       424301: 4352 vehiculos; actuado =, trivial =, ippo =, sumo =
+  ok    poi_malla3       424301: el fijo por sumo puro (como barrer_fijo) da el mismo tripinfo que por TraCI, vehiculo por vehiculo y con sus emisiones
+  ok    poi_malla3       424302: 4252 vehiculos; actuado =, trivial =, ippo =, sumo =
+  ok    poi_malla3       424302: el fijo por sumo puro (como barrer_fijo) da el mismo tripinfo que por TraCI, vehiculo por vehiculo y con sus emisiones
+  ok    poi_malla3_alta  424301: 8704 vehiculos; actuado =, trivial =, ippo =, sumo =
+  ok    poi_malla3_alta  424301: el fijo por sumo puro (como barrer_fijo) da el mismo tripinfo que por TraCI, vehiculo por vehiculo y con sus emisiones
+  ok    poi_malla3_alta  424302: 8610 vehiculos; actuado =, trivial =, ippo =, sumo =
+  ok    poi_malla3_alta  424302: el fijo por sumo puro (como barrer_fijo) da el mismo tripinfo que por TraCI, vehiculo por vehiculo y con sus emisiones
+  ok    malla3_alta_e    424301: 8700 vehiculos; actuado =, trivial =, ippo =, sumo =
+  ok    malla3_alta_e    424301: el fijo por sumo puro (como barrer_fijo) da el mismo tripinfo que por TraCI, vehiculo por vehiculo y con sus emisiones
+  ok    malla3_alta_e    424302: 8700 vehiculos; actuado =, trivial =, ippo =, sumo =
+  ok    malla3_alta_e    424302: el fijo por sumo puro (como barrer_fijo) da el mismo tripinfo que por TraCI, vehiculo por vehiculo y con sus emisiones
+  ok    per_corredor     424301: 1790 vehiculos; actuado =, trivial =, ippo =, sumo =
+  ok    per_corredor     424301: el fijo por sumo puro (como barrer_fijo) da el mismo tripinfo que por TraCI, vehiculo por vehiculo y con sus emisiones
+  ok    per_corredor     424302: 1732 vehiculos; actuado =, trivial =, ippo =, sumo =
+  ok    per_corredor     424302: el fijo por sumo puro (como barrer_fijo) da el mismo tripinfo que por TraCI, vehiculo por vehiculo y con sus emisiones
+  ok    mix_corredor     424301: 1472 vehiculos; actuado =, trivial =, ippo =, sumo =
+  ok    mix_corredor     424301: el fijo por sumo puro (como barrer_fijo) da el mismo tripinfo que por TraCI, vehiculo por vehiculo y con sus emisiones
+  ok    mix_corredor     424302: 1477 vehiculos; actuado =, trivial =, ippo =, sumo =
+  ok    mix_corredor     424302: el fijo por sumo puro (como barrer_fijo) da el mismo tripinfo que por TraCI, vehiculo por vehiculo y con sus emisiones
+  ok    mixa_corredor    424301: 1472 vehiculos; actuado =, trivial =, ippo =, sumo =
+  ok    mixa_corredor    424301: el fijo por sumo puro (como barrer_fijo) da el mismo tripinfo que por TraCI, vehiculo por vehiculo y con sus emisiones
+  ok    mixa_corredor    424302: 1477 vehiculos; actuado =, trivial =, ippo =, sumo =
+  ok    mixa_corredor    424302: el fijo por sumo puro (como barrer_fijo) da el mismo tripinfo que por TraCI, vehiculo por vehiculo y con sus emisiones
+  ok    per_red          424301: 2136 vehiculos; actuado =, trivial =, ippo =, sumo =
+  ok    per_red          424301: el fijo por sumo puro (como barrer_fijo) da el mismo tripinfo que por TraCI, vehiculo por vehiculo y con sus emisiones
+  ok    per_red          424302: 2068 vehiculos; actuado =, trivial =, ippo =, sumo =
+  ok    per_red          424302: el fijo por sumo puro (como barrer_fijo) da el mismo tripinfo que por TraCI, vehiculo por vehiculo y con sus emisiones
+  ok    mix_red          424301: 1763 vehiculos; actuado =, trivial =, ippo =, sumo =
+  ok    mix_red          424301: el fijo por sumo puro (como barrer_fijo) da el mismo tripinfo que por TraCI, vehiculo por vehiculo y con sus emisiones
+  ok    mix_red          424302: 1734 vehiculos; actuado =, trivial =, ippo =, sumo =
+  ok    mix_red          424302: el fijo por sumo puro (como barrer_fijo) da el mismo tripinfo que por TraCI, vehiculo por vehiculo y con sus emisiones
+  ok    mixa_red         424301: 1763 vehiculos; actuado =, trivial =, ippo =, sumo =
+  ok    mixa_red         424301: el fijo por sumo puro (como barrer_fijo) da el mismo tripinfo que por TraCI, vehiculo por vehiculo y con sus emisiones
+  ok    mixa_red         424302: 1734 vehiculos; actuado =, trivial =, ippo =, sumo =
+  ok    mixa_red         424302: el fijo por sumo puro (como barrer_fijo) da el mismo tripinfo que por TraCI, vehiculo por vehiculo y con sus emisiones
+   mixa_ frente a mix_ (fijo, misma semilla): el arranque lento no cambia vehiculos ni tipos
+  ok    mixa_corredor = mix_corredor en 424301: {'n_a': 1472, 'n_b': 1472, 'solo_uno': 0, 'deseada_distinta': 0, 'sf_distinto': 0, 'tipo_distinto': 0, 'mismo_orden': True}
+  ok    mixa_corredor = mix_corredor en 424302: {'n_a': 1477, 'n_b': 1477, 'solo_uno': 0, 'deseada_distinta': 0, 'sf_distinto': 0, 'tipo_distinto': 0, 'mismo_orden': True}
+  ok    mixa_red = mix_red en 424301: {'n_a': 1763, 'n_b': 1763, 'solo_uno': 0, 'deseada_distinta': 0, 'sf_distinto': 0, 'tipo_distinto': 0, 'mismo_orden': True}
+  ok    mixa_red = mix_red en 424302: {'n_a': 1734, 'n_b': 1734, 'solo_uno': 0, 'deseada_distinta': 0, 'sf_distinto': 0, 'tipo_distinto': 0, 'mismo_orden': True}
+4. Dos semillas distintas dan llegadas distintas (fijo, 424301 frente a 424302)
+  ok    poi_corredor     vehiculos 1777 y 1742; de 1661 ids comunes, salida pedida distinta en 1661 y speedFactor distinto en 1601
+  ok    poi_corredor_alta vehiculos 3620 y 3558; de 3464 ids comunes, salida pedida distinta en 3464 y speedFactor distinto en 3373
+  ok    poi_red          vehiculos 2134 y 2064; de 1995 ids comunes, salida pedida distinta en 1995 y speedFactor distinto en 1934
+  ok    poi_red_alta     vehiculos 2564 y 2500; de 2397 ids comunes, salida pedida distinta en 2397 y speedFactor distinto en 2330
+  ok    poi_malla3       vehiculos 4352 y 4252; de 4047 ids comunes, salida pedida distinta en 4047 y speedFactor distinto en 3945
+  ok    poi_malla3_alta  vehiculos 8704 y 8610; de 8316 ids comunes, salida pedida distinta en 8316 y speedFactor distinto en 8092
+  ok    malla3_alta_e    vehiculos 8700 y 8700; de 8700 ids comunes, salida pedida distinta en 0 y speedFactor distinto en 8503 (llegadas regulares: mismas salidas, otros conductores)
+  ok    per_corredor     vehiculos 1790 y 1732; de 1557 ids comunes, salida pedida distinta en 1557 y speedFactor distinto en 1510
+  ok    mix_corredor     vehiculos 1472 y 1477; de 1370 ids comunes, salida pedida distinta en 1370 y speedFactor distinto en 1281
+  ok    mixa_corredor    vehiculos 1472 y 1477; de 1370 ids comunes, salida pedida distinta en 1370 y speedFactor distinto en 1281
+  ok    per_red          vehiculos 2136 y 2068; de 1913 ids comunes, salida pedida distinta en 1913 y speedFactor distinto en 1848
+  ok    mix_red          vehiculos 1763 y 1734; de 1655 ids comunes, salida pedida distinta en 1655 y speedFactor distinto en 1546
+  ok    mixa_red         vehiculos 1763 y 1734; de 1655 ids comunes, salida pedida distinta en 1655 y speedFactor distinto en 1546
+(tiempo por episodio: mediana 5.8 s, maximo 55.5 s; 130 episodios)
+
+Resultado: TODO OK

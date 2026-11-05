@@ -1,0 +1,28 @@
+a. Programas del repositorio por el lanzador (cwd = plan3/, escenario poi_corredor)
+  ok    evaluar.py --brazo fijo: codigo 0; Escrito tmp_esc\lanzador/eval_poi_corredor_fijo.csv; retraso total ['32.6', '31.5']
+  ok    evaluar.py --brazo trivial: codigo 0; Escrito tmp_esc\lanzador/eval_poi_corredor_trivial.csv; retraso total ['89.0', '121.82']
+  ok    evaluar.py sin el lanzador: codigo 2; evaluar.py: error: argument --escenario: invalid choice: 'poi_corredor' (choose from 'cruce', 'cruce2', 'corredor', 'red
+  ok    rl_ippo.py train: codigo 0; Politica guardada en politica_poi_corredor_vecinos_p3humo_s7.pt (episodio 2, val 209.405, criterio total); semillas de los episodios ['8', '9']; val_total del ep. 2 209.405
+  ok    evaluar.py --politica (la de humo): codigo 0; brazo ippo_vecinos_p3humo_s7; retraso total ['159.02', '227.0']
+  ok    barrer_fijo.py --limite 3: codigo 0; 3 configuraciones; sin --instalar no escribe poi_corredor.add.xml; AVISO: poi_corredor.sumocfg no carga poi_corredor.add.xml (el que escribe --instalar)
+  ok    el barrido (sumo puro) en 10/10 con desfases 0 da 105.41 s/veh y el ciclo minimo por evaluar.py (TraCI) 105.41: las dos rutas ven las mismas llegadas
+  ok    un programa de plan3/ (como evaluar3.py) corre con sus argumentos, importa modulos de plan3/ y ve los escenarios nuevos y los de plan2: {'argv': ['--a', '1'], 'poi': True, 'dem': True, 'demanda': 'C:\\Users\\GAMER\\Documents\\demo_rl_semaforo\\w3_esc\\plan3\\demanda_estocastica.py'}
+b. plan2/generar_trabajos.py sobre una copia de plan2/ (tmp_esc/copia_gen), nunca dentro de plan2/
+  ok    con escenarios_plan3.py al lado: 868 trabajos en C:\Users\GAMER\Documents\demo_rl_semaforo\w3_esc\plan3\tmp_esc\copia_gen\plan2\cola\trabajos.jsonl; sha256 4eb09e8f5884... = el de plan2/ (4eb09e8f5884...)
+  ok    importando antes escenarios_plan3 en el mismo proceso: 868 trabajos en C:\Users\GAMER\Documents\demo_rl_semaforo\w3_esc\plan3\tmp_esc\copia_gen\plan2\cola\trabajos.jsonl; mismo sha256
+  ok    el lanzador se niega a correr generar_trabajos.py de una carpeta plan2 (codigo 1: con_escenarios: no se corre nada de plan2/ ni de TESIS/, ni con el cwd dentro de ellas); la copia no cambia
+  (lo que evita el lanzador, medido en la copia) con los escenarios registrados en ese proceso la cola de plan2 pasaria de 868 a 946 trabajos (78 nuevos, 6 por escenario), p. ej. dem_barrido_poi_corredor, dem_eval_poi_corredor_fijo, dem_eval_poi_corredor_fijo_p1
+c. El lanzador se niega cuando debe
+  ok    rl_corredor ya importado: codigo 1; con_escenarios: ya se importo rl_corredor; el registro llegaria tarde
+  ok    evaluar ya importado: codigo 1; con_escenarios: ya se importo rl_corredor, evaluar; el registro llegaria tarde
+  ok    nombre que ya esta en DERIVADOS: codigo 1; con_escenarios: nombres ya usados: poi_corredor
+  ok    nombre de un escenario fijo: codigo 1; con_escenarios: nombres ya usados: corredor_alta
+  ok    nombre de un nivel de demanda: codigo 1; con_escenarios: nombres ya usados: dem_red_t905
+  ok    registrar dos veces: codigo 1; con_escenarios: nombres ya usados: malla3_alta_e, mix_corredor, mix_red, mixa_corredor, mixa_red, per_corredor
+  ok    sin nada importado antes registra los 13 escenarios
+  ok    programa en plan2/: codigo 1; con_escenarios: no se corre nada de plan2/ ni de TESIS/, ni con el cwd dentro de ellas
+  ok    programa en TESIS/: codigo 1; con_escenarios: no se corre nada de plan2/ ni de TESIS/, ni con el cwd dentro de ellas
+  ok    cwd en plan2/: codigo 1; con_escenarios: no se corre nada de plan2/ ni de TESIS/, ni con el cwd dentro de ellas
+  ok    el mismo programa con cwd = plan3/ si corre (control)
+
+Resultado: TODO OK

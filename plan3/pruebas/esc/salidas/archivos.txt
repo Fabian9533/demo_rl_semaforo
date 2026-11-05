@@ -1,0 +1,90 @@
+f. sha256 de 28 .rou.xml de plan2/ guardados en salidas/sha_plan2_rou.txt
+a. Demanda esperada por periodo y por flow frente al caso regular
+  ok    poi_corredor     periodo 1   905.00, periodo 2   905.00 veh; caso corredor 905 y 905; dif. max. por periodo 7.6e-10, por flow 6.0e-10
+  ok    poi_corredor_alta periodo 1  1810.00, periodo 2  1810.00 veh; caso corredor_alta 1810 y 1810; dif. max. por periodo 6.4e-10, por flow 6.0e-10
+  ok    poi_red          periodo 1  1075.00, periodo 2  1075.00 veh; caso red 1075 y 1075; dif. max. por periodo 1.2e-09, por flow 8.0e-10
+  ok    poi_red_alta     periodo 1  1290.00, periodo 2  1290.00 veh; caso red_alta 1290 y 1290; dif. max. por periodo 6.0e-10, por flow 6.0e-10
+  ok    poi_malla3       periodo 1  2175.00, periodo 2  2175.00 veh; caso malla3 2175 y 2175; dif. max. por periodo 2.3e-09, por flow 6.0e-10
+  ok    poi_malla3_alta  periodo 1  4350.00, periodo 2  4350.00 veh; caso malla3_alta 4350 y 4350; dif. max. por periodo 1.9e-09, por flow 6.0e-10
+  ok    malla3_alta_e    periodo 1  4350.00, periodo 2  4350.00 veh; caso malla3_alta 4350 y 4350; dif. max. por periodo 0.0e+00, por flow 0.0e+00
+  ok    per_corredor     periodo 1   905.00, periodo 2   905.00 veh; caso corredor 905 y 905; dif. max. por periodo 2.0e-11, por flow 2.0e-11
+  ok    mix_corredor     periodo 1   758.21, periodo 2   758.21 veh (x 1.1936 = 905.00 y 905.00 equivalentes); caso corredor 905 y 905; dif. max. por periodo 9.4e-10, por flow 3.3e-10
+  ok    mixa_corredor    periodo 1   758.21, periodo 2   758.21 veh (x 1.1936 = 905.00 y 905.00 equivalentes); caso corredor 905 y 905; dif. max. por periodo 9.4e-10, por flow 3.3e-10
+  ok    per_red          periodo 1  1075.00, periodo 2  1075.00 veh; caso red 1075 y 1075; dif. max. por periodo 5.6e-10, por flow 2.0e-10
+  ok    mix_red          periodo 1   900.64, periodo 2   900.64 veh (x 1.1936 = 1075.00 y 1075.00 equivalentes); caso red 1075 y 1075; dif. max. por periodo 1.7e-09, por flow 1.1e-09
+  ok    mixa_red         periodo 1   900.64, periodo 2   900.64 veh (x 1.1936 = 1075.00 y 1075.00 equivalentes); caso red 1075 y 1075; dif. max. por periodo 1.7e-09, por flow 1.1e-09
+b. Estructura de los archivos
+  ok    corredor.rou.xml sin departLane
+  ok    corredor_alta.rou.xml sin departLane
+  ok    malla3.rou.xml sin departLane
+  ok    malla3_alta.rou.xml sin departLane
+  ok    red.rou.xml sin departLane
+  ok    red_alta.rou.xml sin departLane
+  ok    poi_corredor: departLane=best en los 20 flows
+  ok    poi_corredor: mismos ids, rutas, begin y end que corredor; tasa exp = vehsPerHour/3600
+  ok    poi_corredor_alta: departLane=best en los 20 flows
+  ok    poi_corredor_alta: mismos ids, rutas, begin y end que corredor_alta; tasa exp = vehsPerHour/3600
+  ok    poi_red: departLane=best en los 24 flows
+  ok    poi_red: mismos ids, rutas, begin y end que red; tasa exp = vehsPerHour/3600
+  ok    poi_red_alta: departLane=best en los 24 flows
+  ok    poi_red_alta: mismos ids, rutas, begin y end que red_alta; tasa exp = vehsPerHour/3600
+  ok    poi_malla3: departLane=best en los 48 flows
+  ok    poi_malla3: mismos ids, rutas, begin y end que malla3; tasa exp = vehsPerHour/3600
+  ok    poi_malla3_alta: departLane=best en los 48 flows
+  ok    poi_malla3_alta: mismos ids, rutas, begin y end que malla3_alta; tasa exp = vehsPerHour/3600
+  ok    malla3_alta_e: departLane=best en los 48 flows
+  ok    per_corredor: departLane=best en los 60 flows
+  ok    per_corredor: 60 flows (3 bloques por flow del caso), ordenados por inicio
+  ok    mix_corredor: departLane=best en los 20 flows
+  ok    mixa_corredor: departLane=best en los 20 flows
+  ok    per_red: departLane=best en los 72 flows
+  ok    per_red: 72 flows (3 bloques por flow del caso), ordenados por inicio
+  ok    mix_red: departLane=best en los 24 flows
+  ok    mixa_red: departLane=best en los 24 flows
+  ok    malla3_alta_e: los flows de malla3_alta (mismos atributos) mas departLane=best
+  ok    mixa_corredor = mix_corredor salvo startupDelay=0.5 en los 5 tipos (5 veces)
+  ok    mix_corredor: vTypeDistribution 'auto' con 5 tipos que suman 1.000001
+  ok    mixa_red = mix_red salvo startupDelay=0.5 en los 5 tipos (5 veces)
+  ok    mix_red: vTypeDistribution 'auto' con 5 tipos que suman 1.000001
+  composicion de la mezcla (%): auto 78.928, moto 4.364, combi 4.808, micro 5.641, bus 6.258; vehiculos equivalentes por vehiculo 1.1936 -> demanda x 0.8378 (con la moto en 0.5: x 0.8534)
+c. SUMO carga los escenarios (semilla 424301, 300 s, avisos visibles)
+  (caso) corredor         codigo 0, errores 0, avisos 0
+  (caso) corredor_alta    codigo 0, errores 0, avisos 0
+  (caso) malla3           codigo 0, errores 0, avisos 0
+  (caso) malla3_alta      codigo 0, errores 0, avisos 0
+  (caso) red              codigo 0, errores 0, avisos 0
+  (caso) red_alta         codigo 0, errores 0, avisos 0
+  ok    poi_corredor     codigo 0, errores 0, avisos 0
+  ok    poi_corredor_alta codigo 0, errores 0, avisos 0
+  ok    poi_red          codigo 0, errores 0, avisos 0
+  ok    poi_red_alta     codigo 0, errores 0, avisos 0
+  ok    poi_malla3       codigo 0, errores 0, avisos 0
+  ok    poi_malla3_alta  codigo 0, errores 0, avisos 0
+  ok    malla3_alta_e    codigo 0, errores 0, avisos 0
+  ok    per_corredor     codigo 0, errores 0, avisos 0
+  ok    mix_corredor     codigo 0, errores 0, avisos 0
+  ok    mixa_corredor    codigo 0, errores 0, avisos 0
+  ok    per_red          codigo 0, errores 0, avisos 0
+  ok    mix_red          codigo 0, errores 0, avisos 0
+  ok    mixa_red         codigo 0, errores 0, avisos 0
+d. preparar3 es determinista y lo de disco esta al dia
+  ok    preparar3 --revisar: codigo 0; 26 de 26 archivos como los escribiria preparar3
+  ok    preparar3 en una copia (tmp_esc/preparar_copia): 26 de 26 archivos iguales a plan3/
+e. departLane=best en los flows frente a --default.departlane best (P6 regular, fijo instalado, semillas 424301-424303)
+  En SUMO 1.25 no son lo mismo: un vehiculo sin departLane hereda el 'best' de la opcion, pero MSEdge::getDepartLane elige entre getFreeLane y getProbableLane mirando el departLane propio del vehiculo (DEFAULT), asi que con la opcion entra por getProbableLane (el carril con mas hueco, como best_prob) y con el atributo por getFreeLane (el 'best' de la documentacion).
+  ok    semilla 424301: las dos variantes ven los mismos vehiculos, salidas pedidas y speedFactor; tripinfo distinto (cambia el carril de entrada y con el el trafico)
+  ok    semilla 424302: las dos variantes ven los mismos vehiculos, salidas pedidas y speedFactor; tripinfo distinto (cambia el carril de entrada y con el el trafico)
+  ok    semilla 424303: las dos variantes ven los mismos vehiculos, salidas pedidas y speedFactor; tripinfo distinto (cambia el carril de entrada y con el el trafico)
+  flows    espera para entrar   0.28 s/veh, timeLoss  36.12 s/veh, retraso total  36.40; entra por el carril 0 el 40.1 % (media de 3 semillas)
+  opcion   espera para entrar   0.30 s/veh, timeLoss  36.97 s/veh, retraso total  37.27; entra por el carril 0 el 53.6 % (media de 3 semillas)
+  defecto  espera para entrar  45.45 s/veh, timeLoss  36.51 s/veh, retraso total  81.96; entra por el carril 0 el 100.0 % (media de 3 semillas)
+  ok    con las dos formas de 'best' la espera para entrar de P6 queda bajo 1 s/veh
+g. Valores por defecto de SUMO 1.25 por clase (leidos con TraCI) frente a los vType de la mezcla
+  ok    auto: largo 5, accel 2.6, decel 4.5 = los de la clase passenger de SUMO
+  ok    moto: largo 2.2, accel 6, decel 10 = los de la clase motorcycle de SUMO
+  ok    bus: largo 12, accel 1.2, decel 4 = los de la clase bus de SUMO
+  passenger  lo que la mezcla toma de la clase: minGap 2.5, sigma 0.5, speedDev 0.1, emergencyDecel 9.0, maxSpeed 55.56, emision HBEFA4/PC_petrol_Euro-4
+  motorcycle lo que la mezcla toma de la clase: minGap 2.5, sigma 0.5, speedDev 0.1, emergencyDecel 10.0, maxSpeed 55.56, emision HBEFA4/MC_4S_gt250cc_preEuro
+  bus        lo que la mezcla toma de la clase: minGap 2.5, sigma 0.5, speedDev 0.0, emergencyDecel 7.0, maxSpeed 27.78, emision HBEFA4/UBus_Std_gt15-18t_Euro-VI_A-C
+
+Resultado: TODO OK

@@ -1,0 +1,82 @@
+Vehiculos generados en 20 semillas de humo (424301-424320), sumo puro hasta 3601 s
+  ok    en cada corrida el tripinfo tiene todos los vehiculos cargados (statistic-output)
+poi_corredor:
+  ok    total                      esperado   1810.00, media   1814.25 (sd  45.38, ee 10.15), z +0.42; sd / raiz(esperado) 1.07
+  ok    periodo 1                  esperado    905.00, media    907.00 (sd  23.16, ee  5.18), z +0.39; sd / raiz(esperado) 0.77
+  ok    periodo 2                  esperado    905.00, media    907.25 (sd  36.11, ee  8.08), z +0.28; sd / raiz(esperado) 1.20
+  (informativo) flows con la media fuera de +-3 ee: 0 de 20
+poi_corredor_alta:
+  ok    total                      esperado   3620.00, media   3626.95 (sd  53.38, ee 11.94), z +0.58; sd / raiz(esperado) 0.89
+  ok    periodo 1                  esperado   1810.00, media   1814.00 (sd  45.35, ee 10.14), z +0.39; sd / raiz(esperado) 1.07
+  ok    periodo 2                  esperado   1810.00, media   1812.95 (sd  38.21, ee  8.54), z +0.35; sd / raiz(esperado) 0.90
+  (informativo) flows con la media fuera de +-3 ee: 0 de 20
+poi_red:
+  ok    total                      esperado   2150.00, media   2153.20 (sd  45.04, ee 10.07), z +0.32; sd / raiz(esperado) 0.97
+  ok    periodo 1                  esperado   1075.00, media   1081.60 (sd  31.76, ee  7.10), z +0.93; sd / raiz(esperado) 0.97
+  ok    periodo 2                  esperado   1075.00, media   1071.60 (sd  35.00, ee  7.83), z -0.43; sd / raiz(esperado) 1.07
+  (informativo) flows con la media fuera de +-3 ee: 0 de 24
+poi_red_alta:
+  ok    total                      esperado   2580.00, media   2580.20 (sd  39.75, ee  8.89), z +0.02; sd / raiz(esperado) 0.78
+  ok    periodo 1                  esperado   1290.00, media   1296.40 (sd  34.04, ee  7.61), z +0.84; sd / raiz(esperado) 0.95
+  ok    periodo 2                  esperado   1290.00, media   1283.80 (sd  27.18, ee  6.08), z -1.02; sd / raiz(esperado) 0.76
+  (informativo) flows con la media fuera de +-3 ee: 1 de 24
+poi_malla3:
+  ok    total                      esperado   4350.00, media   4355.60 (sd  61.58, ee 13.77), z +0.41; sd / raiz(esperado) 0.93
+  ok    periodo 1                  esperado   2175.00, media   2178.45 (sd  44.86, ee 10.03), z +0.34; sd / raiz(esperado) 0.96
+  ok    periodo 2                  esperado   2175.00, media   2177.15 (sd  49.10, ee 10.98), z +0.20; sd / raiz(esperado) 1.05
+  (informativo) flows con la media fuera de +-3 ee: 0 de 48
+poi_malla3_alta:
+  ok    total                      esperado   8700.00, media   8686.50 (sd 103.96, ee 23.25), z -0.58; sd / raiz(esperado) 1.11
+  ok    periodo 1                  esperado   4350.00, media   4357.65 (sd  59.23, ee 13.24), z +0.58; sd / raiz(esperado) 0.90
+  ok    periodo 2                  esperado   4350.00, media   4328.85 (sd  75.97, ee 16.99), z -1.25; sd / raiz(esperado) 1.15
+  (informativo) flows con la media fuera de +-3 ee: 0 de 48
+per_corredor:
+  ok    total                      esperado   1810.00, media   1815.90 (sd  40.58, ee  9.07), z +0.65; sd / raiz(esperado) 0.95
+  ok    periodo 1                  esperado    905.00, media    908.35 (sd  23.23, ee  5.19), z +0.64; sd / raiz(esperado) 0.77
+  ok    periodo 2                  esperado    905.00, media    907.55 (sd  35.68, ee  7.98), z +0.32; sd / raiz(esperado) 1.19
+  ok    bloque 0 (0-600 s)         esperado    201.11, media    198.20 (sd  13.79, ee  3.08), z -0.94; sd / raiz(esperado) 0.97
+  ok    bloque 1 (600-1200 s)      esperado    301.67, media    308.65 (sd  21.60, ee  4.83), z +1.45; sd / raiz(esperado) 1.24
+  ok    bloque 2 (1200-1800 s)     esperado    402.22, media    401.50 (sd  20.27, ee  4.53), z -0.16; sd / raiz(esperado) 1.01
+  ok    bloque 3 (1800-2400 s)     esperado    402.22, media    404.40 (sd  22.48, ee  5.03), z +0.43; sd / raiz(esperado) 1.12
+  ok    bloque 4 (2400-3000 s)     esperado    301.67, media    301.25 (sd  21.17, ee  4.73), z -0.09; sd / raiz(esperado) 1.22
+  ok    bloque 5 (3000-3600 s)     esperado    201.11, media    201.90 (sd  14.88, ee  3.33), z +0.24; sd / raiz(esperado) 1.05
+  ok    todo vehiculo insertado pidio salir dentro de su bloque (salida pedida = depart - departDelay)
+  (informativo) flows con la media fuera de +-3 ee: 0 de 20
+mix_corredor:
+  ok    total                      esperado   1516.42, media   1519.50 (sd  38.70, ee  8.65), z +0.36; sd / raiz(esperado) 0.99
+  ok    periodo 1                  esperado    758.21, media    763.50 (sd  21.47, ee  4.80), z +1.10; sd / raiz(esperado) 0.78
+  ok    periodo 2                  esperado    758.21, media    756.00 (sd  32.85, ee  7.34), z -0.30; sd / raiz(esperado) 1.19
+  (informativo) flows con la media fuera de +-3 ee: 0 de 20
+  ok    cuota de auto (%)          esperado     78.93, media     79.00 (sd   0.91, ee  0.20), z +0.33
+  ok    cuota de moto (%)          esperado      4.36, media      4.15 (sd   0.67, ee  0.15), z -1.45
+  ok    cuota de combi (%)         esperado      4.81, media      4.77 (sd   0.60, ee  0.14), z -0.31
+  ok    cuota de micro (%)         esperado      5.64, media      5.78 (sd   0.55, ee  0.12), z +1.14
+  ok    cuota de bus (%)           esperado      6.26, media      6.31 (sd   0.49, ee  0.11), z +0.49
+  chi cuadrado de la composicion con los conteos sumados (30390 vehiculos, 4 g.l.): 4.65, p = 0.326
+per_red:
+  ok    total                      esperado   2150.00, media   2155.65 (sd  45.16, ee 10.10), z +0.56; sd / raiz(esperado) 0.97
+  ok    periodo 1                  esperado   1075.00, media   1083.50 (sd  30.97, ee  6.92), z +1.23; sd / raiz(esperado) 0.94
+  ok    periodo 2                  esperado   1075.00, media   1072.15 (sd  34.72, ee  7.76), z -0.37; sd / raiz(esperado) 1.06
+  ok    bloque 0 (0-600 s)         esperado    238.89, media    237.05 (sd  14.65, ee  3.28), z -0.56; sd / raiz(esperado) 0.95
+  ok    bloque 1 (600-1200 s)      esperado    358.33, media    366.30 (sd  21.78, ee  4.87), z +1.64; sd / raiz(esperado) 1.15
+  ok    bloque 2 (1200-1800 s)     esperado    477.78, media    480.15 (sd  22.22, ee  4.97), z +0.48; sd / raiz(esperado) 1.02
+  ok    bloque 3 (1800-2400 s)     esperado    477.78, media    476.15 (sd  28.77, ee  6.43), z -0.25; sd / raiz(esperado) 1.32
+  ok    bloque 4 (2400-3000 s)     esperado    358.33, media    359.00 (sd  19.76, ee  4.42), z +0.15; sd / raiz(esperado) 1.04
+  ok    bloque 5 (3000-3600 s)     esperado    238.89, media    237.00 (sd  18.17, ee  4.06), z -0.46; sd / raiz(esperado) 1.18
+  ok    todo vehiculo insertado pidio salir dentro de su bloque (salida pedida = depart - departDelay)
+  (informativo) flows con la media fuera de +-3 ee: 0 de 24
+mix_red:
+  ok    total                      esperado   1801.27, media   1806.55 (sd  43.89, ee  9.81), z +0.54; sd / raiz(esperado) 1.03
+  ok    periodo 1                  esperado    900.64, media    903.05 (sd  22.79, ee  5.10), z +0.47; sd / raiz(esperado) 0.76
+  ok    periodo 2                  esperado    900.64, media    903.50 (sd  34.46, ee  7.71), z +0.37; sd / raiz(esperado) 1.15
+  (informativo) flows con la media fuera de +-3 ee: 0 de 24
+  ok    cuota de auto (%)          esperado     78.93, media     78.87 (sd   0.88, ee  0.20), z -0.28
+  ok    cuota de moto (%)          esperado      4.36, media      4.20 (sd   0.50, ee  0.11), z -1.46
+  ok    cuota de combi (%)         esperado      4.81, media      4.82 (sd   0.58, ee  0.13), z +0.06
+  ok    cuota de micro (%)         esperado      5.64, media      5.81 (sd   0.53, ee  0.12), z +1.40
+  ok    cuota de bus (%)           esperado      6.26, media      6.30 (sd   0.49, ee  0.11), z +0.41
+  chi cuadrado de la composicion con los conteos sumados (36131 vehiculos, 4 g.l.): 4.02, p = 0.404
+malla3_alta_e (llegadas regulares):
+  ok    genera exactamente 8700 vehiculos en las semillas 424301, 424302
+
+Resultado: TODO OK
