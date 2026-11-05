@@ -37,10 +37,23 @@ def ruta_estadisticas(tripinfo):
     return (tripinfo[:-4] if tripinfo.endswith(".xml") else tripinfo) + "_stats.xml"
 
 
+# plan3 (05.11.2026): evaluar3.py lo activa para tener tambien en el tripinfo una fila por cada vehiculo que al
+# cerrar seguia esperando entrar (depart = -1, departDelay = lo que espero) y asignarlo a su periodo. Apagado por
+# defecto: con False los comandos de sumo son los de siempre. leer_tripinfo y vehiculos_tripinfo ignoran esas filas,
+# asi que las metricas no cambian con la opcion (los no insertados se siguen contando del archivo de estadisticas).
+ESCRIBIR_NO_INSERTADOS = False
+
+
 def args_estadisticas(tripinfo):
     """Argumentos de sumo para escribir el resumen de estadisticas junto al tripinfo. De ahi salen
     los vehiculos que al cerrar la simulacion aun esperaban entrar a la red (no estan en el tripinfo)."""
-    return ["--statistic-output", ruta_estadisticas(tripinfo)]
+    extra = ["--tripinfo-output.write-undeparted", "true"] if ESCRIBIR_NO_INSERTADOS else []
+    return ["--statistic-output", ruta_estadisticas(tripinfo)] + extra
+
+
+def _viajes(archivo):
+    """Filas del tripinfo de los vehiculos que entraron (sin las de los no insertados, depart < 0)."""
+    return [v for v in ET.parse(archivo).getroot().findall("tripinfo") if float(v.get("depart", 0)) >= 0]
 
 
 def borrar_tripinfo(tripinfo, intentos=5, espera=1.0):
@@ -78,7 +91,7 @@ def leer_tripinfo(archivo, flujos_corredor=None):
     Si se pasa flujos_corredor (ids de los <flow> que recorren toda la avenida), agrega
     viaje_corredor_prom y retraso_corredor_prom: duracion y timeLoss medios de esos
     vehiculos, es decir, el tiempo de viaje extremo a extremo del corredor."""
-    viajes = ET.parse(archivo).getroot().findall("tripinfo")
+    viajes = _viajes(archivo)
     n = max(1, len(viajes))
     espera = sum(float(v.get("waitingTime")) for v in viajes) / n
     perdida = sum(float(v.get("timeLoss")) for v in viajes) / n
@@ -137,7 +150,7 @@ def leer_tripinfo(archivo, flujos_corredor=None):
 def vehiculos_tripinfo(archivo):
     """Una fila por vehiculo (para distribuciones): id, salida, retraso, espera, paradas, CO2 en g."""
     filas = []
-    for v in ET.parse(archivo).getroot().findall("tripinfo"):
+    for v in _viajes(archivo):
         e = v.find("emissions")
         filas.append({
             "id": v.get("id"),
