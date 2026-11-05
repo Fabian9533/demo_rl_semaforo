@@ -423,6 +423,31 @@ def brazo_ippo(variante, politicas, brazos_csv):
     return f"ippo_{variante}" if f"ippo_{variante}" in brazos_csv else None
 
 
+# ---------------- Semillas a ciegas del plan 3 (05.11.2026) ----------------
+# Las semillas del examen y de la prueba final (plan3/PRERREGISTRO.md, tabla de §3: examen_regular, examen_h1,
+# examen_aleatorio y final) solo se simulan desde la cola de plan3, en un trabajo de uso ciego: cola.py pone P3_USO.
+# Cualquier otra corrida con ellas (una prueba, una revision) se niega antes de abrir SUMO. Lo entregado nunca uso
+# estas semillas, y las de entrenamiento son base + episodio, asi que no cambia ningun numero.
+BLOQUES_CIEGOS = ((7001, 7100), (8001, 8120), (10001, 10100), (11001, 11030), (12001, 12100), (13001, 13120))
+USOS_CIEGOS = ("examen_regular", "examen_h1", "examen_aleatorio", "final")
+
+
+def revisar_semilla_ciega(cmd):
+    """Sale con error si cmd (lista de argumentos de sumo) lleva --seed de un bloque ciego fuera de un trabajo ciego."""
+    cmd = list(cmd)
+    if "--seed" not in cmd:
+        return
+    try:
+        semilla = int(cmd[cmd.index("--seed") + 1])
+    except (IndexError, ValueError):
+        return
+    uso = os.environ.get("P3_USO")
+    if any(a <= semilla <= b for a, b in BLOQUES_CIEGOS) and uso not in USOS_CIEGOS:
+        raise SystemExit(f"semilla {semilla}: es del examen o de la prueba final del plan 3 y solo se simula desde la "
+                         f"cola, en un trabajo de uso ciego (P3_USO={uso!r}). Para probar, use las de humo "
+                         f"424301-424360 o la base 7.")
+
+
 # ---------------- Arranque robusto de SUMO (plan v2) ----------------
 def iniciar_sumo(cmd, intentos=5, espera=3.0):
     """traci.start con reintentos. En Windows otro proceso (el antivirus) puede tener tomado un
@@ -432,6 +457,7 @@ def iniciar_sumo(cmd, intentos=5, espera=3.0):
     import time
     import traci
     from traci import connection as conexiones
+    revisar_semilla_ciega(cmd)
     for k in range(intentos):
         try:
             return traci.start(cmd)
