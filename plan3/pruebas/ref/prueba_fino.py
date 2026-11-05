@@ -107,7 +107,8 @@ def prueba_regla():
             viejos += not (dentro - mejor <= 0.02 * mejor)
     inf.chequeo(not malos, f"A a_2pct en el borde: con el mejor de 5.00 a 99.99 s (9500 casos), el mayor valor a "
                            f"<= 2 % entra y el centesimo siguiente no: fallas {malos[:3]}; la comparacion de antes "
-                           f"(segundo - primero <= 0.02 x primero) dejaba fuera {viejos} de los {bordes} bordes exactos")
+                           f"(segundo - primero <= 0.02 x primero) dejaba fuera {viejos} de los {bordes} bordes "
+                           f"exactos")
     ejemplos = [(20.50, 20.91, True), (20.50, 20.92, False), (30.00, 30.60, True), (30.00, 30.61, False)]
     inf.chequeo(all(bfn.a_2pct(v, m) == e for m, v, e in ejemplos),
                 f"A ejemplos de la revision (mejor, valor, a <= 2 %): "
@@ -502,7 +503,8 @@ def semillas_ciegas():
             os.environ["P3_USO"] = uso
     inf.chequeo(resultados == [(7001, "negada"), (8001, "negada"), (13120, "negada"), (up.HUMO[0], "llega a sumo")]
                 and llamadas == [str(up.HUMO[0])],
-                f"F semillas del examen y de la final: correr_periodos las niega antes de lanzar sumo (sumo reemplazado: "
+                f"F semillas del examen y de la final: correr_periodos las niega antes de lanzar sumo (sumo "
+                f"reemplazado: "
                 f"nada se simula): {resultados}")
 
 

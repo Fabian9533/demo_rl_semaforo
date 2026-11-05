@@ -65,17 +65,26 @@ PIEZAS = {"actuado": pieza_actuado, "trivial": pieza_trivial, "actuado_aj": piez
 POR_DEFECTO = ("actuado", "trivial")          # actuado_aj solo si se pide (--piezas actuado_aj)
 
 
-def main():
+def validar_args(argv):
+    """Lee y revisa los argumentos (argv sin el nombre del programa): parse_args y todos los ap.error, sin leer el
+    escenario ni tocar archivos. Devuelve args o sale como argparse (SystemExit(2), motivo en stderr).
+    chequeos_previos la llama para cada comando de este script en la lista de trabajos."""
     ap = argparse.ArgumentParser(description="Trabajo preparar de cada noche (plan3, 0.11)", allow_abbrev=False)
     ap.add_argument("escenarios", nargs="+")
     ap.add_argument("--piezas", default=",".join(POR_DEFECTO), help=f"de {', '.join(PIEZAS)} (por defecto "
                                                                    f"{', '.join(POR_DEFECTO)})")
-    args = ap.parse_args()
+    args = ap.parse_args(argv)
+    args.lista_piezas = [p for p in args.piezas.split(",") if p]
+    desconocidas = [p for p in args.lista_piezas if p not in PIEZAS]
+    if desconocidas or not args.lista_piezas:
+        ap.error(f"piezas desconocidas o ninguna: {desconocidas}")
+    return args
+
+
+def main():
+    args = validar_args(sys.argv[1:])
     bfn.exigir_cwd()
-    piezas = [p for p in args.piezas.split(",") if p]
-    desconocidas = [p for p in piezas if p not in PIEZAS]
-    if desconocidas:
-        ap.error(f"piezas desconocidas: {desconocidas}")
+    piezas = args.lista_piezas
     escritas = []
     for esc in args.escenarios:
         for pieza in piezas:

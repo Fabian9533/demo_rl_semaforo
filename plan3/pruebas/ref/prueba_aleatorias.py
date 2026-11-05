@@ -113,7 +113,8 @@ def main():
            "--semillas-final", "424301-424310", "--permitir-prueba")
     bl = leer_json("barridos/per_corredor/bloques.json")
     inf(f"  bloques: {[(p['desde'], p['clave']) for p in bl['programas']]}, cambios {bl['instantes']} (reglas "
-        f"{bl['cambios']['reglas']}, retraso maximo {bl['cambios']['retraso_maximo']} s); {bl['retraso_total_prom']} en "
+        f"{bl['cambios']['reglas']}, retraso maximo {bl['cambios']['retraso_maximo']} s); "
+        f"{bl['retraso_total_prom']} en "
         f"{bl['semillas']}; sin el fijo fino al lado (el perfil no corrio fragil): marca {bl['registro']['prueba']}")
     os.chdir(CARPETA)
     sys.path.insert(0, CARPETA)

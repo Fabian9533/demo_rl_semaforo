@@ -15,7 +15,10 @@ prueba_actuado.py - Pruebas de la tarea 0.9 (actuado.py, modo actuado_aj de rl_c
   6. la variante coordinada (b) "fin fijo" termina el verde de avenida en el fin del plan fijo, con un plan cuya
      transversal puede cortar antes (holgura) y con maxDur de la cadena = los verdes fijos (el caso dificil), en P2
      (la avenida es la fase 2), P3 y P6 (la avenida es la fase 0): tantas salidas como el plan fijo (+-1) y a lo sumo
-     2 por semaforo fuera del fin fijo (el arranque); la transversal nunca termina despues de su fin fijo.
+     2 por semaforo fuera del fin fijo (el arranque); la transversal nunca termina despues de su fin fijo;
+  7. donde pone SUMO los detectores del actuado (TraCI, inductionloop): a min(detector-gap x vmax, (minDur /
+     passing-time + 0.5) x 7.5 m, largo del carril) de la linea, con passing-time 1.9 y minDur 10: con detector-gap 2,
+     27.8 m; con 4, el tope de 43.2 m (informe_ref 1.3), en P1 y P6.
 La variante coordinada usa un fijo fino de prueba (el fijo entregado, escrito como fijo_fino.json en tmp_ref, con la
 marca de prueba: la celda corre con permitir).
 Semillas de humo. Corre en una copia de los escenarios (tmp_ref/actuado/). Uso (cwd = plan3/):
@@ -271,6 +274,32 @@ def alineada(caso, esc, plan):
                            + "; ".join(detalle))
 
 
+def posicion_detectores(caso, esc):
+    """Los detectores que crea SUMO para el actuado, con detector-gap 2 y 4: a que distancia de la linea quedan."""
+    import traci
+    c = celda(esc)
+    detalle, malos = [], []
+    for dg in (2.0, 4.0):
+        ruta = archivo(c, dict(actuado.DEFECTO, **{"detector-gap": dg}), f"det_{int(dg)}")
+        traci.start(["sumo", "-c", c.cfg, "--additional-files", encima(c, ruta), "--seed", str(S), "--no-step-log",
+                     "true", "--no-warnings", "true", "--end", "5",
+                     "--tripinfo-output", os.path.join(CARPETA, f"ti_det_{esc}_{int(dg)}.xml")])
+        traci.simulationStep()
+        distancias = []
+        for d in traci.inductionloop.getIDList():
+            carril = traci.inductionloop.getLaneID(d)
+            largo, vmax = traci.lane.getLength(carril), traci.lane.getMaxSpeed(carril)
+            dist = largo - traci.inductionloop.getPosition(d)
+            esperado = min(dg * vmax, (actuado.VERDE_MIN / 1.9 + 0.5) * 7.5, largo)
+            distancias.append(round(dist, 2))
+            if abs(dist - esperado) > 0.05:
+                malos.append((dg, d, round(dist, 2), round(esperado, 2)))
+        traci.close()
+        detalle.append(f"detector-gap {dg:g}: {len(distancias)} detectores a {sorted(set(distancias))} m")
+    inf.chequeo(not malos and len(detalle) == 2,
+                f"7 {caso}: " + "; ".join(detalle) + (f"; fuera de lo esperado: {malos[:3]}" if malos else ""))
+
+
 def main():
     inf(f"Pruebas de 0.9: actuado ajustado (copia en {CARPETA}; semilla {S})")
     reinstalar()
@@ -290,6 +319,8 @@ def main():
     alineada("P2", "corredor_alta", (25, 15, [0, 25]))
     alineada("P3", "red", (20, 15, [0, 10, 20]))
     alineada("P6", "malla3_alta", (15, 15, [0] * 9, "cero"))
+    posicion_detectores("P1", "corredor")
+    posicion_detectores("P6", "malla3_alta")
     os.chdir(up.PLAN3)
     sys.exit(1 if inf.cerrar() else 0)
 

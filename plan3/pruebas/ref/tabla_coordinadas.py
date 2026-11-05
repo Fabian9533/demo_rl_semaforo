@@ -133,14 +133,16 @@ def caso(nombre_caso, esc, plan):
 def main():
     inf(f"Variantes coordinadas del actuado con el fijo entregado como fino (semilla {S}; antes = {COMMIT_ANTES}; "
         f"copia en {CARPETA})")
-    inf("retraso total (s/veh); entre parentesis, salidas del verde de avenida en el fin del plan fijo / salidas, en el "
+    inf("retraso total (s/veh); entre parentesis, salidas del verde de avenida en el fin del plan fijo / salidas, "
+        "en el "
         "semaforo que peor sale")
     inf("| | fijo | actuado | coordinada (a) antes | (a) ahora | coordinada (b) antes | (b) ahora |")
     inf("|---|---|---|---|---|---|---|")
     for nombre, esc, plan in CASOS:
         r, al, n_fijo = caso(nombre, esc, plan)
         celda_txt = {k: f"{r[k]} ({al[k][0]}/{al[k][1]})" for k in al}
-        inf(f"| {nombre} | {r['fijo']} ({n_fijo} salidas) | {r['actuado']} | {celda_txt['a_antes']} | {celda_txt['a']} | "
+        inf(f"| {nombre} | {r['fijo']} ({n_fijo} salidas) | {r['actuado']} | {celda_txt['a_antes']} | "
+            f"{celda_txt['a']} | "
             f"{celda_txt['b_antes']} | {celda_txt['b']} |")
     os.chdir(up.PLAN3)
     sys.exit(1 if inf.cerrar() else 0)

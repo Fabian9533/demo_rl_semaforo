@@ -734,19 +734,34 @@ CON_TROZOS = ("gruesa", "fina", "desfases", "mult5")
 
 
 def ref_salidas(esc, trabajo):
-    """Salidas que deja cada trabajo de referencias (informe_ref §2.5)."""
+    """Salidas que deja siempre cada trabajo de referencias (informe_ref §2.6, columna "siempre"; los *_semillas.csv
+    tambien, que las etapas siguientes leen)."""
     b = f"barridos/{esc}"
     if trabajo in ("fina", "desfases", "desempate"):
         return [f"{b}/{trabajo}.csv", f"{b}/{trabajo}_semillas.csv"]
+    if trabajo.startswith("actuado_paso"):
+        return [f"{b}/{trabajo}.csv", f"{b}/{trabajo}_semillas.csv", f"{b}/{trabajo}.json"]
+    if trabajo in ("regla", "mp", "reactiva"):
+        return [f"{b}/reglas_{trabajo}.csv", f"{b}/reglas_{trabajo}_final.csv", f"{b}/reglas_{trabajo}_semillas.csv",
+                f"{b}/{trabajo}.json"]
     return {"gruesa": [f"{b}/gruesa.csv", f"{b}/gruesa_semillas.csv", f"{b}/fijo_grueso10.json", f"{esc}_r10g.add.xml"],
-            "fragil": [f"{b}/fragil.csv", f"{b}/fijo_fino.json", f"{esc}_r10f.add.xml"],
-            "mult5": [f"{b}/mult5.csv", f"{b}/mult5_desempate.csv", f"{b}/fijo_mult5.json", f"{esc}_m5f.add.xml"],
-            "franja": [f"{b}/franja.csv", f"{b}/franja_final.csv", f"{b}/franja.json", f"{esc}_franja.add.xml"],
-            "bloques": [f"{b}/bloques.csv", f"{b}/bloques.json", f"{esc}_bloques.add.xml"],
-            "actuado_final": [f"{b}/actuado_final.csv", f"{b}/actuado_aj.json", f"{esc}_actuado_aj.add.xml"],
-            "regla": [f"{b}/reglas_regla.csv", f"{b}/reglas_regla_final.csv", f"{b}/regla.json"],
-            "mp": [f"{b}/reglas_mp.csv", f"{b}/reglas_mp_final.csv", f"{b}/mp.json"],
-            "reactiva": [f"{b}/reglas_reactiva.csv", f"{b}/reglas_reactiva_final.csv", f"{b}/reactiva.json"]}[trabajo]
+            "fragil": [f"{b}/fragil.csv", f"{b}/fragil_semillas.csv", f"{b}/fijo_fino.json", f"{esc}_r10f.add.xml"],
+            "mult5": [f"{b}/mult5.csv", f"{b}/mult5_semillas.csv", f"{b}/mult5_desempate.csv",
+                      f"{b}/mult5_desempate_semillas.csv", f"{b}/fijo_mult5.json", f"{esc}_m5f.add.xml"],
+            "franja": [f"{b}/franja.csv", f"{b}/franja_final.csv", f"{b}/franja_semillas.csv", f"{b}/franja.json",
+                       f"{esc}_franja.add.xml"],
+            "bloques": [f"{b}/bloques.csv", f"{b}/bloques_semillas.csv", f"{b}/bloques.json", f"{esc}_bloques.add.xml"],
+            "actuado_final": [f"{b}/actuado_final.csv", f"{b}/actuado_final_semillas.csv", f"{b}/actuado_aj.json",
+                              f"{esc}_actuado_aj.add.xml"]}[trabajo]
+
+
+# Reparto de la columna "reglas" de REF_H (que cuesta regla + MP) por familia, por las corridas de cada una: con
+# llegadas regulares, 2001-2003 y 3 finalistas con 2001-2010 (regla 30 + 21, reactiva 15 + 21, MP 12 + 21, de 84); con
+# aleatorias, 2001-2003 y hasta 10 finalistas con 2001-2030 (regla 30 + 270, reactiva 15 + 135, MP 12 + 108, de 420).
+PARTE_REGLAS = {"regulares": {"regla": 51 / 84, "reactiva": 36 / 84, "mp": 33 / 84},
+                "aleatorias": {"regla": 300 / 420, "reactiva": 150 / 420, "mp": 120 / 420}}
+# Pasos del actuado por sus corridas nuevas en 2001-2003: 5, 3, 2, 2, 2 y 8 (el 6: 6 delay_based y 2 coordinadas)
+PESO_PASO = {"1": 5 / 22, "2": 3 / 22, "3": 2 / 22, "4": 2 / 22, "5": 2 / 22, "6": 8 / 22}
 
 
 def ref_celda(lista, esc, completa=True, perfil=False, franja=True, mp=True, mult5=True):
@@ -788,7 +803,7 @@ def ref_celda(lista, esc, completa=True, perfil=False, franja=True, mp=True, mul
         lista.agregar({"id": tid, "etapa": "0", "prioridad": 1, "uso": "ajuste",
                        "requiere": [d, f] if perfil else [d],
                        "cmd": f"{pre} franja.py {esc}{' --bloques' if perfil else ''}",
-                       "duracion": round(3600 * max(h["franja"], 0.05) * EMPAQUE), "salidas": ref_salidas(esc, nombre)})
+                       "duracion": round(3600 * max(h["franja"], 0.05)), "salidas": ref_salidas(esc, nombre)})
         ids[nombre] = tid
     previo = []
     for paso in ("1", "2", "3", "4", "5", "6", "final"):
@@ -799,19 +814,20 @@ def ref_celda(lista, esc, completa=True, perfil=False, franja=True, mp=True, mul
                        "cmd": f"{pre} actuado.py {esc} --paso {paso}",
                        "duracion": round(3600 * max(h["actuado"], 0.07) * (
                            (0.81 if esc.startswith(("poi_", "per_", "mix")) else 0.25) if paso == "final" else
-                           (0.19 if esc.startswith(("poi_", "per_", "mix")) else 0.75) / 6)),
+                           (0.19 if esc.startswith(("poi_", "per_", "mix")) else 0.75) * PESO_PASO[paso])),
                        "salidas": (ref_salidas(esc, "actuado_final") if paso == "final"
-                                   else [f"{b}/actuado_paso{paso}.csv", f"{b}/actuado_paso{paso}.json"])})
+                                   else ref_salidas(esc, f"actuado_paso{paso}"))})
         previo = [f"trabajo:{tid}"]
     ids["actuado"] = f"r_actuadofinal_{esc}"
     if completa:
         familias = ("regla", "reactiva", "mp") if mp else ("regla", "reactiva")
+        llegadas = "aleatorias" if esc.startswith(("poi_", "per_", "mix")) else "regulares"
         for fam in familias:
             tid = f"r_{fam}_{esc}"
-            parte = {"regla": 0.5, "reactiva": 0.3, "mp": 0.3}[fam]
+            parte = PARTE_REGLAS[llegadas][fam]
             lista.agregar({"id": tid, "etapa": "0", "prioridad": 1, "uso": "ajuste", "requiere": [],
                            "cmd": f"{pre} reglas.py {esc} --familia {fam}",
-                           "duracion": round(3600 * max(h["reglas"] * parte, 0.05) * EMPAQUE),
+                           "duracion": round(3600 * max(h["reglas"] * parte, 0.05)),
                            "salidas": ref_salidas(esc, fam)})
             ids[fam] = tid
     return ids
@@ -865,6 +881,12 @@ EV.update({"per1": EV["P1"], "per3": EV["P3"], "mix1": EV["P1"] * 1.10, "mix3": 
 TR.update({"mixa1": TR["P1"], "mixa3": TR["P3"]})
 
 
+def congeladas(tanda):
+    """Una evaluacion decisiva (a ciegas) de una referencia ajustada espera a la parte B: referencias_congeladas.json
+    (evaluar3 ademas se niega si la referencia no es la congelada)."""
+    return ["referencias_congeladas.json"] if TANDAS[tanda][0] in CIEGAS else []
+
+
 def evaluaciones_referencias(lista):
     """Las referencias ajustadas en las tandas de su tipo de llegadas (PLAN3 1.6 y 2.3)."""
     if not REFS:
@@ -873,7 +895,7 @@ def evaluaciones_referencias(lista):
         for c, e in celdas.items():
             for clave, brazo, req, tipo in brazos_ref(e):
                 for t in tandas:
-                    evaluacion(lista, c, e, t, clave, brazo, [f"trabajo:{req}"], tipo=tipo)
+                    evaluacion(lista, c, e, t, clave, brazo, [f"trabajo:{req}"] + congeladas(t), tipo=tipo)
 
 
 def evaluaciones_perfil_mezcla(lista):
@@ -891,7 +913,7 @@ def evaluaciones_perfil_mezcla(lista):
                                [req], tipo=tipo, base=b, corrida=(e_pol, "vecinos", et, b))
             for clave, brazo, req, tipo_r in brazos_ref(e, de=e_pol):
                 for t in ALEATORIAS:
-                    evaluacion(lista, c, e, t, clave, brazo, [f"trabajo:{req}"], tipo=tipo_r)
+                    evaluacion(lista, c, e, t, clave, brazo, [f"trabajo:{req}"] + congeladas(t), tipo=tipo_r)
             for clave, brazo in (("fijo", "--brazo fijo"), ("actuado", "--brazo actuado"),
                                  ("trivial", "--brazo trivial")):
                 for t in ALEATORIAS:

@@ -233,7 +233,7 @@ def coordinada(c, v, fin_fijo=False):
     ruta = os.path.join(c.carpeta, "fijo_fino.json")
     if not os.path.exists(ruta):
         raise SystemExit(f"Falta {ruta}: la variante coordinada usa el fijo fino (barrer_fino --etapa fragil)")
-    fino = c.comprobar_marca(ruta)
+    fino = c.comprobar_fino(ruta)
     if fino["ids"] != c.p.ids:
         raise SystemExit(f"{ruta}: semaforos en otro orden que la plantilla")
     salida = dict(v, coordinado=True, ciclo=fino["ciclo"], offsets=fino["offsets"], verde=fino["verde"],
@@ -388,7 +388,7 @@ def reinstalar(esc, carpeta=None):
     return destino
 
 
-def main():
+def construir_parser():
     ap = argparse.ArgumentParser(description="Actuado ajustado por descenso por coordenadas (plan3, 0.9)",
                                  allow_abbrev=False)
     ap.add_argument("escenario")
@@ -401,13 +401,30 @@ def main():
     ap.add_argument("--semillas-final", help="(pruebas) en vez de 2001-2010 / 2001-2030")
     ap.add_argument("--permitir-prueba", action="store_true",
                     help="(pruebas) acepta entradas que no son de la regla y marca la salida como de prueba")
-    args = ap.parse_args()
+    return ap
+
+
+def validar_args(argv):
+    """Lee y revisa los argumentos (argv sin el nombre del programa): parse_args y todos los ap.error, sin leer el
+    escenario ni tocar archivos. Devuelve args o sale como argparse (SystemExit(2), motivo en stderr).
+    chequeos_previos la llama para cada comando de este script en la lista de trabajos."""
+    ap = construir_parser()
+    args = ap.parse_args(argv)
+    if args.instalar and args.paso:
+        ap.error("--instalar y --paso son excluyentes")
+    if not args.instalar and not args.paso:
+        ap.error("falta --paso (o --instalar)")
+    if args.procesos < 1:
+        ap.error("--procesos va desde 1")
+    return args
+
+
+def main():
+    args = validar_args(sys.argv[1:])
     if args.instalar:
         bfn.exigir_cwd()
         print(f"Reescrito {reinstalar(args.escenario)}")
         return
-    if not args.paso:
-        ap.error("falta --paso (o --instalar)")
     t0 = time.time()
     c = bfn.Celda(args.escenario, args.llegadas, procesos=args.procesos,
                   semillas={"barrido": args.semillas or SEMILLAS_PASOS, "desempate": args.semillas_final},

@@ -9,7 +9,10 @@ Pasos (si alguno falla, no escribe lanzamiento.sha256 y la cola no arranca):
   2. lista de trabajos: capas 1 y 2 de protecciones.py (comandos, nombres y salidas unicos, dependencias), y que
      cola/trabajos.jsonl y cola/manifiesto_esperado.json son los que escribe el generador con cola/partes.txt;
   3. semillas: ningun CSV fuera de ciego/ e insumos/ tiene semillas de las tandas decisivas o de la prueba final;
-  4. el codigo y el prerregistro no tienen cambios sin commit.
+  4. el codigo y el prerregistro no tienen cambios sin commit;
+  5. cada comando de la lista pasa el parser de su script (validar_args de rl_ippo, barrer_fino, franja, actuado,
+     reglas, p3_preparar y evaluar3): un desajuste entre el generador y un script se ve aqui y no a la noche;
+  6. desde la parte B (dia 14): cada archivo de referencias_congeladas.json existe con su sha256.
 Si todo pasa, escribe lanzamiento.sha256: "<commit> <sha256 de PRERREGISTRO.md> <sha256 de cola/trabajos.jsonl>".
 """
 import os
@@ -242,47 +245,79 @@ def identidad_v2(tag):
     return malos
 
 
-# Valida cada comando de rl_ippo de la lista con su propio parser (rl_ippo.validar_args), en otro proceso para que el
-# registro de los escenarios nuevos llegue antes de importar rl_ippo (revision del 05.11).
-VALIDAR_RL_IPPO = r'''
-import io, sys, json, shlex, contextlib
+# Valida cada comando de la lista con el parser de su propio script (validar_args), en otro proceso para que el
+# registro de los escenarios nuevos llegue antes de importar los modulos que lo copian (revision del 05.11; G1-F4).
+SCRIPTS_VALIDADOS = {"rl_ippo.py": "rl_ippo", "barrer_fino.py": "barrer_fino", "franja.py": "franja",
+                     "actuado.py": "actuado", "reglas.py": "reglas", "p3_preparar.py": "p3_preparar",
+                     "evaluar3.py": "evaluar3"}
+VALIDAR_COMANDOS = r'''
+import io, os, sys, json, shlex, importlib, contextlib
 sys.path.insert(0, sys.argv[1])
+sys.path.insert(0, os.getcwd())
 import con_escenarios
 con_escenarios.registrar()
-import rl_ippo
-malos, n = [], 0
+SCRIPTS = json.loads(sys.argv[3])
+modulos, malos, n = {}, [], {}
 for linea in open(sys.argv[2], encoding="utf-8"):
     if not linea.strip():
         continue
     t = json.loads(linea)
     partes = shlex.split(t["cmd"])
-    argv = next((partes[i + 1:] for i, p in enumerate(partes) if p.replace("\\", "/").endswith("rl_ippo.py")), None)
-    if argv is None:
+    k = next((i for i, p in enumerate(partes) if os.path.basename(p.replace("\\", "/")) in SCRIPTS), None)
+    if k is None:
         continue
-    n += 1
+    script = os.path.basename(partes[k].replace("\\", "/"))
+    if script not in modulos:
+        modulos[script] = importlib.import_module(SCRIPTS[script])
+    n[script] = n.get(script, 0) + 1
     err = io.StringIO()
     try:
         with contextlib.redirect_stderr(err):
-            rl_ippo.validar_args(argv)
+            modulos[script].validar_args(partes[k + 1:])
     except SystemExit:
-        malos.append(t["id"] + ": " + (err.getvalue().strip().splitlines() or ["?"])[-1])
+        malos.append(t["id"] + ": " + script + ": " + (err.getvalue().strip().splitlines() or ["?"])[-1])
 print(json.dumps({"n": n, "malos": malos}))
 '''
 
 
-def comandos_rl_ippo():
-    """Problemas de los comandos de rl_ippo de cola/trabajos.jsonl (opciones que rl_ippo no acepta)."""
-    ruta = os.path.join(PLAN3, "cola", "trabajos.jsonl")
+def comandos(ruta=None):
+    """Problemas de los comandos de cola/trabajos.jsonl (o de ruta): opciones que su script no acepta, segun el
+    validar_args de rl_ippo, barrer_fino, franja, actuado, reglas, p3_preparar y evaluar3."""
+    ruta = ruta or os.path.join(PLAN3, "cola", "trabajos.jsonl")
     if not os.path.exists(ruta):
         return []
-    r = subprocess.run([sys.executable, "-c", VALIDAR_RL_IPPO, RAIZ, ruta], cwd=PLAN3, capture_output=True,
-                       text=True)
+    r = subprocess.run([sys.executable, "-c", VALIDAR_COMANDOS, RAIZ, ruta, json.dumps(SCRIPTS_VALIDADOS)],
+                       cwd=PLAN3, capture_output=True, text=True)
     if r.returncode != 0 or not r.stdout.strip():
-        return [f"no se pudieron validar los comandos de rl_ippo:\n{r.stderr[-800:]}"]
+        return [f"no se pudieron validar los comandos:\n{r.stderr[-800:]}"]
     datos = json.loads(r.stdout.strip().splitlines()[-1])
-    print(f"comandos de rl_ippo validados: {datos['n']}, rechazados: {len(datos['malos'])}", flush=True)
-    malos = [f"rl_ippo rechaza {m}" for m in datos["malos"][:10]]
+    print(f"comandos validados con el parser de su script: {datos['n']}, rechazados: {len(datos['malos'])}",
+          flush=True)
+    malos = [f"rechazado {m}" for m in datos["malos"][:10]]
     return malos + ([f"... y {len(datos['malos']) - 10} comandos rechazados mas"] if len(datos["malos"]) > 10 else [])
+
+
+def comandos_rl_ippo():
+    """Nombre de antes (lo usan pruebas): ahora valida todos los scripts."""
+    return comandos()
+
+
+def referencias_congeladas():
+    """Desde la parte B: cada archivo de referencias_congeladas.json existe en el disco con su sha256."""
+    ruta = os.path.join(PLAN3, "referencias_congeladas.json")
+    if not os.path.exists(ruta):
+        return []
+    with open(ruta, encoding="utf-8") as f:
+        congeladas = json.load(f)["referencias"]
+    malos = []
+    for rel, dato in sorted(congeladas.items()):
+        archivo = os.path.join(PLAN3, rel)
+        if not os.path.exists(archivo):
+            malos.append(f"referencia congelada que falta: {rel}")
+        elif protecciones.sha(archivo) != dato["sha256"]:
+            malos.append(f"referencia congelada cambiada (sha256 distinto): {rel}")
+    print(f"referencias congeladas: {len(congeladas)}, cambiadas o faltantes: {len(malos)}", flush=True)
+    return malos
 
 
 def semillas_filtradas():
@@ -330,7 +365,8 @@ def main():
             problemas.append(str(e))
         print(f"identidad: {'bien' if not problemas else 'MAL'} ({time.time() - t0:.0f} s)", flush=True)
     problemas += protecciones.revisar_trabajos(protecciones.leer_trabajos())
-    problemas += comandos_rl_ippo()
+    problemas += comandos()
+    problemas += referencias_congeladas()
     r = subprocess.run([sys.executable, "generar_trabajos3.py", "--comprobar"], cwd=PLAN3, capture_output=True,
                        text=True)
     if r.returncode != 0:

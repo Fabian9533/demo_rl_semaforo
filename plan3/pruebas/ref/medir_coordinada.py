@@ -1,8 +1,8 @@
 """
 medir_coordinada.py - Medicion de la variante coordinada (b) "fin fijo" del actuado ajustado (pedido de la verificacion
-de 6e8cfab): semilla de humo 424301, sumo directo (hasta 6000 s, como el barrido) con SaveTLSStates, en dem_red_t3620 (plan 25/15, desfases
-0/23/0: la avenida es la fase 0 de la plantilla) y en el corredor (plan 22/15, 0/17: la avenida es la fase 2), con
-maxDur 60 y con maxDur = los verdes fijos, con el codigo de antes (6e8cfab) y el de ahora. Por semaforo: salidas del
+de 6e8cfab): semilla de humo 424301, sumo directo (hasta 6000 s, como el barrido) con SaveTLSStates, en
+dem_red_t3620 (plan 25/15, desfases 0/23/0: la avenida es la fase 0 de la plantilla) y en el corredor (plan
+22/15, 0/17: la avenida es la fase 2), con maxDur 60 y con maxDur = los verdes fijos, con el codigo de antes (6e8cfab) y el de ahora. Por semaforo: salidas del
 verde de avenida (y las del plan fijo), histograma de (fin de la variante - fin del plan fijo) mod ciclo, y el segundo
 del ciclo (0 = el inicio del verde de avenida en el plan fijo) en que empieza cada verde de avenida.
 Uso (cwd = plan3/): python pruebas/ref/medir_coordinada.py      Salida: pruebas/ref/salidas/medir_coordinada.txt
@@ -90,7 +90,8 @@ def medir(esc, plan):
                 inicios = [t for t, ph in fv[x][1:] if ph == fa]
                 dif = collections.Counter((t - fin_fijo[0]) % C for t in salidas)
                 arr = collections.Counter((t - ini_fijo[0]) % C for t in inicios)
-                inf(f"  {x}: {len(salidas)} salidas de la avenida (plan fijo: {n_fijo}); en el fin fijo {dif.get(0, 0)}")
+                inf(f"  {x}: {len(salidas)} salidas de la avenida (plan fijo: {n_fijo}); en el fin fijo "
+                    f"{dif.get(0, 0)}")
                 inf(f"      (fin - fin fijo) mod {C}: {dict(sorted(dif.items()))}")
                 inf(f"      inicio del verde de avenida (s del ciclo, 0 = inicio fijo): {dict(sorted(arr.items()))}")
 
