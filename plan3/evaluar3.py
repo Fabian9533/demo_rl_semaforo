@@ -4,12 +4,14 @@ evaluar3.py - Evaluacion de un brazo en un escenario y una tanda de semillas, de
 Uso (desde plan3/; con escenarios nuevos, a traves de ../con_escenarios.py):
   python evaluar3.py --escenario E --semillas 8001-8030 --salida ciego/t1r/eval_E_<brazo>.csv  <BRAZO> [opciones]
   BRAZO, uno de:
-    --brazo fijo|actuado|trivial|...        los de evaluar.brazo_referencia (fijo = el programa instalado)
+    --brazo fijo|actuado|trivial            los de lo entregado (fijo = el programa instalado del escenario)
+    --brazo fijo --programa RUTA --nombre X un fijo desde un archivo de programa, p. ej. el fijo fino
+                                            <esc>_r10f.add.xml (brazo fijo_<X>; evaluar.brazo_programa)
+    --brazo franja|bloques|actuado_aj [--programa RUTA]
+                                            franja, bloques (WAUT) o actuado ajustado; por defecto <esc>_<brazo>.add.xml
     --politica politica_<...>.pt            una politica de torch (evaluar.brazo_profundo lee su meta)
-    --programa RUTA.add.xml --nombre X      un fijo desde un archivo de programa (brazo fijo_<X>)
-    --franja RUTA --nombre X                fijo por franja o por bloques (WAUT)
-    --actuado-aj RUTA --nombre X            actuado ajustado (archivo con sus parametros)
-    --regla R                               regla simple o Max-Pressure (evaluar.brazo_regla)
+    --regla R                               regla simple o Max-Pressure por su nombre (evaluar.brazo_regla)
+    --regla-de barridos/<esc>/regla.json    la regla ganadora de un barrido de plan3/reglas.py (o mp.json)
   opciones: --perdida 1 (mensajes cortados, a3), --colas-cero (colas en cero en la observacion, a3)
 
 Distinto de evaluar.py:
@@ -86,23 +88,25 @@ def fin_de_simulacion(tripinfo):
 
 
 def armar_brazo(a, evaluar):
+    """(brazo, modelo, base, correr) con las funciones de evaluar.py (plan3-ref, informe_ref §3)."""
+    import json
     esc = a.escenario
     if a.politica:
         return evaluar.brazo_profundo(esc, a.politica, 0, a.perdida)
+    if a.brazo == "fijo" and a.programa:
+        if not a.nombre:
+            sys.exit("--brazo fijo --programa necesita --nombre")
+        return evaluar.brazo_programa(esc, a.programa, a.nombre)
     if a.brazo:
-        return evaluar.brazo_referencia(esc, a.brazo)
-    for opcion, funcion in (("programa", "brazo_programa"), ("franja", "brazo_franja"),
-                            ("actuado_aj", "brazo_actuado_aj")):
-        ruta = getattr(a, opcion)
-        if ruta:
-            if not hasattr(evaluar, funcion):
-                sys.exit(f"evaluar.py no tiene {funcion} todavia")
-            return getattr(evaluar, funcion)(esc, ruta, a.nombre)
+        if a.programa and a.brazo not in ("franja", "bloques", "actuado_aj"):
+            sys.exit(f"--programa no vale con --brazo {a.brazo}")
+        return evaluar.brazo_referencia(esc, a.brazo, adicional=a.programa)
+    if a.regla_de:
+        with open(a.regla_de, encoding="utf-8") as f:
+            return evaluar.brazo_regla(esc, json.load(f)["regla"])
     if a.regla:
-        if not hasattr(evaluar, "brazo_regla"):
-            sys.exit("evaluar.py no tiene brazo_regla todavia")
         return evaluar.brazo_regla(esc, a.regla)
-    sys.exit("falta el brazo (--brazo, --politica, --programa, --franja, --actuado-aj o --regla)")
+    sys.exit("falta el brazo (--brazo, --politica, --regla o --regla-de)")
 
 
 def main():
@@ -113,9 +117,8 @@ def main():
     ap.add_argument("--brazo")
     ap.add_argument("--politica")
     ap.add_argument("--programa")
-    ap.add_argument("--franja")
-    ap.add_argument("--actuado-aj", dest="actuado_aj")
     ap.add_argument("--regla")
+    ap.add_argument("--regla-de", dest="regla_de")
     ap.add_argument("--nombre", default=None)
     ap.add_argument("--perdida", type=float, default=0.0)
     ap.add_argument("--colas-cero", action="store_true")

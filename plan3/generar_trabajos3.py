@@ -598,18 +598,246 @@ def promocion(lista):
 
 
 def preparar(lista):
-    """Genera los programas del actuado y del ciclo minimo de cada escenario (p3_preparar.py; PLAN3 0.11)."""
-    escenarios = list({**CASOS, **NIVELES, **D}.values()) + list(P6E.values()) + list(POI.values())
+    """Genera los programas del actuado y del ciclo minimo de cada escenario (p3_preparar.py; PLAN3 0.11). Las
+    evaluaciones de esos brazos dependen de el (comun los reescribe de forma atomica, pero asi no compiten)."""
+    escenarios = (list({**CASOS, **NIVELES, **D}.values()) + list(P6E.values()) + list(POI.values())
+                  + list(PERFIL.values()) + list(MEZCLA.values()) + list(MEZCLA_A.values()))
     lista.agregar({"id": "preparar", "etapa": "0", "prioridad": 0, "uso": "sin_semillas",
-                   "cmd": f"{LANZADOR} p3_preparar.py --escenarios {','.join(escenarios)}",
-                   "salidas": ["listo/preparar.ok"], "duracion": 300})
+                   "cmd": f"{LANZADOR} p3_preparar.py {' '.join(escenarios)} --piezas actuado,trivial",
+                   "salidas": [f"{e}_{p}.add.xml" for e in escenarios for p in ("actuado", "trivial")],
+                   "duracion": 600})
+
+
+# ---------------- Referencias (PLAN3 0.7-0.10; informe_ref §2) ----------------
+# h-proceso por etapa (regimen conservador + 10 %) [M plan3/pruebas/ref/salidas/costos_ref.txt]:
+# (gruesa, fina, desfases, desempate, fragil, mult5, franja, actuado (7 trabajos), reglas (regla + mp))
+REF_H = {"corredor": (.29, .14, .02, .04, .03, .12, .03, .06, .11),
+         "corredor_alta": (.91, 1.03, .07, .18, .15, .54, .12, .16, .27),
+         "red": (1.94, .19, .33, .10, .08, 1.18, .07, .11, .17),
+         "red_alta": (2.34, .22, .40, .12, .10, 1.43, .08, .12, .20),
+         "malla3": (.66, 3.20, 0, .21, .18, .43, .15, .32, .46),
+         "malla3_alta": (1.12, 1.69, 0, .36, .31, .72, .25, .55, 1.00),
+         "malla3_alta_e": (1.12, 1.69, 0, .36, .31, .72, .25, .55, 1.00),
+         "dem_corredor_t2715_der": (.64, .62, .04, .11, .09, .32, .07, .16, .27),
+         "dem_corredor_t905": (.15, .15, .02, .02, .02, 0, 0, .07, 0),
+         "dem_corredor_t1358": (.23, .09, .01, .03, .03, 0, 0, .07, 0),
+         "dem_corredor_t2715": (.61, .50, .06, .14, .12, 0, 0, .17, 0),
+         "dem_red_t905": (1.34, .87, .60, .06, .05, 0, 0, .12, 0),
+         "dem_red_t1358": (1.33, .27, .27, .08, .07, 0, 0, .12, 0),
+         "dem_red_t1810": (1.50, .80, .60, .09, .07, 0, 0, .12, 0),
+         "dem_red_t2715": (2.34, 1.25, .93, .13, .12, 0, 0, .12, 0),
+         "dem_red_t3620": (3.63, 1.21, .73, .21, .18, 0, 0, .13, 0),
+         "dem_malla3_t1810": (.28, 1.32, 0, .11, .09, 0, 0, .34, 0),
+         "dem_malla3_t2715": (.33, 1.59, 0, .13, .11, 0, 0, .34, 0),
+         "dem_malla3_t3620": (.39, 1.85, 0, .15, .13, 0, 0, .34, 0),
+         "dem_malla3_t6525": (.75, 2.25, 0, .29, .25, 0, 0, .59, 0),
+         "poi_corredor": (1.04, .50, .06, .12, .02, .29, .17, .27, .60),
+         "poi_corredor_alta": (3.24, 3.68, .25, .54, .02, 1.28, .74, .67, 1.46),
+         "poi_red": (6.92, .66, 1.19, .29, .02, 3.86, .40, .48, .90),
+         "poi_red_alta": (8.36, .80, 1.44, .36, .02, 4.67, .48, .53, 1.06),
+         "poi_malla3": (2.36, 11.40, 0, .66, .02, .75, .88, 1.36, 2.46),
+         "poi_malla3_alta": (4.01, 6.02, 0, 1.11, .02, 1.28, 1.50, 2.32, 5.33)}
+# perfil y mezcla: como la celda aleatoria de su caso (la mezcla, x1.10); el perfil agrega la verificacion de bloques
+REF_H.update({"per_corredor": REF_H["poi_corredor"], "per_red": REF_H["poi_red"],
+              "mix_corredor": tuple(round(x * 1.10, 2) for x in REF_H["poi_corredor"]),
+              "mix_red": tuple(round(x * 1.10, 2) for x in REF_H["poi_red"])})
+TROZO_MAX_H = 2.0
+CON_TROZOS = ("gruesa", "fina", "desfases", "mult5")
+
+
+def ref_salidas(esc, trabajo):
+    """Salidas que deja cada trabajo de referencias (informe_ref §2.5)."""
+    b = f"barridos/{esc}"
+    if trabajo in ("fina", "desfases", "desempate"):
+        return [f"{b}/{trabajo}.csv", f"{b}/{trabajo}_semillas.csv"]
+    return {"gruesa": [f"{b}/gruesa.csv", f"{b}/gruesa_semillas.csv", f"{b}/fijo_grueso10.json", f"{esc}_r10g.add.xml"],
+            "fragil": [f"{b}/fragil.csv", f"{b}/fijo_fino.json", f"{esc}_r10f.add.xml"],
+            "mult5": [f"{b}/mult5.csv", f"{b}/mult5_desempate.csv", f"{b}/fijo_mult5.json", f"{esc}_m5f.add.xml"],
+            "franja": [f"{b}/franja.csv", f"{b}/franja_final.csv", f"{b}/franja.json", f"{esc}_franja.add.xml"],
+            "bloques": [f"{b}/bloques.csv", f"{b}/bloques.json", f"{esc}_bloques.add.xml"],
+            "actuado_final": [f"{b}/actuado_final.csv", f"{b}/actuado_aj.json", f"{esc}_actuado_aj.add.xml"],
+            "regla": [f"{b}/reglas_regla.csv", f"{b}/reglas_regla_final.csv", f"{b}/regla.json"],
+            "mp": [f"{b}/reglas_mp.csv", f"{b}/reglas_mp_final.csv", f"{b}/mp.json"]}[trabajo]
+
+
+def ref_celda(lista, esc, completa=True, perfil=False, franja=True, mp=True, mult5=True):
+    """Trabajos de referencias de un escenario. Devuelve {nombre: id del trabajo que deja su salida}."""
+    pre = LANZADOR if esc.startswith(("poi_", "per_", "mix", "malla3_alta_e")) else "python"
+    h = dict(zip(("gruesa", "fina", "desfases", "desempate", "fragil", "mult5", "franja", "actuado", "reglas"),
+                 REF_H[esc]))
+    bloque = " --bloque 600" if perfil else ""
+    ids = {}
+
+    def etapa(nombre, requiere):
+        horas = max(h[nombre], 0.02)
+        n = int(-(-horas // TROZO_MAX_H)) if nombre in CON_TROZOS and horas > TROZO_MAX_H else 1
+        base = f"{pre} barrer_fino.py {esc} --etapa {nombre}{bloque}"
+        previos = list(requiere)
+        if n > 1:
+            trozos = []
+            for k in range(n):
+                tid = f"r_{nombre}_{esc}_t{k}"
+                lista.agregar({"id": tid, "etapa": "0", "prioridad": 1, "uso": "ajuste", "requiere": list(requiere),
+                               "cmd": f"{base} --trozo {k}/{n}", "duracion": round(3600 * horas / n * EMPAQUE),
+                               "salidas": [f"barridos/{esc}/trozos/{nombre}_t{k}de{n}.csv"]})
+                trozos.append(f"trabajo:{tid}")
+            previos = trozos
+        tid = f"r_{nombre}_{esc}"
+        lista.agregar({"id": tid, "etapa": "0", "prioridad": 1, "uso": "ajuste", "requiere": previos, "cmd": base,
+                       "duracion": round(3600 * (horas if n == 1 else 0.05) * EMPAQUE),
+                       "salidas": ref_salidas(esc, nombre)})
+        ids[nombre] = tid
+        return f"trabajo:{tid}"
+    g = etapa("gruesa", [])
+    d = etapa("desfases", [etapa("fina", [g])])
+    f = etapa("fragil", [etapa("desempate", [d])])
+    if completa and mult5:
+        etapa("mult5", [g])
+    if completa and (franja or perfil):
+        nombre = "bloques" if perfil else "franja"
+        tid = f"r_{nombre}_{esc}"
+        lista.agregar({"id": tid, "etapa": "0", "prioridad": 1, "uso": "ajuste", "requiere": [d],
+                       "cmd": f"{pre} franja.py {esc}{' --bloques' if perfil else ''}",
+                       "duracion": round(3600 * max(h["franja"], 0.05) * EMPAQUE), "salidas": ref_salidas(esc, nombre)})
+        ids[nombre] = tid
+    previo = []
+    for paso in ("1", "2", "3", "4", "5", "6", "final"):
+        tid = f"r_actuado{paso}_{esc}"
+        req = previo + ([f] if paso == "6" else [])
+        b = f"barridos/{esc}"
+        lista.agregar({"id": tid, "etapa": "0", "prioridad": 1, "uso": "ajuste", "requiere": req,
+                       "cmd": f"{pre} actuado.py {esc} --paso {paso}",
+                       "duracion": round(3600 * max(h["actuado"], 0.07) / 7 * EMPAQUE),
+                       "salidas": (ref_salidas(esc, "actuado_final") if paso == "final"
+                                   else [f"{b}/actuado_paso{paso}.csv", f"{b}/actuado_paso{paso}.json"])})
+        previo = [f"trabajo:{tid}"]
+    ids["actuado"] = f"r_actuadofinal_{esc}"
+    if completa:
+        familias = ("regla", "mp") if mp else ("regla",)
+        for fam in familias:
+            tid = f"r_{fam}_{esc}"
+            parte = 0.7 if fam == "regla" else 0.3
+            lista.agregar({"id": tid, "etapa": "0", "prioridad": 1, "uso": "ajuste", "requiere": [],
+                           "cmd": f"{pre} reglas.py {esc} --familia {fam}",
+                           "duracion": round(3600 * max(h["reglas"] * parte, 0.05) * EMPAQUE),
+                           "salidas": ref_salidas(esc, fam)})
+            ids[fam] = tid
+    return ids
+
+
+REFS = {}           # escenario -> {nombre: id}; lo llenan referencias() y lo usan las evaluaciones
+
+
+def referencias(lista):
+    for e in list(CASOS.values()) + list(D.values()) + list(P6E.values()) + list(POI.values()):
+        REFS[e] = ref_celda(lista, e)
+    for e in NIVELES.values():
+        REFS[e] = ref_celda(lista, e, completa=False)
+    for e in PERFIL.values():
+        REFS[e] = ref_celda(lista, e, perfil=True, mult5=False)
+    for e in MEZCLA.values():
+        REFS[e] = ref_celda(lista, e, franja=False, mp=False, mult5=False)
+
+
+def brazos_ref(esc, de=None):
+    """[(clave, brazo de evaluar3, trabajo que lo deja, tipo)] de las referencias ajustadas de un escenario. de: el
+    escenario cuyos ajustes se usan (mixa_ juega los de mix_)."""
+    de = de or esc
+    r = REFS.get(de, {})
+    salida = []
+    if "fragil" in r:
+        salida.append(("fino", f"--brazo fijo --programa {de}_r10f.add.xml --nombre fino", r["fragil"], "ref_fino"))
+    if "mult5" in r:
+        salida.append(("fino5", f"--brazo fijo --programa {de}_m5f.add.xml --nombre mult5", r["mult5"], "ref_fino5"))
+    if de in NIVELES.values() and "gruesa" in r:
+        salida.append(("fijo10", f"--brazo fijo --programa {de}_r10g.add.xml --nombre grueso10", r["gruesa"],
+                       "ref_fijo10"))
+    if "franja" in r:
+        salida.append(("franja", "--brazo franja", r["franja"], "ref_franja"))
+    if "bloques" in r:
+        salida.append(("bloques", "--brazo bloques", r["bloques"], "ref_bloques"))
+    if "actuado" in r:
+        prog = "" if de == esc else f" --programa {de}_actuado_aj.add.xml"
+        salida.append(("actuadoaj", f"--brazo actuado_aj{prog}", r["actuado"], "ref_actuadoaj"))
+    if "regla" in r:
+        salida.append(("regla", f"--regla-de barridos/{de}/regla.json", r["regla"], "ref_regla"))
+    if "mp" in r:
+        salida.append(("mp", f"--regla-de barridos/{de}/mp.json", r["mp"], "ref_mp"))
+    return salida
+
+
+EV.update({"per1": EV["P1"], "per3": EV["P3"], "mix1": EV["P1"] * 1.10, "mix3": EV["P3"] * 1.10,
+           "mixa1": EV["P1"] * 1.10, "mixa3": EV["P3"] * 1.10})
+TR.update({"mixa1": TR["P1"], "mixa3": TR["P3"]})
+
+
+def evaluaciones_referencias(lista):
+    """Las referencias ajustadas en las tandas de su tipo de llegadas (PLAN3 1.6 y 2.3)."""
+    if not REFS:
+        referencias(Lista())                      # solo para conocer los ids, si la parte no esta en la lista
+    for celdas, tandas in (({**CASOS, **D, **P6E, **NIVELES}, REGULARES), (POI, ALEATORIAS)):
+        for c, e in celdas.items():
+            for clave, brazo, req, tipo in brazos_ref(e):
+                for t in tandas:
+                    evaluacion(lista, c, e, t, clave, brazo, [f"trabajo:{req}"], tipo=tipo)
+
+
+def evaluaciones_perfil_mezcla(lista):
+    """2.4 y 2.5: el modelo entrenado con el perfil o con la mezcla, sus referencias re-ajustadas y las de siempre."""
+    if not REFS:
+        referencias(Lista())
+    for celdas, et, tipo, origen in ((PERFIL, "p3v2per", "v2per", None), (MEZCLA, "p3v2mix", "v2mix", None),
+                                     (MEZCLA_A, "p3v2mix", "v2mix", MEZCLA)):
+        for c, e in celdas.items():
+            e_pol = origen[c] if origen else e              # mixa_ juega las politicas y ajustes de mix_
+            for b in BASES3:
+                req = req_entreno(f"e2_{et}", e_pol, b, c, factor=POI_F * (1.10 if et == "p3v2mix" else 1.0))
+                for t in ALEATORIAS:
+                    evaluacion(lista, c, e, t, f"{et}_s{b}", f"--politica politica_{e_pol}_vecinos_{et}_s{b}.pt",
+                               [req], tipo=tipo, base=b, corrida=(e_pol, "vecinos", et, b))
+            for clave, brazo, req, tipo_r in brazos_ref(e, de=e_pol):
+                for t in ALEATORIAS:
+                    evaluacion(lista, c, e, t, clave, brazo, [f"trabajo:{req}"], tipo=tipo_r)
+            for clave, brazo in (("fijo", "--brazo fijo"), ("actuado", "--brazo actuado"),
+                                 ("trivial", "--brazo trivial")):
+                for t in ALEATORIAS:
+                    evaluacion(lista, c, e, t, clave, brazo, ["trabajo:preparar"], tipo=f"ref_{clave}")
+            if celdas is PERFIL:                     # la V2 aleatoria sin perfil, jugada con el perfil
+                caso = "P1" if c == "per1" else "P3"
+                pm = f"politica_{POI[caso]}_vecinos_p3v2poimed.pt"
+                for t in ALEATORIAS:
+                    evaluacion(lista, c, e, t, "v2poimed", f"--politica {pm}", [f"trabajo:el_p3v2poimed_{POI[caso]}"],
+                               tipo="v2poimed")
+
+
+def evaluaciones_a3(lista):
+    """a3 (descriptiva): la version evaluada de V2 y de la observacion nueva con colas en cero y con los mensajes
+    cortados, frente a la misma politica sin perturbar (prerregistro §8, Etapa 3)."""
+    reg = {"D": D["D"], "c2715": NIVELES["c2715"], **{c: CASOS[c] for c in ("P1", "P2", "P3", "P6")}}
+    for celdas, tandas, pares in ((reg, REGULARES, (("p3v2reg", "v2reg3med", "p3v2reg3med", "e1_v2reg", 200, 1.0),
+                                                      ("p3obs", "p3obsmed", "p3obsmed", "e3_p3obs", 200, OBS))),
+                                  (POI, ALEATORIAS, (("p3v2poi", "v2poi3med", "p3v2poi3med", "e2_v2poi", 200, POI_F),
+                                                     ("p3obspoi", "p3obspoimed", "p3obspoimed", "e3_p3obspoi", 200,
+                                                      (OBS * POI_F, OBS * POI_F))))):
+        for c, e in celdas.items():
+            for et, tipo, et_med, pref, eps, f in pares:
+                reqs = [req_entreno(pref, e, b, c, eps, factor=f) for b in BASES3]
+                ruta, tid = mediana(lista, e, "vecinos", et, BASES3, reqs, et_med)
+                for t in tandas:
+                    for pert, op in (("colas0", "--colas-cero"), ("msg0", "--perdida 1")):
+                        evaluacion(lista, c, e, t, f"a3{pert}_{tipo}", f"--politica {ruta} {op}", [f"trabajo:{tid}"],
+                                   factor=FACTOR_EV.get(et, 1.0), tipo=f"a3{pert}_{tipo}")
 
 
 PARTES = {"etapa1": etapa1, "c0": c0, "v2vieja": v2vieja, "etapa2": etapa2, "etapa2pm": etapa2pm,
           "etapa3b": etapa3b, "etapa3b_reg": lambda l: etapa3b(l, ("reg",)),
           "etapa3b_poi": lambda l: etapa3b(l, ("poi",)), "etapa3": etapa3,
-          "preparar": preparar, "evaluaciones": evaluaciones, "evaluaciones_variantes": evaluaciones_variantes,
-          "promocion": promocion}
+          "preparar": preparar, "referencias": referencias, "evaluaciones": evaluaciones,
+          "evaluaciones_variantes": evaluaciones_variantes, "promocion": promocion,
+          "evaluaciones_referencias": evaluaciones_referencias,
+          "evaluaciones_perfil_mezcla": evaluaciones_perfil_mezcla, "evaluaciones_a3": evaluaciones_a3}
+# Partes que forman el plan completo (los alias etapa3b_reg y etapa3b_poi son subconjuntos de etapa3b)
+PARTES_PLAN = [p for p in PARTES if p not in ("etapa3b_reg", "etapa3b_poi")]
 
 
 def generar(partes):
@@ -638,7 +866,7 @@ def main():
             with open(PARTES_TXT, encoding="utf-8") as f:
                 texto_partes = f.read().strip()
         else:
-            texto_partes = ",".join(PARTES)
+            texto_partes = ",".join(PARTES_PLAN)
     partes = [p for p in texto_partes.split(",") if p]
     desconocidas = [p for p in partes if p not in PARTES]
     if desconocidas:
