@@ -1,0 +1,79 @@
+Pruebas 1 y 2 (tarea 1.1): identidad con el tag y opciones que no cambian numeros; ablacion de V2. P1, base 7, 10 episodios, validacion cada 5 en 424301,424302
+05.11.2026 09:10; python 3.14.6, torch 2.14.0+cpu
+
+[OK] corrida tag_ippo (tag: --escenario corredor --seed 7 --episodios 10 --eval-cada 5 --val-seeds 424301,424302): codigo 0
+[OK] corrida tag_v2 (tag: --escenario corredor --seed 7 --episodios 10 --eval-cada 5 --val-seeds 424301,424302 --v2 --criterio-val total --etiqueta p3prbv2): codigo 0
+[OK] corrida nuevo_ippo (nuevo: --escenario corredor --seed 7 --episodios 10 --eval-cada 5 --val-seeds 424301,424302): codigo 0
+[OK] corrida nuevo_v2 (nuevo: --escenario corredor --seed 7 --episodios 10 --eval-cada 5 --val-seeds 424301,424302 --v2 --criterio-val total --etiqueta p3prbv2): codigo 0
+[OK] corrida nuevo_ippo_ext (nuevo: --escenario corredor --seed 7 --episodios 10 --eval-cada 5 --val-seeds 424301,424302 --guardar-estado --registro-extendido): codigo 0
+[OK] corrida nuevo_v2_ext (nuevo: --escenario corredor --seed 7 --episodios 10 --eval-cada 5 --val-seeds 424301,424302 --v2 --criterio-val total --etiqueta p3prbv2 --guardar-estado --registro-extendido): codigo 0
+[OK] corrida nuevo_solos (nuevo: --escenario corredor --seed 7 --episodios 10 --eval-cada 5 --val-seeds 424301,424302 --solo-descuento --solo-exploracion --criterio-val total --etiqueta p3prbv2): codigo 0
+[OK] corrida nuevo_desc (nuevo: --escenario corredor --seed 7 --episodios 10 --eval-cada 5 --val-seeds 424301,424302 --solo-descuento --criterio-val total --etiqueta p3prbv2): codigo 0
+[OK] corrida nuevo_expl (nuevo: --escenario corredor --seed 7 --episodios 10 --eval-cada 5 --val-seeds 424301,424302 --solo-exploracion --criterio-val total --etiqueta p3prbv2): codigo 0
+
+Prueba 1: todo apagado = tag
+-- nuevo_ippo frente a tag_ippo
+[OK] CSV: iguales byte a byte salvo 'segundos' (10 filas)
+[OK] checkpoints: episodios con checkpoint: [5, 10] | [5, 10]
+  ep   5: 12/12 tensores iguales (torch.equal), claves iguales True; meta igual
+  ep  10: 12/12 tensores iguales (torch.equal), claves iguales True; meta igual
+[OK] politica publicada (tensores): 12/12 tensores iguales (torch.equal), claves iguales True
+[OK] politica publicada (bytes)
+[OK] meta publicado: meta igual
+-- nuevo_v2 frente a tag_v2
+[OK] CSV: iguales byte a byte salvo 'segundos' (10 filas)
+[OK] checkpoints: episodios con checkpoint: [5, 10] | [5, 10]
+  ep   5: 12/12 tensores iguales (torch.equal), claves iguales True; meta igual
+  ep  10: 12/12 tensores iguales (torch.equal), claves iguales True; meta igual
+[OK] politica publicada (tensores): 12/12 tensores iguales (torch.equal), claves iguales True
+[OK] politica publicada (bytes)
+[OK] meta publicado: meta igual
+[OK] log de consola de nuevo_ippo = el de tag_ippo (salvo los segundos): 12 lineas
+[OK] log de consola de nuevo_v2 = el de tag_v2 (salvo los segundos): 12 lineas
+
+Prueba 2: --guardar-estado y --registro-extendido no cambian ningun numero
+-- nuevo_ippo_ext frente a tag_ippo
+[OK] CSV en las columnas comunes: 10 filas, 57 columnas comunes (sin ['segundos']), 0 diferencias
+[OK] cabecera = la del tag + columnas al final: 58 columnas del tag, 8 al final: ['val_424301', 'val_424302', 'val_total_424301', 'val_total_424302', 'var_explicada', 'frac_forzadas', 'msg_edad', 'ent_coef']
+[OK] checkpoints: episodios con checkpoint: [5, 10] | [5, 10]
+  ep   5: 12/12 tensores iguales (torch.equal), claves iguales True; meta igual
+  ep  10: 12/12 tensores iguales (torch.equal), claves iguales True; meta igual
+[OK] politica publicada (tensores): 12/12 tensores iguales (torch.equal), claves iguales True
+[OK] politica publicada (bytes)
+[OK] meta publicado: meta igual
+-- nuevo_v2_ext frente a tag_v2
+[OK] CSV en las columnas comunes: 10 filas, 57 columnas comunes (sin ['segundos']), 0 diferencias
+[OK] cabecera = la del tag + columnas al final: 58 columnas del tag, 8 al final: ['val_424301', 'val_424302', 'val_total_424301', 'val_total_424302', 'var_explicada', 'frac_forzadas', 'msg_edad', 'ent_coef']
+[OK] checkpoints: episodios con checkpoint: [5, 10] | [5, 10]
+  ep   5: 12/12 tensores iguales (torch.equal), claves iguales True; meta igual
+  ep  10: 12/12 tensores iguales (torch.equal), claves iguales True; meta igual
+[OK] politica publicada (tensores): 12/12 tensores iguales (torch.equal), claves iguales True
+[OK] politica publicada (bytes)
+[OK] meta publicado: meta igual
+[OK] nuevo_ippo_ext: un estado por checkpoint: estados en [5, 10]
+[OK] nuevo_v2_ext: un estado por checkpoint: estados en [5, 10]
+evaluar.py con la politica publicada sin y con las opciones (semillas 424303,424304)
+[OK] evaluar nuevo_ippo y nuevo_ippo_ext: codigos [0, 0]
+[OK] CSV de evaluar de nuevo_ippo = el de nuevo_ippo_ext (byte a byte): 2 semillas
+[OK] evaluar nuevo_v2 y nuevo_v2_ext: codigos [0, 0]
+[OK] CSV de evaluar de nuevo_v2 = el de nuevo_v2_ext (byte a byte): 2 semillas
+
+Ablacion: --solo-descuento --solo-exploracion = --v2; cada una sola hace su mitad
+-- nuevo_solos frente a tag_v2
+[OK] CSV: iguales byte a byte salvo 'segundos' (10 filas)
+[OK] checkpoints: episodios con checkpoint: [5, 10] | [5, 10]
+  ep   5: 12/12 tensores iguales (torch.equal), claves iguales True; meta igual
+  ep  10: 12/12 tensores iguales (torch.equal), claves iguales True; meta igual
+[OK] politica publicada (tensores): 12/12 tensores iguales (torch.equal), claves iguales True
+[OK] politica publicada (bytes)
+[OK] meta publicado: meta igual
+[OK] nuevo_desc: el episodio 1 juega como tag_ippo: timeloss_prom 80.91|80.91, espera_prom 32.54|32.54, cambios_fase 454|454
+[OK] nuevo_desc: la actualizacion del episodio 1 no es la de tag_ippo: perdida_politica -0.0085|-0.0086, perdida_valor 1.4412|2.2868
+[OK] nuevo_desc: el entrenamiento no es el de tag_v2: 10 filas, 57 columnas comunes (sin ['segundos']), 322 diferencias
+   meta de nuevo_desc: opciones {'v2': False, 'recompensa_insercion': False, 'etiqueta': 'p3prbv2', 'criterio_val': 'total', 'solo_descuento': True}; descuento 'por segundo: gamma^(dt/5)'; exploracion 'independiente (dist.sample)'
+[OK] nuevo_expl: el episodio 1 juega como tag_v2: timeloss_prom 85.9|85.9, espera_prom 37.75|37.75, cambios_fase 457|457
+[OK] nuevo_expl: la actualizacion del episodio 1 no es la de tag_v2: perdida_politica -0.0046|-0.0079, perdida_valor 2.1878|1.4595
+[OK] nuevo_expl: el entrenamiento no es el de tag_ippo: 10 filas, 57 columnas comunes (sin ['segundos']), 330 diferencias
+   meta de nuevo_expl: opciones {'v2': False, 'recompensa_insercion': False, 'etiqueta': 'p3prbv2', 'criterio_val': 'total', 'solo_exploracion': True}; descuento 'por decision'; exploracion 'comun: un u por segundo, default_rng(semilla + 104729)'
+
+Resultado: todo OK
