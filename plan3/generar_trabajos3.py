@@ -58,10 +58,12 @@ def nombre_corrida(esc, variante, etiqueta, base):
 
 
 def duracion_entreno(celda, episodios=EPISODIOS, desde=0, hasta=None, factor=1.0):
+    """s estimados; factor es un numero (entrenamiento y validacion) o un par (entrenamiento, validacion)."""
+    ftr, fval = factor if isinstance(factor, tuple) else (factor, factor)
     tr, val = TR[celda]
     hasta = episodios if hasta is None else hasta
     n_val = hasta // EVAL_CADA - desde // EVAL_CADA
-    return EMPAQUE * factor * ((hasta - desde) * tr + n_val * len(VAL16) * val)
+    return EMPAQUE * ((hasta - desde) * tr * ftr + n_val * len(VAL16) * val * fval)
 
 
 class Lista:
@@ -242,7 +244,51 @@ def v2vieja(lista):
                            "salidas": [f"politica_{e}_vecinos_p3v2vieja_s{b}.pt"], "duracion": 10})
 
 
-PARTES = {"etapa1": etapa1, "c0": c0, "v2vieja": v2vieja, "etapa2": etapa2, "etapa3b": etapa3b}
+# ---------------- Etapa 3: observacion nueva, limpiezas, entropia, reloj de 2 s y modelo completo (PLAN3 3.6) ----------
+# Factores de duracion [S, analisis_mejora_2026-11-04/plan3/final/costos_plan3.py]: observacion x1.35; reloj de 2 s
+# x1.4 al entrenar y x1.15 al validar.
+OBS, RELOJ_TR, RELOJ_VAL = 1.35, 1.40, 1.15
+OP_OBS = "--obs-cercana 75"
+OP_M7 = "--norm-valor --sin-forzadas --msg-cada-paso"
+OP_ENT = "--hiper ent=0.03 --ent-final 0.003"
+OP_RELOJ = "--paso-decision 2 --sin-forzadas"
+OP_COMPLETO = ("--obs-cercana 75 --norm-valor --sin-forzadas --msg-cada-paso --lr-horizonte 200 --lr-piso 0.1 "
+               "--paso-decision 2")
+
+
+def etapa3(lista):
+    """Cada brazo = (etiqueta, opciones ademas de --v2, celdas, bases, factor, episodios). D entra primero."""
+    reg = {**CASOS, **NIVELES, **D}
+    brazos = [
+        ("p3obs", OP_OBS, {"D": D["D"], "c2715": NIVELES["c2715"]}, BASES5, OBS, EPISODIOS),
+        ("p3obs", OP_OBS, {c: CASOS[c] for c in ("P1", "P2", "P3", "P6")}, BASES3, OBS, EPISODIOS),
+        ("p3obspoi", OP_OBS, POI, BASES3, (OBS * POI_F, OBS * POI_F), EPISODIOS),
+        ("p3m7norm", "--norm-valor", D, BASES3, 1.0, EPISODIOS),
+        ("p3m7forz", "--sin-forzadas", D, BASES3, 1.0, EPISODIOS),
+        ("p3m7msg", "--msg-cada-paso", D, BASES3, 1.0, EPISODIOS),
+        ("p3m7", OP_M7, {"D": D["D"], "P2": CASOS["P2"], "P6": CASOS["P6"]}, BASES3, 1.0, EPISODIOS),
+        ("p3ent", OP_ENT, {"D": D["D"], "P1": CASOS["P1"]}, BASES3, 1.0, EPISODIOS),
+        ("p3reloj2", OP_RELOJ, {c: reg[c] for c in ("D", "P1", "P2", "P6")}, BASES3, (RELOJ_TR, RELOJ_VAL),
+         EPISODIOS),
+        ("p3reloj2poi", OP_RELOJ, {c: POI[c] for c in ("P1", "P2", "P6")}, BASES3,
+         (RELOJ_TR * POI_F, RELOJ_VAL * POI_F), EPISODIOS),
+        ("p3completo", OP_COMPLETO, {c: CASOS[c] for c in ("P1", "P2", "P4", "P6")}, BASES3,
+         (OBS * RELOJ_TR, OBS * RELOJ_VAL), 400),
+        ("p3completopoi", OP_COMPLETO, POI, BASES3, (OBS * RELOJ_TR * POI_F, OBS * RELOJ_VAL * POI_F), 400),
+    ]
+    trabajos = []
+    for et, op, celdas, bases, f, eps in brazos:
+        for c, e in celdas.items():
+            for b in bases:
+                trabajos.append((et, op, c, e, b, f, eps))
+    # D primero (prioridad 2); el resto, lo mas largo primero (prioridad 3)
+    trabajos.sort(key=lambda x: (x[2] != "D", -duracion_entreno(x[2], x[6], factor=x[5])))
+    for et, op, c, e, b, f, eps in trabajos:
+        lista.entrenamiento(f"e3_{et}_{e}_s{b}", "3", 2 if c == "D" else 3, c, e, et, b, f"--v2 {op}",
+                            lanzador=e.startswith("poi_"), factor=f, episodios=eps)
+
+
+PARTES = {"etapa1": etapa1, "c0": c0, "v2vieja": v2vieja, "etapa2": etapa2, "etapa3b": etapa3b, "etapa3": etapa3}
 
 
 def generar(partes):
