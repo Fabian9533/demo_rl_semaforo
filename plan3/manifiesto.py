@@ -141,11 +141,15 @@ def politicas_evaluadas(esperado, raiz=PLAN3):
 
 
 def sello(esperado, raiz=PLAN3):
-    """Lo que se sella al cierre: CSV, metas de las politicas evaluadas y los archivos que deciden que se lee."""
+    """Lo que se sella al cierre: CSV, las politicas publicadas con sus metas (todas las politica_*.pt y .json de
+    plan3/: veredicto3 lee tambien las de las bases que no se evaluan, como C0 por base) y los archivos que deciden
+    que se lee. Las politicas que juega cada evaluacion tienen que estar entre ellas."""
     datos = {"csv": {e["csv"]: sha(os.path.join(raiz, e["csv"])) for e in esperado}, "metas": {}, "otros": {}}
-    for pt in politicas_evaluadas(esperado, raiz):
-        for ruta in (pt, pt[:-3] + ".json"):
-            datos["metas"][ruta] = sha(os.path.join(raiz, ruta))
+    for ruta in sorted(glob.glob(os.path.join(raiz, "politica_*.pt")) + glob.glob(os.path.join(raiz, "politica_*.json"))):
+        datos["metas"][os.path.relpath(ruta, raiz).replace(os.sep, "/")] = sha(ruta)
+    faltan = [pt for pt in politicas_evaluadas(esperado, raiz) if pt not in datos["metas"]]
+    if faltan:
+        raise RuntimeError(f"politicas evaluadas que no estan en plan3/: {faltan[:5]}")
     otros = list(OTROS) + sorted(os.path.relpath(p, raiz).replace(os.sep, "/")
                                  for p in glob.glob(os.path.join(raiz, "promocion", "*.json")))
     for ruta in otros:
