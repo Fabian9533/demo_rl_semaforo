@@ -43,6 +43,14 @@ y las politicas IPPO de U4 (--ippo, una o varias). Escribe:
   serie_<esc>_<brazo>_s<semilla>.csv y fases_<esc>_<brazo>_s<semilla>.csv, primera semilla
 En el modo antiguo --semillas vale 1001-1010 por defecto, como antes.
 
+plan3 (05.11.2026; apagado por defecto, lo de antes no cambia):
+  --brazo franja | bloques | actuado_aj [--programa ARCHIVO]   fijo por franja o por bloques (WAUT) y actuado
+      ajustado, con el archivo de franja.py o actuado.py (por defecto <esc>_<brazo>.add.xml)
+  --brazo fijo --programa ARCHIVO --nombre X   fijo con otro programa (p. ej. <esc>_r10f.add.xml): brazo fijo_X
+  --regla NOMBRE   regla simple o Max-Pressure de plan3/reglas.py (regla_u3g60, mp, mp_c60...): brazo NOMBRE
+  Funciones para evaluar3: brazo_referencia(esc, brazo, adicional=None), brazo_programa(esc, ruta, nombre) y
+  brazo_regla(esc, regla), cada una -> (brazo, modelo, base, correr), sin impresiones dentro de correr.
+
 Cambios del plan v2: modo --brazo/--politica/--salida con CSV parcial por brazo
 (la estadistica pasa a consolidar.py), carga por tipo de politica y meta, nombres de brazo
 <alg>_s<base>, columnas modelo/base/ret_*, tripinfo unico por proceso, escenarios del plan v2
@@ -79,7 +87,9 @@ ESCENARIOS = ["cruce", "cruce2"] + list(rl_corredor.ESCENARIOS)
 # Plan v2: columnas del CSV parcial
 ID_V2 = ["brazo", "modelo", "base", "semilla"]
 METRICAS_V2 = METRICAS + ["ret_retraso", "ret_colas", "ret_spill", "vehiculos", "recompensa", "decisiones"]
-MODO_REFERENCIA = {"fijo": "baseline", "actuado": "actuado", "trivial": "trivial"}
+MODO_REFERENCIA = {"fijo": "baseline", "actuado": "actuado", "trivial": "trivial",
+                   # plan3 (0.8 y 0.9): fijo por franja y por bloques (WAUT) y actuado ajustado, desde su archivo
+                   "franja": "franja", "bloques": "bloques", "actuado_aj": "actuado_aj"}
 # meta["algoritmo"] de rl_corredor -> etiqueta del modelo (ESPEC seccion 2)
 ALG_TABULAR = {"qlearning": "ql", "q-learning": "ql", "ql": "ql", "sarsa": "sarsa"}
 
@@ -172,15 +182,46 @@ def leer_json(ruta):
         return json.load(f)
 
 
-def brazo_referencia(esc, brazo):
+def brazo_referencia(esc, brazo, adicional=None):
     """fijo, actuado o trivial (verdes minimos y desfases 0, control de cordura del
-    plan v2): (brazo, modelo, base, correr)."""
+    plan v2): (brazo, modelo, base, correr). plan3: franja, bloques y actuado_aj con su archivo
+    (adicional; por defecto <esc>_<brazo>.add.xml en la carpeta actual)."""
     mod = configurar(esc)
+    opcion = {"adicional": adicional} if adicional else {}
 
     def correr(semilla, tripinfo, serie):
         return mod.correr_episodio(MODO_REFERENCIA[brazo], {}, 0.0, False, 0, semilla,
-                                   tripinfo=tripinfo, serie=serie)
+                                   tripinfo=tripinfo, serie=serie, **opcion)
     return brazo, brazo, "", correr
+
+
+def brazo_programa(esc, ruta, nombre):
+    """plan3: fijo con el programa de un archivo (p. ej. plan3/<esc>_r10f.add.xml, el fijo fino), que reemplaza a
+    los adicionales del .sumocfg con programas. Brazo y modelo fijo_<nombre>."""
+    mod = configurar(esc)
+
+    def correr(semilla, tripinfo, serie):
+        return mod.correr_episodio("baseline", {}, 0.0, False, 0, semilla, tripinfo=tripinfo, serie=serie,
+                                   adicional=ruta)
+    return f"fijo_{nombre}", f"fijo_{nombre}", "", correr
+
+
+def brazo_regla(esc, regla):
+    """plan3: regla simple o Max-Pressure de plan3/reglas.py (regla_u3g60, mp, mp_c60...) por el gancho decidir
+    de rl_ippo, sin mensajes. Brazo y modelo = el nombre de la regla."""
+    import sys
+    import rl_ippo
+    carpeta = os.path.join(os.path.dirname(os.path.abspath(__file__)), "plan3")
+    if carpeta not in sys.path:
+        sys.path.append(carpeta)            # al final: los modulos de la raiz mandan
+    import reglas
+    reglas.validar(regla)
+    rl_ippo.preparar(esc)
+
+    def correr(semilla, tripinfo, serie):
+        rl_ippo.configurar_obs_insercion(False)
+        return reglas.correr(esc, regla, semilla, tripinfo, serie)
+    return regla, regla, "", correr
 
 
 def brazo_tabular(esc, ruta):
@@ -266,8 +307,12 @@ def brazo_profundo(esc, ruta, latencia, perdida):
 def main_v2(args):
     esc = args.escenario
     semillas = rango(args.semillas or "1001-1030")
-    if args.brazo:
-        brazo, modelo, base, correr = brazo_referencia(esc, args.brazo)
+    if args.brazo == "fijo" and args.programa:
+        brazo, modelo, base, correr = brazo_programa(esc, args.programa, args.nombre)
+    elif args.brazo:
+        brazo, modelo, base, correr = brazo_referencia(esc, args.brazo, args.programa)
+    elif args.regla:
+        brazo, modelo, base, correr = brazo_regla(esc, args.regla)
     elif args.politica.endswith(".json"):
         brazo, modelo, base, correr = brazo_tabular(esc, args.politica)
     elif args.politica.endswith(".pt"):
@@ -317,8 +362,13 @@ def main():
     ap.add_argument("--escenario", choices=ESCENARIOS, default="cruce")
     ap.add_argument("--semillas", default=None,
                     help="p. ej. 1001-1030 o 1001,1005 (por defecto 1001-1030; 1001-1010 en el modo antiguo)")
-    ap.add_argument("--brazo", choices=["fijo", "actuado", "trivial"], default=None,
-                    help="plan v2: brazo de referencia")
+    ap.add_argument("--brazo", choices=list(MODO_REFERENCIA), default=None,
+                    help="plan v2: brazo de referencia (plan3: franja, bloques y actuado_aj)")
+    ap.add_argument("--programa", default=None,
+                    help="plan3: archivo del programa (con --brazo fijo y --nombre X: brazo fijo_X; con franja, "
+                         "bloques o actuado_aj: en vez de <esc>_<brazo>.add.xml)")
+    ap.add_argument("--nombre", default=None, help="plan3: con --brazo fijo --programa, el brazo es fijo_<nombre>")
+    ap.add_argument("--regla", default=None, help="plan3: regla de plan3/reglas.py (regla_u3g60, mp, mp_c60...)")
     ap.add_argument("--politica", default=None, help="plan v2: q_table_<tag>.json o politica_*.pt")
     ap.add_argument("--salida", default=None, help="plan v2: CSV parcial (parciales/eval_<esc>_<brazo>.csv)")
     ap.add_argument("--extras", default=None,
@@ -331,7 +381,13 @@ def main():
     args = ap.parse_args()
     if args.brazo and args.politica:
         ap.error("--brazo y --politica son excluyentes")
-    if args.brazo or args.politica:
+    if args.regla and (args.brazo or args.politica):            # plan3
+        ap.error("--regla excluye --brazo y --politica")
+    if args.programa and args.brazo not in ("fijo", "franja", "bloques", "actuado_aj"):
+        ap.error("--programa va con --brazo fijo, franja, bloques o actuado_aj")
+    if bool(args.brazo == "fijo" and args.programa) != bool(args.nombre):
+        ap.error("--brazo fijo --programa ARCHIVO necesita --nombre (y --nombre solo va con ellos)")
+    if args.brazo or args.politica or args.regla:
         if args.ippo:
             ap.error("--ippo es del modo antiguo; en el plan v2 use --politica")
         main_v2(args)
