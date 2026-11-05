@@ -31,6 +31,15 @@ relanzamientos); prerregistro §3 (semillas), §6 (versión evaluada) y §14 (ca
    - una etiqueta nueva exige la ruta del estado de origen (`auto` solo mira su propia etiqueta). Con esa ruta, los
      tramos también son un mismo comando: el primero copia; los siguientes, y cualquier relanzamiento, siguen desde
      los estados propios que salen de ese mismo origen, sin volver a copiar ni borrar.
+6. **Revisión de robustez del 05.11** (sección 7) [M]. Arregla seis fallas raras que encontró una revisión escéptica,
+   sin cambiar ningún número ni los bytes de checkpoints y política:
+   - un estado dañado ya no bloquea los relanzamientos: se aparta a `.roto` y `auto` sigue desde el anterior;
+   - estados, checkpoints, copias y política se escriben por temporal con fsync, y la política publica primero el
+     `.json` y al final el `.pt`;
+   - un CSV abierto en Excel ya no tumba el tramo;
+   - un episodio rehecho que no repite queda en `checkpoints/<tag>_rehechos.json` y en el meta;
+   - el estado anota qué código escribió cada tramo;
+   - `validar_args` revisa un comando sin correrlo.
 
 ## 1. Opciones
 
@@ -84,14 +93,19 @@ Todo es relativo a la carpeta actual (`plan3/` en la cola):
 - `tag = <esc>_ippo_<variante>[_<etiqueta>]_s<base>` (el de siempre);
 - CSV: `resultados_<tag>.csv` (o `--csv`);
 - checkpoints: `checkpoints/<tag>_epNNN.pt` y `.json`, en cada validación (como siempre);
-- estado: `checkpoints/<tag>_epNNN.estado.pt` (y `...estado.pt.tmp` mientras se escribe);
+- estado: `checkpoints/<tag>_epNNN.estado.pt`;
+- temporales mientras se escribe (sección 7): `<tag>_epNNN.tmp`, `.json.tmp` y `.estado.tmp`. El de un `.pt` cambia
+  la extensión en vez de agregarla: `torch.save` guarda dentro del zip el nombre del archivo sin su última extensión,
+  y así el `.pt` sale con los mismos bytes que con un `torch.save` directo;
+- estado apartado por dañado: `checkpoints/<tag>_epNNN.estado.pt.roto` (`.roto2`, ... si se repite). No se borra;
+- `checkpoints/<tag>_rehechos.json`: solo si un episodio rehecho no repite el intento anterior (B22, sección 7);
 - política publicada: `politica_<esc>_<variante>[_<etiqueta>]_s<base>.pt` y `.json` (como siempre).
 
 ### 2.2 Qué guarda el estado
 
-Se escribe al final del episodio NNN, **después** del checkpoint y de la fila del CSV, en un `.tmp` que se renombra.
-Por eso, si el estado existe, todo lo ≤ NNN está completo. Se lee con `torch.load(weights_only=True)`: solo trae
-tensores y tipos simples.
+Se escribe al final del episodio NNN, **después** del checkpoint y de la fila del CSV, en un temporal que se baja a
+disco (fsync) y se renombra; los checkpoints también, antes de anotar su sha256. Por eso, si el estado existe, está
+entero y todo lo ≤ NNN está completo. Se lee con `torch.load(weights_only=True)`: solo trae tensores y tipos simples.
 
 | Clave | Contenido |
 |---|---|
@@ -103,7 +117,12 @@ tensores y tipos simples.
 | `archivos` | sha256 de cada checkpoint (`.pt` y `.json`) de la etiqueta hasta NNN |
 | `config` | lo que debe coincidir para seguir (2.4) |
 | `origen` | `[{"corrida": tag, "episodio": k}]` si la corrida viene de otra etiqueta |
+| `codigo`, `tramos` | huella del código que escribió el estado y `[{desde, hasta, git, codigo}]`: qué código escribió cada episodio (sección 7) |
+| `reanudaciones` | B22: `[{partida, episodios, filas, distintos}]`, una por relanzamiento que rehízo episodios (sección 7) |
 | `fase_av`, `tag`, `etiqueta`, `episodio`, `episodios`, `eval_cada`, `ruta_csv`, `git`, `torch`, `python`, `version` | lo demás |
+
+`codigo`, `tramos` y `reanudaciones` llegaron con la revisión del 05.11 y se leen con `.get`: un estado sin ellas sigue
+valiendo (la versión sigue siendo 1).
 
 Pesa ~185 KB (P1) más ~0.4 KB por fila del CSV [M]: unos 4.5 MB por corrida de 200 episodios con validación cada 10 y
 ~11 MB por una de 400 [I]. La política `.pt` no cambia.
@@ -112,12 +131,14 @@ Pesa ~185 KB (P1) más ~0.4 KB por fila del CSV [M]: unos 4.5 MB por corrida de 
 
 | Caso | Lee | Borra | Escribe | Sale con |
 |---|---|---|---|---|
-| Sin `--reanudar` (o `auto` sin estados) | escenario | `checkpoints/<tag>_ep*` (`.pt`, `.json`, `.estado.pt`, `.tmp`) | CSV desde cero; checkpoints y estados; al final, la política | 0 |
+| Sin `--reanudar` (o `auto` sin estados) | escenario | `checkpoints/<tag>_ep*` (`.pt`, `.json`, `.estado.pt` y temporales; no los `.roto`) | CSV desde cero; checkpoints y estados; al final, la política | 0 |
 | `--hasta-ep K` (K < `--episodios`) | — | — | lo mismo hasta K y el estado de K; **no** publica | 0 |
 | `--reanudar RUTA`, misma etiqueta | el estado; los checkpoints ≤ k que anota (verifica su sha256); el CSV actual (filas > k) | `checkpoints/<tag>_ep*` con NNN > k | CSV = filas ≤ k del estado + las nuevas; checkpoints y estados > k; al final, la política | 0 |
 | `--reanudar RUTA`, etiqueta nueva (primera vez) | el estado; los checkpoints ≤ k y los estados ≤ k de la etiqueta de origen, en la carpeta del estado (verifica sha256) | todo `checkpoints/<nuevo>_ep*` | copia los `.pt` ≤ k byte a byte, reescribe sus `.json` con el meta nuevo, copia los estados ≤ k; CSV con las filas ≤ k del estado y la etiqueta nueva; sigue | 0 |
 | `--reanudar RUTA`, etiqueta nueva que ya tiene estados propios que salen de ese mismo estado (un intento o tramo anterior) | el estado propio de mayor NNN | como `auto` | como `auto` | 0 |
-| `--reanudar auto` con estados | el de mayor NNN de **su** etiqueta | como misma etiqueta | como misma etiqueta | 0 |
+| `--reanudar auto` con estados | el de mayor NNN de **su** etiqueta que sirva (2.4); uno que no sirve se renombra a `.roto` con un AVISO y se prueba el anterior | como misma etiqueta | como misma etiqueta | 0 |
+| `--reanudar RUTA` con un estado que no sirve (2.4) | el estado | nada | nada | 1, con el motivo (no se aparta: lo eligió quien lanza) |
+| El CSV está tomado por otro programa al empezar el tramo | lo de su caso | lo de su caso | lo de su caso, con el CSV en memoria; al final lo escribe entero (el último tramo espera hasta 30 min antes de publicar) | 0 (1 con "Permission denied" si al final sigue tomado: la cola lo reintenta) |
 | Misma etiqueta (o `auto`), k = `--hasta-ep` | el estado | nada | nada ("Nada que hacer") | 0 |
 | `auto` (o etiqueta nueva ya empezada), k > `--hasta-ep`: un tramo posterior ya corrió | el estado | nada | nada ("Nada que hacer") | 0 |
 | RUTA de la misma etiqueta, k > `--hasta-ep` | el estado | nada | nada | 1 (se pidió seguir desde más allá del corte) |
@@ -139,14 +160,20 @@ Detalles:
   checkpoint, sacada de las series). Las filas ≤ k del CSV pasan con la columna `etiqueta` nueva; las demás columnas,
   tal cual. Los estados copiados guardan dentro el `tag` de origen.
 - **Comprobación de B22**: al reanudar, las filas > k que haya en el CSV de esta corrida (las de un intento caído) se
-  comparan con las que se rehacen, salvo `segundos`. El log dice "Reanudacion: los episodios a-b repiten el intento
-  anterior" o "AVISO: el episodio n no repite...".
+  comparan con las que se rehacen, salvo `segundos`, en cuanto sale cada una. El log dice "Reanudacion: los episodios
+  a-b repiten el intento anterior" o "AVISO: el episodio n no repite...". Si alguno no repite, además queda en
+  `checkpoints/<tag>_rehechos.json` (lo muestra el resumen de `p3_noche`). Cada relanzamiento que rehízo episodios
+  queda en `reanudaciones` del estado y del meta publicado (sección 7). El código de salida no cambia.
 - La política se publica solo al llegar a `--episodios`, como siempre: el checkpoint de menor validación de toda la
   serie (la copiada y la nueva).
 
 ### 2.4 Qué se comprueba antes de tocar ningún archivo
 
-1. Versión del estado y que el NNN del nombre sea el episodio guardado.
+1. **Que el estado sirva** (`estado_valido`): el zip está sano (`testzip` revisa el CRC de cada pieza; `torch.load`
+   no lo hace), carga, es de la versión 1, el NNN del nombre es el episodio guardado y cada checkpoint que anota (en
+   su carpeta) tiene su sha256. Con `auto`, uno que no sirve se aparta a `.roto` y se prueba el anterior; con una
+   ruta, sale con 1. Las copias de un origen dentro de una etiqueta nueva no se juzgan por sus checkpoints (llevan el
+   nombre del origen y pueden estar en su carpeta); si se usan, el punto 5 los verifica.
 2. **Misma configuración**: escenario, variante, base, `dim_obs`, `HIPER` (con `--hiper`), descuento y exploración
    de V2, `--recompensa-insercion`, `--obs-insercion` y `--val-seeds`. No cuentan los que solo cambian nombres,
    cortes, validaciones o la elección final: `--episodios`, `--eval-cada`, `--etiqueta`, `--criterio-val`, `--csv`,
@@ -182,9 +209,13 @@ Detalles:
   `val_total_serie` del meta del 400 y publica con su etiqueta. "400 eligiendo entre 20" (ep. 20, 40, ..., 400) sale de
   la misma serie.
 - **Un error de código** (B22: trabajos nuevos `_r2`): el trabajo nuevo debe usar otra etiqueta o borrar los estados
-  viejos; si no, `auto` seguiría desde los estados del código con error. El estado guarda el commit y la reanudación
-  avisa si es otro, pero no lo rechaza: los tramos de un trabajo pueden correr con commits distintos, de una noche a
-  la siguiente.
+  viejos; si no, `auto` seguiría desde los estados del código con error. El estado guarda la huella del código y la
+  reanudación avisa si es otra (no el commit: el HEAD cambia cada mañana al commitear estado y logs), pero no lo
+  rechaza: los tramos de un trabajo pueden correr con código distinto, de una noche a la siguiente. El meta publicado
+  lleva entonces `tramos` con las huellas (sección 7).
+- **Revisar los comandos antes de la noche**: `rl_ippo.validar_args(argv)` (sección 7) o `--validar-args` en la
+  línea de comando.
+- **Publicación**: primero el `.json` y al final el `.pt`; si el `.pt` publicado existe, su `.json` está completo.
 
 ### 2.6 Límites
 
@@ -192,8 +223,10 @@ Detalles:
 - La columna `segundos` de las filas copiadas es la de la corrida que las hizo.
 - Un `.pt` copiado a una etiqueta nueva guarda dentro el nombre del archivo de origen (lo escribe `torch.save`): sus
   tensores son los mismos, su sha256 no (B12).
-- Si el estado más avanzado de una etiqueta nueva es una copia (el trabajo se cayó antes de su primer estado propio),
-  `auto` repite la copia desde el origen: es lo mismo que relanzar el primer tramo.
+- Si el estado más avanzado de una etiqueta nueva es una copia (el trabajo se cayó antes de su primer estado propio,
+  o los propios no sirven), `auto` repite la copia desde el origen: es lo mismo que relanzar el primer tramo. Si
+  tampoco sirve ninguna copia, `auto` empezaría de cero con la etiqueta nueva; con el origen en la misma carpeta
+  `checkpoints/`, como en el plan, las copias solo dejan de servir si se dañan todas a la vez.
 - Con la ruta de otra etiqueta, si la etiqueta nueva tiene estados propios que salen de **otro** estado de partida, la
   ruta manda: se borra la etiqueta nueva y se copia de nuevo.
 - Una corrida reanudada no borra una política publicada antes con la misma etiqueta: la reescribe al llegar a
@@ -249,6 +282,15 @@ de prueba). El meta guarda el commit, así que las corridas que se comparan debe
 `taskkill`) y `prueba_piso.txt` (con `--sin-correr`: compara las mismas dos corridas de 181 episodios, con una línea
 más precisa sobre el estado del 181).
 
+**Revisión de robustez (sección 7): se volvió a correr sobre el commit 24ebb66** lo que toca el código cambiado:
+identidad (pruebas 1 y 2 y ablación), reanudación en P1 (pruebas 3 y 4 y rechazos), caídas, la prueba 5 (base 42
+frente al diagnóstico), las pruebas nuevas `prueba_robustez` y `prueba_comandos`, y la identidad de
+`chequeos_previos`. Resultado: **todo OK**. Las pruebas comparan ahora los estados sin `tramos` (lo único que distingue
+20 seguidos de 10 + 10) y comprueban aparte que sean 1-20 frente a 1-10 y 11-20 con la misma huella; `prueba_caida`
+compara el meta sin `reanudaciones` y comprueba aparte un registro por relanzamiento, todos repetidos, y que no haya
+`rehechos.json`. No se repitieron P6 ni la del piso: la revisión no toca el entrenamiento ni la tasa, y P1 cubre los
+mismos caminos de la reanudación.
+
 | # | Prueba | Resultado [M] | Salida |
 |---|---|---|---|
 | 1 | Todo apagado = tag: IPPO entregado y V2 (`--v2 --criterio-val total`), P1, 10 episodios, validación cada 5 | OK: CSV igual; checkpoints 5 y 10 con 12/12 tensores y `.json` iguales; política publicada igual byte a byte y meta igual; hasta el log de consola es el mismo (salvo los segundos) | `prueba_identidad.txt` |
@@ -258,8 +300,10 @@ más precisa sobre el estado del 181).
 | 3 | P6: lo mismo con V2 | OK: el corte no publica y deja el estado del 10; reanudado, CSV igual (20 filas), checkpoints 5-20 con 12/12 tensores y `.json` iguales, política igual byte a byte, meta igual, y estados 5, 10, 15 y 20 iguales (pesos, Adam con 5960 a 19 900 pasos, los cuatro generadores, series y CSV). P6 tardó 26 s por episodio (mediana; 22-61 s) | `prueba_reanudar_malla3_alta.txt` |
 | 4 | Etiqueta nueva desde el ep 10, 30 episodios con horizonte 20 y piso 0.1 | OK: checkpoints y estados ≤ 10 copiados byte a byte; `reanudado_de` y las opciones de la tasa en el meta; frente a una corrida seguida de 30 con esa etiqueta y esa tasa, CSV igual (30 filas), checkpoints 5-30 con tensores y `.json` iguales (salvo `reanudado_de`), política y meta iguales, estados 15-30 iguales; filas 1-10 iguales a las de la V2 de origen salvo `etiqueta` | `prueba_reanudar_corredor.txt` |
 | — | Rechazos (otra tasa, configuración, semillas, base o registro; checkpoint alterado; opciones incompatibles) | OK, 10 de 10: salen con 1 (o 2, argparse) y el motivo, sin escribir ni borrar nada | `prueba_reanudar_corredor.txt` |
-| — | `--reanudar auto` con `taskkill /F /T` a mitad de cada tramo; y la ruta de una etiqueta nueva relanzada | OK. Misma etiqueta (dos tramos, 10 y 20): cada intento muerto (en el ep 8 y en el 18; python y su sumo) sale distinto de 0 y deja los estados hasta el 5 y el 15; relanzado con el mismo comando, sigue desde ahí, los episodios rehechos repiten los del intento muerto, y el resultado es la corrida seguida (CSV, checkpoints, política byte a byte, meta y estados). Relanzar un tramo ya hecho, o la corrida publicada, sale con 0 sin tocar ningún archivo. Etiqueta nueva (desde el ep 10, 30 episodios, horizonte 20, piso 0.1, la ruta de origen en los dos tramos): muerto en el ep 18 y relanzado, sigue desde su estado del 15 sin volver a copiar, y termina igual que la corrida seguida de 30 con esa etiqueta | `prueba_caida.txt` |
+| — | `--reanudar auto` con `taskkill /F /T` a mitad de cada tramo; y la ruta de una etiqueta nueva relanzada | OK. Misma etiqueta (dos tramos, 10 y 20): cada intento muerto (en el ep 8 y en el 18; python y su sumo) sale distinto de 0 y deja los estados hasta el 5 y el 15; relanzado con el mismo comando, sigue desde ahí, los episodios rehechos repiten los del intento muerto, y el resultado es la corrida seguida (CSV, checkpoints, política byte a byte, meta y estados). Relanzar un tramo ya hecho, o la corrida publicada, sale con 0 sin tocar ningún archivo. Etiqueta nueva (desde el ep 10, 30 episodios, horizonte 20, piso 0.1, la ruta de origen en los dos tramos): muerto en el ep 18 y relanzado, sigue desde su estado del 15 sin volver a copiar, y termina igual que la corrida seguida de 30 con esa etiqueta. Desde la revisión de robustez, el meta publicado anota cada relanzamiento (partidas 5 y 15; 15 en la etiqueta nueva), todos repetidos, y no hay `rehechos.json` | `prueba_caida.txt` |
 | 5 | V2 del corredor, base 42, ep 10, frente a la V2 del diagnóstico | OK: 12/12 tensores iguales (`torch.equal`; el sha256 difiere por el nombre); filas 1-10 iguales en las 48 columnas comparables. Validar en otras semillas, y una vez más (en el 5), no cambió el entrenamiento | `prueba_diag.txt` |
+| r | Robustez (sección 7): estados dañados, etiqueta nueva con estados propios dañados, CSV tomado, B22, procedencia, `validar_args` y escrituras atómicas | OK, R1-R7 (detalle en la sección 7) | `prueba_robustez.txt` |
+| c | Los 403 comandos de `rl_ippo` del generador frente a `validar_args` | OK: pasan todos menos los 175 de la Etapa 3, que esperan sus opciones | `prueba_comandos.txt` |
 | d | 400 con horizonte 200 y piso 0.1 repite los episodios 1-181 de una de 200 | OK: la tasa es la misma bit a bit en 1-180 (en el 181 difiere en el último bit: 0.1 frente a 0.0999...98); CSV 1-181 igual; checkpoints 10-180 iguales; estados 10-180 iguales. En el 181 hasta los pesos y los momentos de Adam coinciden: la diferencia se pierde al pasar a float32. Desde el 182 la tasa cambia de verdad (9.5e-05 frente a 1e-04) | `prueba_piso.txt` |
 
 ## 5. Para la Etapa 3 y la política por red (dónde enganchar)
@@ -307,8 +351,8 @@ debe seguir dando todo OK.
    uno por checkpoint).
 7. **No hay candado**: dos procesos con la misma etiqueta a la vez se pisan. Las dependencias de la cola lo evitan.
 8. **Error de código y `auto`**: un trabajo `_r2` con la misma etiqueta seguiría desde los estados del código con
-   error. El generador debe darle otra etiqueta (o borrar los estados viejos); el log avisa si el commit del estado
-   es otro.
+   error. El generador debe darle otra etiqueta (o borrar los estados viejos); el log avisa si la huella del código
+   del estado es otra, y el meta publicado guarda los `tramos` (sección 7).
 9. **El commit va en el meta** (`git`, como siempre): dos corridas solo dan el mismo meta si corren con el mismo
    commit. Por eso toda la batería final corrió sobre un solo commit (abajo).
 10. Determinismo entre máquinas o versiones: no probado (como antes); las pruebas corren con Python 3.14.6,
@@ -317,3 +361,69 @@ debe seguir dando todo OK.
 **No está hecho (no era de esta tarea):** el paso que publica "200 con piso" y "400 eligiendo entre 20"
 (`p3_elegir.py`), el generador de trabajos y la cola (que deben usar el contrato de la sección 2), y las opciones de
 la Etapa 3 y de la política por red (sección 5).
+
+## 7. Robustez (revisión del 05.11.2026)
+
+Una revisión escéptica del contrato encontró seis fallas posibles. Todas son de gravedad baja: casos raros (un corte
+de luz en el segundo justo, un CSV abierto en Excel, un código que cambia entre noches) y ninguna cambia un número.
+Quedaron arregladas en el commit 24ebb66, sin opciones nuevas salvo `--validar-args`. Con todo apagado, los números
+y los bytes de checkpoints y política siguen siendo los del tag (prueba 1).
+
+| # | Qué podía pasar | Qué hace ahora | Prueba [M] |
+|---|---|---|---|
+| 1 | Un estado truncado o dañado (corte de luz, `taskkill` a mitad de una copia) hacía fallar todos los relanzamientos: `auto` tomaba el de mayor NNN sin probarlo, y `torch.load` no revisa el CRC | Estados, checkpoints y copias se escriben en un temporal que se baja a disco (fsync) y se renombra. `estado_valido` revisa el zip (`testzip`), la carga, la versión, el episodio y el sha256 de los checkpoints que anota. `auto` va de mayor a menor: uno que no sirve se renombra a `.roto` (no se borra), con un AVISO, y prueba el anterior. Con etiqueta nueva, si ningún estado propio sirve, copia otra vez del origen | R1, R2 |
+| 2 | La publicación no era atómica | Primero el `.json` y al final el `.pt`, cada uno por temporal | R7 |
+| 3 | Un CSV abierto en Excel (o tomado por el antivirus) hacía fallar el tramo sin reintento | Tramo intermedio: AVISO y sigue con el CSV en memoria (el estado lo guarda). Último tramo: al final reintenta cada 30 s, hasta 30 min, antes de publicar; si no puede, sale con "Permission denied" y la cola lo reintenta. Las escrituras reintentan si el archivo está tomado | R3, R7 |
+| 4 | B22: un episodio rehecho que no repetía solo dejaba un AVISO en el log | Además, `checkpoints/<tag>_rehechos.json` (lo muestra el resumen de `p3_noche`) y `reanudaciones` en el estado y en el meta publicado. El código de salida no cambia | R4 y `prueba_caida` |
+| 5 | Procedencia: el meta solo guardaba el commit del último tramo, y el aviso de commit saltaba cada mañana | El estado guarda `codigo` (sha256 de `rl_ippo.py`, `comun.py`, `rl_corredor.py` y `escenarios_plan2.py`, con fin de línea normalizado) y `tramos` (`{desde, hasta, git, codigo}`). El aviso compara `codigo`. El meta lleva `tramos` solo si hubo más de un código | R5 y `prueba_reanudar` |
+| 6 | Nada comprobaba que `rl_ippo` aceptara los comandos del generador | `validar_args(argv)`: `parse_args` y todos los `ap.error`, sin leer el escenario, sin tocar archivos y sin cambiar `HIPER`. `--validar-args` hace lo mismo desde la línea de comando | R6 |
+
+**Lo que no cambia.** La versión del estado sigue en 1: las claves nuevas se leen con `.get`, y un estado anterior
+sigue valiendo (su tramo cuenta como "sin huella"). El `.pt` de checkpoints y política tiene los mismos bytes que con
+un `torch.save` directo: el temporal se llama `<tag>_epNNN.tmp` y `torch.save` guarda dentro del zip el nombre del
+archivo sin su última extensión. Con todo apagado, el log de consola es el de siempre.
+
+**`validar_args` para `chequeos_previos`** (en su proceso; `argv` es el comando sin `python ../rl_ippo.py`, y sin
+`../con_escenarios.py` cuando va con el lanzador):
+
+```python
+sys.path.insert(0, RAIZ)                      # la carpeta de rl_ippo.py y con_escenarios.py
+import con_escenarios
+con_escenarios.registrar()                    # antes de importar rl_ippo: suma los escenarios del plan 3
+import rl_ippo
+err = io.StringIO()
+try:
+    with contextlib.redirect_stderr(err):
+        args = rl_ippo.validar_args(argv)     # bien: devuelve args (no toca archivos, ni HIPER, ni C)
+except SystemExit as e:                       # mal: e.code == 2; el motivo es la ultima linea de err
+    motivo = err.getvalue().strip().splitlines()[-1]
+```
+
+**Prueba nueva** (`prueba_robustez.py`; P1, V2 con estado y registro, base 7, 6 episodios con validación cada 2 en
+424301-424302; la referencia es el mismo comando sin cortes ni daños). Resultado: todo OK [M].
+
+| | Caso | Resultado [M] |
+|---|---|---|
+| R1 | Estado del 4 con un byte cambiado en una pieza de tensores: `torch.load` lo carga sin error, `testzip` no | Relanzado con `auto`: AVISO, queda como `.roto` y sigue desde el 2; los episodios 3-4 rehechos repiten. Luego, el checkpoint del 4 alterado: el estado del 4 va a `.roto2` y sigue desde el 2. `auto` con otra configuración sale con error sin apartar ni tocar nada. Final igual que la referencia: CSV, checkpoints, política byte a byte, meta y estados |
+| R2 | Etiqueta nueva (8 episodios, horizonte 6, piso 0.1) desde el estado del 2 | Estado propio del 6 truncado: sigue desde el propio del 4, sin copiar. Propios del 4 y del 6 dañados: los aparta y copia otra vez del origen. Final igual que la corrida seguida de 8 con esa etiqueta |
+| R3 | CSV tomado | Tramo intermedio con el CSV sin compartir: avisa, sigue en memoria, sale con 0 y el estado guarda las filas. Último tramo con el CSV en solo lectura (como Excel): espera, lo escribe al soltarlo (segundo intento) y publica. Final igual que la referencia |
+| R4 | Fila del episodio 3 alterada en el CSV y estado del 4 borrado | AVISO del episodio 3, sale con 0, `rehechos.json` con `{partida 2, episodios 3-4, filas 2, distintos [[3, timeloss_prom]]}`, lo mismo en el estado final y en el meta publicado; el CSV final es el de la referencia |
+| R5 | Último tramo con una copia del código con un comentario de más | AVISO de otro código; meta `tramos` 1-2 y 3-6 con dos huellas; el checkpoint del 2 sin `tramos` y el del 4 con 1-2 y 3-4; mismos números y política byte a byte |
+| R6 | `validar_args`: 2 comandos buenos (uno con `poi_corredor`, tras `registrar()`) y 10 malos | Acepta los buenos y rechaza los malos con código 2 y su motivo; `HIPER` y `C` quedan iguales; `--validar-args` sale con 0 (bueno) o 2 (malo) sin escribir nada |
+| R7 | Escrituras atómicas, en el proceso | `.pt` con los bytes de un `torch.save` directo; `Politica.guardar` escribe el `.json` y después el `.pt`; con el destino tomado 2 s, reintenta y escribe; si el escritor falla, el archivo anterior queda entero |
+
+**Los comandos del generador** (`prueba_comandos.py`, sin simular): arma en el proceso la lista completa de
+`generar_trabajos3` (3037 trabajos) y pasa por `validar_args` los 403 que corren `rl_ippo`, como hará
+`chequeos_previos`. En este commit pasan los de las etapas 1, 2 y 3b, y fallan los 175 de la Etapa 3
+("unrecognized arguments: --obs-cercana 75"), como se esperaba: sus opciones llegan con la Etapa 3. Con
+`--esperar-rechazo etapa3`, la prueba da todo OK [M].
+
+**Límites:**
+
+- Si una etiqueta nueva no tiene ningún estado que sirva, ni propio ni copia, `auto` empieza de cero (como cualquier
+  `auto` sin estados). Con el origen en la misma `checkpoints/`, como en el plan, eso solo pasa si se dañan todas las
+  copias a la vez.
+- Los `.roto` quedan en `checkpoints/`: se borran a mano después de mirarlos. `rehechos.json` tampoco se borra al
+  empezar de cero.
+- El CSV no se baja a disco en cada fila; el estado lo guarda entero.
+- El código de salida no cambia con B22: el aviso llega por `rehechos.json`, el meta y el log.
