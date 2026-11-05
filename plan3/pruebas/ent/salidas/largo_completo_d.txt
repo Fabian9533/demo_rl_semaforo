@@ -1,0 +1,23 @@
+Corrida larga del modelo completo en D (dem_corredor_t2715_der), base 7, 400 episodios, validacion cada 10 en 999,1999 (revision del 05.11, punto h)
+05.11.2026 15:33; python 3.14.6, torch 2.14.0+cpu
+
+400 episodios en el CSV; reloj de la corrida: inicio 14:26:15 fin 15:33:22
+[OK] ninguna celda del CSV es NaN o inf: 0 no finitas: []
+[OK] todos los episodios actualizaron (ningun lote vacio): []
+[OK] pesos finitos en los 40 checkpoints y en el ultimo estado (pesos, Adam, generadores): 528 tensores, 0 con NaN o inf
+
+Por bloques de 50 episodios (medias; vn al final del bloque; validacion: retraso total medio en 999 y 1999)
+   episodios | s/ep (mediana) | var_explicada | vn_media  vn_desv | entropia  kl     | perdida_valor | timeLoss | validacion
+     1-50    |    8.8         |    0.780      |   -5.439   3.570 |  0.255  0.0070 |    0.0069     |  41.39   | 221.7, 28.1, 27.2, 27.6, 26.4
+    51-100   |   10.4         |    0.785      |   -4.622   2.699 |  0.116  0.0054 |    0.0049     |  26.32   | 26.9, 26.3, 27.4, 26.9, 27.0
+   101-150   |    8.3         |    0.780      |   -4.343   2.271 |  0.090  0.0037 |    0.0070     |  26.14   | 26.8, 26.6, 27.0, 26.6, 26.3
+   151-200   |    8.3         |    0.783      |   -4.189   2.011 |  0.091  0.0015 |    0.0090     |  25.75   | 25.7, 25.4, 26.9, 26.3, 26.1
+   201-250   |    8.4         |    0.771      |   -4.096   1.830 |  0.084  0.0012 |    0.0115     |  25.73   | 26.3, 26.5, 26.6, 26.3, 26.5
+   251-300   |    8.9         |    0.775      |   -4.031   1.697 |  0.080  0.0013 |    0.0133     |  25.63   | 26.2, 26.2, 26.2, 26.3, 26.3
+   301-350   |    7.7         |    0.777      |   -3.982   1.593 |  0.079  0.0012 |    0.0153     |  25.49   | 26.3, 26.3, 25.9, 26.0, 26.4
+   351-400   |    7.7         |    0.785      |   -3.948   1.510 |  0.076  0.0012 |    0.0169     |  25.66   | 26.1, 26.3, 26.8, 27.2, 26.4
+
+Publicada: ep 170 (val_total 25.38); vn_media None, vn_desv None (el codigo de 5b2a32d no guardaba la escala del critico en el meta)
+Tiempo por episodio de entrenamiento (sin validacion): mediana 8.4 s, p90 10.3 s, total 0.96 h
+
+Resultado: todo OK

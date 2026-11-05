@@ -1,5 +1,5 @@
 Opciones de la politica por red en rl_ippo.py (PLAN3 Etapa 4)
-05.11.2026 12:04; python 3.14.6, torch 2.14.0+cpu
+05.11.2026 15:19; python 3.14.6, torch 2.14.0+cpu
 
 1. --scale 0.5 frente a dem_corredor_t905 (ciclo minimo, semilla 424301)
 [OK] la corrida termina: codigo 0
@@ -20,5 +20,8 @@ Opciones de la politica por red en rl_ippo.py (PLAN3 Etapa 4)
 [OK] la serie que elige la politica: [ep, nivel 0.5, nivel 1, nivel 1.5, geometrica]: [[2, 21.57, 81.185, 527.095, 97.365], [4, 24.97, 115.49, 564.05, 117.605]]; elegido el ep 2 (val 97.365)
 [OK] meta: opciones de la politica por red: {'v2': True, 'recompensa_insercion': False, 'etiqueta': 'p3prbe4', 'criterio_val': 'total', 'norm_valor': True, 'norm_beta': 0.99, 'escala_demanda': [0.5, 2.0], 'curriculo': 3, 'val_escalas': [0.5, 1.0, 1.5]}
 [OK] --norm-valor: columnas vn_media y vn_desv: vn_media ['-1.1096', '-2.714', '-4.4932', '-7.7331']
+[OK] eval_timeloss de cada validacion = la primera semilla en el nivel 1: [('2', '81.83'), ('4', '115.03')]
+[OK] meta publicado: eval_nivel 1.0 y eval_999_final = la primera semilla en el nivel 1 del ultimo checkpoint: eval_nivel 1.0, eval_999_final 115.03 | 115.03
+[OK] --norm-valor: cada checkpoint guarda vn_media, vn_desv y vn_estado; el meta publicado, los del elegido: [(2, -2.714, 2.62), (4, -7.7331, 7.8475)]; publicado -2.714, 2.62
 
 Resultado: todo OK

@@ -1,5 +1,5 @@
 Pruebas 3 (tarea 1.2): reanudacion exacta en corredor, base 7, validacion cada 5 en 424301,424302; modos e3, e4
-05.11.2026 12:08; python 3.14.6, torch 2.14.0+cpu
+05.11.2026 15:23; python 3.14.6, torch 2.14.0+cpu
 
 
 Prueba 3: 20 seguidos = 10 + 10 reanudados
@@ -47,5 +47,27 @@ Prueba 3: 20 seguidos = 10 + 10 reanudados
 [OK] estado del ep 15: pesos: igual; Adam (paso [3230.0], exp_avg, exp_avg_sq, grupos): igual; random: igual; numpy global: igual; torch: igual; default_rng de sembrar: igual; generador de la escala: igual; CSV hasta el episodio (salvo segundos): igual; archivos, codigo, config, ent, episodio, episodios, etiqueta, eval_cada, fase_av, lr, norm_valor, origen, reanudaciones, ruta_csv, tag, val_serie, val_total_serie, version: igual
 [OK] estado del ep 20: pesos: igual; Adam (paso [4360.0], exp_avg, exp_avg_sq, grupos): igual; random: igual; numpy global: igual; torch: igual; default_rng de sembrar: igual; generador de la escala: igual; CSV hasta el episodio (salvo segundos): igual; archivos, codigo, config, ent, episodio, episodios, etiqueta, eval_cada, fase_av, lr, norm_valor, origen, reanudaciones, ruta_csv, tag, val_serie, val_total_serie, version: igual
 [OK] tramos del estado del 20: 1-20 en la seguida; 1-10 y 11-20 en la de dos tramos, con la misma huella de codigo: [(1, 20)] | [(1, 10), (11, 20)]
+
+Rechazos con las opciones de las Etapas 3 y 4 (revision del 05.11, b)
+-- e3: desde checkpoints/corredor_ippo_vecinos_p3prbe3_s7_ep010.estado.pt con una opcion quitada o cambiada
+[OK] rechaza sin --obs-cercana: codigo 1; archivos sin cambios True; --reanudar: el estado es de otra configuracion (dim_obs, obs_cercana)
+[OK] rechaza --obs-cercana 50: codigo 1; archivos sin cambios True; --reanudar: el estado es de otra configuracion (obs_cercana)
+[OK] rechaza sin --norm-valor: codigo 1; archivos sin cambios True; --reanudar: el estado es de otra configuracion (norm_beta, norm_valor)
+[OK] rechaza con --norm-beta 0.99: codigo 1; archivos sin cambios True; --reanudar: el estado es de otra configuracion (norm_beta)
+[OK] rechaza --paso-decision 5: codigo 1; archivos sin cambios True; --reanudar: el estado es de otra configuracion (paso_decision)
+[OK] rechaza sin --sin-forzadas: codigo 2; archivos sin cambios True; rl_ippo.py: error: --paso-decision distinto de 5 va con --sin-forzadas (H14: antes del verde minimo las decisi
+[OK] rechaza sin --msg-cada-paso: codigo 1; archivos sin cambios True; --reanudar: el estado es de otra configuracion (msg_cada_paso)
+[OK] rechaza sin --hiper ent=0.03: codigo 1; archivos sin cambios True; --reanudar: el estado es de otra configuracion (hiper)
+[OK] rechaza sin --ent-final: codigo 1; archivos sin cambios True; --reanudar: el estado es de otra configuracion (ent_final)
+[OK] rechaza --ent-final 0.001: codigo 1; archivos sin cambios True; --reanudar: el estado es de otra configuracion (ent_final)
+-- e4: desde checkpoints/corredor_ippo_vecinos_p3prbe4_s7_ep010.estado.pt con una opcion quitada o cambiada
+[OK] rechaza sin --escala-demanda ni --curriculo: codigo 1; archivos sin cambios True; --reanudar: el estado es de otra configuracion (curriculo, escala_demanda)
+[OK] rechaza --escala-demanda 0.5,1.5: codigo 1; archivos sin cambios True; --reanudar: el estado es de otra configuracion (escala_demanda)
+[OK] rechaza sin --curriculo: codigo 1; archivos sin cambios True; --reanudar: el estado es de otra configuracion (curriculo)
+[OK] rechaza --curriculo 5: codigo 1; archivos sin cambios True; --reanudar: el estado es de otra configuracion (curriculo)
+[OK] rechaza sin --val-escalas: codigo 1; archivos sin cambios True; --reanudar: el estado es de otra configuracion (val_escalas)
+[OK] rechaza --val-escalas 0.5,1: codigo 1; archivos sin cambios True; --reanudar: el estado es de otra configuracion (val_escalas)
+[OK] rechaza sin --norm-beta: codigo 1; archivos sin cambios True; --reanudar: el estado es de otra configuracion (norm_beta)
+[OK] rechaza sin --norm-valor ni --norm-beta: codigo 1; archivos sin cambios True; --reanudar: el estado es de otra configuracion (norm_beta, norm_valor)
 
 Resultado: todo OK

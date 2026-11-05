@@ -1,5 +1,5 @@
 Robustez de rl_ippo.py (revision del 05.11): estados danados, copias y publicacion atomicas, CSV tomado, B22, procedencia y validar_args. P1, V2 con estado y registro, base 7, validacion cada 2 en 424301,424302
-05.11.2026 12:06; python 3.14.6, torch 2.14.0+cpu
+05.11.2026 15:46; python 3.14.6, torch 2.14.0+cpu
 
 
 R6. validar_args y --validar-args
@@ -22,7 +22,7 @@ R7. Escrituras atomicas
 [OK] guardar_pt da los bytes de un torch.save directo
 [OK] Politica.guardar: primero el .json y despues el .pt: ['.json', 's7.pt']
 [OK] y se carga
-[OK] destino tomado 2 s: reintenta y escribe: 2.0 s
+[OK] destino tomado 2 s: reintenta y escribe: 2.5 s
 [OK] si el escritor falla, el archivo anterior queda entero
 [OK] ruta_tmp: .pt -> .tmp (mismo nombre dentro del zip); lo demas + .tmp
 
@@ -56,7 +56,7 @@ R3. CSV tomado por otro programa
 [OK] tramo intermedio con el CSV tomado (sin compartir): avisa, sigue en memoria y sale con 0: codigo 0; ["AVISO: no se puede escribir resultados_corredor_ippo_vecinos_p3rob_s7.csv ([Errno 13] Permission denied: 'resultados_corredor_ippo_vecinos_p3rob_s7.csv'); el tramo sigue con el CSV en memoria (el estado lo guarda) y lo escribe al terminar", "AVISO: resultados_corredor_ippo_vecinos_p3rob_s7.csv sigue tomado ([WinError 5] Acceso denegado: 'resultados_corredor_ippo_vecinos_p3rob_s7.csv.tmp' -> 'resultados_corredor_ippo_vecinos_p3rob_s7.csv'); el estado guarda el CSV y el tramo siguiente lo escribe"]
 [OK] el CSV en disco no cambio y el estado del 2 guarda las 2 filas: 2 filas en el estado
 [OK] tramo siguiente ya sin tomar: reescribe el CSV desde el estado (filas 1-4): codigo 0, 4 filas
-[OK] ultimo tramo con el CSV tomado (solo lectura, como Excel): espera, lo escribe al soltarlo y publica: codigo 0; aviso de espera a los 29 s; ["AVISO: no se puede escribir resultados_corredor_ippo_vecinos_p3rob_s7.csv ([Errno 13] Permission denied: 'resultados_corredor_ippo_vecinos_p3rob_s7.csv'); el tramo sigue con el CSV en memoria (el estado lo guarda) y lo escribe al terminar", "AVISO: resultados_corredor_ippo_vecinos_p3rob_s7.csv sigue tomado ([WinError 5] Acceso denegado: 'resultados_corredor_ippo_vecinos_p3rob_s7.csv.tmp' -> 'resultados_corredor_ippo_vecinos_p3rob_s7.csv'); cierralo: se reintenta cada 30 s y la politica se publica despues"]
+[OK] ultimo tramo con el CSV tomado (solo lectura, como Excel): espera, lo escribe al soltarlo y publica: codigo 0; aviso de espera a los 28 s; ["AVISO: no se puede escribir resultados_corredor_ippo_vecinos_p3rob_s7.csv ([Errno 13] Permission denied: 'resultados_corredor_ippo_vecinos_p3rob_s7.csv'); el tramo sigue con el CSV en memoria (el estado lo guarda) y lo escribe al terminar", "AVISO: resultados_corredor_ippo_vecinos_p3rob_s7.csv sigue tomado ([WinError 5] Acceso denegado: 'resultados_corredor_ippo_vecinos_p3rob_s7.csv.tmp' -> 'resultados_corredor_ippo_vecinos_p3rob_s7.csv'); cierralo: se reintenta cada 30 s y la politica se publica despues"]
 Frente a la referencia:
 [OK] CSV: iguales byte a byte salvo 'segundos' (6 filas)
 [OK] checkpoints: episodios con checkpoint: [2, 4, 6] | [2, 4, 6]
@@ -74,14 +74,14 @@ Frente a la referencia:
 
 R4. B22: un episodio rehecho que no repite el intento anterior
 [OK] relanzado: AVISO del episodio 3 y sale con 0: codigos 0, 0; ['AVISO: el episodio 3 no repite el intento anterior (timeloss_prom)', 'AVISO: 1 de los 2 episodios rehechos (3-4) no repiten el intento anterior (B22); detalle en checkpoints/corredor_ippo_vecinos_p3rob_s7_rehechos.json']
-[OK] checkpoints/<tag>_rehechos.json con el detalle: [{'tag': 'corredor_ippo_vecinos_p3rob_s7', 'fecha': '2026-11-05 12:12:30', 'git': '5824084', 'partida': 2, 'episodios': [3, 4], 'filas': 2, 'distintos': [[3, ['timeloss_prom']]]}]
+[OK] checkpoints/<tag>_rehechos.json con el detalle: [{'tag': 'corredor_ippo_vecinos_p3rob_s7', 'fecha': '2026-11-05 15:52:56', 'git': '201ec69', 'partida': 2, 'episodios': [3, 4], 'filas': 2, 'distintos': [[3, ['timeloss_prom']]]}]
 [OK] ultimo tramo: publica con meta['reanudaciones'] = esa comparacion: codigo 0; [{'partida': 2, 'episodios': [3, 4], 'filas': 2, 'distintos': [[3, ['timeloss_prom']]]}]
 [OK] el estado final tambien la guarda
 [OK] CSV final = el de la referencia (la fila rehecha reemplaza a la alterada): iguales byte a byte salvo 'segundos' (6 filas)
 
 R5. Procedencia: el ultimo tramo con otra copia del codigo (un comentario de mas)
-[OK] los dos tramos salen con 0 y el segundo avisa que el codigo es otro: codigos 0, 0; ['AVISO: el estado se escribio con otro codigo (huella 8f0e0c9ca65a, commit 5824084); esta corrida: huella 9751ebe96a63, commit 5824084']
-[OK] meta['tramos']: 1-2 y 3-6 con huellas distintas: [(1, 2, '8f0e0c9ca65a'), (3, 6, '9751ebe96a63')]
+[OK] los dos tramos salen con 0 y el segundo avisa que el codigo es otro: codigos 0, 0; ['AVISO: el estado se escribio con otro codigo (huella 7b3c905d2861, commit 201ec69); esta corrida: huella 13c76ed47e65, commit 201ec69']
+[OK] meta['tramos']: 1-2 y 3-6 con huellas distintas: [(1, 2, '7b3c905d2861'), (3, 6, '13c76ed47e65')]
 [OK] checkpoints: el del 2 sin tramos (un solo codigo hasta ahi); el del 4 con 1-2 y 3-4: [(1, 2), (3, 4)]
 Mismos numeros que la referencia:
 [OK] CSV: iguales byte a byte salvo 'segundos' (6 filas)
