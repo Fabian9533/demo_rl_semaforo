@@ -1,0 +1,7 @@
+  ok    sha256 de los 28 .rou.xml de plan2/ iguales a los del comienzo
+  ok    git status --porcelain --ignored -- plan2 TESIS vacio
+  ok    git diff 223f908 -- plan2 TESIS vacio
+  ok    preparar3 --revisar: 26 de 26 archivos como los escribiria preparar3
+  ok    sin restos de las pruebas en plan3/
+
+Resultado: TODO OK

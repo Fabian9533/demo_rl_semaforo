@@ -46,22 +46,27 @@ def correr_sumo(cfg, semilla, tripinfo, extra=(), fin=6000):
     return tripinfo, stats, r.stderr
 
 
-def leer_viajes(ruta):
+def leer_viajes(ruta, fin=None):
     """{id: {deseada, depart, dd, vtype, sf}} de un tripinfo; deseada = depart - departDelay (salida pedida). Los no
-    insertados (write-undeparted) traen depart = -1: su deseada queda en None."""
+    insertados (write-undeparted) traen depart = -1 y la espera hasta el cierre: su salida pedida es fin - departDelay,
+    con fin el instante en que cerro la simulacion (estadisticas()["fin"]); sin fin queda en None."""
     res = {}
     for v in ET.parse(ruta).getroot().iter("tripinfo"):
         dep, dd = float(v.get("depart")), float(v.get("departDelay", 0))
-        res[v.get("id")] = {"deseada": round(dep - dd, 2) if dep >= 0 else None, "depart": dep, "dd": dd,
-                            "vtype": v.get("vType"), "sf": v.get("speedFactor")}
+        deseada = round(dep - dd, 2) if dep >= 0 else (round(fin - dd, 2) if fin is not None else None)
+        res[v.get("id")] = {"deseada": deseada, "depart": dep, "dd": dd, "vtype": v.get("vType"),
+                            "sf": v.get("speedFactor")}
     return res
 
 
 def estadisticas(ruta):
+    """Del statistic-output: vehiculos cargados, insertados, en marcha y sin insertar al cerrar, teletransportes y el
+    instante de cierre (fin)."""
     raiz = ET.parse(ruta).getroot()
     veh, tel = raiz.find("vehicles"), raiz.find("teleports")
     res = {k: int(veh.get(k)) for k in ("loaded", "inserted", "running", "waiting")}
     res["teleports"] = int(tel.get("total")) if tel is not None else 0
+    res["fin"] = float(raiz.find("performance").get("end"))
     return res
 
 
@@ -74,6 +79,19 @@ def comparar_llegadas(a, b):
     return {"n_a": len(a), "n_b": len(b), "solo_uno": len(set(a) ^ set(b)), "deseada_distinta": dif_t,
             "sf_distinto": sum(1 for k in comunes if a[k]["sf"] != b[k]["sf"]),
             "tipo_distinto": sum(1 for k in comunes if a[k]["vtype"] != b[k]["vtype"]), "mismo_orden": orden}
+
+
+def limpiar_generados():
+    """Borra de plan3/ los <esc>_actuado.add.xml y <esc>_trivial.add.xml de los escenarios nuevos: los escriben
+    comun.archivo_actuado y archivo_trivial al vuelo en cada corrida de esos brazos y no se versionan."""
+    borrados = []
+    for esc in escenarios():
+        for sufijo in ("_actuado.add.xml", "_trivial.add.xml"):
+            ruta = os.path.join(PLAN3, esc + sufijo)
+            if os.path.exists(ruta):
+                os.remove(ruta)
+                borrados.append(esc + sufijo)
+    return borrados
 
 
 def sha256(ruta):

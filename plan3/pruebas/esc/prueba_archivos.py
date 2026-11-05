@@ -10,7 +10,8 @@ prueba_archivos.py - Prueba 1 de los escenarios nuevos (y lo que se comprueba si
   e. departLane="best" en los flows frente a --default.departlane best (P6 regular, semillas 424301-424303): las dos
      ven los mismos vehiculos y bajan la espera para entrar bajo 1 s/veh, pero en SUMO 1.25 eligen distinto el
      carril de entrada (se mide cuanto);
-  f. sha256 de los .rou.xml de plan2/ al empezar (prueba_cierre.py los compara al final).
+  f. sha256 de los .rou.xml de plan2/ al empezar (prueba_cierre.py los compara al final);
+  g. los valores de SUMO 1.25 por clase (passenger, motorcycle, bus), leidos con TraCI, son los de la mezcla.
 Uso (desde plan3/): python pruebas/esc/prueba_archivos.py      Salida: salidas/archivos.txt y sha_plan2_rou.txt
 """
 import os
@@ -56,10 +57,10 @@ def parte_a():
         for fid, v in de.por_flow(ruta(f"{esc}.rou.xml")).items():
             juntos[de.flujo_de(fid)] = juntos.get(de.flujo_de(fid), 0.0) + v * f
         dif_flow = max(abs(juntos.get(k, 0) - v) for k, v in por_flow_caso.items())
+        equiv = f" (x {f:.4f} = {n[1] * f:.2f} y {n[2] * f:.2f} equivalentes)" if mezcla else ""
         ok(set(juntos) == set(por_flow_caso) and dif < 1e-6 and dif_flow < 1e-6 and set(n) == {1, 2},
-           f"{esc:16s} periodo 1 {n[1]:8.2f}, periodo 2 {n[2]:8.2f} veh" + (f" (x {f:.4f} = {n[1] * f:.2f} y "
-                                                                             f"{n[2] * f:.2f} equivalentes)" if mezcla else "")
-           + f"; caso {caso} {c[1]:.0f} y {c[2]:.0f}; dif. max. por periodo {dif:.1e}, por flow {dif_flow:.1e}")
+           f"{esc:16s} periodo 1 {n[1]:8.2f}, periodo 2 {n[2]:8.2f} veh{equiv}; caso {caso} {c[1]:.0f} y "
+           f"{c[2]:.0f}; dif. max. por periodo {dif:.1e}, por flow {dif_flow:.1e}")
 
 
 def parte_b():
@@ -94,9 +95,10 @@ def parte_b():
         ok(len(probs) == 5 and abs(sum(probs) - 1) < 1e-5 and raiz.find("vTypeDistribution").get("id") == "auto",
            f"mix_{caso}: vTypeDistribution 'auto' con 5 tipos que suman {sum(probs):.6f}")
     comp = de.composicion()
+    eq = de.equivalencia_media()
     p("  composicion de la mezcla (%): " + ", ".join(f"{k} {v * 100:.3f}" for k, v in comp.items())
-      + f"; vehiculos equivalentes por vehiculo {de.equivalencia_media():.4f} -> demanda x {1 / de.equivalencia_media():.4f}"
-      + f" (con la moto en 0.5: x {1 / (de.equivalencia_media() - 0.5 * comp['moto']):.4f})")
+      + f"; vehiculos equivalentes por vehiculo {eq:.4f} -> demanda x {1 / eq:.4f}"
+      + f" (con la moto en 0.5: x {1 / (eq - 0.5 * comp['moto']):.4f})")
 
 
 def parte_c():
@@ -105,7 +107,8 @@ def parte_c():
 
     def cargar(nombre):
         r = subprocess.run(["sumo", "-c", f"{nombre}.sumocfg", "--seed", "424301", "--end", "300",
-                            "--no-warnings", "false", "--no-step-log", "true"], cwd=u.PLAN3, capture_output=True, text=True)
+                            "--no-warnings", "false", "--no-step-log", "true"],
+                           cwd=u.PLAN3, capture_output=True, text=True)
         avisos = [l for l in r.stderr.splitlines() if l.startswith("Warning")]
         tipos = sorted({re.sub(r"'[^']*'|[-0-9.]+", "#", l)[:60] for l in avisos})
         return nombre, r.returncode, len(avisos), sum(1 for l in r.stderr.splitlines() if l.startswith("Error")), tipos
@@ -113,7 +116,8 @@ def parte_c():
     with cf.ThreadPoolExecutor(u.MAX_SUMO) as pool:
         res = list(pool.map(cargar, casos + list(e3.ESTOCASTICOS)))
     for nombre, codigo, n_avisos, n_err, tipos in res:
-        texto = f"{nombre:16s} codigo {codigo}, errores {n_err}, avisos {n_avisos}" + (f": {'; '.join(tipos)}" if tipos else "")
+        texto = f"{nombre:16s} codigo {codigo}, errores {n_err}, avisos {n_avisos}" + \
+            (f": {'; '.join(tipos)}" if tipos else "")
         if nombre in casos:
             p("  (caso) " + texto)
         else:
@@ -136,7 +140,8 @@ def parte_d():
     iguales = [n for n in os.listdir(copia) if n.split(".")[0] in e3.RECETAS and
                open(os.path.join(copia, n), encoding="utf-8").read() == open(ruta(n), encoding="utf-8").read()]
     ok(r.returncode == 0 and len(iguales) == 2 * len(e3.RECETAS),
-       f"preparar3 en una copia (tmp_esc/preparar_copia): {len(iguales)} de {2 * len(e3.RECETAS)} archivos iguales a plan3/")
+       f"preparar3 en una copia (tmp_esc/preparar_copia): {len(iguales)} de {2 * len(e3.RECETAS)} archivos "
+       f"iguales a plan3/")
 
 
 def parte_e():
@@ -147,7 +152,8 @@ def parte_e():
       "(DEFAULT), asi que con la opcion entra por getProbableLane (el carril con mas hueco, como best_prob) y con el "
       "atributo por getFreeLane (el 'best' de la documentacion).")
     os.makedirs(os.path.join(u.TMP, "archivos"), exist_ok=True)
-    variantes = {"flows": ("malla3_alta_e.sumocfg", []), "opcion": ("malla3_alta.sumocfg", ["--default.departlane", "best"]),
+    variantes = {"flows": ("malla3_alta_e.sumocfg", []),
+                 "opcion": ("malla3_alta.sumocfg", ["--default.departlane", "best"]),
                  "defecto": ("malla3_alta.sumocfg", [])}
     trabajos = [(n, s) for n in variantes for s in (424301, 424302, 424303)]
     with cf.ThreadPoolExecutor(u.MAX_SUMO) as pool:
@@ -175,6 +181,32 @@ def parte_e():
        "con las dos formas de 'best' la espera para entrar de P6 queda bajo 1 s/veh")
 
 
+def parte_g():
+    p("g. Valores por defecto de SUMO 1.25 por clase (leidos con TraCI) frente a los vType de la mezcla")
+    import traci
+    rou = os.path.join(u.TMP, "archivos", "clases.rou.xml")
+    os.makedirs(os.path.dirname(rou), exist_ok=True)
+    clases = ("passenger", "motorcycle", "bus")
+    with open(rou, "w", encoding="utf-8") as f:
+        f.write("<routes>\n" + "".join(f'    <vType id="{c}" vClass="{c}"/>\n' for c in clases) + "</routes>\n")
+    traci.start(["sumo", "-n", "corredor.net.xml", "-r", rou, "--end", "1", "--no-step-log", "true"],
+                label="clases")
+    vt = traci.getConnection("clases").vehicletype
+    medido = {c: {"length": vt.getLength(c), "accel": vt.getAccel(c), "decel": vt.getDecel(c),
+                  "minGap": vt.getMinGap(c), "sigma": vt.getImperfection(c), "speedDev": vt.getSpeedDeviation(c),
+                  "emergencyDecel": vt.getEmergencyDecel(c), "maxSpeed": round(vt.getMaxSpeed(c), 2),
+                  "emision": vt.getEmissionClass(c)} for c in clases}
+    traci.getConnection("clases").close()
+    for clase, vclase in (("auto", "passenger"), ("moto", "motorcycle"), ("bus", "bus")):
+        attrs = dict(re.findall(r'(\w+)="([^"]+)"', de.TIPOS[clase]))
+        iguales = all(abs(float(attrs[k]) - medido[vclase][k]) < 1e-9 for k in ("length", "accel", "decel"))
+        ok(iguales, f"{clase}: largo {attrs['length']}, accel {attrs['accel']}, decel {attrs['decel']} = los de la "
+                    f"clase {vclase} de SUMO")
+    for vclase in clases:
+        resto = ", ".join(f"{k} {v}" for k, v in medido[vclase].items() if k not in ("length", "accel", "decel"))
+        p(f"  {vclase:10s} lo que la mezcla toma de la clase: {resto}")
+
+
 def main():
     os.chdir(u.PLAN3)
     shas = u.sha_plan2_rou()
@@ -186,6 +218,7 @@ def main():
     parte_c()
     parte_d()
     parte_e()
+    parte_g()
     p(f"\nResultado: {'TODO OK' if not fallas else f'{len(fallas)} FALLAS'}")
     p.guardar()
     sys.exit(1 if fallas else 0)

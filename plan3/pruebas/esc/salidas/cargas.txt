@@ -1,0 +1,37 @@
+7. Fijo instalado y actuado en los escenarios nuevos, semillas 424301-424302, evaluar.py por el lanzador (retraso total, timeLoss y espera para entrar en s/veh; media de las 2 semillas)
+  ok    time-to-teleport -1 en los 13 .sumocfg (sin teletransportes)
+  ok    poi_corredor     fijo     total   27.18 (por semilla 28.06/26.31), timeLoss  25.89, entrar   1.30; vehiculos 1760; no insertados 0, no terminados 0; ultima llegada 3710 s
+  ok    poi_corredor     actuado  total   24.38 (por semilla 24.8/23.95), timeLoss  23.08, entrar   1.29; vehiculos 1760; no insertados 0, no terminados 0; ultima llegada 3703 s
+  ok    poi_corredor_alta fijo     total  487.12 (por semilla 527.94/446.29), timeLoss 175.47, entrar 311.65; vehiculos 3589; no insertados 0, no terminados 0; ultima llegada 5724 s
+  ok    poi_corredor_alta actuado  total  438.43 (por semilla 465.44/411.42), timeLoss 136.40, entrar 302.03; vehiculos 3589; no insertados 0, no terminados 0; ultima llegada 5585 s
+  ok    poi_red          fijo     total   23.03 (por semilla 24.44/21.62), timeLoss  21.43, entrar   1.60; vehiculos 2099; no insertados 0, no terminados 0; ultima llegada 3768 s
+  ok    poi_red          actuado  total   24.87 (por semilla 26.46/23.28), timeLoss  23.28, entrar   1.59; vehiculos 2099; no insertados 0, no terminados 0; ultima llegada 3777 s
+  ok    poi_red_alta     fijo     total   32.91 (por semilla 30.89/34.93), timeLoss  30.89, entrar   2.02; vehiculos 2532; no insertados 0, no terminados 0; ultima llegada 3769 s
+  ok    poi_red_alta     actuado  total   33.16 (por semilla 30.56/35.77), timeLoss  31.14, entrar   2.02; vehiculos 2532; no insertados 0, no terminados 0; ultima llegada 3770 s
+  ok    poi_malla3       fijo     total   22.76 (por semilla 22.92/22.6), timeLoss  22.15, entrar   0.61; vehiculos 4302; no insertados 0, no terminados 0; ultima llegada 3775 s
+  ok    poi_malla3       actuado  total   26.29 (por semilla 26.84/25.73), timeLoss  25.67, entrar   0.61; vehiculos 4302; no insertados 0, no terminados 0; ultima llegada 3770 s
+  ok    poi_malla3_alta  fijo     total   47.27 (por semilla 49.19/45.36), timeLoss  46.34, entrar   0.94; vehiculos 8657; no insertados 0, no terminados 0; ultima llegada 3870 s
+  ok    poi_malla3_alta  actuado  total   56.18 (por semilla 47.83/64.53), timeLoss  55.21, entrar   0.96; vehiculos 8657; no insertados 0, no terminados 0; ultima llegada 3852 s
+  ok    malla3_alta_e    fijo     total   36.42 (por semilla 36.24/36.61), timeLoss  36.15, entrar   0.28; vehiculos 8700; no insertados 0, no terminados 0; ultima llegada 3785 s
+  ok    malla3_alta_e    actuado  total   55.70 (por semilla 56.95/54.46), timeLoss  55.42, entrar   0.28; vehiculos 8700; no insertados 0, no terminados 0; ultima llegada 3970 s
+  ok    per_corredor     fijo     total   47.93 (por semilla 42.0/53.86), timeLoss  46.20, entrar   1.73; vehiculos 1761; no insertados 0, no terminados 0; ultima llegada 3720 s
+  ok    per_corredor     actuado  total   28.73 (por semilla 29.75/27.71), timeLoss  27.02, entrar   1.71; vehiculos 1761; no insertados 0, no terminados 0; ultima llegada 3707 s
+  ok    mix_corredor     fijo     total   27.98 (por semilla 31.74/24.21), timeLoss  26.79, entrar   1.19; vehiculos 1474; no insertados 0, no terminados 0; ultima llegada 3706 s
+  ok    mix_corredor     actuado  total   23.91 (por semilla 25.73/22.09), timeLoss  22.73, entrar   1.18; vehiculos 1474; no insertados 0, no terminados 0; ultima llegada 3714 s
+  ok    mixa_corredor    fijo     total   29.23 (por semilla 33.25/25.21), timeLoss  28.04, entrar   1.19; vehiculos 1474; no insertados 0, no terminados 0; ultima llegada 3707 s
+  ok    mixa_corredor    actuado  total   25.33 (por semilla 27.05/23.6), timeLoss  24.14, entrar   1.18; vehiculos 1474; no insertados 0, no terminados 0; ultima llegada 3721 s
+  ok    per_red          fijo     total   25.71 (por semilla 28.08/23.35), timeLoss  24.24, entrar   1.47; vehiculos 2102; no insertados 0, no terminados 0; ultima llegada 3754 s
+  ok    per_red          actuado  total   27.11 (por semilla 29.5/24.71), timeLoss  25.63, entrar   1.48; vehiculos 2102; no insertados 0, no terminados 0; ultima llegada 3750 s
+  ok    mix_red          fijo     total   22.32 (por semilla 22.78/21.86), timeLoss  21.19, entrar   1.13; vehiculos 1748; no insertados 0, no terminados 0; ultima llegada 3760 s
+  ok    mix_red          actuado  total   23.78 (por semilla 23.9/23.66), timeLoss  22.64, entrar   1.14; vehiculos 1748; no insertados 0, no terminados 0; ultima llegada 3765 s
+  ok    mixa_red         fijo     total   22.51 (por semilla 22.62/22.4), timeLoss  21.37, entrar   1.14; vehiculos 1748; no insertados 0, no terminados 0; ultima llegada 3759 s
+  ok    mixa_red         actuado  total   24.02 (por semilla 23.98/24.06), timeLoss  22.89, entrar   1.14; vehiculos 1748; no insertados 0, no terminados 0; ultima llegada 3763 s
+  (P6 entregado, entrada por defecto) malla3_alta      fijo     total   81.87 (por semilla 82.57/81.17), timeLoss  36.64, entrar  45.23; vehiculos 8700; no insertados 0, no terminados 0; ultima llegada 3929 s
+  per_corredor fijo, semilla 424301, retraso total por bloque de 10 min (vehiculos / s por vehiculo): b0 182 / 20.1, b1 296 / 25.0, b2 423 / 42.1, b3 388 / 71.9, b4 288 / 46.0, b5 213 / 24.4  (esperados por bloque: 201, 302, 402, 402, 302, 201)
+  per_corredor actuado, semilla 424301, retraso total por bloque de 10 min (vehiculos / s por vehiculo): b0 182 / 18.5, b1 296 / 23.3, b2 423 / 33.3, b3 388 / 39.0, b4 288 / 31.6, b5 213 / 22.0  (esperados por bloque: 201, 302, 402, 402, 302, 201)
+  per_red fijo, semilla 424301, retraso total por bloque de 10 min (vehiculos / s por vehiculo): b0 214 / 19.1, b1 352 / 23.4, b2 495 / 43.5, b3 449 / 26.3, b4 378 / 24.4, b5 248 / 20.4  (esperados por bloque: 239, 358, 478, 478, 358, 239)
+  per_red actuado, semilla 424301, retraso total por bloque de 10 min (vehiculos / s por vehiculo): b0 214 / 19.4, b1 352 / 24.2, b2 495 / 43.0, b3 449 / 30.7, b4 378 / 26.5, b5 248 / 21.1  (esperados por bloque: 239, 358, 478, 478, 358, 239)
+5. Espera para entrar del fijo en P6e (malla3_alta_e) frente a P6 entregado, mismas semillas
+  ok    P6e: [0.28, 0.27] s/veh (bajo 1 s/veh); P6 entregado: [45.66, 44.8] s/veh
+
+Resultado: TODO OK

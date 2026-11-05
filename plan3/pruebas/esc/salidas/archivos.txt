@@ -79,5 +79,12 @@ e. departLane=best en los flows frente a --default.departlane best (P6 regular, 
   opcion   espera para entrar   0.30 s/veh, timeLoss  36.97 s/veh, retraso total  37.27; entra por el carril 0 el 53.6 % (media de 3 semillas)
   defecto  espera para entrar  45.45 s/veh, timeLoss  36.51 s/veh, retraso total  81.96; entra por el carril 0 el 100.0 % (media de 3 semillas)
   ok    con las dos formas de 'best' la espera para entrar de P6 queda bajo 1 s/veh
+g. Valores por defecto de SUMO 1.25 por clase (leidos con TraCI) frente a los vType de la mezcla
+  ok    auto: largo 5, accel 2.6, decel 4.5 = los de la clase passenger de SUMO
+  ok    moto: largo 2.2, accel 6, decel 10 = los de la clase motorcycle de SUMO
+  ok    bus: largo 12, accel 1.2, decel 4 = los de la clase bus de SUMO
+  passenger  lo que la mezcla toma de la clase: minGap 2.5, sigma 0.5, speedDev 0.1, emergencyDecel 9.0, maxSpeed 55.56, emision HBEFA4/PC_petrol_Euro-4
+  motorcycle lo que la mezcla toma de la clase: minGap 2.5, sigma 0.5, speedDev 0.1, emergencyDecel 10.0, maxSpeed 55.56, emision HBEFA4/MC_4S_gt250cc_preEuro
+  bus        lo que la mezcla toma de la clase: minGap 2.5, sigma 0.5, speedDev 0.0, emergencyDecel 7.0, maxSpeed 27.78, emision HBEFA4/UBus_Std_gt15-18t_Euro-VI_A-C
 
 Resultado: TODO OK
