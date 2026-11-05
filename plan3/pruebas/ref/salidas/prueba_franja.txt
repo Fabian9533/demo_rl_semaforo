@@ -1,0 +1,49 @@
+Pruebas de 0.8: fijo por franja y por bloques con WAUT (semillas de humo)
+OK    1 corredor: franja v20_t10_o0_15 -> el mismo, sumo directo: tripinfo ('ae56de609cf881bb', 1810) = fijo ('ae56de609cf881bb', 1810); retraso total 21.91 = 21.91
+OK    1 corredor: por TraCI (evaluar fijo y franja): ('ae56de609cf881bb', 1810) = ('ae56de609cf881bb', 1810); mismas metricas: True
+OK    1 red: franja v10_t10_o0_25_24 -> el mismo, sumo directo: tripinfo ('0e059ec02585dcfd', 2152) = fijo ('0e059ec02585dcfd', 2152); retraso total 20.14 = 20.14
+OK    1 red: por TraCI (evaluar fijo y franja): ('0e059ec02585dcfd', 2152) = ('0e059ec02585dcfd', 2152); mismas metricas: True
+OK    1 malla3_alta: franja v15_t10_o0_0_0_0_0_0_0_0_0 -> el mismo, sumo directo: tripinfo ('d38c08112ac098a0', 8700) = fijo ('d38c08112ac098a0', 8700); retraso total 82.57 = 82.57
+OK    1 malla3_alta: por TraCI (evaluar fijo y franja): ('d38c08112ac098a0', 8700) = ('d38c08112ac098a0', 8700); mismas metricas: True
+OK    2 P1_off30 semaforo_C1: instante limpio 1801 s (WAUT), franja2 desde 1802 s, alineado con el plan 2 solo en los 1898 s siguientes: True
+OK    2 P1_off30 semaforo_C2: instante limpio 1800 s (WAUT), franja2 desde 1801 s, alineado con el plan 2 solo en los 1899 s siguientes: True
+OK    3 P1_off30: cortes de verde sin ambar con los instantes limpios: 0
+  3 P1_off30: con el cambio de todos a los 1800 s habria 0 cortes
+OK    4 P1_off30: sumo directo ('d93cc01ce4616a92', 1810) = TraCI ('d93cc01ce4616a92', 1810); retraso total 23.92 = 23.92
+OK    2 P1_off5 semaforo_C1: instante limpio 1801 s (WAUT), franja2 desde 1802 s, alineado con el plan 2 solo en los 1901 s siguientes: True
+OK    2 P1_off5 semaforo_C2: instante limpio 1829 s (WAUT), franja2 desde 1830 s, alineado con el plan 2 solo en los 1873 s siguientes: True
+OK    3 P1_off5: cortes de verde sin ambar con los instantes limpios: 0
+  3 P1_off5: con el cambio de todos a los 1800 s habria 6 cortes
+OK    4 P1_off5: sumo directo ('c98f2d371b3ba62b', 1810) = TraCI ('c98f2d371b3ba62b', 1810); retraso total 27.21 = 27.21
+OK    2 P1_off40 semaforo_C1: instante limpio 1801 s (WAUT), franja2 desde 1802 s, alineado con el plan 2 solo en los 1903 s siguientes: True
+OK    2 P1_off40 semaforo_C2: instante limpio 1807 s (WAUT), franja2 desde 1808 s, alineado con el plan 2 solo en los 1897 s siguientes: True
+OK    3 P1_off40: cortes de verde sin ambar con los instantes limpios: 0
+  3 P1_off40: con el cambio de todos a los 1800 s habria 6 cortes
+OK    4 P1_off40: sumo directo ('01a7a8882283f789', 1810) = TraCI ('01a7a8882283f789', 1810); retraso total 25.75 = 25.75
+OK    2 P3 semaforo_C1: instante limpio 1801 s (WAUT), franja2 desde 1802 s, alineado con el plan 2 solo en los 1954 s siguientes: True
+OK    2 P3 semaforo_C2: instante limpio 1820 s (WAUT), franja2 desde 1821 s, alineado con el plan 2 solo en los 1935 s siguientes: True
+OK    2 P3 semaforo_C3: instante limpio 1800 s (WAUT), franja2 desde 1801 s, alineado con el plan 2 solo en los 1955 s siguientes: True
+OK    3 P3: cortes de verde sin ambar con los instantes limpios: 0
+  3 P3: con el cambio de todos a los 1800 s habria 8 cortes
+OK    4 P3: sumo directo ('68f13eda1e11a4f8', 2152) = TraCI ('68f13eda1e11a4f8', 2152); retraso total 21.17 = 21.17
+OK    2 P6 semaforo_C11: instante limpio 1800 s (WAUT), franja2 desde 1801 s, alineado con el plan 2 solo en los 2141 s siguientes: True
+OK    2 P6 semaforo_C12: instante limpio 1804 s (WAUT), franja2 desde 1805 s, alineado con el plan 2 solo en los 2137 s siguientes: True
+OK    2 P6 semaforo_C13: instante limpio 1871 s (WAUT), franja2 desde 1872 s, alineado con el plan 2 solo en los 2070 s siguientes: True
+OK    2 P6 semaforo_C21: instante limpio 1800 s (WAUT), franja2 desde 1801 s, alineado con el plan 2 solo en los 2141 s siguientes: True
+OK    2 P6 semaforo_C22: instante limpio 1804 s (WAUT), franja2 desde 1805 s, alineado con el plan 2 solo en los 2137 s siguientes: True
+OK    2 P6 semaforo_C23: instante limpio 1871 s (WAUT), franja2 desde 1872 s, alineado con el plan 2 solo en los 2070 s siguientes: True
+OK    2 P6 semaforo_C31: instante limpio 1800 s (WAUT), franja2 desde 1801 s, alineado con el plan 2 solo en los 2141 s siguientes: True
+OK    2 P6 semaforo_C32: instante limpio 1804 s (WAUT), franja2 desde 1805 s, alineado con el plan 2 solo en los 2137 s siguientes: True
+OK    2 P6 semaforo_C33: instante limpio 1871 s (WAUT), franja2 desde 1872 s, alineado con el plan 2 solo en los 2070 s siguientes: True
+OK    3 P6: cortes de verde sin ambar con los instantes limpios: 0
+  3 P6: con el cambio de todos a los 1800 s habria 24 cortes
+OK    4 P6: sumo directo ('73b33920e402acd8', 8700) = TraCI ('73b33920e402acd8', 8700); retraso total 83.91 = 83.91
+OK    3 la prueba ve cortes cuando los hay (cambio ingenuo): [0, 6, 6, 8, 24]
+OK    5 P1: 6 programas; cada semaforo cambia en sus instantes limpios (p. ej. semaforo_C1: [626, 1200, 1813, 2426, 3002])
+OK    5 P1: cortes de verde sin ambar: 0
+OK    5 P1: sumo directo ('17b18c075d3a17a7', 1810) = TraCI modo bloques ('17b18c075d3a17a7', 1810)
+OK    5 P6: 5 programas; cada semaforo cambia en sus instantes limpios (p. ej. semaforo_C11: [608, 1205, 2431, 3008])
+OK    5 P6: cortes de verde sin ambar: 0
+OK    5 P6: sumo directo ('c6d04557f5497016', 8700) = TraCI modo bloques ('c6d04557f5497016', 8700)
+
+RESULTADO: PASA
