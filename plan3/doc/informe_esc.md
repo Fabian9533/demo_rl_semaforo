@@ -108,15 +108,15 @@ python ../con_escenarios.py ../rl_ippo.py train --escenario poi_<caso> --variant
     --episodios 200 --eval-cada 10 --v2 --criterio-val total --guardar-estado --etiqueta p3v2poi \
     --val-seeds 999,1999,2999,3999,4999,7999,8999,9999,15001,15002,15003,15004,15005,15006,15007,15008
 # 1.3 P6e (V2 con llegadas regulares, 5 bases): lo mismo con --escenario malla3_alta_e --etiqueta p3v2reg
-# 2.4 perfil (3 bases): --escenario per_corredor | per_red --etiqueta p3per
-# 2.5 mezcla (3 bases): --escenario mix_corredor | mix_red --etiqueta p3mix
+# 2.4 perfil (3 bases): --escenario per_corredor | per_red --etiqueta p3v2per
+# 2.5 mezcla (3 bases): --escenario mix_corredor | mix_red --etiqueta p3v2mix
 
 # evaluaciones (evaluar3.py corre igual por el lanzador)
 python ../con_escenarios.py ../evaluar.py --escenario <esc> --brazo fijo|actuado|trivial --semillas <s> --salida <csv>
 python ../con_escenarios.py ../evaluar.py --escenario <esc> --politica <politica.pt> --semillas <s> --salida <csv>
 # arranque lento (2.5): la politica entrenada en mix_<caso> se juega en mixa_<caso> (evaluar avisa que se entreno en
 # otro escenario; es lo buscado)
-python ../con_escenarios.py ../evaluar.py --escenario mixa_<caso> --politica politica_mix_<caso>_vecinos_p3mix_s<b>.pt ...
+python ../con_escenarios.py evaluar3.py --escenario mixa_<caso> --politica politica_mix_<caso>_vecinos_p3v2mix_s<b>.pt ...
 
 # barridos del fijo (barrer_fino.py es de la tarea 0.7; barrer_fijo.py nunca con --instalar)
 python ../con_escenarios.py barrer_fino.py <esc> ...
@@ -321,3 +321,12 @@ En `plan3-esc`, a nombre de Fabian y sin coautor: a22974c (metas `.json` de insu
 generador, escenarios y prueba de archivos), fea637a (las demás pruebas, sus salidas y el formato a ≤ 110
 caracteres) y el último (este informe, y la prueba 7 con la copia de sus CSV en `salidas/cargas/`). No toqué archivos
 de otras tareas; `plan3/insumos/entregado/*.json` es idéntico a lo que agregó el coordinador en `plan3-dev`.
+
+
+## Nota de la integración (05.11.2026)
+
+Las etiquetas del perfil y de la mezcla quedaron `p3v2per` y `p3v2mix` (las que usa `generar_trabajos3.py`); en el
+manifiesto de evaluaciones sus tipos son `v2per` y `v2mix`. Las evaluaciones van con `evaluar3.py`. La revisión
+del 05.11 corrigió además: las cifras de la entrada `best` (ver prerregistro §5), el cierre a los 6000 s en P2 (el
+ciclo mínimo siempre llega; prerregistro §4) y las métricas del corredor en `per_` (`comun.QUITAR_BLOQUE`, que
+activa `con_escenarios.registrar`).

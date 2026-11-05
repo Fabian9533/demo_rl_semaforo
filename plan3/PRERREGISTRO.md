@@ -141,12 +141,21 @@ tengan el mismo protocolo, ninguna decide con 1001-1030.
 - El redondeo de `exp()` al segundo agrega +0.5 s/veh de espera con llegadas aleatorias, igual en todos los brazos
   [M `plan3/demanda/salidas/prueba_e_resumen.txt`].
 - **Cierre de la simulación.** Cada episodio cierra a más tardar a los 6000 s, como en lo entregado. Un vehículo que a
-  esa hora todavía espera entrar cuenta con la espera que llevaba: es una cota inferior de su retraso. Con llegadas
-  aleatorias en P2 la espera para entrar es larga (312 s/veh con el fijo instalado y el último vehículo llega a los
-  5724 s, en semillas de humo [M `plan3/pruebas/esc/salidas/cargas.txt`]), así que alguna semilla puede tocar el
-  cierre. Por celda y brazo se informan las semillas con no insertados al cerrar y cuántos vehículos. **Lectura
-  obligada:** si un brazo deja vehículos sin entrar, su retraso total está subestimado y la diferencia con un brazo
-  que no los deja es conservadora.
+  esa hora todavía espera entrar cuenta con la espera que llevaba, y uno que sigue en la red, con su timeLoss hasta
+  ahí: el retraso total de esa semilla es una cota inferior. En P2 el ciclo mínimo llega siempre al cierre, con
+  llegadas regulares (como en lo entregado, 30 de 30 semillas) y aleatorias (62-307 vehículos sin entrar en semillas de
+  humo); el fijo instalado, el actuado y el IPPO entregado no llegan en 40 semillas de humo, aunque el fijo queda a 37 s
+  en la peor. Con llegadas aleatorias en P2 la espera para entrar del fijo instalado es de 335 s/veh en media (224-429
+  en 40 semillas de humo) [M `plan3/pruebas/esc/salidas/` y revisión del 05.11]. Por celda y brazo se informan las
+  semillas con vehículos sin entrar o sin terminar al cerrar, y cuántos. **Lectura obligada:** el brazo que llega al
+  cierre tiene su retraso subestimado. Si es la referencia (por ejemplo, el ciclo mínimo), la ventaja medida del modelo
+  frente a ella es menor que la real (conservadora); si es el modelo, su ventaja medida es mayor que la real y se dice.
+- **Rutas en la malla.** En P5, P6 y P6e cada vehículo elige su camino al entrar según los tiempos de viaje recientes
+  (el ruteo por defecto de SUMO, también en lo entregado). Los brazos reciben las mismas llegadas, pero no siempre
+  recorren los mismos caminos (cambian 387-708 de ~8700 en una semilla de humo), y el timeLoss no cuenta el tiempo
+  extra de un camino más largo: en semillas de humo eso es ≤ 0.3 s/veh con el fijo, 0.8-1.7 con el actuado y ~0 con
+  el IPPO entregado [M revisión del 05.11]. Se declara; los escenarios no se cambian, para seguir comparables con lo
+  entregado.
 
 ## 5. Referencias
 
@@ -172,10 +181,12 @@ llegadas aleatorias se re-ajustan con ellas. Los ganadores salen de estas reglas
 10, 15, 20... s [M `rl_ippo.py` l. 671-678]. Se declara. El fijo de verdes de 5 en 5 mide ese límite.
 
 **Inserción en los escenarios nuevos** [A2]: `departLane="best"` en cada flujo de los escenarios nuevos
-(`plan3/demanda_estocastica.py`), no como opción por defecto de SUMO. En SUMO 1.25 las dos formas eligen el carril de
-manera distinta (el atributo del flujo usa el carril libre; la opción, el carril probable): en P6 regular, la espera
-para entrar del fijo es 0.28 s/veh con el atributo y 0.30 con la opción, y el retraso total 36.40 y 37.27 s/veh [M
-`plan3/pruebas/esc/salidas/`, 3 semillas de humo]. Las cifras del diseño citadas en §4 y §15 se midieron con la opción.
+(`plan3/demanda_estocastica.py`), no como opción por defecto de SUMO: así la entrada va con la demanda. En SUMO 1.25 las
+dos formas eligen el carril de manera distinta (el atributo del flujo usa el carril libre; la opción, el carril
+probable). En P6 regular, con el fijo y 60 semillas de humo, el carril 0 recibe el 40.0 % de los vehículos con el
+atributo y el 53.8 % con la opción, y la espera para entrar es 0.278 y 0.296 s/veh; el retraso total no cambia de forma
+medible (36.59 y 36.71 s/veh; diferencia +0.12, error estándar 0.09) [M revisión del 05.11]. Por eso las cifras del
+diseño citadas en §4 y §15, que se midieron con la opción, valen también aquí.
 
 ## 6. Versión evaluada, emparejamiento y convergencia
 
