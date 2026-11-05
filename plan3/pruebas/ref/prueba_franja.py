@@ -273,6 +273,7 @@ def prueba_regla_de_antes(n_pares=3000):
     verdes = list(range(10, 61))
     cuenta = {r: 0 for r in franja.REGLAS_CAMBIO}
     distintos, malos, retraso_max = [], [], {r: 0 for r in franja.REGLAS_CAMBIO}
+    tardes, sin_aviso = 0, []
     for k in range(n_pares):
         c = celdas[k % 3]
         a1, t1, a2, t2 = (rng.choice(verdes) for _ in range(4))
@@ -296,11 +297,17 @@ def prueba_regla_de_antes(n_pares=3000):
                 malos.append((c.esc, p1["clave"], p2["clave"], i, t, regla))
             if regla == "relajada" and franja.verdes_cortos(a, b, t):
                 malos.append((c.esc, p1["clave"], p2["clave"], i, t, "relajada con un verde corto"))
-    inf.chequeo(not distintos and not malos and cuenta["forzado"] == 0,
+            if t - 1800 > franja.TARDE:
+                tardes += 1
+                r = franja.resumen_cambios(c.p, [(0, p1), (1800, p2)])
+                if c.p.ids[i] not in {x["semaforo"] for x in r["tardios"]} or "tardios" not in (r["aviso"] or ""):
+                    sin_aviso.append((c.esc, p1["clave"], p2["clave"], i, t))
+    inf.chequeo(not distintos and not malos and cuenta["forzado"] == 0 and not sin_aviso,
                 f"7 {n_pares} pares al azar en P1, P3 y P6 ({sum(cuenta.values())} cambios de semaforo): reglas "
                 f"{cuenta}, retraso maximo por regla {retraso_max}; instante estricto distinto del de antes: "
                 f"{len(distintos)} {distintos[:2]}; cambios que cortan un verde o dejan un ambar corto (o, la "
-                f"relajada, un verde de menos de {franja.VERDE_MINIMO} s): {len(malos)}")
+                f"relajada, un verde de menos de {franja.VERDE_MINIMO} s): {len(malos)}; cambios de mas de "
+                f"{franja.TARDE} s tarde: {tardes}, sin su aviso en resumen_cambios: {len(sin_aviso)}")
 
 
 def main():

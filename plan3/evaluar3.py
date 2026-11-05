@@ -98,7 +98,7 @@ def fin_de_simulacion(tripinfo):
 
 BRAZOS = ("fijo", "actuado", "trivial", "franja", "bloques", "actuado_aj")
 CON_PROGRAMA = ("fijo", "franja", "bloques", "actuado_aj")
-CONGELADAS = os.path.join(PLAN3, "referencias_congeladas.json")
+CONGELADAS = "referencias_congeladas.json"      # en la carpeta actual (plan3/), como los programas
 
 
 def sha256_de(ruta):
@@ -126,12 +126,12 @@ def comprobar_congelada(ruta):
     """A ciegas: la referencia debe ser la congelada en la parte B (referencias_congeladas.json, mismo sha256)."""
     import json
     if not os.path.exists(CONGELADAS):
-        sys.exit(f"a ciegas, la referencia {ruta} necesita {os.path.basename(CONGELADAS)} (parte B, p3_congelar.py)")
+        sys.exit(f"a ciegas, la referencia {ruta} necesita {CONGELADAS} (parte B, p3_congelar.py)")
     with open(CONGELADAS, encoding="utf-8") as f:
         congeladas = json.load(f)["referencias"]
-    clave = os.path.relpath(os.path.abspath(ruta), PLAN3).replace(os.sep, "/")
+    clave = os.path.relpath(os.path.abspath(ruta), os.getcwd()).replace(os.sep, "/")
     if clave not in congeladas:
-        sys.exit(f"a ciegas: {clave} no esta en {os.path.basename(CONGELADAS)}")
+        sys.exit(f"a ciegas: {clave} no esta en {CONGELADAS}")
     if not os.path.exists(ruta) or sha256_de(ruta) != congeladas[clave]["sha256"]:
         sys.exit(f"a ciegas: {clave} no es la referencia congelada (sha256 distinto o falta el archivo)")
 

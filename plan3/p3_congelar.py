@@ -28,7 +28,7 @@ for _ruta in (AQUI, RAIZ):
     if _ruta not in sys.path:
         sys.path.insert(0, _ruta)
 
-DESTINO = os.path.join(AQUI, "referencias_congeladas.json")
+DESTINO = "referencias_congeladas.json"          # en la carpeta actual (plan3/, o la copia de una prueba)
 # sufijo del programa -> JSON de su barrido en barridos/<esc>/
 FUENTES = {"_r10f.add.xml": "fijo_fino.json", "_m5f.add.xml": "fijo_mult5.json", "_r10g.add.xml": "fijo_grueso10.json",
            "_franja.add.xml": "franja.json", "_bloques.add.xml": "bloques.json",
@@ -58,7 +58,7 @@ def archivo_del_brazo(esc, brazo):
 
 def revisar(rel):
     """(datos de la entrada, problemas) de un archivo de referencia, relativo a plan3/."""
-    ruta = os.path.join(AQUI, rel)
+    ruta = rel
     if not os.path.exists(ruta):
         return None, [f"{rel}: falta"]
     problemas = []
@@ -78,9 +78,9 @@ def revisar(rel):
         return entrada, [f"{rel}: no se de que barrido sale"]
     esc = rel[:-len(sufijo)]
     fuente = os.path.join("barridos", esc, FUENTES[sufijo]).replace(os.sep, "/")
-    if not os.path.exists(os.path.join(AQUI, fuente)):
+    if not os.path.exists(fuente):
         return entrada, [f"{rel}: falta {fuente}"]
-    with open(os.path.join(AQUI, fuente), encoding="utf-8") as f:
+    with open(fuente, encoding="utf-8") as f:
         datos = json.load(f)
     if datos.get("sha256") != entrada["sha256"]:
         problemas.append(f"{rel}: su sha256 no es el que anoto {fuente}")
