@@ -136,7 +136,44 @@ def etapa1(lista):
                                 variante="local")
 
 
-PARTES = {"etapa1": etapa1}
+# ---------------- Etapa 1: control C0 (PLAN3 1.4) ----------------
+C0_MAX_S = 3600          # trabajos de <= 1 h: la validacion de P6 con 16 semillas son ~11 min por checkpoint
+
+
+def c0(lista, celdas=None, etiqueta="p3c0", origen="insumos/c0_checkpoints", fuente=None, etapa="1", requiere=None,
+       uso_poi=False):
+    """Re-valida con las 16 semillas los 20 checkpoints de cada base y publica el elegido por retraso total.
+    celdas: {celda: escenario de evaluacion}; fuente(celda, base) -> nombre de la corrida de origen."""
+    celdas = celdas or {**CASOS, **NIVELES}
+    fuente = fuente or (lambda c, b: f"{celdas[c]}_ippo_vecinos_s{b}")
+    for c, esc in celdas.items():
+        por_ckpt = EMPAQUE * len(VAL16) * TR[c][1] * (POI_F if uso_poi else 1.0)
+        n = max(1, int(C0_MAX_S // por_ckpt))
+        eps = list(range(EVAL_CADA, EPISODIOS + 1, EVAL_CADA))
+        grupos = [eps[i:i + n] for i in range(0, len(eps), n)]
+        for b in BASES3:
+            corrida = fuente(c, b)
+            pre = LANZADOR if uso_poi else "python"
+            partes = []
+            for k, g in enumerate(grupos):
+                tid = f"c0_{etiqueta}_{esc}_s{b}_g{k + 1}"
+                salida = f"parciales/c0/{etiqueta}_{esc}_s{b}_g{k + 1}.json"
+                lista.agregar({"id": tid, "etapa": etapa, "prioridad": 2, "uso": "validacion",
+                               "requiere": list(requiere(c, b)) if requiere else [],
+                               "cmd": f"{pre} revalidar_c0.py validar --escenario {esc} --origen {origen} "
+                                      f"--corrida {corrida} --eps {','.join(map(str, g))} --val-seeds {VAL} "
+                                      f"--salida {salida}",
+                               "salidas": [salida], "duracion": round(por_ckpt * len(g))})
+                partes.append((tid, salida))
+            lista.agregar({"id": f"c0_{etiqueta}_{esc}_s{b}_publicar", "etapa": etapa, "prioridad": 2,
+                           "uso": "sin_semillas", "requiere": [f"trabajo:{t}" for t, _ in partes],
+                           "cmd": f"{pre} revalidar_c0.py publicar --escenario {esc} --origen {origen} "
+                                  f"--corrida {corrida} --entradas {','.join(s for _, s in partes)} "
+                                  f"--etiqueta {etiqueta}",
+                           "salidas": [f"politica_{esc}_vecinos_{etiqueta}_s{b}.pt"], "duracion": 30})
+
+
+PARTES = {"etapa1": etapa1, "c0": c0}
 
 
 def generar(partes):
