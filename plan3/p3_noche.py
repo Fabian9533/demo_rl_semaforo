@@ -131,12 +131,20 @@ def resumen(inicio):
                 if os.path.getmtime(p) >= inicio]
     if rehechos:
         lineas.append(f"  PROBLEMA (B22): episodios rehechos que no repiten el intento anterior: {', '.join(rehechos)}")
-    avisos = []
+    avisos, otro_codigo = [], []
     for t in de_hoy:
         ruta_log = os.path.join(COLA, "logs", t + ".log")
         if os.path.exists(ruta_log):
             with open(ruta_log, encoding="utf-8", errors="replace") as f:
-                avisos += [f"{t}: {l.strip()[:160]}" for l in f if l.startswith("AVISO")]
+                for l in f:
+                    if l.startswith("AVISO: el estado se escribio con otro codigo"):
+                        otro_codigo.append(t)
+                    elif l.startswith("AVISO"):
+                        avisos.append(f"{t}: {l.strip()[:160]}")
+    # Revision del 05.11 (R4-05): seguir un estado escrito por el codigo de antes de una fusion es lo esperado (la
+    # reanudacion entre versiones es exacta); se cuentan aparte para que no tapen los otros avisos.
+    if otro_codigo:
+        lineas.append(f"  tramos que siguieron un estado de otro codigo (esperado tras una fusion): {len(otro_codigo)}")
     if avisos:
         lineas.append(f"  avisos en los logs ({len(avisos)}):")
         lineas += [f"    {a}" for a in avisos[:30]]

@@ -79,12 +79,20 @@ def duracion_entreno(celda, episodios=EPISODIOS, desde=0, hasta=None, factor=1.0
 
 
 def cortes_tramos(celda, episodios=EPISODIOS, desde=0, factor=1.0):
-    """Episodios donde termina cada tramo de <= 5 h (multiplos de EVAL_CADA, para cortar en un checkpoint)."""
+    """Episodios donde termina cada tramo de <= 5 h (multiplos de EVAL_CADA, para cortar en un checkpoint). Si al
+    redondear a EVAL_CADA un tramo pasa de 5 h, se agrega un tramo (revision del 05.11, R4-04); los que ya cumplian
+    quedan igual."""
     total = duracion_entreno(celda, episodios, desde=desde, factor=factor)
     n_tramos = max(1, -(-int(total) // TRAMO_MAX_S))
-    paso = -(-(episodios - desde) // n_tramos)
-    paso = -(-paso // EVAL_CADA) * EVAL_CADA
-    return list(range(desde + paso, episodios, paso)) + [episodios]
+    while True:
+        paso = -(-(episodios - desde) // n_tramos)
+        paso = -(-paso // EVAL_CADA) * EVAL_CADA
+        cortes = list(range(desde + paso, episodios, paso)) + [episodios]
+        inicios = [desde] + cortes[:-1]
+        if paso == EVAL_CADA or all(duracion_entreno(celda, episodios, a, b, factor) <= TRAMO_MAX_S
+                                    for a, b in zip(inicios, cortes)):
+            return cortes
+        n_tramos += 1
 
 
 class Lista:
@@ -115,8 +123,10 @@ class Lista:
         previo, inicio = list(requiere), desde
         for k, fin in enumerate(cortes):
             ultimo = fin == episodios
-            # el primer tramo de una etiqueta nueva parte del estado de origen; los demas, de su propio ultimo estado
-            cmd = base_cmd + (f" --reanudar {ruta_origen}" if ruta_origen and k == 0 else " --reanudar auto")
+            # una etiqueta nueva pasa su estado de origen en todos los tramos: rl_ippo sigue desde el ultimo estado
+            # propio que salga de ese origen y, si no queda ninguno, copia otra vez el origen (con auto empezaria de
+            # cero; revision del 05.11); las demas, --reanudar auto
+            cmd = base_cmd + (f" --reanudar {ruta_origen}" if ruta_origen else " --reanudar auto")
             if not ultimo:
                 cmd += f" --hasta-ep {fin}"
             salidas = ([f"politica_{esc}_{variante}_{etiqueta}_s{base}.pt",
@@ -273,9 +283,40 @@ def v2vieja(lista):
 
 
 # ---------------- Etapa 3: observacion nueva, limpiezas, entropia, reloj de 2 s y modelo completo (PLAN3 3.6) ----------
-# Factores de duracion [S, analisis_mejora_2026-11-04/plan3/final/costos_plan3.py]: observacion x1.35; reloj de 2 s
-# x1.4 al entrenar y x1.15 al validar.
+# Factores de duracion (entrenamiento, validacion) frente a V2 en la misma celda.
+# [S] diseno (analisis_mejora_2026-11-04/plan3/final/costos_plan3.py): observacion x1.35; reloj de 2 s x1.4 al
+#     entrenar y x1.15 al validar.
+# [M] revision del 05.11 (ABBA con el mismo trafico): la observacion cercana entrena a x1.23-1.35 fuera de la malla y a
+#     x1.45 en poi_malla3, y valida a x1.57 en P6; el modelo completo valida a x1.41-1.86 y entrena a x1.17-1.64 (con
+#     politicas nuevas). Se toman cotas por encima de lo medido: sobreestimar solo hace tramos mas cortos.
 OBS, RELOJ_TR, RELOJ_VAL = 1.35, 1.40, 1.15
+OBS_MALLA, OBS_VAL, OBS_VAL_MALLA = 1.5, 1.45, 1.6
+COMPLETO_TR, COMPLETO_VAL = OBS * RELOJ_TR, 1.9
+MALLA_E3 = ("P5", "P6", "P6e")
+
+
+def factor_e3(et, celda):
+    """(entrenamiento, validacion) de un brazo de la Etapa 3 o 3b en una celda; 1.0 si su costo es el de V2. Es el
+    unico lugar de estos factores: los cortes en tramos (y los ids de los tramos) dependen de ellos, asi que el
+    entrenamiento y quien lo requiere tienen que usar el mismo."""
+    poi = POI_F if et.endswith("poi") else 1.0
+    brazo = et[:-3] if et.endswith("poi") else et
+    if brazo == "p3obs":
+        f = (OBS_MALLA, OBS_VAL_MALLA) if celda in MALLA_E3 else (OBS, OBS_VAL)
+    elif brazo == "p3reloj2":
+        f = (RELOJ_TR, RELOJ_VAL)
+    elif brazo == "p3completo":
+        f = (COMPLETO_TR, COMPLETO_VAL)
+    else:
+        return 1.0
+    return (f[0] * poi, f[1] * poi)
+
+
+def factor_ev(et, celda):
+    """Factor de una evaluacion de la politica de un brazo (el de su validacion, sin el de las llegadas, que ya esta
+    en la tanda)."""
+    f = factor_e3(et, celda)
+    return 1.0 if f == 1.0 else f[1] / (POI_F if et.endswith("poi") else 1.0)
 OP_OBS = "--obs-cercana 75"
 OP_M7 = "--norm-valor --sin-forzadas --msg-cada-paso"
 OP_ENT = "--hiper ent=0.03 --ent-final 0.003"
@@ -285,30 +326,28 @@ OP_COMPLETO = ("--obs-cercana 75 --norm-valor --sin-forzadas --msg-cada-paso --l
 
 
 def etapa3(lista):
-    """Cada brazo = (etiqueta, opciones ademas de --v2, celdas, bases, factor, episodios). D entra primero."""
+    """Cada brazo = (etiqueta, opciones ademas de --v2, celdas, bases, episodios); su factor de duracion sale de
+    factor_e3 por celda. D entra primero."""
     reg = {**CASOS, **NIVELES, **D}
     brazos = [
-        ("p3obs", OP_OBS, {"D": D["D"], "c2715": NIVELES["c2715"]}, BASES5, OBS, EPISODIOS),
-        ("p3obs", OP_OBS, {c: CASOS[c] for c in ("P1", "P2", "P3", "P6")}, BASES3, OBS, EPISODIOS),
-        ("p3obspoi", OP_OBS, POI, BASES3, (OBS * POI_F, OBS * POI_F), EPISODIOS),
-        ("p3m7norm", "--norm-valor", D, BASES3, 1.0, EPISODIOS),
-        ("p3m7forz", "--sin-forzadas", D, BASES3, 1.0, EPISODIOS),
-        ("p3m7msg", "--msg-cada-paso", D, BASES3, 1.0, EPISODIOS),
-        ("p3m7", OP_M7, {"D": D["D"], "P2": CASOS["P2"], "P6": CASOS["P6"]}, BASES3, 1.0, EPISODIOS),
-        ("p3ent", OP_ENT, {"D": D["D"], "P1": CASOS["P1"]}, BASES3, 1.0, EPISODIOS),
-        ("p3reloj2", OP_RELOJ, {c: reg[c] for c in ("D", "P1", "P2", "P6")}, BASES3, (RELOJ_TR, RELOJ_VAL),
-         EPISODIOS),
-        ("p3reloj2poi", OP_RELOJ, {c: POI[c] for c in ("P1", "P2", "P6")}, BASES3,
-         (RELOJ_TR * POI_F, RELOJ_VAL * POI_F), EPISODIOS),
-        ("p3completo", OP_COMPLETO, {c: CASOS[c] for c in ("P1", "P2", "P4", "P6")}, BASES3,
-         (OBS * RELOJ_TR, OBS * RELOJ_VAL), 400),
-        ("p3completopoi", OP_COMPLETO, POI, BASES3, (OBS * RELOJ_TR * POI_F, OBS * RELOJ_VAL * POI_F), 400),
+        ("p3obs", OP_OBS, {"D": D["D"], "c2715": NIVELES["c2715"]}, BASES5, EPISODIOS),
+        ("p3obs", OP_OBS, {c: CASOS[c] for c in ("P1", "P2", "P3", "P6")}, BASES3, EPISODIOS),
+        ("p3obspoi", OP_OBS, POI, BASES3, EPISODIOS),
+        ("p3m7norm", "--norm-valor", D, BASES3, EPISODIOS),
+        ("p3m7forz", "--sin-forzadas", D, BASES3, EPISODIOS),
+        ("p3m7msg", "--msg-cada-paso", D, BASES3, EPISODIOS),
+        ("p3m7", OP_M7, {"D": D["D"], "P2": CASOS["P2"], "P6": CASOS["P6"]}, BASES3, EPISODIOS),
+        ("p3ent", OP_ENT, {"D": D["D"], "P1": CASOS["P1"]}, BASES3, EPISODIOS),
+        ("p3reloj2", OP_RELOJ, {c: reg[c] for c in ("D", "P1", "P2", "P6")}, BASES3, EPISODIOS),
+        ("p3reloj2poi", OP_RELOJ, {c: POI[c] for c in ("P1", "P2", "P6")}, BASES3, EPISODIOS),
+        ("p3completo", OP_COMPLETO, {c: CASOS[c] for c in ("P1", "P2", "P4", "P6")}, BASES3, 400),
+        ("p3completopoi", OP_COMPLETO, POI, BASES3, 400),
     ]
     trabajos = []
-    for et, op, celdas, bases, f, eps in brazos:
+    for et, op, celdas, bases, eps in brazos:
         for c, e in celdas.items():
             for b in bases:
-                trabajos.append((et, op, c, e, b, f, eps))
+                trabajos.append((et, op, c, e, b, factor_e3(et, c), eps))
     # D primero (prioridad 2); el resto, lo mas largo primero (prioridad 3)
     trabajos.sort(key=lambda x: (x[2] != "D", -duracion_entreno(x[2], x[6], factor=x[5])))
     for et, op, c, e, b, f, eps in trabajos:
@@ -328,8 +367,6 @@ REGULARES, ALEATORIAS = ("t1r", "t2r"), ("t1a", "t2a")
 EV = {"P1": 5.4, "P2": 13.2, "P3": 9.0, "P4": 10.0, "P5": 23.6, "P6": 42.2, "P6e": 42.2,
       "c905": 3.6, "c1358": 4.2, "c2715": 6.6, "r905": 5.6, "r1358": 6.2, "r1810": 6.6, "r2715": 8.8,
       "r3620": 12.0, "m1810": 13.6, "m2715": 15.6, "m3620": 17.6, "m6525": 24.8, "D": 5.4}
-FACTOR_EV = {"p3obs": OBS, "p3obspoi": OBS, "p3reloj2": RELOJ_VAL, "p3reloj2poi": RELOJ_VAL,
-             "p3completo": OBS * RELOJ_VAL, "p3completopoi": OBS * RELOJ_VAL}
 
 
 def n_semillas(texto):
@@ -527,16 +564,13 @@ def evaluaciones_variantes(lista):
                  ("p3completopoi", list(POI), BASES3, 400)]
     for et, celdas, bases, eps in variantes:
         poi = et.endswith("poi")
-        f_tr = {"p3obspoi": (OBS * POI_F, OBS * POI_F), "p3reloj2poi": (RELOJ_TR * POI_F, RELOJ_VAL * POI_F),
-                "p3completopoi": (OBS * RELOJ_TR * POI_F, OBS * RELOJ_VAL * POI_F), "p3obs": OBS,
-                "p3reloj2": (RELOJ_TR, RELOJ_VAL), "p3completo": (OBS * RELOJ_TR, OBS * RELOJ_VAL)}.get(et, 1.0)
         for c in celdas:
             e = POI[c] if poi else reg[c]
             for b in bases:
-                req = req_entreno(f"e3_{et}", e, b, c, eps, factor=f_tr)
+                req = req_entreno(f"e3_{et}", e, b, c, eps, factor=factor_e3(et, c))
                 for t in (ALEATORIAS if poi else REGULARES):
                     evaluacion(lista, c, e, t, f"{et}_s{b}", f"--politica politica_{e}_vecinos_{et}_s{b}.pt",
-                               [req], factor=FACTOR_EV.get(et, 1.0), tipo=et, base=b,
+                               [req], factor=factor_ev(et, c), tipo=et, base=b,
                                corrida=(e, "vecinos", et, b))
     for tipo, celdas, pref in (("reg", CASOS, "p3e400"), ("poi", POI, "p3e400poi")):
         tandas = ALEATORIAS if tipo == "poi" else REGULARES
@@ -588,15 +622,11 @@ def promocion(lista):
                     et_med = f"{et}med"
                 else:
                     eps = 400 if et.startswith("p3completo") else EPISODIOS
-                    f_tr = {"p3obs": OBS, "p3obspoi": (OBS * POI_F, OBS * POI_F),
-                            "p3reloj2": (RELOJ_TR, RELOJ_VAL), "p3reloj2poi": (RELOJ_TR * POI_F, RELOJ_VAL * POI_F),
-                            "p3completo": (OBS * RELOJ_TR, OBS * RELOJ_VAL),
-                            "p3completopoi": (OBS * RELOJ_TR * POI_F, OBS * RELOJ_VAL * POI_F)}.get(et, 1.0)
-                    reqs = [req_entreno(f"e3_{et}", e, b, c, eps, factor=f_tr) for b in BASES3]
+                    reqs = [req_entreno(f"e3_{et}", e, b, c, eps, factor=factor_e3(et, c)) for b in BASES3]
                     et_med = f"{et}med"
                 ruta, tid = mediana(lista, e, "vecinos", et, BASES3, reqs, et_med)
                 ev = evaluacion(lista, c, e, "promo", et_med, f"--politica {ruta}", [f"trabajo:{tid}"],
-                                factor=FACTOR_EV.get(et, 1.0), tipo=f"promo_{et}")
+                                factor=factor_ev(et, c), tipo=f"promo_{et}")
                 csvs[et] = (f"parciales/promo/eval_{e}__{et_med}.csv", ev)
             salida = f"promocion/{e}.json"
             lista.agregar({"id": f"promo_decidir_{e}", "etapa": "ev", "prioridad": 4, "uso": "sin_semillas",
@@ -836,19 +866,21 @@ def evaluaciones_a3(lista):
     """a3 (descriptiva): la version evaluada de V2 y de la observacion nueva con colas en cero y con los mensajes
     cortados, frente a la misma politica sin perturbar (prerregistro §8, Etapa 3)."""
     reg = {"D": D["D"], "c2715": NIVELES["c2715"], **{c: CASOS[c] for c in ("P1", "P2", "P3", "P6")}}
+    # factor de V2 (None = el de la Etapa 3, factor_e3 por celda, igual que en su entrenamiento)
     for celdas, tandas, pares in ((reg, REGULARES, (("p3v2reg", "v2reg3med", "p3v2reg3med", "e1_v2reg", 200, 1.0),
-                                                      ("p3obs", "p3obsmed", "p3obsmed", "e3_p3obs", 200, OBS))),
+                                                      ("p3obs", "p3obsmed", "p3obsmed", "e3_p3obs", 200, None))),
                                   (POI, ALEATORIAS, (("p3v2poi", "v2poi3med", "p3v2poi3med", "e2_v2poi", 200, POI_F),
                                                      ("p3obspoi", "p3obspoimed", "p3obspoimed", "e3_p3obspoi", 200,
-                                                      (OBS * POI_F, OBS * POI_F))))):
+                                                      None)))):
         for c, e in celdas.items():
             for et, tipo, et_med, pref, eps, f in pares:
+                f = factor_e3(et, c) if f is None else f
                 reqs = [req_entreno(pref, e, b, c, eps, factor=f) for b in BASES3]
                 ruta, tid = mediana(lista, e, "vecinos", et, BASES3, reqs, et_med)
                 for t in tandas:
                     for pert, op in (("colas0", "--colas-cero"), ("msg0", "--perdida 1")):
                         evaluacion(lista, c, e, t, f"a3{pert}_{tipo}", f"--politica {ruta} {op}", [f"trabajo:{tid}"],
-                                   factor=FACTOR_EV.get(et, 1.0), tipo=f"a3{pert}_{tipo}")
+                                   factor=factor_ev(et, c), tipo=f"a3{pert}_{tipo}")
 
 
 PARTES = {"etapa1": etapa1, "c0": c0, "v2vieja": v2vieja, "etapa2": etapa2, "etapa2pm": etapa2pm,

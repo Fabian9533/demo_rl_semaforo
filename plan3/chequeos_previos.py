@@ -34,22 +34,23 @@ CMD = ["train", "--escenario", "corredor", "--seed", "7", "--episodios", "10", "
 CSV_ID = "resultados_corredor_ippo_vecinos_s7.csv"
 
 
-def correr(codigo, carpeta, extra=()):
-    """Entrena con el rl_ippo.py de `codigo` en `carpeta` (con los archivos del escenario)."""
+def correr(codigo, carpeta, extra=(), programa="rl_ippo.py", cmd=None, archivos=None):
+    """Corre el `programa` de `codigo` en `carpeta` (con los archivos del escenario). Por omision, el entrenamiento CMD
+    de rl_ippo en P1."""
     os.makedirs(carpeta, exist_ok=True)
-    for a in ESCENARIO:
+    for a in (ESCENARIO if archivos is None else archivos):
         shutil.copy(os.path.join(PLAN3, a), carpeta)
     entorno = dict(os.environ, OMP_NUM_THREADS="1", MKL_NUM_THREADS="1", PYTHONIOENCODING="utf-8")
-    r = subprocess.run([sys.executable, os.path.join(codigo, "rl_ippo.py")] + CMD + list(extra), cwd=carpeta,
-                       capture_output=True, text=True, env=entorno)
+    r = subprocess.run([sys.executable, os.path.join(codigo, programa)] + list(CMD if cmd is None else cmd)
+                       + list(extra), cwd=carpeta, capture_output=True, text=True, env=entorno)
     if r.returncode != 0:
-        raise RuntimeError(f"rl_ippo fallo en {carpeta}:\n{r.stdout[-2000:]}\n{r.stderr[-2000:]}")
+        raise RuntimeError(f"{programa} fallo en {carpeta}:\n{r.stdout[-2000:]}\n{r.stderr[-2000:]}")
 
 
-def filas(ruta, columnas=None):
+def filas(ruta, columnas=None, sin=("segundos",)):
     """Filas del CSV sin 'segundos' (y, si se da, solo esas columnas)."""
     with open(ruta, encoding="utf-8", newline="") as f:
-        return [{k: v for k, v in r.items() if k != "segundos" and (columnas is None or k in columnas)}
+        return [{k: v for k, v in r.items() if k not in sin and (columnas is None or k in columnas)}
                 for r in csv.DictReader(f)]
 
 
@@ -111,7 +112,99 @@ def identidad():
     if not tensores_iguales(os.path.join(a, pol), os.path.join(b, pol)):
         malos.append("identidad: la politica publicada difiere")
     malos += identidad_v2(tag)
+    malos += identidad_tramos()
+    malos += identidad_evaluar(tag)
+    malos += identidad_malla(tag)
     return malos
+
+
+def iguales_corridas(a, b, etiqueta_a, etiqueta_b, que, esc="corredor", base=7, columnas_csv=None, subconjunto=False):
+    """Compara dos corridas de entrenamiento: CSV (sin 'segundos' ni 'etiqueta'), tensores de los checkpoints y de la
+    politica publicada, y la eleccion del checkpoint. Con subconjunto, los checkpoints de b pueden ser parte de los de a
+    (una etiqueta nueva no repite los anteriores a su origen), pero el ultimo tiene que estar."""
+    malos = []
+    csv_a = f"resultados_{esc}_ippo_vecinos_{etiqueta_a}_s{base}.csv"
+    csv_b = f"resultados_{esc}_ippo_vecinos_{etiqueta_b}_s{base}.csv"
+    sin = ("segundos", "etiqueta")
+    if filas(os.path.join(a, csv_a), columnas_csv, sin) != filas(os.path.join(b, csv_b), columnas_csv, sin):
+        malos.append(f"{que}: el CSV difiere")
+    pts = lambda d, et: {x.replace(f"_{et}_", "_"): x for x in os.listdir(os.path.join(d, "checkpoints"))
+                         if x.endswith(".pt") and not x.endswith(".estado.pt") and f"_{et}_" in x}
+    pa, pb = pts(a, etiqueta_a), pts(b, etiqueta_b)
+    if (not set(pb) <= set(pa) or max(pa, default="") not in pb) if subconjunto else sorted(pa) != sorted(pb):
+        malos.append(f"{que}: checkpoints distintos: {sorted(pa)} frente a {sorted(pb)}")
+    for k in pa:
+        if k in pb and not tensores_iguales(os.path.join(a, "checkpoints", pa[k]), os.path.join(b, "checkpoints", pb[k])):
+            malos.append(f"{que}: tensores distintos en {pa[k]}")
+    pol_a = os.path.join(a, f"politica_{esc}_vecinos_{etiqueta_a}_s{base}.pt")
+    pol_b = os.path.join(b, f"politica_{esc}_vecinos_{etiqueta_b}_s{base}.pt")
+    if not tensores_iguales(pol_a, pol_b):
+        malos.append(f"{que}: la politica publicada difiere")
+    ma, mb = (json.load(open(p[:-3] + ".json", encoding="utf-8")) for p in (pol_a, pol_b))
+    if (ma["ep_elegido"], ma["val_elegido"]) != (mb["ep_elegido"], mb["val_elegido"]):
+        malos.append(f"{que}: la eleccion del checkpoint difiere")
+    return malos
+
+
+def identidad_tramos():
+    """El camino de los trabajos en tramos (revision de las Etapas 3-4, 05.11): V2 de hoy cortada en 5 + 5 con
+    --reanudar auto, y la continuacion con una etiqueta nueva desde el estado del ep 5 (como la Etapa 3b, con las
+    mismas opciones), dan lo mismo que la corrida seguida de identidad_v2 (TMP/v2_actual)."""
+    base = ["--v2", "--criterio-val", "total", "--guardar-estado", "--registro-extendido"]
+    seguida, tramos, nueva = (os.path.join(TMP, x) for x in ("v2_actual", "v2_tramos", "v2_nueva"))
+    correr(RAIZ, tramos, base + ["--etiqueta", "p3id", "--reanudar", "auto", "--hasta-ep", "5"])
+    correr(RAIZ, tramos, base + ["--etiqueta", "p3id", "--reanudar", "auto"])
+    malos = iguales_corridas(seguida, tramos, "p3id", "p3id", "identidad en tramos (5 + 5)")
+    os.makedirs(os.path.join(nueva, "checkpoints"), exist_ok=True)
+    for x in os.listdir(os.path.join(tramos, "checkpoints")):
+        if "_ep005" in x:
+            shutil.copy(os.path.join(tramos, "checkpoints", x), os.path.join(nueva, "checkpoints"))
+    correr(RAIZ, nueva, base + ["--etiqueta", "p3idn", "--reanudar",
+                                "checkpoints/corredor_ippo_vecinos_p3id_s7_ep005.estado.pt"])
+    malos += iguales_corridas(seguida, nueva, "p3id", "p3idn", "identidad con etiqueta nueva desde el ep 5",
+                              subconjunto=True)
+    return malos
+
+
+def identidad_evaluar(tag):
+    """evaluar.py del tag y de hoy juegan igual la politica V2 publicada por el tag (una semilla de humo)."""
+    for a in ("evaluar.py",):
+        rc, texto = protecciones.git("show", f"{TAG}:{a}")
+        if rc != 0:
+            return [f"no se pudo leer {a} del tag"]
+        with open(os.path.join(tag, a), "w", encoding="utf-8", newline="") as f:
+            f.write(texto)
+    pol = os.path.join(TMP, "v2_tag", "politica_corredor_vecinos_p3id_s7.pt")
+    salidas = {}
+    for nombre, codigo in (("tag", tag), ("actual", RAIZ)):
+        carpeta = os.path.join(TMP, f"evaluar_{nombre}")
+        os.makedirs(carpeta, exist_ok=True)
+        for x in (pol, pol[:-3] + ".json"):
+            shutil.copy(x, carpeta)
+        correr(codigo, carpeta, programa="evaluar.py",
+               cmd=["--escenario", "corredor", "--politica", os.path.basename(pol), "--semillas", "424303",
+                    "--salida", "eval_id.csv"])
+        salidas[nombre] = filas(os.path.join(carpeta, "eval_id.csv"))
+    return [] if salidas["tag"] == salidas["actual"] else ["identidad de evaluar.py: el CSV difiere del del tag"]
+
+
+def identidad_malla(tag):
+    """V2 en la malla de P6 (malla3_alta, 3 episodios, validacion al final en 2 semillas de humo): la red donde las
+    cadenas de la Etapa 1 cruzan las fusiones. El tag y el codigo de hoy, a la vez (dos procesos)."""
+    from concurrent.futures import ThreadPoolExecutor
+    archivos = ["malla3_alta.sumocfg", "malla3.net.xml", "malla3_alta.rou.xml", "malla3_alta.add.xml"]
+    cmd = ["train", "--escenario", "malla3_alta", "--seed", "7", "--episodios", "3", "--eval-cada", "3",
+           "--val-seeds", "424301,424302", "--v2", "--criterio-val", "total", "--etiqueta", "p3id"]
+    a, b = os.path.join(TMP, "malla_tag"), os.path.join(TMP, "malla_actual")
+    with ThreadPoolExecutor(2) as ex:
+        trabajos = [ex.submit(correr, tag, a, (), "rl_ippo.py", cmd, archivos),
+                    ex.submit(correr, RAIZ, b, ["--guardar-estado", "--registro-extendido"], "rl_ippo.py", cmd,
+                              archivos)]
+        for t in trabajos:
+            t.result()
+    cab_a = encabezado(os.path.join(a, "resultados_malla3_alta_ippo_vecinos_p3id_s7.csv"))
+    return iguales_corridas(a, b, "p3id", "p3id", "identidad V2 en la malla (P6)", esc="malla3_alta",
+                            columnas_csv=set(cab_a))
 
 
 def identidad_v2(tag):
