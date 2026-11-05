@@ -50,6 +50,9 @@ def registrar():
     if choque:
         raise SystemExit(f"con_escenarios: nombres ya usados: {', '.join(choque)}")
     ep.DERIVADOS.update(e3.ESTOCASTICOS)
+    # perfil de 10 min: las metricas del corredor reconocen los flows <flow>_b<k> (comun no importa escenarios)
+    import comun
+    comun.QUITAR_BLOQUE = True
     return sorted(e3.ESTOCASTICOS)
 
 

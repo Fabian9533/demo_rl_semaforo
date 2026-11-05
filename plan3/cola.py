@@ -167,10 +167,9 @@ def problema_de_arbol(sin_git):
     head = protecciones.git("rev-parse", "HEAD")[1].strip()
     if head != aprobado:
         return f"HEAD {head[:10]} no es el commit aprobado {aprobado[:10]}"
-    _, cambios = protecciones.git("status", "--porcelain", "--untracked-files=no", "--", "*.py",
-                                  "plan3/PRERREGISTRO.md")
+    _, cambios = protecciones.git("status", "--porcelain", "--untracked-files=no", "--", *protecciones.SIN_CAMBIOS)
     if cambios.strip():
-        return "hay codigo o prerregistro sin commit:\n" + cambios
+        return "hay codigo, prerregistro o escenarios sin commit:\n" + cambios
     return None
 
 

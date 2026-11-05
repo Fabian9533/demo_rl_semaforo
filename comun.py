@@ -4,6 +4,7 @@ lectura de las metricas U3 del tripinfo, programa actuado de referencia, CSV de
 resultados con sus columnas y series de cola por minuto.
 """
 import os
+import re
 import csv
 import sys
 import xml.etree.ElementTree as ET
@@ -49,6 +50,19 @@ def args_estadisticas(tripinfo):
     los vehiculos que al cerrar la simulacion aun esperaban entrar a la red (no estan en el tripinfo)."""
     extra = ["--tripinfo-output.write-undeparted", "true"] if ESCRIBIR_NO_INSERTADOS else []
     return ["--statistic-output", ruta_estadisticas(tripinfo)] + extra
+
+
+# plan3 (05.11.2026): en el perfil de 10 min (plan3/demanda_estocastica.py) los flows de cada bloque se llaman
+# <flow>_b<k>. con_escenarios.registrar() lo activa para que las metricas del corredor reconozcan esos vehiculos.
+# Apagado por defecto: corredor_var (plan2), que ya usaba _b<k>, sigue dando lo mismo que en lo entregado.
+QUITAR_BLOQUE = False
+_SUFIJO_BLOQUE = re.compile(r"_b(\d+)$")
+
+
+def _flujo(ident):
+    """Flow de un vehiculo ("<flow>.<numero>"), sin el sufijo de bloque si QUITAR_BLOQUE esta activo."""
+    flujo = ident.rsplit(".", 1)[0]
+    return _SUFIJO_BLOQUE.sub("", flujo) if QUITAR_BLOQUE else flujo
 
 
 def _viajes(archivo):
@@ -133,8 +147,8 @@ def leer_tripinfo(archivo, flujos_corredor=None):
     res["no_terminados"] = sum(1 for v in viajes if float(v.get("arrival", -1)) < 0)
     if flujos_corredor:
         # el id de un vehiculo de un flow es "<flow>.<numero>"
-        largos = [v for v in viajes if v.get("id").rsplit(".", 1)[0] in flujos_corredor]
-        punta = [v for v in largos if v.get("id").rsplit(".", 1)[0] in FLUJOS_PUNTA]
+        largos = [v for v in viajes if _flujo(v.get("id")) in flujos_corredor]
+        punta = [v for v in largos if _flujo(v.get("id")) in FLUJOS_PUNTA]
         k = max(1, len(largos))
         res["viaje_corredor_prom"] = round(sum(float(v.get("duration")) for v in largos) / k, 2)
         res["retraso_corredor_prom"] = round(sum(float(v.get("timeLoss")) for v in largos) / k, 2)

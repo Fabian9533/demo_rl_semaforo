@@ -28,4 +28,11 @@ ok  RECHAZADO script no permitido: script no permitido: ../consolidar.py; solo s
 ok  RECHAZADO script local que sube de carpeta: script no permitido: ../veredicto.py; solo se sube de carpeta para los scripts de la raiz: ../veredicto.py
 ok  RECHAZADO prueba final sin holdout.ok: la prueba final exige listo/holdout.ok
 ok  RECHAZADO TESIS en un argumento: nombra plan2/TESIS, una ruta absoluta, '\', cd, --instalar u operadores de consola
-30 de 30 casos dan lo esperado
+ok  RECHAZADO --semillas=valor: opcion escrita con '=' (va separada): --semillas=5001-5030; --semillas usa semillas prohibidas: 5001-5030; --semillas fuera del bloque 'puente': [5001, 5002, 5003, 5004, 5005]
+ok  RECHAZADO --sem abreviada: opcion abreviada: --sem (se escribe completa: --semillas)
+ok  RECHAZADO --val-s abreviada: opcion abreviada: --val-s (se escribe completa: --val-seeds)
+ok  RECHAZADO --see abreviada: opcion abreviada: --see (se escribe completa: --seed); rl_ippo train sin --seed
+ok  RECHAZADO --inst abreviada: opcion abreviada: --inst (se escribe completa: --instalar)
+ok  RECHAZADO --et abreviada: opcion abreviada: --et (se escribe completa: --etiqueta); rl_ippo train sin --etiqueta p3...: pisaria los nombres de lo entregado
+ok  RECHAZADO --salida= : opcion escrita con '=' (va separada): --salida=../x.csv; un argumento sube de carpeta ('..')
+37 de 37 casos dan lo esperado

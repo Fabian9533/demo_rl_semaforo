@@ -79,6 +79,20 @@ CASOS = [
     ("prueba final sin holdout.ok", "final",
      "python evaluar3.py --escenario corredor --brazo fijo --semillas 11001-11030 --salida ciego/final/x.csv", False),
     ("TESIS en un argumento", "sin_semillas", "python veredicto3.py --final --salida TESIS/tabla.tex", False),
+    # revision del 05.11: '--x=valor' y abreviaturas de argparse saltaban las reglas
+    ("--semillas=valor", "puente", "python evaluar3.py --escenario corredor --brazo fijo --semillas=5001-5030 "
+     "--salida parciales/x.csv", False),
+    ("--sem abreviada", "puente", "python evaluar3.py --escenario corredor --brazo fijo --sem 5001-5030 "
+     "--salida parciales/x.csv", False),
+    ("--val-s abreviada", "entrenamiento", f"python ../rl_ippo.py train --escenario corredor --seed 42 "
+     f"--val-seeds {VAL16} --val-s 5001 --etiqueta p3v2reg", False),
+    ("--see abreviada", "entrenamiento", f"python ../rl_ippo.py train --escenario corredor --see 6042 "
+     f"--val-seeds {VAL16} --etiqueta p3v2reg", False),
+    ("--inst abreviada", "ajuste", "python ../barrer_fijo.py corredor --semillas 2001-2003 --inst", False),
+    ("--et abreviada", "entrenamiento", f"python ../rl_ippo.py train --escenario corredor --seed 42 "
+     f"--val-seeds {VAL16} --et p3v2reg", False),
+    ("--salida= ", "puente", "python evaluar3.py --escenario corredor --brazo fijo --semillas 1001-1030 "
+     "--salida=../x.csv", False),
 ]
 
 

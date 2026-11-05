@@ -155,10 +155,14 @@ def main():
     if r.returncode != 0:
         problemas.append("la lista de trabajos o el manifiesto no son los del generador:\n" + r.stdout + r.stderr)
     problemas += semillas_filtradas()
-    _, cambios = protecciones.git("status", "--porcelain", "--untracked-files=no", "--", "*.py",
-                                  "plan3/PRERREGISTRO.md")
+    # los escenarios nuevos estan como los escribe preparar3 (una receta cambiada sin regenerar, o un archivo editado)
+    r = subprocess.run([sys.executable, "demanda_estocastica.py", "preparar3", "--revisar"], cwd=PLAN3,
+                       capture_output=True, text=True)
+    if r.returncode != 0:
+        problemas.append("los escenarios nuevos no estan como los escribe preparar3:\n" + r.stdout + r.stderr)
+    _, cambios = protecciones.git("status", "--porcelain", "--untracked-files=no", "--", *protecciones.SIN_CAMBIOS)
     if cambios.strip():
-        problemas.append("hay codigo o prerregistro sin commit:\n" + cambios)
+        problemas.append("hay codigo, prerregistro o escenarios sin commit:\n" + cambios)
     for p in problemas:
         print("PROBLEMA:", p)
     if problemas:

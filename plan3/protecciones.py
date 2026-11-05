@@ -37,6 +37,10 @@ LANZADOR = "../con_escenarios.py"
 SCRIPTS_RAIZ = {"../rl_ippo.py", "../evaluar.py", "../barrer_fijo.py"}
 PROHIBIDO = re.compile(r"\bplan2\b|\bTESIS\b|[A-Za-z]:[\\/]|\\|[&|<>;`$]|(^|\s)cd(\s|$)|--instalar", re.IGNORECASE)
 OPCION_SEMILLAS = re.compile(r"^--[a-z-]*(semilla|seed)[a-z-]*$")
+CON_REGLAS = ("--semillas", "--seed", "--val-seeds", "--instalar", "--salida", "--etiqueta", "--csv", "--reanudar")
+# Lo que no puede tener cambios sin commit al lanzar: el codigo, el prerregistro y los escenarios (rutas y
+# configuraciones; los .add.xml no, porque de noche se escriben los del actuado, el ciclo minimo y las referencias).
+SIN_CAMBIOS = ("*.py", "plan3/PRERREGISTRO.md", "plan3/*.rou.xml", "plan3/*.sumocfg")
 USOS_CIEGOS = {"examen_regular", "examen_h1", "examen_aleatorio", "final"}
 LARGO_MAX = 200                                    # caracteres desde C:\ (MAX_PATH de Windows = 260)
 VERSIONES = {"python": "3.14.6", "torch": "2.14.0+cpu", "sumo": "1.25.0"}
@@ -128,6 +132,21 @@ def revisar_comando(t, existe=os.path.exists):
     if len(partes) < 2 or partes[0] != "python":
         return malos + ["debe ser 'python <script> ...'"]
     prog, args = desenvolver(partes)
+    # argparse acepta '--opcion=valor' y abreviaturas ('--sem' por '--semillas'): las dos saltarian las reglas de
+    # abajo, asi que se rechazan (y '--x=v' se separa para revisar igual su valor).
+    normales = []
+    for a in args:
+        if a.startswith("--") and "=" in a:
+            malos.append(f"opcion escrita con '=' (va separada): {a}")
+            normales += a.split("=", 1)
+        else:
+            normales.append(a)
+    args = normales
+    for a in args:
+        if a.startswith("--") and not OPCION_SEMILLAS.match(a):
+            abreviada = [r for r in CON_REGLAS if r != a and r.startswith(a)]
+            if abreviada:
+                malos.append(f"opcion abreviada: {a} (se escribe completa: {abreviada[0]})")
     permitidos = set(tab["scripts"]) - {LANZADOR}
     if prog not in permitidos:
         malos.append(f"script no permitido: {prog}")
