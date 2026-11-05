@@ -100,6 +100,31 @@ politica publicada que antes. Contrato de --guardar-estado, --hasta-ep y --reanu
          queda en checkpoints/<tag>_rehechos.json y en meta["reanudaciones"]. El estado anota la huella del codigo
          de cada tramo; el meta la lleva (meta["tramos"]) solo si cambio entre tramos.
 
+Plan 3, Etapas 3 y 4 (PLAN3 3.1-3.4 y Etapa 4; DECISIONES B14, B16, B24 y B25). Apagadas por defecto; las
+activas van al meta (opciones), a la configuracion que compara --reanudar y, si llevan estado, al estado.
+Informe: plan3/doc/informe_ent2.md.
+  --obs-cercana L   (M3) 16 + lados entradas al final de la observacion: por acceso, vehiculos a menos de L m de la
+         linea detenidos y en movimiento (detectores E2 de L m por carril, suscritos), espera del primero y
+         giro_izq (alguien detenido en el primer tramo interno del giro a la izquierda: espera el hueco dentro del
+         cruce); por lado con vecino, los detenidos del enlace de SALIDA i->j (la ranura vieja cola_mi_salida mide
+         el que entra: hallazgo 5 de CLAUDE.md). Dimension 31 -> 49 (53 -> 73 en malla3). Los E2 van en
+         e2_<esc>_<L>.add.xml (archivo_e2; p3_preparar.py puede escribirlo antes) y se suman a los adicionales del
+         .sumocfg.
+  --norm-valor [--norm-beta B]   el critico aprende el retorno normalizado con medias moviles (ValueNorm de MAPPO,
+         Yu et al. 2022; B = 0.99999 por defecto; la politica por red usa una mas rapida, fijada con un piloto).
+  --sin-forzadas   (exige el descuento por segundo de V2) las decisiones con una sola accion legal se aplican pero
+         no entran al lote ni cierran la decision pendiente: un cambio dura 13 s (ambar + verde minimo).
+  --msg-cada-paso   los mensajes se publican cada segundo: al decidir, el del segundo actual (edad 0).
+  --ent-final X   coeficiente de entropia lineal de HIPER["ent"] a X en el horizonte de la tasa, constante despues.
+  --paso-decision K   (exige el descuento por segundo de V2) reloj de decision: cada K s antes del verde minimo
+         (decisiones forzadas), cada K s desde el verde minimo y una al verde maximo; mensajes cada K s. La
+         recompensa y el descuento de V2 siguen en unidades de 5 s (PASO_CONTROL). Con K = 5, el reloj de siempre.
+  --escala-demanda a,b [--curriculo K]   (politica por red) cada episodio sortea f ~ U(a, tope) y corre sumo con
+         --scale f; tope = b, o sube de a a b en K episodios. Generador propio: default_rng(base + 15485863).
+  --val-escalas e1,e2,...   valida en varios niveles de demanda (--scale e): por nivel, la media de las semillas;
+         val y val_total son la media geometrica de los niveles.
+  configurar_colas_cero(True)   (a3, evaluar3.py --colas-cero) al jugar, las colas de la observacion valen cero.
+
 Interfaz para decisores externos (correr_episodio):
   correr_episodio(modo, politica, gui, delay, seed, tripinfo=None, serie=None, latencia=0,
                   perdida=0.0, variante="vecinos", buffer=None, decidir=None,
@@ -231,8 +256,13 @@ CAMPOS_IPPO = ["variante", "base", "episodio", "semilla", "lr", "segundos", "veh
 # columnas entre versiones del codigo y un tramo reanudado escribe las mismas que el primero.
 CAMPOS_EXTENDIDOS = ["var_explicada", "frac_forzadas", "msg_edad", "ent_coef"]
 VERSION_ESTADO = 1             # formato de checkpoints/<tag>_epNNN.estado.pt (--guardar-estado)
-# Las claves que se agregan despues (codigo, tramos, reanudaciones) se leen con .get: un estado sin ellas sigue valiendo
+# Las claves que se agregan despues (codigo, tramos, reanudaciones; ent, norm_valor y generadores.escala de las Etapas
+# 3 y 4) se leen con .get: un estado sin ellas sigue valiendo y la version no cambia
 ESPERA_CSV, INTENTOS_CSV = 30, 60   # CSV tomado al final del ultimo tramo: reintenta cada 30 s durante 30 min
+SEMILLA_ESCALA = 15485863      # --escala-demanda: generador del factor = default_rng(base + esto)
+CERCA_MAX_ESPERA = 120.0       # --obs-cercana: espera del primero que satura la entrada (s)
+BETA_NORM = 0.99999            # --norm-valor: beta por defecto de las medias moviles (ValueNorm de MAPPO)
+COLAS_CERO = False             # a3 (configurar_colas_cero): fuera de C, porque preparar() vacia C
 
 # Se rellena con preparar(escenario)
 C = {}
@@ -262,15 +292,150 @@ def preparar(escenario):
         # --obs-insercion (configurar_obs_insercion): apagada por defecto
         "dim_base": 12 + n_id + 8 * len(lados), "obs_ins": False,
         "ins_salida": salidas_flujos(e["cfg"]), "pend_arista": {},
+        # plan3, Etapas 3 y 4: apagadas (las ponen main y configurar_desde_meta)
+        "obs_cerca": 0.0, "n_cerca": 0, "msg_paso": False, "sin_forzadas": False, "paso_decision": PASO_CONTROL,
+        "vnorm": None, "_medidor": None,
     })
     return C
+
+
+def dim_total():
+    """Tamano de la observacion: base, + 4 con --obs-insercion, + 16 + lados con --obs-cercana (en ese orden)."""
+    return C["dim_base"] + (4 if C["obs_ins"] else 0) + (C["n_cerca"] if C["obs_cerca"] else 0)
 
 
 def configurar_obs_insercion(activa):
     """--obs-insercion: agrega (o quita) las cuatro entradas de vehiculos que esperan para entrar al final
     de la observacion. Se llama despues de preparar(); evaluar.py la llama con el valor del meta."""
     C["obs_ins"] = bool(activa)
-    C["dim_obs"] = C["dim_base"] + (4 if activa else 0)
+    C["dim_obs"] = dim_total()
+
+
+def configurar_obs_cercana(largo):
+    """--obs-cercana L (M3, B14): agrega (o quita, con 0) las 16 + lados entradas cercanas al final de la
+    observacion, con la geometria del escenario y el archivo de los E2 (lo escribe si falta). Va despues de
+    preparar()."""
+    C["obs_cerca"] = float(largo or 0)
+    C["n_cerca"] = 16 + len(C["lados"]) if largo else 0
+    C["dim_obs"] = dim_total()
+    if largo:
+        C.update(geometria_cercana(C["escenario"]))
+        C["e2_archivo"] = archivo_e2(C["escenario"], largo)
+
+
+_GEOMETRIA = {}         # escenario -> geometria de la zona cercana (la red se lee una vez por proceso)
+
+
+def geometria_cercana(escenario):
+    """Carriles de cada acceso, su largo y el primer carril interno del giro a la izquierda de cada carril (donde el
+    que gira espera el hueco, como en plan2/diag_corredor/bloqueo.py)."""
+    if escenario not in _GEOMETRIA:
+        e = ESCENARIOS[escenario]
+        net = sumolib.net.readNet(comun.leer_cfg(e["cfg"])[0], withInternal=True)
+        aprox = [a for lista in e["semaforos"].values() for a in lista]
+        carriles = {a: [l.getID() for l in net.getEdge(a).getLanes()] for a in aprox}
+        via_izq = {}
+        for a in aprox:
+            for conns in net.getEdge(a).getOutgoing().values():
+                for c in conns:
+                    if c.getDirection() in ("l", "L") and c.getViaLaneID():
+                        via_izq[c.getFromLane().getID()] = c.getViaLaneID()
+        _GEOMETRIA[escenario] = {
+            "carriles_aprox": carriles, "via_izq": via_izq,
+            "largo_carril": {l: net.getLane(l).getLength() for ls in carriles.values() for l in ls}}
+    return _GEOMETRIA[escenario]
+
+
+def archivo_e2(escenario, largo, carpeta="."):
+    """--obs-cercana: escribe (si falta o es otro) <carpeta>/e2_<esc>_<L>.add.xml, un detector E2 de L m que termina
+    en la linea de parada en cada carril de acceso, y devuelve su ruta. Escritura atomica (temporal con el pid y
+    reemplazo con reintentos): la llaman a la vez el trabajo "preparar" (plan3/p3_preparar.py), los entrenamientos y
+    las evaluaciones."""
+    geo = geometria_cercana(escenario)
+    lineas = ["<additional>"]
+    for ls in geo["carriles_aprox"].values():
+        for l in ls:
+            lg = geo["largo_carril"][l]
+            lineas.append(f'    <laneAreaDetector id="e2_{l}" lane="{l}" pos="{max(0.0, lg - largo):.2f}" '
+                          f'endPos="{lg:.2f}" period="100000" file="{os.devnull}" friendlyPos="true"/>')
+    texto = "\n".join(lineas + ["</additional>"]) + "\n"
+    ruta = os.path.join(carpeta, f"e2_{escenario}_{float(largo):g}.add.xml")
+    if os.path.exists(ruta):
+        with open(ruta, encoding="utf-8") as f:
+            if f.read() == texto:
+                return ruta
+    tmp = f"{ruta}.{os.getpid()}.tmp"          # con el pid: varios procesos pueden escribirlo a la vez
+    with open(tmp, "w", encoding="utf-8") as f:
+        f.write(texto)
+    reintentar(bajar_a_disco, tmp)
+    reemplazar(tmp, ruta)
+    return ruta
+
+
+def configurar_desde_meta(meta):
+    """La observacion, el reloj y los mensajes con que se entreno una politica, leidos de las opciones de su meta
+    (evaluar.brazo_profundo y el modo demo). Con {} deja todo como siempre."""
+    op = (meta or {}).get("opciones", {})
+    configurar_obs_insercion(op.get("obs_insercion", False))
+    configurar_obs_cercana(op.get("obs_cercana", 0.0))
+    C["msg_paso"] = bool(op.get("msg_cada_paso", False))
+    C["paso_decision"] = int(op.get("paso_decision", PASO_CONTROL))
+
+
+def configurar_colas_cero(activo):
+    """a3 (evaluar3.py --colas-cero): al jugar, todas las entradas de colas (vehiculos detenidos) de la observacion
+    valen cero: cola_o..cola_s, las que mandan los vecinos (<lado>_cola_alimentadora y <lado>_cola_mi_salida) y, con
+    --obs-cercana, cerca_det_* y salida_ocup_*. Va fuera de C para que preparar() no la apague."""
+    global COLAS_CERO
+    COLAS_CERO = bool(activo)
+
+
+def es_cola(nombre):
+    return (nombre.startswith(("cola_", "cerca_det_", "salida_ocup_"))
+            or nombre.endswith(("_cola_alimentadora", "_cola_mi_salida")))
+
+
+def indices_colas():
+    """Posiciones de las colas en la observacion de este escenario y estas opciones (para configurar_colas_cero)."""
+    if C.get("_colas_dim") != C["dim_obs"]:
+        C["_idx_colas"] = np.array([k for k, n in enumerate(nombres_features()) if es_cola(n)], dtype=np.int64)
+        C["_colas_dim"] = C["dim_obs"]
+    return C["_idx_colas"]
+
+
+class NormValor:
+    """--norm-valor: media y segundo momento moviles de los retornos (ValueNorm de MAPPO, Yu et al. 2022), un paso
+    por actualizacion con beta y correccion de sesgo. El critico predice (V - media) / desv; los valores que entran
+    a gae() se desnormalizan (a_valor) y el objetivo del critico se normaliza con las medias ya actualizadas."""
+
+    def __init__(self, beta=BETA_NORM):
+        self.beta, self.m1, self.m2, self.peso = float(beta), 0.0, 0.0, 0.0
+
+    def actualizar(self, x):
+        x = np.asarray(x, dtype=np.float64)
+        self.m1 = self.beta * self.m1 + (1 - self.beta) * float(x.mean())
+        self.m2 = self.beta * self.m2 + (1 - self.beta) * float((x ** 2).mean())
+        self.peso = self.beta * self.peso + (1 - self.beta)
+
+    def media_desv(self):
+        if self.peso == 0:
+            return 0.0, 1.0
+        m = self.m1 / self.peso
+        return m, max(1e-2, self.m2 / self.peso - m * m) ** 0.5
+
+    def a_valor(self, v):
+        m, d = self.media_desv()
+        return v * d + m
+
+    def normalizar(self, r):
+        m, d = self.media_desv()
+        return (r - m) / d
+
+    def estado(self):
+        return [self.beta, self.m1, self.m2, self.peso]
+
+    def restaurar(self, e):
+        self.beta, self.m1, self.m2, self.peso = (float(x) for x in e)
 
 
 def salidas_flujos(cfg):
@@ -348,7 +513,9 @@ def nombres_features():
             + [f"{lado}_{f}" for lado in C["lados"]
                for f in ("presente", "verde_hacia_mi", "ambar", "t_fase", "outflow",
                          "cola_alimentadora", "cola_mi_salida", "edad")]
-            + (["pend_o", "pend_e", "pend_n", "pend_s"] if C["obs_ins"] else []))
+            + (["pend_o", "pend_e", "pend_n", "pend_s"] if C["obs_ins"] else [])
+            + ([f"{f}_{x}" for x in "oens" for f in ("cerca_det", "cerca_mov", "espera_cab", "giro_izq")]
+               + [f"salida_ocup_{lado}" for lado in C["lados"]] if C["obs_cerca"] else []))
 
 
 def fase_avenida(tls, aprox, verdes):
@@ -514,29 +681,68 @@ def observar(tls, ag, lect, canal, t, con_vecinos):
         for k, a in enumerate(aprox):
             n = C["pend_arista"].get(a, 0)
             obs[C["dim_base"] + k] = n / (n + C["cap"][a])
-    if not con_vecinos:
-        return obs
+    if C["obs_cerca"]:
+        obs[C["dim_obs"] - C["n_cerca"]:] = entradas_cercanas(tls)
+    if con_vecinos:
+        for r, lado in enumerate(C["lados"]):
+            vec = C["vecinos"][tls].get(lado)
+            if vec is None:
+                continue
+            j, enlace_j_a_i, enlace_i_a_j = vec
+            base = 12 + C["n_id"] + 8 * r
+            obs[base] = 1.0
+            msg, edad = canal.leer(j, tls, t)
+            if msg is None:
+                obs[base + 7] = 1.0
+                continue
+            lado_de_i = OPUESTO[lado]                           # i visto desde j
+            cap_alim = C["cap"][alimentadora(j, lado_de_i)]
+            obs[base + 1] = 1.0 if msg["fase"] == EJE[lado] else 0.0     # verde de j hacia mi
+            obs[base + 2] = 1.0 if msg["fase"] == "ambar" else 0.0
+            obs[base + 3] = min(1.0, msg["t_fase"] / VERDE_MAX)
+            obs[base + 4] = min(1.0, msg["outflow"] / cap_alim)
+            obs[base + 5] = min(1.0, msg["cola_alimentadora"] / cap_alim)
+            obs[base + 6] = min(1.0, msg["cola_salida"] / C["plazas"][enlace_i_a_j])
+            obs[base + 7] = min(1.0, edad / EDAD_MAX)
+    if COLAS_CERO:
+        obs[indices_colas()] = 0.0
+    return obs
+
+
+def entradas_cercanas(tls):
+    """--obs-cercana (M3), leidas al decidir. Por acceso: vehiculos a menos de L m de la linea, detenidos y en
+    movimiento (del E2 suscrito; / (carriles * L / 7.5), tope 1), espera del primero de cada carril con alguien a
+    menos de L m (la mayor; / 120 s, tope 1; con la zona vacia vale 0 y no se lee) y giro_izq = 1 si hay un detenido
+    en el primer tramo interno del giro a la izquierda de algun carril. Por lado con vecino: detenidos del carril
+    mas cargado del enlace de SALIDA i->j / plazas (MedidorEnlaces)."""
+    res = np.zeros(C["n_cerca"], dtype=np.float32)
+    e2 = traci.lanearea.getAllSubscriptionResults()
+    vias = traci.lane.getAllSubscriptionResults()
+    largo = C["obs_cerca"]
+    for k, a in enumerate(C["semaforos"][tls]):
+        det = mov = 0
+        espera, giro = 0.0, 0.0
+        for l in C["carriles_aprox"][a]:
+            r = e2.get(f"e2_{l}", {})
+            n, h = r.get(VEH, 0), r.get(HALT, 0)
+            det += h
+            mov += max(0, n - h)
+            if n:                # zona vacia: el primero esta lejos y no espera (ahorra las 2 llamadas del carril)
+                ids = traci.lane.getLastStepVehicleIDs(l)
+                if ids:                              # el ultimo de la lista es el mas cercano a la linea
+                    espera = max(espera, traci.vehicle.getWaitingTime(ids[-1]))
+            via = C["via_izq"].get(l)
+            if via is not None and vias.get(via, {}).get(HALT, 0) > 0:
+                giro = 1.0
+        plazas = len(C["carriles_aprox"][a]) * max(1.0, largo / (comun.LARGO_VEH + comun.MIN_GAP))
+        res[4 * k: 4 * k + 4] = [min(1.0, det / plazas), min(1.0, mov / plazas),
+                                 min(1.0, espera / CERCA_MAX_ESPERA), giro]
+    medidor = C["_medidor"]
     for r, lado in enumerate(C["lados"]):
         vec = C["vecinos"][tls].get(lado)
-        if vec is None:
-            continue
-        j, enlace_j_a_i, enlace_i_a_j = vec
-        base = 12 + C["n_id"] + 8 * r
-        obs[base] = 1.0
-        msg, edad = canal.leer(j, tls, t)
-        if msg is None:
-            obs[base + 7] = 1.0
-            continue
-        lado_de_i = OPUESTO[lado]                           # i visto desde j
-        cap_alim = C["cap"][alimentadora(j, lado_de_i)]
-        obs[base + 1] = 1.0 if msg["fase"] == EJE[lado] else 0.0     # verde de j hacia mi
-        obs[base + 2] = 1.0 if msg["fase"] == "ambar" else 0.0
-        obs[base + 3] = min(1.0, msg["t_fase"] / VERDE_MAX)
-        obs[base + 4] = min(1.0, msg["outflow"] / cap_alim)
-        obs[base + 5] = min(1.0, msg["cola_alimentadora"] / cap_alim)
-        obs[base + 6] = min(1.0, msg["cola_salida"] / C["plazas"][enlace_i_a_j])
-        obs[base + 7] = min(1.0, edad / EDAD_MAX)
-    return obs
+        if vec is not None:
+            res[16 + r] = min(1.0, medidor.max_halting(vec[2]) / C["plazas"][vec[2]])
+    return res
 
 
 def mascara(ag):
@@ -592,9 +798,25 @@ def exceso_enlaces(medidor):
 
 
 # ---------------- Episodio ----------------
+def toca_decidir(ag, pasos):
+    """Reloj de decision de un agente (fuera del ambar). Por defecto, cada PASO_CONTROL s de su verde (la primera a
+    los 5 s) y todos en el segundo 0, como siempre. Con --paso-decision K: cada K s antes del verde minimo (son
+    decisiones forzadas), cada K s desde el verde minimo y una al llegar al verde maximo."""
+    if ag["ambar_restante"] > 0:
+        return False
+    t = ag["t_verde"]
+    if t == 0:
+        return pasos == 0
+    k = C["paso_decision"]
+    if k == PASO_CONTROL:
+        return t % PASO_CONTROL == 0
+    m = minimo_verde(ag)
+    return t % k == 0 if t < m else ((t - m) % k == 0 or t == VERDE_MAX)
+
+
 def correr_episodio(modo, politica, gui, delay, seed, tripinfo=None, serie=None,
                     latencia=0, perdida=0.0, variante="vecinos", buffer=None,
-                    decidir=None, transicion=None, con_estado=False, v2=False, ins=False):
+                    decidir=None, transicion=None, con_estado=False, v2=False, ins=False, escala=None):
     """Una hora simulada con los agentes IPPO. modo train (muestrea acciones y llena buffer)
     o demo (argmax). Devuelve las mismas metricas que rl_corredor.correr_episodio mas las
     de U4 y los retornos ret_*. El reloj de decision es el de rl_corredor.py. decidir,
@@ -602,8 +824,12 @@ def correr_episodio(modo, politica, gui, delay, seed, tripinfo=None, serie=None,
     v2: exploracion comun en train (--v2 o --solo-exploracion); ins: suma a la recompensa los
     vehiculos que esperan para entrar (--recompensa-insercion). Apagados, nada cambia.
     Con buffer (entrenamiento IPPO) devuelve ademas frac_forzadas y msg_edad (--registro-extendido);
-    contarlas no cambia ningun numero."""
+    contarlas no cambia ningun numero. escala: --scale de sumo (--escala-demanda, --val-escalas).
+    Las opciones de las Etapas 3 y 4 que cambian el episodio se leen de C (obs_cerca, msg_paso,
+    sin_forzadas, paso_decision, vnorm)."""
     assert decidir is None or buffer is None, "buffer es solo para la politica IPPO"
+    assert not (C["sin_forzadas"] and (decidir is not None or transicion is not None)), \
+        "--sin-forzadas es solo para la politica IPPO"
     esc = C["escenario"]
     con_vecinos = variante != "local"
     binario = sumolib.checkBinary("sumo-gui" if gui else "sumo")
@@ -616,9 +842,23 @@ def correr_episodio(modo, politica, gui, delay, seed, tripinfo=None, serie=None,
         cmd += ["--start", "--quit-on-end", "--delay", str(delay)]
         if os.path.exists(f"vista_{esc}.xml"):
             cmd += ["--gui-settings-file", f"vista_{esc}.xml"]
+    if C["obs_cerca"]:
+        # --additional-files reemplaza la lista del .sumocfg: van sus adicionales (el programa) y los E2 juntos
+        carpeta_cfg = os.path.dirname(C["cfg"])
+        cmd += ["--additional-files", ",".join([os.path.join(carpeta_cfg, a) for a in comun.leer_cfg(C["cfg"])[1]]
+                                               + [C["e2_archivo"]])]
+    if escala is not None:
+        cmd += ["--scale", f"{escala:.4f}"]
     comun.iniciar_sumo(cmd)
     suscribir()
     medidor = comun.MedidorEnlaces(C["net"], C["enlaces"])
+    C["_medidor"] = medidor                # entradas_cercanas lee de aqui la salida real de cada enlace
+    if C["obs_cerca"]:
+        for ls in C["carriles_aprox"].values():
+            for l in ls:
+                traci.lanearea.subscribe(f"e2_{l}", [VEH, HALT])
+        for via in sorted(set(C["via_izq"].values())):
+            traci.lane.subscribe(via, [HALT])
     canal = Canal(latencia, perdida, seed)
     crn = v2 and modo == "train" and decidir is None
     rng_expl = np.random.default_rng(seed + SEMILLA_EXPL) if crn else None
@@ -705,25 +945,23 @@ def correr_episodio(modo, politica, gui, delay, seed, tripinfo=None, serie=None,
             for tls in orden:
                 r_reporte += recompensa_base(tls, lect)
                 n_reporte += 1
-            if con_vecinos:
-                for j, ag_j in agentes.items():
-                    for lado, vec in C["vecinos"][j].items():
-                        if vec is None:
-                            continue
-                        i, _, enlace_i_a_j = vec
-                        msg = mensaje(j, ag_j, lect, medidor, lado, enlace_i_a_j, pasos)
-                        canal.publicar(j, i, pasos, msg)
+        # mensajes: cada PASO_CONTROL s de reloj global (cada K s con --paso-decision K; cada segundo con
+        # --msg-cada-paso, antes de las decisiones de ese segundo: el receptor lee el de este segundo)
+        if con_vecinos and pasos > 0 and (C["msg_paso"] or pasos % C["paso_decision"] == 0):
+            for j, ag_j in agentes.items():
+                for lado, vec in C["vecinos"][j].items():
+                    if vec is None:
+                        continue
+                    i, _, enlace_i_a_j = vec
+                    msg = mensaje(j, ag_j, lect, medidor, lado, enlace_i_a_j, pasos)
+                    canal.publicar(j, i, pasos, msg)
 
-        deciden = []
-        for tls in orden:
-            ag = agentes[tls]
-            if ag["ambar_restante"] > 0 or ag["t_verde"] % PASO_CONTROL != 0:
-                continue
-            if ag["t_verde"] == 0 and pasos > 0:
-                continue
-            deciden.append(tls)
+        deciden = [tls for tls in orden if toca_decidir(agentes[tls], pasos)]
         if deciden:
-            r_cerradas = {tls: cerrar_pendiente(tls, agentes[tls]) for tls in deciden}
+            # --sin-forzadas: una decision con una sola accion legal se aplica pero no cierra la pendiente ni entra
+            # al lote (su recompensa se suma a la de la decision libre anterior)
+            forzada = ({tls: sum(mascara(agentes[tls])) == 1 for tls in deciden} if C["sin_forzadas"] else {})
+            r_cerradas = {tls: None if forzada.get(tls) else cerrar_pendiente(tls, agentes[tls]) for tls in deciden}
             obs = np.stack([observar(tls, agentes[tls], lect, canal, pasos, con_vecinos) for tls in deciden])
             masc = np.array([mascara(agentes[tls]) for tls in deciden], dtype=np.float32)
             if buffer is not None:
@@ -772,17 +1010,19 @@ def correr_episodio(modo, politica, gui, delay, seed, tripinfo=None, serie=None,
                     decisiones_libres += 1
                     if modo == "train" and decidir is None and a != int(logits[k].argmax()):
                         minoritarias += 1
-                if buffer is not None:
+                if buffer is not None and not forzada.get(tls):
                     b = buffer[tls]
                     b["obs"].append(obs[k])
                     b["mascara"].append(masc[k])
                     b["accion"].append(a)
                     b["logp"].append(float(logp[k]))
-                    b["valor"].append(float(valores[k]))
+                    v = float(valores[k])
+                    b["valor"].append(C["vnorm"].a_valor(v) if C["vnorm"] is not None else v)
                     b["t"].append(pasos)
                 if transicion is not None:
                     ag["ultima"] = (obs[k], a, extras[k])
-                ag["pendiente"] = True
+                if not forzada.get(tls):
+                    ag["pendiente"] = True
                 if a == 1:                                  # la mascara garantiza que es legal
                     f_actual = ag["verdes"][ag["verde"]]
                     traci.trafficlight.setPhase(tls, ag["ambar"][f_actual])
@@ -845,7 +1085,8 @@ def correr_episodio(modo, politica, gui, delay, seed, tripinfo=None, serie=None,
             else:
                 with torch.no_grad():
                     o = torch.from_numpy(observar(tls, ag, lect, canal, pasos, con_vecinos)).unsqueeze(0)
-                    buffer[tls]["v_final"] = float(politica(o)[1][0])
+                    v = float(politica(o)[1][0])
+                    buffer[tls]["v_final"] = C["vnorm"].a_valor(v) if C["vnorm"] is not None else v
         if transicion is not None and ag["ultima"] is not None and r is not None:
             ult = ag["ultima"]
             transicion(tls, ult[0], ult[1], r * ESCALA_R,
@@ -854,6 +1095,7 @@ def correr_episodio(modo, politica, gui, delay, seed, tripinfo=None, serie=None,
                        {"extra": ult[2], "ultima": True, "vaciada": vaciada, "t": pasos,
                         "estado_sig": estado_fin})
     traci.close()
+    C["_medidor"] = None
 
     if serie is not None:
         comun.guardar_serie(serie, ["t"] + aprox_todas, filas_serie)
@@ -982,27 +1224,47 @@ def actualizar(politica, opt, lote, hiper, rng):
 
 
 # ---------------- Validacion, checkpoints y publicacion ----------------
-def validar(politica, semillas, variante, tripinfo, decidir=None):
+def validar(politica, semillas, variante, tripinfo, decidir=None, escalas=None):
     """Politica congelada (argmax, modo demo) en cada semilla de validacion. Guarda y restaura
     el RNG de random, numpy y torch: el entrenamiento da el mismo CSV con o sin validacion.
     Devuelve {"val_<s>": timeLoss medio, ..., "val": media, "val_total_<s>": retraso total medio
     (timeLoss + espera para entrar), ..., "val_total": media, "eval_timeloss": el de la primera
-    semilla, "eval_espera": su espera}."""
+    semilla, "eval_espera": su espera}.
+    Con escalas (--val-escalas), cada semilla en cada nivel de demanda (--scale e): por semilla y nivel
+    val_<s>_x<e> y val_total_<s>_x<e>; por nivel, val_x<e> y val_total_x<e> (medias de las semillas,
+    con 3 decimales); y val y val_total = la media geometrica de los niveles (no depende de la escala de
+    cada nivel)."""
     estados = (random.getstate(), np.random.get_state(), torch.get_rng_state())
     fila = {}
-    for k, s in enumerate(semillas):
-        res = correr_episodio("demo", politica, False, 0, s, tripinfo=tripinfo, variante=variante,
-                              decidir=decidir)
-        fila[f"val_{s}"] = res["timeloss_prom"]
-        fila[f"val_total_{s}"] = res["retraso_total_prom"]
-        if k == 0:
-            fila["eval_timeloss"], fila["eval_espera"] = res["timeloss_prom"], res["espera_prom"]
-    fila["val"] = round(float(np.mean([fila[f"val_{s}"] for s in semillas])), 3)
-    fila["val_total"] = round(float(np.mean([fila[f"val_total_{s}"] for s in semillas])), 3)
+    for j, e in enumerate(escalas or [None]):
+        x = "" if e is None else sufijo_escala(e)
+        for k, s in enumerate(semillas):
+            res = correr_episodio("demo", politica, False, 0, s, tripinfo=tripinfo, variante=variante,
+                                  decidir=decidir, escala=e)
+            fila[f"val_{s}{x}"] = res["timeloss_prom"]
+            fila[f"val_total_{s}{x}"] = res["retraso_total_prom"]
+            if j == 0 and k == 0:
+                fila["eval_timeloss"], fila["eval_espera"] = res["timeloss_prom"], res["espera_prom"]
+        fila[f"val{x}"] = round(float(np.mean([fila[f"val_{s}{x}"] for s in semillas])), 3)
+        fila[f"val_total{x}"] = round(float(np.mean([fila[f"val_total_{s}{x}"] for s in semillas])), 3)
+    if escalas:
+        fila["val"] = media_geometrica([fila[f"val{sufijo_escala(e)}"] for e in escalas])
+        fila["val_total"] = media_geometrica([fila[f"val_total{sufijo_escala(e)}"] for e in escalas])
     random.setstate(estados[0])
     np.random.set_state(estados[1])
     torch.set_rng_state(estados[2])
     return fila
+
+
+def sufijo_escala(e):
+    """Sufijo de las claves de un nivel de demanda de la validacion: _x0.5, _x1, _x1.5."""
+    return f"_x{float(e):g}"
+
+
+def media_geometrica(valores):
+    """Media geometrica con 3 decimales (como val): la de los niveles de --val-escalas."""
+    assert all(v > 0 for v in valores), valores
+    return round(float(np.exp(np.mean(np.log(np.asarray(valores, dtype=np.float64))))), 3)
 
 
 def ruta_checkpoint(tag, ep, ext=".pt"):
@@ -1061,6 +1323,41 @@ def correcciones_v2(args):
     return (v2 or getattr(args, "solo_descuento", False), v2 or getattr(args, "solo_exploracion", False))
 
 
+def opciones_etapas(args):
+    """Opciones de las Etapas 3 y 4 de esta corrida, solo las activas (asi los meta y los estados de antes no
+    cambian): van a meta["opciones"] y a la configuracion que compara --reanudar. evaluar.py lee del meta las que
+    cambian como juega la politica (configurar_desde_meta)."""
+    op = {}
+    if C["obs_cerca"]:
+        op["obs_cercana"] = C["obs_cerca"]
+    if C["msg_paso"]:
+        op["msg_cada_paso"] = True
+    if C["sin_forzadas"]:
+        op["sin_forzadas"] = True
+    if C["paso_decision"] != PASO_CONTROL:
+        op["paso_decision"] = C["paso_decision"]
+    if C["vnorm"] is not None:
+        op.update({"norm_valor": True, "norm_beta": C["vnorm"].beta})
+    if getattr(args, "ent_final", None) is not None:
+        op["ent_final"] = args.ent_final
+    if getattr(args, "escalas_demanda", None):
+        op["escala_demanda"] = list(args.escalas_demanda)
+        if args.curriculo:
+            op["curriculo"] = args.curriculo
+    if getattr(args, "escalas_val", None):
+        op["val_escalas"] = list(args.escalas_val)
+    return op
+
+
+def coef_entropia(ep, ent_final, horizonte):
+    """Coeficiente de entropia del episodio ep: HIPER["ent"] y, con --ent-final, lineal hasta ent_final en el
+    horizonte de la tasa (en el ultimo episodio del horizonte vale ent_final) y constante despues."""
+    if ent_final is None:
+        return HIPER["ent"]
+    frac = min(1.0, (ep - 1) / max(1, horizonte - 1))
+    return HIPER["ent"] + (ent_final - HIPER["ent"]) * frac
+
+
 def meta_base(args, val_seeds):
     """Meta comun de checkpoints y politica publicada."""
     descuento, exploracion = correcciones_v2(args)
@@ -1078,6 +1375,7 @@ def meta_base(args, val_seeds):
         opciones["lr_horizonte"] = horizonte
     if piso:
         opciones["lr_piso"] = piso
+    opciones.update(opciones_etapas(args))
     return {"escenario": C["escenario"], "variante": args.variante, "algoritmo": "ippo",
             "recompensa": RECOMPENSA[args.variante] + ("+insercion" if ins else ""),
             "etiqueta": opciones["etiqueta"], "opciones": opciones,
@@ -1106,13 +1404,19 @@ def tasa(ep, horizonte, piso=0.0):
     return HIPER["lr"] * max(piso, 1 - (ep - 1) / horizonte)
 
 
-def campos_csv(val_seeds, extendido=False):
+def campos_csv(val_seeds, extendido=False, escalas=None, extra=()):
     """Columnas del CSV de entrenamiento: CAMPOS_IPPO y, con --registro-extendido, al final val_<s> y val_total_<s>
-    de las semillas de validacion que no tienen columna fija, y CAMPOS_EXTENDIDOS."""
+    de las semillas de validacion que no tienen columna fija (con --val-escalas, val_x<e> y val_total_x<e> de cada
+    nivel), CAMPOS_EXTENDIDOS y las columnas de las opciones activas que las tienen (extra: escala, vn_media,
+    vn_desv)."""
     if not extendido:
         return list(CAMPOS_IPPO)
-    por_semilla = [f"val_{s}" for s in val_seeds] + [f"val_total_{s}" for s in val_seeds]
-    return CAMPOS_IPPO + [c for c in por_semilla if c not in CAMPOS_IPPO] + CAMPOS_EXTENDIDOS
+    if escalas:
+        xs = [sufijo_escala(e) for e in escalas]
+        por_semilla = [f"val{x}" for x in xs] + [f"val_total{x}" for x in xs]
+    else:
+        por_semilla = [f"val_{s}" for s in val_seeds] + [f"val_total_{s}" for s in val_seeds]
+    return CAMPOS_IPPO + [c for c in por_semilla if c not in CAMPOS_IPPO] + CAMPOS_EXTENDIDOS + list(extra)
 
 
 def linea_csv(campos, fila=None):
@@ -1127,13 +1431,23 @@ def linea_csv(campos, fila=None):
     return buf.getvalue()
 
 
-def meta_checkpoint(meta, ep, val, val_seeds, tramos=()):
+def meta_checkpoint(meta, ep, val, val_seeds, escalas=None, tramos=()):
     """Meta del checkpoint del episodio ep: el de la corrida mas su validacion (val trae val_<s>, val,
-    val_total_<s> y val_total) y, si los episodios <= ep los escribio mas de un codigo, sus tramos."""
-    m = {**meta, "ep_checkpoint": ep, "val_checkpoint": val["val"],
-         **{f"val_{s}": val[f"val_{s}"] for s in val_seeds},
-         "val_total_checkpoint": val["val_total"],
-         **{f"val_total_{s}": val[f"val_total_{s}"] for s in val_seeds}}
+    val_total_<s> y val_total; con --val-escalas, ademas las de cada nivel, de validar()) y, si los episodios <= ep
+    los escribio mas de un codigo, sus tramos."""
+    if escalas:
+        xs = [sufijo_escala(e) for e in escalas]
+        m = {**meta, "ep_checkpoint": ep, "val_checkpoint": val["val"],
+             **{f"val{x}": val[f"val{x}"] for x in xs},
+             **{f"val_{s}{x}": val[f"val_{s}{x}"] for x in xs for s in val_seeds},
+             "val_total_checkpoint": val["val_total"],
+             **{f"val_total{x}": val[f"val_total{x}"] for x in xs},
+             **{f"val_total_{s}{x}": val[f"val_total_{s}{x}"] for x in xs for s in val_seeds}}
+    else:
+        m = {**meta, "ep_checkpoint": ep, "val_checkpoint": val["val"],
+             **{f"val_{s}": val[f"val_{s}"] for s in val_seeds},
+             "val_total_checkpoint": val["val_total"],
+             **{f"val_total_{s}": val[f"val_total_{s}"] for s in val_seeds}}
     distintos = procedencia(tramos, ep)
     if distintos:
         m["tramos"] = distintos
@@ -1250,26 +1564,31 @@ def config_reanudacion(args, val_seeds):
     return {"escenario": C["escenario"], "variante": args.variante, "base": args.seed, "dim_obs": C["dim_obs"],
             "hiper": dict(HIPER), "descuento": descuento, "exploracion": exploracion,
             "recompensa_insercion": args.recompensa_insercion, "obs_insercion": C["obs_ins"],
-            "val_seeds": list(val_seeds)}
+            "val_seeds": list(val_seeds), **opciones_etapas(args)}
 
 
-def estado_generadores(rng):
-    """random, numpy global, torch y el default_rng de sembrar (baraja los minilotes), en tipos que torch.load lee
-    con weights_only=True."""
+def estado_generadores(rng, rng_escala=None):
+    """random, numpy global, torch, el default_rng de sembrar (baraja los minilotes) y, con --escala-demanda, el
+    del factor de demanda, en tipos que torch.load lee con weights_only=True."""
     version, interno, gauss = random.getstate()
     nombre, claves, pos, tiene_gauss, gauss_np = np.random.get_state()
-    return {"random": [version, list(interno), gauss],
-            "numpy": [nombre, [int(x) for x in claves], int(pos), int(tiene_gauss), float(gauss_np)],
-            "torch": torch.get_rng_state(), "rng": rng.bit_generator.state}
+    gen = {"random": [version, list(interno), gauss],
+           "numpy": [nombre, [int(x) for x in claves], int(pos), int(tiene_gauss), float(gauss_np)],
+           "torch": torch.get_rng_state(), "rng": rng.bit_generator.state}
+    if rng_escala is not None:
+        gen["escala"] = rng_escala.bit_generator.state
+    return gen
 
 
-def restaurar_generadores(gen, rng):
+def restaurar_generadores(gen, rng, rng_escala=None):
     version, interno, gauss = gen["random"]
     random.setstate((version, tuple(interno), gauss))
     nombre, claves, pos, tiene_gauss, gauss_np = gen["numpy"]
     np.random.set_state((nombre, np.array(claves, dtype=np.uint32), pos, tiene_gauss, gauss_np))
     torch.set_rng_state(gen["torch"])
     rng.bit_generator.state = gen["rng"]
+    if rng_escala is not None:
+        rng_escala.bit_generator.state = gen["escala"]
 
 
 def nueva_corrida(campos):
@@ -1278,6 +1597,7 @@ def nueva_corrida(campos):
     return {"val_serie": [], "val_total_serie": [],   # [ep, val_<s1>, ..., media] en timeLoss y en retraso total
             "lineas": [linea_csv(campos)],            # el CSV como esta en el archivo: cabecera y una por episodio
             "lr": [],                                 # tasa usada en cada episodio
+            "ent": [],                                # coeficiente de entropia de cada episodio
             "archivos": {},                           # {nombre: sha256} de los checkpoints (con --guardar-estado)
             "origen": [],                             # [{"corrida": tag, "episodio": k}] si sigue a otra etiqueta
             "tramos": [],                             # [{desde, hasta, git, codigo}]: quien escribio cada episodio
@@ -1287,17 +1607,21 @@ def nueva_corrida(campos):
             "b22": None}                              # la comparacion B22 de este proceso, si hay previas
 
 
-def guardar_estado(ruta, ep, etiqueta, args, val_seeds, corrida, politica, opt, rng, ruta_csv, git):
+def guardar_estado(ruta, ep, etiqueta, args, val_seeds, corrida, politica, opt, rng, ruta_csv, git,
+                   rng_escala=None):
     """--guardar-estado: todo lo necesario para seguir exacto despues del episodio ep. Se escribe al final del
     episodio, despues del checkpoint y de la fila del CSV, en un temporal bajado a disco que se renombra: si el
-    estado existe, esta entero y todo lo <= ep esta completo."""
+    estado existe, esta entero y todo lo <= ep esta completo. Etapas 3 y 4 (claves nuevas, la version sigue en 1):
+    el coeficiente de entropia de cada episodio, las medias de --norm-valor y el generador de --escala-demanda."""
     estado = {"version": VERSION_ESTADO, "episodio": ep, "tag": etiqueta, "etiqueta": args.etiqueta,
               "config": config_reanudacion(args, val_seeds), "episodios": args.episodios,
               "eval_cada": args.eval_cada, "ruta_csv": ruta_csv, "csv": "".join(corrida["lineas"]),
-              "lr": list(corrida["lr"]), "val_serie": corrida["val_serie"],
+              "lr": list(corrida["lr"]), "ent": list(corrida["ent"]), "val_serie": corrida["val_serie"],
               "val_total_serie": corrida["val_total_serie"], "archivos": dict(corrida["archivos"]),
               "origen": corrida["origen"], "fase_av": dict(C["fase_av"]),
-              "politica": politica.state_dict(), "opt": opt.state_dict(), "generadores": estado_generadores(rng),
+              "norm_valor": C["vnorm"].estado() if C["vnorm"] is not None else None,
+              "politica": politica.state_dict(), "opt": opt.state_dict(),
+              "generadores": estado_generadores(rng, rng_escala),
               "git": git, "torch": str(torch.__version__), "python": sys.version.split()[0],
               "codigo": corrida["codigo"], "tramos": [dict(t) for t in corrida["tramos"]],
               "reanudaciones": [dict(r) for r in corrida["reanudaciones"]]}
@@ -1376,6 +1700,11 @@ def comprobar_estado(estado, args, val_seeds, horizonte):
         raise SystemExit(f"--reanudar: en el episodio {distinto} la tasa de esta corrida es "
                          f"{esperada[distinto - 1]!r} y la del estado {estado['lr'][distinto - 1]!r} (revisa "
                          "--episodios, --lr-horizonte y --lr-piso)")
+    if "ent" in estado:         # un estado de antes de las Etapas 3 y 4 no lo trae: era HIPER["ent"] (en la config)
+        esperada = [coef_entropia(e, args.ent_final, horizonte) for e in range(1, k + 1)]
+        if estado["ent"] != esperada:
+            raise SystemExit("--reanudar: el calendario de entropia de esta corrida no es el del estado (revisa "
+                             "--hiper ent, --ent-final y el horizonte de la tasa)")
 
 
 def ya_terminada(estado, etiqueta, ruta_csv, ruta_politica, criterio):
@@ -1424,7 +1753,7 @@ def lineas_csv_estado(texto, campos, etiqueta=None):
     return salida
 
 
-def reanudar(estado, ruta_estado, etiqueta, args, val_seeds, campos, meta, ruta_csv, politica, opt, rng):
+def reanudar(estado, ruta_estado, etiqueta, args, campos, meta, ruta_csv, politica, opt, rng, rng_escala=None):
     """--reanudar: deja los archivos de la etiqueta como los habria dejado una corrida seguida al terminar el
     episodio de partida k, restaura pesos, Adam, generadores y series, y devuelve la corrida para seguir en k + 1.
       Misma etiqueta: verifica (sha256) los checkpoints <= k y borra los checkpoints y estados > k de un intento
@@ -1445,7 +1774,7 @@ def reanudar(estado, ruta_estado, etiqueta, args, val_seeds, campos, meta, ruta_
     # un estado escrito antes de la huella del codigo: un tramo sin huella (cuenta como otro codigo)
     tramos = estado.get("tramos") or [{"desde": 1, "hasta": k, "git": estado.get("git", ""), "codigo": None}]
     corrida.update({"val_serie": estado["val_serie"], "val_total_serie": estado["val_total_serie"],
-                    "lr": list(estado["lr"]),
+                    "lr": list(estado["lr"]), "ent": list(estado.get("ent", [HIPER["ent"]] * k)),
                     "origen": estado["origen"] + ([] if misma else [{"corrida": estado["tag"], "episodio": k}]),
                     "tramos": [dict(t) for t in tramos],
                     "reanudaciones": [dict(r) for r in estado.get("reanudaciones", [])]})
@@ -1485,16 +1814,24 @@ def reanudar(estado, ruta_estado, etiqueta, args, val_seeds, campos, meta, ruta_
         corrida["archivos"] = dict(estado["archivos"])
     else:
         limpiar_checkpoints(etiqueta, desde=k if misma else 0)
-        for f, t in zip(estado["val_serie"], estado["val_total_serie"]):
+        for f in estado["val_serie"]:
             ep = f[0]
             destino = ruta_checkpoint(etiqueta, ep)
+            origen_json = os.path.join(carpeta, nombre(estado["tag"], ep, ".json"))
             if misma:
-                copiar(os.path.join(carpeta, nombre(estado["tag"], ep, ".json")), destino.replace(".pt", ".json"))
+                copiar(origen_json, destino.replace(".pt", ".json"))
             else:
-                val = {"val": f[-1], "val_total": t[-1], **{f"val_{s}": f[1 + i] for i, s in enumerate(val_seeds)},
-                       **{f"val_total_{s}": t[1 + i] for i, s in enumerate(val_seeds)}}
-                guardar_json(meta_checkpoint(meta, ep, val, val_seeds, corrida["tramos"]),
-                             destino.replace(".pt", ".json"))
+                # meta de esta corrida + la validacion de ese checkpoint (todo lo que va desde ep_checkpoint, en el
+                # mismo orden, sin los tramos del origen) y los tramos de esta corrida hasta ep: lo que habria
+                # escrito meta_checkpoint en una corrida seguida con esta etiqueta
+                with open(origen_json, encoding="utf-8") as g:
+                    viejo = json.load(g)
+                claves = list(viejo)
+                nuevo = {**meta, **{c: viejo[c] for c in claves[claves.index("ep_checkpoint"):] if c != "tramos"}}
+                distintos = procedencia(corrida["tramos"], ep)
+                if distintos:
+                    nuevo["tramos"] = distintos
+                guardar_json(nuevo, destino.replace(".pt", ".json"))
             copiar(os.path.join(carpeta, nombre(estado["tag"], ep)), destino)
             for ext in (".pt", ".json"):
                 corrida["archivos"][nombre(etiqueta, ep, ext)] = sha256(ruta_checkpoint(etiqueta, ep, ext))
@@ -1504,7 +1841,9 @@ def reanudar(estado, ruta_estado, etiqueta, args, val_seeds, campos, meta, ruta_
                     copiar(ruta, ruta_checkpoint(etiqueta, ep, ".estado.pt"))
     politica.load_state_dict(estado["politica"])
     opt.load_state_dict(estado["opt"])
-    restaurar_generadores(estado["generadores"], rng)
+    restaurar_generadores(estado["generadores"], rng, rng_escala)
+    if C["vnorm"] is not None:          # la configuracion ya comprobo que el estado tambien usa --norm-valor
+        C["vnorm"].restaurar(estado["norm_valor"])
     return corrida
 
 
@@ -1616,6 +1955,25 @@ def construir_parser():
                     help="sigue exacto desde un estado; auto: el ultimo de esta etiqueta (sin estados, de cero)")
     ap.add_argument("--hasta-ep", type=int, default=None,
                     help="corta despues de este episodio: guarda el estado y sale con 0 sin publicar la politica")
+    # plan3, Etapas 3 y 4 (todas apagadas por defecto)
+    ap.add_argument("--obs-cercana", type=float, default=0.0,
+                    help="M3: largo (m) de la zona cercana a la linea (E2 y giro a la izquierda); 0 = apagada")
+    ap.add_argument("--norm-valor", action="store_true", help="M7: el critico aprende el retorno normalizado")
+    ap.add_argument("--norm-beta", type=float, default=None,
+                    help=f"beta de las medias moviles de --norm-valor (por defecto {BETA_NORM})")
+    ap.add_argument("--sin-forzadas", action="store_true",
+                    help="M7: las decisiones con una sola accion legal no entran al lote (exige descuento de V2)")
+    ap.add_argument("--msg-cada-paso", action="store_true", help="M7: los mensajes se publican cada segundo")
+    ap.add_argument("--ent-final", type=float, default=None,
+                    help="entropia lineal de HIPER['ent'] a este valor en el horizonte de la tasa")
+    ap.add_argument("--paso-decision", type=int, default=PASO_CONTROL,
+                    help="reloj de decision (s) desde el verde minimo; 5 = el de siempre (otro exige descuento V2)")
+    ap.add_argument("--escala-demanda", default=None, metavar="a,b",
+                    help="politica por red: cada episodio corre con --scale f, f ~ U(a, tope)")
+    ap.add_argument("--curriculo", type=int, default=0,
+                    help="con --escala-demanda: episodios en que el tope sube de a a b (0 = tope b desde el 1)")
+    ap.add_argument("--val-escalas", default=None, metavar="e1,e2,...",
+                    help="valida en estos niveles de demanda (--scale); elige por la media geometrica")
     ap.add_argument("--validar-args", action="store_true",
                     help="solo revisa los argumentos y sale con 0 (no lee el escenario ni escribe nada)")
     return ap
@@ -1649,6 +2007,34 @@ def validar_args(argv):
         ap.error("--lr-horizonte va desde 1")
     if not 0.0 <= args.lr_piso < 1.0:
         ap.error("--lr-piso va de 0 a 1 (fraccion del lr inicial)")
+    descuento_v2 = correcciones_v2(args)[0]
+    if args.sin_forzadas and not descuento_v2:
+        ap.error("--sin-forzadas exige el descuento por segundo de V2 (--v2 o --solo-descuento)")
+    if args.paso_decision < 1 or (args.paso_decision != PASO_CONTROL and not descuento_v2):
+        ap.error("--paso-decision va desde 1 y, si no es 5, exige el descuento por segundo de V2")
+    if args.obs_cercana < 0:
+        ap.error("--obs-cercana es un largo en metros (0 = apagada)")
+    if args.norm_beta is not None and not (args.norm_valor and 0.0 < args.norm_beta < 1.0):
+        ap.error("--norm-beta va con --norm-valor y entre 0 y 1")
+    if args.ent_final is not None and args.ent_final < 0:
+        ap.error("--ent-final es un coeficiente de entropia (>= 0)")
+
+    def lista_escalas(texto, opcion):
+        try:
+            valores = [float(x) for x in texto.split(",") if x.strip()]
+        except ValueError:
+            ap.error(f"{opcion}: numeros separados por coma")
+        if not valores or any(v <= 0 for v in valores):
+            ap.error(f"{opcion}: factores de demanda positivos")
+        return valores
+
+    args.escalas_demanda = lista_escalas(args.escala_demanda, "--escala-demanda") if args.escala_demanda else None
+    dem = args.escalas_demanda
+    if dem and (len(dem) != 2 or dem[0] > dem[1]):
+        ap.error("--escala-demanda: dos factores a,b con a <= b")
+    if args.curriculo and (args.curriculo < 0 or not args.escalas_demanda):
+        ap.error("--curriculo va con --escala-demanda y es un numero de episodios")
+    args.escalas_val = lista_escalas(args.val_escalas, "--val-escalas") if args.val_escalas else None
     cambios = {}
     for cambio in [c for c in args.hiper.split(",") if c]:
         clave, igual, valor = cambio.partition("=")
@@ -1713,12 +2099,16 @@ def main():
 
     preparar(args.escenario)
     configurar_obs_insercion(args.obs_insercion)
+    configurar_obs_cercana(args.obs_cercana)
+    C["msg_paso"], C["sin_forzadas"], C["paso_decision"] = args.msg_cada_paso, args.sin_forzadas, args.paso_decision
+    C["vnorm"] = NormValor(args.norm_beta if args.norm_beta is not None else BETA_NORM) if args.norm_valor else None
     esc = args.escenario
     rng = sembrar(args.seed)
 
     if args.modo == "demo":
         politica, meta = Politica.cargar(args.politica)
-        configurar_obs_insercion(meta.get("opciones", {}).get("obs_insercion", False))
+        configurar_desde_meta(meta)          # la observacion, el reloj y los mensajes con que se entreno
+        C["sin_forzadas"], C["vnorm"] = False, None
         assert meta["dim_obs"] == C["dim_obs"], \
             f"la politica espera {meta['dim_obs']} entradas y {esc} da {C['dim_obs']}"
         variante = meta["variante"]
@@ -1738,9 +2128,13 @@ def main():
     descuento, exploracion = correcciones_v2(args)
     horizonte = args.lr_horizonte or args.episodios
     fin = args.hasta_ep or args.episodios           # ultimo episodio de esta llamada (un tramo si hay --hasta-ep)
-    campos = campos_csv(val_seeds, args.registro_extendido)
+    extra = ((["escala"] if args.escalas_demanda else [])
+             + (["vn_media", "vn_desv"] if C["vnorm"] is not None else []))
+    campos = campos_csv(val_seeds, args.registro_extendido, args.escalas_val, extra)
     meta = meta_base(args, val_seeds)
     codigo = huella_codigo()
+    # --escala-demanda: generador propio del factor de cada episodio (no toca los demas)
+    rng_escala = np.random.default_rng(args.seed + SEMILLA_ESCALA) if args.escalas_demanda else None
     # --reanudar: ruta explicita (misma etiqueta o nueva) o auto (el estado valido mas avanzado de esta etiqueta)
     ruta_estado, estado, como_auto = None, None, args.reanudar == "auto"
     if args.reanudar == "auto":
@@ -1773,8 +2167,8 @@ def main():
             print(f"Nada que hacer: {etiqueta} ya llego al episodio {k}"
                   + (f" (--hasta-ep {fin})" if fin < args.episodios else f" y publico {ruta}"))
             return
-        corrida = reanudar(estado, ruta_estado, etiqueta, args, val_seeds, campos, meta, ruta_csv,
-                           politica, opt, rng)
+        corrida = reanudar(estado, ruta_estado, etiqueta, args, campos, meta, ruta_csv, politica, opt, rng,
+                           rng_escala)
     else:
         limpiar_checkpoints(etiqueta)
         corrida = nueva_corrida(campos)
@@ -1792,6 +2186,8 @@ def main():
           + (f", solo el {'descuento' if descuento else 'exploracion comun'} de V2"
              if descuento != exploracion else "")
           + (", obs_insercion" if C["obs_ins"] else ""))
+    if opciones_etapas(args):
+        print(f"Plan 3, Etapas 3 y 4: {opciones_etapas(args)}")
     if estado is not None:
         print(f"Reanuda desde {ruta_estado} (episodio {estado['episodio']}, "
               + ("misma etiqueta" if estado["tag"] == etiqueta else f"etiqueta nueva; copia lo de {estado['tag']}")
@@ -1810,28 +2206,52 @@ def main():
         for g in opt.param_groups:
             g["lr"] = lr
         corrida["lr"].append(lr)
-        hiper_ep = HIPER            # hiperparametros de este episodio (Etapa 3: calendario de entropia)
+        # hiperparametros de este episodio: el coeficiente de entropia sigue --ent-final (si no, es el de HIPER)
+        hiper_ep = (HIPER if args.ent_final is None
+                    else {**HIPER, "ent": coef_entropia(ep, args.ent_final, horizonte)})
+        corrida["ent"].append(hiper_ep["ent"])
+        escala = None
+        if args.escalas_demanda:            # --escala-demanda: factor del episodio (con curriculo, el tope sube)
+            a_, b_ = args.escalas_demanda
+            tope = b_ if not args.curriculo else a_ + (b_ - a_) * min(1.0, ep / args.curriculo)
+            escala = round(float(rng_escala.uniform(a_, tope)), 4)
         buffer = {}
         t0 = time.time()
         res = correr_episodio("train", politica, args.gui, args.delay, args.seed + ep,
                               tripinfo=f"tripinfo_{etiqueta}_train.xml", variante=args.variante,
-                              buffer=buffer, v2=exploracion, ins=args.recompensa_insercion)
+                              buffer=buffer, v2=exploracion, ins=args.recompensa_insercion, escala=escala)
         lote = gae(buffer, HIPER["gamma"], HIPER["lam"], smdp=descuento)
         dts = np.concatenate([intervalos(b) for b in buffer.values() if b["recompensa"]])
         res.update({"dt_medio": round(float(dts.mean()), 3), "frac_dt8": round(float((dts == 8).mean()), 4)})
         if args.registro_extendido:
             res.update({"var_explicada": varianza_explicada(buffer, lote[5]), "ent_coef": hiper_ep["ent"]})
+            if escala is not None:
+                res["escala"] = escala
+        if C["vnorm"] is not None:
+            # --norm-valor: las medias toman los retornos de este lote; el critico aprende el normalizado
+            retornos = lote[5].numpy()
+            C["vnorm"].actualizar(retornos)
+            lote = lote[:5] + (torch.from_numpy(np.asarray(C["vnorm"].normalizar(retornos), dtype=np.float32)),)
+            if args.registro_extendido:
+                m, d = C["vnorm"].media_desv()
+                res.update({"vn_media": round(m, 4), "vn_desv": round(d, 4)})
         diag = actualizar(politica, opt, lote, hiper_ep, rng)
         fila = {"variante": args.variante, "base": args.seed, "episodio": ep, "semilla": args.seed + ep,
                 "lr": f"{lr:.2e}", "segundos": round(time.time() - t0, 1), **res, **diag,
                 "algoritmo": "ippo", "recompensa_tipo": meta["recompensa"], "etiqueta": args.etiqueta}
         checkpoint = bool(val_seeds and args.eval_cada and (ep % args.eval_cada == 0 or ep == args.episodios))
         if checkpoint:
-            fila.update(validar(politica, val_seeds, args.variante, f"tripinfo_{etiqueta}_val.xml"))
-            val_serie.append([ep] + [fila[f"val_{s}"] for s in val_seeds] + [fila["val"]])
-            val_total_serie.append([ep] + [fila[f"val_total_{s}"] for s in val_seeds] + [fila["val_total"]])
+            fila.update(validar(politica, val_seeds, args.variante, f"tripinfo_{etiqueta}_val.xml",
+                                escalas=args.escalas_val))
+            if args.escalas_val:        # una columna por nivel (media de sus semillas); la ultima, la geometrica
+                xs = [sufijo_escala(e) for e in args.escalas_val]
+                val_serie.append([ep] + [fila[f"val{x}"] for x in xs] + [fila["val"]])
+                val_total_serie.append([ep] + [fila[f"val_total{x}"] for x in xs] + [fila["val_total"]])
+            else:
+                val_serie.append([ep] + [fila[f"val_{s}"] for s in val_seeds] + [fila["val"]])
+                val_total_serie.append([ep] + [fila[f"val_total_{s}"] for s in val_seeds] + [fila["val_total"]])
             politica.guardar(ruta_checkpoint(etiqueta, ep),
-                             meta_checkpoint(meta, ep, fila, val_seeds, corrida["tramos"]))
+                             meta_checkpoint(meta, ep, fila, val_seeds, args.escalas_val, corrida["tramos"]))
             if args.guardar_estado:         # despues del fsync de guardar: el sha256 es el de lo que esta en disco
                 for ext in (".pt", ".json"):
                     corrida["archivos"][os.path.basename(ruta_checkpoint(etiqueta, ep, ext))] = \
@@ -1853,7 +2273,7 @@ def main():
               flush=True)
         if args.guardar_estado and (checkpoint or ep == fin):
             guardar_estado(ruta_checkpoint(etiqueta, ep, ".estado.pt"), ep, etiqueta, args, val_seeds, corrida,
-                           politica, opt, rng, ruta_csv, meta["git"])
+                           politica, opt, rng, ruta_csv, meta["git"], rng_escala)
     if salida is not None:
         salida.close()
     else:                           # el CSV estaba tomado al empezar: entero ahora (en el ultimo tramo, con esperas)

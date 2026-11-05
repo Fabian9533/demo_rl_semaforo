@@ -14,7 +14,9 @@ prueba_reanudar.py - Pruebas 3 y 4 de la tarea 1.2 del plan 3 (informe: plan3/do
 
 Uso:  python plan3/pruebas/ent/prueba_reanudar.py corredor      (P1: IPPO y V2, prueba 4 y rechazos)
       python plan3/pruebas/ent/prueba_reanudar.py malla3_alta   (P6: V2; ~2 procesos durante 20-45 min)
-Salida: plan3/pruebas/ent/salidas/prueba_reanudar_<escenario>.txt; corridas en plan3/tmp_ent/rean_<esc>_*.
+      python plan3/pruebas/ent/prueba_reanudar.py corredor e3 e4   (solo la prueba 3 con las opciones de las
+                                                                    Etapas 3 y 4 juntas; informe_ent2.md)
+Salida: plan3/pruebas/ent/salidas/prueba_reanudar_<escenario>[_<modos>].txt; corridas en plan3/tmp_ent/rean_<esc>_*.
 """
 import sys
 import json
@@ -26,6 +28,15 @@ MODOS = {   # modo: (opciones, tag, politica)
     "ippo": (["--guardar-estado"], "ippo_vecinos_s7", "vecinos_s7"),
     "v2": (["--v2", "--criterio-val", "total", "--etiqueta", "p3prbv2", "--guardar-estado", "--registro-extendido"],
            "ippo_vecinos_p3prbv2_s7", "vecinos_p3prbv2_s7"),
+    # Etapa 3 (informe_ent2): observacion cercana, normalizacion del valor, reloj de 2 s, sin forzadas, mensajes
+    # cada paso y calendario de entropia, juntos
+    "e3": (["--v2", "--criterio-val", "total", "--etiqueta", "p3prbe3", "--guardar-estado", "--registro-extendido",
+            "--obs-cercana", "75", "--norm-valor", "--paso-decision", "2", "--sin-forzadas", "--msg-cada-paso",
+            "--hiper", "ent=0.03", "--ent-final", "0.003"], "ippo_vecinos_p3prbe3_s7", "vecinos_p3prbe3_s7"),
+    # Etapa 4: escala de demanda por episodio con curriculo, validacion por niveles y beta rapido
+    "e4": (["--v2", "--criterio-val", "total", "--etiqueta", "p3prbe4", "--guardar-estado", "--registro-extendido",
+            "--escala-demanda", "0.5,2.0", "--curriculo", "10", "--val-escalas", "0.5,1,1.5", "--norm-valor",
+            "--norm-beta", "0.99"], "ippo_vecinos_p3prbe4_s7", "vecinos_p3prbe4_s7"),
 }
 
 
@@ -190,12 +201,14 @@ def prueba_rechazos(inf, seguida_v2):
 
 def main():
     esc = sys.argv[1] if len(sys.argv) > 1 else "corredor"
-    p1 = esc == "corredor"
-    inf = u.Informe(f"prueba_reanudar_{esc}", f"Pruebas 3{' y 4' if p1 else ''} (tarea 1.2): reanudacion exacta en "
-                    f"{esc}, base 7, validacion cada 5 en {u.VAL_HUMO}")
+    pedidos = sys.argv[2:]                  # modos a mano (p. ej. e3 e4): solo la prueba 3 con ellos
+    p1 = esc == "corredor" and not pedidos
+    nombre = f"prueba_reanudar_{esc}" + (f"_{'_'.join(pedidos)}" if pedidos else "")
+    inf = u.Informe(nombre, f"Pruebas 3{' y 4' if p1 else ''} (tarea 1.2): reanudacion exacta en {esc}, base 7, "
+                    f"validacion cada 5 en {u.VAL_HUMO}" + (f"; modos {', '.join(pedidos)}" if pedidos else ""))
     inf("")
     inf("Prueba 3: 20 seguidos = 10 + 10 reanudados")
-    seguidas = prueba_tramos(inf, esc, ["ippo", "v2"] if p1 else ["v2"])
+    seguidas = prueba_tramos(inf, esc, pedidos or (["ippo", "v2"] if esc == "corredor" else ["v2"]))
     if p1:
         inf("")
         inf("Prueba 4: etiqueta nueva")

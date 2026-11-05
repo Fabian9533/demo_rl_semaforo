@@ -8,7 +8,7 @@ prueba_identidad.py - Pruebas 1 y 2 de la tarea 1.1 del plan 3 (informe: plan3/d
      y meta), y evaluar.py juega igual la politica publicada con y sin las opciones (CSV de evaluar en 424303-424304).
   Ademas, ablacion: --solo-descuento mas --solo-exploracion es --v2 (CSV, checkpoints, politica y meta); cada una
   sola hace solo su mitad (el episodio 1 de --solo-descuento juega como IPPO y el de --solo-exploracion como V2, y la
-  actualizacion cambia).
+  actualizacion cambia). Desde la Etapa 3 (plan3/doc/informe_ent2.md): --paso-decision 5 = tag.
 
 Uso (desde cualquier carpeta):  python plan3/pruebas/ent/prueba_identidad.py
 Salida: plan3/pruebas/ent/salidas/prueba_identidad.txt; corridas en plan3/tmp_ent/ident_*.
@@ -40,6 +40,8 @@ CORRIDAS = {   # nombre: (codigo, argumentos, tag de los checkpoints, politica p
                    TAG_V2, POL_V2),
     "nuevo_expl": ("nuevo", BASE + ["--solo-exploracion", "--criterio-val", "total", "--etiqueta", "p3prbv2"],
                    TAG_V2, POL_V2),
+    # plan3, Etapa 3 (PLAN3 3.4): el reloj de 5 s puesto a mano es el de siempre
+    "nuevo_v2_paso5": ("nuevo", BASE + V2 + ["--paso-decision", "5"], TAG_V2, POL_V2),
 }
 
 
@@ -90,6 +92,8 @@ def main():
     for a, b in (("nuevo_ippo", "tag_ippo"), ("nuevo_v2", "tag_v2")):
         inf.chequeo(f"log de consola de {a} = el de {b} (salvo los segundos)", log_sin_tiempos(a) == log_sin_tiempos(b),
                     f"{len(log_sin_tiempos(a))} lineas")
+    inf("--paso-decision 5 (el reloj de siempre, puesto a mano) = tag")
+    misma_corrida("nuevo_v2_paso5", "tag_v2")
     inf("")
     inf("Prueba 2: --guardar-estado y --registro-extendido no cambian ningun numero")
     misma_corrida("nuevo_ippo_ext", "tag_ippo", bytes_csv=False)
