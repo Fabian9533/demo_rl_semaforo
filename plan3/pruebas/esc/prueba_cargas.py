@@ -8,7 +8,8 @@ prueba_cargas.py - Pruebas 7 y 5 de los escenarios nuevos:
      por bloque de 10 min de la primera semilla (el bloque punta no se traba).
   5. En malla3_alta_e (P6e) la espera para entrar del fijo queda bajo 1 s/veh; al lado, P6 entregado (entrada por
      defecto) con las mismas semillas.
-Uso (desde plan3/): python pruebas/esc/prueba_cargas.py      Salida: salidas/cargas.txt y cargas.csv
+Uso (desde plan3/): python pruebas/esc/prueba_cargas.py
+Salida: salidas/cargas.txt, cargas.csv y salidas/cargas/eval_<esc>_<brazo>.csv (los CSV de evaluar.py)
 """
 import os
 import re
@@ -114,6 +115,13 @@ def main():
             p(f"  {e} {b}, semilla 424301, retraso total por bloque de 10 min (vehiculos / s por vehiculo): "
               + ", ".join(f"b{k} {n} / {x:.1f}" for k, (n, x) in bl.items())
               + f"  (esperados por bloque: {', '.join(f'{v:.0f}' for v in esperado.values())})")
+    corredor = ("viaje_corredor_prom", "retraso_corredor_punta", "paradas_corredor_le1")
+    for e in ("poi_corredor", "per_corredor", "poi_red", "per_red"):
+        rs = res[(e, "fijo")][0]
+        p(f"  (informativo) {e:12s} fijo, metricas del corredor por semilla ({', '.join(corredor)}): "
+          + "; ".join("/".join(r[m] for m in corredor) for r in rs)
+          + ("  <- en per_ salen en 0: comun.leer_tripinfo no reconoce los flows <flow>_b<k>"
+             if e.startswith("per_") else ""))
     p("5. Espera para entrar del fijo en P6e (malla3_alta_e) frente a P6 entregado, mismas semillas")
     p6e = [float(r["retraso_insercion_prom"]) for r in res[("malla3_alta_e", "fijo")][0]]
     p6 = [float(r["retraso_insercion_prom"]) for r in res[("malla3_alta", "fijo")][0]]
@@ -122,6 +130,11 @@ def main():
         w = csv.DictWriter(f, fieldnames=list(filas[0]))
         w.writeheader()
         w.writerows(filas)
+    destino = os.path.join(u.SALIDAS, "cargas")        # los CSV de evaluar.py (2 filas cada uno)
+    shutil.rmtree(destino, ignore_errors=True)
+    os.makedirs(destino)
+    for e, b in trabajos:
+        shutil.copyfile(os.path.join(CARPETA, f"eval_{e}_{b}.csv"), os.path.join(destino, f"eval_{e}_{b}.csv"))
     u.limpiar_generados()
     p(f"\nResultado: {'TODO OK' if not fallas else f'{len(fallas)} FALLAS'}")
     p.guardar()

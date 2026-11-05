@@ -31,6 +31,10 @@
   per_corredor actuado, semilla 424301, retraso total por bloque de 10 min (vehiculos / s por vehiculo): b0 182 / 18.5, b1 296 / 23.3, b2 423 / 33.3, b3 388 / 39.0, b4 288 / 31.6, b5 213 / 22.0  (esperados por bloque: 201, 302, 402, 402, 302, 201)
   per_red fijo, semilla 424301, retraso total por bloque de 10 min (vehiculos / s por vehiculo): b0 214 / 19.1, b1 352 / 23.4, b2 495 / 43.5, b3 449 / 26.3, b4 378 / 24.4, b5 248 / 20.4  (esperados por bloque: 239, 358, 478, 478, 358, 239)
   per_red actuado, semilla 424301, retraso total por bloque de 10 min (vehiculos / s por vehiculo): b0 214 / 19.4, b1 352 / 24.2, b2 495 / 43.0, b3 449 / 30.7, b4 378 / 26.5, b5 248 / 21.1  (esperados por bloque: 239, 358, 478, 478, 358, 239)
+  (informativo) poi_corredor fijo, metricas del corredor por semilla (viaje_corredor_prom, retraso_corredor_punta, paradas_corredor_le1): 113.18/35.41/0.767; 110.55/28.45/0.841
+  (informativo) per_corredor fijo, metricas del corredor por semilla (viaje_corredor_prom, retraso_corredor_punta, paradas_corredor_le1): 0.0/0.0/0.0; 0.0/0.0/0.0  <- en per_ salen en 0: comun.leer_tripinfo no reconoce los flows <flow>_b<k>
+  (informativo) poi_red      fijo, metricas del corredor por semilla (viaje_corredor_prom, retraso_corredor_punta, paradas_corredor_le1): 160.62/30.44/0.888; 159.03/27.94/0.931
+  (informativo) per_red      fijo, metricas del corredor por semilla (viaje_corredor_prom, retraso_corredor_punta, paradas_corredor_le1): 0.0/0.0/0.0; 0.0/0.0/0.0  <- en per_ salen en 0: comun.leer_tripinfo no reconoce los flows <flow>_b<k>
 5. Espera para entrar del fijo en P6e (malla3_alta_e) frente a P6 entregado, mismas semillas
   ok    P6e: [0.28, 0.27] s/veh (bajo 1 s/veh); P6 entregado: [45.66, 44.8] s/veh
 
