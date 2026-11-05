@@ -346,7 +346,8 @@ def evaluacion(lista, celda, esc, tanda, clave, brazo, requiere=(), etapa="ev", 
 
 def mediana(lista, esc, variante, et, bases, requiere, et_med, origen=""):
     """Paso de eleccion: la version evaluada (base mediana por val_elegido) publicada como <...>_<et_med>.pt."""
-    rutas = ",".join(f"{origen}politica_{esc}_{variante}_{et}_s{b}.pt" for b in bases)
+    var_et = f"{variante}_{et}" if et else variante          # lo entregado no lleva etiqueta: politica_<esc>_vecinos_s42
+    rutas = ",".join(f"{origen}politica_{esc}_{var_et}_s{b}.pt" for b in bases)
     salida = f"politica_{esc}_{variante}_{et_med}.pt"
     tid = f"el_{et_med}_{esc}"
     if tid not in lista.ids:
