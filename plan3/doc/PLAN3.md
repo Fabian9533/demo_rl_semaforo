@@ -703,7 +703,7 @@ puerta.
 | Crítica | Gravedad | Dónde se atiende |
 |---|---|---|
 | Reloj de 5 s fijo frente a un fijo de 1 s y un actuado de 1 s | alta | Reloj de 2 s como variante prerregistrada, con H14 (A4 (i); 3.4; B24). **Se agrega P6**, que la crítica dejaba fuera: la misma medición da +23.0 % ahí y el 12/10 usa verdes que el reloj de 5 s no da |
-| Mejoras de entrenamiento solo con llegadas regulares | alta | 3b y a3 también con llegadas aleatorias; `--guardar-estado` en 2.1; limpiezas y entropía aleatorias dentro del modelo completo (A4 (ii)). **No se acepta** sacar P3 y P5 del 3b regular |
+| Mejoras de entrenamiento solo con llegadas regulares | alta | 3b y a3 también con llegadas aleatorias; `--guardar-estado` en 2.1; limpiezas aleatorias dentro del modelo completo (A4 (ii); la entropía no entra, B25 y prerregistro §12). **No se acepta** sacar P3 y P5 del 3b regular |
 | Modelo citable fijo en V2 con 200 episodios | alta | Modelo completo y regla de promoción con semillas nuevas y margen de 1 % (A4 (iii)-(iv); prerregistro §12). **Celdas cambiadas:** P1, P2, P4 y P6 regulares en vez de P6e, porque las etiquetas regulares se citan en P6 y H6 usa V2 |
 | H9b casi idéntica por construcción | media | H9b descriptiva; H9 = "400 con piso < 200 sin piso". **No se agrega** el brazo con `--lr-horizonte 100` |
 | Etapa 4 con las dos piezas | media | Una sola: la política por red (A6) |
