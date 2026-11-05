@@ -59,6 +59,7 @@ def respaldar_checkpoints():
         os.makedirs(os.path.dirname(destino), exist_ok=True)
         shutil.copy2(os.path.join(PLAN3, "checkpoints", rel), destino)
         copiados += 1
+    os.makedirs(COLA, exist_ok=True)
     with open(os.path.join(COLA, "manifiesto_checkpoints.json"), "w", encoding="utf-8") as f:
         json.dump(man, f, indent=0, sort_keys=True)
     return len(man), copiados
@@ -81,6 +82,7 @@ def manifiesto_ciego():
                     semillas = sorted({int(float(r[col])) for r in filas if r.get(col)})
                     info["semillas"] = [semillas[0], semillas[-1], len(semillas)] if semillas else []
             salida[rel] = info
+    os.makedirs(COLA, exist_ok=True)
     with open(os.path.join(COLA, "manifiesto_ciego.json"), "w", encoding="utf-8") as f:
         json.dump(salida, f, indent=1, sort_keys=True)
     return len(salida)
