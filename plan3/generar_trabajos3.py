@@ -344,13 +344,26 @@ def leer_caidas():
 
 
 CAIDAS = leer_caidas()
+# Corridas que salen de otra: si la de origen cayo, tampoco existen (V2 vieja y 3b re-eligen o siguen la de V2).
+DERIVA = {"p3v2vieja": "p3v2reg", "p3e400": "p3v2reg", "p3e400poi": "p3v2poi",
+          "p3piso200reg": "p3e400", "p3e400c20reg": "p3e400", "p3piso200poi": "p3e400poi", "p3e400c20poi": "p3e400poi"}
+
+
+def caida(esc, variante, et, base):
+    """¿Esta corrida, o aquella de la que sale, esta declarada caida?"""
+    while et:
+        if nombre_corrida(esc, variante, et, base) in CAIDAS:
+            return True
+        et = DERIVA.get(et)
+    return False
 
 
 def evaluacion(lista, celda, esc, tanda, clave, brazo, requiere=(), etapa="ev", factor=1.0, tipo="",
                base="", corrida=None):
     """Un brazo en un escenario y una tanda. clave da el nombre del CSV (el brazo real lo pone evaluar3).
-    corrida: el entrenamiento del que sale la politica, si es una base; si esta caido no se evalua."""
-    if corrida is not None and corrida in CAIDAS:
+    corrida: (escenario, variante, etiqueta, base) del entrenamiento del que sale la politica, si es una base; si esta
+    caido (o cayo aquel del que sale) no se evalua."""
+    if corrida is not None and caida(*corrida):
         return None
     uso, semillas = TANDAS[tanda]
     carpeta = "ciego" if uso in CIEGAS else "parciales"
@@ -366,11 +379,13 @@ def evaluacion(lista, celda, esc, tanda, clave, brazo, requiere=(), etapa="ev", 
     return tid
 
 
-def mediana(lista, esc, variante, et, bases, requiere, et_med, origen=""):
+def mediana(lista, esc, variante, et, bases, requiere, et_med, origen="", fuente=None):
     """Paso de eleccion: la version evaluada (base mediana por val_elegido) publicada como <...>_<et_med>.pt.
-    requiere va alineada con bases (o vacia); las bases caidas no entran (prerregistro §6)."""
+    requiere va alineada con bases (o vacia); las bases caidas no entran (prerregistro §6). fuente(b) da la corrida de
+    origen (escenario, variante, etiqueta) cuando no es la misma (C0 aleatorio sale de la V2 regular)."""
     var_et = f"{variante}_{et}" if et else variante          # lo entregado no lleva etiqueta: politica_<esc>_vecinos_s42
-    vivas = [k for k, b in enumerate(bases) if not et or nombre_corrida(esc, variante, et, b) not in CAIDAS]
+    origen_de = fuente or (lambda b: (esc, variante, et))
+    vivas = [k for k, b in enumerate(bases) if not et or not caida(*origen_de(b), b)]
     requiere = [requiere[k] for k in vivas] if requiere else []
     bases = [bases[k] for k in vivas]
     rutas = ",".join(f"{origen}politica_{esc}_{var_et}_s{b}.pt" for b in bases)
@@ -397,7 +412,7 @@ def evaluaciones(lista):
         for t in REGULARES:
             for b in bases:                                                       # V2, todas las bases
                 evaluacion(lista, c, e, t, f"v2reg_s{b}", f"--politica politica_{e}_vecinos_p3v2reg_s{b}.pt",
-                           [reqs[b]], tipo="v2reg", base=b, corrida=nombre_corrida(e, "vecinos", "p3v2reg", b))
+                           [reqs[b]], tipo="v2reg", base=b, corrida=(e, "vecinos", "p3v2reg", b))
             for clave, brazo in (("fijo", "--brazo fijo"), ("actuado", "--brazo actuado"),
                                  ("trivial", "--brazo trivial")):                 # referencias que ya existen
                 evaluacion(lista, c, e, t, clave, brazo, ["trabajo:preparar"], tipo=f"ref_{clave}")
@@ -428,7 +443,7 @@ def evaluaciones(lista):
                                [f"trabajo:c0_p3c0_{e}_s{b}_publicar"], tipo="c0", base=b)
                 for t in ("h1t1", "h1t2"):
                     evaluacion(lista, c, e, t, f"v2reg_s{b}", f"--politica politica_{e}_vecinos_p3v2reg_s{b}.pt",
-                               [reqs[b]], tipo="v2reg", base=b, corrida=nombre_corrida(e, "vecinos", "p3v2reg", b))
+                               [reqs[b]], tipo="v2reg", base=b, corrida=(e, "vecinos", "p3v2reg", b))
         if c in CASOS:
             # puente con lo entregado (descriptivo): los CSV del fijo y del IPPO entregados se reutilizan
             for clave, ruta, req in (("v2reg3med", v3m, v3t), ("v2viejamed", vvm, vvt), ("c0med", c0m, c0t)):
@@ -441,25 +456,25 @@ def evaluaciones(lista):
                 for t in REGULARES:
                     evaluacion(lista, c, e, t, f"{et}_s{b}", f"--politica politica_{e}_vecinos_{et}_s{b}.pt",
                                [req_entreno(f"e1_{et}", e, b, c)], tipo=et, base=b,
-                               corrida=nombre_corrida(e, "vecinos", et, b))
+                               corrida=(e, "vecinos", et, b))
     for c in ("P1", "P2", "P6"):
         e = CASOS[c]
         for b in BASES3:
             for t in REGULARES:
                 evaluacion(lista, c, e, t, f"v2loc_s{b}", f"--politica politica_{e}_local_p3v2reg_s{b}.pt",
                            [req_entreno("e1_v2loc", e, b, c)], tipo="v2loc", base=b,
-                           corrida=nombre_corrida(e, "local", "p3v2reg", b))
+                           corrida=(e, "local", "p3v2reg", b))
     # --- Llegadas aleatorias: poi_P1-P6 ---
     for c, e in POI.items():
         reqs = {b: req_entreno("e2_v2poi", e, b, c, factor=POI_F) for b in BASES5}
         for t in ALEATORIAS:
             for b in BASES5:
                 evaluacion(lista, c, e, t, f"v2poi_s{b}", f"--politica politica_{e}_vecinos_p3v2poi_s{b}.pt",
-                           [reqs[b]], tipo="v2poi", base=b, corrida=nombre_corrida(e, "vecinos", "p3v2poi", b))
+                           [reqs[b]], tipo="v2poi", base=b, corrida=(e, "vecinos", "p3v2poi", b))
             for b in BASES3:
                 evaluacion(lista, c, e, t, f"v2poiloc_s{b}", f"--politica politica_{e}_local_p3v2poi_s{b}.pt",
                            [req_entreno("e2_v2poiloc", e, b, c, factor=POI_F)], tipo="v2poiloc", base=b,
-                           corrida=nombre_corrida(e, "local", "p3v2poi", b))
+                           corrida=(e, "local", "p3v2poi", b))
             for clave, brazo in (("fijo", "--brazo fijo"), ("actuado", "--brazo actuado"),
                                  ("trivial", "--brazo trivial")):
                 evaluacion(lista, c, e, t, clave, brazo, ["trabajo:preparar"], tipo=f"ref_{clave}")
@@ -469,7 +484,8 @@ def evaluaciones(lista):
         v5m, v5t = mediana(lista, e_reg, "vecinos", "p3v2reg", BASES5,
                            [req_entreno(pref, e_reg, b, c_reg) for b in BASES5], "p3v2regmed")
         cpm, cpt = mediana(lista, e, "vecinos", "p3c0poi", BASES3,
-                           [f"trabajo:c0_p3c0poi_{e}_s{b}_publicar" for b in BASES3], "p3c0poimed")
+                           [f"trabajo:c0_p3c0poi_{e}_s{b}_publicar" for b in BASES3], "p3c0poimed",
+                           fuente=lambda b, e_reg=e_reg: (e_reg, "vecinos", "p3v2reg"))
         enm, ent = mediana(lista, CASOS[c], "vecinos", "", BASES3, [], "p3entmed", origen="insumos/entregado/")
         pm, pt = mediana(lista, e, "vecinos", "p3v2poi", BASES5, list(reqs.values()), "p3v2poimed")
         # la V2 regular de 42/2042/4042 (en P6, la de P6e) frente al C0 aleatorio, que solo tiene esas bases (§6)
@@ -505,7 +521,7 @@ def evaluaciones_variantes(lista):
                 for t in (ALEATORIAS if poi else REGULARES):
                     evaluacion(lista, c, e, t, f"{et}_s{b}", f"--politica politica_{e}_vecinos_{et}_s{b}.pt",
                                [req], factor=FACTOR_EV.get(et, 1.0), tipo=et, base=b,
-                               corrida=nombre_corrida(e, "vecinos", et, b))
+                               corrida=(e, "vecinos", et, b))
     for tipo, celdas, pref in (("reg", CASOS, "p3e400"), ("poi", POI, "p3e400poi")):
         tandas = ALEATORIAS if tipo == "poi" else REGULARES
         for c, e in celdas.items():
@@ -514,11 +530,11 @@ def evaluaciones_variantes(lista):
                 req = req_entreno(f"e3b_{pref}", e, b, c, 400, factor=f, desde=DESDE_3B)
                 for t in tandas:
                     evaluacion(lista, c, e, t, f"{pref}_s{b}", f"--politica politica_{e}_vecinos_{pref}_s{b}.pt",
-                               [req], tipo=pref, base=b, corrida=nombre_corrida(e, "vecinos", pref, b))
+                               [req], tipo=pref, base=b, corrida=(e, "vecinos", pref, b))
                     for et_r in (f"p3piso200{tipo}", f"p3e400c20{tipo}"):
                         evaluacion(lista, c, e, t, f"{et_r}_s{b}", f"--politica politica_{e}_vecinos_{et_r}_s{b}.pt",
                                    [f"trabajo:e3b_elegir_{et_r}_{e}_s{b}"], tipo=et_r, base=b,
-                                   corrida=nombre_corrida(e, "vecinos", pref, b))
+                                   corrida=(e, "vecinos", pref, b))
 
 
 # ---------------- Promocion: que modelo se cita en cada celda (prerregistro §12; PLAN3 3.5) ----------------
