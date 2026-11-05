@@ -78,13 +78,14 @@ las noches que el código igual tiene que esperar se llenan con entrenamientos l
 | 18 | 5.0 `veredicto3` | — | Lo pendiente | 120 (8) |
 | 19 | 5.0 (fin y pruebas); esqueleto del anexo con datos sintéticos | — | Lo pendiente | 120 (—) |
 | 20 | Análisis en seco (central: cierre) | (Central: crea `cierre.ok`) | Últimas evaluaciones de la política por red | 3 (—) |
-| 21 | 5.1 cierre; 5.2 `veredicto3 --final` | **Crea `cierre.ok`** | — | — |
-| 22 | Análisis; lista de lo que se cita; enmienda de la prueba final si hace falta | Decide qué se cita; `holdout.ok` si hace falta | Prueba final, solo si se usa (~22 h-p, ~2 h) | — |
+| 21 | 5.1 cierre, en orden: `manifiesto.py cierre`; `cierre.ok`; **un** commit con el sello, `cierre.ok`, `cola/` y `ciego/`; push; después 5.2 `veredicto3 --final` | **Crea `cierre.ok`**, hace ese commit y el push | — | — |
+| 22 | Análisis; lista de lo que se cita; si hace falta, 5.3 en orden: enmienda (código y lista) con push, resello con push, `holdout.ok` con push | Decide qué se cita; `holdout.ok` (commit y push) antes de la noche, si hace falta | Prueba final, solo si se usa (~22 h-p, ~2 h); a la mañana, commit y push, `--prueba-final` y enseguida el commit del candado | — |
 | 23-26 | 5.4 escritura: anexo nuevo y sección corta del Cap. V | Revisa el borrador | — | — |
 | 27 | Revisión final; zonas protegidas, una por una | Confirma; fusiona `plan3` con commit de fusión | — | — |
 
 **Cada mañana** (5-10 min): Fabian mira solo el resumen (terminados, fallidos y bloqueados), hace commit y push del
-manifiesto con los sha256 de lo decisivo y, si algo falló, se diagnostica con el error, nunca con resultados.
+manifiesto con los sha256 de lo decisivo (nunca del sello `cola/manifiesto_cierre.json`) y, si algo falló, se
+diagnostica con el error, nunca con resultados.
 
 ## Carga por noche (h-proceso)
 
