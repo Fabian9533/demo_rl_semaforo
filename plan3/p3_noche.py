@@ -1,7 +1,7 @@
 """
 p3_noche.py - Rutina de cada noche del bloque plan3 (PLAN3 0.4 y 0.16).
 
-Uso (desde <worktree de ejecucion>/plan3):  python p3_noche.py --hasta 07:30 [--cpus 12]
+Uso (desde <worktree de ejecucion>/plan3):  python p3_noche.py --hasta 07:30 [--desde 21:00] [--cpus 12]
 Pasos, en orden; si el 1 encuentra problemas no corre nada:
   1. protecciones.py antes (git, prerregistro igual al de origin, insumos, checkpoints, versiones, lista de trabajos);
   2. cola.py --hasta HH:MM (no lanza lo que no alcance a terminar antes del corte);
@@ -105,11 +105,27 @@ def resumen(inicio):
     return "\n".join(lineas)
 
 
+def esperar_hasta(hhmm):
+    """Duerme hasta la proxima vez que el reloj marque HH:MM (para dejar la noche lanzada de dia)."""
+    import datetime
+    h, m = (int(x) for x in hhmm.split(":"))
+    ahora = datetime.datetime.now()
+    objetivo = ahora.replace(hour=h, minute=m, second=0, microsecond=0)
+    if objetivo <= ahora:
+        objetivo += datetime.timedelta(days=1)
+    print(f"{time.strftime('%H:%M:%S')} esperando hasta {objetivo:%Y-%m-%d %H:%M}", flush=True)
+    while datetime.datetime.now() < objetivo:
+        time.sleep(30)
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--hasta", required=True, help="HH:MM de corte")
+    ap.add_argument("--desde", default=None, help="HH:MM: espera hasta esa hora para empezar")
     ap.add_argument("--cpus", type=int, default=12)
     args = ap.parse_args()
+    if args.desde:
+        esperar_hasta(args.desde)
     inicio = time.time()
     os.makedirs(COLA, exist_ok=True)
     if paso("protecciones antes", ["protecciones.py", "antes"]) != 0:
