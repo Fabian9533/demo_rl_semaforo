@@ -6,8 +6,8 @@ Generado por `veredicto3.py` con las reglas de `PRERREGISTRO.md` (§7-§12). No 
 
 - Número único, llegadas regulares (P1-P6, con P6): frente al plan fijo ajustado al segundo, -4.0 % [-4.0, -3.9] en la tanda 1 y -2.1 % [-2.3, -2.0] en la tanda 2 (frente al plan fijo entregado: -5.8 % [-5.9, -5.8] y -4.0 % [-4.2, -3.9]). IPPO con mensajes corregido: -3.6 % [-3.7, -3.6] y -1.7 % [-1.9, -1.6].
 - Número único, llegadas aleatorias (P1-P6, con P6): frente al plan fijo ajustado al segundo, -6.0 % [-6.1, -6.0] en la tanda 1 y -6.0 % [-6.1, -6.0] en la tanda 2 (frente al plan fijo entregado: -7.8 % [-7.9, -7.8] y -7.9 % [-7.9, -7.8]). Cifra provisional en P3.
-- Casos con etiqueta citable MEJORA o FUNCIONA: 19 de 29 (P1 (regulares), P2 (regulares), P6 (regulares), P6e (regulares), r1810 (regulares), r2715 (regulares), r3620 (regulares), m1810 (regulares), m2715 (regulares), m3620 (regulares), m6525 (regulares), P1 (aleatorias), P2 (aleatorias), P4 (aleatorias), P5 (aleatorias), P6 (aleatorias), mix1 (aleatorias), mixa1 (aleatorias), per1 (aleatorias))
-- Hipótesis que pasan (con su regla global o, si se juzgan caso por caso, en al menos un caso): H2, H7r, H7, H8a, H8c, H12, H14 regulares, H14 aleatorias, H15 regulares, H9 regulares, H9 aleatorias, H3, H5, H6.
+- Casos con etiqueta citable MEJORA o FUNCIONA: 22 de 32 (P1 (regulares), P2 (regulares), P6 (regulares), P6e (regulares), r1810 (regulares), r2715 (regulares), r3620 (regulares), m1810 (regulares), m2715 (regulares), m3620 (regulares), m6525 (regulares), P1 (aleatorias), P2 (aleatorias), P4 (aleatorias), P5 (aleatorias), P6 (aleatorias), mix1 (mix_corredor) (aleatorias), mix1 (mixa_corredor) (aleatorias), mix3 (mix_red) (aleatorias), mix3 (mixa_red) (aleatorias), per1 (aleatorias), per3 (aleatorias))
+- Hipótesis que pasan (con su regla global o, si se juzgan caso por caso, en al menos un caso): H2, H7r, H7, H8a, H8c, H12, H14 regulares, H14 aleatorias, H15 regulares, H9 regulares, H9 aleatorias, H10 corredor, H3, H5, H6.
 
 ## Cómo leer
 
@@ -45,9 +45,12 @@ Generado por `veredicto3.py` con las reglas de `PRERREGISTRO.md` (§7-§12). No 
 | P4 | aleatorias | IPPO con mensajes corregido (entrenado con llegadas aleatorias) | FUNCIONA | FUNCIONA | FUNCIONA | -6.0 % [-6.1, -5.8] | -6.0 % [-6.2, -5.9] | 3 de 5; 3 de 5 | FUNCIONA |
 | P5 | aleatorias | IPPO con mensajes corregido (entrenado con llegadas aleatorias) | FUNCIONA | FUNCIONA | FUNCIONA | -6.1 % [-6.2, -6.0] | -6.1 % [-6.2, -5.9] | 5 de 5; 5 de 5 | FUNCIONA |
 | P6 | aleatorias | IPPO con mensajes corregido (entrenado con llegadas aleatorias) | FUNCIONA | FUNCIONA | FUNCIONA | -6.1 % [-6.2, -6.0] | -6.1 % [-6.2, -5.9] | 5 de 5; 5 de 5 | FUNCIONA |
-| mix1 | aleatorias | IPPO con mensajes corregido (entrenado con la mezcla) | FUNCIONA | FUNCIONA | FUNCIONA | -6.0 % [-6.1, -5.9] | -6.0 % [-6.1, -5.8] | 3 de 3; 3 de 3 | FUNCIONA |
-| mixa1 | aleatorias | IPPO con mensajes corregido (entrenado con la mezcla) | FUNCIONA | FUNCIONA | FUNCIONA | -6.0 % [-6.1, -5.8] | -6.0 % [-6.2, -5.8] | 3 de 3; 3 de 3 | FUNCIONA |
+| mix1 (mix_corredor) | aleatorias | IPPO con mensajes corregido (entrenado con la mezcla) | FUNCIONA | FUNCIONA | FUNCIONA | -6.0 % [-6.1, -5.9] | -6.0 % [-6.1, -5.8] | 3 de 3; 3 de 3 | FUNCIONA |
+| mix1 (mixa_corredor) | aleatorias | IPPO con mensajes corregido (entrenado con la mezcla) | FUNCIONA | FUNCIONA | FUNCIONA | -6.0 % [-6.1, -5.8] | -6.0 % [-6.2, -5.8] | 3 de 3; 3 de 3 | FUNCIONA |
+| mix3 (mix_red) | aleatorias | IPPO con mensajes corregido (entrenado con la mezcla) | FUNCIONA | FUNCIONA | FUNCIONA | -5.9 % [-6.0, -5.8] | -6.0 % [-6.2, -5.8] | 3 de 3; 3 de 3 | FUNCIONA |
+| mix3 (mixa_red) | aleatorias | IPPO con mensajes corregido (entrenado con la mezcla) | FUNCIONA | FUNCIONA | FUNCIONA | -5.9 % [-6.0, -5.8] | -6.0 % [-6.2, -5.8] | 3 de 3; 3 de 3 | FUNCIONA |
 | per1 | aleatorias | IPPO con mensajes corregido (entrenado con el perfil) | FUNCIONA | FUNCIONA | FUNCIONA | -6.1 % [-6.2, -6.0] | -6.0 % [-6.2, -5.9] | 3 de 3; 3 de 3 | FUNCIONA |
+| per3 | aleatorias | IPPO con mensajes corregido (entrenado con el perfil) | FUNCIONA | FUNCIONA | FUNCIONA | -5.8 % [-5.9, -5.7] | -6.0 % [-6.2, -5.8] | 3 de 3; 3 de 3 | FUNCIONA |
 
 ## Hipótesis
 
@@ -67,9 +70,9 @@ Generado por `veredicto3.py` con las reglas de `PRERREGISTRO.md` (§7-§12). No 
 | H15 aleatorias | modelo completo < V2 | pasa en 0 de 6 casos: ninguno |
 | H9 regulares | 400 episodios con piso < 200 sin piso | pasa en 5 de 6 casos: P1, P2, P3, P5, P6 |
 | H9 aleatorias | 400 episodios con piso < 200 sin piso | pasa en 6 de 6 casos: P1, P2, P3, P4, P5, P6 |
-| H10 corredor | una política por red (corredor) no es peor que la V2 de cada nivel | no pasa: 'no es peor' en 0 de 5 niveles; hacen falta 4 ('no concluyente' no cuenta) |
-| H10 red | una política por red (red) no es peor que la V2 de cada nivel | no pasa: 'no es peor' en 0 de 7 niveles; hacen falta 6 ('no concluyente' no cuenta) |
-| H10 malla | una política por red (malla) no es peor que la V2 de cada nivel | no pasa: 'no es peor' en 0 de 6 niveles; hacen falta 5 ('no concluyente' no cuenta) |
+| H10 corredor | una política por red (corredor) no es peor que la V2 de cada nivel | pasa: 'no es peor' en 4 de 5 niveles; hacen falta 4 ('no concluyente' no cuenta) |
+| H10 red | una política por red (red) no es peor que la V2 de cada nivel | no pasa: 'no es peor' en 0 de 7 niveles; hacen falta 6 ('no concluyente' no cuenta); no se pudo correr en 7 |
+| H10 malla | una política por red (malla) no es peor que la V2 de cada nivel | no pasa: 'no es peor' en 0 de 6 niveles; hacen falta 5 ('no concluyente' no cuenta); no se pudo correr en 6 |
 | H3 | V2 MEJORA o FUNCIONA frente al fijo fino en P6 | citable MEJORA; sentido 4 de 5 y 4 de 5 |
 | H3e | V2 MEJORA o FUNCIONA frente al fijo fino en P6e | citable MEJORA; sentido 3 de 5 (hacen falta 4) y 3 de 5 (hacen falta 4) (descriptiva) |
 | H5 | V2 aleatoria MEJORA o FUNCIONA frente al fijo fino re-ajustado en al menos 3 de 6 | pasa: 4 de 6 casos (P1, P2, P5, P6); hacen falta 3 |
@@ -84,7 +87,7 @@ Generado por `veredicto3.py` con las reglas de `PRERREGISTRO.md` (§7-§12). No 
 - P6 (regulares): P6 con la entrada por defecto: el cambio relativo está diluido por la espera de inserción; ver P6e. | V2 mejora a C0 y C0 mejora a IPPO entregado: parte de la ganancia viene de cómo se elige la versión.
 - P6e (regulares): La versión evaluada mejora; el método no se repite en 3 de 5 entrenamientos (T1).
 - c905 (regulares): V2 mejora a C0 y C0 mejora a IPPO entregado: parte de la ganancia viene de cómo se elige la versión.
-- c1358 (regulares): El fijo de verdes de 5 en 5 iguala o supera al modelo: parte de la ventaja del fijo fino viene de verdes que IPPO, al decidir cada 5 s, no puede dar. | V2 mejora a C0 y C0 mejora a IPPO entregado: parte de la ganancia viene de cómo se elige la versión.
+- c1358 (regulares): V2 mejora a C0 y C0 mejora a IPPO entregado: parte de la ganancia viene de cómo se elige la versión.
 - c2715 (regulares): V2 mejora a C0 y C0 mejora a IPPO entregado: parte de la ganancia viene de cómo se elige la versión. | PENDIENTE por no convergencia; probabilidad de que una política estable salga así por ruido: no medido (§6).
 - r905 (regulares): V2 mejora a C0 y C0 mejora a IPPO entregado: parte de la ganancia viene de cómo se elige la versión.
 - r1358 (regulares): V2 mejora a C0 y C0 mejora a IPPO entregado: parte de la ganancia viene de cómo se elige la versión.
@@ -100,37 +103,40 @@ Generado por `veredicto3.py` con las reglas de `PRERREGISTRO.md` (§7-§12). No 
 
 ## Referencias al lado (etiqueta citable del modelo citado frente a cada una)
 
-| Caso | Llegadas | actuado por defecto | actuado ajustado | fijo por bloques | fijo entregado | fijo de verdes de 5 en 5 | fijo por franja | Max-Pressure | Max-Pressure con ciclo máximo | regla simple | ciclo mínimo |
+| Caso | Llegadas | actuado por defecto | actuado ajustado | fijo por bloques | fijo entregado | fijo ajustado desde 10 s | fijo de verdes de 5 en 5 | fijo por franja | Max-Pressure | regla simple | ciclo mínimo |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| P1 | regulares | FUNCIONA | FUNCIONA | — | FUNCIONA | FUNCIONA | FUNCIONA | FUNCIONA | FUNCIONA | FUNCIONA | FUNCIONA |
-| P2 | regulares | FUNCIONA | FUNCIONA | — | MEJORA | MEJORA | MEJORA | FUNCIONA | FUNCIONA | FUNCIONA | FUNCIONA |
-| P3 | regulares | MEJORA | MEJORA | — | MEJORA | MEJORA | CONTRADICTORIO (no se concluye) | FUNCIONA | FUNCIONA | FUNCIONA | FUNCIONA |
-| P4 | regulares | MEJORA | CONTRADICTORIO (no se concluye) | — | CONTRADICTORIO (no se concluye) | CONTRADICTORIO (no se concluye) | EMPATA (falla no confirmada) | FUNCIONA | FUNCIONA | FUNCIONA | FUNCIONA |
-| P5 | regulares | MEJORA | CONTRADICTORIO (no se concluye) | — | CONTRADICTORIO (no se concluye) | CONTRADICTORIO (no se concluye) | CONTRADICTORIO (no se concluye) | FUNCIONA | FUNCIONA | FUNCIONA | FUNCIONA |
-| P6 | regulares | FUNCIONA | FUNCIONA | — | MEJORA | MEJORA | MEJORA | FUNCIONA | FUNCIONA | FUNCIONA | FUNCIONA |
-| P6e | regulares | FUNCIONA | FUNCIONA | — | MEJORA | MEJORA | MEJORA | FUNCIONA | FUNCIONA | FUNCIONA | FUNCIONA |
+| P1 | regulares | FUNCIONA | FUNCIONA | — | FUNCIONA | — | FUNCIONA | FUNCIONA | FUNCIONA | FUNCIONA | FUNCIONA |
+| P2 | regulares | FUNCIONA | FUNCIONA | — | MEJORA | — | MEJORA | MEJORA | FUNCIONA | FUNCIONA | FUNCIONA |
+| P3 | regulares | MEJORA | MEJORA | — | MEJORA | — | MEJORA | CONTRADICTORIO (no se concluye) | FUNCIONA | FUNCIONA | FUNCIONA |
+| P4 | regulares | MEJORA | CONTRADICTORIO (no se concluye) | — | CONTRADICTORIO (no se concluye) | — | CONTRADICTORIO (no se concluye) | EMPATA (falla no confirmada) | FUNCIONA | FUNCIONA | FUNCIONA |
+| P5 | regulares | MEJORA | CONTRADICTORIO (no se concluye) | — | CONTRADICTORIO (no se concluye) | — | CONTRADICTORIO (no se concluye) | CONTRADICTORIO (no se concluye) | FUNCIONA | FUNCIONA | FUNCIONA |
+| P6 | regulares | FUNCIONA | FUNCIONA | — | MEJORA | — | MEJORA | MEJORA | FUNCIONA | FUNCIONA | FUNCIONA |
+| P6e | regulares | FUNCIONA | FUNCIONA | — | MEJORA | — | MEJORA | MEJORA | FUNCIONA | FUNCIONA | FUNCIONA |
 | D | regulares | — | — | — | — | — | — | — | — | — | — |
-| c905 | regulares | MEJORA | MEJORA | — | MEJORA | MEJORA | EMPATA (falla no confirmada) | FUNCIONA | FUNCIONA | FUNCIONA | FUNCIONA |
-| c1358 | regulares | MEJORA | FALLA | — | FALLA | FALLA | FALLA | FUNCIONA | FUNCIONA | FUNCIONA | FUNCIONA |
-| c2715 | regulares | FUNCIONA | FUNCIONA | — | MEJORA | MEJORA | MEJORA | FUNCIONA | FUNCIONA | FUNCIONA | FUNCIONA |
-| r905 | regulares | FUNCIONA | FUNCIONA | — | MEJORA | MEJORA | MEJORA | FUNCIONA | FUNCIONA | FUNCIONA | FUNCIONA |
-| r1358 | regulares | FUNCIONA | — | — | MEJORA | MEJORA | MEJORA | FUNCIONA | FUNCIONA | FUNCIONA | FUNCIONA |
-| r1810 | regulares | FUNCIONA | FUNCIONA | — | MEJORA | MEJORA | MEJORA | FUNCIONA | FUNCIONA | FUNCIONA | FUNCIONA |
-| r2715 | regulares | FUNCIONA | FUNCIONA | — | MEJORA | MEJORA | MEJORA | FUNCIONA | FUNCIONA | FUNCIONA | FUNCIONA |
-| r3620 | regulares | FUNCIONA | FUNCIONA | — | MEJORA | MEJORA | MEJORA | FUNCIONA | FUNCIONA | FUNCIONA | FUNCIONA |
-| m1810 | regulares | FUNCIONA | FUNCIONA | — | MEJORA | MEJORA | MEJORA | FUNCIONA | FUNCIONA | FUNCIONA | FUNCIONA |
-| m2715 | regulares | FUNCIONA | FUNCIONA | — | MEJORA | MEJORA | PENDIENTE | FUNCIONA | FUNCIONA | FUNCIONA | FUNCIONA |
-| m3620 | regulares | FUNCIONA | FUNCIONA | — | MEJORA | MEJORA | MEJORA | FUNCIONA | FUNCIONA | FUNCIONA | EMPATA |
-| m6525 | regulares | FUNCIONA | FUNCIONA | — | MEJORA | MEJORA | MEJORA | FUNCIONA | FUNCIONA | FUNCIONA | FUNCIONA |
-| P1 | aleatorias | FUNCIONA | FUNCIONA | — | FUNCIONA | FUNCIONA | FUNCIONA | FUNCIONA | FUNCIONA | FUNCIONA | FUNCIONA |
-| P2 | aleatorias | FUNCIONA | FUNCIONA | — | FUNCIONA | FUNCIONA | FUNCIONA | FUNCIONA | FUNCIONA | FUNCIONA | FUNCIONA |
-| P3 | aleatorias | FUNCIONA | FUNCIONA | — | FUNCIONA | FUNCIONA | FUNCIONA | FUNCIONA | FUNCIONA | FUNCIONA | FUNCIONA |
-| P4 | aleatorias | FUNCIONA | FUNCIONA | — | FUNCIONA | FUNCIONA | FUNCIONA | FUNCIONA | FUNCIONA | FUNCIONA | FUNCIONA |
-| P5 | aleatorias | FUNCIONA | FUNCIONA | — | FUNCIONA | FUNCIONA | FUNCIONA | FUNCIONA | FUNCIONA | FUNCIONA | FUNCIONA |
-| P6 | aleatorias | FUNCIONA | FUNCIONA | — | FUNCIONA | FUNCIONA | FUNCIONA | FUNCIONA | FUNCIONA | FUNCIONA | FUNCIONA |
-| mix1 | aleatorias | FUNCIONA | FUNCIONA | — | FUNCIONA | — | — | — | — | FUNCIONA | FUNCIONA |
-| mixa1 | aleatorias | FUNCIONA | FUNCIONA | — | FUNCIONA | — | — | — | — | FUNCIONA | FUNCIONA |
-| per1 | aleatorias | FUNCIONA | FUNCIONA | MEJORA | FUNCIONA | — | — | — | — | FUNCIONA | FUNCIONA |
+| c905 | regulares | MEJORA | MEJORA | — | MEJORA | EMPATA (mejora no confirmada) | — | — | — | — | FUNCIONA |
+| c1358 | regulares | MEJORA | FALLA | — | FALLA | FALLA | — | — | — | — | FUNCIONA |
+| c2715 | regulares | FUNCIONA | FUNCIONA | — | MEJORA | MEJORA | — | — | — | — | FUNCIONA |
+| r905 | regulares | FUNCIONA | FUNCIONA | — | MEJORA | MEJORA | — | — | — | — | FUNCIONA |
+| r1358 | regulares | FUNCIONA | — | — | MEJORA | MEJORA | — | — | — | — | FUNCIONA |
+| r1810 | regulares | FUNCIONA | FUNCIONA | — | MEJORA | MEJORA | — | — | — | — | FUNCIONA |
+| r2715 | regulares | FUNCIONA | FUNCIONA | — | MEJORA | MEJORA | — | — | — | — | FUNCIONA |
+| r3620 | regulares | FUNCIONA | FUNCIONA | — | MEJORA | MEJORA | — | — | — | — | FUNCIONA |
+| m1810 | regulares | FUNCIONA | FUNCIONA | — | MEJORA | MEJORA | — | — | — | — | FUNCIONA |
+| m2715 | regulares | FUNCIONA | FUNCIONA | — | MEJORA | PENDIENTE | — | — | — | — | FUNCIONA |
+| m3620 | regulares | FUNCIONA | FUNCIONA | — | MEJORA | MEJORA | — | — | — | — | EMPATA |
+| m6525 | regulares | FUNCIONA | FUNCIONA | — | MEJORA | MEJORA | — | — | — | — | FUNCIONA |
+| P1 | aleatorias | FUNCIONA | FUNCIONA | — | FUNCIONA | — | FUNCIONA | FUNCIONA | FUNCIONA | FUNCIONA | FUNCIONA |
+| P2 | aleatorias | FUNCIONA | FUNCIONA | — | FUNCIONA | — | FUNCIONA | FUNCIONA | FUNCIONA | FUNCIONA | FUNCIONA |
+| P3 | aleatorias | FUNCIONA | FUNCIONA | — | FUNCIONA | — | FUNCIONA | FUNCIONA | FUNCIONA | FUNCIONA | FUNCIONA |
+| P4 | aleatorias | FUNCIONA | FUNCIONA | — | FUNCIONA | — | FUNCIONA | FUNCIONA | FUNCIONA | FUNCIONA | FUNCIONA |
+| P5 | aleatorias | FUNCIONA | FUNCIONA | — | FUNCIONA | — | FUNCIONA | FUNCIONA | FUNCIONA | FUNCIONA | FUNCIONA |
+| P6 | aleatorias | FUNCIONA | FUNCIONA | — | FUNCIONA | — | FUNCIONA | FUNCIONA | FUNCIONA | FUNCIONA | FUNCIONA |
+| mix1 (mix_corredor) | aleatorias | FUNCIONA | FUNCIONA | — | FUNCIONA | — | — | — | — | FUNCIONA | FUNCIONA |
+| mix1 (mixa_corredor) | aleatorias | FUNCIONA | FUNCIONA | — | FUNCIONA | — | — | — | — | FUNCIONA | FUNCIONA |
+| mix3 (mix_red) | aleatorias | FUNCIONA | FUNCIONA | — | FUNCIONA | — | — | — | — | FUNCIONA | FUNCIONA |
+| mix3 (mixa_red) | aleatorias | FUNCIONA | FUNCIONA | — | FUNCIONA | — | — | — | — | FUNCIONA | FUNCIONA |
+| per1 | aleatorias | FUNCIONA | FUNCIONA | MEJORA | FUNCIONA | — | — | — | FUNCIONA | FUNCIONA | FUNCIONA |
+| per3 | aleatorias | FUNCIONA | FUNCIONA | MEJORA | FUNCIONA | — | — | — | FUNCIONA | FUNCIONA | FUNCIONA |
 
 ## PENDIENTE
 
@@ -163,8 +169,8 @@ Generado por `veredicto3.py` con las reglas de `PRERREGISTRO.md` (§7-§12). No 
 
 ## Entrenamientos caídos o sin publicar
 
-- poi_red_alta: IPPO con mensajes corregido (entrenado con llegadas aleatorias), base 14042: caída declarada en cola/caidas.json (e2_v2poi_poi_red_alta_s14042: pérdida NaN (2026-11-15 03:10), e2_v2poi_poi_red_alta_s14042: pérdida NaN (2026-11-16 02:55))
-- poi_red_alta: IPPO con mensajes corregido (entrenado con llegadas aleatorias), base 16042: caída declarada en cola/caidas.json (e2_v2poi_poi_red_alta_s16042: pérdida NaN (2026-11-15 03:10), e2_v2poi_poi_red_alta_s16042: pérdida NaN (2026-11-16 02:55))
+- poi_red_alta: IPPO con mensajes corregido (entrenado con llegadas aleatorias), base 14042: caída declarada en cola/caidas.json (e2_v2poi_poi_red_alta_s14042: pérdida NaN (2026-11-15 03:10), e2_v2poi_poi_red_alta_s14042_r2: pérdida NaN (2026-11-16 02:55))
+- poi_red_alta: IPPO con mensajes corregido (entrenado con llegadas aleatorias), base 16042: caída declarada en cola/caidas.json (e2_v2poi_poi_red_alta_s16042: pérdida NaN (2026-11-15 03:10), e2_v2poi_poi_red_alta_s16042_r2: pérdida NaN (2026-11-16 02:55))
 - Relanzamientos, desvíos y enmiendas: en cola/estado.json y en las enmiendas del prerregistro (§11, §14); veredicto3 no los calcula.
 
 ## V2 del diagnóstico del corredor (§6)
@@ -174,6 +180,6 @@ Generado por `veredicto3.py` con las reglas de `PRERREGISTRO.md` (§7-§12). No 
 ## Avisos
 
 - 58 CSV de la tanda promo no entran al veredicto (regla de promoción: se leen en promocion.json)
-- m2715 (dem_malla3_t2715, t1r): los brazos no generan los mismos vehículos en 1 semilla (la primera, 424304; distinto: ciego/t1r/eval_dem_malla3_t2715__ref_franja.csv)
+- m2715 (dem_malla3_t2715, t1r): los brazos no generan los mismos vehículos en 1 semilla (la primera, 424304; distinto: ciego/t1r/eval_dem_malla3_t2715__fijo10.csv)
 
 La predicción de §15 del prerregistro va al lado de estos resultados para medir la sorpresa. El detalle está en veredicto3_celdas.csv, veredicto3_bases.csv, veredicto3_hipotesis.csv, veredicto3_comparaciones.csv y veredicto3_no_insertados.csv.

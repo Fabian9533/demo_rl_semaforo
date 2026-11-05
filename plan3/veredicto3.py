@@ -8,9 +8,10 @@ Uso (desde plan3/):
       datos sinteticos en tmp_ver/ (semillas de humo; no simula nada). Escribe pruebas/ver/prueba_veredicto3.txt y
       pruebas/ver/ejemplo_veredicto3.md (las salidas de un mundo sintetico). Sale con 1 si alguna prueba falla.
   python veredicto3.py --final
-      Se niega (ERROR, no escribe nada) si: falta listo/cierre.ok; falta el sello cola/manifiesto_cierre.json o algo
-      sellado cambio (CSV, metas y otros: manifiesto esperado, trabajos, caidas, promocion); un CSV de ciego/ no esta
-      en la historia versionada de cola/manifiesto_ciego.json o cambio desde la primera manana en que aparecio; las
+      Se niega (ERROR, no escribe nada) si: falta listo/cierre.ok; falta el sello cola/manifiesto_cierre.json (el de
+      manifiesto.py cierre) o algo sellado cambio (CSV, politicas y metas, y otros: manifiesto esperado, trabajos,
+      caidas, promocion); un CSV de ciego/ no esta en la historia versionada de cola/manifiesto_ciego.json o cambio
+      desde la primera manana en que aparecio, o la ultima manana que vio el cierre no esta en la historia; las
       semillas no son las del prerregistro; falta un trabajo, un meta o una base sin declararla caida
       (cola/caidas.json); o una celda no tiene modelo principal. Escribe en salidas/: veredicto3_celdas.csv,
       veredicto3_bases.csv, veredicto3_hipotesis.csv, veredicto3_comparaciones.csv, veredicto3_no_insertados.csv y
@@ -24,7 +25,8 @@ Uso (desde plan3/):
 Lee (rutas relativas a plan3/):
   cola/manifiesto_esperado.json   un CSV por (celda, escenario, tanda, brazo), con su tipo, su base y sus semillas
   cola/trabajos.jsonl             el comando de cada CSV: la politica que juega (y su meta) y el brazo que debe decir
-  cola/caidas.json                bases caidas declaradas (§14, B22): celda, escenario, tipo, base y los dos intentos
+  cola/caidas.json                bases caidas declaradas (§14, B22): corrida, celda, escenario, tipo, base y los dos
+                                  intentos; con la corrida caen tambien las que salen de ella (como el generador)
   los CSV del manifiesto          evaluar3.py: una fila por semilla; metrica principal retraso_total_prom (§4)
   politica_*.json, insumos/entregado/politica_*.json   metas: val_elegido, ep_elegido, val_total_serie...
   promocion.json, promocion/*.json                     regla de promocion (§12, p3_promocion.py), con sha256
@@ -70,6 +72,7 @@ import consolidar                       # noqa: E402  solo consolidar.comparar
 import sintesis_plan                    # noqa: E402  solo sintesis_plan.indice_geo
 import generar_trabajos3 as gt          # noqa: E402  celdas, bases y tandas del generador (importarlo no escribe)
 import protecciones                     # noqa: E402  tabla de semillas del prerregistro y git (importarlo no escribe)
+import manifiesto as mf                 # noqa: E402  lo que sella el cierre (OTROS; importarlo no escribe)
 
 METRICA = "retraso_total_prom"          # principal (§4)
 ALFA = vd.ALFA
@@ -109,11 +112,11 @@ REDES = {"corredor": ["P1", "P2", "c905", "c1358", "c2715"],
          "red": ["P3", "P4", "r905", "r1358", "r1810", "r2715", "r3620"],
          "malla": ["P5", "P6", "m1810", "m2715", "m3620", "m6525"]}
 MINIMO_RED = {"corredor": 4, "red": 6, "malla": 5}          # H10: al menos el 80 % de los niveles
-# Perfil, mezcla y arranque lento (§8, A7; descriptivas): (celda, escenario, que); las celdas se buscan por escenario
-ESTOCASTICAS = [("per1", "per_corredor", "perfil de 10 min"), ("per3", "per_red", "perfil de 10 min"),
-                ("mix1", "mix_corredor", "mezcla de Lima"), ("mix3", "mix_red", "mezcla de Lima"),
-                ("mixa1", "mixa_corredor", "mezcla con arranque lento"),
-                ("mixa3", "mixa_red", "mezcla con arranque lento")]
+# Perfil, mezcla y arranque lento (§8, A7; descriptivas): (celda, escenario, que), las del generador. La celda se busca
+# por escenario: el arranque lento (mixa_) lleva la misma celda que la mezcla (gt.MEZCLA_A: mix1 y mix3).
+ESTOCASTICAS = ([(c, e, "perfil de 10 min") for c, e in gt.PERFIL.items()]
+                + [(c, e, "mezcla de Lima") for c, e in gt.MEZCLA.items()]
+                + [(c, e, "mezcla con arranque lento") for c, e in gt.MEZCLA_A.items()])
 # a3 (§8, "¿la política usa lo que ve?"): version perturbada t -> la misma version sin perturbar
 A3_VERSION = {"v2reg3med": ("v2reg", 3), "p3obsmed": ("p3obs", 3), "v2poi3med": ("v2poi", 3),
               "p3obspoimed": ("p3obspoi", 3)}
@@ -150,7 +153,7 @@ NOMBRE = {
     "p3red": "una política por red",
     "ref_fino": "fijo fino", "ref_fino5": "fijo de verdes de 5 en 5", "ref_franja": "fijo por franja",
     "ref_bloques": "fijo por bloques", "ref_actuadoaj": "actuado ajustado", "ref_actuado": "actuado por defecto",
-    "ref_regla": "regla simple", "ref_mp": "Max-Pressure", "ref_mpc": "Max-Pressure con ciclo máximo",
+    "ref_regla": "regla simple", "ref_mp": "Max-Pressure", "ref_fijo10": "fijo ajustado desde 10 s",
     "ref_trivial": "ciclo mínimo", "ref_fijo": "fijo entregado"}
 
 
@@ -244,6 +247,64 @@ def politica_de(trabajo):
     return opcion_de(trabajo, "--politica")
 
 
+def corrida_de(pol):
+    """(escenario, variante, etiqueta) de la corrida de entrenamiento de una politica por base
+    (politica_<esc>_<variante>_<etiqueta>_s<base>.pt; gt.nombre_corrida), o None (lo entregado, lo publicado)."""
+    m = re.fullmatch(r"politica_(.+)_(vecinos|local)_(p3[a-z0-9]+)_s\d+\.pt", os.path.basename(pol or ""))
+    return m.groups() if m else None
+
+
+def base_de(e):
+    """Base de una entrada del manifiesto (entero) o None (referencias y versiones publicadas)."""
+    return int(e["base"]) if str(e.get("base", "")).strip() not in ("", "None") else None
+
+
+def caidas_de_texto(texto):
+    """cola/caidas.json (§14, B22), el que lee tambien generar_trabajos3.leer_caidas: lista de {corrida, celda,
+    escenario, tipo, base, intentos: [{id, error, fecha}, ...], fecha}, con los dos intentos fallidos. [AMB-7] La fecha
+    va en cada intento o una vez en la declaracion; la corrida (gt.nombre_corrida) es opcional y, si esta, tiene que
+    ser de esa base. Devuelve ({(celda, escenario, tipo, base): declaracion}, {corrida: declaracion})."""
+    datos = json.loads(texto)
+    lista = datos.get("caidas", []) if isinstance(datos, dict) else datos
+    caidas, corridas = {}, {}
+    for c in lista:
+        faltan = [k for k in ("celda", "escenario", "tipo", "base", "intentos") if k not in c]
+        intentos = c.get("intentos") or []
+        incompletos = any(not (isinstance(i, dict) and i.get("id") and i.get("error")
+                               and (i.get("fecha") or c.get("fecha"))) for i in intentos)
+        if faltan or len(intentos) < 2 or incompletos:
+            raise ErrorVeredicto(f"cola/caidas.json: cada base caída lleva celda, escenario, tipo, base y los dos "
+                                 f"intentos fallidos con id, error y fecha (§14): {c}")
+        corrida = c.get("corrida")
+        if corrida and not (str(corrida).endswith(f"_s{int(c['base'])}") and "_ippo_" in str(corrida)):
+            raise ErrorVeredicto(f"cola/caidas.json: la corrida {corrida} no es una corrida de la base {c['base']} "
+                                 f"({c['escenario']}, {c['tipo']})")
+        caidas[(c["celda"], c["escenario"], c["tipo"], int(c["base"]))] = c
+        if corrida:
+            corridas[corrida] = c
+    return caidas, corridas
+
+
+def declaracion_caida(caidas, corridas, ck, fam, b, pol):
+    """La declaracion de cola/caidas.json que hace caer la base b de una familia en una celda (§14), o None. Por su
+    (celda, escenario, tipo, base) o, como el generador (gt.caida), por la corrida de su politica pol o aquella de la
+    que sale (gt.DERIVA): una V2 caida se lleva sus 400 episodios y la V2 de la mezcla cae tambien en el arranque
+    lento."""
+    decl = caidas.get((ck[0], ck[1], fam, b))
+    if decl is not None or not corridas:
+        return decl
+    origen = corrida_de(pol)
+    if origen is None:
+        return None
+    esc, variante, et = origen
+    while et:
+        decl = corridas.get(gt.nombre_corrida(esc, variante, et, b))
+        if decl is not None:
+            return decl
+        et = gt.DERIVA.get(et)
+    return None
+
+
 def partes_de(trabajo):
     if not trabajo:
         return []
@@ -260,24 +321,39 @@ def opcion_de(trabajo, opcion):
     return None
 
 
+# --regla-de barridos/<esc>/regla.json o mp.json (evaluar.brazo_regla): el nombre exacto de la regla ganadora esta en
+# ese archivo, que no se sella; se comprueba su forma (PATRON de plan3/reglas.py), con un texto para los mensajes
+FORMA_REGLA = {"regla.json": (r"regla_u(\d+|inf)g\d+", "regla_u<U>g<G>"),
+               "mp.json": (r"mp(_det)?(_c\d+)?", "mp, mp_det, mp_c<C> o mp_det_c<C>")}
+
+
 def brazo_de_trabajo(trabajo, meta):
-    """El brazo que escribe evaluar3.py para un trabajo (o None si su nombre todavia no esta fijado: --programa,
-    --franja, --actuado-aj, --regla). Con --politica, como evaluar.brazo_profundo: ippo_<variante>[_<etiqueta>]_s<base>,
-    mas _L0p<perdida> que agrega brazo_profundo y _p<perdida> y _colas0 que agrega evaluar3 (a3)."""
+    """El brazo que escribe evaluar3.py para un trabajo, como evaluar3.armar_brazo con las funciones de evaluar.py:
+    --politica: ippo_<variante>[_<etiqueta>]_s<base> (brazo_profundo; None sin su meta), mas _L0p<k> con --perdida;
+    --brazo fijo --programa P --nombre X: fijo_X (brazo_programa); --brazo X: X (brazo_referencia: fijo, actuado,
+    trivial, franja, bloques, actuado_aj); --regla R: R; --regla-de: una expresion regular con la forma de la regla
+    (FORMA_REGLA). evaluar3 agrega _p<k> con --perdida y _colas0 con --colas-cero (a3). None si no se reconoce."""
     partes = partes_de(trabajo)
+    k = int(round(float(opcion_de(trabajo, "--perdida") or 0) * 100))
+    sufijo = (f"_p{k}" if k else "") + ("_colas0" if "--colas-cero" in partes else "")
     if "--politica" in partes:
         if meta is None:
             return None
         modelo = "ippo_" + meta["variante"] + (f"_{meta['etiqueta']}" if meta.get("etiqueta") else "")
         base = meta.get("base", "")
-        brazo = f"{modelo}_s{base}" if base != "" else modelo
-        perdida = float(opcion_de(trabajo, "--perdida") or 0)
-        if perdida:
-            brazo += f"_L0p{int(round(perdida * 100))}_p{int(round(perdida * 100))}"
-        if "--colas-cero" in partes:
-            brazo += "_colas0"
-        return brazo
-    return opcion_de(trabajo, "--brazo")
+        brazo = (f"{modelo}_s{base}" if base != "" else modelo) + (f"_L0p{k}" if k else "")
+    elif opcion_de(trabajo, "--brazo") == "fijo" and "--programa" in partes:
+        brazo = f"fijo_{opcion_de(trabajo, '--nombre')}"
+    elif "--brazo" in partes:
+        brazo = opcion_de(trabajo, "--brazo")
+    elif "--regla-de" in partes:
+        forma = FORMA_REGLA.get(os.path.basename(opcion_de(trabajo, "--regla-de") or ""))
+        return re.compile(forma[0] + re.escape(sufijo)) if forma else None
+    elif "--regla" in partes:
+        brazo = opcion_de(trabajo, "--regla")
+    else:
+        return None
+    return brazo + sufijo
 
 
 def nombre(tipo):
@@ -652,13 +728,13 @@ class Datos:
             raise ErrorVeredicto("falta cola/trabajos.jsonl: sin el comando de cada CSV no se sabe qué política juega")
         else:
             self.avisos.append("falta cola/trabajos.jsonl: no se conocen las políticas ni sus metas")
-        self.caidas = self.leer_caidas()
+        self.caidas, self.corridas_caidas = self.leer_caidas()
         vistos, fuera = set(), {}
         for e in self.manifiesto:
             if e["csv"] in vistos:
                 raise ErrorVeredicto(f"{e['csv']} aparece dos veces en el manifiesto")
             vistos.add(e["csv"])
-            base = int(e["base"]) if str(e.get("base", "")).strip() not in ("", "None") else None
+            base = base_de(e)
             trabajo = self.trabajos.get(e.get("trabajo"))
             if trabajo is None and estricto:
                 raise ErrorVeredicto(f"{e['csv']}: su trabajo {e.get('trabajo')} no está en cola/trabajos.jsonl")
@@ -668,7 +744,7 @@ class Datos:
             if lleg is None:
                 fuera[e["tanda"]] = fuera.get(e["tanda"], 0) + 1
                 continue
-            if (e["celda"], e["escenario"], e["tipo"], base) in self.caidas:
+            if base is not None and self.es_caida((e["celda"], e["escenario"]), e["tipo"], base, ent["politica"]):
                 continue                        # base caida declarada: sus CSV no existen (§14)
             ck = (e["celda"], e["escenario"])
             c = self.celdas.setdefault(ck, {"llegadas": lleg, "tipos": {}})
@@ -718,22 +794,11 @@ class Datos:
             return f.read()
 
     def leer_caidas(self):
-        """cola/caidas.json (§14, B22): lista de {celda, escenario, tipo, base, intentos: [{id, error, fecha}, ...]},
-        con los dos intentos fallidos. Una base declarada cuenta como caida: fuera de la mediana y fuera del lado."""
+        """cola/caidas.json (caidas_de_texto), sellado en --final. Una base declarada cuenta como caida: fuera de la
+        mediana y fuera del lado."""
         if not os.path.exists(os.path.join(self.raiz, "cola", "caidas.json")):
-            return {}
-        datos = json.loads(self.leer_otro("cola/caidas.json"))
-        lista = datos.get("caidas", []) if isinstance(datos, dict) else datos
-        caidas = {}
-        for c in lista:
-            faltan = [k for k in ("celda", "escenario", "tipo", "base", "intentos") if k not in c]
-            intentos = c.get("intentos") or []
-            incompletos = any(not all(i.get(k) for k in ("id", "error", "fecha")) for i in intentos)
-            if faltan or len(intentos) < 2 or incompletos:
-                raise ErrorVeredicto(f"cola/caidas.json: cada base caída lleva celda, escenario, tipo, base y los dos "
-                                     f"intentos fallidos con id, error y fecha (§14): {c}")
-            caidas[(c["celda"], c["escenario"], c["tipo"], int(c["base"]))] = c
-        return caidas
+            return {}, {}
+        return caidas_de_texto(self.leer_otro("cola/caidas.json"))
 
     # --- celdas, bases y metas ---
 
@@ -752,8 +817,23 @@ class Datos:
             return []
         return BASES5 if (fam, ck[0]) in DISENIO5 else BASES3
 
-    def es_caida(self, ck, fam, b):
-        return (ck[0], ck[1], fam, b) in self.caidas
+    def ruta_base(self, ck, fam, b):
+        """Ruta de la politica de la base b de una familia: la de su trabajo o, si no tiene CSV, la de otra base con
+        _s<b> (None si la familia no tiene ninguna)."""
+        por = self.celdas.get(ck, {}).get("tipos", {}).get(fam, {})
+        pol = next((e["politica"] for e in por.get(b, {}).values() if e.get("politica")), None)
+        if pol is None:
+            otra = next((e["politica"] for bb, ents in por.items() if bb is not None for e in ents.values()
+                         if e.get("politica")), None)
+            pol = re.sub(r"_s\d+\.pt$", f"_s{b}.pt", otra) if otra else None
+        return pol
+
+    def es_caida(self, ck, fam, b, pol=None):
+        """La declaracion que hace caer la base b de una familia (declaracion_caida), o None. Sin pol, la ruta de su
+        politica sale de las otras bases de la familia (ruta_base)."""
+        if pol is None and self.corridas_caidas and (ck[0], ck[1], fam, b) not in self.caidas:
+            pol = self.ruta_base(ck, fam, b)
+        return declaracion_caida(self.caidas, self.corridas_caidas, ck, fam, b, pol)
 
     def meta(self, rel):
         if not rel:
@@ -773,14 +853,9 @@ class Datos:
         cola/caidas.json), 'publicada' o 'sin_meta'. ERROR si la base tiene CSV y no tiene meta (una base caida no se
         evalua, §14), si en --final no tiene CSV y no esta declarada caida, o si no se eligio con criterio total y 16
         semillas (validar_meta)."""
-        por = self.celdas[ck]["tipos"].get(fam, {})
-        pol = next((e["politica"] for e in por.get(b, {}).values() if e.get("politica")), None)
-        tiene_csv = bool(por.get(b))
-        if pol is None:                         # sin CSV de esa base: la ruta de otra base de la familia
-            otra = next((e["politica"] for bb, ents in por.items() if bb is not None for e in ents.values()
-                         if e.get("politica")), None)
-            pol = re.sub(r"_s\d+\.pt$", f"_s{b}.pt", otra) if otra else None
-        if self.es_caida(ck, fam, b):
+        tiene_csv = bool(self.celdas[ck]["tipos"].get(fam, {}).get(b))
+        pol = self.ruta_base(ck, fam, b)
+        if self.es_caida(ck, fam, b, pol):
             return None, pol, "caida"
         m = self.meta(pol)
         if m is None and tiene_csv:
@@ -908,8 +983,16 @@ class Datos:
             if politica_de(trabajo) and meta is None:
                 raise ErrorVeredicto(f"{e['csv']}: tiene CSV y no tiene el meta de su política {politica_de(trabajo)}")
             esperado = brazo_de_trabajo(trabajo, meta)
-            if esperado is not None and brazo != esperado:
-                raise ErrorVeredicto(f"{e['csv']}: el brazo es {brazo} y su trabajo escribe {esperado}")
+            texto = esperado
+            if isinstance(esperado, re.Pattern):            # --regla-de: la forma del nombre
+                bien = esperado.fullmatch(brazo) is not None
+                texto = next((f"un nombre de la forma {leg}{esperado.pattern[len(rx):]}".replace("\\", "")
+                              for rx, leg in FORMA_REGLA.values() if esperado.pattern.startswith(rx)),
+                             esperado.pattern)
+            else:
+                bien = esperado is None or brazo == esperado
+            if not bien:
+                raise ErrorVeredicto(f"{e['csv']}: el brazo es {brazo} y su trabajo escribe {texto}")
             if meta is not None and e.get("base") is not None and meta.get("base") != e["base"]:
                 raise ErrorVeredicto(f"{e['csv']}: el manifiesto dice base {e['base']} y el meta {meta.get('base')}")
         por = {}
@@ -1326,10 +1409,15 @@ def tabla_bases(d):
                 "nombre": nombre(fam), "base": b, "politica": pol or "",
                 "version_evaluada": "sí" if b == ver else "no", "mejor_base": "sí" if b == mejor else "no"}
         if meta is None:
-            caida = d.caidas.get((ck[0], ck[1], fam, b))
-            fila["estado"] = ("caída declarada en cola/caidas.json (" + ", ".join(
-                f"{i['id']}: {i['error']} ({i['fecha']})" for i in caida["intentos"]) + ")" if caida
-                else "sin meta: falta entrenarla o declararla caída (§14)")
+            caida = d.es_caida(ck, fam, b, pol)
+            if caida:
+                origen = corrida_de(pol)
+                propia = gt.nombre_corrida(*origen, b) if origen else None
+                fila["estado"] = ("caída declarada en cola/caidas.json (" + ", ".join(
+                    f"{i['id']}: {i['error']} ({i.get('fecha') or caida.get('fecha')})" for i in caida["intentos"])
+                    + ")" + (f"; sale de {caida['corrida']}" if caida.get("corrida") not in (None, propia) else ""))
+            else:
+                fila["estado"] = "sin meta: falta entrenarla o declararla caída (§14)"
             filas.append(fila)
             return
         e = entrenamiento(meta)
@@ -1691,9 +1779,10 @@ def hipotesis(d, filas_celdas):
     for red in REDES:
         rs = [r for r in res if r["spec"]["familia"] == f"H10 {red}"]
         k = sum(1 for r in rs if r["pasa"])
+        sin = sum(1 for r in rs if str(r.get("lectura", "")).startswith("no se pudo correr"))
         pasa = k >= MINIMO_RED[red]
         lect = (f"{'pasa' if pasa else 'no pasa'}: 'no es peor' en {k} de {len(rs)} niveles; hacen falta "
-                f"{MINIMO_RED[red]} ('no concluyente' no cuenta)")
+                f"{MINIMO_RED[red]} ('no concluyente' no cuenta)" + (f"; no se pudo correr en {sin}" if sin else ""))
         salida.append(fila_h("H10", f"H10 {red}", len(rs), "resumen", "global", "regulares", "", "", [], pasa, lect,
                              "", f"una política por red ({red}) no es peor que la V2 de cada nivel"))
         resumen.append((f"H10 {red}", f"una política por red ({red}) no es peor que la V2 de cada nivel", pasa, lect))
@@ -1772,8 +1861,9 @@ def hipotesis(d, filas_celdas):
                              "V2, cada base", "ciclo mínimo", [], None,
                              f"{k} de {len(bases)} bases a ±1 % del ciclo mínimo en T1 y T2", "; ".join(det)))
     # H0 (descriptiva): controles que reaccionan frente al fijo fino re-ajustado con llegadas aleatorias
+    # (Max-Pressure: la mejor de la familia, con y sin ciclo maximo; el generador la evalua como ref_mp)
     controles = [("ref", "ref_actuado"), ("ref", "ref_actuadoaj"), ("ref", "ref_regla"), ("ref", "ref_mp"),
-                 ("ref", "ref_mpc"), ("pub", "entmed"), ("pub", "v2regmed")]
+                 ("pub", "entmed"), ("pub", "v2regmed")]
     por_caso = {}
     for brazo in controles:
         k = 0
@@ -2094,6 +2184,12 @@ def texto_md(res, titulo_extra=""):
     L = [f"# Veredicto del bloque nuevo (plan 3){titulo_extra}", "",
          "Generado por `veredicto3.py` con las reglas de `PRERREGISTRO.md` (§7-§12). No editar a mano.", ""]
     L += ["## Respuesta corta", ""]
+    cuenta = {}
+    for f in res["celdas"]:
+        cuenta[(f["celda"], f["llegadas"])] = cuenta.get((f["celda"], f["llegadas"]), 0) + 1
+
+    def caso(f):            # la celda; con su escenario si otra de las mismas llegadas se llama igual (mixa_: mix1)
+        return f["celda"] + (f" ({f['escenario']})" if cuenta.get((f["celda"], f["llegadas"]), 0) > 1 else "")
     num = {(f["llegadas"], f["modelo"], f["referencia"], f["tanda"]): f for f in res["numero"]}
     for lleg in ("regulares", "aleatorias"):            # la frase de §17: siempre las dos tandas, por separado
         fino = [valor_numero(num.get((lleg, "modelo citado", "fijo fino", t))) for t in T]
@@ -2107,7 +2203,7 @@ def texto_md(res, titulo_extra=""):
         if notas:                               # [AMB-17] "provisional en [casos]", una sola vez por linea
             linea += " Cifra " + "; ".join(notas) + "."
         L.append(linea)
-    pos = [f"{f['celda']} ({f['llegadas']})" for f in res["celdas"] if palabra(f["etiqueta_citable"]) in POSITIVAS]
+    pos = [f"{caso(f)} ({f['llegadas']})" for f in res["celdas"] if palabra(f["etiqueta_citable"]) in POSITIVAS]
     L.append(f"- Casos con etiqueta citable MEJORA o FUNCIONA: {len(pos)} de {len(res['celdas'])}"
              + (f" ({', '.join(pos)})" if pos else ""))
     pasan = [r[0] for r in res["resumen"] if r[2] is True]
@@ -2125,14 +2221,14 @@ def texto_md(res, titulo_extra=""):
           "| Se repite (T1; T2) | Con la mejor base |",
           "|---|---|---|---|---|---|---|---|---|---|"]
     for f in res["celdas"]:
-        L.append(f"| {f['celda']} | {f['llegadas']} | {f['modelo_citado']} | {corto(f['etiqueta_T1'])} | "
+        L.append(f"| {caso(f)} | {f['llegadas']} | {f['modelo_citado']} | {corto(f['etiqueta_T1'])} | "
                  f"{corto(f['etiqueta_T2'])} | {corto(f['etiqueta_citable'])} | {cambio_md(f, 'T1')} | "
                  f"{cambio_md(f, 'T2')} | {f.get('repite_T1') or '—'}; {f.get('repite_T2') or '—'} | "
                  f"{corto(f['etiqueta_mejor_citable'])} |")
     L += ["", "## Hipótesis", "", "| Id | Qué se prueba | Resultado |", "|---|---|---|"]
     for id_, que, pasa, lect in res["resumen"]:
         L.append(f"| {id_} | {que} | {lect} |")
-    lect = [(f["celda"], f["llegadas"], f["lecturas"]) for f in res["celdas"] if f["lecturas"]]
+    lect = [(caso(f), f["llegadas"], f["lecturas"]) for f in res["celdas"] if f["lecturas"]]
     L += ["", "## Lecturas obligadas (§5 y §11)", ""]
     L += [f"- {c} ({ll}): {x}" for c, ll, x in lect] or ["- Ninguna."]
     al_lado = sorted({ref for f in res["celdas"] for ref in f["_al_lado"]})
@@ -2141,7 +2237,7 @@ def texto_md(res, titulo_extra=""):
               "| Caso | Llegadas | " + " | ".join(nombre(r) for r in al_lado) + " |",
               "|---|---|" + "---|" * len(al_lado)]
         for f in res["celdas"]:
-            L.append(f"| {f['celda']} | {f['llegadas']} | "
+            L.append(f"| {caso(f)} | {f['llegadas']} | "
                      + " | ".join(corto(f["_al_lado"][r]["citable"]) if r in f["_al_lado"] else "—" for r in al_lado)
                      + " |")
     pend = [f for f in res["celdas"] if palabra(f["etiqueta_citable"]) == "PENDIENTE"]
@@ -2150,7 +2246,7 @@ def texto_md(res, titulo_extra=""):
         for f in pend:
             ruido = (f"; probabilidad de que una política estable no converja por ruido (§6): "
                      f"{f['prob_pendiente_ruido']}" if provisional(f["etiqueta_citable"]) else "")
-            L.append(f"- {f['celda']} ({f['llegadas']}): {f['etiqueta_citable']}{ruido}.")
+            L.append(f"- {caso(f)} ({f['llegadas']}): {f['etiqueta_citable']}{ruido}.")
     promo = [f for f in res["celdas"] if f.get("_promocion")]
     if promo:
         L += ["", "## Regla de promoción (§12): validación en 15009-15024 frente a V2", ""]
@@ -2159,11 +2255,11 @@ def texto_md(res, titulo_extra=""):
             cands = [c for c in dec.get("candidatos", []) if c.get("brazo") != (dec.get("v2") or {}).get("brazo")]
             texto = ", ".join(f"{nombre(tipo_de_brazo(c['brazo'], CANDIDATOS_PROMOCION)[0] or c['brazo'])} "
                               f"{c.get('cambio_vs_v2_pct', 0):+.2f} %" for c in cands) or "sin candidatos"
-            L.append(f"- {f['celda']} ({f['llegadas']}): {texto}; se cita {f['modelo_citado']}"
+            L.append(f"- {caso(f)} ({f['llegadas']}): {texto}; se cita {f['modelo_citado']}"
                      f"{' (promovido: le gana a V2 por al menos 1 %)' if f['promovido'] == 'sí' else ''}.")
     dejan = [x for x in res.get("no_insertados", []) if x["vehiculos_no_insertados"] > 0]
     L += ["", "## Vehículos sin entrar al cierre (§4)", ""]
-    L += [f"- {x['celda']} ({x['llegadas']}, {x['tanda']}): {x['nombre']}: {x['semillas_con_no_insertados']} de "
+    L += [f"- {caso(x)} ({x['llegadas']}, {x['tanda']}): {x['nombre']}: {x['semillas_con_no_insertados']} de "
           f"{x['semillas']} semillas, {x['vehiculos_no_insertados']} vehículos" for x in dejan] or \
         ["- Ningún brazo dejó vehículos sin entrar."]
     if dejan:
@@ -2208,35 +2304,22 @@ def es_final(tanda):
     return gt.TANDAS.get(tanda, ("",))[0] == "final"
 
 
-def clave_base(e):
-    return (e["celda"], e["escenario"], e["tipo"],
-            int(e["base"]) if str(e.get("base", "")).strip() not in ("", "None") else None)
-
-
-def caidas_declaradas(raiz):
-    p = os.path.join(raiz, "cola", "caidas.json")
-    if not os.path.exists(p):
-        return set()
-    datos = leer_json(p)
-    lista = datos.get("caidas", []) if isinstance(datos, dict) else datos
-    return {(c.get("celda"), c.get("escenario"), c.get("tipo"), int(c["base"])) for c in lista if "base" in c}
-
-
 def otros_que_se_sellan(raiz):
-    """Los archivos de control que deciden el veredicto: el manifiesto esperado, los trabajos, las caidas y la
-    promocion. Deben estar en el sello ("otros")."""
-    rels = ["cola/manifiesto_esperado.json", "cola/trabajos.jsonl"]
-    rels += [r for r in ("cola/caidas.json", "promocion.json") if os.path.exists(os.path.join(raiz, r))]
+    """Los archivos de control que sella manifiesto.py cierre en "otros" (mf.OTROS que existen y promocion/*.json):
+    deciden que se lee (manifiesto esperado, trabajos y sus partes, caidas, promocion, referencias congeladas). Todos
+    deben estar en el sello."""
+    rels = [r for r in mf.OTROS if os.path.exists(os.path.join(raiz, r))]
     rels += sorted(os.path.relpath(p, raiz).replace(os.sep, "/")
                    for p in glob.glob(os.path.join(raiz, "promocion", "*.json")))
     return rels
 
 
 def comprobar_cierre(raiz):
-    """--final se niega sin listo/cierre.ok o si algo de lo sellado en cola/manifiesto_cierre.json cambio. El sello
-    (manifiesto.py cierre) es {"csv": {ruta: sha256}, "metas": {...}, "otros": {...}}: todos los CSV del manifiesto
-    salvo los de la prueba final (uso 'final') y los de bases caidas declaradas, los metas politica_*.json de lo
-    evaluado y los archivos de control (otros_que_se_sellan). Devuelve el sello."""
+    """--final se niega sin listo/cierre.ok o si algo de lo sellado en cola/manifiesto_cierre.json cambio. El sello es
+    el de manifiesto.py cierre (mf.sello): {"csv": {ruta: sha256}, "metas": {...}, "otros": {...},
+    "manifiesto_ciego_commit": ...}. Cada CSV del manifiesto esta sellado, salvo los de la prueba final (uso 'final':
+    sellados o no, no se miran aqui) y los que no existen por una base caida declarada (§14); no hay CSV sellados
+    fuera del manifiesto; y lo sellado (CSV, politica_*.pt y .json, otros) tiene el mismo sha256. Devuelve el sello."""
     if not os.path.exists(os.path.join(raiz, "listo", "cierre.ok")):
         raise ErrorVeredicto("falta listo/cierre.ok: los resultados decisivos siguen a ciegas (§14); no se corre")
     ruta = os.path.join(raiz, "cola", "manifiesto_cierre.json")
@@ -2245,15 +2328,31 @@ def comprobar_cierre(raiz):
     sello = leer_json(ruta)
     if not isinstance(sello, dict) or not {"csv", "metas", "otros"} <= set(sello):
         raise ErrorVeredicto("cola/manifiesto_cierre.json no tiene las claves csv, metas y otros; no se corre")
-    caidas = caidas_declaradas(raiz)
-    esperado = leer_json(os.path.join(raiz, "cola", "manifiesto_esperado.json"))
-    csvs = {e["csv"] for e in esperado if not es_final(e["tanda"]) and clave_base(e) not in caidas}
+    esperado = {e["csv"]: e for e in leer_json(os.path.join(raiz, "cola", "manifiesto_esperado.json"))}
+    politicas = {}
+    if os.path.exists(os.path.join(raiz, "cola", "trabajos.jsonl")):
+        with open(os.path.join(raiz, "cola", "trabajos.jsonl"), encoding="utf-8") as f:
+            politicas = {t["id"]: politica_de(t) for t in (json.loads(x) for x in f if x.strip())}
+    caidas, corridas = ({}, {})
+    if os.path.exists(os.path.join(raiz, "cola", "caidas.json")):
+        with open(os.path.join(raiz, "cola", "caidas.json"), encoding="utf-8") as f:
+            caidas, corridas = caidas_de_texto(f.read())
+
+    def caida(e):                               # un CSV que no existe porque su base cayo (declarada)
+        b = base_de(e)
+        return (b is not None and not os.path.exists(os.path.join(raiz, e["csv"])) and
+                declaracion_caida(caidas, corridas, (e["celda"], e["escenario"]), e["tipo"], b,
+                                  politicas.get(e.get("trabajo"))) is not None)
+    finales = {c for c, e in esperado.items() if es_final(e["tanda"])}
+    csvs = set(esperado) - finales
+    sellados = set(sello["csv"])
+    faltan = sorted(c for c in csvs - sellados if not caida(esperado[c]))
+    sobran = sorted(sellados - csvs - finales)
     problemas = []
-    if set(sello["csv"]) != csvs:
-        faltan, sobran = sorted(csvs - set(sello["csv"])), sorted(set(sello["csv"]) - csvs)
+    if faltan or sobran:
         problemas.append(f"el sello y el manifiesto no listan los mismos CSV (sin sellar: {faltan[:3]}; de más: "
                          f"{sobran[:3]})")
-    for grupo, rels in (("csv", sorted(csvs & set(sello["csv"]))), ("metas", sorted(sello["metas"])),
+    for grupo, rels in (("csv", sorted(csvs & sellados)), ("metas", sorted(sello["metas"])),
                         ("otros", sorted(sello["otros"]))):
         for rel in rels:
             p = os.path.join(raiz, rel)
@@ -2289,11 +2388,17 @@ def historia_ciego(raiz):
 
 def comprobar_ciego(raiz, sello):
     """Segunda barrera del a ciegas (§14, A5 #8): cada CSV sellado de ciego/ aparece en algun manifiesto de manana
-    versionado, su sha256 no cambio de una manana a otra y el del cierre es el de la primera manana en que aparecio."""
+    versionado, su sha256 no cambio de una manana a otra y el del cierre es el de la primera manana en que aparecio; y
+    el commit de la ultima manana que guarda el sello (manifiesto_ciego_commit, de manifiesto.py cierre) esta en la
+    historia."""
     versiones = historia_ciego(raiz)
     if not versiones:
         raise ErrorVeredicto("no hay ninguna versión commiteada de cola/manifiesto_ciego.json (§14); no se corre")
     primero, problemas = {}, []
+    commit = sello.get("manifiesto_ciego_commit")       # el ultimo manifiesto de la manana que vio el cierre
+    if commit and commit not in {h for h, _ in versiones}:
+        problemas.append(f"el cierre se hizo con el manifiesto de la mañana {commit[:10]}, que no está en la "
+                         f"historia de git")
     for h, man in versiones:
         for rel, info in man.items():
             if rel in primero and info.get("sha256") != primero[rel][1]:
@@ -2456,13 +2561,21 @@ DELTA = {"v2loc": 2, "c0": 1, "c0med": 1, "entmed": 1.5, "v2viejamed": 0.5, "v2p
          "p3reloj2": -2, "p3completo": -1.5, "p3e400": -1, "p3sd": 1, "p3se": 0.5, "p3ent": 0, "p3m7norm": 0.2,
          "p3m7forz": 0.2, "p3m7msg": 0.2, "p3piso200reg": 0, "p3e400c20reg": -0.5, "v2reg3med": 0,
          "v2poiloc": 2, "p3obspoi": 1, "p3reloj2poi": -2, "p3completopoi": "alt", "p3e400poi": -1,
-         "p3piso200poi": 0, "p3e400c20poi": -0.5}
+         "p3piso200poi": 0, "p3e400c20poi": -0.5, TIPO_RED: 0.5}
 REF_EFECTO = {"ref_fino": 0, "ref_actuadoaj": 3, "ref_actuado": 5, "ref_fijo": 2, "ref_trivial": 10, "ref_fino5": 1,
-              "ref_franja": -1, "ref_bloques": -1.5, "ref_regla": 20, "ref_mp": 15, "ref_mpc": 12}
-EXTRAS_REF = ("ref_fino", "ref_actuadoaj", "ref_fino5", "ref_franja", "ref_regla", "ref_mp", "ref_mpc")
+              "ref_franja": -1, "ref_bloques": -1.5, "ref_regla": 20, "ref_mp": 15, "ref_fijo10": 1}
 NO_CONVERGE = {("dem_corredor_t2715", "p3v2reg", 42), ("poi_red", "p3v2poi", 42)}
-# bases caidas declaradas en el mundo: las dos nuevas de V2 aleatoria en P4 (n sigue siendo 5: 3 de 5 no alcanza)
-CAIDAS_MUNDO = {("P4", "poi_red_alta", "v2poi", 14042), ("P4", "poi_red_alta", "v2poi", 16042)}
+# bases caidas declaradas en el mundo, con su corrida (formato de generar_trabajos3.leer_caidas): las dos nuevas de V2
+# aleatoria en P4 (n sigue siendo 5: 3 de 5 no alcanza). El generador no las evalua (gt.CAIDAS)
+CAIDAS_MUNDO = [("P4", "poi_red_alta", "v2poi", b, gt.nombre_corrida("poi_red_alta", "vecinos", "p3v2poi", b))
+                for b in (14042, 16042)]
+# lo unico que el mundo quita del manifiesto del generador: (celda, tipo) de dos referencias, para probar la etiqueta
+# PENDIENTE por una referencia que falta
+QUITAR_MUNDO = {("r905", "ref_fino"), ("r1358", "ref_actuadoaj")}
+# (celda, tipo, tanda) del CSV con un vehiculo de mas en una semilla: numeros aleatorios comunes rotos
+ROTO_MUNDO = ("m2715", "ref_fijo10", "t1r")
+# la regla ganadora de cada familia en el mundo (en la noche, la dice barridos/<esc>/regla.json o mp.json)
+REGLA_MUNDO = {"regla.json": "regla_u3g60", "mp.json": "mp_c60"}
 NO_INSERTADOS_MUNDO = {("P2", "poi_corredor_alta", "ref_fino", "t1a"): {1: 40, 4: 40, 7: 40}}
 
 
@@ -2511,6 +2624,8 @@ def efecto_mundo(celda, esc, lleg, tl, tipo, base):
         return 0.0, 0.0, (esc, tipo, b)          # H7r en P6: el sentido falla (2 de 3)
     if tipo == "p3m7" and celda == "P2":
         delta = 5                               # H12 en P2: es peor
+    if tipo == TIPO_RED and celda == "c1358":
+        delta = 4                               # H10 en el corredor: la politica por red es peor solo en c1358
     if delta == "alt":
         return v2, 1.0, (esc, tipo, b)
     return v2 + delta, 0.0, (esc, tipo.replace("med", ""), b)
@@ -2579,82 +2694,72 @@ def manifiesto_ciego_de(raiz, manifiesto, filtro):
 
 
 def sellar_mundo(raiz, manifiesto):
-    """cola/manifiesto_cierre.json con las claves de manifiesto.py cierre: csv, metas y otros."""
-    csvs = {e["csv"]: sha256(os.path.join(raiz, e["csv"])) for e in manifiesto if not es_final(e["tanda"])}
-    metas = {os.path.relpath(p, raiz).replace(os.sep, "/"): sha256(p)
-             for p in glob.glob(os.path.join(raiz, "politica_*.json"))}
-    otros = {r: sha256(os.path.join(raiz, r)) for r in otros_que_se_sellan(raiz)}
-    escribir(os.path.join(raiz, "cola", "manifiesto_cierre.json"),
-             json.dumps({"csv": csvs, "metas": metas, "otros": otros}, indent=0, sort_keys=True) + "\n")
+    """cola/manifiesto_cierre.json como lo escribe manifiesto.py cierre: el sello real (mf.sello: los CSV, todas las
+    politica_*.pt y .json de la carpeta y los otros) y el ultimo manifiesto de la manana (mf.revisar_historia, con el
+    repositorio git del mundo en la carpeta de arriba, como plan3/ en el worktree). Devuelve los problemas que encontro
+    mf.revisar_historia: el cierre de verdad no sella con problemas; algunas pruebas sellan igual, como quien sella a
+    mano, para ver que --final se niega."""
+    malos, ultimo = mf.revisar_historia(manifiesto, raiz)
+    datos = mf.sello(manifiesto, raiz)
+    datos["manifiesto_ciego_commit"] = ultimo
+    escribir(os.path.join(raiz, "cola", "manifiesto_cierre.json"), json.dumps(datos, indent=0, sort_keys=True))
+    return malos
+
+
+def extras_mundo():
+    """Lo que el generador todavia no produce y el mundo agrega: [AMB-19] la politica por red de la Etapa 4, en los
+    niveles del corredor, 3 bases, con un nombre de archivo supuesto. (celda, escenario, tanda, tipo, base, clave,
+    brazo de evaluar3)."""
+    return [(c, ESC_REG[c], t, TIPO_RED, b, f"{TIPO_RED}_s{b}",
+             f"--politica politica_corredor_niveles_vecinos_{TIPO_RED}_s{b}.pt")
+            for c in REDES["corredor"] for t in gt.REGULARES for b in BASES3]
+
+
+def agregar_si_falta(manifiesto, trabajos, extras):
+    """Agrega al manifiesto y a los trabajos, con generar_trabajos3.evaluacion (sus rutas, claves e ids), cada
+    evaluacion de extras que el manifiesto no tenga ya por (celda, escenario, tanda, tipo, base). Devuelve las
+    entradas agregadas."""
+    hay = {(e["celda"], e["escenario"], e["tanda"], e["tipo"], e["base"]) for e in manifiesto}
+    lista = gt.Lista()
+    for celda, esc, tanda, tipo, base, clave, brazo in extras:
+        if (celda, esc, tanda, tipo, base) not in hay:
+            gt.evaluacion(lista, celda, esc, tanda, clave, brazo, tipo=tipo, base=base)
+    trabajos += lista.trabajos
+    manifiesto += lista.manifiesto
+    return lista.manifiesto
 
 
 def mundo_sintetico(raiz):
-    """Carpeta plan3 sintetica (dentro de tmp_ver/) con el manifiesto y los trabajos reales del generador (las partes
-    base, sin los alias de etapa3b), mas lo que el generador todavia no produce (referencias nuevas, V2 regular de 3
-    bases con llegadas aleatorias, a3, perfil, mezcla y arranque lento); semillas de humo; CSV de cada brazo con efectos
-    conocidos; metas; bases caidas declaradas; promocion decidida con p3_promocion; insumos del puente; el sello del
-    cierre y dos mananas de cola/manifiesto_ciego.json commiteadas en un repositorio git anidado (temporal)."""
-    carpeta_limpia(raiz)
-    partes = [p for p in gt.PARTES if not p.startswith("etapa3b_")]           # sin los alias etapa3b_reg/_poi
-    trabajos, manifiesto = gt.generar_con_manifiesto(partes)
-    nuevos = []
-
-    def agregar(celda, esc, tanda, tipo, base, brazo_cmd):
-        clave = f"{tipo}_s{base}" if base != "" else tipo
-        carpeta = "ciego" if tanda in ("t1r", "t2r", "t1a", "t2a", "h1t1", "h1t2") else "parciales"
-        ruta, tid = f"{carpeta}/{tanda}/eval_{esc}__{clave}.csv", f"ev_{tanda}_{esc}__{clave}"
-        nuevos.append({"csv": ruta, "celda": celda, "escenario": esc, "tanda": tanda, "clave": clave, "tipo": tipo,
-                       "base": base, "semillas": "", "trabajo": tid})
-        trabajos.append({"id": tid, "etapa": "ev", "prioridad": 4, "uso": "sin_semillas", "requiere": [],
-                         "cmd": f"python evaluar3.py --escenario {esc} --salida {ruta} {brazo_cmd}",
-                         "salidas": [ruta], "duracion": 1})
-    celdas = {}
-    for e in manifiesto:
-        celdas.setdefault((e["celda"], e["escenario"]), set()).add(e["tanda"])
-    for (c, esc), tandas in sorted(celdas.items()):
-        for t in sorted(tandas & {"t1r", "t2r", "t1a", "t2a"}):
-            for ref in EXTRAS_REF:
-                if (c, ref) not in (("r905", REF_FINO), ("r1358", REF_VETO)):  # una referencia que falta: PENDIENTE
-                    agregar(c, esc, t, ref, "", f"--programa {ref}.add.xml --nombre {ref}")
-    for c in CASOS6:                            # V2 regular de 42/2042/4042 con llegadas aleatorias (P6: la de P6e)
-        e_reg = gt.P6E["P6e"] if c == "P6" else gt.CASOS[c]
-        for t in ("t1a", "t2a"):
-            agregar(c, gt.POI[c], t, "v2reg3poi", "", f"--politica politica_{e_reg}_vecinos_p3v2reg3med.pt")
-    rutas_p6e = ",".join(f"politica_malla3_alta_e_vecinos_p3v2reg_s{b}.pt" for b in BASES3)
-    trabajos.append({"id": "el_p3v2reg3med_malla3_alta_e", "etapa": "ev", "prioridad": 2, "uso": "sin_semillas",
-                     "requiere": [], "salidas": ["politica_malla3_alta_e_vecinos_p3v2reg3med.pt"], "duracion": 10,
-                     "cmd": f"python p3_elegir.py mediana --politicas {rutas_p6e} --etiqueta p3v2reg3med "
-                            f"--salida politica_malla3_alta_e_vecinos_p3v2reg3med.pt"})
-    for c, esc, tandas, versiones in (("P1", "corredor", ("t1r", "t2r"), ("v2reg3med", "p3obsmed")),
-                                      ("P1", "poi_corredor", ("t1a", "t2a"), ("v2poi3med", "p3obspoimed"))):
-        for t in tandas:                        # a3 solo en P1: las otras celdas de a3 quedan "no se pudo correr"
-            for ver in versiones:
-                pol = f"politica_{esc}_vecinos_{'p3' if ver.startswith('v2') else ''}{ver}.pt"
-                agregar(c, esc, t, f"a3colas0_{ver}", "", f"--politica {pol} --colas-cero")
-                agregar(c, esc, t, f"a3msg0_{ver}", "", f"--politica {pol} --perdida 1")
-    for celda, esc, fam, et in (("per1", "per_corredor", "v2per", "p3v2per"),
-                                ("mix1", "mix_corredor", "v2mix", "p3v2mix"),
-                                ("mixa1", "mixa_corredor", "v2mix", "p3v2mix")):
-        esc_pol = "mix_corredor" if et == "p3v2mix" else esc        # el arranque lento juega la V2 de la mezcla
-        for t in ("t1a", "t2a"):
-            for b in BASES3:
-                agregar(celda, esc, t, fam, b, f"--politica politica_{esc_pol}_vecinos_{et}_s{b}.pt")
-            refs = ("ref_fino", "ref_actuadoaj", "ref_regla", "ref_trivial", "ref_actuado", "ref_fijo")
-            for ref in refs + (("ref_bloques",) if fam == "v2per" else ()):
-                agregar(celda, esc, t, ref, "", f"--programa {ref}.add.xml --nombre {ref}")
-            if fam == "v2per":
-                agregar(celda, esc, t, "v2poimed", "", "--politica politica_poi_corredor_vecinos_p3v2poimed.pt")
-    manifiesto = [e for e in manifiesto + nuevos if clave_base(e) not in CAIDAS_MUNDO]
+    """Carpeta plan3 sintetica (tmp_ver/mundo/plan3, con su repositorio git en tmp_ver/mundo, como plan3/ en el
+    worktree). El manifiesto y los trabajos son los del generador tal cual (gt.PARTES_PLAN, con las bases caidas del
+    mundo en gt.CAIDAS: el generador ya no las evalua); el mundo solo agrega lo que el generador todavia no produce, si
+    falta por (celda, escenario, tanda, tipo, base) (extras_mundo), y quita dos referencias (QUITAR_MUNDO). Semillas de
+    humo; CSV de cada brazo con efectos conocidos y el brazo que escribe su trabajo; metas y .pt de cada politica;
+    cola/caidas.json; promocion decidida con p3_promocion; insumos del puente; dos mananas de cola/manifiesto_ciego.json
+    commiteadas; y el sello del cierre con manifiesto.py. Devuelve (manifiesto, {generador, agregados, quitados})."""
+    repo = os.path.dirname(raiz)
+    carpeta_limpia(repo)
+    viejas = gt.CAIDAS
+    gt.CAIDAS = {c[4] for c in CAIDAS_MUNDO}
+    try:
+        trabajos, manifiesto = gt.generar_con_manifiesto(gt.PARTES_PLAN)
+    finally:
+        gt.CAIDAS = viejas
+    info = {"generador": len(manifiesto)}
+    info["agregados"] = len(agregar_si_falta(manifiesto, trabajos, extras_mundo()))
+    quitar = [e for e in manifiesto if (e["celda"], e["tipo"]) in QUITAR_MUNDO]
+    manifiesto = [e for e in manifiesto if (e["celda"], e["tipo"]) not in QUITAR_MUNDO]
+    info["quitados"] = len(quitar)
     for e in manifiesto:
         e["semillas"] = SEMILLAS_PRUEBA[e["tanda"]]
     escribir(os.path.join(raiz, "cola", "manifiesto_esperado.json"), json.dumps(manifiesto, indent=0) + "\n")
     escribir(os.path.join(raiz, "cola", "trabajos.jsonl"), "".join(json.dumps(t) + "\n" for t in trabajos))
     escribir(os.path.join(raiz, "cola", "caidas.json"), json.dumps([
-        {"celda": c, "escenario": esc, "tipo": tipo, "base": b,
+        {"corrida": corrida, "celda": c, "escenario": esc, "tipo": tipo, "base": b, "fecha": "2026-11-16",
          "intentos": [{"id": f"e2_v2poi_{esc}_s{b}", "error": "pérdida NaN", "fecha": "2026-11-15 03:10"},
-                      {"id": f"e2_v2poi_{esc}_s{b}", "error": "pérdida NaN", "fecha": "2026-11-16 02:55"}]}
-        for c, esc, tipo, b in sorted(CAIDAS_MUNDO)], indent=1) + "\n")
-    # metas de cada base (menos las caidas) y de cada version publicada (con las candidatas que existen)
+                      {"id": f"e2_v2poi_{esc}_s{b}_r2", "error": "pérdida NaN", "fecha": "2026-11-16 02:55"}]}
+        for c, esc, tipo, b, corrida in CAIDAS_MUNDO], indent=1) + "\n")
+    # metas y .pt de cada politica que juega o que entra a una mediana (las caidas no estan: el generador no las usa)
     rutas, medianas_pub = set(), []
     for t in trabajos:
         partes_t = partes_de(t)
@@ -2664,8 +2769,7 @@ def mundo_sintetico(raiz):
         if "mediana" in partes_t:
             medianas_pub.append((partes_t[partes_t.index("--politicas") + 1].split(","),
                                  partes_t[partes_t.index("--salida") + 1], partes_t[partes_t.index("--etiqueta") + 1]))
-    caidas_pol = {f"politica_{esc}_vecinos_p3{tipo}_s{b}.pt" for _, esc, tipo, b in CAIDAS_MUNDO}
-    for r in sorted(rutas - {m[1] for m in medianas_pub} - caidas_pol):
+    for r in sorted(rutas - {m[1] for m in medianas_pub}):
         m = (re.fullmatch(r"insumos/entregado/politica_(.+)_(vecinos)_s(\d+)\.pt", r)
              or re.fullmatch(r"politica_(.+)_(vecinos|local)_(p3[a-z0-9]+)_s(\d+)\.pt", r))
         if not m:
@@ -2676,6 +2780,7 @@ def mundo_sintetico(raiz):
             et = m.group(3)
             eps = 400 if et.startswith(("p3e400", "p3completo")) else 200
             meta = meta_sintetico(r, m.group(1), m.group(2), et, int(m.group(4)), eps)
+            escribir(os.path.join(raiz, r), f"politica sintetica {r}\n")
         escribir(os.path.join(raiz, r[:-3] + ".json"), json.dumps(meta) + "\n")
     for cand, salida, et in medianas_pub:
         metas = {r: leer_json(os.path.join(raiz, r[:-3] + ".json")) for r in cand
@@ -2686,14 +2791,19 @@ def mundo_sintetico(raiz):
                     candidatas=[{"base": m["base"], "val_elegido": m["val_elegido"], "politica": r}
                                 for r, m in metas.items()])
         escribir(os.path.join(raiz, salida[:-3] + ".json"), json.dumps(meta) + "\n")
-    # CSV de cada entrada del manifiesto (el brazo, el que escribiria evaluar3 para su trabajo)
+        escribir(os.path.join(raiz, salida), f"politica sintetica {salida} (copia de la base {b})\n")
+    # CSV de cada entrada del manifiesto, con el brazo que escribiria evaluar3 para su trabajo
     trab = {t["id"]: t for t in trabajos}
     for e in manifiesto:
         lleg = LLEGADAS.get(e["tanda"]) or ("aleatorias" if e["escenario"].startswith("poi_") else "regulares")
-        t = trab.get(e["trabajo"])
+        t = trab[e["trabajo"]]
         pol = politica_de(t)
-        brazo = brazo_de_trabajo(t, leer_json(os.path.join(raiz, pol[:-3] + ".json")) if pol else None) or e["tipo"]
-        roto = 3 if (e["celda"], e["tipo"], e["tanda"]) == ("m2715", "ref_franja", "t1r") else None
+        brazo = brazo_de_trabajo(t, leer_json(os.path.join(raiz, pol[:-3] + ".json")) if pol else None)
+        if isinstance(brazo, re.Pattern):
+            brazo = REGLA_MUNDO[os.path.basename(opcion_de(t, "--regla-de"))]
+        if not brazo:
+            raise ErrorVeredicto(f"mundo sintetico: no se sabe qué brazo escribe {e['trabajo']}")
+        roto = 3 if (e["celda"], e["tipo"], e["tanda"]) == ROTO_MUNDO else None
         no_ins = NO_INSERTADOS_MUNDO.get((e["celda"], e["escenario"], e["tipo"], e["tanda"]))
         csv_sintetico(os.path.join(raiz, e["csv"]), e, lleg, brazo, roto=roto, no_ins=no_ins)
     # puente: CSV entregados del fijo y de IPPO entregado (version evaluada: base 42) e insumos/manifiesto.json
@@ -2730,12 +2840,10 @@ def mundo_sintetico(raiz):
     finally:
         p3_promocion.SEMILLAS = viejas
     escribir(os.path.join(raiz, "listo", "cierre.ok"), "cierre sintetico\n")
-    sellar_mundo(raiz, manifiesto)
-    # dos mananas de cola/manifiesto_ciego.json, commiteadas en un repositorio git anidado y temporal
-    for args in (("init", "-q"),):
-        rc, out = protecciones.git(*args, cwd=raiz)
-        if rc != 0:
-            raise ErrorVeredicto(f"mundo sintetico: git {args}: {out}")
+    # dos mananas de cola/manifiesto_ciego.json, commiteadas en un repositorio git anidado y temporal; despues, el sello
+    rc, out = protecciones.git("init", "-q", cwd=repo)
+    if rc != 0:
+        raise ErrorVeredicto(f"mundo sintetico: git init: {out}")
     for n, filtro in ((1, lambda e: e["tanda"] in ("t1r", "t2r")), (2, lambda e: True)):
         escribir(os.path.join(raiz, "cola", "manifiesto_ciego.json"),
                  json.dumps(manifiesto_ciego_de(raiz, manifiesto, filtro), indent=1, sort_keys=True))
@@ -2743,7 +2851,10 @@ def mundo_sintetico(raiz):
             rc, out = protecciones.git(*args, cwd=raiz)
             if rc != 0:
                 raise ErrorVeredicto(f"mundo sintetico: git {args}: {out}")
-    return manifiesto
+    malos = sellar_mundo(raiz, manifiesto)
+    if malos:
+        raise ErrorVeredicto(f"mundo sintetico: manifiesto.revisar_historia encontró problemas: {malos[:3]}")
+    return manifiesto, info
 
 
 def probar():
@@ -3085,7 +3196,7 @@ def probar():
                           "p3_elegir regla no")
 
     # ===== 3. Mundo sintetico de punta a punta =====
-    raiz = os.path.join(TMP_VER, "mundo")
+    raiz = os.path.join(TMP_VER, "mundo", "plan3")          # su repositorio git: tmp_ver/mundo (como el worktree)
 
     def negarse(etiqueta_prueba, funcion, contiene=""):
         """La funcion debe dar ErrorVeredicto (con 'contiene' en el mensaje)."""
@@ -3116,7 +3227,29 @@ def probar():
                     f.write(viejo)
 
     def mundo():
-        manifiesto = mundo_sintetico(raiz)
+        manifiesto, info = mundo_sintetico(raiz)
+        claves = [(e["celda"], e["escenario"], e["tanda"], e["tipo"], e["base"]) for e in manifiesto]
+        ok(len(set(claves)) == len(claves) == info["generador"] + info["agregados"] - info["quitados"]
+           and info["agregados"] == 2 * 3 * len(REDES["corredor"]) and info["quitados"] == 4
+           and not agregar_si_falta(list(manifiesto), [], extras_mundo()),
+           f"M00 el mundo usa el manifiesto del generador ({info['generador']} CSV) sin duplicados: agrega solo lo que "
+           f"falta ({info['agregados']}, la política por red del corredor; una segunda vez, nada) y quita "
+           f"{info['quitados']} (dos referencias)")
+        tr = {}
+        with open(os.path.join(raiz, "cola", "trabajos.jsonl"), encoding="utf-8") as f:
+            for x in f:
+                tr[json.loads(x)["id"]] = politica_de(json.loads(x))
+        caidas_m, corridas_m = caidas_de_texto(open(os.path.join(raiz, "cola", "caidas.json"), encoding="utf-8").read())
+        sello = leer_json(os.path.join(raiz, "cola", "manifiesto_cierre.json"))
+        ok(not any(base_de(e) is not None and declaracion_caida(caidas_m, corridas_m, (e["celda"], e["escenario"]),
+                                                                e["tipo"], base_de(e), tr[e["trabajo"]])
+                   for e in manifiesto)
+           and set(sello["csv"]) == {e["csv"] for e in manifiesto} and sello["manifiesto_ciego_commit"]
+           and all(pt in sello["metas"] for pt in mf.politicas_evaluadas(manifiesto, raiz))
+           and {"cola/manifiesto_esperado.json", "cola/trabajos.jsonl", "cola/caidas.json", "promocion.json"}
+           <= set(sello["otros"]),
+           "M00b el generador no evalúa las bases caídas (gt.CAIDAS) y el sello es el de manifiesto.py (CSV, cada "
+           ".pt y .json, otros y el commit de la última mañana)")
         # --- negativas de --final (antes de analizar) ---
         con_cambio("listo/cierre.ok", None, lambda: negarse(
             "M01 --final sin listo/cierre.ok se niega", lambda: correr_final(raiz, exigir_semillas=False), "cierre.ok"))
@@ -3130,7 +3263,7 @@ def probar():
         negarse("M04 --final con semillas que no son las del prerregistro: se niega",
                 lambda: correr_final(raiz, exigir_semillas=True), "semillas")
         sello = leer_json(os.path.join(raiz, "cola", "manifiesto_cierre.json"))
-        rel_meta = next(r for r in sello["metas"] if "p3v2reg_s14042" in r and "corredor_vecinos" in r)
+        rel_meta = next(r for r in sello["metas"] if r.endswith("politica_corredor_vecinos_p3v2reg_s14042.json"))
         texto_meta = open(os.path.join(raiz, rel_meta), encoding="utf-8").read()
         con_cambio(rel_meta, texto_meta.replace('"val_elegido": 28.0', '"val_elegido": 35.0'), lambda: negarse(
             "M04b un meta cambiado después del cierre (otra versión evaluada): se niega",
@@ -3159,7 +3292,8 @@ def probar():
                     lambda: correr_final(raiz, exigir_semillas=False), "primera mañana")
         con_cambio(rel_c, texto_c.replace(texto_c.splitlines()[1].split(",")[5],
                                           str(float(texto_c.splitlines()[1].split(",")[5]) + 1), 1), resellado)
-        sellar_mundo(raiz, manifiesto)
+        if sellar_mundo(raiz, manifiesto):
+            ok(False, "M04g: el mundo no volvió a quedar sellado sin problemas")
         # --- bases caidas, metas y brazos ---
         rel_m = "politica_red_vecinos_p3v2reg_s2042.json"
         con_cambio(rel_m, None, lambda: negarse(
@@ -3173,6 +3307,16 @@ def probar():
         un_intento = json.dumps([dict(c, intentos=c["intentos"][:1]) for c in json.loads(caidas)])
         con_cambio("cola/caidas.json", un_intento, lambda: negarse(
             "M04j cola/caidas.json sin los dos intentos fallidos: ERROR", lambda: Datos(raiz), "dos intentos"))
+        otra_corrida = json.dumps([dict(c, corrida=c["corrida"].replace("_s16042", "_s42")) if c["base"] == 16042
+                                   else c for c in json.loads(caidas)])
+        con_cambio("cola/caidas.json", otra_corrida, lambda: negarse(
+            "M04j2 cola/caidas.json con una corrida que no es la de su base: ERROR", lambda: Datos(raiz),
+            "no es una corrida"))
+        fecha_arriba = json.dumps([dict(c, intentos=[{k: v for k, v in i.items() if k != "fecha"}
+                                                     for i in c["intentos"]]) for c in json.loads(caidas)])
+        con_cambio("cola/caidas.json", fecha_arriba, lambda: ok(
+            len(Datos(raiz).caidas) == 2, "M04j3 cola/caidas.json con la fecha una vez por declaración (como la "
+                                          "documenta generar_trabajos3.leer_caidas): se acepta"))
         rel_b = "ciego/t1r/eval_red__v2reg_s42.csv"
         texto_b = open(os.path.join(raiz, rel_b), encoding="utf-8").read()
         con_cambio(rel_b, texto_b.replace("ippo_vecinos_p3v2reg_s42", "ippo_vecinos_p3v2reg_s2042"), lambda: negarse(
@@ -3183,13 +3327,52 @@ def probar():
         con_cambio("cola/manifiesto_esperado.json", json.dumps(man + [dict(man[0], tipo="v2loc", clave="otro")]),
                    lambda: negarse("M04l un CSV que aparece dos veces en el manifiesto: ERROR", lambda: Datos(raiz),
                                    "aparece dos veces"))
-        rel_d = "ciego/t1r/eval_dem_malla3_t1810__ref_fino5.csv"
+        # un CSV copiado bajo otro nombre: el fijo ajustado desde 10 s con el brazo y el trabajo del fijo fino
+        rel_d = "ciego/t1r/eval_dem_malla3_t1810__fijo10.csv"
+        trabajo_fino = next(e["trabajo"] for e in man if e["csv"] == "ciego/t1r/eval_dem_malla3_t1810__fino.csv")
         texto_d = open(os.path.join(raiz, rel_d), encoding="utf-8").read()
-        con_cambio(rel_d, texto_d.replace("ref_fino5", "ref_fino"), lambda: negarse(
-            "M04m dos CSV de una celda y tanda con el mismo brazo: ERROR", lambda: revisar_generados(Datos(raiz)),
-            "el mismo brazo"))
+        man_d = [dict(e, trabajo=trabajo_fino) if e["csv"] == rel_d else e for e in man]
+        con_cambio("cola/manifiesto_esperado.json", json.dumps(man_d), lambda: con_cambio(
+            rel_d, texto_d.replace("fijo_grueso10", "fijo_fino"), lambda: negarse(
+                "M04m dos CSV de una celda y tanda con el mismo brazo (uno copiado bajo otro nombre): ERROR",
+                lambda: revisar_generados(Datos(raiz)), "el mismo brazo")))
+        rel_o = "ciego/t1r/eval_corredor__fino.csv"
+        texto_o = open(os.path.join(raiz, rel_o), encoding="utf-8").read()
+        con_cambio(rel_o, texto_o.replace("fijo_fino", "fijo_mult5"), lambda: negarse(
+            "M04o el fijo fino con el brazo del fijo de verdes de 5 en 5: ERROR (fijo_<nombre> de su trabajo)",
+            lambda: Datos(raiz).serie(("P1", "corredor"), ("ref", REF_FINO), "T1"), "su trabajo escribe fijo_fino"))
+        rel_p = "ciego/t1r/eval_corredor__regla.csv"
+        texto_p = open(os.path.join(raiz, rel_p), encoding="utf-8").read()
+        con_cambio(rel_p, texto_p.replace("regla_u3g60", "mp_c60"), lambda: negarse(
+            "M04p la regla simple con el nombre de un Max-Pressure: ERROR (la forma de la regla de su trabajo)",
+            lambda: Datos(raiz).serie(("P1", "corredor"), ("ref", "ref_regla"), "T1"),
+            "su trabajo escribe un nombre de la forma regla_u<U>g<G>"))
         con_cambio("cola/trabajos.jsonl", None, lambda: negarse(
             "M04n en --final, sin cola/trabajos.jsonl: ERROR", lambda: Datos(raiz, estricto=True), "trabajos.jsonl"))
+        # el manifiesto todavia lista el CSV de una base (generado antes de declararla caida): sin CSV y sin sellar
+        e_c = next(e for e in man if (e["celda"], e["escenario"], e["tipo"], e["tanda"], e["base"])
+                   == ("P4", "poi_red_alta", "v2poi", "t1a", 42))
+
+        def con_entrada(base, funcion):
+            nueva = dict(e_c, base=base, clave=f"v2poi_s{base}", csv=f"ciego/t1a/eval_poi_red_alta__v2poi_s{base}.csv",
+                         trabajo=f"ev_t1a_poi_red_alta__v2poi_s{base}")
+            texto_m = json.dumps(man + [nueva])
+            sello_m = leer_json(os.path.join(raiz, "cola", "manifiesto_cierre.json"))
+            sello_m["otros"]["cola/manifiesto_esperado.json"] = hashlib.sha256(texto_m.encode("utf-8")).hexdigest()
+            con_cambio("cola/manifiesto_esperado.json", texto_m, lambda: con_cambio(
+                "cola/manifiesto_cierre.json", json.dumps(sello_m), funcion))
+
+        def cierre_pasa(etiqueta_prueba):
+            try:
+                comprobar_cierre(raiz)
+                ok(True, etiqueta_prueba)
+            except ErrorVeredicto as ex:
+                ok(False, f"{etiqueta_prueba}: {ex}")
+        con_entrada(14042, lambda: cierre_pasa(
+            "M04q comprobar_cierre no pide sellar el CSV de una base caída declarada que el manifiesto todavía lista"))
+        con_entrada(99, lambda: negarse(
+            "M04r ... y sí el de una base que no está declarada caída: se niega", lambda: comprobar_cierre(raiz),
+            "sin sellar"))
         # --- la corrida final ---
         res, rutas = correr_final(raiz, exigir_semillas=False)
         ok(all(os.path.exists(r) for r in rutas) and len(rutas) == 6,
@@ -3205,12 +3388,16 @@ def probar():
                     ("r1358", "regulares"): "PENDIENTE (falta actuado ajustado en t1r)",
                     ("m3620", "regulares"): "MEJORA", ("P1", "aleatorias"): "FUNCIONA",
                     ("P3", "aleatorias"): "PENDIENTE (no convergió; provisional: FUNCIONA)",
-                    ("P4", "aleatorias"): "FUNCIONA", ("P6", "aleatorias"): "FUNCIONA",
-                    ("per1", "aleatorias"): "FUNCIONA", ("mix1", "aleatorias"): "FUNCIONA",
-                    ("mixa1", "aleatorias"): "FUNCIONA"}
+                    ("P4", "aleatorias"): "FUNCIONA", ("P6", "aleatorias"): "FUNCIONA"}
         for k, v in esperado.items():
             ok(cel[k]["etiqueta_v2_citable"] == v,
                f"M06 {k[0]} {k[1]}: etiqueta citable de V2 {cel[k]['etiqueta_v2_citable']} (esperada {v})")
+        por_esc = {f["escenario"]: f for f in res["celdas"]}
+        estoc = {esc: por_esc[esc]["etiqueta_v2_citable"] for _, esc, _ in ESTOCASTICAS}
+        ok(all(v == "FUNCIONA" for v in estoc.values()) and len(estoc) == 6
+           and por_esc["mixa_corredor"]["celda"] == "mix1",
+           f"M06b perfil, mezcla y arranque lento (las celdas del generador, por escenario; mixa_ con la celda de la "
+           f"mezcla): {estoc}")
         f = cel[("D", "regulares")]
         ok(f["etiqueta_v2_citable"] == "MEJORA" and palabra(f["etiqueta_citable"]) == "PENDIENTE"
            and "promoción" in f["etiqueta_citable"],
@@ -3269,9 +3456,16 @@ def probar():
             "pasa en 3 de 3 casos: "), "M20 H8a pasa en 3 de 3; H8b (al menos 1 de 6) no pasa")
         ok(hip[("H12", "H12", "P2")]["lectura"].startswith("es peor (T1: es peor; T2: es peor)")
            and hip[("H12", "H12", "P6")]["lectura"] == "no es peor", "M21 H12: P2 es peor, P6 no es peor")
-        ok(hip[("H10", "H10 corredor", "global")]["pasa"] == "no" and
-           hip[("H10", "H10 red", "P3")]["lectura"].startswith("no se pudo correr"),
-           "M22 H10 sin datos de la política por red: 'no se pudo correr', la familia conserva su tamaño y no pasa")
+        ok(hip[("H10", "H10 red", "global")]["pasa"] == "no" and hip[("H10", "H10 red", "global")]["n_familia"] == 7
+           and hip[("H10", "H10 red", "global")]["lectura"].endswith("no se pudo correr en 7")
+           and hip[("H10", "H10 red", "P3")]["lectura"].startswith("no se pudo correr"),
+           "M22 H10 en la red, sin datos de la política por red: 'no se pudo correr' (y el resumen lo dice), la "
+           "familia conserva su tamaño (7) y no pasa")
+        h10 = {c: hip[("H10", "H10 corredor", c)]["lectura"] for c in REDES["corredor"]}
+        ok(hip[("H10", "H10 corredor", "global")]["lectura"].startswith("pasa: 'no es peor' en 4 de 5 niveles")
+           and h10["c1358"].startswith("es peor") and all(v == "no es peor" for c, v in h10.items() if c != "c1358"),
+           f"M22b H10 en el corredor (la política por red que agrega el mundo): no es peor en 4 de 5 niveles (c1358 es "
+           f"peor) y pasa, porque hacen falta 4 ({hip[('H10', 'H10 corredor', 'global')]['lectura']})")
         ok(hip[("H15", "H15 regulares", "global")]["lectura"].startswith("pasa en 4 de 4") and
            hip[("H15", "H15 aleatorias", "global")]["lectura"] == "pasa en 0 de 6 casos: ninguno" and
            hip[("H15", "H15 regulares", "global")]["pasa"] == "sí" and
@@ -3294,10 +3488,10 @@ def probar():
         num_a = [f for f in res["numero"] if f["modelo"] == "modelo citado" and f["llegadas"] == "aleatorias"]
         ok(all(f["nota"] == "provisional en P3" for f in num_a),
            "M24b número único con llegadas aleatorias: dice 'provisional en P3' (AMB-17)")
-        comp = [f for f in res["comparaciones"] if f["celda"] == "m2715" and f["clave"] == "ref_franja"
+        comp = [f for f in res["comparaciones"] if f["celda"] == ROTO_MUNDO[0] and f["clave"] == ROTO_MUNDO[1]
                 and f["tanda"] == "T1" and f["referencia"] == "fijo fino"]
         ok(comp and "no generan los mismos vehículos" in comp[0]["nota"],
-           "M25 números aleatorios comunes rotos (m2715, franja): la comparación queda con su motivo")
+           "M25 números aleatorios comunes rotos (m2715, fijo ajustado desde 10 s): la comparación queda con su motivo")
         b = [x for x in res["bases"] if x["escenario"] == "dem_corredor_t2715" and x["familia"] == "v2reg"
              and x["base"] == 42]
         ok(b and b[0]["convergio"] == "no" and b[0]["version_evaluada"] == "sí" and b[0]["min_repetido"] == "no",
@@ -3320,16 +3514,18 @@ def probar():
            "M28c el .md trae la promoción de cada celda y el número único con las dos tandas y el fijo entregado (§17)")
         filas_h = {(r["id"], r["caso"], r["llegadas"], r["a"]): r for r in res["hipotesis"]}
         a3 = [r for r in res["hipotesis"] if r["id"] == "a3"]
-        a3_p1 = [r for r in a3 if r["caso"] == "P1" and r["lectura"] == "mayor"]
-        a3_no = [r for r in a3 if r["lectura"].startswith("no se pudo correr")]
-        ok(len(a3) == 2 * 2 * (6 + 6) and len(a3_p1) == 8 and len(a3_no) == len(a3) - 8,
-           f"M28d a3: {len(a3)} filas; en P1 las 8 perturbadas pierden frente a la misma versión; el resto 'no se pudo "
-           f"correr'")
+        a3_mayor = [r for r in a3 if r["lectura"] == "mayor"]
+        ok(len(a3) == 2 * 2 * (6 + 6) and len(a3_mayor) == len(a3),
+           f"M28d a3 (las celdas del generador): {len(a3)} filas; en todas, la versión perturbada (colas en cero o "
+           f"mensajes cortados) pierde frente a la misma versión sin perturbar ({len(a3_mayor)} 'mayor')")
         pm = [r for r in res["hipotesis"] if r["id"] == "Perfil y mezcla"]
-        ok(any(r["caso"] == "per1" and r["lectura"] == "citable FUNCIONA" and "fijo por bloques" in r["nota"]
-               for r in pm) and sum(1 for r in pm if r["lectura"] == "no se pudo correr") == 3,
-           "M28e perfil, mezcla y arranque lento: per1, mix1 y mixa1 con su etiqueta (per1 con el fijo por bloques al "
-           "lado); per3, mix3 y mixa3 'no se pudo correr'")
+        con_bloques = {r["caso"] for r in pm if "fijo por bloques" in r["nota"]}
+        ok(sum(1 for r in pm if r["a"] == nombre_brazo(("ver", "v2per", None)) and r["lectura"] == "citable FUNCIONA")
+           == 2 and sum(1 for r in pm if r["a"] == nombre_brazo(("ver", "v2mix", None))
+                        and r["lectura"] == "citable FUNCIONA") == 4
+           and con_bloques == {"per1", "per3"} and not any(r["lectura"] == "no se pudo correr" for r in pm),
+           "M28e perfil, mezcla y arranque lento: la V2 de cada una de las 6 celdas con su etiqueta (FUNCIONA); el "
+           "perfil con el fijo por bloques al lado")
         c0a = [r for r in res["hipotesis"] if r["id"] == "C0 aleatorio" and r["b"].startswith("IPPO con mensajes "
                                                                                               "corregido de 3 bases")]
         ok(len(c0a) == 6 and all(r["lectura"] == "menor" for r in c0a),
@@ -3375,12 +3571,17 @@ def probar():
                                                                  encoding="utf-8").read())
                     extra.append(f_)
             escribir(os.path.join(raiz, "cola", "manifiesto_esperado.json"), json.dumps(manifiesto + extra, indent=0))
-            sellar_mundo(raiz, manifiesto + extra)
+            sellar_mundo(raiz, manifiesto + extra)          # mf.sello sella tambien los CSV de la prueba final
             d = Datos(raiz)
             ok(any("tanda f1r" in a and "prueba final" in a for a in d.avisos),
                "M32 los CSV de una tanda de uso 'final' no entran al veredicto (una línea de aviso)")
             comprobar_cierre(raiz)
-            ok(True, "M32b comprobar_cierre no exige el sello de la prueba final (uso 'final')")
+            sello_f = leer_json(os.path.join(raiz, "cola", "manifiesto_cierre.json"))
+            sin_finales = dict(sello_f, csv={k: v for k, v in sello_f["csv"].items() if "/f1r/" not in k})
+            con_cambio("cola/manifiesto_cierre.json", json.dumps(sin_finales), lambda: comprobar_cierre(raiz))
+            ok(sum("/f1r/" in k for k in sello_f["csv"]) == 2,
+               "M32b comprobar_cierre acepta el sello con y sin los CSV de la prueba final (uso 'final'; mf.sello los "
+               "sella si ya están al cierre)")
             lista = escribir(os.path.join(raiz, "listo", "lista_final.json"), json.dumps(
                 {"comparaciones": [{"celda": "P1", "escenario": "corredor", "tanda": "f1r",
                                     "a": {"tipo": "v2reg", "base": 42}, "b": {"tipo": "ref_fino"}}]}))
@@ -3417,6 +3618,12 @@ def probar():
                     "ya corrió")
         finally:
             del gt.TANDAS["f1r"]
+            escribir(os.path.join(raiz, "cola", "manifiesto_esperado.json"), json.dumps(manifiesto, indent=0) + "\n")
+            sellar_mundo(raiz, manifiesto)
+        sello_v = leer_json(os.path.join(raiz, "cola", "manifiesto_cierre.json"))
+        negarse("M35b un sello cuyo último manifiesto de la mañana no está en la historia de git: se niega",
+                lambda: comprobar_ciego(raiz, dict(sello_v, manifiesto_ciego_commit="0" * 40)),
+                "no está en la historia")
         # tercera manana con un sha256 distinto para un CSV ya registrado: --final se niega
         man_c = leer_json(os.path.join(raiz, "cola", "manifiesto_ciego.json"))
         clave_c = sorted(man_c)[0]
@@ -3427,6 +3634,39 @@ def probar():
         sello_v = leer_json(os.path.join(raiz, "cola", "manifiesto_cierre.json"))
         negarse("M35 un CSV cuyo sha256 cambia de una mañana a otra: se niega",
                 lambda: comprobar_ciego(raiz, sello_v), "cambió en el manifiesto de la mañana")
+        # caidas por corrida (con lo que sale de ellas, gt.DERIVA, y la V2 de la mezcla en el arranque lento):
+        # veredicto3 da por caidas exactamente las bases que el generador deja de evaluar
+        corridas = [("P1", "corredor", "v2reg", 42, "corredor", "p3v2reg"),
+                    ("mix1", "mix_corredor", "v2mix", 2042, "mix_corredor", "p3v2mix"),
+                    ("P3", "poi_red", "p3e400poi", 4042, "poi_red", "p3e400poi")]
+        viejas = gt.CAIDAS
+        try:
+            gt.CAIDAS = set()
+            trabajos0, man0 = gt.generar_con_manifiesto(gt.PARTES_PLAN)
+            gt.CAIDAS = {gt.nombre_corrida(esc, "vecinos", et, b) for _, _, _, b, esc, et in corridas}
+            _, man1 = gt.generar_con_manifiesto(gt.PARTES_PLAN)
+        finally:
+            gt.CAIDAS = viejas
+
+        def clave_e(e):
+            return (e["celda"], e["escenario"], e["tipo"], base_de(e))
+        evaluadas = {clave_e(e) for e in man0 if base_de(e) is not None and e["tanda"] in LLEGADAS}
+        caen = evaluadas - {clave_e(e) for e in man1}
+        raiz_c = os.path.join(TMP_VER, "caidas")
+        carpeta_limpia(raiz_c)
+        escribir(os.path.join(raiz_c, "cola", "manifiesto_esperado.json"), json.dumps(man0))
+        escribir(os.path.join(raiz_c, "cola", "trabajos.jsonl"), "".join(json.dumps(t) + "\n" for t in trabajos0))
+        escribir(os.path.join(raiz_c, "cola", "caidas.json"), json.dumps([
+            {"corrida": gt.nombre_corrida(esc, "vecinos", et, b), "celda": c, "escenario": e_c, "tipo": tipo,
+             "base": b, "fecha": "2026-11-16", "intentos": [{"id": "a", "error": "NaN"}, {"id": "b", "error": "NaN"}]}
+            for c, e_c, tipo, b, esc, et in corridas]))
+        d = Datos(raiz_c)
+        segun_v3 = {(ck[0], ck[1], fam, b) for ck, fam, b in ((k[:2], k[2], k[3]) for k in evaluadas)
+                    if d.es_caida(ck, fam, b)}
+        ok(segun_v3 == caen and len(caen) == 9,
+           f"M36 caídas por corrida: veredicto3 da por caídas las mismas {len(segun_v3)} bases que el generador deja "
+           f"de evaluar (la V2 con sus 400 episodios y sus dos derivadas, la V2 de la mezcla también en el arranque "
+           f"lento, los 400 episodios aleatorios con sus derivadas)")
 
     grupo("1. Pruebas del prototipo (lo entregado de plan2/, solo lectura)", prototipo)
     grupo("2. Reglas nuevas con datos por semilla fabricados", reglas)
