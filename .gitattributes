@@ -1,0 +1,3 @@
+# Salidas de las pruebas de veredicto3 (las escribe --probar con LF): sin conversion CRLF en Windows
+plan3/pruebas/ver/* text eol=lf
+plan3/pruebas/ver/salidas/* text eol=lf

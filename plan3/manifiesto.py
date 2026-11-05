@@ -69,13 +69,16 @@ def leer_csv(ruta):
 def revisar(esperado, raiz=PLAN3):
     estado = {"bien": [], "faltan": [], "mal": []}
     grupos = defaultdict(dict)                         # (escenario, tanda) -> {csv: {semilla: generados}}
+    caidas, trabajos = None, None                      # se leen solo si falta algun CSV
     for e in esperado:
         if es_final(e["tanda"]):
             continue
         ruta = os.path.join(raiz, e["csv"])
         if not os.path.exists(ruta):
+            if caidas is None:
+                caidas, trabajos = leer_caidas_y_trabajos(raiz)
             estado["faltan"].append(e["csv"] + (" (base caida declarada despues: regenerar el manifiesto)"
-                                                if caida_declarada(e) else ""))
+                                                if caida_declarada(e, caidas, trabajos) else ""))
             continue
         brazos, generados, filas = leer_csv(ruta)
         semillas = rango(e["semillas"])
@@ -101,16 +104,30 @@ def revisar(esperado, raiz=PLAN3):
     return estado
 
 
-def caida_declarada(e):
-    """¿El CSV es de una base declarada caida en cola/caidas.json (con el criterio del generador)?"""
-    try:
-        import generar_trabajos3 as gt
-        caidas = gt.leer_caidas()
-        if not caidas or e.get("base") in ("", None):
-            return False
-        return any(c.endswith(f"_s{e['base']}") and c.startswith(e["escenario"] + "_ippo_") for c in caidas)
-    except Exception:
-        return False
+def leer_caidas_y_trabajos(raiz=PLAN3):
+    """(corridas declaradas caidas en <raiz>/cola/caidas.json, {id: trabajo} de <raiz>/cola/trabajos.jsonl)."""
+    import generar_trabajos3 as gt
+    caidas = gt.leer_caidas(os.path.join(raiz, "cola", "caidas.json"))
+    trabajos = {}
+    ruta = os.path.join(raiz, "cola", "trabajos.jsonl")
+    if os.path.exists(ruta):
+        with open(ruta, encoding="utf-8") as f:
+            for linea in f:
+                if linea.strip():
+                    t = json.loads(linea)
+                    trabajos[t["id"]] = t
+    return caidas, trabajos
+
+
+def caida_declarada(e, caidas, trabajos):
+    """¿El CSV es de una base declarada caida? Con la corrida de la politica que juega su trabajo y las que salen de
+    ella (generar_trabajos3.caida), como el generador; caidas y trabajos de leer_caidas_y_trabajos."""
+    import generar_trabajos3 as gt
+    trabajo = trabajos.get(e.get("trabajo")) or {}
+    partes = shlex.split(trabajo.get("cmd", ""))
+    politica = partes[partes.index("--politica") + 1] if "--politica" in partes[:-1] else None
+    corrida = gt.corrida_de_politica(politica)
+    return bool(caidas) and corrida is not None and gt.caida(*corrida, caidas=caidas)
 
 
 def historia_ciego(raiz_git):
@@ -139,8 +156,8 @@ def revisar_historia(esperado, raiz=PLAN3, raiz_git=None):
                 malos.append(f"{ruta}: su sha256 cambio entre la manana del {primera[ruta][0][:10]} y la del {commit[:10]}")
             primera.setdefault(ruta, (commit, h))
     for e in esperado:
-        if not e["csv"].startswith("ciego/"):
-            continue
+        if not e["csv"].startswith("ciego/") or es_final(e["tanda"]):
+            continue                                # la prueba final se coteja en veredicto3 --prueba-final
         if e["csv"] not in primera:
             malos.append(f"{e['csv']}: nunca aparecio en un manifiesto de la manana commiteado")
         elif sha(os.path.join(raiz, e["csv"])) != primera[e["csv"]][1]:
