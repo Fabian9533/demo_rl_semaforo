@@ -7,9 +7,9 @@ OK    A fragil: el ganador del desempate (a 30.0) tiene una semilla trabada -> 3
 OK    B P1: subrejilla de 65 planes por la linea de comandos: 65/65 filas iguales a plan2/barrido_corredor.csv (14 columnas)
 OK    B P1: ganador 20/10 0/15 20.88 = ganador de plan2 20/10 0/15 20.88
   C barridos/corredor/gruesa.csv: f2e6e126f56f123e / f2e6e126f56f123e
-  C barridos/corredor/gruesa_semillas.csv: fec9d4811f4113fd / fec9d4811f4113fd
+  C barridos/corredor/gruesa_semillas.csv: 6d35d43968d94f6d / 6d35d43968d94f6d
   C corredor_r10g.add.xml: e9d59a6289f279f1 / e9d59a6289f279f1
-  C barridos/corredor/fijo_grueso10.json: 9d03c509c31b9a18 / 9d03c509c31b9a18
+  C barridos/corredor/fijo_grueso10.json: 54191aef89073d10 / 54191aef89073d10
 OK    C dos corridas (una con 3 hilos; otra en 2 trozos y la union) dan los mismos archivos: [True, True, True, True]
 OK    B P2: 3 de 3 filas de plan2/barrido_corredor_alta.csv reproducidas (25/15 0/25, 25/15 0/20, 25/15 0/10)
 OK    B P3: 3 de 3 filas de plan2/barrido_red.csv reproducidas (10/10 0/25/24, 10/10 0/0/0, 10/10 0/25/0)

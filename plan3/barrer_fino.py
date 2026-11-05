@@ -236,11 +236,14 @@ def correr_periodos(cfg, extra, semilla, tripinfo, cortes, intentos=5):
     write-undeparted, solo para el puntaje por periodo (leer_periodos). Reintenta como correr_sumo si Windows
     tiene tomado un archivo un instante; no cambia ningun numero."""
     todo = tripinfo[:-len(".xml")] + "_todo.xml"
+    estadisticas = comun.args_estadisticas(tripinfo)
+    # comun.ESCRIBIR_NO_INSERTADOS (evaluar3) ya agrega la misma opcion: no se repite
+    no_insertados = [] if "--tripinfo-output.write-undeparted" in estadisticas else \
+        ["--tripinfo-output.write-undeparted", "true"]
     cmd = ["sumo", "-c", cfg, "--seed", str(semilla), "--tripinfo-output", todo,
-           "--tripinfo-output.write-unfinished", "true", "--tripinfo-output.write-undeparted", "true",
-           "--device.emissions.probability", "1",
-           "--no-step-log", "true", "--no-warnings", "true", "--end", str(bf.FIN_SIM)] + \
-        comun.args_estadisticas(tripinfo) + extra
+           "--tripinfo-output.write-unfinished", "true"] + no_insertados + \
+          ["--device.emissions.probability", "1",
+           "--no-step-log", "true", "--no-warnings", "true", "--end", str(bf.FIN_SIM)] + estadisticas + extra
     for k in range(intentos):
         try:
             subprocess.run(cmd, check=True, **bf.SILENCIO)
