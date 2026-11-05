@@ -59,14 +59,32 @@ PASA  N11a generados_iguales encuentra la semilla con otro vehiculo
 PASA  N11b igual al ciclo minimo hasta 0.0005 s
 PASA  N12 numero unico = media geometrica de los cocientes ((-0.71, -0.79, -0.63); directo -0.71)
 PASA  N13 se niega a escribir fuera de plan3/ (la raiz del repositorio)
-PASA  N13b se niega a escribir en el temporal del sistema
+PASA  N13b se niega a escribir fuera del repositorio (sin sondear el temporal)
+PASA  N13c dentro_de_plan3 rechaza la carpeta plan3 misma
+PASA  N13d carpeta_limpia solo borra plan3/tmp_* (pruebas/ sigue intacta)
 PASA  N14 --final exige las semillas del prerregistro (8001-8030 pasa; las de humo, no)
+PASA  N15 lectura conjunta de la no inferioridad (AMB-9): 8 de 8 casos
+PASA  N16 acuerdo con una sola tanda PENDIENTE por convergencia: PENDIENTE (sin StopIteration)
+PASA  N17 una base de plan3 elegida con timeLoss o con 8 semillas es ERROR (§6); lo entregado y p3_elegir regla no
 --- 3. Mundo sintético de punta a punta (tmp_ver/mundo; semillas de humo)
 PASA  M01 --final sin listo/cierre.ok se niega (falta listo/cierre.ok: los resultados decisivos siguen a ciegas (§14); no se corre)
-PASA  M02 un CSV cambiado después del cierre: se niega
-PASA  M03 sin cola/manifiesto_cierre.json: se niega
-PASA  M04 --final con semillas que no son las del prerregistro: se niega
-PASA  M05 --final escribe las 5 salidas en salidas/ (dentro de la carpeta plan3)
+PASA  M02 un CSV cambiado después del cierre: se niega (lo sellado al cierre no coincide; no se corre: ciego/t1r/eval_corredor__v2reg_s42.csv cambió después del cierre (sha256 distinto))
+PASA  M03 sin cola/manifiesto_cierre.json: se niega (falta cola/manifiesto_cierre.json (python manifiesto.py cierre); no se corre)
+PASA  M04 --final con semillas que no son las del prerregistro: se niega (semillas del manifiesto distintas de las del prerregistro: ciego/t1r/eval_corredor__v2reg_s42.csv: semillas 424301-424310 y la tanda t1r es 8001-8030; ciego/...)
+PASA  M04b un meta cambiado después del cierre (otra versión evaluada): se niega (lo sellado al cierre no coincide; no se corre: politica_corredor_vecinos_p3v2reg_s14042.json cambió después del cierre (sha256 distinto))
+PASA  M04c promocion.json cambiado después del cierre: se niega (lo sellado al cierre no coincide; no se corre: promocion.json cambió después del cierre (sha256 distinto))
+PASA  M04d cola/caidas.json sin sellar: se niega (lo sellado al cierre no coincide; no se corre: cola/caidas.json no está sellado (otros))
+PASA  M04e un meta que se lee y no está sellado: ERROR (politica_corredor_vecinos_p3v2reg_s14042.json no está sellado en cola/manifiesto_cierre.json (metas))
+PASA  M04f un CSV de ciego/ que no aparece en ninguna mañana: se niega (los CSV de ciego/ no son los de cada mañana (§14); no se corre: ciego/t1r/eval_corredor__otro.csv no aparece en ningún manifiesto de la mañana)
+PASA  M04g un CSV de ciego/ cambiado después de su mañana, aunque se vuelva a sellar: se niega (los CSV de ciego/ no son los de cada mañana (§14); no se corre: ciego/t1a/eval_poi_corredor__v2poi_s42.csv: el sha256 del cierre no es el de la primera mañan...)
+PASA  M04h una base con CSV y sin meta: ERROR (red: la base 2042 de IPPO con mensajes corregido tiene CSV y no tiene meta (politica_red_vecinos_p3v2reg_s2042.pt); una base caída no se evalúa y se declara ...)
+PASA  M04i en --final, una base sin CSV y sin declarar caída: ERROR (poi_red_alta: la base 16042 de IPPO con mensajes corregido (entrenado con llegadas aleatorias) no tiene CSV y no está declarada caída en cola/caidas.json (§14))
+PASA  M04j cola/caidas.json sin los dos intentos fallidos: ERROR (cola/caidas.json: cada base caída lleva celda, escenario, tipo, base y los dos intentos fallidos con id, error y fecha (§14): {'celda': 'P4', 'escenario': 'p...)
+PASA  M04k un CSV con otro brazo que el de su trabajo: ERROR (ciego/t1r/eval_red__v2reg_s42.csv: el brazo es ippo_vecinos_p3v2reg_s2042 y su trabajo escribe ippo_vecinos_p3v2reg_s42)
+PASA  M04l un CSV que aparece dos veces en el manifiesto: ERROR (ciego/t1r/eval_corredor__v2reg_s42.csv aparece dos veces en el manifiesto)
+PASA  M04m dos CSV de una celda y tanda con el mismo brazo: ERROR (ciego/t1r/eval_dem_malla3_t1810__ref_fino5.csv y ciego/t1r/eval_dem_malla3_t1810__ref_fino.csv dicen el mismo brazo (ref_fino) en la misma celda y tanda)
+PASA  M04n en --final, sin cola/trabajos.jsonl: ERROR (falta cola/trabajos.jsonl: sin el comando de cada CSV no se sabe qué política juega)
+PASA  M05 --final escribe las 6 salidas en salidas/ (dentro de la carpeta plan3)
 PASA  M06 P1 regulares: etiqueta citable de V2 FUNCIONA (esperada FUNCIONA)
 PASA  M06 P2 regulares: etiqueta citable de V2 MEJORA (esperada MEJORA)
 PASA  M06 P3 regulares: etiqueta citable de V2 EMPATA (mejora no confirmada) (esperada EMPATA (mejora no confirmada))
@@ -82,37 +100,58 @@ PASA  M06 r1358 regulares: etiqueta citable de V2 PENDIENTE (falta actuado ajust
 PASA  M06 m3620 regulares: etiqueta citable de V2 MEJORA (esperada MEJORA)
 PASA  M06 P1 aleatorias: etiqueta citable de V2 FUNCIONA (esperada FUNCIONA)
 PASA  M06 P3 aleatorias: etiqueta citable de V2 PENDIENTE (no convergió; provisional: FUNCIONA) (esperada PENDIENTE (no convergió; provisional: FUNCIONA))
+PASA  M06 P4 aleatorias: etiqueta citable de V2 FUNCIONA (esperada FUNCIONA)
 PASA  M06 P6 aleatorias: etiqueta citable de V2 FUNCIONA (esperada FUNCIONA)
+PASA  M06 per1 aleatorias: etiqueta citable de V2 FUNCIONA (esperada FUNCIONA)
+PASA  M06 mix1 aleatorias: etiqueta citable de V2 FUNCIONA (esperada FUNCIONA)
+PASA  M06 mixa1 aleatorias: etiqueta citable de V2 FUNCIONA (esperada FUNCIONA)
 PASA  M07 D: veto del actuado ajustado (V2 MEJORA) y sin decisión de promoción el citado queda PENDIENTE (falta la decisión de promoción de dem_corredor_t2715_der)
-PASA  M08 P1: modelo citado promovido (observación nueva, FUNCIONA) con la etiqueta de V2 al lado
+PASA  M08 P1: la promoción (p3_promocion, -3 % en la validación) cita la observación nueva (FUNCIONA) con la etiqueta de V2 al lado
 PASA  M09 P6: se repite en 4 de 5 y lleva la lectura de la espera de inserción
 PASA  M10 m3620: V2 igual al ciclo mínimo -> 'Reproduce el ciclo mínimo'
 PASA  M11 probabilidad de PENDIENTE por ruido de §6 junto a la celda
-PASA  M12 H1 global por intersección-unión: no pasa (no da 'no es peor' al 5 % en las dos tandas: P5 (no concluyente))
-PASA  M13 H1 en P5: T1 no es peor, T2 es peor -> no concluyente
-PASA  M14 H1 en los otros casos: no es peor, con T1 = t1r + h1t1
+PASA  M11b P4 aleatoria con dos bases caídas declaradas: n del diseño (5), se repite en 3 de 5 y la versión evaluada sale de las que quedan
+PASA  M11c P2 aleatoria: el fijo fino deja vehículos sin entrar y la celda lleva la lectura obligada de §4
+PASA  M11d veredicto3_no_insertados.csv: una fila por tanda y brazo (80 en P2 aleatoria)
+PASA  M12 H1 global por intersección-unión: no pasa, y nombra la tanda que es peor con su cifra (no da 'no es peor' al 5 % en las dos tandas: P5 (contradictorio (T1x: no es peor; T2x: es peor)). P5 es peor en T2x (+6.07 % [5.95, 6.20]))
+PASA  M13 H1 en P5: T1 no es peor, T2 es peor -> contradictorio (T1x: no es peor; T2x: es peor)
+PASA  M14 H1 en los otros casos: no es peor, con T1 = t1r + h1t1 y sin sentido entre entrenamientos (AMB-8)
 PASA  M15 H2 pasa en P4 y m6525 (3 de 3)
 PASA  M16 H3 pasa con una base en contra (4 de 5); H3e, con dos en contra, no alcanza el sentido
-PASA  M17 H5: pasa: 5 de 6 casos (P1, P2, P4, P5, P6); hacen falta 3
-PASA  M18 H6 por caso: {'P1': 'no', 'P2': 'no', 'P3': 'sí', 'P4': 'sí', 'P5': 'sí', 'P6': 'sí'}
-PASA  M19 H7r: pasa en P1; en P6 el sentido es 2 de 3 y no pasa
+PASA  M17 H5 (P4 no cuenta: 3 de 5 bases, dos caídas): pasa: 4 de 6 casos (P1, P2, P5, P6); hacen falta 3
+PASA  M18 H6 por caso: {'P1': 'no', 'P2': 'no', 'P3': 'sí', 'P4': 'no', 'P5': 'sí', 'P6': 'sí'}
+PASA  M19 H7r: pasa en P1; en P6 la versión evaluada mejora pero el sentido es 2 de 3 (lectura de §11)
 PASA  M20 H8a pasa en 3 de 3; H8b (al menos 1 de 6) no pasa
 PASA  M21 H12: P2 es peor, P6 no es peor
 PASA  M22 H10 sin datos de la política por red: 'no se pudo correr', la familia conserva su tamaño y no pasa
-PASA  M23 H15: 4 de 4 con llegadas regulares, 0 de 6 con aleatorias
+PASA  M23 H15: 'pasa en k de n casos' (AMB-18; pasa = al menos un caso)
 PASA  M24 número único regular T1 frente al fijo fino -3.99 % = directo -3.99 %; con un promovido se agrega el de V2
+PASA  M24b número único con llegadas aleatorias: dice 'provisional en P3' (AMB-17)
 PASA  M25 números aleatorios comunes rotos (m2715, franja): la comparación queda con su motivo
 PASA  M26 tabla de bases: la versión evaluada de c2715 no convergió
-PASA  M27 tabla de bases: también las bases de C0 e IPPO entregado (candidatas de sus versiones publicadas)
-PASA  M28 veredicto3.md tiene la tabla simple y las lecturas obligadas
-PASA  M28b el chequeo de todos los brazos de cada celda y tanda avisa solo de m2715 (franja, t1r)
+PASA  M27 tabla de bases: las candidatas de C0 e IPPO entregado, y las dos caídas declaradas con sus intentos
+PASA  M28 veredicto3.md tiene la tabla simple, las lecturas obligadas y los vehículos sin entrar
+PASA  M28b avisos: una sola línea para la tanda promo (58 CSV de la tanda promo no entran al veredicto (regla de promoción: se leen en promocion.json)) y la de m2715
 PASA  M28c el .md trae la promoción de cada celda y el número único con las dos tandas y el fijo entregado (§17)
-PASA  M29 version publicada distinta de la mediana: ERROR (politica_corredor_alta_vecinos_p3v2reg3med.pt: base_elegida 2042, pero la mediana por val_elegido de sus candidatas es 42 (B21))
+PASA  M28d a3: 48 filas; en P1 las 8 perturbadas pierden frente a la misma versión; el resto 'no se pudo correr'
+PASA  M28e perfil, mezcla y arranque lento: per1, mix1 y mixa1 con su etiqueta (per1 con el fijo por bloques al lado); per3, mix3 y mixa3 'no se pudo correr'
+PASA  M28f C0 aleatorio frente a la V2 regular de 42/2042/4042 jugada con llegadas aleatorias (v2reg3poi)
+PASA  M28g la fila global de H1 está
+PASA  M28h una celda sin modelo principal: fila PENDIENTE con motivo y aviso
+PASA  M28i en --final, una celda sin modelo principal: ERROR (la celda zz (poi_zz) no tiene modelo principal: sin modelo principal (v2reg, v2poi, v2per, v2mix); tipos: ref_fino)
+PASA  M29 una versión publicada que no es la mediana: ERROR (politica_corredor_alta_vecinos_p3v2reg3med.pt: base_elegida 2042, pero la mediana por val_elegido de sus candidatas es 42 (B21))
 PASA  M30 un CSV con una semilla de más: ERROR (ciego/t2r/eval_red__v2reg_s42.csv: faltan las semillas [] y sobran [424399] (§7))
-PASA  M31 una decisión de promoción con otro sha256 que el registrado: ERROR
-PASA  M32 prueba final sin listo/holdout.ok: se niega
-PASA  M33 holdout.ok sin el sha256 de la lista: se niega
-PASA  M34 la prueba final corre una vez, deja su candado y no corre una segunda vez
-PASA  M35 la prueba final solo usa las semillas reservadas (11001-11030, 12001-12100); una lista mal armada se rechaza antes de cerrar el candado
-PASA  G01 git status --porcelain --ignored -- plan2 TESIS vacío después de las pruebas
-=== 108 pasan, 0 fallan
+PASA  M31 una decisión de promoción con otro sha256 que el registrado: ERROR (promocion: promocion/corredor_alta.json no coincide con el sha256 de promocion.json)
+PASA  M32 los CSV de una tanda de uso 'final' no entran al veredicto (una línea de aviso)
+PASA  M32b comprobar_cierre no exige el sello de la prueba final (uso 'final')
+PASA  M33 prueba final sin listo/holdout.ok: se niega (falta listo/holdout.ok (lo crea Fabian con la enmienda, §13))
+PASA  M33b holdout.ok sin el sha256 de la lista: se niega (listo/holdout.ok no tiene el sha256 de la lista: no es la lista de la enmienda)
+PASA  M33c con exigir_semillas, una tanda 'final' sin el bloque completo de su tipo de llegadas: se niega (prueba final: ciego/f1r/eval_corredor__v2reg_s42.csv no usa el bloque completo de llegadas regulares (§3, §13))
+PASA  M33d una métrica vacía: ERROR antes de cerrar el candado (retraso_total_prom vacio en la semilla 424301 (corredor, ref_fino))
+PASA  M33e otros vehículos en una semilla: ERROR antes de cerrar el candado (prueba final: ciego/f1r/eval_corredor__v2reg_s42.csv y ciego/f1r/eval_corredor__ref_fino.csv no generan los mismos vehículos en 1 semilla (§7))
+PASA  M33f ninguna de esas negativas cerró el candado
+PASA  M34 la prueba final corre una vez; el candado guarda el sha256 de la lista, de cada CSV y de la salida
+PASA  M34b no corre una segunda vez (la prueba final ya corrió (listo/holdout.candado): no corre una segunda vez)
+PASA  M35 un CSV cuyo sha256 cambia de una mañana a otra: se niega (los CSV de ciego/ no son los de cada mañana (§14); no se corre: ciego/h1t1/eval_corredor__c0med.csv: su sha256 cambió en el manifiesto de la mañana e3b1128d18)
+PASA  G01 git status --porcelain --ignored -- plan2 TESIS vacío después de las pruebas (git rc 0)
+=== 147 pasan, 0 fallan
