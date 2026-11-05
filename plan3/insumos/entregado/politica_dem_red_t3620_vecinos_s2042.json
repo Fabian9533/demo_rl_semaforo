@@ -1,0 +1,256 @@
+{
+ "escenario": "dem_red_t3620",
+ "variante": "vecinos",
+ "algoritmo": "ippo",
+ "recompensa": "retraso",
+ "base": 2042,
+ "episodios": 200,
+ "dim_obs": 31,
+ "n_id": 3,
+ "lados": [
+  "oeste",
+  "este"
+ ],
+ "ocultas": 64,
+ "hiper": {
+  "gamma": 0.95,
+  "lam": 0.95,
+  "clip": 0.2,
+  "epocas": 10,
+  "minibatch": 64,
+  "lr": 0.001,
+  "ent": 0.01,
+  "valor": 0.5,
+  "grad": 0.5
+ },
+ "w1": 1.0,
+ "w2": 0.01,
+ "w3": 2.0,
+ "w4": 2.0,
+ "escala_r": 0.02,
+ "fase_av": {
+  "semaforo_C1": 0,
+  "semaforo_C2": 0,
+  "semaforo_C3": 0
+ },
+ "vecinos": {
+  "semaforo_C1": {
+   "oeste": null,
+   "este": [
+    "semaforo_C2",
+    "C2_C1",
+    "C1_C2"
+   ]
+  },
+  "semaforo_C2": {
+   "oeste": [
+    "semaforo_C1",
+    "C1_C2",
+    "C2_C1"
+   ],
+   "este": [
+    "semaforo_C3",
+    "C3_C2",
+    "C2_C3"
+   ]
+  },
+  "semaforo_C3": {
+   "oeste": [
+    "semaforo_C2",
+    "C2_C3",
+    "C3_C2"
+   ],
+   "este": null
+  }
+ },
+ "cap": {
+  "RE_C1": 72,
+  "C2_C1": 76,
+  "N1_C1": 38,
+  "S1_C1": 38,
+  "C1_C2": 76,
+  "C3_C2": 76,
+  "N2_C2": 38,
+  "S2_C2": 38,
+  "C2_C3": 76,
+  "E_C3": 104,
+  "N3_C3": 38,
+  "S3_C3": 38
+ },
+ "plazas": {
+  "C1_C2": 38,
+  "C2_C1": 38,
+  "C2_C3": 38,
+  "C3_C2": 38
+ },
+ "umbral_spillback": 0.9,
+ "latencia_entrenamiento": 0,
+ "perdida_entrenamiento": 0.0,
+ "val_seeds": [
+  999,
+  1999
+ ],
+ "eval_seed": 999,
+ "torch": "2.14.0+cpu",
+ "python": "3.14.6",
+ "sumo": "1.25.0",
+ "git": "7181ab8",
+ "features": [
+  "cola_o",
+  "cola_e",
+  "cola_n",
+  "cola_s",
+  "movil_o",
+  "movil_e",
+  "movil_n",
+  "movil_s",
+  "fase_0",
+  "fase_1",
+  "t_verde",
+  "puede_cambiar",
+  "id_C1",
+  "id_C2",
+  "id_C3",
+  "oeste_presente",
+  "oeste_verde_hacia_mi",
+  "oeste_ambar",
+  "oeste_t_fase",
+  "oeste_outflow",
+  "oeste_cola_alimentadora",
+  "oeste_cola_mi_salida",
+  "oeste_edad",
+  "este_presente",
+  "este_verde_hacia_mi",
+  "este_ambar",
+  "este_t_fase",
+  "este_outflow",
+  "este_cola_alimentadora",
+  "este_cola_mi_salida",
+  "este_edad"
+ ],
+ "ep_elegido": 70,
+ "val_elegido": 59.74,
+ "val_serie": [
+  [
+   10,
+   60.07,
+   59.66,
+   59.865
+  ],
+  [
+   20,
+   60.32,
+   60.45,
+   60.385
+  ],
+  [
+   30,
+   60.22,
+   60.68,
+   60.45
+  ],
+  [
+   40,
+   60.32,
+   60.83,
+   60.575
+  ],
+  [
+   50,
+   59.62,
+   60.73,
+   60.175
+  ],
+  [
+   60,
+   59.22,
+   60.77,
+   59.995
+  ],
+  [
+   70,
+   60.15,
+   59.33,
+   59.74
+  ],
+  [
+   80,
+   59.6,
+   60.55,
+   60.075
+  ],
+  [
+   90,
+   60.08,
+   59.55,
+   59.815
+  ],
+  [
+   100,
+   60.95,
+   60.56,
+   60.755
+  ],
+  [
+   110,
+   60.13,
+   59.96,
+   60.045
+  ],
+  [
+   120,
+   61.02,
+   59.67,
+   60.345
+  ],
+  [
+   130,
+   60.2,
+   61.01,
+   60.605
+  ],
+  [
+   140,
+   60.5,
+   59.99,
+   60.245
+  ],
+  [
+   150,
+   60.99,
+   60.34,
+   60.665
+  ],
+  [
+   160,
+   60.22,
+   60.47,
+   60.345
+  ],
+  [
+   170,
+   60.54,
+   60.17,
+   60.355
+  ],
+  [
+   180,
+   60.57,
+   60.2,
+   60.385
+  ],
+  [
+   190,
+   59.87,
+   60.59,
+   60.23
+  ],
+  [
+   200,
+   59.86,
+   60.56,
+   60.21
+  ]
+ ],
+ "eval_999_final": 59.86
+}
