@@ -36,6 +36,11 @@ NIVELES = {"c905": "dem_corredor_t905", "c1358": "dem_corredor_t1358", "c2715": 
 D = {"D": "dem_corredor_t2715_der"}
 P6E = {"P6e": "malla3_alta_e"}
 POI = {c: f"poi_{e}" for c, e in CASOS.items()}
+# Perfil de 10 min y mezcla de Lima (A7), en P1 y P3, con llegadas aleatorias; mixa_ = mezcla con arranque lento,
+# solo para evaluar (escenarios_plan3.ESTOCASTICOS).
+PERFIL = {"per1": "per_corredor", "per3": "per_red"}
+MEZCLA = {"mix1": "mix_corredor", "mix3": "mix_red"}
+MEZCLA_A = {"mix1": "mixa_corredor", "mix3": "mixa_red"}
 
 BASES5 = [42, 2042, 4042, 14042, 16042]
 BASES3 = [42, 2042, 4042]
@@ -54,6 +59,7 @@ TR = {"P1": (6.0, 4.8), "P2": (14.0, 11.9), "P3": (9.3, 7.6), "P4": (10.2, 8.4),
       "r905": (7.4, 5.6), "r1358": (8.1, 6.3), "r1810": (8.9, 7.1), "r2715": (10.8, 9.1), "r3620": (14.1, 12.1),
       "m1810": (20.0, 14.8), "m2715": (21.5, 15.7), "m3620": (23.0, 17.4), "m6525": (29.4, 24.1),
       "D": (5.7, 4.8)}
+TR.update({"per1": TR["P1"], "per3": TR["P3"], "mix1": TR["P1"], "mix3": TR["P3"]})
 POI_F = 1.07            # llegadas aleatorias frente a regulares [M +3 a +13 %]
 
 
@@ -212,6 +218,14 @@ def etapa2(lista):
 
 # ---------------- Etapa 3b: 400 episodios, reanudando desde el 180 (PLAN3 3b; A4) ----------------
 DESDE_3B = 180
+
+
+def etapa2pm(lista):
+    """2.4 y 2.5: V2 entrenada con el perfil y con la mezcla (3 bases), con llegadas aleatorias."""
+    for celdas, et, f in ((PERFIL, "p3v2per", POI_F), (MEZCLA, "p3v2mix", POI_F * 1.10)):
+        for c, e in celdas.items():
+            for b in BASES3:
+                lista.entrenamiento(f"e2_{et}_{e}_s{b}", "2", 3, c, e, et, b, "--v2", lanzador=True, factor=f)
 
 
 def etapa3b(lista):
@@ -479,7 +493,8 @@ def preparar(lista):
                    "salidas": ["listo/preparar.ok"], "duracion": 300})
 
 
-PARTES = {"etapa1": etapa1, "c0": c0, "v2vieja": v2vieja, "etapa2": etapa2, "etapa3b": etapa3b, "etapa3": etapa3,
+PARTES = {"etapa1": etapa1, "c0": c0, "v2vieja": v2vieja, "etapa2": etapa2, "etapa2pm": etapa2pm,
+          "etapa3b": etapa3b, "etapa3": etapa3,
           "preparar": preparar, "evaluaciones": evaluaciones, "evaluaciones_variantes": evaluaciones_variantes}
 
 
