@@ -95,7 +95,9 @@ def correr(script, argumentos, cwd, log):
 
 
 def en_tandas(trabajos, maximo=3):
-    """trabajos = [(script, argumentos, cwd, log)]: corre de a `maximo` a la vez; devuelve los codigos en orden."""
+    """trabajos = [(script, argumentos, cwd, log)]: corre de a `maximo` a la vez (tope: la variable ENT_PROCESOS,
+    para no pasar de 3 procesos si otra prueba corre al lado); devuelve los codigos en orden."""
+    maximo = max(1, min(maximo, int(os.environ.get("ENT_PROCESOS", maximo))))
     codigos, activos = [None] * len(trabajos), {}
     pendientes = list(enumerate(trabajos))
     while pendientes or activos:

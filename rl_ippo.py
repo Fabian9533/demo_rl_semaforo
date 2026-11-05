@@ -86,8 +86,9 @@ politica publicada que antes. Contrato de --guardar-estado, --hasta-ep y --reanu
   --reanudar ESTADO|auto   sigue exacto desde un estado. Misma etiqueta: conserva los checkpoints y las filas del
          CSV <= NNN y borra lo > NNN de un intento caido. Etiqueta nueva: copia los checkpoints y estados <= NNN,
          las filas del CSV <= NNN (con la etiqueta nueva) y las series de validacion, y anota reanudado_de en el
-         meta. auto: el estado de mayor NNN de la propia etiqueta; sin estados empieza de cero; si la corrida ya
-         publico, sale con codigo 0 sin tocar nada.
+         meta; si un intento anterior ya avanzo desde ese mismo estado, sigue desde su estado mas avanzado. auto:
+         el estado de mayor NNN de la propia etiqueta; sin estados empieza de cero; si la corrida ya llego a
+         --hasta-ep o ya publico, sale con codigo 0 sin tocar nada.
 
 Interfaz para decisores externos (correr_episodio):
   correr_episodio(modo, politica, gui, delay, seed, tripinfo=None, serie=None, latencia=0,
@@ -1467,11 +1468,23 @@ def main():
     if args.reanudar == "auto" and ruta_estado is None:
         print(f"--reanudar auto: {etiqueta} no tiene estados; empieza de cero")
     estado = cargar_estado(ruta_estado) if ruta_estado else None
+    como_auto = args.reanudar == "auto"
+    if estado is not None and estado["tag"] != etiqueta:
+        # Etiqueta nueva ya empezada por un intento anterior de esta misma reanudacion (estados propios que salen
+        # de este estado de origen): sigue desde el mas avanzado, como auto, en vez de copiar otra vez y borrar
+        propio = ultimo_estado(etiqueta)
+        if propio is not None:
+            mio = cargar_estado(propio)
+            salto = {"corrida": estado["tag"], "episodio": estado["episodio"]}
+            if mio["tag"] == etiqueta and mio["episodio"] > estado["episodio"] and \
+                    mio["origen"] == estado["origen"] + [salto]:
+                print(f"{etiqueta} ya sigue a {os.path.basename(ruta_estado)}: continua desde {propio}")
+                ruta_estado, estado, como_auto = propio, mio, True
     if estado is not None:
         comprobar_estado(estado, args, val_seeds, horizonte)
         k = estado["episodio"]
         if k > fin:                 # solo con --hasta-ep: un tramo posterior ya paso de aqui
-            if args.reanudar != "auto":
+            if not como_auto:
                 raise SystemExit(f"--reanudar: el estado esta en el episodio {k}, despues de --hasta-ep {fin}")
             print(f"Nada que hacer: {ruta_estado} ya pasa del episodio {fin} (--hasta-ep)")
             return

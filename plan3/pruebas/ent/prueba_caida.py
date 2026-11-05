@@ -5,12 +5,17 @@ Informe: plan3/doc/informe_ent1.md.
 Un mismo comando, con --reanudar auto, en dos tramos (--hasta-ep 10 y hasta el final, 20 episodios), V2 en P1,
 base 7, validacion cada 5 en 424301-424302. En cada tramo se mata el proceso a mitad de un episodio con
 taskkill /F /T y se relanza el mismo comando: debe seguir desde el ultimo estado, repetir los episodios que el
-intento caido alcanzo a escribir y terminar igual que la corrida seguida de prueba_reanudar.py (CSV salvo segundos,
-checkpoints, politica publicada y estados). Relanzar un tramo ya hecho (o la corrida ya publicada) sale con 0 sin
-tocar ningun archivo.
+intento caido alcanzo a escribir y terminar igual que la corrida seguida (el mismo comando sin --hasta-ep ni
+caidas, en otra carpeta y con el mismo commit: el meta lo guarda): CSV salvo segundos, checkpoints, politica
+publicada y estados. Relanzar un tramo ya hecho (o la corrida ya publicada) sale con 0 sin tocar ningun archivo.
 
-Uso:  python plan3/pruebas/ent/prueba_caida.py   (despues de prueba_reanudar.py corredor, que deja la seguida)
-Salida: plan3/pruebas/ent/salidas/prueba_caida.txt; corrida en plan3/tmp_ent/caida_corredor.
+Despues, lo mismo con una etiqueta nueva (como "400 desde el 180"): desde el estado del ep 10 de esa corrida, otra
+etiqueta con 30 episodios, --lr-horizonte 20 --lr-piso 0.1 y la ruta del estado de origen en los dos tramos
+(--hasta-ep 20 y final). El primer tramo se mata a mitad; relanzado con el mismo comando debe seguir desde sus
+propios estados (no volver a copiar) y terminar igual que una corrida seguida de 30 con esa etiqueta.
+
+Uso:  python plan3/pruebas/ent/prueba_caida.py   (un proceso a la vez, ~12 min)
+Salida: plan3/pruebas/ent/salidas/prueba_caida.txt; corridas en plan3/tmp_ent/caida_*.
 """
 import sys
 import time
@@ -25,10 +30,14 @@ COMANDO = ["train", "--escenario", ESC, "--seed", "7", "--episodios", "20", "--e
            "--guardar-estado", "--registro-extendido", "--reanudar", "auto"]
 TRAMO1 = COMANDO + ["--hasta-ep", "10"]
 TRAMO2 = COMANDO
+TAG_N, POL_N = f"{ESC}_ippo_vecinos_p3prbcaidan_s7", f"{ESC}_vecinos_p3prbcaidan_s7"
+NUEVA = ["train", "--escenario", ESC, "--seed", "7", "--episodios", "30", "--eval-cada", "5",
+         "--val-seeds", u.VAL_HUMO, "--v2", "--criterio-val", "total", "--etiqueta", "p3prbcaidan",
+         "--guardar-estado", "--registro-extendido", "--lr-horizonte", "20", "--lr-piso", "0.1"]
 
 
-def filas(c):
-    ruta = c / f"resultados_{TAG}.csv"
+def filas(c, tag=TAG):
+    ruta = c / f"resultados_{tag}.csv"
     if not ruta.exists():
         return 0
     with open(ruta, newline="") as f:
@@ -41,28 +50,78 @@ def huellas(c):
             if p.is_file() and not p.name.startswith("log")}
 
 
-def matar_en(inf, c, argumentos, log, filas_objetivo):
+def matar_en(inf, c, argumentos, log, filas_objetivo, tag=TAG):
     """Lanza, espera a que el CSV tenga filas_objetivo filas y mata el arbol de procesos (python y sumo)."""
     p = u.lanzar(u.RL_NUEVO, argumentos, c, log)
-    while p.poll() is None and filas(c) < filas_objetivo:
+    while p.poll() is None and filas(c, tag) < filas_objetivo:
         time.sleep(0.2)
     if p.poll() is None:
         r = subprocess.run(["taskkill", "/F", "/T", "/PID", str(p.pid)], capture_output=True, text=True)
-        inf(f"   taskkill /F /T /PID {p.pid} con {filas(c)} filas escritas: {r.stdout.strip()[:120]}")
+        muertos = r.stdout.count("PID")
+        inf(f"   taskkill /F /T /PID {p.pid} con {filas(c, tag)} filas escritas: codigo {r.returncode}, "
+            f"{muertos} procesos terminados (python y sumo)")
     cod = p.wait()
     p.log.close()
     time.sleep(1)
     return cod
 
 
+def lineas_de(log, *inicios):
+    return [linea for linea in log.read_text().splitlines() if linea.startswith(inicios)]
+
+
+def etiqueta_nueva(inf, seguida):
+    """Etiqueta nueva con la ruta del estado de origen en todos los tramos; caida a mitad del primero."""
+    origen = seguida / "checkpoints" / f"{TAG}_ep010.estado.pt"
+    ref = u.carpeta("caida_nueva_seguida", [ESC])
+    cod = u.correr(u.RL_NUEVO, NUEVA, ref, ref / "log.txt")
+    inf.chequeo("corrida seguida de 30 con la etiqueta nueva (desde cero)", cod == 0, f"codigo {cod}")
+    n = u.carpeta("caida_nueva", [ESC])
+    tramo_a = NUEVA + ["--reanudar", origen, "--hasta-ep", "20"]
+    tramo_b = NUEVA + ["--reanudar", origen]
+    inf(f"Tramo A: rl_ippo.py {' '.join(str(a) for a in NUEVA)} --reanudar <origen ep 10> --hasta-ep 20 "
+        "(el B, sin --hasta-ep)")
+    cod = matar_en(inf, n, tramo_a, n / "log_a1.txt", 17, TAG_N)
+    estados = sorted(u.checkpoints(n, TAG_N, ".estado.pt"))
+    inf.chequeo("A muerto durante el ep 18: no sale con 0; estados 5 y 10 copiados y 15 propio",
+                cod != 0 and estados == [5, 10, 15], f"codigo {cod}, estados {estados}")
+    cod = u.correr(u.RL_NUEVO, tramo_a, n, n / "log_a2.txt")
+    log = (n / "log_a2.txt").read_text()
+    inf.chequeo("A relanzado: sigue desde su estado del 15 (no copia otra vez) y corta en el 20",
+                cod == 0 and "continua desde" in log and "_ep015.estado.pt" in log and "copia lo de" not in log
+                and "CORTE: 20 de 30" in log, f"codigo {cod}; {lineas_de(n / 'log_a2.txt', 'corredor_ippo')}")
+    repite = lineas_de(n / "log_a2.txt", "Reanudacion:", "AVISO")
+    inf.chequeo("los episodios rehechos repiten los del intento muerto",
+                bool(repite) and all(x.startswith("Reanudacion:") for x in repite), " | ".join(repite))
+    cod = u.correr(u.RL_NUEVO, tramo_b, n, n / "log_b.txt")
+    log = (n / "log_b.txt").read_text()
+    inf.chequeo("B (misma ruta de origen): sigue desde su estado del 20 y publica",
+                cod == 0 and "_ep020.estado.pt" in log and "Politica guardada" in log and filas(n, TAG_N) == 30,
+                f"codigo {cod}, {filas(n, TAG_N)} filas")
+    antes = huellas(n)
+    for nombre, argumentos in (("A", tramo_a), ("B", tramo_b)):
+        cod = u.correr(u.RL_NUEVO, argumentos, n, n / f"log_rel_{nombre}.txt")
+        nada = lineas_de(n / f"log_rel_{nombre}.txt", "Nada que hacer")
+        inf.chequeo(f"relanzar {nombre} con todo terminado: sale con 0 sin tocar nada",
+                    cod == 0 and bool(nada) and huellas(n) == antes, f"codigo {cod}: {nada}")
+    inf("Frente a la corrida seguida de 30 con la etiqueta nueva:")
+    inf.chequeo("CSV", *u.comparar_csv_bytes(ref / f"resultados_{TAG_N}.csv", n / f"resultados_{TAG_N}.csv"))
+    inf.chequeo("checkpoints", *u.comparar_checkpoints(ref, TAG_N, n, TAG_N, ("reanudado_de",)))
+    pa, pb = ref / f"politica_{POL_N}.pt", n / f"politica_{POL_N}.pt"
+    inf.chequeo("politica publicada (tensores)", *u.comparar_pt(pa, pb))
+    inf.chequeo("meta publicado", *u.comparar_json(pa.with_suffix(".json"), pb.with_suffix(".json"),
+                                                   ("reanudado_de",)))
+    ea, eb = u.checkpoints(ref, TAG_N, ".estado.pt"), u.checkpoints(n, TAG_N, ".estado.pt")
+    for ep in (15, 20, 25, 30):
+        inf.chequeo(f"estado del ep {ep}", *u.comparar_estados(ea[ep], eb[ep], ("origen", "archivos")))
+
+
 def main():
     inf = u.Informe("prueba_caida", "--reanudar auto con caidas (taskkill /F /T) a mitad de cada tramo: V2 en P1, "
                     "base 7, 20 episodios en dos tramos (--hasta-ep 10 y final), validacion cada 5 en " + u.VAL_HUMO)
-    seguida = u.TMP / f"rean_{ESC}_v2_seguida"
-    if not (seguida / f"politica_{POL}.pt").exists():
-        inf("La corrida seguida no existe: la corro (mismo comando sin --reanudar auto).")
-        s = u.carpeta(f"rean_{ESC}_v2_seguida", [ESC])
-        u.correr(u.RL_NUEVO, COMANDO[:-2], s, s / "log.txt")
+    seguida = u.carpeta("caida_seguida", [ESC])
+    cod = u.correr(u.RL_NUEVO, COMANDO, seguida, seguida / "log.txt")
+    inf.chequeo("corrida seguida (el mismo comando, sin --hasta-ep ni caidas)", cod == 0, f"codigo {cod}")
     c = u.carpeta(f"caida_{ESC}", [ESC])
     inf(f"Comando de cada tramo: rl_ippo.py {' '.join(TRAMO1)}  (el segundo, sin --hasta-ep)")
     inf("")
@@ -119,6 +178,10 @@ def main():
         inf.chequeo(f"estado del ep {ep}", *u.comparar_estados(ea[ep], eb[ep]))
     restos = sorted(p.name for p in (c / "checkpoints").glob("*.tmp"))
     inf.chequeo("no quedan estados a medio escribir (.tmp)", not restos, f"{restos}")
+    inf("")
+    inf("Etiqueta nueva p3prbcaidan desde el estado del ep 10 de la corrida seguida (30 episodios, horizonte 20, "
+        "piso 0.1)")
+    etiqueta_nueva(inf, seguida)
     return inf.cerrar()
 
 
