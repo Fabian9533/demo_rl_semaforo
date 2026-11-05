@@ -30,7 +30,16 @@ ESPERADO = os.path.join(PLAN3, "cola", "manifiesto_esperado.json")
 CIERRE = os.path.join(PLAN3, "cola", "manifiesto_cierre.json")
 CIEGO_MANANA = "plan3/cola/manifiesto_ciego.json"           # ruta en git, desde la raiz del worktree
 OTROS = ["cola/manifiesto_esperado.json", "cola/trabajos.jsonl", "cola/partes.txt", "cola/caidas.json",
-         "promocion.json", "referencias_congeladas.json"]
+         "promocion.json", "referencias_congeladas.json", "insumos/manifiesto.json"]
+
+
+def es_final(tanda):
+    """Tandas de la prueba final (uso 'final'): no se sellan al cierre; la enmienda que la active las agrega."""
+    try:
+        import generar_trabajos3 as gt
+        return gt.TANDAS.get(tanda, ("",))[0] == "final"
+    except Exception:
+        return False
 
 
 def rango(texto):
@@ -61,9 +70,12 @@ def revisar(esperado, raiz=PLAN3):
     estado = {"bien": [], "faltan": [], "mal": []}
     grupos = defaultdict(dict)                         # (escenario, tanda) -> {csv: {semilla: generados}}
     for e in esperado:
+        if es_final(e["tanda"]):
+            continue
         ruta = os.path.join(raiz, e["csv"])
         if not os.path.exists(ruta):
-            estado["faltan"].append(e["csv"])
+            estado["faltan"].append(e["csv"] + (" (base caida declarada despues: regenerar el manifiesto)"
+                                                if caida_declarada(e) else ""))
             continue
         brazos, generados, filas = leer_csv(ruta)
         semillas = rango(e["semillas"])
@@ -87,6 +99,18 @@ def revisar(esperado, raiz=PLAN3):
             if dif:
                 estado["mal"].append(f"{r}: genera otros vehiculos que {rutas[0]} en {len(dif)} semillas")
     return estado
+
+
+def caida_declarada(e):
+    """¿El CSV es de una base declarada caida en cola/caidas.json (con el criterio del generador)?"""
+    try:
+        import generar_trabajos3 as gt
+        caidas = gt.leer_caidas()
+        if not caidas or e.get("base") in ("", None):
+            return False
+        return any(c.endswith(f"_s{e['base']}") and c.startswith(e["escenario"] + "_ippo_") for c in caidas)
+    except Exception:
+        return False
 
 
 def historia_ciego(raiz_git):
@@ -144,7 +168,8 @@ def sello(esperado, raiz=PLAN3):
     """Lo que se sella al cierre: CSV, las politicas publicadas con sus metas (todas las politica_*.pt y .json de
     plan3/: veredicto3 lee tambien las de las bases que no se evaluan, como C0 por base) y los archivos que deciden
     que se lee. Las politicas que juega cada evaluacion tienen que estar entre ellas."""
-    datos = {"csv": {e["csv"]: sha(os.path.join(raiz, e["csv"])) for e in esperado}, "metas": {}, "otros": {}}
+    datos = {"csv": {e["csv"]: sha(os.path.join(raiz, e["csv"])) for e in esperado if not es_final(e["tanda"])},
+             "metas": {}, "otros": {}}
     for ruta in sorted(glob.glob(os.path.join(raiz, "politica_*.pt")) + glob.glob(os.path.join(raiz, "politica_*.json"))):
         datos["metas"][os.path.relpath(ruta, raiz).replace(os.sep, "/")] = sha(ruta)
     faltan = [pt for pt in politicas_evaluadas(esperado, raiz) if pt not in datos["metas"]]
