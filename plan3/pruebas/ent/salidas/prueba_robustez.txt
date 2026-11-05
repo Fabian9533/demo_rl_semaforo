@@ -1,0 +1,116 @@
+Robustez de rl_ippo.py (revision del 05.11): estados danados, copias y publicacion atomicas, CSV tomado, B22, procedencia y validar_args. P1, V2 con estado y registro, base 7, validacion cada 2 en 424301,424302
+05.11.2026 11:29; python 3.14.6, torch 2.14.0+cpu
+
+
+R6. validar_args y --validar-args
+[OK] acepta --escenario corredor --seed 7 --episodios 6 --eval-cada 2 --val-seeds : acepta; cambios_hiper {}
+[OK] acepta --escenario poi_corredor --v2 --etiqueta p3v2poi --hiper lr=5e-4,minib: acepta; cambios_hiper {'lr': 0.0005, 'minibatch': 128}
+[OK] rechaza --escenario corredor --seed 7 --episodios 6 --eval-cada 2 --val-seeds : sale 2: rl_ippo.py: error: --hasta-ep va de 1 a --episodios
+[OK] rechaza --hasta-ep 4: sale 2: rl_ippo.py: error: --hasta-ep y --reanudar auto necesitan --guardar-estado
+[OK] rechaza --v2 --solo-descuento: sale 2: rl_ippo.py: error: --v2 ya trae el descuento por segundo y la exploracion comun
+[OK] rechaza --etiqueta P3: sale 2: rl_ippo.py: error: --etiqueta: solo minusculas y digitos
+[OK] rechaza --hiper ent=x: sale 2: rl_ippo.py: error: --hiper: 'ent=x' no es un numero
+[OK] rechaza --hiper otra=1: sale 2: rl_ippo.py: error: --hiper: 'otra=1' (clave=valor con clave en gamma, lam, clip, epocas, minibatch, lr, ent, v
+[OK] rechaza --val-seeds 1,a: sale 2: rl_ippo.py: error: --val-seeds: enteros separados por coma
+[OK] rechaza --escenario no_existe: sale 2: rl_ippo.py: error: argument --escenario: invalid choice: 'no_existe' (choose from 'corredor', 'corredor_alta',
+[OK] rechaza --opcion-que-no-existe: sale 2: rl_ippo.py: error: unrecognized arguments: --opcion-que-no-existe
+[OK] rechaza : sale 2: rl_ippo.py: error: demo necesita --politica
+[OK] HIPER y C quedan iguales
+[OK] --validar-args: bueno sale con 0 y malo con 2, sin escribir nada: codigos 0, 2; archivos ['corredor.add.xml', 'corredor.net.xml', 'corredor.rou.xml', 'corredor.sumocfg']
+
+R7. Escrituras atomicas
+[OK] guardar_pt da los bytes de un torch.save directo
+[OK] Politica.guardar: primero el .json y despues el .pt: ['.json', 's7.pt']
+[OK] y se carga
+[OK] destino tomado 2 s: reintenta y escribe: 2.5 s
+[OK] si el escritor falla, el archivo anterior queda entero
+[OK] ruta_tmp: .pt -> .tmp (mismo nombre dentro del zip); lo demas + .tmp
+
+[OK] referencias: el comando seguido (6 episodios) y la etiqueta nueva seguida (8): codigos [0, 0]
+
+R1. Estados danados con --reanudar auto (misma etiqueta)
+[OK] tramo 1 (--hasta-ep 4): codigo 0, estados [2, 4]
+[OK] estado del ep 4 con un byte cambiado en una pieza de tensores: testzip lo detecta: pieza corredor_ippo_vecinos_p3rob_s7_ep004.estado/data/2; torch.load lo carga sin error; testzip -> corredor_ippo_vecinos_p3rob_s7_ep004.estado/data/2
+[OK] relanzado: AVISO, el danado queda como .roto y sigue desde el estado del 2: codigo 0; ['AVISO: checkpoints\\corredor_ippo_vecinos_p3rob_s7_ep004.estado.pt no sirve para reanudar (la pieza corredor_ippo_vecinos_p3rob_s7_ep004.estado/data/2 del zip no pasa su CRC); queda como corredor_ippo_vecinos_p3rob_s7_ep004.estado.pt.roto y se prueba el estado anterior']
+[OK] los episodios rehechos (3-4) repiten el intento anterior
+[OK] checkpoint del 4 alterado: el estado del 4 queda como .roto2 y sigue desde el del 2; publica: codigo 0; ['AVISO: checkpoints\\corredor_ippo_vecinos_p3rob_s7_ep004.estado.pt no sirve para reanudar (corredor_ippo_vecinos_p3rob_s7_ep004.pt falta o no es el que escribio la corrida del estado); queda como corredor_ippo_vecinos_p3rob_s7_ep004.estado.pt.roto2 y se prueba el estado anterior']
+[OK] los .roto siguen ahi (no se borran)
+[OK] auto con otra configuracion (--solo-descuento): sale con error sin apartar ni tocar nada: codigo 1; ['--reanudar: el estado es de otra configuracion (exploracion)']
+Frente a la referencia:
+[OK] CSV: iguales byte a byte salvo 'segundos' (6 filas)
+[OK] checkpoints: episodios con checkpoint: [2, 4, 6] | [2, 4, 6]
+  ep   2: 12/12 tensores iguales (torch.equal), claves iguales True; meta igual
+  ep   4: 12/12 tensores iguales (torch.equal), claves iguales True; meta igual
+  ep   6: 12/12 tensores iguales (torch.equal), claves iguales True; meta igual
+[OK] politica publicada (tensores): 12/12 tensores iguales (torch.equal), claves iguales True
+[OK] politica publicada (bytes)
+[OK] meta publicado: meta igual (sin ['reanudaciones'])
+[OK] estado del ep 2: pesos: igual; Adam (paso [430.0], exp_avg, exp_avg_sq, grupos): igual; random: igual; numpy global: igual; torch: igual; default_rng de sembrar: igual; CSV hasta el episodio (salvo segundos): igual; archivos, codigo, config, episodio, episodios, etiqueta, eval_cada, fase_av, lr, origen, ruta_csv, tag, val_serie, val_total_serie, version: igual
+[OK] estado del ep 4: pesos: igual; Adam (paso [840.0], exp_avg, exp_avg_sq, grupos): igual; random: igual; numpy global: igual; torch: igual; default_rng de sembrar: igual; CSV hasta el episodio (salvo segundos): igual; archivos, codigo, config, episodio, episodios, etiqueta, eval_cada, fase_av, lr, origen, ruta_csv, tag, val_serie, val_total_serie, version: igual
+[OK] estado del ep 6: pesos: igual; Adam (paso [1240.0], exp_avg, exp_avg_sq, grupos): igual; random: igual; numpy global: igual; torch: igual; default_rng de sembrar: igual; CSV hasta el episodio (salvo segundos): igual; archivos, codigo, config, episodio, episodios, etiqueta, eval_cada, fase_av, lr, origen, ruta_csv, tag, val_serie, val_total_serie, version: igual
+[OK] no quedan temporales (.tmp): []
+[OK] meta: reanudaciones = la del ultimo relanzamiento (3-4 repetidos): [{'partida': 2, 'episodios': [3, 4], 'filas': 2, 'distintos': []}]
+[OK] sin rehechos.json (todo repitio)
+
+R3. CSV tomado por otro programa
+[OK] tramo intermedio con el CSV tomado (sin compartir): avisa, sigue en memoria y sale con 0: codigo 0; ["AVISO: no se puede escribir resultados_corredor_ippo_vecinos_p3rob_s7.csv ([Errno 13] Permission denied: 'resultados_corredor_ippo_vecinos_p3rob_s7.csv'); el tramo sigue con el CSV en memoria (el estado lo guarda) y lo escribe al terminar", "AVISO: resultados_corredor_ippo_vecinos_p3rob_s7.csv sigue tomado ([WinError 5] Acceso denegado: 'resultados_corredor_ippo_vecinos_p3rob_s7.csv.tmp' -> 'resultados_corredor_ippo_vecinos_p3rob_s7.csv'); el estado guarda el CSV y el tramo siguiente lo escribe"]
+[OK] el CSV en disco no cambio y el estado del 2 guarda las 2 filas: 2 filas en el estado
+[OK] tramo siguiente ya sin tomar: reescribe el CSV desde el estado (filas 1-4): codigo 0, 4 filas
+[OK] ultimo tramo con el CSV tomado (solo lectura, como Excel): espera, lo escribe al soltarlo y publica: codigo 0; aviso de espera a los 28 s; ["AVISO: no se puede escribir resultados_corredor_ippo_vecinos_p3rob_s7.csv ([Errno 13] Permission denied: 'resultados_corredor_ippo_vecinos_p3rob_s7.csv'); el tramo sigue con el CSV en memoria (el estado lo guarda) y lo escribe al terminar", "AVISO: resultados_corredor_ippo_vecinos_p3rob_s7.csv sigue tomado ([WinError 5] Acceso denegado: 'resultados_corredor_ippo_vecinos_p3rob_s7.csv.tmp' -> 'resultados_corredor_ippo_vecinos_p3rob_s7.csv'); cierralo: se reintenta cada 30 s y la politica se publica despues"]
+Frente a la referencia:
+[OK] CSV: iguales byte a byte salvo 'segundos' (6 filas)
+[OK] checkpoints: episodios con checkpoint: [2, 4, 6] | [2, 4, 6]
+  ep   2: 12/12 tensores iguales (torch.equal), claves iguales True; meta igual
+  ep   4: 12/12 tensores iguales (torch.equal), claves iguales True; meta igual
+  ep   6: 12/12 tensores iguales (torch.equal), claves iguales True; meta igual
+[OK] politica publicada (tensores): 12/12 tensores iguales (torch.equal), claves iguales True
+[OK] politica publicada (bytes)
+[OK] meta publicado: meta igual (sin ['reanudaciones'])
+[OK] estado del ep 2: pesos: igual; Adam (paso [430.0], exp_avg, exp_avg_sq, grupos): igual; random: igual; numpy global: igual; torch: igual; default_rng de sembrar: igual; CSV hasta el episodio (salvo segundos): igual; archivos, codigo, config, episodio, episodios, etiqueta, eval_cada, fase_av, lr, origen, ruta_csv, tag, val_serie, val_total_serie, version: igual
+[OK] estado del ep 4: pesos: igual; Adam (paso [840.0], exp_avg, exp_avg_sq, grupos): igual; random: igual; numpy global: igual; torch: igual; default_rng de sembrar: igual; CSV hasta el episodio (salvo segundos): igual; archivos, codigo, config, episodio, episodios, etiqueta, eval_cada, fase_av, lr, origen, ruta_csv, tag, val_serie, val_total_serie, version: igual
+[OK] estado del ep 6: pesos: igual; Adam (paso [1240.0], exp_avg, exp_avg_sq, grupos): igual; random: igual; numpy global: igual; torch: igual; default_rng de sembrar: igual; CSV hasta el episodio (salvo segundos): igual; archivos, codigo, config, episodio, episodios, etiqueta, eval_cada, fase_av, lr, origen, ruta_csv, tag, val_serie, val_total_serie, version: igual
+[OK] no quedan temporales (.tmp): []
+[OK] meta sin reanudaciones (ningun episodio rehecho)
+
+R4. B22: un episodio rehecho que no repite el intento anterior
+[OK] relanzado: AVISO del episodio 3 y sale con 0: codigos 0, 0; ['AVISO: el episodio 3 no repite el intento anterior (timeloss_prom)', 'AVISO: 1 de los 2 episodios rehechos (3-4) no repiten el intento anterior (B22); detalle en checkpoints/corredor_ippo_vecinos_p3rob_s7_rehechos.json']
+[OK] checkpoints/<tag>_rehechos.json con el detalle: [{'tag': 'corredor_ippo_vecinos_p3rob_s7', 'fecha': '2026-11-05 11:35:21', 'git': '24ebb66', 'partida': 2, 'episodios': [3, 4], 'filas': 2, 'distintos': [[3, ['timeloss_prom']]]}]
+[OK] ultimo tramo: publica con meta['reanudaciones'] = esa comparacion: codigo 0; [{'partida': 2, 'episodios': [3, 4], 'filas': 2, 'distintos': [[3, ['timeloss_prom']]]}]
+[OK] el estado final tambien la guarda
+[OK] CSV final = el de la referencia (la fila rehecha reemplaza a la alterada): iguales byte a byte salvo 'segundos' (6 filas)
+
+R5. Procedencia: el ultimo tramo con otra copia del codigo (un comentario de mas)
+[OK] los dos tramos salen con 0 y el segundo avisa que el codigo es otro: codigos 0, 0; ['AVISO: el estado se escribio con otro codigo (huella e91a461caf69, commit 24ebb66); esta corrida: huella f043dc543458, commit 24ebb66']
+[OK] meta['tramos']: 1-2 y 3-6 con huellas distintas: [(1, 2, 'e91a461caf69'), (3, 6, 'f043dc543458')]
+[OK] checkpoints: el del 2 sin tramos (un solo codigo hasta ahi); el del 4 con 1-2 y 3-4: [(1, 2), (3, 4)]
+Mismos numeros que la referencia:
+[OK] CSV: iguales byte a byte salvo 'segundos' (6 filas)
+[OK] checkpoints: episodios con checkpoint: [2, 4, 6] | [2, 4, 6]
+  ep   2: 12/12 tensores iguales (torch.equal), claves iguales True; meta igual (sin ['tramos'])
+  ep   4: 12/12 tensores iguales (torch.equal), claves iguales True; meta igual (sin ['tramos'])
+  ep   6: 12/12 tensores iguales (torch.equal), claves iguales True; meta igual (sin ['tramos'])
+[OK] politica publicada (bytes)
+[OK] meta publicado: meta igual (sin ['tramos'])
+
+R2. Etiqueta nueva desde el estado del ep 2 de la referencia (8 episodios, horizonte 6, piso 0.1)
+[OK] tramo A (--hasta-ep 6): copia el 2 y escribe estados propios 4 y 6: codigo 0, estados [2, 4, 6]
+[OK] estado propio del 6 truncado (0 bytes): AVISO, .roto y sigue desde el propio del 4 (no copia): codigo 0; ['AVISO: checkpoints\\corredor_ippo_vecinos_p3robn_s7_ep006.estado.pt no sirve para reanudar (no se puede leer (BadZipFile: File is not a zip file)); queda como corredor_ippo_vecinos_p3robn_s7_ep006.estado.pt.roto y se prueba el estado anterior']
+[OK] los episodios rehechos (5-6) repiten
+[OK] propios del 4 y del 6 danados: los aparta y copia otra vez del origen: codigo 0; ['AVISO: checkpoints\\corredor_ippo_vecinos_p3robn_s7_ep006.estado.pt no sirve para reanudar (no se puede leer (BadZipFile: File is not a zip file)); queda como corredor_ippo_vecinos_p3robn_s7_ep006.estado.pt.roto2 y se prueba el estado anterior', 'AVISO: checkpoints\\corredor_ippo_vecinos_p3robn_s7_ep004.estado.pt no sirve para reanudar (la pieza corredor_ippo_vecinos_p3robn_s7_ep004.estado/data/2 del zip no pasa su CRC); queda como corredor_ippo_vecinos_p3robn_s7_ep004.estado.pt.roto y se prueba el estado anterior']
+[OK] los episodios rehechos (3-6) repiten
+[OK] tramo B (misma ruta de origen): sigue desde su estado del 6 y publica: codigo 0
+Frente a la corrida seguida de 8 con la etiqueta nueva:
+[OK] CSV: iguales byte a byte salvo 'segundos' (8 filas)
+[OK] checkpoints: episodios con checkpoint: [2, 4, 6, 8] | [2, 4, 6, 8]
+  ep   2: 12/12 tensores iguales (torch.equal), claves iguales True; meta igual (sin ['reanudado_de'])
+  ep   4: 12/12 tensores iguales (torch.equal), claves iguales True; meta igual (sin ['reanudado_de'])
+  ep   6: 12/12 tensores iguales (torch.equal), claves iguales True; meta igual (sin ['reanudado_de'])
+  ep   8: 12/12 tensores iguales (torch.equal), claves iguales True; meta igual (sin ['reanudado_de'])
+[OK] politica publicada (tensores): 12/12 tensores iguales (torch.equal), claves iguales True
+[OK] meta publicado: meta igual (sin ['reanudado_de', 'reanudaciones'])
+[OK] estado del ep 4: pesos: igual; Adam (paso [840.0], exp_avg, exp_avg_sq, grupos): igual; random: igual; numpy global: igual; torch: igual; default_rng de sembrar: igual; CSV hasta el episodio (salvo segundos): igual; codigo, config, episodio, episodios, etiqueta, eval_cada, fase_av, lr, ruta_csv, tag, val_serie, val_total_serie, version: igual
+[OK] estado del ep 6: pesos: igual; Adam (paso [1240.0], exp_avg, exp_avg_sq, grupos): igual; random: igual; numpy global: igual; torch: igual; default_rng de sembrar: igual; CSV hasta el episodio (salvo segundos): igual; codigo, config, episodio, episodios, etiqueta, eval_cada, fase_av, lr, ruta_csv, tag, val_serie, val_total_serie, version: igual
+[OK] estado del ep 8: pesos: igual; Adam (paso [1640.0], exp_avg, exp_avg_sq, grupos): igual; random: igual; numpy global: igual; torch: igual; default_rng de sembrar: igual; CSV hasta el episodio (salvo segundos): igual; codigo, config, episodio, episodios, etiqueta, eval_cada, fase_av, lr, ruta_csv, tag, val_serie, val_total_serie, version: igual
+[OK] no quedan temporales (.tmp): []
+
+Resultado: todo OK

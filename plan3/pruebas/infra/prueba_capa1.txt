@@ -19,7 +19,7 @@ ok  RECHAZADO examen fuera de ciego/: uso 'examen_regular' debe escribir en cieg
 ok  RECHAZADO examen con evaluar.py: las tandas decisivas se evaluan con evaluar3.py (a ciegas)
 ok  RECHAZADO examen regular con semillas aleatorias: --semillas fuera del bloque 'examen_regular': [7001, 7002, 7003, 7004, 7005]
 ok  RECHAZADO semillas prohibidas: --semillas usa semillas prohibidas: 5001-5030; --semillas fuera del bloque 'puente': [5001, 5002, 5003, 5004, 5005]
-ok  RECHAZADO barrido con semillas de examen: --semillas fuera del bloque 'ajuste': [8001, 8002, 8003, 8004, 8005]; opciones de prueba en un barrido de verdad: ['--semillas']
+ok  RECHAZADO barrido con semillas de examen: --semillas fuera del bloque 'ajuste': [8001, 8002, 8003, 8004, 8005]; opciones de prueba en un barrido de la cola: ['--semillas']
 ok  RECHAZADO nombra plan2: nombra plan2/TESIS, una ruta absoluta, '\', cd, --instalar u operadores de consola; un argumento sube de carpeta ('..')
 ok  RECHAZADO ruta absoluta: nombra plan2/TESIS, una ruta absoluta, '\', cd, --instalar u operadores de consola; ruta absoluta en --salida: C:/tmp/x.csv
 ok  RECHAZADO barrer_fijo con --instalar: nombra plan2/TESIS, una ruta absoluta, '\', cd, --instalar u operadores de consola
@@ -37,9 +37,11 @@ ok  RECHAZADO --et abreviada: opcion abreviada: --et (se escribe completa: --eti
 ok  ACEPTADO  barrido fino de verdad
 ok  ACEPTADO  actuado paso 6
 ok  ACEPTADO  reglas por familia
-ok  RECHAZADO barrido con semillas de prueba: opciones de prueba en un barrido de verdad: ['--semillas']
-ok  RECHAZADO barrido con --limite: opciones de prueba en un barrido de verdad: ['--limite']
-ok  RECHAZADO actuado con --semillas-final: opciones de prueba en un barrido de verdad: ['--semillas-final']
-ok  ACEPTADO  barrido de humo con --limite
+ok  RECHAZADO barrido con semillas de prueba: opciones de prueba en un barrido de la cola: ['--semillas']
+ok  RECHAZADO barrido con --limite: opciones de prueba en un barrido de la cola: ['--limite']
+ok  RECHAZADO actuado con --semillas-final: opciones de prueba en un barrido de la cola: ['--semillas-final']
+ok  RECHAZADO barrido de humo con --limite (ya no se exime): opciones de prueba en un barrido de la cola: ['--limite']; un barrido de referencias va con uso 'ajuste', no 'humo'
+ok  RECHAZADO barrido con --llegadas: opciones de prueba en un barrido de la cola: ['--llegadas']
+ok  RECHAZADO evaluar.py sin --semillas: ../evaluar.py sin --semillas usaria las suyas por defecto (1001-1030 o 2001-2003)
 ok  RECHAZADO --salida= : opcion escrita con '=' (va separada): --salida=../x.csv; un argumento sube de carpeta ('..')
-44 de 44 casos dan lo esperado
+46 de 46 casos dan lo esperado

@@ -149,6 +149,49 @@ def identidad_v2(tag):
     return malos
 
 
+# Valida cada comando de rl_ippo de la lista con su propio parser (rl_ippo.validar_args), en otro proceso para que el
+# registro de los escenarios nuevos llegue antes de importar rl_ippo (revision del 05.11).
+VALIDAR_RL_IPPO = r'''
+import io, sys, json, shlex, contextlib
+sys.path.insert(0, sys.argv[1])
+import con_escenarios
+con_escenarios.registrar()
+import rl_ippo
+malos, n = [], 0
+for linea in open(sys.argv[2], encoding="utf-8"):
+    if not linea.strip():
+        continue
+    t = json.loads(linea)
+    partes = shlex.split(t["cmd"])
+    argv = next((partes[i + 1:] for i, p in enumerate(partes) if p.replace("\\", "/").endswith("rl_ippo.py")), None)
+    if argv is None:
+        continue
+    n += 1
+    err = io.StringIO()
+    try:
+        with contextlib.redirect_stderr(err):
+            rl_ippo.validar_args(argv)
+    except SystemExit:
+        malos.append(t["id"] + ": " + (err.getvalue().strip().splitlines() or ["?"])[-1])
+print(json.dumps({"n": n, "malos": malos}))
+'''
+
+
+def comandos_rl_ippo():
+    """Problemas de los comandos de rl_ippo de cola/trabajos.jsonl (opciones que rl_ippo no acepta)."""
+    ruta = os.path.join(PLAN3, "cola", "trabajos.jsonl")
+    if not os.path.exists(ruta):
+        return []
+    r = subprocess.run([sys.executable, "-c", VALIDAR_RL_IPPO, RAIZ, ruta], cwd=PLAN3, capture_output=True,
+                       text=True)
+    if r.returncode != 0 or not r.stdout.strip():
+        return [f"no se pudieron validar los comandos de rl_ippo:\n{r.stderr[-800:]}"]
+    datos = json.loads(r.stdout.strip().splitlines()[-1])
+    print(f"comandos de rl_ippo validados: {datos['n']}, rechazados: {len(datos['malos'])}", flush=True)
+    malos = [f"rl_ippo rechaza {m}" for m in datos["malos"][:10]]
+    return malos + ([f"... y {len(datos['malos']) - 10} comandos rechazados mas"] if len(datos["malos"]) > 10 else [])
+
+
 def semillas_filtradas():
     """CSV fuera de ciego/ e insumos/ con semillas de las tandas decisivas o de la prueba final."""
     tab = protecciones.tabla()["semillas"]
@@ -194,6 +237,7 @@ def main():
             problemas.append(str(e))
         print(f"identidad: {'bien' if not problemas else 'MAL'} ({time.time() - t0:.0f} s)", flush=True)
     problemas += protecciones.revisar_trabajos(protecciones.leer_trabajos())
+    problemas += comandos_rl_ippo()
     r = subprocess.run([sys.executable, "generar_trabajos3.py", "--comprobar"], cwd=PLAN3, capture_output=True,
                        text=True)
     if r.returncode != 0:

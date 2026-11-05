@@ -201,12 +201,17 @@ def revisar_comando(t, existe=os.path.exists):
             malos.append("rl_ippo train sin --val-seeds")
         if opcion(args, "--csv") is not None:
             malos.append("--csv no se usa: el nombre lo da la etiqueta")
-    if prog in AJUSTE and uso != "humo":
-        # las semillas y la rejilla de los barridos son las de la regla del prerregistro §5, escritas en el script;
-        # estas opciones solo sirven para probar (informe_ref §6)
-        de_prueba = [a for a in args if a in OPCIONES_PRUEBA or a.startswith("--semilla")]
+    if prog in AJUSTE:
+        # las semillas, la rejilla y el tipo de llegadas de los barridos son los de la regla del prerregistro §5,
+        # escritos en el script; estas opciones solo sirven para probar fuera de la cola (informe_ref §6). Sin
+        # excepcion para el humo: los barridos escriben en barridos/<esc>/ y en los programas instalados.
+        de_prueba = [a for a in args if a in OPCIONES_PRUEBA or a.startswith("--semilla") or a == "--llegadas"]
         if de_prueba:
-            malos.append(f"opciones de prueba en un barrido de verdad: {de_prueba}")
+            malos.append(f"opciones de prueba en un barrido de la cola: {de_prueba}")
+        if uso != "ajuste":
+            malos.append(f"un barrido de referencias va con uso 'ajuste', no '{uso}'")
+    if prog in ("../evaluar.py", "../barrer_fijo.py") and opcion(args, "--semillas") is None:
+        malos.append(f"{prog} sin --semillas usaria las suyas por defecto (1001-1030 o 2001-2003)")
     if prog == "../evaluar.py" and uso in USOS_CIEGOS:
         malos.append("las tandas decisivas se evaluan con evaluar3.py (a ciegas)")
     salida = opcion(args, "--salida")

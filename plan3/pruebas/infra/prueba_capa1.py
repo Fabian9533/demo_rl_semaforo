@@ -99,7 +99,11 @@ CASOS = [
     ("barrido con --limite", "ajuste", "python barrer_fino.py corredor --etapa gruesa --limite 3", False),
     ("actuado con --semillas-final", "ajuste", "python actuado.py corredor --paso final --semillas-final 2001-2002",
      False),
-    ("barrido de humo con --limite", "humo", "python barrer_fino.py corredor --etapa gruesa --limite 3", True),
+    ("barrido de humo con --limite (ya no se exime)", "humo", "python barrer_fino.py corredor --etapa gruesa --limite 3",
+     False),
+    ("barrido con --llegadas", "ajuste", "python barrer_fino.py corredor --etapa gruesa --llegadas aleatorias", False),
+    ("evaluar.py sin --semillas", "puente", "python ../evaluar.py --escenario corredor --brazo fijo --salida x.csv",
+     False),
     ("--salida= ", "puente", "python evaluar3.py --escenario corredor --brazo fijo --semillas 1001-1030 "
      "--salida=../x.csv", False),
 ]

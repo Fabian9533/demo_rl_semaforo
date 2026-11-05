@@ -107,13 +107,26 @@ def salidas_completas(t, desde=None):
     return True
 
 
-def lineas_python():
-    """Lineas de comando de los python.exe vivos (para seguir a los huerfanos de una cola caida)."""
+def procesos_vivos():
+    """[(pid, pid del padre, linea de comando)] de los procesos vivos (para seguir a los huerfanos de una cola caida)."""
     r = subprocess.run(["powershell", "-NoProfile", "-Command",
-                        "Get-CimInstance Win32_Process -Filter \"Name='python.exe'\" | "
-                        "Select-Object -ExpandProperty CommandLine"],
-                       capture_output=True, text=True, timeout=60)
-    return r.stdout
+                        "Get-CimInstance Win32_Process | ForEach-Object { \"$($_.ProcessId)|$($_.ParentProcessId)|"
+                        "$($_.CommandLine)\" }"], capture_output=True, text=True, timeout=60)
+    salida = []
+    for linea in r.stdout.splitlines():
+        partes = linea.split("|", 2)
+        if len(partes) == 3 and partes[0].isdigit() and partes[1].isdigit():
+            salida.append((int(partes[0]), int(partes[1]), partes[2]))
+    return salida
+
+
+def huerfano_vivo(cmd, pid, vivos):
+    """¿Sigue vivo el trabajo? Por el pid del cmd.exe que lo lanzo (el proceso o un hijo suyo con su comando). Sin pid
+    (estados viejos), por el comando entero entre los python vivos. Comparar solo texto confundia trabajos cuyo comando
+    esta dentro del de otro (revision del 05.11)."""
+    if pid:
+        return any((p == pid or padre == pid) and cmd in linea for p, padre, linea in vivos)
+    return any(cmd in linea for _, _, linea in vivos if "python" in linea.lower())
 
 
 def cumple(req, hechos):
@@ -218,7 +231,7 @@ def main():
     huerfanos = {}
     for tid in e.get("corriendo", {}):
         if tid in trabajos and tid not in hechos:
-            huerfanos[tid] = trabajos[tid]["cmd"].split(" ", 1)[1]
+            huerfanos[tid] = (trabajos[tid]["cmd"].split(" ", 1)[1], e.get("registro", {}).get(tid, {}).get("pid"))
     revisado = 0.0
     if huerfanos:
         print(f"cola: {len(huerfanos)} huerfanos de la cola anterior: {sorted(huerfanos)}", flush=True)
@@ -259,12 +272,12 @@ def main():
         if huerfanos and time.time() - revisado > 30:
             revisado = time.time()
             try:
-                vivas = lineas_python()
+                vivas = procesos_vivos()
             except Exception:
                 vivas = None
             if vivas is not None:
                 for tid in list(huerfanos):
-                    if huerfanos[tid] in vivas:
+                    if huerfano_vivo(*huerfanos[tid], vivas):
                         continue
                     reg = e["registro"].get(tid, {})
                     ini = reg.get("primer_inicio_epoch", reg.get("inicio_epoch"))
@@ -328,7 +341,7 @@ def main():
                 previo = e["registro"].get(t["id"], {})
                 e["registro"][t["id"]] = {"inicio": ahora(), "inicio_epoch": inicio,
                                           "primer_inicio_epoch": previo.get("primer_inicio_epoch", inicio),
-                                          "commit": protecciones.git("rev-parse", "HEAD")[1].strip(),
+                                          "commit": protecciones.git("rev-parse", "HEAD")[1].strip(), "pid": proc.pid,
                                           "intento": intentos.get(t["id"], 0)}
                 usados += cpus
                 print(f"{time.strftime('%H:%M:%S')} INICIO {t['id']} (prio {t.get('prioridad', 5)}, "

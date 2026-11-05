@@ -166,16 +166,30 @@ llegadas aleatorias se re-ajustan con ellas. Los ganadores salen de estas reglas
 | Referencia | Cómo se ajusta | Papel | Lectura obligada si iguala o supera al modelo |
 |---|---|---|---|
 | **Fijo fino** [A1]: un plan para toda la hora | Etapa gruesa desde 10 s; etapa fina de 1 s alrededor de cada mínimo local a ≤ 2 % del mejor (con llegadas aleatorias, a ≤ 2 errores estándar de la diferencia pareada), tope 3; desfases finos ±4 s; malla con sus 3 esquemas y `onda_oe`; desempate de las 10 mejores por la media (2001-2010; 2001-2030 con llegadas aleatorias). **Ganador frágil:** si los dos primeros quedan a ≤ 2 % o el ganador tiene una semilla con retraso total > 1.10 veces su mediana, se desempata entre los 3 primeros con 2001-2030 y gana la menor media | **Decide la etiqueta** | — |
-| **Actuado ajustado** [A1] | Descenso por coordenadas en cadena con rejillas fijas (DECISIONES B9), que incluyen los valores por defecto; dos variantes coordinadas con los desfases del fijo fino (solo `earliestEnd` en el verde de la avenida, y `earliestEnd` = `latestEnd` en la avenida); 2001-2003, y los 3 mejores con 2001-2010 (con llegadas aleatorias, los 10 mejores con 2001-2030) | **Veta FUNCIONA** | — |
+| **Actuado ajustado** [A1] | Descenso por coordenadas en cadena con rejillas fijas (DECISIONES B9), que incluyen los valores por defecto; dos variantes coordinadas con el ciclo y los desfases del fijo fino: (a) solo `earliestEnd` en el verde de la avenida; (b) `earliestEnd` = `latestEnd` en la avenida y `latestEnd` en la transversal, en sus fines del plan fijo; 2001-2003, y los 3 mejores con 2001-2010 (con llegadas aleatorias, los 10 mejores con 2001-2030) | **Veta FUNCIONA** | — |
 | **Fijo con verdes de 5 en 5** [A1] | Los 3 mejores planes de la etapa gruesa (verdes múltiplos de 5 s) con desfases finos ±4 s; desempate como el fijo fino | Al lado | "Parte de la ventaja del fijo fino viene de verdes que IPPO, al decidir cada 5 s, no puede dar" |
 | Fijo por franja: un plan por media hora | Los 3 mejores de cada periodo según el puntaje por periodo; 9 pares; los 3 mejores pares con 2001-2010 (con llegadas aleatorias, los 10 mejores con 2001-2030). WAUT por semáforo en un instante limpio | Al lado | "La ventaja frente al fijo la logra también un plan por horario" |
 | Fijo por bloques (solo en el perfil) | Un plan por bloque de 10 min con el puntaje por bloque; secuencia verificada con 2001-2030 | Al lado | Igual que la franja |
 | Regla simple: ciclo mínimo y alargar el verde si hay cola | U ∈ {1, 2, 3, 4, 6} × G ∈ {30, 60}; 2001-2003 y las 3 mejores con 2001-2010 (con llegadas aleatorias, las 10 mejores con 2001-2030) | Al lado | Prohibido decir "aprendió algo que la regla no hace" o "coordinación aprendida" |
+| Regla reactiva: alargar cualquier verde mientras haya un vehículo a ≤ D m de la línea en un carril con verde; si no, cambiar | Mismo reloj de 5 s y misma máscara que IPPO (verde mínimo 10 s, máximo 60 s, ámbar 3 s); D ∈ {15, 25, 35, 50, 70} m; 2001-2003 y las 3 mejores con 2001-2010 (con llegadas aleatorias, las 10 mejores con 2001-2030) | Al lado | Igual que la regla simple |
 | Ciclo mínimo: verdes mínimos, desfases 0 | — | Al lado y como marca | "Reproduce el ciclo mínimo" si la media de retraso y la de espera coinciden hasta 0.0005 s |
 | Fijo entregado (rejilla de 5 s) | El de la robustez v2.1 | Al lado, solo para comparar con lo entregado | — |
 | Actuado por defecto | El de `comun.archivo_actuado` | Al lado | — |
 | Max-Pressure (por carril, verde mínimo 10 s, con y sin ciclo máximo) | Igual que la regla | Solo descriptiva | — (en SUMO suele perder contra buenos fijos [L]) |
 | IPPO entregado y C0 | — | Comparadores del modelo (§8) | — |
+
+**Detalles operativos de las referencias** (los fija el código del tag de esta parte A; revisión del 05.11):
+- *Fijo fino* (`plan3/barrer_fino.py`): la etapa fina prueba cada segundo de la avenida a ±4 s y de la transversal a ±2 s
+  del mínimo, entre 10 y 60 s; un mínimo local es el mejor plan de un par de verdes que no supera a sus 4 vecinos de la
+  rejilla gruesa; la fina usa los 3 mejores patrones de desfase de la gruesa en ese par (módulo el ciclo); los desfases
+  finos van a ±4 s del mejor plan de cada región, con el primer semáforo en 0; en la malla no hay desfases libres: la
+  fina y el fijo de verdes de 5 en 5 usan los 3 esquemas y `onda_oe`; un empate se decide por la media redondeada a
+  0.01 y, si sigue, por el plan generado antes.
+- *Actuado ajustado* (`plan3/actuado.py`): en SUMO 1.25, con `minDur` 10 y `passing-time` 1.9 (sus valores por
+  defecto), `detector-gap` 4 queda topado en 43.2 m (≈ 3.1 s): la rejilla efectiva de esa distancia es 13.9, 27.8, 41.7
+  y 43.2 m. SUMO lee `minTimeloss` (no `minTimeLoss`, como dice su documentación).
+- *Regla simple*: alarga solo el verde de la avenida mientras haya al menos U detenidos; es una vara débil (en semillas
+  de humo queda 37-69 % sobre el fijo en P1 y 40 % en P2 y P6). Por eso se agrega al lado la regla reactiva.
 
 **Del fijo fino frente a IPPO.** El fijo fino puede usar verdes de 12 o 14 s. IPPO decide cada 5 s y solo da verdes de
 10, 15, 20... s [M `rl_ippo.py` l. 671-678]. Se declara. El fijo de verdes de 5 en 5 mide ese límite.
@@ -357,7 +371,7 @@ casos.
 
 | Id | Hipótesis | Prueba | Familia (Holm) |
 |---|---|---|---|
-| H0 | ¿El desorden abre margen? En cuántos casos un control que reacciona da MEJORA o FUNCIONA frente al fijo fino re-ajustado con llegadas aleatorias: actuado por defecto o ajustado, regla simple, MP, IPPO entregado y V2 regular (en P6, la de P6e) | Cuenta de etiquetas citables en T1 y T2 | Descriptiva |
+| H0 | ¿El desorden abre margen? En cuántos casos un control que reacciona da MEJORA o FUNCIONA frente al fijo fino re-ajustado con llegadas aleatorias: actuado por defecto o ajustado, regla simple, regla reactiva, MP, IPPO entregado y V2 regular (en P6, la de P6e) | Cuenta de etiquetas citables en T1 y T2 | Descriptiva |
 | H5 | V2 con mensajes, entrenada con llegadas aleatorias, da MEJORA o FUNCIONA frente al fijo fino re-ajustado en al menos 3 de los 6 casos | Cuenta de etiquetas citables, cada una con versión convergida y sentido 4 de 5 | Sin Holm |
 | H6 | La ventaja frente al fijo es mayor con llegadas aleatorias que con regulares, en el mismo caso | Ver abajo; sentido: D por base (base b en los dos tipos de llegadas), 4 de 5 | 6 |
 | H7 | Con mensajes < sin mensajes, con llegadas aleatorias | Superioridad; sentido 3 de 3 emparejadas | 6 (P2 y P6 son los informativos; en P3 y P5 se espera que pase) |
@@ -474,7 +488,7 @@ casos [I `plan3/final/potencia/potencia_plan3_salida.txt`].
 |---|---|
 | El modelo da lo mismo que el ciclo mínimo | "Reproduce el ciclo mínimo", no "coordinación aprendida" |
 | MEJORA frente al fijo, pero no frente al plan por franja | "La ventaja la logra también un plan por horario" |
-| No le gana a la regla simple | No se dice que el modelo aprendió algo que la regla no hace |
+| No le gana a la regla simple o a la reactiva | No se dice que el modelo aprendió algo que la regla no hace |
 | La versión evaluada mejora, pero no se repite entre entrenamientos | "La versión evaluada mejora; el método no se repite en k de n entrenamientos" |
 | V2 mejora a C0 y C0 mejora al IPPO entregado | Parte de la ganancia viene de cómo se elige la versión |
 | Gana el fijo fino y empata el de verdes de 5 en 5 | La diferencia está en verdes que IPPO, decidiendo cada 5 s, no puede dar |
