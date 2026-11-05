@@ -1,9 +1,10 @@
 # veredicto3.py: informe de implementación (PLAN3 5.0; DECISIONES B11, B21 y B22)
 
-05.11.2026, con la revisión de la tarde y el ajuste de la noche al generador nuevo. Rama `plan3-ver` (nació de
-`plan3-dev` en cff0d61 y trae `plan3-dev` fusionada hasta 2adbaf8). No se simuló nada y no se abrió ningún resultado
-decisivo (todavía no existen): todo se probó con lo entregado de `plan2/` (solo lectura) y con datos sintéticos que usan
-las semillas de humo (424301-424360) en `plan3/tmp_ver/` (ignorada por git).
+05.11.2026, con la revisión de la tarde, el ajuste de la noche al generador nuevo y el seguimiento de la revisión de
+referencias. Rama `plan3-ver` (nació de `plan3-dev` en cff0d61 y trae `plan3-dev` fusionada hasta 1bcb4c9). No se
+simuló nada y no se abrió ningún resultado decisivo (todavía no existen): todo se probó con lo entregado de `plan2/`
+(solo lectura) y con datos sintéticos que usan las semillas de humo (424301-424360) en `plan3/tmp_ver/` (ignorada por
+git).
 
 ## Respuesta corta
 
@@ -11,15 +12,18 @@ las semillas de humo (424301-424360) en `plan3/tmp_ver/` (ignorada por git).
   las reglas del prerregistro (parte A), las etiquetas de cada celda (T1, T2 y citable), el modelo citado, el sentido
   entre entrenamientos, todas las hipótesis de §8 con sus familias y Holm, el número único, las lecturas obligadas y el
   informe de vehículos sin entrar al cierre (§4).
-- **Modos.** `--probar` (156 pruebas, ~55 s), `--final` (se niega si algo sellado cambió, si un CSV de `ciego/` no es
+- **Modos.** `--probar` (160 pruebas, ~55 s), `--final` (se niega si algo sellado cambió, si un CSV de `ciego/` no es
   el de su primera mañana, si falta un trabajo, un meta o una base sin declararla caída) y `--prueba-final LISTA.json`
   (§13: valida todo, luego crea el candado en exclusiva y corre una sola vez).
-- **Pruebas: 156 de 156 pasan** en `plan3-dev` fusionada (`plan3/pruebas/ver/prueba_veredicto3.txt`; el registro sale
+- **Pruebas: 160 de 160 pasan** en `plan3-dev` fusionada (`plan3/pruebas/ver/prueba_veredicto3.txt`; el registro sale
   igual byte a byte en dos corridas).
 - **Ajuste de la noche (05.11).** El mundo sintético ahora es el manifiesto del generador tal cual: no agrega lo que el
   generador ya produce (eso daba los duplicados), y se sella con `manifiesto.sello` real. veredicto3 lee las bases
-  caídas por su corrida, como el generador, y coteja el brazo de las referencias nuevas. Lo que habría que cambiar en
-  `manifiesto.py` está al final ("Interfaces").
+  caídas por su corrida, como el generador, y coteja el brazo de las referencias nuevas.
+- **Seguimiento (05.11).** `manifiesto.py` ya hace los tres cambios propuestos (d2501e5) y `comprobar_cierre` no
+  necesitó más. Se agregaron la regla reactiva (al lado, con la lectura de la regla simple, y en H0), los nombres
+  `mixa1` y `mixa3`, las caídas declaradas sin corrida y la corrección de los cambios de fase de los brazos que corren
+  por rl_ippo (se les resta k, los semáforos que su plantilla arranca fuera del primer verde).
 
 ## Ajuste al generador nuevo y al sello real (05.11, noche)
 
@@ -31,10 +35,42 @@ las semillas de humo (424301-424360) en `plan3/tmp_ver/` (ignorada por git).
 | 4 | `comprobar_cierre` frente a `manifiesto.sello` | Los CSV de uso 'final' que estén sellados no se exigen ni se rechazan; los "otros" que se exigen son `manifiesto.OTROS` que existen y `promocion/*.json` (así siguen a `manifiesto.py`); un CSV sin sellar que no existe porque su base cayó (declarada) no es problema | M32b, M04d, M04q, M04r |
 | 5 | `manifiesto_ciego_commit` del sello | `comprobar_ciego` exige que ese commit esté en la historia de git | M35b |
 | 6 | Bases caídas por corrida | `cola/caidas.json` es el mismo archivo que lee `generar_trabajos3.leer_caidas` (`corrida`, celda, escenario, tipo, base, intentos, fecha). veredicto3 da por caída una base por su (celda, escenario, tipo, base) o por la corrida de su política y las que salen de ella (`gt.DERIVA`): una V2 caída se lleva sus 400 episodios y sus dos derivadas, y la V2 de la mezcla cae también en el arranque lento. Da exactamente las mismas bases que el generador deja de evaluar. La fecha va en cada intento o una vez por declaración; una corrida que no es de su base es ERROR | M36, M04i, M04j-M04j3, M27 |
-| 7 | Brazo de las referencias | `brazo_de_trabajo` sigue a `evaluar3.armar_brazo`: `--brazo fijo --programa P --nombre X` → `fijo_X`; `--brazo X` → X (franja, bloques, actuado_aj...); `--regla-de .../regla.json` o `mp.json` → la forma del nombre (`regla_u<U>g<G>`; `mp`, `mp_det`, `mp_c<C>`), porque el nombre exacto está en un archivo que no se sella | M04k, M04m, M04o, M04p |
+| 7 | Brazo de las referencias | `brazo_de_trabajo` sigue a `evaluar3.armar_brazo`: `--brazo fijo --programa P --nombre X` → `fijo_X`; `--brazo X` → X (franja, bloques, actuado_aj...); `--regla-de .../regla.json`, `reactiva.json` o `mp.json` → la forma del nombre (`regla_u<U>g<G>`; `reactiva<...>`; `mp`, `mp_det`, `mp_c<C>`), porque el nombre exacto está en un archivo que no se sella | M04k, M04m, M04o, M04p |
 | 8 | Sin `ref_mpc` | Max-Pressure es una sola referencia (`ref_mp`, la mejor de la familia con y sin ciclo máximo); H0 ya no la lista dos veces. `ref_fijo10` se llama "fijo ajustado desde 10 s" y va al lado | M28 |
-| 9 | Arranque lento con la celda de la mezcla | El generador pone `mix1` y `mix3` también a `mixa_corredor` y `mixa_red`. veredicto3 distingue las celdas por (celda, escenario), toma perfil, mezcla y arranque lento de `gt.PERFIL`, `gt.MEZCLA` y `gt.MEZCLA_A`, y en el `.md` escribe "mix1 (mixa_corredor)" cuando el nombre se repite | M06b, M28e |
+| 9 | Celdas de perfil, mezcla y arranque lento | veredicto3 las toma de `gt.PERFIL`, `gt.MEZCLA` y `gt.MEZCLA_A` (hoy `per1`, `per3`, `mix1`, `mix3`, `mixa1` y `mixa3`) y las distingue por (celda, escenario); en el `.md` agrega el escenario si un nombre se repite | M06b, M28e |
 | 10 | H10 con datos | El resumen dice además en cuántos niveles no se pudo correr | M22, M22b |
+
+## Seguimiento de la revisión de referencias y de `manifiesto.py` (05.11, noche)
+
+| # | Qué cambió | Qué se hizo | Prueba |
+|---|---|---|---|
+| 1 | `manifiesto.py` (d2501e5): `revisar` y `sello` saltan las tandas de uso 'final', `revisar` avisa de una base caída declarada después, y `OTROS` trae `insumos/manifiesto.json` | `comprobar_cierre` ya casaba: lee la lista de `manifiesto.OTROS`, así que ahora exige sellado `insumos/manifiesto.json`, y sigue aceptando un sello con o sin los CSV de la prueba final | M00b, M32b |
+| 2 | Regla reactiva al lado (`ref_reactiva`, clave `reactiva`; §5) | Se coteja la forma de su nombre; lleva la misma lectura obligada que la regla simple (§11): "No le gana a la regla simple", "a la regla reactiva" o "a la regla simple ni a la regla reactiva"; H0 la cuenta entre los controles que reaccionan | M28j |
+| 3 | Celdas `mixa1` y `mixa3` | Salen de `gt.MEZCLA_A`; nada que cambiar en las reglas | M06b, M28e |
+| 4 | `cola/caidas.json` sin `corrida` | Se arma como el generador (`gt.corrida_de_tipo` con el escenario, el tipo y la base) y vale igual para lo que sale de ella | M36b |
+| 5 | Cambios de fase (hallazgo 10) | A los brazos que corren por rl_ippo se les resta k por semilla antes de compararlos (ver abajo) | N18, M37 |
+
+**Cambios de fase: qué se corrige y por qué.** rl_ippo pone cada semáforo en su primera fase verde al empezar, pero su
+contador de cambios de fase compara con la fase en que arrancó la plantilla (la lee antes de ponerlo en verde): por cada
+semáforo que la plantilla arranca fuera de su primer verde, suma un cambio que no ocurrió. rl_corredor lee la fase
+después y no lo suma. Corren por rl_ippo las políticas (V2 y sus variantes, C0, IPPO entregado, la política por red) y
+las reglas (simple, reactiva y Max-Pressure); por rl_corredor, el fijo, el fijo fino, el de verdes de 5 en 5, el ajustado
+desde 10 s, la franja, los bloques, el actuado, el actuado ajustado y el ciclo mínimo. veredicto3 resta k a cada semilla
+de los brazos de rl_ippo al leer `cambios_fase`, de modo que todo brazo cuenta los cambios que de verdad hubo; la fila de
+`veredicto3_comparaciones.csv` lo dice. k sale de la plantilla versionada del escenario (`plan3/<esc>.sumocfg`, su red
+y sus `.add.xml`): la fase en que está cada semáforo a t = 0 ((−offset) mod ciclo) frente a su primer verde, como
+`k_plantillas.py` de la revisión. Solo cambia una métrica secundaria; la principal no se toca.
+
+| Plantilla | k |
+|---|---|
+| corredor, corredor_alta, dem_corredor_t905, dem_corredor_t2715_der (y poi_, per_, mix_ y mixa_ del corredor) | 1 |
+| dem_red_t905, dem_red_t1358, dem_red_t1810 | 1 |
+| dem_corredor_t1358, dem_corredor_t2715, red, red_alta, dem_red_t2715, dem_red_t3620 (y poi_, per_, mix_ y mixa_ de la red) | 0 |
+| malla3, malla3_alta, malla3_alta_e, dem_malla3_* (y poi_ de la malla) | 0 |
+
+`pruebas/ref/prueba_nr_p6.py` muestra este mismo efecto: el CSV entregado de IPPO en P6 (el del puente) se corrió con la
+plantilla 15/10 en ajedrez (k = 4) y cuenta 4 cambios más que con la de plan3 (k = 0), con las otras 33 columnas
+iguales. El puente solo usa la métrica principal, así que no hace falta corregirlo.
 
 ## Cómo se corre
 
@@ -71,6 +107,7 @@ Desde `plan3/`:
 | `politica_*.json`, `insumos/entregado/politica_*.json` | `val_elegido`, `ep_elegido`, `val_total_serie` (o la serie con que se eligió), criterio y semillas de validación |
 | `promocion.json` y `promocion/<escenario>.json` | Modelo citado (§12), con su sha256 |
 | `insumos/puente/eval_<esc>_*.csv` e `insumos/manifiesto.json` | Fijo e IPPO entregados en 1001-1030 (puente) y sus sha256 |
+| `<esc>.sumocfg` con su red y sus `.add.xml` (la plantilla versionada) | k de cada plantilla, para corregir los cambios de fase |
 | `listo/cierre.ok`, `cola/manifiesto_cierre.json`, historia git de `cola/manifiesto_ciego.json` | Solo `--final` |
 | `listo/holdout.ok`, `listo/holdout.candado` | Solo `--prueba-final` |
 | `PRERREGISTRO.md` (tabla JSON de §3, vía `protecciones.tabla_prerregistro`) | Semillas de cada uso |
@@ -110,7 +147,8 @@ las pruebas, `sello`, `revisar_historia` y `politicas_evaluadas`) y, en las prue
 | `generados_iguales`, `igual_ciclo_minimo` | Mismos vehículos por semilla; igual al ciclo mínimo | §7, §5 [AMB-14, 24] |
 | `demanda_esperada`, `numero_unico` | Demanda con `exp(λ)`; `sintesis_plan.indice_geo` con `default_rng(0)` | §7 |
 | `brazo_de_trabajo` | El brazo que escribe `evaluar3.py` para un trabajo (política, fijo desde un programa, referencia, regla) | — |
-| `caidas_de_texto`, `declaracion_caida`, `corrida_de` | Lee y valida `cola/caidas.json`; la declaración que hace caer una base, por su clave o por su corrida y lo que sale de ella | §14 [AMB-7] |
+| `caidas_de_texto`, `declaracion_caida`, `corrida_de` | Lee y valida `cola/caidas.json` (sin corrida, la arma como el generador); la declaración que hace caer una base, por su clave o por su corrida y lo que sale de ella | §14 [AMB-7] |
+| `corre_por_rl_ippo`, `k_plantilla` | Si un brazo corre por rl_ippo; k de la plantilla de un escenario | Hallazgo 10 |
 
 **Datos (`class Datos`).** Lee el manifiesto y arma, por celda (celda, escenario), los tipos con sus bases y tandas;
 con `estricto` y `sello` (modo `--final`) exige todo lo de arriba.
@@ -121,7 +159,7 @@ con `estricto` y `sello` (modo `--final`) exige todo lo de arriba.
 | `leer_caidas`, `ruta_base`, `es_caida` | `cola/caidas.json` (sellado); la ruta de la política de una base; si cayó |
 | `bases_disenio`, `meta_base`, `base_version` | Bases del diseño; meta y estado de cada base (caída, publicada, sin meta); versión evaluada o mejor base |
 | `pub_info` | Versión publicada por `p3_elegir mediana`: **comprueba** que su base es la mediana de sus candidatas |
-| `entrada`, `filas_csv`, `serie`, `serie_insumo` | El CSV de un brazo en una tanda; T1x = t1r + h1t1; cotejo de semillas, brazo y base |
+| `entrada`, `filas_csv`, `serie`, `serie_insumo`, `k_cambios` | El CSV de un brazo en una tanda; T1x = t1r + h1t1; cotejo de semillas, brazo y base; los cambios de fase de rl_ippo menos k |
 | `comp`, `convergencia` | Comparación con caché (motivo si faltan datos o cambian los vehículos); convergencia de la versión [AMB-28] |
 | `promocion`, `citado` | Decisión de promoción por escenario (con sha256) y modelo citado [AMB-20] |
 
@@ -139,7 +177,7 @@ cual, con dos bases caídas que el generador ya no evalúa; `agregar_si_falta` c
 con `p3_promocion`; dos mañanas commiteadas; el sello de `manifiesto.py`), `sellar_mundo`, `manifiesto_ciego_de` y
 `probar`.
 
-## Pruebas y resultados (156 de 156 pasan)
+## Pruebas y resultados (160 de 160 pasan)
 
 **1. Las del prototipo, con lo entregado de `plan2/` (solo lectura).** P01-P18 y P08b: la regla no cambió
 (`veredicto.probar()`); la V2 de P6 da meseta 3.19 % y estabilidad 0.00 % (P02; con x[3], 9.43 % y "no convergió");
@@ -158,7 +196,7 @@ A5), margen +2 %, demanda con `exp()`, mismos vehículos en P1, H6 y no inferior
 | N05 veto del actuado ajustado; N06 sentido 4 de 5 (una base en contra pasa, dos no; una caída cuenta fuera) | pasan |
 | N07 Holm con 6; N08 tres lecturas de la no inferioridad; N09 H1 por intersección-unión; N10 H6; N11 vehículos y ciclo mínimo; N12 número único | pasan |
 | N13-N13d no escribe fuera de `plan3/` ni la carpeta `plan3`; `carpeta_limpia` solo `tmp_*` | pasan |
-| N14 semillas del prerregistro; N15 lectura conjunta de la no inferioridad (8 casos); N16 `acuerdo` sin StopIteration; N17 criterio y semillas de las bases | pasan |
+| N14 semillas del prerregistro; N15 lectura conjunta de la no inferioridad (8 casos); N16 `acuerdo` sin StopIteration; N17 criterio y semillas de las bases; N18 k de las plantillas de plan3 y qué brazos corren por rl_ippo | pasan |
 
 **3. Mundo sintético de punta a punta** (`tmp_ver/mundo/plan3`: 32 celdas, 1696 CSV = 1670 del generador + 30 de la
 política por red − 4 referencias quitadas).
@@ -170,9 +208,9 @@ política por red − 4 referencias quitadas).
 | M05 las 6 salidas; M06 etiqueta citable de V2 en 17 celdas (todas las filas de la tabla de §7, PENDIENTE por convergencia y por referencia faltante); M06b las 6 celdas de perfil, mezcla y arranque lento | 18/18 |
 | M07-M11d: veto en D y citado PENDIENTE sin decisión de promoción; P1 promovida por `p3_promocion` (−3.2 % en la validación) con V2 al lado; "se repite 4 de 5" y la lectura de P6; ciclo mínimo; probabilidad por ruido; P4 aleatoria con dos bases caídas: 3 de 5; vehículos sin entrar en P2 aleatoria con su lectura | pasan |
 | M12-M24b: H1 (global no pasa y nombra "P5 es peor en T2x (+6.07 %)"; P5 contradictorio), H2, H3/H3e, H5 (4 de 6: P4 cae por las bases caídas), H6, H7r (lectura de §11), H8a/H8b, H12, H10 (red sin datos: "no se pudo correr en 7"; corredor con la política por red: 4 de 5 niveles, pasa), H15 (AMB-18), número único = cálculo directo y "provisional en P3" | pasan |
-| M25-M28i: vehículos distintos en una referencia (m2715, fijo ajustado desde 10 s), tabla de bases (convergencia, candidatas, caídas con sus intentos), `.md` (tabla, lecturas, no insertados, promoción, frase de §17), avisos (una línea para promo), a3 (48 filas, todas "mayor"), perfil y mezcla (6 celdas, bloques al lado en el perfil), C0 aleatorio con `v2reg3poi`, celda sin modelo principal | pasan |
+| M25-M28j: vehículos distintos en una referencia (m2715, fijo ajustado desde 10 s), tabla de bases (convergencia, candidatas, caídas con sus intentos), `.md` (tabla, lecturas, no insertados, promoción, frase de §17), avisos (una línea para promo), a3 (48 filas, todas "mayor"), perfil y mezcla (6 celdas, bloques al lado en el perfil), C0 aleatorio con `v2reg3poi`, celda sin modelo principal, regla reactiva (lectura en P3 regular, no en P1; en H0) | pasan |
 | M29-M31: versión publicada que no es la mediana, CSV con una semilla de más y promoción alterada: ERROR | pasan |
-| M32-M36: prueba final (tanda de uso 'final' simulada con humo): no entra al veredicto; el sello con o sin sus CSV pasa; sin `holdout.ok` o con otro sha256 se niega; sin el bloque completo, con una métrica vacía o con otros vehículos se niega sin cerrar el candado; corre una vez y no dos. Un sello cuya última mañana no está en la historia y una mañana posterior con otro sha256: se niega. Caídas por corrida: las mismas 9 bases que deja de evaluar el generador | pasan |
+| M32-M37: prueba final (tanda de uso 'final' simulada con humo): no entra al veredicto; `manifiesto.sello` no sella sus CSV y el cierre pasa con o sin ellos; sin `holdout.ok` o con otro sha256 se niega; sin el bloque completo, con una métrica vacía o con otros vehículos se niega sin cerrar el candado; corre una vez y no dos. Un sello cuya última mañana no está en la historia y una mañana posterior con otro sha256: se niega. Caídas por corrida, con o sin la corrida en la declaración: las mismas 9 bases que deja de evaluar el generador. Cambios de fase: a V2 y a la regla de P1 se les resta 1 y al fijo fino nada; en P3, 0 | pasan |
 | G01 `git status --porcelain --ignored -- plan2 TESIS` vacío, rc 0 | pasa |
 
 ## Ambigüedades del prerregistro y lectura implementada
@@ -212,34 +250,24 @@ Cada una lleva `[AMB-n]` en el código. **Fijada (05.11)** = el coordinador la d
 
 ## Interfaces con otras áreas
 
-1. **Sello del cierre: lo que conviene cambiar en `manifiesto.py`** (no lo toqué). Con el `manifiesto.py` de hoy,
-   `sello` y `comprobar_cierre` casan (M00b, M04b-M04g, M32b). Quedan tres puntos:
-   - **Prueba final (lo importante).** La enmienda que la active agrega entradas de uso 'final' a
-     `cola/manifiesto_esperado.json` y a `cola/trabajos.jsonl`, que están sellados en `otros`: desde ese momento
-     `--final` ya no corre (el sha256 cambió). Y volver a correr `manifiesto.py cierre` tampoco sirve, porque `revisar`
-     exige que existan los CSV de la prueba final, que todavía no se jugaron. Propuesta: que `revisar` y `sello` salten
-     las entradas cuya tanda tenga uso 'final' en `generar_trabajos3.TANDAS`, y volver a sellar después de la enmienda
-     (los CSV de T1 y T2 no cambian y la historia de las mañanas lo comprueba). La otra salida es escribir la prueba
-     final en archivos aparte (`cola/manifiesto_final.json` y sus trabajos), y entonces `--prueba-final` leería esos.
-   - **Bases caídas.** `revisar` y `sello` exigen todo CSV del manifiesto. Funciona si el manifiesto se regenera después
-     de declarar una caída (el generador ya no la evalúa); si no, el cierre falla con "faltan". Conviene que `revisar`
-     diga "base caída declarada: regenerar el manifiesto" (con `generar_trabajos3.caida`). veredicto3 acepta las dos
-     formas.
-   - **`insumos/manifiesto.json` en `OTROS`.** veredicto3 coteja los insumos (puente y metas entregados) contra ese
-     archivo, que está versionado pero no sellado. Si se agrega a `OTROS`, veredicto3 lo exige sin más cambios (lee la
-     lista de `manifiesto.OTROS`).
-2. **`cola/caidas.json`.** `generar_trabajos3.leer_caidas` hace `c["corrida"]`: una declaración sin corrida lo rompe al
-   importar. El prerregistro no nombra la corrida. veredicto3 la acepta con o sin ella (sin ella, solo por celda,
-   escenario, tipo y base, sin lo que sale de esa corrida). Conviene que cada declaración traiga las dos cosas.
-3. **Celdas del arranque lento.** `gt.MEZCLA_A` usa las claves `mix1` y `mix3`, así que las celdas son
-   (`mix1`, `mixa_corredor`) y (`mix3`, `mixa_red`); `EV` y `TR` tienen `mixa1` y `mixa3` sin uso. veredicto3 funciona
-   con cualquiera de los dos nombres (toma las celdas de `gt`); si se quiere `mixa1`, cambiar las claves de `MEZCLA_A`
-   y el `origen` de `evaluaciones_perfil_mezcla`.
+1. **Sello del cierre.** Los tres cambios de `manifiesto.py` ya están (d2501e5) y casan con `comprobar_cierre` (M00b,
+   M04b-M04g, M32b). Después de la enmienda de la prueba final hay que volver a correr `manifiesto.py cierre`: sella el
+   manifiesto nuevo sin los CSV de uso 'final', y la historia de las mañanas comprueba que los de T1 y T2 no cambiaron.
+   Dos detalles menores de `manifiesto.caida_declarada` (solo cambian el texto del aviso): lee el `cola/caidas.json`
+   real (`gt.leer_caidas`) y no el de la carpeta que se revisa, y busca la corrida por el escenario del CSV, así que en
+   `mixa_` (que juega la política de `mix_`) no avisa.
+2. **`cola/caidas.json`.** El generador y veredicto3 aceptan la declaración con o sin corrida. Para la mezcla y el
+   arranque lento conviene declarar con el escenario de la política (`mix_corredor`, `mix_red`): así cae en las dos
+   celdas, en el generador y en veredicto3.
+3. **Regla reactiva.** `reglas.py` todavía no tiene la familia `reactiva` (el generador ya la pide). veredicto3 acepta
+   cualquier nombre que empiece con "reactiva"; cuando se fije (p. ej. `reactiva_d<D>`), conviene ajustar `FORMA_REGLA`.
 4. **Política por red (Etapa 4).** veredicto3 espera el tipo `p3red` con 3 bases en cada nivel de su red. Cuando el
    generador la produzca con ese tipo, el mundo usará sus entradas (compara por clave); con otro tipo, hay que avisarme.
 5. **evaluar3 con `--perdida`:** el brazo sale con doble sufijo (`..._L0p100_p100`: uno de `evaluar.brazo_profundo` y otro
    de `evaluar3`). veredicto3 lo reproduce tal cual; si se cambia uno, hay que cambiar `brazo_de_trabajo`.
-6. **Prueba final:** la lista que acepta `--prueba-final` es
+6. **Cambios de fase.** Si se corrige el contador de rl_ippo (leer la fase después del setPhase), k pasa a 0 para los
+   CSV nuevos y hay que quitar la resta en `Datos.k_cambios` (o hacerla depender del código con que se corrió cada CSV).
+7. **Prueba final:** la lista que acepta `--prueba-final` es
    `{"comparaciones": [{"celda", "escenario", "tanda", "a": {"tipo", "base"}, "b": {"tipo", "base"}}]}`.
 
 ## Límites

@@ -31,6 +31,8 @@ Lee (rutas relativas a plan3/):
   politica_*.json, insumos/entregado/politica_*.json   metas: val_elegido, ep_elegido, val_total_serie...
   promocion.json, promocion/*.json                     regla de promocion (§12, p3_promocion.py), con sha256
   insumos/puente/eval_<esc>_*.csv                      fijo e IPPO entregados en 1001-1030 (puente, descriptivo)
+  <esc>.sumocfg y su net y sus .add.xml de plan3/      la plantilla versionada de cada escenario: k para corregir los
+                                                       cambios de fase de los brazos de rl_ippo (k_plantilla)
   listo/cierre.ok, cola/manifiesto_cierre.json y la historia git de cola/manifiesto_ciego.json: solo en --final
 Escribe solo dentro de plan3/ (y nunca la carpeta plan3 misma): escribir() resuelve la ruta real y se niega si cae
 fuera; carpeta_limpia() solo borra carpetas plan3/tmp_*. Importar veredicto, consolidar y sintesis_plan solo define
@@ -112,8 +114,8 @@ REDES = {"corredor": ["P1", "P2", "c905", "c1358", "c2715"],
          "red": ["P3", "P4", "r905", "r1358", "r1810", "r2715", "r3620"],
          "malla": ["P5", "P6", "m1810", "m2715", "m3620", "m6525"]}
 MINIMO_RED = {"corredor": 4, "red": 6, "malla": 5}          # H10: al menos el 80 % de los niveles
-# Perfil, mezcla y arranque lento (§8, A7; descriptivas): (celda, escenario, que), las del generador. La celda se busca
-# por escenario: el arranque lento (mixa_) lleva la misma celda que la mezcla (gt.MEZCLA_A: mix1 y mix3).
+# Perfil, mezcla y arranque lento (§8, A7; descriptivas): (celda, escenario, que), las del generador (per1, per3, mix1,
+# mix3, mixa1, mixa3). La celda se busca por escenario.
 ESTOCASTICAS = ([(c, e, "perfil de 10 min") for c, e in gt.PERFIL.items()]
                 + [(c, e, "mezcla de Lima") for c, e in gt.MEZCLA.items()]
                 + [(c, e, "mezcla con arranque lento") for c, e in gt.MEZCLA_A.items()])
@@ -153,7 +155,8 @@ NOMBRE = {
     "p3red": "una política por red",
     "ref_fino": "fijo fino", "ref_fino5": "fijo de verdes de 5 en 5", "ref_franja": "fijo por franja",
     "ref_bloques": "fijo por bloques", "ref_actuadoaj": "actuado ajustado", "ref_actuado": "actuado por defecto",
-    "ref_regla": "regla simple", "ref_mp": "Max-Pressure", "ref_fijo10": "fijo ajustado desde 10 s",
+    "ref_regla": "regla simple", "ref_reactiva": "regla reactiva", "ref_mp": "Max-Pressure",
+    "ref_fijo10": "fijo ajustado desde 10 s",
     "ref_trivial": "ciclo mínimo", "ref_fijo": "fijo entregado"}
 
 
@@ -262,8 +265,9 @@ def base_de(e):
 def caidas_de_texto(texto):
     """cola/caidas.json (§14, B22), el que lee tambien generar_trabajos3.leer_caidas: lista de {corrida, celda,
     escenario, tipo, base, intentos: [{id, error, fecha}, ...], fecha}, con los dos intentos fallidos. [AMB-7] La fecha
-    va en cada intento o una vez en la declaracion; la corrida (gt.nombre_corrida) es opcional y, si esta, tiene que
-    ser de esa base. Devuelve ({(celda, escenario, tipo, base): declaracion}, {corrida: declaracion})."""
+    va en cada intento o una vez en la declaracion; la corrida (gt.nombre_corrida) es opcional: si esta, tiene que ser
+    de esa base; si no, se arma como el generador (gt.corrida_de_tipo con el escenario, el tipo y la base).
+    Devuelve ({(celda, escenario, tipo, base): declaracion}, {corrida: declaracion})."""
     datos = json.loads(texto)
     lista = datos.get("caidas", []) if isinstance(datos, dict) else datos
     caidas, corridas = {}, {}
@@ -280,8 +284,7 @@ def caidas_de_texto(texto):
             raise ErrorVeredicto(f"cola/caidas.json: la corrida {corrida} no es una corrida de la base {c['base']} "
                                  f"({c['escenario']}, {c['tipo']})")
         caidas[(c["celda"], c["escenario"], c["tipo"], int(c["base"]))] = c
-        if corrida:
-            corridas[corrida] = c
+        corridas[corrida or gt.corrida_de_tipo(c["escenario"], c["tipo"], int(c["base"]))] = c
     return caidas, corridas
 
 
@@ -321,9 +324,11 @@ def opcion_de(trabajo, opcion):
     return None
 
 
-# --regla-de barridos/<esc>/regla.json o mp.json (evaluar.brazo_regla): el nombre exacto de la regla ganadora esta en
-# ese archivo, que no se sella; se comprueba su forma (PATRON de plan3/reglas.py), con un texto para los mensajes
+# --regla-de barridos/<esc>/regla.json, reactiva.json o mp.json (evaluar.brazo_regla): el nombre exacto de la regla
+# ganadora esta en ese archivo, que no se sella; se comprueba su forma (PATRON de plan3/reglas.py), con un texto para
+# los mensajes. La reactiva todavia no esta en reglas.py: se acepta cualquier nombre que empiece con "reactiva".
 FORMA_REGLA = {"regla.json": (r"regla_u(\d+|inf)g\d+", "regla_u<U>g<G>"),
+               "reactiva.json": (r"reactiva[a-z0-9_]*", "reactiva<...>"),
                "mp.json": (r"mp(_det)?(_c\d+)?", "mp, mp_det, mp_c<C> o mp_det_c<C>")}
 
 
@@ -354,6 +359,62 @@ def brazo_de_trabajo(trabajo, meta):
     else:
         return None
     return brazo + sufijo
+
+
+def corre_por_rl_ippo(trabajo):
+    """True si el brazo de un trabajo corre por rl_ippo.correr_episodio (--politica: evaluar.brazo_profundo; --regla y
+    --regla-de: evaluar.brazo_regla con reglas.correr); False si corre por rl_corredor (--brazo, tambien con
+    --programa); None si no se sabe."""
+    partes = partes_de(trabajo)
+    if any(op in partes for op in ("--politica", "--regla", "--regla-de")):
+        return True
+    return False if "--brazo" in partes else None
+
+
+_K_PLANTILLA, _TL_ARCHIVO = {}, {}
+
+
+def k_plantilla(esc):
+    """Hallazgo 10 de la revision de referencias (05.11): cuantos semaforos arranca la plantilla de un escenario (t = 0)
+    fuera de su primera fase verde. rl_ippo pone cada semaforo en su primer verde y su contador de cambios de fase
+    compara con la fase de la plantilla (la suscripcion se lee antes del setPhase): suma 1 por cada uno; rl_corredor
+    lee la fase despues y no los cuenta. Se calcula a mano, como k_plantillas.a_mano de la revision: el programa activo
+    de cada semaforo es el ultimo tlLogic que cargan el net-file y los additional-files de plan3/<esc>.sumocfg (la
+    plantilla versionada, no los datos); su fase a t = 0 es la que contiene (-offset) mod ciclo; verde = una fase con G
+    o g y sin y (rl_corredor.fases_verdes). None si falta el escenario."""
+    if esc in _K_PLANTILLA:
+        return _K_PLANTILLA[esc]
+    cfg = os.path.join(PLAN3, f"{esc}.sumocfg")
+    k = None
+    if os.path.exists(cfg):
+        entrada = ET.parse(cfg).getroot().find("input")
+        archivos = []
+        for etiqueta_xml in ("net-file", "additional-files"):
+            nodo = entrada.find(etiqueta_xml) if entrada is not None else None
+            if nodo is not None:
+                archivos += [a for a in re.split(r"[,\s]+", nodo.get("value", "")) if a]
+        logicas = {}
+        for a in archivos:
+            ruta = os.path.join(os.path.dirname(cfg), a)
+            if ruta not in _TL_ARCHIVO and os.path.exists(ruta):
+                _TL_ARCHIVO[ruta] = list(ET.parse(ruta).getroot().iter("tlLogic"))
+            for tl in _TL_ARCHIVO.get(ruta, []):
+                logicas[tl.get("id")] = tl
+        k = 0
+        for tl in logicas.values():
+            fases = [(float(p.get("duration")), p.get("state")) for p in tl.iter("phase")]
+            verdes = [i for i, (_, s) in enumerate(fases) if ("G" in s or "g" in s) and "y" not in s]
+            ciclo = sum(d for d, _ in fases)
+            pos = (-float(tl.get("offset", "0"))) % ciclo if ciclo else 0.0
+            acum, fase0 = 0.0, 0
+            for i, (d, _) in enumerate(fases):
+                if pos < acum + d:
+                    fase0 = i
+                    break
+                acum += d
+            k += bool(verdes) and fase0 != verdes[0]
+    _K_PLANTILLA[esc] = k
+    return k
 
 
 def nombre(tipo):
@@ -1030,7 +1091,7 @@ class Datos:
         fisicas = FISICAS[c["llegadas"]].get(tl)
         if not fisicas:
             return None, None, None, f"no hay tanda {tl} con llegadas {c['llegadas']}"
-        filas, esperadas = {}, set()
+        filas, esperadas, k_de = {}, set(), {}
         for tf in fisicas:
             e, motivo = self.entrada(ck, brazo, tf)
             if motivo:
@@ -1046,9 +1107,27 @@ class Datos:
             repetidas = set(por) & set(filas)
             if repetidas:
                 raise ErrorVeredicto(f"{e['csv']}: semillas repetidas entre tandas {sorted(repetidas)[:5]}")
+            if metrica == "cambios_fase":               # los de rl_ippo cuentan k de mas (k_plantilla)
+                k = self.k_cambios(e)
+                if k is None:
+                    return None, None, None, f"no se sabe la plantilla de {ck[1]} para corregir los cambios de fase"
+                k_de.update({s: k for s in por})
             filas.update(por)
             esperadas |= set(rango(e["semillas"]))
-        return self._valores(filas, metrica, ck, brazo) + (esperadas, None)
+        valores, filas = self._valores(filas, metrica, ck, brazo)
+        if k_de:
+            valores = {s: v - k_de[s] for s, v in valores.items()}
+        return valores, filas, esperadas, None
+
+    def k_cambios(self, e):
+        """Cambios de fase que el conteo de un CSV tiene de mas (hallazgo 10 de la revision de referencias): k de la
+        plantilla del escenario si su brazo corre por rl_ippo (politicas, regla simple, reactiva y Max-Pressure); 0 si
+        corre por rl_corredor (fijo, fijo fino, franja, bloques, actuado, actuado ajustado, ciclo minimo). None si no
+        se sabe (sin trabajo o sin plantilla)."""
+        por_ippo = corre_por_rl_ippo(self.trabajos.get(e.get("trabajo")))
+        if por_ippo is None:
+            return None
+        return k_plantilla(e["escenario"]) if por_ippo else 0
 
     def serie_insumo(self, ck, cual, tl, metrica):
         """Puente (§8, descriptivo): fijo entregado o IPPO entregado de insumos/puente, en las semillas del puente."""
@@ -1350,9 +1429,11 @@ def fila_celda(d, ck):
                                                                                           "CONTRADICTORIO"):
             lecturas.append(f"Mejora frente al fijo, pero no frente al {nombre(ref)}: la ventaja la logra también "
                             f"un plan por horario.")
-    if "ref_regla" in al_lado and palabra(al_lado["ref_regla"]["citable"]) in ("EMPATA", "FALLA", "CONTRADICTORIO"):
-        lecturas.append("No le gana a la regla simple: no se dice que el modelo aprendió algo que la regla no hace ni "
-                        "\"coordinación aprendida\" (§5).")
+    reglas_ganan = [nombre(r) for r in ("ref_regla", "ref_reactiva")      # §5 y §11: la regla simple o la reactiva
+                    if r in al_lado and palabra(al_lado[r]["citable"]) in ("EMPATA", "FALLA", "CONTRADICTORIO")]
+    if reglas_ganan:
+        lecturas.append(f"No le gana a la {' ni a la '.join(reglas_ganan)}: no se dice que el modelo aprendió algo que "
+                        f"la regla no hace ni \"coordinación aprendida\" (§5).")
     if cit is not None and cit_p in POSITIVAS:
         no_rep = [t for t in T if not fila[f"_sentido_{t}"]["cumple"]]
         if no_rep:
@@ -1413,9 +1494,11 @@ def tabla_bases(d):
             if caida:
                 origen = corrida_de(pol)
                 propia = gt.nombre_corrida(*origen, b) if origen else None
+                declarada = caida.get("corrida") or gt.corrida_de_tipo(caida["escenario"], caida["tipo"],
+                                                                         int(caida["base"]))
                 fila["estado"] = ("caída declarada en cola/caidas.json (" + ", ".join(
                     f"{i['id']}: {i['error']} ({i.get('fecha') or caida.get('fecha')})" for i in caida["intentos"])
-                    + ")" + (f"; sale de {caida['corrida']}" if caida.get("corrida") not in (None, propia) else ""))
+                    + ")" + (f"; sale de {declarada}" if propia and declarada != propia else ""))
             else:
                 fila["estado"] = "sin meta: falta entrenarla o declararla caída (§14)"
             filas.append(fila)
@@ -1862,8 +1945,8 @@ def hipotesis(d, filas_celdas):
                              f"{k} de {len(bases)} bases a ±1 % del ciclo mínimo en T1 y T2", "; ".join(det)))
     # H0 (descriptiva): controles que reaccionan frente al fijo fino re-ajustado con llegadas aleatorias
     # (Max-Pressure: la mejor de la familia, con y sin ciclo maximo; el generador la evalua como ref_mp)
-    controles = [("ref", "ref_actuado"), ("ref", "ref_actuadoaj"), ("ref", "ref_regla"), ("ref", "ref_mp"),
-                 ("pub", "entmed"), ("pub", "v2regmed")]
+    controles = [("ref", "ref_actuado"), ("ref", "ref_actuadoaj"), ("ref", "ref_regla"), ("ref", "ref_reactiva"),
+                 ("ref", "ref_mp"), ("pub", "entmed"), ("pub", "v2regmed")]
     por_caso = {}
     for brazo in controles:
         k = 0
@@ -2020,6 +2103,10 @@ def comparaciones(d, filas_celdas):
         for m in metricas:
             for t in T:
                 filas.append(fila_comparacion(ck, lleg, t, cit, REF_FINO, m, d.comp(ck, cit, ("ref", REF_FINO), t, m)))
+                if m == "cambios_fase":                 # hallazgo 10: se declara la correccion en la fila
+                    filas[-1]["nota"] = "; ".join(x for x in (filas[-1]["nota"], (
+                        f"a los brazos de rl_ippo se les resta k = {k_plantilla(ck[1])} por semilla (semáforos que la "
+                        f"plantilla arranca fuera de su primer verde)")) if x)
         if "corredor" in ck[1]:                 # no insertados por periodo, aparte (§4)
             for t in T:
                 for brazo in (cit, ("ref", REF_FINO)):
@@ -2563,7 +2650,8 @@ DELTA = {"v2loc": 2, "c0": 1, "c0med": 1, "entmed": 1.5, "v2viejamed": 0.5, "v2p
          "v2poiloc": 2, "p3obspoi": 1, "p3reloj2poi": -2, "p3completopoi": "alt", "p3e400poi": -1,
          "p3piso200poi": 0, "p3e400c20poi": -0.5, TIPO_RED: 0.5}
 REF_EFECTO = {"ref_fino": 0, "ref_actuadoaj": 3, "ref_actuado": 5, "ref_fijo": 2, "ref_trivial": 10, "ref_fino5": 1,
-              "ref_franja": -1, "ref_bloques": -1.5, "ref_regla": 20, "ref_mp": 15, "ref_fijo10": 1}
+              "ref_franja": -1, "ref_bloques": -1.5, "ref_regla": 20, "ref_reactiva": -4, "ref_mp": 15,
+              "ref_fijo10": 1}
 NO_CONVERGE = {("dem_corredor_t2715", "p3v2reg", 42), ("poi_red", "p3v2poi", 42)}
 # bases caidas declaradas en el mundo, con su corrida (formato de generar_trabajos3.leer_caidas): las dos nuevas de V2
 # aleatoria en P4 (n sigue siendo 5: 3 de 5 no alcanza). El generador no las evalua (gt.CAIDAS)
@@ -2575,7 +2663,7 @@ QUITAR_MUNDO = {("r905", "ref_fino"), ("r1358", "ref_actuadoaj")}
 # (celda, tipo, tanda) del CSV con un vehiculo de mas en una semilla: numeros aleatorios comunes rotos
 ROTO_MUNDO = ("m2715", "ref_fijo10", "t1r")
 # la regla ganadora de cada familia en el mundo (en la noche, la dice barridos/<esc>/regla.json o mp.json)
-REGLA_MUNDO = {"regla.json": "regla_u3g60", "mp.json": "mp_c60"}
+REGLA_MUNDO = {"regla.json": "regla_u3g60", "reactiva.json": "reactiva_d35", "mp.json": "mp_c60"}
 NO_INSERTADOS_MUNDO = {("P2", "poi_corredor_alta", "ref_fino", "t1a"): {1: 40, 4: 40, 7: 40}}
 
 
@@ -3194,6 +3282,15 @@ def probar():
                      "politica_x_vecinos_p3v2vieja_s42.json")
         ok(rechazos == 2, "N17 una base de plan3 elegida con timeLoss o con 8 semillas es ERROR (§6); lo entregado y "
                           "p3_elegir regla no")
+        ok(k_plantilla("corredor") == 1 and k_plantilla("poi_corredor") == 1 and k_plantilla("red") == 0
+           and k_plantilla("malla3_alta") == 0 and k_plantilla("dem_red_t905") == 1 and k_plantilla("no_existe") is None
+           and corre_por_rl_ippo({"cmd": "python evaluar3.py --politica politica_x_vecinos_p3v2reg_s42.pt"}) is True
+           and corre_por_rl_ippo({"cmd": "python evaluar3.py --regla-de barridos/x/reactiva.json"}) is True
+           and corre_por_rl_ippo({"cmd": "python evaluar3.py --brazo fijo --programa x_r10f.add.xml --nombre fino"})
+           is False and corre_por_rl_ippo({"cmd": "python evaluar3.py --escenario x"}) is None,
+           "N18 k por plantilla (semáforos que arrancan fuera de su primer verde, de las plantillas de plan3: corredor "
+           "1, red 0, malla3_alta 0, dem_red_t905 1) y qué brazos corren por rl_ippo (política, regla) o por "
+           "rl_corredor (fijo desde un programa)")
 
     # ===== 3. Mundo sintetico de punta a punta =====
     raiz = os.path.join(TMP_VER, "mundo", "plan3")          # su repositorio git: tmp_ver/mundo (como el worktree)
@@ -3246,8 +3343,8 @@ def probar():
                    for e in manifiesto)
            and set(sello["csv"]) == {e["csv"] for e in manifiesto} and sello["manifiesto_ciego_commit"]
            and all(pt in sello["metas"] for pt in mf.politicas_evaluadas(manifiesto, raiz))
-           and {"cola/manifiesto_esperado.json", "cola/trabajos.jsonl", "cola/caidas.json", "promocion.json"}
-           <= set(sello["otros"]),
+           and {"cola/manifiesto_esperado.json", "cola/trabajos.jsonl", "cola/caidas.json", "promocion.json",
+                "insumos/manifiesto.json"} <= set(sello["otros"]),
            "M00b el generador no evalúa las bases caídas (gt.CAIDAS) y el sello es el de manifiesto.py (CSV, cada "
            ".pt y .json, otros y el commit de la última mañana)")
         # --- negativas de --final (antes de analizar) ---
@@ -3395,9 +3492,9 @@ def probar():
         por_esc = {f["escenario"]: f for f in res["celdas"]}
         estoc = {esc: por_esc[esc]["etiqueta_v2_citable"] for _, esc, _ in ESTOCASTICAS}
         ok(all(v == "FUNCIONA" for v in estoc.values()) and len(estoc) == 6
-           and por_esc["mixa_corredor"]["celda"] == "mix1",
-           f"M06b perfil, mezcla y arranque lento (las celdas del generador, por escenario; mixa_ con la celda de la "
-           f"mezcla): {estoc}")
+           and por_esc["mixa_corredor"]["celda"] == "mixa1" and por_esc["mixa_red"]["celda"] == "mixa3",
+           f"M06b perfil, mezcla y arranque lento (las celdas del generador: per1, per3, mix1, mix3, mixa1 y mixa3): "
+           f"{estoc}")
         f = cel[("D", "regulares")]
         ok(f["etiqueta_v2_citable"] == "MEJORA" and palabra(f["etiqueta_citable"]) == "PENDIENTE"
            and "promoción" in f["etiqueta_citable"],
@@ -3540,6 +3637,28 @@ def probar():
         d.estricto = True
         negarse("M28i en --final, una celda sin modelo principal: ERROR", lambda: fila_celda(d, ("zz", "poi_zz")),
                 "no tiene modelo principal")
+        h0_reac = [r for r in res["hipotesis"] if r["id"] == "H0" and r["a"] == nombre("ref_reactiva")]
+        ok("No le gana a la regla reactiva" in cel[("P3", "regulares")]["lecturas"]
+           and "regla reactiva" not in cel[("P1", "regulares")]["lecturas"] and len(h0_reac) == 7,
+           "M28j regla reactiva al lado (§5, §11): en P3 regular V2 no le gana y la celda lleva la lectura de la "
+           "regla; en P1 el citado le gana; H0 la cuenta entre los controles que reaccionan (6 casos y su resumen)")
+        # hallazgo 10: los cambios de fase de los brazos de rl_ippo, menos k de su plantilla
+        d = Datos(raiz)
+
+        def crudo(rel):
+            with open(os.path.join(raiz, rel), newline="", encoding="utf-8") as f:
+                return {int(r["semilla"]): float(r["cambios_fase"]) for r in csv.DictReader(f)}
+        casos_k = [(("P1", "corredor"), ("base", "v2reg", 42), "ciego/t1r/eval_corredor__v2reg_s42.csv", 1),
+                   (("P1", "corredor"), ("ref", "ref_regla"), "ciego/t1r/eval_corredor__regla.csv", 1),
+                   (("P1", "corredor"), ("ref", REF_FINO), "ciego/t1r/eval_corredor__fino.csv", 0),
+                   (("P3", "red"), ("base", "v2reg", 42), "ciego/t1r/eval_red__v2reg_s42.csv", 0)]
+        bien = all(d.serie(ck, brazo, "T1", "cambios_fase")[0] == {s: v - k for s, v in crudo(rel).items()}
+                   for ck, brazo, rel, k in casos_k)
+        filas_c = [f for f in res["comparaciones"] if (f["celda"], f["escenario"], f["metrica"])
+                   == ("P1", "corredor", "cambios_fase")]
+        ok(bien and len(filas_c) == 2 and all("k = 1" in f["nota"] for f in filas_c),
+           "M37 cambios de fase (hallazgo 10): a los brazos de rl_ippo (V2, regla) se les resta k de su plantilla "
+           "(P1: 1; P3: 0) y a los de rl_corredor (fijo fino) no; la fila de comparaciones lo dice")
         escribir(os.path.join(SALIDA_PRUEBAS, "ejemplo_veredicto3.md"),
                  texto_md(res, " — EJEMPLO CON DATOS SINTÉTICOS (veredicto3.py --probar), no son resultados"))
         # version publicada inconsistente con la mediana -> ERROR
@@ -3571,17 +3690,18 @@ def probar():
                                                                  encoding="utf-8").read())
                     extra.append(f_)
             escribir(os.path.join(raiz, "cola", "manifiesto_esperado.json"), json.dumps(manifiesto + extra, indent=0))
-            sellar_mundo(raiz, manifiesto + extra)          # mf.sello sella tambien los CSV de la prueba final
+            sellar_mundo(raiz, manifiesto + extra)          # mf.sello salta las tandas de uso 'final'
             d = Datos(raiz)
             ok(any("tanda f1r" in a and "prueba final" in a for a in d.avisos),
                "M32 los CSV de una tanda de uso 'final' no entran al veredicto (una línea de aviso)")
             comprobar_cierre(raiz)
             sello_f = leer_json(os.path.join(raiz, "cola", "manifiesto_cierre.json"))
-            sin_finales = dict(sello_f, csv={k: v for k, v in sello_f["csv"].items() if "/f1r/" not in k})
-            con_cambio("cola/manifiesto_cierre.json", json.dumps(sin_finales), lambda: comprobar_cierre(raiz))
-            ok(sum("/f1r/" in k for k in sello_f["csv"]) == 2,
-               "M32b comprobar_cierre acepta el sello con y sin los CSV de la prueba final (uso 'final'; mf.sello los "
-               "sella si ya están al cierre)")
+            con_finales = dict(sello_f, csv=dict(sello_f["csv"], **{x["csv"]: sha256(os.path.join(raiz, x["csv"]))
+                                                                    for x in extra}))
+            con_cambio("cola/manifiesto_cierre.json", json.dumps(con_finales), lambda: comprobar_cierre(raiz))
+            ok(not any("/f1r/" in k for k in sello_f["csv"]),
+               "M32b manifiesto.sello no sella los CSV de la prueba final (uso 'final') y comprobar_cierre acepta el "
+               "sello sin ellos y también uno que los traiga")
             lista = escribir(os.path.join(raiz, "listo", "lista_final.json"), json.dumps(
                 {"comparaciones": [{"celda": "P1", "escenario": "corredor", "tanda": "f1r",
                                     "a": {"tipo": "v2reg", "base": 42}, "b": {"tipo": "ref_fino"}}]}))
@@ -3667,6 +3787,14 @@ def probar():
            f"M36 caídas por corrida: veredicto3 da por caídas las mismas {len(segun_v3)} bases que el generador deja "
            f"de evaluar (la V2 con sus 400 episodios y sus dos derivadas, la V2 de la mezcla también en el arranque "
            f"lento, los 400 episodios aleatorios con sus derivadas)")
+        sin_corrida = [{k: v for k, v in c.items() if k != "corrida"}
+                       for c in leer_json(os.path.join(raiz_c, "cola", "caidas.json"))]
+        escribir(os.path.join(raiz_c, "cola", "caidas.json"), json.dumps(sin_corrida))
+        d = Datos(raiz_c)
+        ok({(ck[0], ck[1], fam, b) for ck, fam, b in ((k[:2], k[2], k[3]) for k in evaluadas)
+            if d.es_caida(ck, fam, b)} == caen,
+           "M36b las mismas declaraciones sin corrida: veredicto3 la arma como el generador (gt.corrida_de_tipo) y da "
+           "las mismas 9 bases")
 
     grupo("1. Pruebas del prototipo (lo entregado de plan2/, solo lectura)", prototipo)
     grupo("2. Reglas nuevas con datos por semilla fabricados", reglas)
