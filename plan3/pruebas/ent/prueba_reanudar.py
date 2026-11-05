@@ -83,7 +83,15 @@ def prueba_tramos(inf, esc, modos):
         log = (tramos / "log_tramo2.txt").read_text(encoding="utf-8")
         inf.chequeo("tramo 2 (--reanudar ep 10) sale con 0 y dice desde donde sigue",
                     cod == 0 and "Reanuda desde" in log and "misma etiqueta" in log, f"codigo {cod}")
-        comparar_corridas(inf, seguida, tramos, tag, pol)
+        # los estados anotan quien escribio cada episodio (tramos): es lo unico que distingue 20 de 10 + 10
+        comparar_corridas(inf, seguida, tramos, tag, pol, ignorar_estado=("tramos",))
+        ta = u.tensores_estado(u.checkpoints(seguida, tag, ".estado.pt")[20])["tramos"]
+        tb = u.tensores_estado(u.checkpoints(tramos, tag, ".estado.pt")[20])["tramos"]
+        inf.chequeo("tramos del estado del 20: 1-20 en la seguida; 1-10 y 11-20 en la de dos tramos, con la misma "
+                    "huella de codigo", [(t["desde"], t["hasta"]) for t in ta] == [(1, 20)]
+                    and [(t["desde"], t["hasta"]) for t in tb] == [(1, 10), (11, 20)]
+                    and len({t["codigo"] for t in ta + tb}) == 1,
+                    f"{[(t['desde'], t['hasta']) for t in ta]} | {[(t['desde'], t['hasta']) for t in tb]}")
     return {modo: c[0] for modo, c in carpetas.items()}
 
 
@@ -117,7 +125,7 @@ def prueba_nueva(inf, seguida_v2):
                 meta["opciones"].get("lr_piso") == 0.1, f"{meta['opciones']}")
     inf("Frente a la corrida seguida de 30 con la misma etiqueta y la misma tasa:")
     comparar_corridas(inf, nueva, seguida, tag, pol, ignorar_json=("reanudado_de",),
-                      ignorar_estado=("origen", "archivos"), estados=(15, 20, 25, 30))
+                      ignorar_estado=("origen", "archivos", "tramos"), estados=(15, 20, 25, 30))
     ok, txt = u.comparar_columnas(nueva / f"resultados_{tag}.csv", seguida_v2 / f"resultados_{origen}.csv",
                                   ignorar=("segundos", "etiqueta"), filas=10)
     inf.chequeo("filas 1-10 = las de la V2 de origen (salvo etiqueta y segundos)", ok, txt)

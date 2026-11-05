@@ -19,6 +19,7 @@ Salida: plan3/pruebas/ent/salidas/prueba_caida.txt; corridas en plan3/tmp_ent/ca
 """
 import re
 import sys
+import json
 import time
 import subprocess
 
@@ -111,10 +112,24 @@ def etiqueta_nueva(inf, seguida):
     pa, pb = ref / f"politica_{POL_N}.pt", n / f"politica_{POL_N}.pt"
     inf.chequeo("politica publicada (tensores)", *u.comparar_pt(pa, pb))
     inf.chequeo("meta publicado", *u.comparar_json(pa.with_suffix(".json"), pb.with_suffix(".json"),
-                                                   ("reanudado_de",)))
+                                                   ("reanudado_de", "reanudaciones")))
+    reanudaciones(inf, pb.with_suffix(".json"), [15])
     ea, eb = u.checkpoints(ref, TAG_N, ".estado.pt"), u.checkpoints(n, TAG_N, ".estado.pt")
     for ep in (15, 20, 25, 30):
-        inf.chequeo(f"estado del ep {ep}", *u.comparar_estados(ea[ep], eb[ep], ("origen", "archivos")))
+        inf.chequeo(f"estado del ep {ep}", *u.comparar_estados(ea[ep], eb[ep], ("origen", "archivos", "tramos",
+                                                                                 "reanudaciones")))
+
+
+def reanudaciones(inf, ruta_meta, partidas):
+    """B22 en el meta publicado: un registro por relanzamiento (partida = estado desde el que siguio), todos sin
+    diferencias; y ningun checkpoints/<tag>_rehechos.json (solo se escribe si algo no repite)."""
+    with open(ruta_meta, encoding="utf-8") as f:
+        regs = json.load(f).get("reanudaciones", [])
+    inf.chequeo("meta['reanudaciones']: un registro por relanzamiento, todos repetidos",
+                [r["partida"] for r in regs] == partidas and all(r["filas"] >= 1 and not r["distintos"] for r in regs),
+                f"{regs}")
+    rehechos = sorted(p.name for p in (ruta_meta.parent / "checkpoints").glob("*_rehechos.json"))
+    inf.chequeo("sin checkpoints/*_rehechos.json", not rehechos, f"{rehechos}")
 
 
 def main():
@@ -173,12 +188,14 @@ def main():
     inf.chequeo("checkpoints", *u.comparar_checkpoints(seguida, TAG, c, TAG))
     pa, pb = seguida / f"politica_{POL}.pt", c / f"politica_{POL}.pt"
     inf.chequeo("politica publicada (bytes)", u.sha256(pa) == u.sha256(pb))
-    inf.chequeo("meta publicado", *u.comparar_json(pa.with_suffix(".json"), pb.with_suffix(".json")))
+    inf.chequeo("meta publicado (salvo reanudaciones)", *u.comparar_json(pa.with_suffix(".json"),
+                                                                         pb.with_suffix(".json"), ("reanudaciones",)))
+    reanudaciones(inf, pb.with_suffix(".json"), [5, 15])
     ea, eb = u.checkpoints(seguida, TAG, ".estado.pt"), u.checkpoints(c, TAG, ".estado.pt")
     for ep in (5, 10, 15, 20):
-        inf.chequeo(f"estado del ep {ep}", *u.comparar_estados(ea[ep], eb[ep]))
-    restos = sorted(p.name for p in (c / "checkpoints").glob("*.tmp"))
-    inf.chequeo("no quedan estados a medio escribir (.tmp)", not restos, f"{restos}")
+        inf.chequeo(f"estado del ep {ep}", *u.comparar_estados(ea[ep], eb[ep], ("tramos", "reanudaciones")))
+    restos = sorted(p.name for p in (c / "checkpoints").glob("*.tmp")) + sorted(p.name for p in c.glob("*.tmp"))
+    inf.chequeo("no quedan temporales a medio escribir (.tmp)", not restos, f"{restos}")
     inf("")
     inf("Etiqueta nueva p3prbcaidan desde el estado del ep 10 de la corrida seguida (30 episodios, horizonte 20, "
         "piso 0.1)")
