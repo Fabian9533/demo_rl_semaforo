@@ -59,6 +59,13 @@ def preparar_referencias():
 
 def main():
     inf(f"Referencias congeladas (copia en {CARPETA})")
+    import shutil
+    for resto in ("ciego", "parciales", "barridos", "referencias_congeladas.json"):     # lo de una corrida anterior
+        ruta = os.path.join(CARPETA, resto)
+        if os.path.isdir(ruta):
+            shutil.rmtree(ruta)
+        elif os.path.exists(ruta):
+            os.remove(ruta)
     regla = preparar_referencias()
     fino = ["--brazo", "fijo", "--programa", "corredor_r10f.add.xml", "--nombre", "fino"]
     cod, texto = evaluar3("--salida", "parciales/eval_fino.csv", *fino)
