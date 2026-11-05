@@ -6,7 +6,9 @@ Uso (desde plan3/):  python pruebas/infra/prueba_cola.py
 Casos (PLAN3 0.4):
   A bien; B depende de A; C falla y D depende de C (bloqueado); E sale con 0 sin escribir su salida (fallido);
   F se mata con taskkill /F a mitad (fallido); G y su cola se matan juntos y la cola se reinicia (huerfano sin
-  salidas: fallido); H falla una vez con 'WinError 32' y se reintenta (hecho); I no cabe antes del corte (no corre).
+  salidas: fallido); H falla una vez con 'WinError 32' y se reintenta (hecho); I no cabe antes del corte (no corre);
+  J escribe su salida, falla al cerrar con 'WinError 32' y el reintento sale con 0 sin escribir (hecho: la salida es
+  del primer intento).
 Salida: pruebas/infra/prueba_cola.txt. Sale con codigo 1 si algo no da lo esperado.
 """
 import os
@@ -30,6 +32,14 @@ elif modo == "falla":
     sys.exit(1)
 elif modo == "sin_salida":
     pass
+elif modo == "ya_hecho":
+    marca = salida + ".intento"
+    if not os.path.exists(marca):
+        open(marca, "w").write("1")
+        open(salida, "w").write("ok")
+        print("PermissionError: [WinError 32] archivo tomado al cerrar")
+        sys.exit(1)
+    # segundo intento: ya estaba hecho (como rl_ippo --reanudar auto), sale con 0 sin escribir
 elif modo == "reintento":
     marca = salida + ".intento"
     if not os.path.exists(marca):
@@ -97,7 +107,7 @@ def main():
     hasta = time.strftime("%H:%M", time.localtime(time.time() + 600))
     escribir([trabajo("A", "bien", 1), trabajo("B", "bien", 1, ["trabajo:A"]), trabajo("C", "falla", 1),
               trabajo("D", "bien", 1, ["trabajo:C"]), trabajo("E", "sin_salida", 1), trabajo("F", "bien", 40),
-              trabajo("H", "reintento", 1), trabajo("I", "bien", 1, duracion=7200)])
+              trabajo("H", "reintento", 1), trabajo("I", "bien", 1, duracion=7200), trabajo("J", "ya_hecho", 1)])
     cola = subprocess.Popen([sys.executable, "cola.py", "--sin-git", "--cpus", "4", "--hasta", hasta], cwd=TMP,
                             stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
     pid = None
@@ -116,6 +126,8 @@ def main():
     revisar("E fallido por salidas incompletas", e["fallidos"].get("E") == "salidas incompletas")
     revisar("F matado con taskkill: fallido, no hecho", "F" in e["fallidos"] and "F" not in e["hechos"])
     revisar("H hecho tras un reintento", "H" in e["hechos"] and e["reintentos"].get("H") == 1)
+    revisar("J hecho: el reintento no reescribe y la salida del primer intento cuenta",
+            "J" in e["hechos"] and e["reintentos"].get("J") == 1)
     revisar("I no corrio (no cabe antes del corte)", "I" not in e["hechos"] and "I" not in e["fallidos"]
             and "I" in e.get("salida", {}).get("pendientes", []))
     # Ronda 2: G y la cola se matan juntos; la cola se reinicia y G queda como huerfano sin salidas
