@@ -1,0 +1,26 @@
+<additional>
+    <!-- Programa fijo del plan v2 para dem_red_t3620, instalado por barrer_fijo.py. Malla barrida: verde
+         de avenida (E-O) 15/20/25/30/35 s x verde transversal (N-S) 10/15/20 s x desfase del segundo
+         cruce de 0 a 40 s cada 5 s y 23 s; tercero en 0, el del segundo o el doble; 405 configuraciones
+         con las semillas 2001-2003. Ganador: avenida 25 s, transversal 10 s, ciclo 41 s, desfases
+         0/20/0; elegido por timeLoss: retraso total 103.73 s (sd 2.16), timeLoss 59.68 s (sd 0.57) sobre
+         esas semillas. -->
+    <tlLogic id="semaforo_C1" type="static" programID="fijo" offset="0">
+        <phase duration="25" state="rrrGGGgrrrGGGg"/>
+        <phase duration="3" state="rrryyyyrrryyyy"/>
+        <phase duration="10" state="GGgrrrrGGgrrrr"/>
+        <phase duration="3" state="yyyrrrryyyrrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C2" type="static" programID="fijo" offset="20">
+        <phase duration="25" state="rrrGGGgrrrGGGg"/>
+        <phase duration="3" state="rrryyyyrrryyyy"/>
+        <phase duration="10" state="GGgrrrrGGgrrrr"/>
+        <phase duration="3" state="yyyrrrryyyrrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C3" type="static" programID="fijo" offset="0">
+        <phase duration="25" state="rrrGGGgrrrGGGg"/>
+        <phase duration="3" state="rrryyyyrrryyyy"/>
+        <phase duration="10" state="GGgrrrrGGgrrrr"/>
+        <phase duration="3" state="yyyrrrryyyrrrr"/>
+    </tlLogic>
+</additional>

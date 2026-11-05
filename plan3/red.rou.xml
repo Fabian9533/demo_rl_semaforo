@@ -1,0 +1,32 @@
+<routes>
+    <vType id="auto" accel="2.6" decel="4.5" sigma="0.5" length="5" minGap="2.5" maxSpeed="13.89"/>
+
+    <!-- Demanda muy asimetrica: la avenida carga mucho mas que las transversales.
+         Periodo 1 (0-1800 s): hora punta de oeste a este -->
+    <flow id="p1_W_E"   type="auto" from="W_RW"  to="C3_E"  begin="0" end="1800" vehsPerHour="650"/>
+    <flow id="p1_E_W"   type="auto" from="E_C3"  to="RW_W"  begin="0" end="1800" vehsPerHour="250"/>
+    <flow id="p1_SR_E"  type="auto" from="SR_RS" to="C3_E"  begin="0" end="1800" vehsPerHour="150"/>
+    <flow id="p1_W_NR"  type="auto" from="W_RW"  to="RN_NR" begin="0" end="1800" vehsPerHour="80"/>
+    <flow id="p1_N1_S1" type="auto" from="N1_C1" to="C1_S1" begin="0" end="1800" vehsPerHour="150"/>
+    <flow id="p1_S1_N1" type="auto" from="S1_C1" to="C1_N1" begin="0" end="1800" vehsPerHour="150"/>
+    <flow id="p1_N2_S2" type="auto" from="N2_C2" to="C2_S2" begin="0" end="1800" vehsPerHour="150"/>
+    <flow id="p1_S2_N2" type="auto" from="S2_C2" to="C2_N2" begin="0" end="1800" vehsPerHour="150"/>
+    <flow id="p1_N3_S3" type="auto" from="N3_C3" to="C3_S3" begin="0" end="1800" vehsPerHour="150"/>
+    <flow id="p1_S3_N3" type="auto" from="S3_C3" to="C3_N3" begin="0" end="1800" vehsPerHour="150"/>
+    <flow id="p1_S1_E"  type="auto" from="S1_C1" to="C3_E"  begin="0" end="1800" vehsPerHour="60"/>
+    <flow id="p1_N3_W"  type="auto" from="N3_C3" to="RW_W"  begin="0" end="1800" vehsPerHour="60"/>
+
+    <!-- Periodo 2 (1800-3600 s): la punta se invierte, de este a oeste -->
+    <flow id="p2_W_E"   type="auto" from="W_RW"  to="C3_E"  begin="1800" end="3600" vehsPerHour="250"/>
+    <flow id="p2_E_W"   type="auto" from="E_C3"  to="RW_W"  begin="1800" end="3600" vehsPerHour="650"/>
+    <flow id="p2_NR_W"  type="auto" from="NR_RN" to="RW_W"  begin="1800" end="3600" vehsPerHour="150"/>
+    <flow id="p2_E_SR"  type="auto" from="E_C3"  to="RS_SR" begin="1800" end="3600" vehsPerHour="80"/>
+    <flow id="p2_N1_S1" type="auto" from="N1_C1" to="C1_S1" begin="1800" end="3600" vehsPerHour="150"/>
+    <flow id="p2_S1_N1" type="auto" from="S1_C1" to="C1_N1" begin="1800" end="3600" vehsPerHour="150"/>
+    <flow id="p2_N2_S2" type="auto" from="N2_C2" to="C2_S2" begin="1800" end="3600" vehsPerHour="150"/>
+    <flow id="p2_S2_N2" type="auto" from="S2_C2" to="C2_N2" begin="1800" end="3600" vehsPerHour="150"/>
+    <flow id="p2_N3_S3" type="auto" from="N3_C3" to="C3_S3" begin="1800" end="3600" vehsPerHour="150"/>
+    <flow id="p2_S3_N3" type="auto" from="S3_C3" to="C3_N3" begin="1800" end="3600" vehsPerHour="150"/>
+    <flow id="p2_N1_W"  type="auto" from="N1_C1" to="RW_W"  begin="1800" end="3600" vehsPerHour="60"/>
+    <flow id="p2_S3_E"  type="auto" from="S3_C3" to="C3_E"  begin="1800" end="3600" vehsPerHour="60"/>
+</routes>
