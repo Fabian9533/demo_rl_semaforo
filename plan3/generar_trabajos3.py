@@ -4,7 +4,10 @@ generar_trabajos3.py - Escribe cola/trabajos.jsonl con los trabajos del bloque p
 Uso (desde plan3/):  python generar_trabajos3.py [--partes etapa1,...] [--seco] [--comprobar]
   --partes     partes a incluir (por defecto, todas las que ya tienen codigo; ver PARTES)
   --seco       no escribe: muestra cuantos trabajos y cuantas h-proceso por etapa
-  --comprobar  sale con 1 si cola/trabajos.jsonl no es lo que este script generaria (lo usa chequeos_previos)
+  --comprobar  sale con 1 si cola/trabajos.jsonl o cola/manifiesto_esperado.json no son lo que este script
+               generaria (lo usa chequeos_previos)
+Escribe tambien cola/manifiesto_esperado.json: una entrada por CSV de evaluacion esperado (celda, escenario, tanda,
+clave del brazo, tipo, base, semillas y trabajo que lo produce). Lo usan manifiesto.py y veredicto3.py.
 
 Cada trabajo declara: id, prioridad (menor = antes), cpus, requiere, cmd (cwd = plan3/), salidas (la cola lo da por
 hecho solo si existen y son nuevas), duracion (s estimados, regimen conservador + 10 %), uso (bloque de semillas del
@@ -20,6 +23,7 @@ import argparse
 
 PLAN3 = os.path.dirname(os.path.abspath(__file__))
 TRABAJOS = os.path.join(PLAN3, "cola", "trabajos.jsonl")
+MANIFIESTO = os.path.join(PLAN3, "cola", "manifiesto_esperado.json")
 LANZADOR = "python ../con_escenarios.py"
 
 # ---------------- Celdas ----------------
@@ -503,12 +507,16 @@ def main():
     desconocidas = [p for p in partes if p not in PARTES]
     if desconocidas:
         sys.exit(f"partes desconocidas: {desconocidas}; hay {sorted(PARTES)}")
-    trabajos = generar(partes)
+    trabajos, manifiesto = generar_con_manifiesto(partes)
     texto = "".join(json.dumps(t, ensure_ascii=False) + "\n" for t in trabajos)
+    texto_m = json.dumps(manifiesto, ensure_ascii=False, indent=0) + "\n"
     if args.comprobar:
-        actual = open(TRABAJOS, encoding="utf-8").read() if os.path.exists(TRABAJOS) else ""
-        print("cola/trabajos.jsonl al dia" if actual == texto else "cola/trabajos.jsonl NO coincide")
-        sys.exit(0 if actual == texto else 1)
+        bien = True
+        for ruta, esperado in ((TRABAJOS, texto), (MANIFIESTO, texto_m)):
+            actual = open(ruta, encoding="utf-8").read() if os.path.exists(ruta) else ""
+            print(f"{os.path.relpath(ruta, PLAN3)} {'al dia' if actual == esperado else 'NO coincide'}")
+            bien &= actual == esperado
+        sys.exit(0 if bien else 1)
     por_etapa = {}
     for t in trabajos:
         n, h = por_etapa.get(t["etapa"], (0, 0.0))
@@ -520,7 +528,10 @@ def main():
         os.makedirs(os.path.dirname(TRABAJOS), exist_ok=True)
         with open(TRABAJOS, "w", encoding="utf-8", newline="\n") as f:
             f.write(texto)
-        print(f"escrito {os.path.relpath(TRABAJOS, PLAN3)}")
+        with open(MANIFIESTO, "w", encoding="utf-8", newline="\n") as f:
+            f.write(texto_m)
+        print(f"escritos {os.path.relpath(TRABAJOS, PLAN3)} y {os.path.relpath(MANIFIESTO, PLAN3)} "
+              f"({len(manifiesto)} CSV esperados)")
 
 
 if __name__ == "__main__":
