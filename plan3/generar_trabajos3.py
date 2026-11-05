@@ -70,6 +70,7 @@ class Lista:
     def __init__(self):
         self.trabajos = []
         self.ids = set()
+        self.manifiesto = []            # una entrada por CSV de evaluacion esperado (lo lee veredicto3)
 
     def agregar(self, t):
         assert t["id"] not in self.ids, f"id repetido: {t['id']}"
@@ -288,7 +289,194 @@ def etapa3(lista):
                             lanzador=e.startswith("poi_"), factor=f, episodios=eps)
 
 
-PARTES = {"etapa1": etapa1, "c0": c0, "v2vieja": v2vieja, "etapa2": etapa2, "etapa3b": etapa3b, "etapa3": etapa3}
+# ---------------- Evaluaciones (PLAN3 1.6, 2.3, 3.6 y 3b; prerregistro §3, §7 y §12) ----------------
+# tanda -> (uso del prerregistro, semillas). Las decisivas escriben en ciego/; las demas en parciales/.
+TANDAS = {"t1r": ("examen_regular", "8001-8030"), "t2r": ("examen_regular", "13001-13030"),
+          "h1t1": ("examen_h1", "8031-8120"), "h1t2": ("examen_h1", "13031-13120"),
+          "t1a": ("examen_aleatorio", "7001-7100"), "t2a": ("examen_aleatorio", "10001-10100"),
+          "puente": ("puente", "1001-1030"), "promo": ("promocion", "15009-15024")}
+CIEGAS = {"examen_regular", "examen_h1", "examen_aleatorio", "final"}
+REGULARES, ALEATORIAS = ("t1r", "t2r"), ("t1a", "t2a")
+# s por semilla al jugar una politica o una referencia (regimen conservador) [M costos_plan3.py, EV]
+EV = {"P1": 5.4, "P2": 13.2, "P3": 9.0, "P4": 10.0, "P5": 23.6, "P6": 42.2, "P6e": 42.2,
+      "c905": 3.6, "c1358": 4.2, "c2715": 6.6, "r905": 5.6, "r1358": 6.2, "r1810": 6.6, "r2715": 8.8,
+      "r3620": 12.0, "m1810": 13.6, "m2715": 15.6, "m3620": 17.6, "m6525": 24.8, "D": 5.4}
+FACTOR_EV = {"p3obs": OBS, "p3obspoi": OBS, "p3reloj2": RELOJ_VAL, "p3reloj2poi": RELOJ_VAL,
+             "p3completo": OBS * RELOJ_VAL, "p3completopoi": OBS * RELOJ_VAL}
+
+
+def n_semillas(texto):
+    return sum(int(b) - int(a) + 1 for a, b in (p.split("-") for p in texto.split(",")))
+
+
+def evaluacion(lista, celda, esc, tanda, clave, brazo, requiere=(), etapa="ev", factor=1.0, tipo="",
+               base=""):
+    """Un brazo en un escenario y una tanda. clave da el nombre del CSV (el brazo real lo pone evaluar3)."""
+    uso, semillas = TANDAS[tanda]
+    carpeta = "ciego" if uso in CIEGAS else "parciales"
+    salida = f"{carpeta}/{tanda}/eval_{esc}__{clave}.csv"
+    pre = LANZADOR if esc.startswith(("poi_", "per_", "mix", "malla3_alta_e")) else "python"
+    f = factor * (POI_F if esc.startswith("poi_") else 1.0)
+    tid = f"ev_{tanda}_{esc}__{clave}"
+    lista.agregar({"id": tid, "etapa": etapa, "prioridad": 4, "uso": uso, "requiere": list(requiere),
+                   "cmd": f"{pre} evaluar3.py --escenario {esc} --semillas {semillas} --salida {salida} {brazo}",
+                   "salidas": [salida], "duracion": round(EMPAQUE * f * n_semillas(semillas) * EV[celda])})
+    lista.manifiesto.append({"csv": salida, "celda": celda, "escenario": esc, "tanda": tanda, "clave": clave,
+                             "tipo": tipo or clave, "base": base, "semillas": semillas, "trabajo": tid})
+    return tid
+
+
+def mediana(lista, esc, variante, et, bases, requiere, et_med, origen=""):
+    """Paso de eleccion: la version evaluada (base mediana por val_elegido) publicada como <...>_<et_med>.pt."""
+    rutas = ",".join(f"{origen}politica_{esc}_{variante}_{et}_s{b}.pt" for b in bases)
+    salida = f"politica_{esc}_{variante}_{et_med}.pt"
+    tid = f"el_{et_med}_{esc}"
+    if tid not in lista.ids:
+        lista.agregar({"id": tid, "etapa": "ev", "prioridad": 2, "uso": "sin_semillas", "requiere": list(requiere),
+                       "cmd": f"python p3_elegir.py mediana --politicas {rutas} --etiqueta {et_med} --salida {salida}",
+                       "salidas": [salida], "duracion": 10})
+    return salida, tid
+
+
+def req_entreno(pref, esc, b, celda, episodios=EPISODIOS, factor=1.0, desde=0):
+    return f"trabajo:{id_entreno(pref, esc, b, celda, episodios, desde=desde, factor=factor)}"
+
+
+def evaluaciones(lista):
+    # --- Llegadas regulares: P1-P6, niveles, D y P6e ---
+    celdas_reg = {**CASOS, **NIVELES, **D, **P6E}
+    for c, e in celdas_reg.items():
+        pref = "e2_v2reg" if c == "P6e" else "e1_v2reg"
+        bases = BASES5 if c in CASOS or c in ("c2715", "D", "P6e") else BASES3
+        reqs = {b: req_entreno(pref, e, b, c) for b in bases}
+        for t in REGULARES:
+            for b in bases:                                                       # V2, todas las bases
+                evaluacion(lista, c, e, t, f"v2reg_s{b}", f"--politica politica_{e}_vecinos_p3v2reg_s{b}.pt",
+                           [reqs[b]], tipo="v2reg", base=b)
+            for clave, brazo in (("fijo", "--brazo fijo"), ("actuado", "--brazo actuado"),
+                                 ("trivial", "--brazo trivial")):                 # referencias que ya existen
+                evaluacion(lista, c, e, t, clave, brazo, ["trabajo:preparar"], tipo=f"ref_{clave}")
+        if c in ("P6e", "D"):
+            continue
+        # version evaluada de C0, de la V2 vieja, del IPPO entregado y de V2 entre 42/2042/4042
+        c0m, c0t = mediana(lista, e, "vecinos", "p3c0", BASES3,
+                           [f"trabajo:c0_p3c0_{e}_s{b}_publicar" for b in BASES3], "p3c0med")
+        vvm, vvt = mediana(lista, e, "vecinos", "p3v2vieja", BASES3,
+                           [f"trabajo:e1_elegir_p3v2vieja_{e}_s{b}" for b in BASES3], "p3v2viejamed")
+        enm, ent = mediana(lista, e, "vecinos", "", BASES3, [], "p3entmed", origen="insumos/entregado/")
+        v3m, v3t = mediana(lista, e, "vecinos", "p3v2reg", BASES3, [reqs[b] for b in BASES3], "p3v2reg3med")
+        for t in REGULARES:
+            evaluacion(lista, c, e, t, "c0med", f"--politica {c0m}", [f"trabajo:{c0t}"], tipo="c0med")
+            evaluacion(lista, c, e, t, "v2viejamed", f"--politica {vvm}", [f"trabajo:{vvt}"], tipo="v2viejamed")
+            evaluacion(lista, c, e, t, "entmed", f"--politica {enm}", [f"trabajo:{ent}"], tipo="entmed")
+        if c in CASOS or c == "m6525":
+            # H1 y H2: 120 semillas por tanda para V2 (de 42/2042/4042), C0 e IPPO entregado
+            for t in ("h1t1", "h1t2"):
+                evaluacion(lista, c, e, t, "v2reg3med", f"--politica {v3m}", [f"trabajo:{v3t}"], tipo="v2reg3med")
+                evaluacion(lista, c, e, t, "c0med", f"--politica {c0m}", [f"trabajo:{c0t}"], tipo="c0med")
+                evaluacion(lista, c, e, t, "entmed", f"--politica {enm}", [f"trabajo:{ent}"], tipo="entmed")
+        if c in ("P4", "m6525"):
+            # H2: sentido por base, V2 de la base b frente a C0 de la base b, en las 120 semillas
+            for b in BASES3:
+                for t in ("t1r", "t2r", "h1t1", "h1t2"):
+                    evaluacion(lista, c, e, t, f"c0_s{b}", f"--politica politica_{e}_vecinos_p3c0_s{b}.pt",
+                               [f"trabajo:c0_p3c0_{e}_s{b}_publicar"], tipo="c0", base=b)
+                for t in ("h1t1", "h1t2"):
+                    evaluacion(lista, c, e, t, f"v2reg_s{b}", f"--politica politica_{e}_vecinos_p3v2reg_s{b}.pt",
+                               [reqs[b]], tipo="v2reg", base=b)
+        if c in CASOS:
+            # puente con lo entregado (descriptivo): los CSV del fijo y del IPPO entregados se reutilizan
+            for clave, ruta, req in (("v2reg3med", v3m, v3t), ("v2viejamed", vvm, vvt), ("c0med", c0m, c0t)):
+                evaluacion(lista, c, e, "puente", clave, f"--politica {ruta}", [f"trabajo:{req}"], tipo=clave)
+    # ablacion (P4, P6) y V2 sin mensajes (P1, P2, P6), todas sus bases
+    for c in ("P4", "P6"):
+        e = CASOS[c]
+        for et in ("p3sd", "p3se"):
+            for b in BASES3:
+                for t in REGULARES:
+                    evaluacion(lista, c, e, t, f"{et}_s{b}", f"--politica politica_{e}_vecinos_{et}_s{b}.pt",
+                               [req_entreno(f"e1_{et}", e, b, c)], tipo=et, base=b)
+    for c in ("P1", "P2", "P6"):
+        e = CASOS[c]
+        for b in BASES3:
+            for t in REGULARES:
+                evaluacion(lista, c, e, t, f"v2loc_s{b}", f"--politica politica_{e}_local_p3v2reg_s{b}.pt",
+                           [req_entreno("e1_v2loc", e, b, c)], tipo="v2loc", base=b)
+    # --- Llegadas aleatorias: poi_P1-P6 ---
+    for c, e in POI.items():
+        reqs = {b: req_entreno("e2_v2poi", e, b, c, factor=POI_F) for b in BASES5}
+        for t in ALEATORIAS:
+            for b in BASES5:
+                evaluacion(lista, c, e, t, f"v2poi_s{b}", f"--politica politica_{e}_vecinos_p3v2poi_s{b}.pt",
+                           [reqs[b]], tipo="v2poi", base=b)
+            for b in BASES3:
+                evaluacion(lista, c, e, t, f"v2poiloc_s{b}", f"--politica politica_{e}_local_p3v2poi_s{b}.pt",
+                           [req_entreno("e2_v2poiloc", e, b, c, factor=POI_F)], tipo="v2poiloc", base=b)
+            for clave, brazo in (("fijo", "--brazo fijo"), ("actuado", "--brazo actuado"),
+                                 ("trivial", "--brazo trivial")):
+                evaluacion(lista, c, e, t, clave, brazo, ["trabajo:preparar"], tipo=f"ref_{clave}")
+        # V2 regular jugada con llegadas aleatorias (en P6, la de P6e), C0 aleatorio e IPPO entregado
+        e_reg, c_reg = (P6E["P6e"], "P6e") if c == "P6" else (CASOS[c], c)
+        pref = "e2_v2reg" if c == "P6" else "e1_v2reg"
+        v5m, v5t = mediana(lista, e_reg, "vecinos", "p3v2reg", BASES5,
+                           [req_entreno(pref, e_reg, b, c_reg) for b in BASES5], "p3v2regmed")
+        cpm, cpt = mediana(lista, e, "vecinos", "p3c0poi", BASES3,
+                           [f"trabajo:c0_p3c0poi_{e}_s{b}_publicar" for b in BASES3], "p3c0poimed")
+        enm, ent = mediana(lista, CASOS[c], "vecinos", "", BASES3, [], "p3entmed", origen="insumos/entregado/")
+        pm, pt = mediana(lista, e, "vecinos", "p3v2poi", BASES5, list(reqs.values()), "p3v2poimed")
+        for t in ALEATORIAS:
+            evaluacion(lista, c, e, t, "v2regmed", f"--politica {v5m}", [f"trabajo:{v5t}"], tipo="v2regmed")
+            evaluacion(lista, c, e, t, "c0poimed", f"--politica {cpm}", [f"trabajo:{cpt}"], tipo="c0poimed")
+            evaluacion(lista, c, e, t, "entmed", f"--politica {enm}", [f"trabajo:{ent}"], tipo="entmed")
+        for t in REGULARES:                      # transferencia de vuelta: V2 aleatoria con llegadas regulares
+            evaluacion(lista, c_reg, e_reg, t, "v2poimed", f"--politica {pm}", [f"trabajo:{pt}"], tipo="v2poimed")
+
+
+def evaluaciones_variantes(lista):
+    """Etapa 3 y 3b: todas las bases de cada variante, en las tandas de su tipo de llegadas."""
+    reg = {**CASOS, **NIVELES, **D}
+    variantes = [("p3obs", ["D", "c2715"], BASES5, 200), ("p3obs", ["P1", "P2", "P3", "P6"], BASES3, 200),
+                 ("p3m7norm", ["D"], BASES3, 200), ("p3m7forz", ["D"], BASES3, 200), ("p3m7msg", ["D"], BASES3, 200),
+                 ("p3m7", ["D", "P2", "P6"], BASES3, 200), ("p3ent", ["D", "P1"], BASES3, 200),
+                 ("p3reloj2", ["D", "P1", "P2", "P6"], BASES3, 200), ("p3completo", ["P1", "P2", "P4", "P6"], BASES3, 400),
+                 ("p3obspoi", list(POI), BASES3, 200), ("p3reloj2poi", ["P1", "P2", "P6"], BASES3, 200),
+                 ("p3completopoi", list(POI), BASES3, 400)]
+    for et, celdas, bases, eps in variantes:
+        poi = et.endswith("poi")
+        f_tr = {"p3obspoi": (OBS * POI_F, OBS * POI_F), "p3reloj2poi": (RELOJ_TR * POI_F, RELOJ_VAL * POI_F),
+                "p3completopoi": (OBS * RELOJ_TR * POI_F, OBS * RELOJ_VAL * POI_F), "p3obs": OBS,
+                "p3reloj2": (RELOJ_TR, RELOJ_VAL), "p3completo": (OBS * RELOJ_TR, OBS * RELOJ_VAL)}.get(et, 1.0)
+        for c in celdas:
+            e = POI[c] if poi else reg[c]
+            for b in bases:
+                req = req_entreno(f"e3_{et}", e, b, c, eps, factor=f_tr)
+                for t in (ALEATORIAS if poi else REGULARES):
+                    evaluacion(lista, c, e, t, f"{et}_s{b}", f"--politica politica_{e}_vecinos_{et}_s{b}.pt",
+                               [req], factor=FACTOR_EV.get(et, 1.0), tipo=et, base=b)
+    for tipo, celdas, pref in (("reg", CASOS, "p3e400"), ("poi", POI, "p3e400poi")):
+        tandas = ALEATORIAS if tipo == "poi" else REGULARES
+        for c, e in celdas.items():
+            for b in BASES3:
+                f = POI_F if tipo == "poi" else 1.0
+                req = req_entreno(f"e3b_{pref}", e, b, c, 400, factor=f, desde=DESDE_3B)
+                for t in tandas:
+                    evaluacion(lista, c, e, t, f"{pref}_s{b}", f"--politica politica_{e}_vecinos_{pref}_s{b}.pt",
+                               [req], tipo=pref, base=b)
+                    for et_r in (f"p3piso200{tipo}", f"p3e400c20{tipo}"):
+                        evaluacion(lista, c, e, t, f"{et_r}_s{b}", f"--politica politica_{e}_vecinos_{et_r}_s{b}.pt",
+                                   [f"trabajo:e3b_elegir_{et_r}_{e}_s{b}"], tipo=et_r, base=b)
+
+
+def preparar(lista):
+    """Genera los programas del actuado y del ciclo minimo de cada escenario (p3_preparar.py; PLAN3 0.11)."""
+    escenarios = list({**CASOS, **NIVELES, **D}.values()) + list(P6E.values()) + list(POI.values())
+    lista.agregar({"id": "preparar", "etapa": "0", "prioridad": 0, "uso": "sin_semillas",
+                   "cmd": f"{LANZADOR} p3_preparar.py --escenarios {','.join(escenarios)}",
+                   "salidas": ["listo/preparar.ok"], "duracion": 300})
+
+
+PARTES = {"etapa1": etapa1, "c0": c0, "v2vieja": v2vieja, "etapa2": etapa2, "etapa3b": etapa3b, "etapa3": etapa3,
+          "preparar": preparar, "evaluaciones": evaluaciones, "evaluaciones_variantes": evaluaciones_variantes}
 
 
 def generar(partes):
@@ -296,6 +484,13 @@ def generar(partes):
     for p in partes:
         PARTES[p](lista)
     return lista.trabajos
+
+
+def generar_con_manifiesto(partes):
+    lista = Lista()
+    for p in partes:
+        PARTES[p](lista)
+    return lista.trabajos, lista.manifiesto
 
 
 def main():
