@@ -8,5 +8,6 @@ PASA  2e. ninguna semilla de entrenamiento (base 7, 42, 2042, 4042, 14042, 16042
 PASA  2f. un comando sin --seed pasa
 PASA  3. iniciar_sumo con --seed 8001 y sin P3_USO sale con el mensaje de la guarda (codigo 1) y no llega a SUMO
 PASA  4. cola.py lanza cada trabajo con P3_USO = su uso
+PASA  5. barrer_fijo.correr_sumo con --seed 8001 y sin P3_USO sale con el mensaje de la guarda (codigo 1)
 
-10 de 10 pasan
+11 de 11 pasan

@@ -96,6 +96,15 @@ fuente = open(os.path.join(PLAN3, "cola.py"), encoding="utf-8").read()
 ok(re.search(r"env=dict\(entorno, P3_USO=t\.get\(\"uso\", \"\"\)\)", fuente) is not None,
    "4. cola.py lanza cada trabajo con P3_USO = su uso")
 
+# 5. barrer_fijo (sumo sin TraCI) tambien pasa por la guarda
+r = subprocess.run([sys.executable, "-B", "-c",
+                    "import sys; sys.path.insert(0, r'%s'); import barrer_fijo; "
+                    "barrer_fijo.correr_sumo('no_existe.sumocfg', [], 8001, 'no_se_escribe.xml', intentos=1)" % RAIZ],
+                   capture_output=True, text=True, env=entorno, cwd=AQUI)
+ok(r.returncode != 0 and "semilla 8001" in (r.stderr + r.stdout) and not os.path.exists(
+    os.path.join(AQUI, "no_se_escribe.xml")),
+   f"5. barrer_fijo.correr_sumo con --seed 8001 y sin P3_USO sale con el mensaje de la guarda (codigo {r.returncode})")
+
 lineas.append(f"\n{len(lineas) - len(fallos)} de {len(lineas)} pasan")
 salida = os.path.join(AQUI, "prueba_semillas_ciegas.txt")
 with open(salida, "w", encoding="utf-8", newline="\n") as f:
