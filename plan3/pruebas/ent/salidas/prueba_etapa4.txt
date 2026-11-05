@@ -1,0 +1,24 @@
+Opciones de la politica por red en rl_ippo.py (PLAN3 Etapa 4)
+05.11.2026 12:04; python 3.14.6, torch 2.14.0+cpu
+
+1. --scale 0.5 frente a dem_corredor_t905 (ciclo minimo, semilla 424301)
+[OK] la corrida termina: codigo 0
+[OK] --scale 0.5 = dem_corredor_t905: mismas metricas y mismos viajes: 906 viajes; vehiculos 906 | 906; timeLoss 16.0 | 16.0; distintas: []
+[OK] --scale 1 = sin escala: vehiculos 1810 | 1810
+[OK] --scale 1.5 multiplica los vehiculos por ~1.5: 1810 -> 2716 (x1.501)
+
+2. Entrenamiento corto con escala por episodio y validacion por niveles (P1, base 7, 4 episodios)
+   rl_ippo.py train --escenario corredor --seed 7 --episodios 4 --eval-cada 2 --val-seeds 424301,424302 --v2 --criterio-val total --etiqueta p3prbe4 --guardar-estado --registro-extendido --escala-demanda 0.5,2.0 --curriculo 3 --val-escalas 0.5,1,1.5 --norm-valor --norm-beta 0.99
+[OK] entrena y publica: codigo 0
+[OK] la columna escala sigue el sorteo (con el tope del curriculo: 1.0, 1.5, 2.0, 2.0): [0.7855, 0.9862, 1.1845, 1.8884] | esperadas [0.7855, 0.9862, 1.1845, 1.8884]
+   vehiculos por episodio [1428, 1790, 2150, 3422]; escala x 1810 (sin escala): [1422, 1785, 2144, 3418]
+[OK] los vehiculos siguen la escala (+-2 %)
+[OK] CSV, episodio 2: val_total = media geometrica de los niveles: ['21.57', '81.185', '527.095'] -> 97.365 (97.365)
+[OK] CSV, episodio 4: val_total = media geometrica de los niveles: ['24.97', '115.49', '564.05'] -> 117.605 (117.605)
+[OK] checkpoint del ep 2: cada nivel es la media de sus semillas y val_total su media geometrica: niveles [21.57, 81.185, 527.095] -> 97.365
+[OK] checkpoint del ep 4: cada nivel es la media de sus semillas y val_total su media geometrica: niveles [24.97, 115.49, 564.05] -> 117.605
+[OK] la serie que elige la politica: [ep, nivel 0.5, nivel 1, nivel 1.5, geometrica]: [[2, 21.57, 81.185, 527.095, 97.365], [4, 24.97, 115.49, 564.05, 117.605]]; elegido el ep 2 (val 97.365)
+[OK] meta: opciones de la politica por red: {'v2': True, 'recompensa_insercion': False, 'etiqueta': 'p3prbe4', 'criterio_val': 'total', 'norm_valor': True, 'norm_beta': 0.99, 'escala_demanda': [0.5, 2.0], 'curriculo': 3, 'val_escalas': [0.5, 1.0, 1.5]}
+[OK] --norm-valor: columnas vn_media y vn_desv: vn_media ['-1.1096', '-2.714', '-4.4932', '-7.7331']
+
+Resultado: todo OK

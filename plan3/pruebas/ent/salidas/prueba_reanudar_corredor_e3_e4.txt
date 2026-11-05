@@ -1,0 +1,51 @@
+Pruebas 3 (tarea 1.2): reanudacion exacta en corredor, base 7, validacion cada 5 en 424301,424302; modos e3, e4
+05.11.2026 12:08; python 3.14.6, torch 2.14.0+cpu
+
+
+Prueba 3: 20 seguidos = 10 + 10 reanudados
+-- corredor, e3: --v2 --criterio-val total --etiqueta p3prbe3 --guardar-estado --registro-extendido --obs-cercana 75 --norm-valor --paso-decision 2 --sin-forzadas --msg-cada-paso --hiper ent=0.03 --ent-final 0.003
+[OK] corrida seguida de 20: codigo 0
+[OK] tramo 1 (--hasta-ep 10) sale con 0: codigo 0
+[OK] tramo 1: CSV con los episodios 1-10: 10 filas
+[OK] tramo 1: no publica la politica
+[OK] tramo 1: estados en 5 y 10: [5, 10]
+-- corredor, e4: --v2 --criterio-val total --etiqueta p3prbe4 --guardar-estado --registro-extendido --escala-demanda 0.5,2.0 --curriculo 10 --val-escalas 0.5,1,1.5 --norm-valor --norm-beta 0.99
+[OK] corrida seguida de 20: codigo 0
+[OK] tramo 1 (--hasta-ep 10) sale con 0: codigo 0
+[OK] tramo 1: CSV con los episodios 1-10: 10 filas
+[OK] tramo 1: no publica la politica
+[OK] tramo 1: estados en 5 y 10: [5, 10]
+-- corredor, e3: 20 seguidos frente a 10 + 10 reanudados
+[OK] tramo 2 (--reanudar ep 10) sale con 0 y dice desde donde sigue: codigo 0
+[OK] CSV: iguales byte a byte salvo 'segundos' (20 filas)
+[OK] checkpoints: episodios con checkpoint: [5, 10, 15, 20] | [5, 10, 15, 20]
+  ep   5: 12/12 tensores iguales (torch.equal), claves iguales True; meta igual
+  ep  10: 12/12 tensores iguales (torch.equal), claves iguales True; meta igual
+  ep  15: 12/12 tensores iguales (torch.equal), claves iguales True; meta igual
+  ep  20: 12/12 tensores iguales (torch.equal), claves iguales True; meta igual
+[OK] politica publicada (tensores): 12/12 tensores iguales (torch.equal), claves iguales True
+[OK] politica publicada (bytes)
+[OK] meta publicado: meta igual
+[OK] estado del ep 5: pesos: igual; Adam (paso [960.0], exp_avg, exp_avg_sq, grupos): igual; random: igual; numpy global: igual; torch: igual; default_rng de sembrar: igual; CSV hasta el episodio (salvo segundos): igual; archivos, codigo, config, ent, episodio, episodios, etiqueta, eval_cada, fase_av, lr, norm_valor, origen, reanudaciones, ruta_csv, tag, val_serie, val_total_serie, version: igual
+[OK] estado del ep 10: pesos: igual; Adam (paso [1980.0], exp_avg, exp_avg_sq, grupos): igual; random: igual; numpy global: igual; torch: igual; default_rng de sembrar: igual; CSV hasta el episodio (salvo segundos): igual; archivos, codigo, config, ent, episodio, episodios, etiqueta, eval_cada, fase_av, lr, norm_valor, origen, reanudaciones, ruta_csv, tag, val_serie, val_total_serie, version: igual
+[OK] estado del ep 15: pesos: igual; Adam (paso [3010.0], exp_avg, exp_avg_sq, grupos): igual; random: igual; numpy global: igual; torch: igual; default_rng de sembrar: igual; CSV hasta el episodio (salvo segundos): igual; archivos, codigo, config, ent, episodio, episodios, etiqueta, eval_cada, fase_av, lr, norm_valor, origen, reanudaciones, ruta_csv, tag, val_serie, val_total_serie, version: igual
+[OK] estado del ep 20: pesos: igual; Adam (paso [4060.0], exp_avg, exp_avg_sq, grupos): igual; random: igual; numpy global: igual; torch: igual; default_rng de sembrar: igual; CSV hasta el episodio (salvo segundos): igual; archivos, codigo, config, ent, episodio, episodios, etiqueta, eval_cada, fase_av, lr, norm_valor, origen, reanudaciones, ruta_csv, tag, val_serie, val_total_serie, version: igual
+[OK] tramos del estado del 20: 1-20 en la seguida; 1-10 y 11-20 en la de dos tramos, con la misma huella de codigo: [(1, 20)] | [(1, 10), (11, 20)]
+-- corredor, e4: 20 seguidos frente a 10 + 10 reanudados
+[OK] tramo 2 (--reanudar ep 10) sale con 0 y dice desde donde sigue: codigo 0
+[OK] CSV: iguales byte a byte salvo 'segundos' (20 filas)
+[OK] checkpoints: episodios con checkpoint: [5, 10, 15, 20] | [5, 10, 15, 20]
+  ep   5: 12/12 tensores iguales (torch.equal), claves iguales True; meta igual
+  ep  10: 12/12 tensores iguales (torch.equal), claves iguales True; meta igual
+  ep  15: 12/12 tensores iguales (torch.equal), claves iguales True; meta igual
+  ep  20: 12/12 tensores iguales (torch.equal), claves iguales True; meta igual
+[OK] politica publicada (tensores): 12/12 tensores iguales (torch.equal), claves iguales True
+[OK] politica publicada (bytes)
+[OK] meta publicado: meta igual
+[OK] estado del ep 5: pesos: igual; Adam (paso [980.0], exp_avg, exp_avg_sq, grupos): igual; random: igual; numpy global: igual; torch: igual; default_rng de sembrar: igual; generador de la escala: igual; CSV hasta el episodio (salvo segundos): igual; archivos, codigo, config, ent, episodio, episodios, etiqueta, eval_cada, fase_av, lr, norm_valor, origen, reanudaciones, ruta_csv, tag, val_serie, val_total_serie, version: igual
+[OK] estado del ep 10: pesos: igual; Adam (paso [2050.0], exp_avg, exp_avg_sq, grupos): igual; random: igual; numpy global: igual; torch: igual; default_rng de sembrar: igual; generador de la escala: igual; CSV hasta el episodio (salvo segundos): igual; archivos, codigo, config, ent, episodio, episodios, etiqueta, eval_cada, fase_av, lr, norm_valor, origen, reanudaciones, ruta_csv, tag, val_serie, val_total_serie, version: igual
+[OK] estado del ep 15: pesos: igual; Adam (paso [3230.0], exp_avg, exp_avg_sq, grupos): igual; random: igual; numpy global: igual; torch: igual; default_rng de sembrar: igual; generador de la escala: igual; CSV hasta el episodio (salvo segundos): igual; archivos, codigo, config, ent, episodio, episodios, etiqueta, eval_cada, fase_av, lr, norm_valor, origen, reanudaciones, ruta_csv, tag, val_serie, val_total_serie, version: igual
+[OK] estado del ep 20: pesos: igual; Adam (paso [4360.0], exp_avg, exp_avg_sq, grupos): igual; random: igual; numpy global: igual; torch: igual; default_rng de sembrar: igual; generador de la escala: igual; CSV hasta el episodio (salvo segundos): igual; archivos, codigo, config, ent, episodio, episodios, etiqueta, eval_cada, fase_av, lr, norm_valor, origen, reanudaciones, ruta_csv, tag, val_serie, val_total_serie, version: igual
+[OK] tramos del estado del 20: 1-20 en la seguida; 1-10 y 11-20 en la de dos tramos, con la misma huella de codigo: [(1, 20)] | [(1, 10), (11, 20)]
+
+Resultado: todo OK

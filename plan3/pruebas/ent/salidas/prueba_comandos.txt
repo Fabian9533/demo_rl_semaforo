@@ -1,11 +1,11 @@
-Comandos de rl_ippo de la lista de trabajos frente a validar_args (se espera que falle etapa3)
-05.11.2026 11:45; python 3.14.6, torch 2.14.0+cpu
+Comandos de rl_ippo de la lista de trabajos frente a validar_args
+05.11.2026 11:53; python 3.14.6, torch 2.14.0+cpu
 
    etapa 1: 108 aceptados, 0 rechazados
    etapa 2: 78 aceptados, 0 rechazados
-   etapa 3: 0 aceptados, 175 rechazados; primero: e3_p3obs_dem_corredor_t2715_der_s42: rl_ippo.py: error: unrecognized arguments: --obs-cercana 75
+   etapa 3: 175 aceptados, 0 rechazados
    etapa 3b: 42 aceptados, 0 rechazados
-[OK] 403 comandos de rl_ippo en 3037 trabajos: pasan todos menos los de etapa3, que fallan: 0 fuera de lo esperado: []
+[OK] 403 comandos de rl_ippo en 3037 trabajos: todos pasan: 0 fuera de lo esperado: []
 [OK] validar_args no cambia HIPER ni C
 
 Resultado: todo OK
