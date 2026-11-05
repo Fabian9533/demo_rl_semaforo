@@ -1,0 +1,19 @@
+Pruebas de 0.10: regla simple y Max-Pressure por el gancho decidir (copia en C:\Users\GAMER\Documents\demo_rl_semaforo\w3_ref\plan3\tmp_ref\reglas)
+OK    1 corredor s424301: regla_uinfg60 tripinfo ('479ce631d3e55d1f', 1810) = ciclo minimo ('479ce631d3e55d1f', 1810); retraso total 97.28 = 97.28, timeLoss 95.76 = 95.76
+OK    1 malla3 s424301: regla_uinfg60 tripinfo ('070e057a692adf46', 4350) = ciclo minimo ('070e057a692adf46', 4350); retraso total 21.34 = 21.34, timeLoss 20.87 = 20.87
+OK    2 corredor regla_u2g30: 1179 decisiones (634 libres, 0 forzadas por el verde maximo, 542 cambios), fuera de la mascara: 0; retraso total 40.63
+OK    2 corredor regla_u6g60: 1262 decisiones (677 libres, 1 forzadas por el verde maximo, 581 cambios), fuera de la mascara: 0; retraso total 81.9
+OK    2 corredor mp: 1328 decisiones (1056 libres, 18 forzadas por el verde maximo, 250 cambios), fuera de la mascara: 0; retraso total 28.22
+OK    2 corredor mp_det: 1201 decisiones (729 libres, 0 forzadas por el verde maximo, 468 cambios), fuera de la mascara: 0; retraso total 26.89
+OK    2 corredor mp_c60: 1320 decisiones (1043 libres, 0 forzadas por el verde maximo, 273 cambios), fuera de la mascara: 0; retraso total 25.82
+OK    2 corredor mp_det_c90: 1201 decisiones (729 libres, 0 forzadas por el verde maximo, 468 cambios), fuera de la mascara: 0; retraso total 26.89
+OK    2 malla3_alta regla_u1g30: 5835 decisiones (3292 libres, 0 forzadas por el verde maximo, 2531 cambios), fuera de la mascara: 0; retraso total 98.63
+OK    2 malla3_alta mp_c90: 6021 decisiones (4180 libres, 50 forzadas por el verde maximo, 1775 cambios), fuera de la mascara: 0; retraso total 100.13
+OK    3 corredor: red vacia (0 vehiculos): presion 0 en las 8 (semaforo, fase, medida)
+OK    3 corredor: a los 900 s (43 vehiculos) la presion no es 0 en 6 de 8
+OK    3 malla3_alta: red vacia (0 vehiculos): presion 0 en las 36 (semaforo, fase, medida)
+OK    3 malla3_alta: a los 900 s (319 vehiculos) la presion no es 0 en 32 de 36
+OK    4 evaluar.py --regla regla_u2g30: codigo 0, filas [('regla_u2g30', '424301', '40.63'), ('regla_u2g30', '424302', '39.35')]
+OK    4 una regla desconocida se rechaza (codigo 1)
+
+RESULTADO: PASA
