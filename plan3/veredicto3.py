@@ -3093,8 +3093,9 @@ def probar():
             funcion()
             ok(False, f"{etiqueta_prueba}: debería negarse")
         except ErrorVeredicto as ex:
-            ok(contiene in str(ex), f"{etiqueta_prueba} ({ex})" if len(str(ex)) < 160 else
-               f"{etiqueta_prueba} ({str(ex)[:157]}...)")
+            texto = re.sub(r"\b[0-9a-f]{10}\b", "<commit>", str(ex))     # el registro no depende de la hora
+            ok(contiene in str(ex), f"{etiqueta_prueba} ({texto})" if len(texto) < 160 else
+               f"{etiqueta_prueba} ({texto[:157]}...)")
 
     def con_cambio(rel, nuevo_texto, funcion):
         """Corre funcion con rel cambiado y lo deja como estaba, byte a byte."""

@@ -152,6 +152,6 @@ PASA  M33e otros vehículos en una semilla: ERROR antes de cerrar el candado (pr
 PASA  M33f ninguna de esas negativas cerró el candado
 PASA  M34 la prueba final corre una vez; el candado guarda el sha256 de la lista, de cada CSV y de la salida
 PASA  M34b no corre una segunda vez (la prueba final ya corrió (listo/holdout.candado): no corre una segunda vez)
-PASA  M35 un CSV cuyo sha256 cambia de una mañana a otra: se niega (los CSV de ciego/ no son los de cada mañana (§14); no se corre: ciego/h1t1/eval_corredor__c0med.csv: su sha256 cambió en el manifiesto de la mañana e3b1128d18)
+PASA  M35 un CSV cuyo sha256 cambia de una mañana a otra: se niega (los CSV de ciego/ no son los de cada mañana (§14); no se corre: ciego/h1t1/eval_corredor__c0med.csv: su sha256 cambió en el manifiesto de la mañana <commit>)
 PASA  G01 git status --porcelain --ignored -- plan2 TESIS vacío después de las pruebas (git rc 0)
 === 147 pasan, 0 fallan
