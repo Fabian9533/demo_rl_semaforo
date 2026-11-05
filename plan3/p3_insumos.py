@@ -71,8 +71,9 @@ def plan_de_copias(ckpt, diag):
                 copias.append((".", rel, os.path.join(PLAN2, rel)))
     for esc in CELDAS_C0:
         for b in BASES:
-            rel = f"politica_{esc}_vecinos_s{b}.pt"
-            copias.append(("insumos/entregado", rel, os.path.join(PLAN2, rel)))
+            for ext in (".pt", ".json"):             # la politica y su meta (Politica.cargar lee los dos)
+                rel = f"politica_{esc}_vecinos_s{b}{ext}"
+                copias.append(("insumos/entregado", rel, os.path.join(PLAN2, rel)))
             for ep in range(10, 201, 10):
                 for ext in (".pt", ".json"):
                     rel = f"{esc}_ippo_vecinos_s{b}_ep{ep:03d}{ext}"
