@@ -5,7 +5,8 @@ Uso (desde <worktree de ejecucion>/plan3):  python chequeos_previos.py [--sin-id
 Pasos (si alguno falla, no escribe lanzamiento.sha256 y la cola no arranca):
   1. identidad: rl_ippo con todo apagado (P1, base de humo 7, 10 episodios, validacion cada 5 en 2 semillas de humo)
      da el mismo CSV (salvo la columna 'segundos') y los mismos tensores que el codigo del tag entregado-2026-10-25;
-  2. lista de trabajos: capas 1 y 2 de protecciones.py (comandos, nombres y salidas unicos, dependencias);
+  2. lista de trabajos: capas 1 y 2 de protecciones.py (comandos, nombres y salidas unicos, dependencias), y que
+     cola/trabajos.jsonl y cola/manifiesto_esperado.json son los que escribe el generador con cola/partes.txt;
   3. semillas: ningun CSV fuera de ciego/ e insumos/ tiene semillas de las tandas decisivas o de la prueba final;
   4. el codigo y el prerregistro no tienen cambios sin commit.
 Si todo pasa, escribe lanzamiento.sha256: "<commit> <sha256 de PRERREGISTRO.md> <sha256 de cola/trabajos.jsonl>".
@@ -149,6 +150,10 @@ def main():
             problemas.append(str(e))
         print(f"identidad: {'bien' if not problemas else 'MAL'} ({time.time() - t0:.0f} s)", flush=True)
     problemas += protecciones.revisar_trabajos(protecciones.leer_trabajos())
+    r = subprocess.run([sys.executable, "generar_trabajos3.py", "--comprobar"], cwd=PLAN3, capture_output=True,
+                       text=True)
+    if r.returncode != 0:
+        problemas.append("la lista de trabajos o el manifiesto no son los del generador:\n" + r.stdout + r.stderr)
     problemas += semillas_filtradas()
     _, cambios = protecciones.git("status", "--porcelain", "--untracked-files=no", "--", "*.py",
                                   "plan3/PRERREGISTRO.md")

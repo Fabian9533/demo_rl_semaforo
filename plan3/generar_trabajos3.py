@@ -24,6 +24,7 @@ import argparse
 PLAN3 = os.path.dirname(os.path.abspath(__file__))
 TRABAJOS = os.path.join(PLAN3, "cola", "trabajos.jsonl")
 MANIFIESTO = os.path.join(PLAN3, "cola", "manifiesto_esperado.json")
+PARTES_TXT = os.path.join(PLAN3, "cola", "partes.txt")       # partes con que se escribio la lista (para --comprobar)
 LANZADOR = "python ../con_escenarios.py"
 
 # ---------------- Celdas ----------------
@@ -576,11 +577,18 @@ def generar_con_manifiesto(partes):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--partes", default=",".join(PARTES))
+    ap.add_argument("--partes", default=None, help="por defecto, todas; con --comprobar, las de cola/partes.txt")
     ap.add_argument("--seco", action="store_true")
     ap.add_argument("--comprobar", action="store_true")
     args = ap.parse_args()
-    partes = [p for p in args.partes.split(",") if p]
+    texto_partes = args.partes
+    if texto_partes is None:
+        if args.comprobar and os.path.exists(PARTES_TXT):
+            with open(PARTES_TXT, encoding="utf-8") as f:
+                texto_partes = f.read().strip()
+        else:
+            texto_partes = ",".join(PARTES)
+    partes = [p for p in texto_partes.split(",") if p]
     desconocidas = [p for p in partes if p not in PARTES]
     if desconocidas:
         sys.exit(f"partes desconocidas: {desconocidas}; hay {sorted(PARTES)}")
@@ -607,6 +615,8 @@ def main():
             f.write(texto)
         with open(MANIFIESTO, "w", encoding="utf-8", newline="\n") as f:
             f.write(texto_m)
+        with open(PARTES_TXT, "w", encoding="utf-8", newline="\n") as f:
+            f.write(",".join(partes) + "\n")
         print(f"escritos {os.path.relpath(TRABAJOS, PLAN3)} y {os.path.relpath(MANIFIESTO, PLAN3)} "
               f"({len(manifiesto)} CSV esperados)")
 
