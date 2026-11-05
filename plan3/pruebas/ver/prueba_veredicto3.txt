@@ -1,0 +1,118 @@
+--- 1. Pruebas del prototipo (lo entregado de plan2/, solo lectura)
+PASA  P01 veredicto.probar(): la regla, la convergencia, la base mediana y el formato no cambiaron
+PASA  P02 V2 de P6 (s4042, 8 semillas, serie del diagnostico): meseta 3.19 %, estabilidad 0.00 %, convergio
+PASA  P03 con x[3] (lo que hace info_base) sale 9.43 % y 'no convergio'
+PASA  P04 V5 de P6 (s42): meseta -4.61 %
+PASA  P05 metas entregados de IPPO con mensajes: identico a info_base en 18/18
+PASA  P06 V2 del corredor (criterio total): convergencia igual a analisis.py en 5/5 niveles
+PASA  P07 comparar reproduce el resumen de consolidar: -6.7 % (-7.85, -5.67) p=1.86e-09
+      P1: base 4042 -> FUNCIONA (entregado: FUNCIONA)
+      P2: base 2042 -> FALLA (entregado: FALLA)
+      P3: base 4042 -> MEJORA (entregado: MEJORA)
+      P4: base 42 -> FALLA (entregado: FALLA)
+      P5: base 2042 -> FALLA (entregado: FALLA)
+      P6: base 42 -> PENDIENTE (no convergió; provisional: EMPATA) (entregado: PENDIENTE (no convergió; provisional: EMPATA))
+PASA  P08 etiqueta de IPPO con mensajes P1-P6 igual a la robustez entregada en 6/6
+PASA  P08b etiquetas de los 12 niveles de la entrega 3 (timeLoss) desde los CSV por semilla: iguales en 12/12
+PASA  P09 Holm {'d': 0.02, 'a': 0.03, 'c': 0.06, 'b': 0.06}
+PASA  P10 acuerdo: tabla de verdad (textos de §7)
+PASA  P11 con 3 bases, 2 de 3 del lado ya no alcanza (A5: 3 de 3)
+PASA  P12 con 3 bases, 3 de 3 cumple
+PASA  P13 con 5 bases, 4 de 5 cumple
+PASA  P14 no inferioridad: margen +2 %
+PASA  P15 demanda esperada con period=exp(l)
+PASA  P16 numeros aleatorios comunes (P1): mismos vehiculos en las 30 semillas
+PASA  P17 diferencia no pareada (V2 P1, 1001 menos 6001): {'D': -1.85, 'cambio_1': -7.38, 'cambio_2': -5.53, 'ic': (-3.16, -0.53), 'p': 0.0024}
+PASA  P18 p de no inferioridad de V2 P1 frente al fijo (margen +2 %): 9.31e-10
+--- 2. Reglas nuevas con datos por semilla fabricados
+PASA  N01a base_mediana_n con 3 bases = veredicto.base_mediana (200 casos al azar, con empates)
+PASA  N01b con 5 bases, la 3.a por val_elegido
+PASA  N01c con 4 bases (una caida), la peor de las dos centrales
+PASA  N01d empate de val: la base menor va primero
+PASA  N02 serie_criterio: val_total_serie con x[-1] (la media de 16), no x[3]
+PASA  N03a una semilla de mas es ERROR (semillas del brazo: faltan [] y sobran [424399] (§7))
+PASA  N03b una semilla de menos es ERROR (semillas del brazo: faltan [424301] y sobran [] (§7))
+PASA  N04 T1 FUNCIONA y T2 FUNCIONA (datos por semilla): FUNCIONA / FUNCIONA -> FUNCIONA
+PASA  N04 T1 MEJORA y T2 MEJORA (datos por semilla): MEJORA / MEJORA -> MEJORA
+PASA  N04 T1 EMPATA y T2 EMPATA (datos por semilla): EMPATA / EMPATA -> EMPATA
+PASA  N04 T1 FALLA y T2 FALLA (datos por semilla): FALLA / FALLA -> FALLA
+PASA  N04 T1 FUNCIONA y T2 MEJORA (datos por semilla): FUNCIONA / MEJORA -> MEJORA
+PASA  N04 T1 MEJORA y T2 FUNCIONA (datos por semilla): MEJORA / FUNCIONA -> MEJORA
+PASA  N04 T1 MEJORA y T2 EMPATA (datos por semilla): MEJORA / EMPATA -> EMPATA (mejora no confirmada)
+PASA  N04 T1 FUNCIONA y T2 EMPATA (datos por semilla): FUNCIONA / EMPATA -> EMPATA (mejora no confirmada)
+PASA  N04 T1 EMPATA y T2 MEJORA (datos por semilla): EMPATA / MEJORA -> EMPATA (mejora no confirmada)
+PASA  N04 T1 FALLA y T2 EMPATA (datos por semilla): FALLA / EMPATA -> EMPATA (falla no confirmada)
+PASA  N04 T1 EMPATA y T2 FALLA (datos por semilla): EMPATA / FALLA -> EMPATA (falla no confirmada)
+PASA  N04 T1 MEJORA y T2 FALLA (datos por semilla): MEJORA / FALLA -> CONTRADICTORIO (no se concluye)
+PASA  N04 T1 FUNCIONA y T2 FALLA (datos por semilla): FUNCIONA / FALLA -> CONTRADICTORIO (no se concluye)
+PASA  N04 T1 FALLA y T2 MEJORA (datos por semilla): FALLA / MEJORA -> CONTRADICTORIO (no se concluye)
+PASA  N04 version no convergida: PENDIENTE (no convergió; provisional: MEJORA)
+PASA  N04 una referencia que falta: PENDIENTE con su motivo
+PASA  N05 veto: -8 % frente al fino y pierde contra el actuado ajustado (IC entero sobre 0, p < 0.05) -> MEJORA; empata con el actuado ajustado -> FUNCIONA; le gana -> FUNCIONA
+PASA  N06 sentido: 4 de 5 con una base en contra pasa; con dos, no
+PASA  N06b una base caida cuenta como fuera del lado (4 de 5 aun alcanza; con 3, no)
+PASA  N07 Holm con una familia de 6 (P6 no se pudo correr y cuenta con p = 1): {'P1': 0.006, 'P2': 0.05, 'P4': 0.12, 'P3': 0.12, 'P5': 0.4, 'P6': None}
+PASA  N08 tres lecturas de la no inferioridad: {'no es peor': 'no es peor', 'es peor': 'es peor', 'no concluyente': 'no concluyente'}
+PASA  N09 H1 global (interseccion-union): 6 casos 'no es peor' en T1 y T2 pasa; uno que no lo es en T2, no
+PASA  N10 H6, diferencia no pareada: D -3.07 [-3.24, -2.89], p de una cola 0.0
+PASA  N11a generados_iguales encuentra la semilla con otro vehiculo
+PASA  N11b igual al ciclo minimo hasta 0.0005 s
+PASA  N12 numero unico = media geometrica de los cocientes ((-0.71, -0.79, -0.63); directo -0.71)
+PASA  N13 se niega a escribir fuera de plan3/ (la raiz del repositorio)
+PASA  N13b se niega a escribir en el temporal del sistema
+PASA  N14 --final exige las semillas del prerregistro (8001-8030 pasa; las de humo, no)
+--- 3. Mundo sintético de punta a punta (tmp_ver/mundo; semillas de humo)
+PASA  M01 --final sin listo/cierre.ok se niega (falta listo/cierre.ok: los resultados decisivos siguen a ciegas (§14); no se corre)
+PASA  M02 un CSV cambiado después del cierre: se niega
+PASA  M03 sin cola/manifiesto_cierre.json: se niega
+PASA  M04 --final con semillas que no son las del prerregistro: se niega
+PASA  M05 --final escribe las 5 salidas en salidas/ (dentro de la carpeta plan3)
+PASA  M06 P1 regulares: etiqueta citable de V2 FUNCIONA (esperada FUNCIONA)
+PASA  M06 P2 regulares: etiqueta citable de V2 MEJORA (esperada MEJORA)
+PASA  M06 P3 regulares: etiqueta citable de V2 EMPATA (mejora no confirmada) (esperada EMPATA (mejora no confirmada))
+PASA  M06 P4 regulares: etiqueta citable de V2 EMPATA (falla no confirmada) (esperada EMPATA (falla no confirmada))
+PASA  M06 P5 regulares: etiqueta citable de V2 CONTRADICTORIO (no se concluye) (esperada CONTRADICTORIO (no se concluye))
+PASA  M06 P6 regulares: etiqueta citable de V2 MEJORA (esperada MEJORA)
+PASA  M06 P6e regulares: etiqueta citable de V2 MEJORA (esperada MEJORA)
+PASA  M06 c905 regulares: etiqueta citable de V2 EMPATA (esperada EMPATA)
+PASA  M06 c1358 regulares: etiqueta citable de V2 FALLA (esperada FALLA)
+PASA  M06 c2715 regulares: etiqueta citable de V2 PENDIENTE (no convergió; provisional: MEJORA) (esperada PENDIENTE (no convergió; provisional: MEJORA))
+PASA  M06 r905 regulares: etiqueta citable de V2 PENDIENTE (falta fijo fino en t1r) (esperada PENDIENTE (falta fijo fino en t1r))
+PASA  M06 r1358 regulares: etiqueta citable de V2 PENDIENTE (falta actuado ajustado en t1r) (esperada PENDIENTE (falta actuado ajustado en t1r))
+PASA  M06 m3620 regulares: etiqueta citable de V2 MEJORA (esperada MEJORA)
+PASA  M06 P1 aleatorias: etiqueta citable de V2 FUNCIONA (esperada FUNCIONA)
+PASA  M06 P3 aleatorias: etiqueta citable de V2 PENDIENTE (no convergió; provisional: FUNCIONA) (esperada PENDIENTE (no convergió; provisional: FUNCIONA))
+PASA  M06 P6 aleatorias: etiqueta citable de V2 FUNCIONA (esperada FUNCIONA)
+PASA  M07 D: veto del actuado ajustado (V2 MEJORA) y sin decisión de promoción el citado queda PENDIENTE (falta la decisión de promoción de dem_corredor_t2715_der)
+PASA  M08 P1: modelo citado promovido (observación nueva, FUNCIONA) con la etiqueta de V2 al lado
+PASA  M09 P6: se repite en 4 de 5 y lleva la lectura de la espera de inserción
+PASA  M10 m3620: V2 igual al ciclo mínimo -> 'Reproduce el ciclo mínimo'
+PASA  M11 probabilidad de PENDIENTE por ruido de §6 junto a la celda
+PASA  M12 H1 global por intersección-unión: no pasa (no da 'no es peor' al 5 % en las dos tandas: P5 (no concluyente))
+PASA  M13 H1 en P5: T1 no es peor, T2 es peor -> no concluyente
+PASA  M14 H1 en los otros casos: no es peor, con T1 = t1r + h1t1
+PASA  M15 H2 pasa en P4 y m6525 (3 de 3)
+PASA  M16 H3 pasa con una base en contra (4 de 5); H3e, con dos en contra, no alcanza el sentido
+PASA  M17 H5: pasa: 5 de 6 casos (P1, P2, P4, P5, P6); hacen falta 3
+PASA  M18 H6 por caso: {'P1': 'no', 'P2': 'no', 'P3': 'sí', 'P4': 'sí', 'P5': 'sí', 'P6': 'sí'}
+PASA  M19 H7r: pasa en P1; en P6 el sentido es 2 de 3 y no pasa
+PASA  M20 H8a pasa en 3 de 3; H8b (al menos 1 de 6) no pasa
+PASA  M21 H12: P2 es peor, P6 no es peor
+PASA  M22 H10 sin datos de la política por red: 'no se pudo correr', la familia conserva su tamaño y no pasa
+PASA  M23 H15: 4 de 4 con llegadas regulares, 0 de 6 con aleatorias
+PASA  M24 número único regular T1 frente al fijo fino -3.99 % = directo -3.99 %; con un promovido se agrega el de V2
+PASA  M25 números aleatorios comunes rotos (m2715, franja): la comparación queda con su motivo
+PASA  M26 tabla de bases: la versión evaluada de c2715 no convergió
+PASA  M27 tabla de bases: también las bases de C0 e IPPO entregado (candidatas de sus versiones publicadas)
+PASA  M28 veredicto3.md tiene la tabla simple y las lecturas obligadas
+PASA  M28b el chequeo de todos los brazos de cada celda y tanda avisa solo de m2715 (franja, t1r)
+PASA  M28c el .md trae la promoción de cada celda y el número único con las dos tandas y el fijo entregado (§17)
+PASA  M29 version publicada distinta de la mediana: ERROR (politica_corredor_alta_vecinos_p3v2reg3med.pt: base_elegida 2042, pero la mediana por val_elegido de sus candidatas es 42 (B21))
+PASA  M30 un CSV con una semilla de más: ERROR (ciego/t2r/eval_red__v2reg_s42.csv: faltan las semillas [] y sobran [424399] (§7))
+PASA  M31 una decisión de promoción con otro sha256 que el registrado: ERROR
+PASA  M32 prueba final sin listo/holdout.ok: se niega
+PASA  M33 holdout.ok sin el sha256 de la lista: se niega
+PASA  M34 la prueba final corre una vez, deja su candado y no corre una segunda vez
+PASA  M35 la prueba final solo usa las semillas reservadas (11001-11030, 12001-12100); una lista mal armada se rechaza antes de cerrar el candado
+PASA  G01 git status --porcelain --ignored -- plan2 TESIS vacío después de las pruebas
+=== 108 pasan, 0 fallan
