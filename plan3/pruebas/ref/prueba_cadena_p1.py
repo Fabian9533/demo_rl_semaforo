@@ -1,13 +1,18 @@
 """
 prueba_cadena_p1.py - La cadena completa de las referencias en P1 (corredor), por la linea de comandos y en la
 carpeta de prueba tmp_ref/fino/p1_a/ (despues de prueba_fino.py, que deja ahi la gruesa de una subrejilla con
-2001-2003). Desempates y finales con semillas de humo, para no elegir nada con las de ajuste fuera de la cola:
+2001-2003). Desempates y finales con semillas de humo; la fina, los desfases, el barrido de mult5 y los 9 pares de la
+franja usan las semillas del barrido de P1, 2001-2003 (en esta copia; nada de aqui se instala ni se usa despues).
+Como la gruesa es una subrejilla (opciones de prueba), las etapas siguientes se niegan sin --permitir-prueba (se
+comprueba) y corren con el:
   barrer_fino.py fina, desfases, desempate, fragil y mult5 -> corredor_r10f.add.xml y corredor_m5f.add.xml
   franja.py -> corredor_franja.add.xml;  actuado.py --paso todos -> corredor_actuado_aj.add.xml
-  reglas.py -> regla.json y mp.json;  p3_preparar.py corredor (las tres piezas)
-Comprueba que cada paso termina con codigo 0 y sus salidas, que el ganador de cada referencia jugado por TraCI (evaluar:
-brazo_programa, brazo_referencia franja y actuado_aj, brazo_regla) reproduce su media, que p3_preparar reescribe el
-actuado ajustado con el mismo sha256 y que actuado y ciclo minimo salen byte a byte iguales a los del codigo
+  reglas.py (las tres familias) -> regla.json, reactiva.json y mp.json
+  p3_preparar.py corredor --piezas actuado,trivial,actuado_aj
+Comprueba que cada paso termina con codigo 0 y sus salidas, que fragil no reescribe el desempate, que las salidas
+quedan marcadas como de prueba, que el ganador de cada referencia jugado por TraCI (evaluar: brazo_programa,
+brazo_referencia franja y actuado_aj, brazo_regla) reproduce su media, que p3_preparar no toca el actuado ajustado
+igual al congelado y lo recrea igual si falta, y que actuado y ciclo minimo salen byte a byte iguales a los del codigo
 entregado (comun.py de 223f908).
 Uso (cwd = plan3/): python pruebas/ref/prueba_cadena_p1.py     Salida: pruebas/ref/salidas/prueba_cadena_p1.txt
 """
@@ -25,6 +30,7 @@ up.preparar()
 inf = up.Informe("prueba_cadena_p1")
 CARPETA = os.path.join(up.TMP, "fino", "p1_a")
 DES = ["--semillas-desempate", "424301-424310", "--semillas-fragil", "424301-424330"]
+PERMITIR = ["--permitir-prueba"]
 
 
 def correr(script, *args):
@@ -59,23 +65,36 @@ def main():
     if not os.path.exists(os.path.join(CARPETA, "barridos", "corredor", "gruesa.csv")):
         raise SystemExit("Corra antes pruebas/ref/prueba_fino.py (deja la gruesa de P1 en tmp_ref/fino/p1_a)")
     inf(f"Cadena de las referencias en P1 (carpeta {CARPETA})")
+    r = subprocess.run([sys.executable, os.path.join(up.PLAN3, "barrer_fino.py"), "corredor", "--etapa", "fina"],
+                       cwd=CARPETA, capture_output=True, text=True)
+    inf.chequeo(r.returncode != 0 and "no es de la regla" in r.stderr,
+                f"sin --permitir-prueba la fina se niega a leer la gruesa de la subrejilla: codigo {r.returncode}")
     for etapa in ("fina", "desfases"):
-        correr("barrer_fino.py", "corredor", "--etapa", etapa, "--procesos", "3")
-    correr("barrer_fino.py", "corredor", "--etapa", "desempate", "--procesos", "3", *DES)
-    correr("barrer_fino.py", "corredor", "--etapa", "fragil", "--procesos", "3", *DES)
-    correr("barrer_fino.py", "corredor", "--etapa", "mult5", "--procesos", "3", *DES)
-    correr("franja.py", "corredor", "--procesos", "3", "--semillas-final", "424301-424310")
+        correr("barrer_fino.py", "corredor", "--etapa", etapa, "--procesos", "3", *PERMITIR)
+    correr("barrer_fino.py", "corredor", "--etapa", "desempate", "--procesos", "3", *DES, *PERMITIR)
+    des = [os.path.join(CARPETA, "barridos", "corredor", f) for f in ("desempate.csv", "desempate_semillas.csv")]
+    antes = [(up.sha256(x), os.stat(x).st_mtime_ns) for x in des]
+    correr("barrer_fino.py", "corredor", "--etapa", "fragil", "--procesos", "3", *DES, *PERMITIR)
+    inf.chequeo(antes == [(up.sha256(x), os.stat(x).st_mtime_ns) for x in des],
+                "fragil no reescribe desempate.csv ni desempate_semillas.csv (mismo sha256 y misma fecha)")
+    correr("barrer_fino.py", "corredor", "--etapa", "mult5", "--procesos", "3", *DES, *PERMITIR)
+    correr("franja.py", "corredor", "--procesos", "3", "--semillas-final", "424301-424310", *PERMITIR)
     correr("actuado.py", "corredor", "--paso", "todos", "--procesos", "3", "--semillas", "424301-424303",
-           "--semillas-final", "424301-424310")
+           "--semillas-final", "424301-424310", *PERMITIR)
     correr("reglas.py", "corredor", "--semillas", "424301-424303", "--semillas-final", "424301-424310")
     salidas = ["barridos/corredor/" + x for x in
                ("gruesa.csv", "fina.csv", "desfases.csv", "desempate.csv", "fragil.csv", "mult5.csv",
                 "mult5_desempate.csv", "fijo_fino.json", "fijo_mult5.json", "fijo_grueso10.json", "franja.csv",
                 "franja_final.csv", "franja.json", "actuado_final.csv", "actuado_aj.json", "reglas_regla.csv",
-                "reglas_regla_final.csv", "reglas_mp.csv", "reglas_mp_final.csv", "regla.json", "mp.json")] + \
+                "reglas_regla_final.csv", "reglas_reactiva.csv", "reglas_reactiva_final.csv", "reglas_mp.csv",
+                "reglas_mp_final.csv", "regla.json", "reactiva.json", "mp.json")] + \
         [f"corredor_{x}.add.xml" for x in ("r10g", "r10f", "m5f", "franja", "actuado_aj")]
     faltan = [x for x in salidas if not os.path.exists(os.path.join(CARPETA, x))]
     inf.chequeo(not faltan, f"salidas de la cadena: {len(salidas) - len(faltan)}/{len(salidas)} (faltan {faltan})")
+    marcas = {x: bool(leer(f"barridos/corredor/{x}")["registro"]["prueba"])
+              for x in ("fijo_grueso10.json", "fijo_fino.json", "fijo_mult5.json", "franja.json", "actuado_aj.json",
+                        "regla.json", "reactiva.json", "mp.json")}
+    inf.chequeo(all(marcas.values()), f"todas las salidas quedan marcadas como de prueba: {marcas}")
     p6 = leer("barridos/corredor/actuado_paso6.json")
     coord = sorted((bool(v.get("fin_fijo")), v["tipo"]) for v in p6["variantes"] if v.get("coordinado"))
     inf.chequeo(coord == [(False, "actuated"), (True, "actuated")],
@@ -111,28 +130,37 @@ def main():
     fr = leer("barridos/corredor/franja.json")
     _, _, _, cb = evaluar.brazo_referencia("corredor", "franja", "corredor_franja.add.xml")
     m = media_traci(cb, semillas(fr["semillas"]), "franja")
-    inf.chequeo(m == fr["retraso_total_prom"], f"TraCI franja ({[p['clave'] for p in fr['programas']]}, cambios "
-                                               f"{fr['instantes']}): media {m} = {fr['retraso_total_prom']}")
+    inf.chequeo(m == fr["retraso_total_prom"] and sum(fr["cambios"]["reglas"].values()) == 2,
+                f"TraCI franja ({[p['clave'] for p in fr['programas']]}, cambios {fr['instantes']}, reglas "
+                f"{fr['cambios']['reglas']}, retraso maximo {fr['cambios']['retraso_maximo']} s): media {m} = "
+                f"{fr['retraso_total_prom']}")
     aj = leer("barridos/corredor/actuado_aj.json")
     _, _, _, cb = evaluar.brazo_referencia("corredor", "actuado_aj", "corredor_actuado_aj.add.xml")
     m = media_traci(cb, semillas(aj["semillas"]), "actuado_aj")
     inf.chequeo(m == aj["retraso_total_prom"], f"TraCI actuado_aj ({aj['clave']}): media {m} = "
                                                f"{aj['retraso_total_prom']}")
-    for archivo in ("regla.json", "mp.json"):
+    for archivo in ("regla.json", "reactiva.json", "mp.json"):
         rg = leer(f"barridos/corredor/{archivo}")
         _, _, _, cb = evaluar.brazo_regla("corredor", rg["regla"])
         m = media_traci(cb, semillas(rg["semillas"]), rg["regla"])
         inf.chequeo(m == rg["retraso_total_prom"], f"evaluar --regla {rg['regla']}: media {m} = "
                                                    f"{rg['retraso_total_prom']} (el barrido de reglas ya era TraCI)")
 
-    # p3_preparar: reescribe el actuado ajustado igual y deja actuado y ciclo minimo como el codigo entregado
+    # p3_preparar: no toca el actuado ajustado congelado, lo recrea igual si falta, y deja actuado y ciclo minimo
+    # como el codigo entregado
     sha_aj = up.sha256("corredor_actuado_aj.add.xml")
+    fecha = os.stat("corredor_actuado_aj.add.xml").st_mtime_ns
     for f in ("corredor_actuado.add.xml", "corredor_trivial.add.xml"):
         if os.path.exists(f):
             os.remove(f)
-    correr("p3_preparar.py", "corredor")
-    inf.chequeo(up.sha256("corredor_actuado_aj.add.xml") == sha_aj == aj["sha256"],
-                f"p3_preparar reescribe corredor_actuado_aj.add.xml con el mismo sha256 ({sha_aj[:16]})")
+    correr("p3_preparar.py", "corredor", "--piezas", "actuado,trivial,actuado_aj")
+    inf.chequeo(up.sha256("corredor_actuado_aj.add.xml") == sha_aj == aj["sha256"]
+                and os.stat("corredor_actuado_aj.add.xml").st_mtime_ns == fecha,
+                f"p3_preparar no toca corredor_actuado_aj.add.xml, igual al congelado ({sha_aj[:16]})")
+    os.remove("corredor_actuado_aj.add.xml")
+    correr("p3_preparar.py", "corredor", "--piezas", "actuado_aj")
+    inf.chequeo(up.sha256("corredor_actuado_aj.add.xml") == sha_aj,
+                f"p3_preparar --piezas actuado_aj lo recrea con el mismo sha256 ({sha_aj[:16]})")
     viejo = subprocess.run(["git", "show", "223f908:comun.py"], capture_output=True, text=True,
                            cwd=up.RAIZ, encoding="utf-8").stdout
     mod = types.ModuleType("comun_entregado")

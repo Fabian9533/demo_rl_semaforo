@@ -57,6 +57,8 @@ def main():
                                encoding="utf-8").stdout
         with open(os.path.join(CODIGO, f), "w", encoding="utf-8", newline="\n") as g:
             g.write(texto)
+    for linea in up.cabecera_codigo():
+        inf(linea)
     inf("IPPO con mensajes (base 42) en P6, semillas 1001-1002")
     ent = os.path.join(NR, "nr_p6_codigo_entregado.csv")
     cod = evaluar(os.path.join(CODIGO, "evaluar.py"), NR, ent)
