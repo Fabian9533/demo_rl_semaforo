@@ -20,6 +20,7 @@ ok  RECHAZADO examen con evaluar.py: las tandas decisivas se evaluan con evaluar
 ok  RECHAZADO examen regular con semillas aleatorias: --semillas fuera del bloque 'examen_regular': [7001, 7002, 7003, 7004, 7005]
 ok  RECHAZADO semillas prohibidas: --semillas usa semillas prohibidas: 5001-5030; --semillas fuera del bloque 'puente': [5001, 5002, 5003, 5004, 5005]
 ok  RECHAZADO barrido con semillas de examen: --semillas fuera del bloque 'ajuste': [8001, 8002, 8003, 8004, 8005]; opciones de prueba en un barrido de la cola: ['--semillas']
+ok  RECHAZADO barrido que acepta salidas de prueba (--permitir-prueba): opciones de prueba en un barrido de la cola: ['--permitir-prueba']
 ok  RECHAZADO nombra plan2: nombra plan2/TESIS, una ruta absoluta, '\', cd, --instalar u operadores de consola; un argumento sube de carpeta ('..')
 ok  RECHAZADO ruta absoluta: nombra plan2/TESIS, una ruta absoluta, '\', cd, --instalar u operadores de consola; ruta absoluta en --salida: C:/tmp/x.csv
 ok  RECHAZADO barrer_fijo con --instalar: nombra plan2/TESIS, una ruta absoluta, '\', cd, --instalar u operadores de consola
@@ -44,4 +45,4 @@ ok  RECHAZADO barrido de humo con --limite (ya no se exime): opciones de prueba 
 ok  RECHAZADO barrido con --llegadas: opciones de prueba en un barrido de la cola: ['--llegadas']
 ok  RECHAZADO evaluar.py sin --semillas: ../evaluar.py sin --semillas usaria las suyas por defecto (1001-1030 o 2001-2003)
 ok  RECHAZADO --salida= : opcion escrita con '=' (va separada): --salida=../x.csv; un argumento sube de carpeta ('..')
-46 de 46 casos dan lo esperado
+47 de 47 casos dan lo esperado

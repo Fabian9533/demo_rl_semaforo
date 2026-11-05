@@ -39,7 +39,7 @@ PROHIBIDO = re.compile(r"\bplan2\b|\bTESIS\b|[A-Za-z]:[\\/]|\\|[&|<>;`$]|(^|\s)c
 OPCION_SEMILLAS = re.compile(r"^--[a-z-]*(semilla|seed)[a-z-]*$")
 CON_REGLAS = ("--semillas", "--seed", "--val-seeds", "--instalar", "--salida", "--etiqueta", "--csv", "--reanudar")
 AJUSTE = ("barrer_fino.py", "franja.py", "actuado.py", "reglas.py")       # barridos de las referencias
-OPCIONES_PRUEBA = ("--avenida", "--transversal", "--limite")
+OPCIONES_PRUEBA = ("--avenida", "--transversal", "--limite", "--permitir-prueba")
 # Lo que no puede tener cambios sin commit al lanzar: el codigo, el prerregistro y los escenarios (rutas y
 # configuraciones; los .add.xml no, porque de noche se escriben los del actuado, el ciclo minimo y las referencias).
 SIN_CAMBIOS = ("*.py", "plan3/PRERREGISTRO.md", "plan3/*.rou.xml", "plan3/*.sumocfg")
