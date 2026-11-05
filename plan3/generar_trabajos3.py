@@ -486,6 +486,66 @@ def evaluaciones_variantes(lista):
                                    [f"trabajo:e3b_elegir_{et_r}_{e}_s{b}"], tipo=et_r, base=b)
 
 
+# ---------------- Promocion: que modelo se cita en cada celda (prerregistro §12; PLAN3 3.5) ----------------
+# Candidatos de cada celda: V2 y las variantes prerregistradas entrenadas ahi con el mismo tipo de llegadas
+# (observacion nueva, limpiezas juntas, 400 episodios, reloj de 2 s y modelo completo). Cada uno aporta su version
+# evaluada entre 42, 2042 y 4042, jugada en 15009-15024. La decision se guarda por escenario (promocion/<esc>.json).
+CANDIDATOS_REG = {"P1": ["p3obs", "p3reloj2", "p3completo", "p3e400"],
+                  "P2": ["p3obs", "p3m7", "p3reloj2", "p3completo", "p3e400"],
+                  "P3": ["p3obs", "p3e400"], "P4": ["p3completo", "p3e400"], "P5": ["p3e400"],
+                  "P6": ["p3obs", "p3m7", "p3reloj2", "p3completo", "p3e400"],
+                  "D": ["p3obs", "p3m7", "p3reloj2"], "c2715": ["p3obs"]}
+CANDIDATOS_POI = {"P1": ["p3obspoi", "p3reloj2poi", "p3completopoi", "p3e400poi"],
+                  "P2": ["p3obspoi", "p3reloj2poi", "p3completopoi", "p3e400poi"],
+                  "P3": ["p3obspoi", "p3completopoi", "p3e400poi"], "P4": ["p3obspoi", "p3completopoi", "p3e400poi"],
+                  "P5": ["p3obspoi", "p3completopoi", "p3e400poi"],
+                  "P6": ["p3obspoi", "p3reloj2poi", "p3completopoi", "p3e400poi"]}
+
+
+def promocion(lista):
+    reg = {**CASOS, **NIVELES, **D}
+    decisiones = []
+    for tipo, candidatos in (("reg", CANDIDATOS_REG), ("poi", CANDIDATOS_POI)):
+        for c, ets in candidatos.items():
+            e = POI[c] if tipo == "poi" else reg[c]
+            et_v2 = "p3v2poi" if tipo == "poi" else "p3v2reg"
+            pref_v2 = "e2_v2poi" if tipo == "poi" else "e1_v2reg"
+            f_v2 = POI_F if tipo == "poi" else 1.0
+            csvs = {}
+            for et in [et_v2] + ets:
+                if et == et_v2:
+                    reqs = [req_entreno(pref_v2, e, b, c, factor=f_v2) for b in BASES3]
+                    et_med = f"{et_v2}3med"
+                elif et.startswith("p3e400"):
+                    reqs = [req_entreno(f"e3b_{et}", e, b, c, 400, factor=f_v2, desde=DESDE_3B) for b in BASES3]
+                    et_med = f"{et}med"
+                else:
+                    eps = 400 if et.startswith("p3completo") else EPISODIOS
+                    f_tr = {"p3obs": OBS, "p3obspoi": (OBS * POI_F, OBS * POI_F),
+                            "p3reloj2": (RELOJ_TR, RELOJ_VAL), "p3reloj2poi": (RELOJ_TR * POI_F, RELOJ_VAL * POI_F),
+                            "p3completo": (OBS * RELOJ_TR, OBS * RELOJ_VAL),
+                            "p3completopoi": (OBS * RELOJ_TR * POI_F, OBS * RELOJ_VAL * POI_F)}.get(et, 1.0)
+                    reqs = [req_entreno(f"e3_{et}", e, b, c, eps, factor=f_tr) for b in BASES3]
+                    et_med = f"{et}med"
+                ruta, tid = mediana(lista, e, "vecinos", et, BASES3, reqs, et_med)
+                ev = evaluacion(lista, c, e, "promo", et_med, f"--politica {ruta}", [f"trabajo:{tid}"],
+                                factor=FACTOR_EV.get(et, 1.0), tipo=f"promo_{et}")
+                csvs[et] = (f"parciales/promo/eval_{e}__{et_med}.csv", ev)
+            salida = f"promocion/{e}.json"
+            lista.agregar({"id": f"promo_decidir_{e}", "etapa": "ev", "prioridad": 4, "uso": "sin_semillas",
+                           "requiere": [f"trabajo:{ev}" for _, ev in csvs.values()],
+                           "cmd": f"python p3_promocion.py decidir --celda {e} --v2 {csvs[et_v2][0]} "
+                                  f"--candidatos {','.join(r for et, (r, _) in csvs.items() if et != et_v2)} "
+                                  f"--salida {salida}",
+                           "salidas": [salida], "duracion": 10})
+            decisiones.append((f"promo_decidir_{e}", salida))
+    lista.agregar({"id": "promo_juntar", "etapa": "ev", "prioridad": 4, "uso": "sin_semillas",
+                   "requiere": [f"trabajo:{t}" for t, _ in decisiones],
+                   "cmd": f"python p3_promocion.py juntar --entradas {','.join(s for _, s in decisiones)} "
+                          f"--salida promocion.json",
+                   "salidas": ["promocion.json"], "duracion": 10})
+
+
 def preparar(lista):
     """Genera los programas del actuado y del ciclo minimo de cada escenario (p3_preparar.py; PLAN3 0.11)."""
     escenarios = list({**CASOS, **NIVELES, **D}.values()) + list(P6E.values()) + list(POI.values())
@@ -496,7 +556,8 @@ def preparar(lista):
 
 PARTES = {"etapa1": etapa1, "c0": c0, "v2vieja": v2vieja, "etapa2": etapa2, "etapa2pm": etapa2pm,
           "etapa3b": etapa3b, "etapa3": etapa3,
-          "preparar": preparar, "evaluaciones": evaluaciones, "evaluaciones_variantes": evaluaciones_variantes}
+          "preparar": preparar, "evaluaciones": evaluaciones, "evaluaciones_variantes": evaluaciones_variantes,
+          "promocion": promocion}
 
 
 def generar(partes):
