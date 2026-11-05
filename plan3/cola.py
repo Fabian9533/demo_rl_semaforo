@@ -335,8 +335,9 @@ def main():
                 log = open(ruta_log, "w", encoding="utf-8")
                 cmd = t["cmd"].replace("python ", f'"{sys.executable}" ', 1)
                 inicio = time.time()
+                # P3_USO: comun.revisar_semilla_ciega deja simular semillas a ciegas solo en trabajos de uso ciego
                 proc = subprocess.Popen(cmd, cwd=RAIZ, shell=True, stdout=log, stderr=subprocess.STDOUT,
-                                        env=entorno)
+                                        env=dict(entorno, P3_USO=t.get("uso", "")))
                 corriendo[t["id"]] = (proc, inicio, cpus, log)
                 previo = e["registro"].get(t["id"], {})
                 e["registro"][t["id"]] = {"inicio": ahora(), "inicio_epoch": inicio,

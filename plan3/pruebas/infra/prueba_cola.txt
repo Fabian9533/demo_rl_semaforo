@@ -11,24 +11,24 @@ ok  G huerfano sin salidas: fallido, no hecho
 ok  un trabajo malo en la lista: la cola no lanza nada
 11 de 11 comprobaciones bien
 --- salida de la ronda 1 ---
-cola: 0 hechos, 0 fallidos al arrancar; cpus=4; commit 385b6a7566; corte 12:05
-11:55:40 INICIO A (prio 1, 1/4 cpus)
-11:55:40 INICIO C (prio 1, 2/4 cpus)
-11:55:40 INICIO E (prio 1, 3/4 cpus)
-11:55:40 INICIO F (prio 1, 4/4 cpus)
-11:55:45 OK    A (5 s)
-11:55:45 FALLO C (1, 5 s)
-11:55:45 FALLO E (salidas incompletas, 5 s)
-11:55:45 FALLO F (1, 5 s)
-11:55:45 INICIO B (prio 1, 1/4 cpus)
-11:55:45 INICIO H (prio 1, 2/4 cpus)
-11:55:45 INICIO J (prio 1, 3/4 cpus)
-11:55:50 OK    B (5 s)
-11:55:50 REINTENTO H (1/2)
-11:55:50 REINTENTO J (1/2)
-11:55:50 INICIO H (prio 1, 1/4 cpus)
-11:55:50 INICIO J (prio 1, 2/4 cpus)
-11:55:55 OK    H (5 s)
-11:55:55 OK    J (5 s)
+cola: 0 hechos, 0 fallidos al arrancar; cpus=4; commit 1bcb4c9488; corte 14:03
+13:53:09 INICIO A (prio 1, 1/4 cpus)
+13:53:09 INICIO C (prio 1, 2/4 cpus)
+13:53:09 INICIO E (prio 1, 3/4 cpus)
+13:53:09 INICIO F (prio 1, 4/4 cpus)
+13:53:14 OK    A (5 s)
+13:53:14 FALLO C (1, 5 s)
+13:53:14 FALLO E (salidas incompletas, 5 s)
+13:53:14 FALLO F (1, 5 s)
+13:53:14 INICIO B (prio 1, 1/4 cpus)
+13:53:14 INICIO H (prio 1, 2/4 cpus)
+13:53:14 INICIO J (prio 1, 3/4 cpus)
+13:53:19 OK    B (5 s)
+13:53:19 REINTENTO H (1/2)
+13:53:19 REINTENTO J (1/2)
+13:53:20 INICIO H (prio 1, 1/4 cpus)
+13:53:20 INICIO J (prio 1, 2/4 cpus)
+13:53:25 OK    H (5 s)
+13:53:25 OK    J (5 s)
 cola: fin; 4 hechos, 3 fallidos, 1 bloqueados, 1 pendientes
   bloqueado: D
