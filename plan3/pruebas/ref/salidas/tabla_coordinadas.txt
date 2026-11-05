@@ -1,0 +1,12 @@
+Variantes coordinadas del actuado con el fijo entregado como fino (semilla 424301; antes = 6e8cfab; copia en C:\Users\GAMER\Documents\demo_rl_semaforo\w3_ref\plan3\tmp_ref\coordinadas)
+retraso total (s/veh); entre parentesis, salidas del verde de avenida en el fin del plan fijo / salidas, en el semaforo que peor sale
+| | fijo | actuado | coordinada (a) antes | (a) ahora | coordinada (b) antes | (b) ahora |
+|---|---|---|---|---|---|---|
+| P1 | 21.91 (166 salidas) | 21.49 | 21.19 (75/164) | 21.19 (75/164) | 21.91 (166/166) | 21.91 (166/166) |
+| P2 | 392.73 (130 salidas) | 437.26 | 446.78 (12/73) | 446.78 (12/73) | 394.4 (128/129) | 394.4 (128/129) |
+| P3 | 20.14 (231 salidas) | 21.46 | 21.61 (2/216) | 22.55 (11/209) | 20.14 (231/231) | 20.14 (230/230) |
+| P6 | 82.57 (194 salidas) | 114.64 | 115.94 (60/143) | 118.13 (69/144) | 82.57 (194/194) | 82.57 (193/193) |
+| P1, plan 22/15 0/17 | 26.4 (139 salidas) | 21.49 | 21.29 (71/139) | 21.29 (71/139) | 21.6 (139/139) | 21.6 (139/139) |
+| dem_red_t3620, plan 25/15 0/23/0 | 104.19 (130 salidas) | 106.9 | 107.8 (39/146) | 103.64 (51/121) | 106.17 (84/166) | 103.32 (128/129) |
+
+RESULTADO: PASA
