@@ -14,7 +14,7 @@ ok  RECHAZADO rl_ippo train sin etiqueta: rl_ippo train sin --etiqueta p3...: pi
 ok  RECHAZADO rl_ippo con etiqueta que no empieza por p3: rl_ippo train sin --etiqueta p3...: pisaria los nombres de lo entregado
 ok  RECHAZADO base fuera de la tabla: base de entrenamiento fuera de la tabla: 6042
 ok  RECHAZADO base de humo en un trabajo de verdad: base de entrenamiento fuera de la tabla: 7
-ok  RECHAZADO validacion con semillas de examen: --val-seeds fuera del bloque 'entrenamiento': [8001, 8002]
+ok  RECHAZADO validacion con semillas de examen: --val-seeds fuera del bloque 'validacion': [8001, 8002]
 ok  RECHAZADO examen fuera de ciego/: uso 'examen_regular' debe escribir en ciego/: --salida parciales/x.csv
 ok  RECHAZADO examen con evaluar.py: las tandas decisivas se evaluan con evaluar3.py (a ciegas)
 ok  RECHAZADO examen regular con semillas aleatorias: --semillas fuera del bloque 'examen_regular': [7001, 7002, 7003, 7004, 7005]

@@ -189,11 +189,11 @@ def revisar_comando(t, existe=os.path.exists):
         malos.append("la prueba final exige listo/holdout.ok")
     for k, a in enumerate(args):
         if a.startswith("--") and k + 1 < len(args) and ("/" in args[k + 1] or "." in args[k + 1]):
-            v = args[k + 1]
-            if os.path.isabs(v) or ":" in v:
-                malos.append(f"ruta absoluta en {a}: {v}")
-            elif len(os.path.join(PLAN3, v)) > LARGO_MAX:
-                malos.append(f"ruta demasiado larga para Windows en {a}: {v}")
+            for v in args[k + 1].split(","):          # una opcion puede llevar varias rutas separadas por comas
+                if os.path.isabs(v) or ":" in v:
+                    malos.append(f"ruta absoluta en {a}: {v}")
+                elif len(os.path.join(PLAN3, v)) > LARGO_MAX:
+                    malos.append(f"ruta demasiado larga para Windows en {a}: {v}")
     return malos
 
 
