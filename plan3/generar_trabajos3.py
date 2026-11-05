@@ -229,10 +229,12 @@ def etapa2pm(lista):
                 lista.entrenamiento(f"e2_{et}_{e}_s{b}", "2", 3, c, e, et, b, "--v2", lanzador=True, factor=f)
 
 
-def etapa3b(lista):
+def etapa3b(lista, tipos=("reg", "poi")):
     op = "--v2 --lr-horizonte 200 --lr-piso 0.1"
     for tipo, celdas, et_v2, et, pref_v2 in (("reg", CASOS, "p3v2reg", "p3e400", "e1_v2reg"),
                                             ("poi", POI, "p3v2poi", "p3e400poi", "e2_v2poi")):
+        if tipo not in tipos:
+            continue
         for c, e in celdas.items():
             f = POI_F if tipo == "poi" else 1.0
             for b in BASES3:
@@ -556,7 +558,8 @@ def preparar(lista):
 
 
 PARTES = {"etapa1": etapa1, "c0": c0, "v2vieja": v2vieja, "etapa2": etapa2, "etapa2pm": etapa2pm,
-          "etapa3b": etapa3b, "etapa3": etapa3,
+          "etapa3b": etapa3b, "etapa3b_reg": lambda l: etapa3b(l, ("reg",)),
+          "etapa3b_poi": lambda l: etapa3b(l, ("poi",)), "etapa3": etapa3,
           "preparar": preparar, "evaluaciones": evaluaciones, "evaluaciones_variantes": evaluaciones_variantes,
           "promocion": promocion}
 
