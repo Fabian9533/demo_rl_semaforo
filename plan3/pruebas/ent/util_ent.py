@@ -254,6 +254,19 @@ def sha256(ruta):
         return hashlib.sha256(f.read()).hexdigest()
 
 
+def proteger(inf, cuerpo, *args):
+    """Corre cuerpo(inf, *args) y cierra el informe siempre: una excepcion queda anotada como FALLA (con la ultima
+    linea de su traza), asi la salida existe aunque la prueba se caiga a mitad. Devuelve el numero de fallas."""
+    import traceback
+    try:
+        cuerpo(inf, *args)
+    except Exception as e:
+        donde = traceback.extract_tb(e.__traceback__)[-1]
+        inf.chequeo("la prueba corre entera, sin excepciones", False,
+                    f"{type(e).__name__}: {e} ({os.path.basename(donde.filename)}:{donde.lineno})")
+    return inf.cerrar()
+
+
 class Informe:
     """Acumula lineas y el resultado de cada comprobacion; escribe salidas/<nombre>.txt."""
 

@@ -103,6 +103,25 @@ def prueba_entrenamiento(inf, vehiculos_base):
                 and op.get("norm_beta") == 0.99, f"{op}")
     inf.chequeo("--norm-valor: columnas vn_media y vn_desv", all(x["vn_media"] and x["vn_desv"] for x in filas),
                 f"vn_media {[x['vn_media'] for x in filas]}")
+    # revision del 05.11 (R3-5 y R5-4): eval_* del nivel 1 y la escala del critico en los meta
+    s0 = SEMILLAS[0]
+    cks = {int(r.name[len(tag) + 3:len(tag) + 6]): json.loads(r.read_text(encoding="utf-8"))
+           for r in sorted((c / "checkpoints").glob(f"{tag}_ep*.json"))}
+    ok_eval = all(x["eval_timeloss"] == "" or float(x["eval_timeloss"]) == cks[int(x["episodio"])][f"val_{s0}_x1"]
+                  for x in filas if x["val_total"]) and all(x["eval_timeloss"] for x in filas if x["val_total"])
+    inf.chequeo("eval_timeloss de cada validacion = la primera semilla en el nivel 1",
+                ok_eval, f"{[(x['episodio'], x['eval_timeloss']) for x in filas if x['val_total']]}")
+    ultimo = cks[max(cks)]
+    inf.chequeo("meta publicado: eval_nivel 1.0 y eval_999_final = la primera semilla en el nivel 1 del ultimo "
+                "checkpoint", meta.get("eval_nivel") == 1.0 and meta["eval_999_final"] == ultimo[f"val_{s0}_x1"],
+                f"eval_nivel {meta.get('eval_nivel')}, eval_999_final {meta['eval_999_final']} | "
+                f"{ultimo[f'val_{s0}_x1']}")
+    elegido = cks[meta["ep_elegido"]]
+    inf.chequeo("--norm-valor: cada checkpoint guarda vn_media, vn_desv y vn_estado; el meta publicado, los del "
+                "elegido", all(all(k in m for k in ("vn_media", "vn_desv", "vn_estado")) for m in cks.values())
+                and all(meta.get(k) == elegido[k] for k in ("vn_media", "vn_desv", "vn_estado")),
+                f"{[(e, m.get('vn_media'), m.get('vn_desv')) for e, m in cks.items()]}; publicado "
+                f"{meta.get('vn_media')}, {meta.get('vn_desv')}")
 
 
 def main():

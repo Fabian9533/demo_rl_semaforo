@@ -48,6 +48,10 @@ CORRIDAS = {   # nombre: (codigo, argumentos, tag de los checkpoints, politica p
 def main():
     inf = u.Informe("prueba_identidad", "Pruebas 1 y 2 (tarea 1.1): identidad con el tag y opciones que no cambian "
                     "numeros; ablacion de V2. P1, base 7, 10 episodios, validacion cada 5 en " + u.VAL_HUMO)
+    return u.proteger(inf, cuerpo)        # una excepcion queda como FALLA y el informe se escribe igual
+
+
+def cuerpo(inf):
     script_tag = u.codigo_tag()
     trabajos, carpetas = [], {}
     for nombre, (codigo, argumentos, _, _) in CORRIDAS.items():
@@ -107,7 +111,8 @@ def main():
                                  "--salida", "eval_humo.csv"], carpetas[n], carpetas[n] / "log_evaluar.txt")
                     for n in (sin, con)]
         cods = u.en_tandas(trabajos, maximo=2)
-        inf.chequeo(f"evaluar {sin} y {con}", cods == [0, 0], f"codigos {cods}")
+        if not inf.chequeo(f"evaluar {sin} y {con}", cods == [0, 0], f"codigos {cods}"):
+            continue                    # sin los dos CSV no hay nada que comparar (la falla ya quedo anotada)
         a, b = carpetas[sin] / "eval_humo.csv", carpetas[con] / "eval_humo.csv"
         iguales = a.read_bytes() == b.read_bytes()
         inf.chequeo(f"CSV de evaluar de {sin} = el de {con} (byte a byte)", iguales,
@@ -135,7 +140,6 @@ def main():
             meta = json.load(fj)
         inf(f"   meta de {n}: opciones {meta['opciones']}; descuento '{meta['descuento']}'; "
             f"exploracion '{meta['exploracion']}'")
-    return inf.cerrar()
 
 
 if __name__ == "__main__":
