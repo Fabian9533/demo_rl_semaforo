@@ -18,7 +18,9 @@ prueba_fino.py - Pruebas de la tarea 0.7 (barrer_fino.py):
   F. la cadena de etapas (sin sumo, con resultados inventados): la fina se niega a leer una gruesa con opciones de
      prueba y la acepta con --permitir-prueba (y su salida queda marcada); una gruesa con el registro de la regla pero
      otras semillas tambien se niega; la etapa fragil lee el desempate sin reescribirlo (mismo sha256 y misma fecha) y
-     se niega si desempate.csv no es el de las etapas o si sus semillas no son las de la regla.
+     se niega si desempate.csv no es el de las etapas o si sus semillas no son las de la regla; desde la raiz se niega
+     (cwd) y una opcion abreviada no se acepta; correr_periodos niega las semillas del examen y de la final antes de
+     lanzar sumo (con sumo reemplazado: no se simula ninguna).
 Uso (cwd = plan3/): python pruebas/ref/prueba_fino.py      Salida: pruebas/ref/salidas/prueba_fino.txt
 Semillas: 2001-2003 en B y C (las del barrido entregado, para reproducirlo); humo en D y E; en F nada corre (los
 numeros son inventados, con los nombres de las semillas de la regla).
@@ -471,6 +473,39 @@ def fuera_de_plan3():
                 f"F una opcion abreviada (--sem) no se acepta: codigo {r.returncode}")
 
 
+def semillas_ciegas():
+    """comun.revisar_semilla_ciega antes del sumo de barrer_fino.correr_periodos. Sin sumo: subprocess.run se
+    reemplaza por uno que solo anota la semilla, asi ninguna semilla del examen o de la final llega a simularse."""
+    llamadas, resultados = [], []
+
+    class Lanzado(Exception):
+        pass
+
+    def falso(cmd, *a, **k):
+        llamadas.append(cmd[cmd.index("--seed") + 1])
+        raise Lanzado()
+    real, uso = bfn.subprocess.run, os.environ.pop("P3_USO", None)
+    bfn.subprocess.run = falso
+    try:
+        for semilla in (7001, 8001, 13120, up.HUMO[0]):
+            try:
+                bfn.correr_periodos("corredor.sumocfg", [], semilla, os.path.join(up.TMP, "ti_ciega.xml"), [1800],
+                                    intentos=1)
+                resultados.append((semilla, "corrio"))
+            except SystemExit:
+                resultados.append((semilla, "negada"))
+            except Lanzado:
+                resultados.append((semilla, "llega a sumo"))
+    finally:
+        bfn.subprocess.run = real
+        if uso is not None:
+            os.environ["P3_USO"] = uso
+    inf.chequeo(resultados == [(7001, "negada"), (8001, "negada"), (13120, "negada"), (up.HUMO[0], "llega a sumo")]
+                and llamadas == [str(up.HUMO[0])],
+                f"F semillas del examen y de la final: correr_periodos las niega antes de lanzar sumo (sumo reemplazado: "
+                f"nada se simula): {resultados}")
+
+
 def main():
     inf("Pruebas de 0.7: barrido fino con puntaje por periodo")
     prueba_regla()
@@ -489,6 +524,7 @@ def main():
     fragil_lee_el_desempate()
     fuera_de_plan3()
     os.chdir(up.PLAN3)
+    semillas_ciegas()
     sys.exit(1 if inf.cerrar() else 0)
 
 

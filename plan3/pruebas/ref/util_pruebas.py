@@ -75,6 +75,7 @@ def sumo_directo(cfg, adicionales, semilla, tripinfo, extra=(), log=None):
     cmd += ["--log", log, "--no-warnings", "false"] if log else ["--no-warnings", "true"]
     if adicionales:
         cmd += ["--additional-files", adicionales]
+    comun.revisar_semilla_ciega(cmd)            # las pruebas nunca simulan semillas del examen ni de la final
     subprocess.run(cmd + list(extra), check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     return comun.leer_tripinfo(tripinfo)
 

@@ -69,7 +69,9 @@ Salidas en barridos/<esc>/: <etapa>.csv (una fila por plan, ordenada por retraso
 fila por plan y semilla), fijo_grueso10.json, fijo_fino.json y fijo_mult5.json (el ganador, la traza de la regla, el
 registro y el sha256 del .add.xml). La etapa fragil lee el desempate (desempate.csv y desempate_semillas.csv) sin
 reescribirlo. Codigo 0 solo con las salidas de la etapa completas. Se corre con cwd = plan3/ (o una carpeta dentro de
-plan3/, como las copias de las pruebas en tmp_ref/): desde otro lugar se niega.
+plan3/, como las copias de las pruebas en tmp_ref/): desde otro lugar se niega. Como todo sumo de plan3, antes de cada
+corrida pasa por comun.revisar_semilla_ciega: una semilla del examen o de la prueba final sale con error antes de
+simular si el proceso no es un trabajo ciego de la cola (franja.py y actuado.py corren por aqui).
 """
 import os
 import sys
@@ -335,6 +337,7 @@ def correr_periodos(cfg, extra, semilla, tripinfo, cortes, intentos=5):
            "--tripinfo-output.write-unfinished", "true"] + no_insertados + \
           ["--device.emissions.probability", "1",
            "--no-step-log", "true", "--no-warnings", "true", "--end", str(bf.FIN_SIM)] + estadisticas + extra
+    comun.revisar_semilla_ciega(cmd)            # plan3: semillas del examen y de la prueba final solo desde la cola
     for k in range(intentos):
         try:
             subprocess.run(cmd, check=True, **bf.SILENCIO)
