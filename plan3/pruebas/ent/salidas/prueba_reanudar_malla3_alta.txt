@@ -1,0 +1,28 @@
+Pruebas 3 (tarea 1.2): reanudacion exacta en malla3_alta, base 7, validacion cada 5 en 424301,424302
+05.11.2026 08:58; python 3.14.6, torch 2.14.0+cpu
+
+
+Prueba 3: 20 seguidos = 10 + 10 reanudados
+-- malla3_alta, v2: --v2 --criterio-val total --etiqueta p3prbv2 --guardar-estado --registro-extendido
+[OK] corrida seguida de 20: codigo 0
+[OK] tramo 1 (--hasta-ep 10) sale con 0: codigo 0
+[OK] tramo 1: CSV con los episodios 1-10: 10 filas
+[OK] tramo 1: no publica la politica
+[OK] tramo 1: estados en 5 y 10: [5, 10]
+-- malla3_alta, v2: 20 seguidos frente a 10 + 10 reanudados
+[OK] tramo 2 (--reanudar ep 10) sale con 0 y dice desde donde sigue: codigo 0
+[OK] CSV: iguales byte a byte salvo 'segundos' (20 filas)
+[OK] checkpoints: episodios con checkpoint: [5, 10, 15, 20] | [5, 10, 15, 20]
+  ep   5: 12/12 tensores iguales (torch.equal), claves iguales True; meta igual
+  ep  10: 12/12 tensores iguales (torch.equal), claves iguales True; meta igual
+  ep  15: 12/12 tensores iguales (torch.equal), claves iguales True; meta igual
+  ep  20: 12/12 tensores iguales (torch.equal), claves iguales True; meta igual
+[OK] politica publicada (tensores): 12/12 tensores iguales (torch.equal), claves iguales True
+[OK] politica publicada (bytes)
+[OK] meta publicado: meta igual
+[OK] estado del ep 5: pesos: igual; Adam (paso [5960.0], exp_avg, exp_avg_sq, grupos): igual; random: igual; numpy global: igual; torch: igual; default_rng de sembrar: igual; CSV hasta el episodio (salvo segundos): igual; archivos, config, episodio, episodios, etiqueta, eval_cada, fase_av, lr, origen, ruta_csv, tag, val_serie, val_total_serie, version: igual
+[OK] estado del ep 10: pesos: igual; Adam (paso [10610.0], exp_avg, exp_avg_sq, grupos): igual; random: igual; numpy global: igual; torch: igual; default_rng de sembrar: igual; CSV hasta el episodio (salvo segundos): igual; archivos, config, episodio, episodios, etiqueta, eval_cada, fase_av, lr, origen, ruta_csv, tag, val_serie, val_total_serie, version: igual
+[OK] estado del ep 15: pesos: igual; Adam (paso [15240.0], exp_avg, exp_avg_sq, grupos): igual; random: igual; numpy global: igual; torch: igual; default_rng de sembrar: igual; CSV hasta el episodio (salvo segundos): igual; archivos, config, episodio, episodios, etiqueta, eval_cada, fase_av, lr, origen, ruta_csv, tag, val_serie, val_total_serie, version: igual
+[OK] estado del ep 20: pesos: igual; Adam (paso [19900.0], exp_avg, exp_avg_sq, grupos): igual; random: igual; numpy global: igual; torch: igual; default_rng de sembrar: igual; CSV hasta el episodio (salvo segundos): igual; archivos, config, episodio, episodios, etiqueta, eval_cada, fase_av, lr, origen, ruta_csv, tag, val_serie, val_total_serie, version: igual
+
+Resultado: todo OK

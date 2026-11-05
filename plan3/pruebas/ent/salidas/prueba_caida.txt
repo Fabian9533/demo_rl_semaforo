@@ -1,0 +1,67 @@
+--reanudar auto con caidas (taskkill /F /T) a mitad de cada tramo: V2 en P1, base 7, 20 episodios en dos tramos (--hasta-ep 10 y final), validacion cada 5 en 424301,424302
+05.11.2026 09:35; python 3.14.6, torch 2.14.0+cpu
+
+[OK] corrida seguida (el mismo comando, sin --hasta-ep ni caidas): codigo 0
+Comando de cada tramo: rl_ippo.py train --escenario corredor --seed 7 --episodios 20 --eval-cada 5 --val-seeds 424301,424302 --v2 --criterio-val total --etiqueta p3prbv2 --guardar-estado --registro-extendido --reanudar auto --hasta-ep 10  (el segundo, sin --hasta-ep)
+
+Tramo 1, primer intento (sin estados: empieza de cero), muerto durante el episodio 8
+   taskkill /F /T /PID 10356 con 7 filas escritas: codigo 0, 2 procesos terminados (python y su sumo)
+[OK] el intento muerto no sale con 0 y deja el estado del 5, no el del 10: codigo 1, estados [5], 7 filas
+[OK] empezo de cero
+Tramo 1, relanzado con el mismo comando
+[OK] sale con 0, sigue desde el estado del 5 y llega al 10: codigo 0, 10 filas
+[OK] los episodios rehechos repiten los del intento muerto: Reanudacion: los episodios 6-7 repiten el intento anterior (2 filas, sin la columna segundos)
+[OK] no publica la politica
+[OK] relanzar el tramo 1 ya hecho: sale con 0 sin tocar nada: codigo 0
+
+Tramo 2, primer intento, muerto durante el episodio 18
+   taskkill /F /T /PID 12816 con 17 filas escritas: codigo 0, 2 procesos terminados (python y su sumo)
+[OK] el intento muerto no sale con 0 y deja los estados hasta el 15: codigo 1, estados [5, 10, 15], 17 filas
+Tramo 2, relanzado con el mismo comando
+[OK] sale con 0, sigue desde el estado del 15 y publica: codigo 0, 20 filas
+[OK] los episodios rehechos repiten los del intento muerto: Reanudacion: los episodios 16-17 repiten el intento anterior (2 filas, sin la columna segundos)
+[OK] relanzar el tramo 2 con todo terminado: sale con 0 sin tocar nada: codigo 0: ['Nada que hacer: corredor_ippo_vecinos_p3prbv2_s7 ya llego al episodio 20 y publico politica_corredor_vecinos_p3prbv2_s7.pt']
+[OK] relanzar el tramo 1 con todo terminado: sale con 0 sin tocar nada: codigo 0: ['Nada que hacer: checkpoints\\corredor_ippo_vecinos_p3prbv2_s7_ep020.estado.pt ya pasa del episodio 10 (--hasta-ep)']
+
+Frente a la corrida seguida (mismo comando sin cortes ni caidas)
+[OK] CSV: iguales byte a byte salvo 'segundos' (20 filas)
+[OK] checkpoints: episodios con checkpoint: [5, 10, 15, 20] | [5, 10, 15, 20]
+  ep   5: 12/12 tensores iguales (torch.equal), claves iguales True; meta igual
+  ep  10: 12/12 tensores iguales (torch.equal), claves iguales True; meta igual
+  ep  15: 12/12 tensores iguales (torch.equal), claves iguales True; meta igual
+  ep  20: 12/12 tensores iguales (torch.equal), claves iguales True; meta igual
+[OK] politica publicada (bytes)
+[OK] meta publicado: meta igual
+[OK] estado del ep 5: pesos: igual; Adam (paso [1040.0], exp_avg, exp_avg_sq, grupos): igual; random: igual; numpy global: igual; torch: igual; default_rng de sembrar: igual; CSV hasta el episodio (salvo segundos): igual; archivos, config, episodio, episodios, etiqueta, eval_cada, fase_av, lr, origen, ruta_csv, tag, val_serie, val_total_serie, version: igual
+[OK] estado del ep 10: pesos: igual; Adam (paso [2040.0], exp_avg, exp_avg_sq, grupos): igual; random: igual; numpy global: igual; torch: igual; default_rng de sembrar: igual; CSV hasta el episodio (salvo segundos): igual; archivos, config, episodio, episodios, etiqueta, eval_cada, fase_av, lr, origen, ruta_csv, tag, val_serie, val_total_serie, version: igual
+[OK] estado del ep 15: pesos: igual; Adam (paso [3040.0], exp_avg, exp_avg_sq, grupos): igual; random: igual; numpy global: igual; torch: igual; default_rng de sembrar: igual; CSV hasta el episodio (salvo segundos): igual; archivos, config, episodio, episodios, etiqueta, eval_cada, fase_av, lr, origen, ruta_csv, tag, val_serie, val_total_serie, version: igual
+[OK] estado del ep 20: pesos: igual; Adam (paso [4040.0], exp_avg, exp_avg_sq, grupos): igual; random: igual; numpy global: igual; torch: igual; default_rng de sembrar: igual; CSV hasta el episodio (salvo segundos): igual; archivos, config, episodio, episodios, etiqueta, eval_cada, fase_av, lr, origen, ruta_csv, tag, val_serie, val_total_serie, version: igual
+[OK] no quedan estados a medio escribir (.tmp): []
+
+Etiqueta nueva p3prbcaidan desde el estado del ep 10 de la corrida seguida (30 episodios, horizonte 20, piso 0.1)
+[OK] corrida seguida de 30 con la etiqueta nueva (desde cero): codigo 0
+Tramo A: rl_ippo.py train --escenario corredor --seed 7 --episodios 30 --eval-cada 5 --val-seeds 424301,424302 --v2 --criterio-val total --etiqueta p3prbcaidan --guardar-estado --registro-extendido --lr-horizonte 20 --lr-piso 0.1 --reanudar <origen ep 10> --hasta-ep 20 (el B, sin --hasta-ep)
+   taskkill /F /T /PID 16208 con 17 filas escritas: codigo 0, 2 procesos terminados (python y su sumo)
+[OK] A muerto durante el ep 18: no sale con 0; estados 5 y 10 copiados y 15 propio: codigo 1, estados [5, 10, 15]
+[OK] A relanzado: sigue desde su estado del 15 (no copia otra vez) y corta en el 20: codigo 0; ['corredor_ippo_vecinos_p3prbcaidan_s7 ya sigue a corredor_ippo_vecinos_p3prbv2_s7_ep010.estado.pt: continua desde checkpoints\\corredor_ippo_vecinos_p3prbcaidan_s7_ep015.estado.pt']
+[OK] los episodios rehechos repiten los del intento muerto: Reanudacion: los episodios 16-17 repiten el intento anterior (2 filas, sin la columna segundos)
+[OK] B (misma ruta de origen): sigue desde su estado del 20 y publica: codigo 0, 30 filas
+[OK] relanzar A con todo terminado: sale con 0 sin tocar nada: codigo 0: ['Nada que hacer: checkpoints\\corredor_ippo_vecinos_p3prbcaidan_s7_ep030.estado.pt ya pasa del episodio 20 (--hasta-ep)']
+[OK] relanzar B con todo terminado: sale con 0 sin tocar nada: codigo 0: ['Nada que hacer: corredor_ippo_vecinos_p3prbcaidan_s7 ya llego al episodio 30 y publico politica_corredor_vecinos_p3prbcaidan_s7.pt']
+Frente a la corrida seguida de 30 con la etiqueta nueva:
+[OK] CSV: iguales byte a byte salvo 'segundos' (30 filas)
+[OK] checkpoints: episodios con checkpoint: [5, 10, 15, 20, 25, 30] | [5, 10, 15, 20, 25, 30]
+  ep   5: 12/12 tensores iguales (torch.equal), claves iguales True; meta igual (sin ['reanudado_de'])
+  ep  10: 12/12 tensores iguales (torch.equal), claves iguales True; meta igual (sin ['reanudado_de'])
+  ep  15: 12/12 tensores iguales (torch.equal), claves iguales True; meta igual (sin ['reanudado_de'])
+  ep  20: 12/12 tensores iguales (torch.equal), claves iguales True; meta igual (sin ['reanudado_de'])
+  ep  25: 12/12 tensores iguales (torch.equal), claves iguales True; meta igual (sin ['reanudado_de'])
+  ep  30: 12/12 tensores iguales (torch.equal), claves iguales True; meta igual (sin ['reanudado_de'])
+[OK] politica publicada (tensores): 12/12 tensores iguales (torch.equal), claves iguales True
+[OK] meta publicado: meta igual (sin ['reanudado_de'])
+[OK] estado del ep 15: pesos: igual; Adam (paso [3040.0], exp_avg, exp_avg_sq, grupos): igual; random: igual; numpy global: igual; torch: igual; default_rng de sembrar: igual; CSV hasta el episodio (salvo segundos): igual; config, episodio, episodios, etiqueta, eval_cada, fase_av, lr, ruta_csv, tag, val_serie, val_total_serie, version: igual
+[OK] estado del ep 20: pesos: igual; Adam (paso [4040.0], exp_avg, exp_avg_sq, grupos): igual; random: igual; numpy global: igual; torch: igual; default_rng de sembrar: igual; CSV hasta el episodio (salvo segundos): igual; config, episodio, episodios, etiqueta, eval_cada, fase_av, lr, ruta_csv, tag, val_serie, val_total_serie, version: igual
+[OK] estado del ep 25: pesos: igual; Adam (paso [5040.0], exp_avg, exp_avg_sq, grupos): igual; random: igual; numpy global: igual; torch: igual; default_rng de sembrar: igual; CSV hasta el episodio (salvo segundos): igual; config, episodio, episodios, etiqueta, eval_cada, fase_av, lr, ruta_csv, tag, val_serie, val_total_serie, version: igual
+[OK] estado del ep 30: pesos: igual; Adam (paso [6040.0], exp_avg, exp_avg_sq, grupos): igual; random: igual; numpy global: igual; torch: igual; default_rng de sembrar: igual; CSV hasta el episodio (salvo segundos): igual; config, episodio, episodios, etiqueta, eval_cada, fase_av, lr, ruta_csv, tag, val_serie, val_total_serie, version: igual
+
+Resultado: todo OK

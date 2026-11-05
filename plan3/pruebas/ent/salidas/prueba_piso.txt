@@ -1,0 +1,33 @@
+Tasa con piso: 400 episodios con --lr-horizonte 200 --lr-piso 0.1 frente a 200 sin piso, episodios 1-181 (V2 en P1, base 7)
+05.11.2026 09:36; python 3.14.6, torch 2.14.0+cpu
+
+[OK] formula: la tasa es la misma (bit a bit) en los episodios 1-180: iguales en 1-180; ep 181: 9.999999999999998e-05 | 0.0001; ep 182: 9.499999999999998e-05 | 0.0001; ep 400 con piso: 0.0001
+[OK] formula: sin piso es la de siempre (lr0 * (1 - (ep - 1) / 200))
+(--sin-correr: compara las corridas que ya estan en tmp_ent/piso_200 y piso_400)
+[OK] las dos corridas llegaron al 181 y cortaron: [True, True]
+[OK] CSV de los episodios 1-181 (todas las columnas salvo segundos): iguales byte a byte salvo 'segundos' (181 filas)
+[OK] checkpoints 10-180 (tensores; meta igual salvo episodios y opciones): episodios con checkpoint: [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180] | [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180]
+  ep  10: 12/12 tensores iguales (torch.equal), claves iguales True; meta igual (sin ['episodios', 'opciones'])
+  ep  20: 12/12 tensores iguales (torch.equal), claves iguales True; meta igual (sin ['episodios', 'opciones'])
+  ep  30: 12/12 tensores iguales (torch.equal), claves iguales True; meta igual (sin ['episodios', 'opciones'])
+  ep  40: 12/12 tensores iguales (torch.equal), claves iguales True; meta igual (sin ['episodios', 'opciones'])
+  ep  50: 12/12 tensores iguales (torch.equal), claves iguales True; meta igual (sin ['episodios', 'opciones'])
+  ep  60: 12/12 tensores iguales (torch.equal), claves iguales True; meta igual (sin ['episodios', 'opciones'])
+  ep  70: 12/12 tensores iguales (torch.equal), claves iguales True; meta igual (sin ['episodios', 'opciones'])
+  ep  80: 12/12 tensores iguales (torch.equal), claves iguales True; meta igual (sin ['episodios', 'opciones'])
+  ep  90: 12/12 tensores iguales (torch.equal), claves iguales True; meta igual (sin ['episodios', 'opciones'])
+  ep 100: 12/12 tensores iguales (torch.equal), claves iguales True; meta igual (sin ['episodios', 'opciones'])
+  ep 110: 12/12 tensores iguales (torch.equal), claves iguales True; meta igual (sin ['episodios', 'opciones'])
+  ep 120: 12/12 tensores iguales (torch.equal), claves iguales True; meta igual (sin ['episodios', 'opciones'])
+  ep 130: 12/12 tensores iguales (torch.equal), claves iguales True; meta igual (sin ['episodios', 'opciones'])
+  ep 140: 12/12 tensores iguales (torch.equal), claves iguales True; meta igual (sin ['episodios', 'opciones'])
+  ep 150: 12/12 tensores iguales (torch.equal), claves iguales True; meta igual (sin ['episodios', 'opciones'])
+  ep 160: 12/12 tensores iguales (torch.equal), claves iguales True; meta igual (sin ['episodios', 'opciones'])
+  ep 170: 12/12 tensores iguales (torch.equal), claves iguales True; meta igual (sin ['episodios', 'opciones'])
+  ep 180: 12/12 tensores iguales (torch.equal), claves iguales True; meta igual (sin ['episodios', 'opciones'])
+[OK] estados 10-180 iguales (salvo --episodios y los sha256 de los .json): 19 estados, distintos: []
+[OK] estado del 181: tasa usada en 1-180 igual y en el 181 distinta en el ultimo bit: 9.999999999999998e-05 | 0.0001
+   estado del 181 (despues de actualizar con esa tasa): pesos iguales True; momentos y pasos de Adam iguales True; grupos de Adam iguales salvo el lr guardado True (lr 9.999999999999998e-05 | 0.0001)
+   (descriptivo: la diferencia de ~1e-20 en el lr del 181 se pierde al redondear a float32; desde el 182 la tasa cambia de verdad: 9.5e-05 frente a 1e-04)
+
+Resultado: todo OK

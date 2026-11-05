@@ -7,7 +7,8 @@ base 7, validacion cada 10 en 424301-424302, las dos cortadas con --hasta-ep 181
 columnas salvo segundos), los checkpoints 10-180 (tensores y validacion) y los estados; ademas la formula de la tasa
 en todos los episodios.
 
-Uso:  python plan3/pruebas/ent/prueba_piso.py   (~2 procesos durante ~20 min)
+Uso:  python plan3/pruebas/ent/prueba_piso.py [--sin-correr]   (~2 procesos durante ~20 min; con --sin-correr solo
+      compara las corridas que ya estan en tmp_ent, hechas por este guion)
 Salida: plan3/pruebas/ent/salidas/prueba_piso.txt; corridas en plan3/tmp_ent/piso_200 y piso_400.
 """
 import sys
@@ -34,12 +35,18 @@ def main():
                 f"ep 182: {sin[181]!r} | {con[181]!r}; ep 400 con piso: {con[399]!r}")
     inf.chequeo("formula: sin piso es la de siempre (lr0 * (1 - (ep - 1) / 200))",
                 all(sin[ep - 1] == 1e-3 * (1 - (ep - 1) / 200) for ep in range(1, 201)))
-    c200, c400 = u.carpeta("piso_200", ["corredor"]), u.carpeta("piso_400", ["corredor"])
-    codigos = u.en_tandas([
-        (u.RL_NUEVO, BASE + ["--episodios", "200"], c200, c200 / "log.txt"),
-        (u.RL_NUEVO, BASE + ["--episodios", "400", "--lr-horizonte", "200", "--lr-piso", "0.1"], c400,
-         c400 / "log.txt")], maximo=2)
-    inf.chequeo("las dos corridas llegan al 181 y cortan", codigos == [0, 0], f"codigos {codigos}")
+    if "--sin-correr" in sys.argv:
+        c200, c400 = u.TMP / "piso_200", u.TMP / "piso_400"
+        cortes = [("CORTE: 181 de" in (c / "log.txt").read_text()) for c in (c200, c400)]
+        inf(f"(--sin-correr: compara las corridas que ya estan en {c200.parent.name}/piso_200 y piso_400)")
+        inf.chequeo("las dos corridas llegaron al 181 y cortaron", all(cortes), f"{cortes}")
+    else:
+        c200, c400 = u.carpeta("piso_200", ["corredor"]), u.carpeta("piso_400", ["corredor"])
+        codigos = u.en_tandas([
+            (u.RL_NUEVO, BASE + ["--episodios", "200"], c200, c200 / "log.txt"),
+            (u.RL_NUEVO, BASE + ["--episodios", "400", "--lr-horizonte", "200", "--lr-piso", "0.1"], c400,
+             c400 / "log.txt")], maximo=2)
+        inf.chequeo("las dos corridas llegan al 181 y cortan", codigos == [0, 0], f"codigos {codigos}")
     a, b = c200 / f"resultados_{TAG}.csv", c400 / f"resultados_{TAG}.csv"
     inf.chequeo("CSV de los episodios 1-181 (todas las columnas salvo segundos)", *u.comparar_csv_bytes(a, b))
     inf.chequeo("checkpoints 10-180 (tensores; meta igual salvo episodios y opciones)",
@@ -54,10 +61,16 @@ def main():
     inf.chequeo("estado del 181: tasa usada en 1-180 igual y en el 181 distinta en el ultimo bit",
                 x["lr"][:180] == y["lr"][:180] and x["lr"][180] != y["lr"][180],
                 f"{x['lr'][180]!r} | {y['lr'][180]!r}")
-    ok181, txt181 = u.comparar_estados(ea[181], eb[181], ignorar=("episodios", "lr", "archivos"))
-    inf(f"   estado del 181 (pesos y Adam despues de actualizar con esa tasa): {txt181}")
-    inf("   (descriptivo: el lr del 181 difiere en ~1e-20; si los pesos coinciden es porque Adam lo redondea a "
-        "float32)")
+    ox, oy = x["opt"], y["opt"]
+    pesos = all(torch.equal(x["politica"][k], y["politica"][k]) for k in x["politica"])
+    momentos = all(torch.equal(ox["state"][i][c], oy["state"][i][c]) for i in ox["state"] for c in ox["state"][i])
+    grupos = [{k: v for k, v in g.items() if k != "lr"} for g in ox["param_groups"]] == \
+        [{k: v for k, v in g.items() if k != "lr"} for g in oy["param_groups"]]
+    inf(f"   estado del 181 (despues de actualizar con esa tasa): pesos iguales {pesos}; momentos y pasos de Adam "
+        f"iguales {momentos}; grupos de Adam iguales salvo el lr guardado {grupos} (lr {ox['param_groups'][0]['lr']!r}"
+        f" | {oy['param_groups'][0]['lr']!r})")
+    inf("   (descriptivo: la diferencia de ~1e-20 en el lr del 181 se pierde al redondear a float32; desde el 182 la "
+        "tasa cambia de verdad: 9.5e-05 frente a 1e-04)")
     return inf.cerrar()
 
 

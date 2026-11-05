@@ -13,8 +13,10 @@ prueba_identidad.py - Pruebas 1 y 2 de la tarea 1.1 del plan 3 (informe: plan3/d
 Uso (desde cualquier carpeta):  python plan3/pruebas/ent/prueba_identidad.py
 Salida: plan3/pruebas/ent/salidas/prueba_identidad.txt; corridas en plan3/tmp_ent/ident_*.
 """
+import re
 import csv
 import sys
+import json
 
 import util_ent as u
 
@@ -77,10 +79,17 @@ def main():
         inf.chequeo("politica publicada (bytes)", u.sha256(pol(a)) == u.sha256(pol(b)))
         inf.chequeo("meta publicado", *u.comparar_json(pol(a).with_suffix(".json"), pol(b).with_suffix(".json")))
 
+    def log_sin_tiempos(n):
+        return [re.sub(r"\d+\.\d+s( |$)", r"Xs\1", linea)
+                for linea in (carpetas[n] / "log.txt").read_text(encoding="utf-8").splitlines()]
+
     inf("")
     inf("Prueba 1: todo apagado = tag")
     misma_corrida("nuevo_ippo", "tag_ippo")
     misma_corrida("nuevo_v2", "tag_v2")
+    for a, b in (("nuevo_ippo", "tag_ippo"), ("nuevo_v2", "tag_v2")):
+        inf.chequeo(f"log de consola de {a} = el de {b} (salvo los segundos)", log_sin_tiempos(a) == log_sin_tiempos(b),
+                    f"{len(log_sin_tiempos(a))} lineas")
     inf("")
     inf("Prueba 2: --guardar-estado y --registro-extendido no cambian ningun numero")
     misma_corrida("nuevo_ippo_ext", "tag_ippo", bytes_csv=False)
@@ -118,7 +127,6 @@ def main():
                     ", ".join(f"{c} {f[c]}|{g[c]}" for c in actualizacion[:2]))
         ok, txt = u.comparar_columnas(csv_de(n), csv_de(distinto_de))
         inf.chequeo(f"{n}: el entrenamiento no es el de {distinto_de}", not ok, txt.splitlines()[0])
-        import json
         with open(pol(n).with_suffix(".json"), encoding="utf-8") as fj:
             meta = json.load(fj)
         inf(f"   meta de {n}: opciones {meta['opciones']}; descuento '{meta['descuento']}'; "

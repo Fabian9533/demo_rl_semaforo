@@ -17,6 +17,7 @@ propios estados (no volver a copiar) y terminar igual que una corrida seguida de
 Uso:  python plan3/pruebas/ent/prueba_caida.py   (un proceso a la vez, ~12 min)
 Salida: plan3/pruebas/ent/salidas/prueba_caida.txt; corridas en plan3/tmp_ent/caida_*.
 """
+import re
 import sys
 import time
 import subprocess
@@ -57,9 +58,9 @@ def matar_en(inf, c, argumentos, log, filas_objetivo, tag=TAG):
         time.sleep(0.2)
     if p.poll() is None:
         r = subprocess.run(["taskkill", "/F", "/T", "/PID", str(p.pid)], capture_output=True, text=True)
-        muertos = r.stdout.count("PID")
+        muertos = len(re.findall(r"PID \d+ \(", r.stdout))     # una linea por proceso: "... PID n (... PID m)"
         inf(f"   taskkill /F /T /PID {p.pid} con {filas(c, tag)} filas escritas: codigo {r.returncode}, "
-            f"{muertos} procesos terminados (python y sumo)")
+            f"{muertos} procesos terminados (python y su sumo)")
     cod = p.wait()
     p.log.close()
     time.sleep(1)
