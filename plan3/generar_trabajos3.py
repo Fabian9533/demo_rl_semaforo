@@ -378,14 +378,23 @@ CAIDAS_JSON = os.path.join(PLAN3, "cola", "caidas.json")
 # Corridas que salen de otra: si la de origen cayo, tampoco existen (V2 vieja y 3b re-eligen o siguen la de V2).
 DERIVA = {"p3v2vieja": "p3v2reg", "p3e400": "p3v2reg", "p3e400poi": "p3v2poi",
           "p3piso200reg": "p3e400", "p3e400c20reg": "p3e400", "p3piso200poi": "p3e400poi", "p3e400c20poi": "p3e400poi"}
-# Tipos que no son un entrenamiento y no pueden caer por si mismos: las re-elecciones de p3_elegir regla (V2 vieja,
-# piso200, cada20) y la re-validacion de C0. Se declara la corrida de la que salen. p3e400 y p3e400poi si son
-# entrenamientos (siguen a V2 desde el episodio 180) y se pueden declarar.
-NO_ENTRENAMIENTO = {k for k in DERIVA if k not in ("p3e400", "p3e400poi")} | {"c0"}
+# celda de cada escenario de entrenamiento (la que va en una declaracion de cola/caidas.json)
+CELDA_DE_ESCENARIO = {e: c for d in (CASOS, NIVELES, D, P6E, POI, PERFIL, MEZCLA) for c, e in d.items()}
+
+
+def origen_de(et):
+    """Etiqueta de la corrida de la que sale otra (DERIVA), tambien para las rehechas por un error de codigo (§14,
+    sufijo r<N>): la rehecha de una derivada sale de la rehecha de su origen (p3e400r2 de p3v2regr2). None si no sale
+    de otra."""
+    if et in DERIVA:
+        return DERIVA[et]
+    m = re.fullmatch(r"(.+?)(r\d+)", et or "")
+    return DERIVA[m.group(1)] + m.group(2) if m and m.group(1) in DERIVA else None
 
 
 def corrida_de_tipo(esc, tipo, base):
-    """Nombre de la corrida de una base declarada por su tipo del manifiesto (v2reg, v2poi, v2loc, p3obs...)."""
+    """Nombre de la corrida de una base declarada por su tipo del manifiesto (v2reg, v2poi, v2loc, p3obs...), sin
+    sufijo de rehecha."""
     variante = "local" if tipo in ("v2loc", "v2poiloc") else "vecinos"
     etiqueta = {"v2reg": "p3v2reg", "v2loc": "p3v2reg", "v2poi": "p3v2poi", "v2poiloc": "p3v2poi",
                 "v2per": "p3v2per", "v2mix": "p3v2mix", "c0": "p3c0"}.get(tipo, tipo)
@@ -399,12 +408,32 @@ def corrida_de_politica(ruta):
     return (m.group(1), m.group(2), m.group(3), int(m.group(4))) if m else None
 
 
+_ENTRENAMIENTOS = None
+
+
+def entrenamientos_del_plan():
+    """Las corridas (cadena) de todos los entrenamientos del plan completo (PARTES_PLAN), sacadas del codigo de este
+    generador: lo unico que se puede declarar caido. C0 (re-validacion), las re-elecciones de p3_elegir y lo que no
+    existe no estan. Se calcula una vez; los entrenamientos no dependen de las caidas."""
+    global _ENTRENAMIENTOS, CAIDAS
+    if _ENTRENAMIENTOS is None:
+        viejas = CAIDAS
+        CAIDAS = set()
+        try:
+            _ENTRENAMIENTOS = {t["cadena"] for t in generar(PARTES_PLAN) if t.get("uso") == "entrenamiento"}
+        finally:
+            CAIDAS = viejas
+    return _ENTRENAMIENTOS
+
+
 def validar_caida(c):
     """La corrida de una declaracion de cola/caidas.json (prerregistro §14; B22), o ValueError con el motivo. Las
-    mismas reglas para el generador (leer_caidas) y para veredicto3 (caidas_de_texto). Cada declaracion lleva celda,
-    escenario, tipo, base y los dos intentos fallidos con id, error y fecha (la fecha en cada intento o una vez en la
-    declaracion); el escenario es el de la politica (mix_, no mixa_: el arranque lento juega la de la mezcla); el tipo
-    es un entrenamiento (no una re-eleccion ni C0); la corrida, si esta, es la de ese escenario, tipo y base."""
+    mismas reglas para el generador (leer_caidas), manifiesto.py y veredicto3 (caidas_de_texto). Cada declaracion
+    lleva celda, escenario, tipo, base y los dos intentos fallidos con id, error y fecha (la fecha en cada intento o
+    una vez en la declaracion); el escenario es el de la politica (mix_, no mixa_: el arranque lento juega la de la
+    mezcla; la politica por red, el suyo) y la celda, la de ese escenario; la corrida tiene que ser un entrenamiento
+    del plan (entrenamientos_del_plan; C0 y las re-elecciones no lo son). Sin corrida, la de su tipo (la rehecha mas
+    nueva si un error de codigo la rehizo, §14); con corrida, la de su tipo o una rehecha de ella (sufijo r<N>)."""
     faltan = [k for k in ("celda", "escenario", "tipo", "base", "intentos") if k not in c]
     intentos = c.get("intentos") or []
     incompletos = any(not (isinstance(i, dict) and i.get("id") and i.get("error")
@@ -412,45 +441,83 @@ def validar_caida(c):
     if faltan or len(intentos) < 2 or incompletos:
         raise ValueError(f"cada base caída lleva celda, escenario, tipo, base y los dos intentos fallidos con id, "
                          f"error y fecha (§14): {c}")
-    if c["escenario"] in MEZCLA_A.values():
-        raise ValueError(f"{c['escenario']} juega la política de la mezcla: declárela con el escenario de la "
+    esc, tipo = c["escenario"], c["tipo"]
+    try:
+        base = int(c["base"])
+    except (TypeError, ValueError):
+        raise ValueError(f"la base no es un número: {c}")
+    if esc in MEZCLA_A.values():
+        raise ValueError(f"{esc} juega la política de la mezcla: declárela con el escenario de la "
                          f"política (mix_corredor / mix_red): {c}")
-    if c["tipo"] in NO_ENTRENAMIENTO:
-        origen = DERIVA.get(c["tipo"], "la de los checkpoints entregados")
-        raise ValueError(f"{c['tipo']} no es un entrenamiento (sale de {origen}): declare la corrida de la que sale: "
-                         f"{c}")
-    esperada = corrida_de_tipo(c["escenario"], c["tipo"], int(c["base"]))
-    if c.get("corrida") and c["corrida"] != esperada:
-        raise ValueError(f"la corrida {c['corrida']} no es la de {c['escenario']}, {c['tipo']}, base {c['base']} "
-                         f"({esperada})")
-    return esperada
+    if esc in CELDA_DE_ESCENARIO and c["celda"] != CELDA_DE_ESCENARIO[esc]:
+        raise ValueError(f"la celda de {esc} es {CELDA_DE_ESCENARIO[esc]}, no {c['celda']}: {c}")
+    raiz = corrida_de_tipo(esc, tipo, base)
+    pre, suf = raiz[:-len(f"_s{base}")], f"_s{base}"
+    rehecha = re.compile(re.escape(pre) + r"r(\d+)" + re.escape(suf))
+    entrenos = entrenamientos_del_plan()
+    corrida = c.get("corrida")
+    if corrida and corrida != raiz and not rehecha.fullmatch(corrida):
+        raise ValueError(f"la corrida {corrida} no es la de {esc}, {tipo}, base {base} ({raiz}, o una rehecha "
+                         f"{pre}r<N>{suf})")
+    if not corrida:                         # la vigente: la rehecha mas nueva que este en el plan, o la original
+        rehechas = sorted((int(m.group(1)), x) for x in entrenos if (m := rehecha.fullmatch(x)))
+        corrida = rehechas[-1][1] if rehechas else raiz
+    if corrida not in entrenos:
+        origen = origen_de(tipo)
+        raise ValueError(f"{corrida} no es un entrenamiento del plan (C0 es una re-validación y las re-elecciones de "
+                         f"p3_elegir salen de otra corrida{f', aquí de {origen}' if origen else ''}): declare la "
+                         f"corrida que entrenó y falló: {c}")
+    return corrida
 
 
 def leer_caidas(ruta=None):
     """Corridas declaradas caidas (falla del metodo en dos intentos; prerregistro §7 y §14): sus evaluaciones no se
     generan y las versiones evaluadas salen de las bases que quedan. cola/caidas.json = lista de
     {"corrida", "celda", "escenario", "tipo", "base", "intentos", "fecha"} (validar_caida; la corrida es opcional).
-    ruta: otro caidas.json (por defecto el de plan3/cola)."""
+    ruta: otro caidas.json (por defecto el de plan3/cola). ValueError con el nombre del archivo si no se puede leer
+    o una declaracion no vale."""
     ruta = ruta or CAIDAS_JSON
+    nombre = "cola/caidas.json" if ruta == CAIDAS_JSON else ruta
     if not os.path.exists(ruta):
         return set()
-    with open(ruta, encoding="utf-8") as f:
-        datos = json.load(f)
+    try:
+        with open(ruta, encoding="utf-8-sig") as f:
+            datos = json.load(f)
+    except (OSError, UnicodeDecodeError, ValueError) as ex:
+        raise ValueError(f"{nombre}: no es un JSON válido ({ex})")
     lista = datos.get("caidas", []) if isinstance(datos, dict) else datos
-    return {validar_caida(c) for c in lista}
+    corridas = set()
+    for c in lista:
+        try:
+            corridas.add(validar_caida(c))
+        except ValueError as ex:
+            raise ValueError(f"{nombre}: {ex}")
+    return corridas
 
 
-CAIDAS = leer_caidas()
+CAIDAS = None                       # se leen al usarse (cargar_caidas): un caidas.json invalido no rompe el import
+
+
+def cargar_caidas():
+    global CAIDAS
+    if CAIDAS is None:
+        CAIDAS = leer_caidas()
+    return CAIDAS
 
 
 def caida(esc, variante, et, base, caidas=None):
-    """¿Esta corrida, o aquella de la que sale, esta declarada caida? caidas: otro conjunto (por defecto CAIDAS)."""
-    caidas = CAIDAS if caidas is None else caidas
+    """¿Esta corrida, o aquella de la que sale (origen_de), esta declarada caida? caidas: otro conjunto (por defecto
+    el de cola/caidas.json)."""
+    caidas = cargar_caidas() if caidas is None else caidas
     while et:
         if nombre_corrida(esc, variante, et, base) in caidas:
             return True
-        et = DERIVA.get(et)
+        et = origen_de(et)
     return False
+
+
+# versiones publicadas sin ninguna base viva (cayeron todas): no hay paso de eleccion ni evaluaciones que las jueguen
+MEDIANAS_SIN_BASES = set()
 
 
 def evaluacion(lista, celda, esc, tanda, clave, brazo, requiere=(), etapa="ev", factor=1.0, tipo="",
@@ -460,6 +527,9 @@ def evaluacion(lista, celda, esc, tanda, clave, brazo, requiere=(), etapa="ev", 
     caido (o cayo aquel del que sale) no se evalua."""
     if corrida is not None and caida(*corrida):
         return None
+    partes_b = brazo.split()
+    if "--politica" in partes_b[:-1] and partes_b[partes_b.index("--politica") + 1] in MEDIANAS_SIN_BASES:
+        return None                                 # una version publicada de la que cayeron todas las bases
     uso, semillas = TANDAS[tanda]
     carpeta = "ciego" if uso in CIEGAS else "parciales"
     salida = f"{carpeta}/{tanda}/eval_{esc}__{clave}.csv"
@@ -477,7 +547,9 @@ def evaluacion(lista, celda, esc, tanda, clave, brazo, requiere=(), etapa="ev", 
 def mediana(lista, esc, variante, et, bases, requiere, et_med, origen="", fuente=None):
     """Paso de eleccion: la version evaluada (base mediana por val_elegido) publicada como <...>_<et_med>.pt.
     requiere va alineada con bases (o vacia); las bases caidas no entran (prerregistro §6). fuente(b) da la corrida de
-    origen (escenario, variante, etiqueta) cuando no es la misma (C0 aleatorio sale de la V2 regular)."""
+    origen (escenario, variante, etiqueta) cuando no es la misma (C0 aleatorio sale de la V2 regular). Si cayeron
+    todas, no hay paso de eleccion: devuelve (ruta, None) y las evaluaciones que la juegan no se generan
+    (MEDIANAS_SIN_BASES)."""
     var_et = f"{variante}_{et}" if et else variante          # lo entregado no lleva etiqueta: politica_<esc>_vecinos_s42
     origen_de = fuente or (lambda b: (esc, variante, et))
     vivas = [k for k, b in enumerate(bases) if not et or not caida(*origen_de(b), b)]
@@ -485,6 +557,9 @@ def mediana(lista, esc, variante, et, bases, requiere, et_med, origen="", fuente
     bases = [bases[k] for k in vivas]
     rutas = ",".join(f"{origen}politica_{esc}_{var_et}_s{b}.pt" for b in bases)
     salida = f"politica_{esc}_{variante}_{et_med}.pt"
+    if not bases:                       # cayeron todas: no hay version evaluada (veredicto3: 'cayeron todas')
+        MEDIANAS_SIN_BASES.add(salida)
+        return salida, None
     tid = f"el_{et_med}_{esc}"
     if tid not in lista.ids:
         lista.agregar({"id": tid, "etapa": "ev", "prioridad": 2, "uso": "sin_semillas", "requiere": list(requiere),
@@ -669,7 +744,10 @@ def promocion(lista):
                 ruta, tid = mediana(lista, e, "vecinos", et, BASES3, reqs, et_med)
                 ev = evaluacion(lista, c, e, "promo", et_med, f"--politica {ruta}", [f"trabajo:{tid}"],
                                 factor=factor_ev(et, c), tipo=f"promo_{et}")
-                csvs[et] = (f"parciales/promo/eval_{e}__{et_med}.csv", ev)
+                if ev is not None:              # un candidato sin bases vivas no compite
+                    csvs[et] = (f"parciales/promo/eval_{e}__{et_med}.csv", ev)
+            if et_v2 not in csvs:               # sin V2 no hay decision: la celda queda sin promocion
+                continue
             salida = f"promocion/{e}.json"
             lista.agregar({"id": f"promo_decidir_{e}", "etapa": "ev", "prioridad": 4, "uso": "sin_semillas",
                            "requiere": [f"trabajo:{ev}" for _, ev in csvs.values()],
@@ -937,6 +1015,8 @@ PARTES_PLAN = [p for p in PARTES if p not in ("etapa3b_reg", "etapa3b_poi")]
 
 
 def generar(partes):
+    cargar_caidas()                     # antes que nada: leerlas puede generar el plan (entrenamientos_del_plan)
+    MEDIANAS_SIN_BASES.clear()
     lista = Lista()
     for p in partes:
         PARTES[p](lista)
@@ -944,6 +1024,8 @@ def generar(partes):
 
 
 def generar_con_manifiesto(partes):
+    cargar_caidas()                     # antes que nada: leerlas puede generar el plan (entrenamientos_del_plan)
+    MEDIANAS_SIN_BASES.clear()
     lista = Lista()
     for p in partes:
         PARTES[p](lista)
@@ -967,7 +1049,10 @@ def main():
     desconocidas = [p for p in partes if p not in PARTES]
     if desconocidas:
         sys.exit(f"partes desconocidas: {desconocidas}; hay {sorted(PARTES)}")
-    trabajos, manifiesto = generar_con_manifiesto(partes)
+    try:
+        trabajos, manifiesto = generar_con_manifiesto(partes)
+    except ValueError as ex:                # cola/caidas.json invalido: una linea con la causa, sin traceback
+        sys.exit(f"generar_trabajos3: {ex}")
     texto = "".join(json.dumps(t, ensure_ascii=False) + "\n" for t in trabajos)
     texto_m = json.dumps(manifiesto, ensure_ascii=False, indent=0) + "\n"
     if args.comprobar:

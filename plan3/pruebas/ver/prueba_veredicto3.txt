@@ -67,8 +67,13 @@ PASA  N15 lectura conjunta de la no inferioridad (AMB-9): 8 de 8 casos
 PASA  N16 acuerdo con una sola tanda PENDIENTE por convergencia: PENDIENTE (sin StopIteration)
 PASA  N17 una base de plan3 elegida con timeLoss o con 8 semillas es ERROR (§6); lo entregado y p3_elegir regla no
 PASA  N18 k por plantilla (semáforos que arrancan fuera de su primer verde, de las plantillas de plan3: corredor 1, red 0, malla3_alta 0, dem_red_t905 1) y por dónde corre cada brazo, en el orden de evaluar3.armar_brazo (política y regla por rl_ippo; --brazo por rl_corredor, aunque traiga --regla)
-PASA  N19 una plantilla a la que le falta un archivo que nombra su .sumocfg da k None; en --final cada archivo que lee k se coteja con insumos/manifiesto.json["."] y el .sumocfg derivado (poi_), con git desde el tag de la parte A
-PASA  N20 cola/caidas.json con las mismas reglas en el generador y en veredicto3: ERROR con mixa_ (se declara con el escenario de la política), con una re-elección o C0 (no son entrenamientos), con una corrida que no es la de su escenario, tipo y base, o con un solo intento; p3e400 sí se declara (es un entrenamiento)
+PASA  N19 una plantilla a la que le falta un archivo que nombra su .sumocfg da k None; en --final cada archivo que lee k se coteja con git desde el tag de la parte A y, si está ahí, con insumos/manifiesto.json["."] del tag
+PASA  N20 cola/caidas.json con las mismas reglas en el generador y en veredicto3: ERROR con mixa_ (se declara con el escenario de la política), con una re-elección, C0 (c0 o p3c0) o un escenario que no existe (no son entrenamientos del plan: sale del código del generador), con otra celda, con una corrida que no es la de su escenario, tipo y base, o con un solo intento; p3e400 sí se declara (es un entrenamiento)
+PASA  N21 una corrida rehecha (§14, r2): sin el entrenamiento rehecho en el plan, ERROR; con él, la declaración (con o sin corrida) va a la rehecha, y caen ella y lo que sale de ella (p3e400r2, p3piso200regr2), no la original
+PASA  N22 cambio_desde_tag: el mismo archivo, False; cambiado, True; sin seguimiento, que no existe o que no está en el tag, None (no se pudo comprobar) [False, True, None, None, None]
+PASA  N23 un JSON con BOM se lee (caidas.json en veredicto3 y en el generador); uno inválido es ERROR que nombra el archivo, no un traceback
+PASA  N24 el sha256 de la lista de la prueba final no depende de los fines de línea (--sha-lista)
+PASA  N25 si caen todas las bases de una familia, el generador no publica su versión evaluada ni la evalúa (y esa celda queda sin decisión de promoción)
 --- 3. Mundo sintético de punta a punta (tmp_ver/mundo; semillas de humo)
 PASA  M00 el mundo usa el manifiesto del generador (1710 CSV) sin duplicados: agrega solo lo que falta (30, la política por red del corredor; una segunda vez, nada) y quita 4 (dos referencias)
 PASA  M00b el generador no evalúa las bases caídas (gt.CAIDAS) y el sello es el de manifiesto.py (CSV, cada .pt y .json, otros y el commit de la última mañana)
@@ -85,21 +90,23 @@ PASA  M04g un CSV de ciego/ cambiado después de su mañana, aunque se vuelva a 
 PASA  M04h una base con CSV y sin meta: ERROR (red: la base 2042 de IPPO con mensajes corregido tiene CSV y no tiene meta (politica_red_vecinos_p3v2reg_s2042.pt); una base caída no se evalúa y se declara ...)
 PASA  M04i en --final, una base sin CSV y sin declarar caída: ERROR (poi_red_alta: la base 16042 de IPPO con mensajes corregido (entrenado con llegadas aleatorias) no tiene CSV y no está declarada caída en cola/caidas.json (§14))
 PASA  M04j cola/caidas.json sin los dos intentos fallidos: ERROR (cola/caidas.json: cada base caída lleva celda, escenario, tipo, base y los dos intentos fallidos con id, error y fecha (§14): {'corrida': 'poi_red_alta_ippo_...)
-PASA  M04j2 cola/caidas.json con una corrida que no es la de su base: ERROR (cola/caidas.json: la corrida poi_red_alta_ippo_vecinos_p3v2poi_s42 no es la de poi_red_alta, v2poi, base 16042 (poi_red_alta_ippo_vecinos_p3v2poi_s16042))
+PASA  M04j2 cola/caidas.json con una corrida que no es la de su base: ERROR (cola/caidas.json: la corrida poi_red_alta_ippo_vecinos_p3v2poi_s42 no es la de poi_red_alta, v2poi, base 16042 (poi_red_alta_ippo_vecinos_p3v2poi_s16042, o u...)
 PASA  M04j3 cola/caidas.json con la fecha una vez por declaración (como la documenta generar_trabajos3.leer_caidas): se acepta
 PASA  M04k un CSV con otro brazo que el de su trabajo: ERROR (ciego/t1r/eval_red__v2reg_s42.csv: el brazo es ippo_vecinos_p3v2reg_s2042 y su trabajo escribe ippo_vecinos_p3v2reg_s42)
 PASA  M04l un CSV que aparece dos veces en el manifiesto: ERROR (ciego/t1r/eval_corredor__v2reg_s42.csv aparece dos veces en el manifiesto)
 PASA  M04m dos CSV de una celda y tanda con el mismo brazo (uno copiado bajo otro nombre): ERROR (ciego/t1r/eval_dem_malla3_t1810__fijo10.csv y ciego/t1r/eval_dem_malla3_t1810__fino.csv dicen el mismo brazo (fijo_fino) en la misma celda y tanda)
 PASA  M04o el fijo fino con el brazo del fijo de verdes de 5 en 5: ERROR (fijo_<nombre> de su trabajo) (ciego/t1r/eval_corredor__fino.csv: el brazo es fijo_mult5 y su trabajo escribe fijo_fino)
 PASA  M04p la regla simple con el nombre de un Max-Pressure: ERROR (la forma de la regla de su trabajo) (ciego/t1r/eval_corredor__regla.csv: el brazo es mp_c60 y su trabajo escribe un nombre de la forma regla_u<U>g<G>)
-PASA  M04p2 la regla reactiva con el nombre de una regla simple: ERROR (la forma reactiva_d<D> de su trabajo) (ciego/t1r/eval_corredor__reactiva.csv: el brazo es regla_u3g60 y su trabajo escribe un nombre de la forma reactiva_d<D> (D en 15, 25, 35, 50 o 70))
+PASA  M04p2 la regla reactiva con el nombre de una regla simple (regla_u3g60): ERROR (reactiva_d<D> de su trabajo) (ciego/t1r/eval_corredor__reactiva.csv: el brazo es regla_u3g60 y su trabajo escribe un nombre de la forma reactiva_d<D> (D en 15, 25, 35, 50 o 70))
+PASA  M04p2 la regla reactiva con el nombre de una D que no está en REACTIVAS (reactiva_d99): ERROR (reactiva_d<D> de su trabajo) (ciego/t1r/eval_corredor__reactiva.csv: el brazo es reactiva_d99 y su trabajo escribe un nombre de la forma reactiva_d<D> (D en 15, 25, 35, 50 o 70))
+PASA  M04p2 la regla reactiva con el nombre de otra forma (reactiva_x): ERROR (reactiva_d<D> de su trabajo) (ciego/t1r/eval_corredor__reactiva.csv: el brazo es reactiva_x y su trabajo escribe un nombre de la forma reactiva_d<D> (D en 15, 25, 35, 50 o 70))
 PASA  M04n en --final, sin cola/trabajos.jsonl: ERROR (falta cola/trabajos.jsonl: sin el comando de cada CSV no se sabe qué política juega)
 PASA  M04q comprobar_cierre no pide sellar el CSV de una base caída declarada que el manifiesto todavía lista
 PASA  M04r ... y sí el de una base que no está declarada caída: se niega (lo sellado al cierre no coincide; no se corre: el sello y el manifiesto no listan los mismos CSV (sin sellar: ['ciego/t1a/eval_poi_red_alta__v2poi_s99.csv'];...)
 PASA  M04v una base declarada caída que tiene CSV en disco: ERROR (ciego/t1a/eval_poi_red_alta__v2poi_s14042.csv: la base 14042 está declarada caída en cola/caidas.json y tiene CSV (en disco); una base caída no se evalúa (§14))
 PASA  M04w ... o que está en un manifiesto de la mañana: ERROR (ciego/t1a/eval_poi_red_alta__v2poi_s14042.csv: la base 14042 está declarada caída en cola/caidas.json y tiene CSV (en un manifiesto de la mañana); una base c...)
-PASA  M04s un sello nuevo con un meta distinto del primer sello commiteado: se niega (el sello no es el primero del cierre (<commit>) ni solo le agrega la prueba final; no se corre: las políticas o sus metas no son las del primer sello)
-PASA  M04u un sello nuevo cuyo manifiesto suma algo que no es la prueba final: se niega (el sello no es el primero del cierre (<commit>) ni solo le agrega la prueba final; no se corre: los CSV sellados no son los del primer sello; cola/manifiesto...)
+PASA  M04s un sello nuevo con un meta distinto del primer sello commiteado: se niega (el sello no es el del cierre (<commit>) ni solo le agrega la prueba final; no se corre: las políticas o sus metas no son las del primer sello)
+PASA  M04u un sello nuevo cuyo manifiesto suma algo que no es la prueba final: se niega (el sello no es el del cierre (<commit>) ni solo le agrega la prueba final; no se corre: los CSV sellados no son los del primer sello; cola/manifiesto_esperad...)
 PASA  M05 --final escribe las 6 salidas en salidas/ (dentro de la carpeta plan3)
 PASA  M06 P1 regulares: etiqueta citable de V2 FUNCIONA (esperada FUNCIONA)
 PASA  M06 P2 regulares: etiqueta citable de V2 MEJORA (esperada MEJORA)
@@ -156,29 +163,38 @@ PASA  M28h una celda sin modelo principal: fila PENDIENTE con motivo y aviso
 PASA  M28i en --final, una celda sin modelo principal: ERROR (la celda zz (poi_zz) no tiene modelo principal: sin modelo principal (v2reg, v2poi, v2per, v2mix); tipos: ref_fino)
 PASA  M28j regla reactiva al lado (§5, §11): en P3 regular V2 no le gana y la celda lleva la lectura de la regla; en P1 el citado le gana; H0 la cuenta entre los controles que reaccionan (6 casos y su resumen: MEJORA o FUNCIONA en 6 de 6 casos; y en el detalle de 'algún control')
 PASA  M37 cambios de fase (hallazgo 10): a los brazos de rl_ippo (V2, regla) se les resta k de su plantilla (P1: 1; P3: 0) y a los de rl_corredor (fijo fino) no; la fila de comparaciones lo dice
-PASA  M37b en cada fila de cambios de fase (62) el k de la nota es el que se le resta al modelo citado, y ninguna va marcada sin verificar []
+PASA  M37b en cada fila de cambios de fase (62) lo que se le resta al modelo citado, semilla por semilla frente a su CSV, es el k de la nota, y ninguna va marcada sin verificar []
 PASA  M38 en --final, si un archivo de la plantilla no es el de insumos/manifiesto.json (o un .sumocfg derivado cambió desde el tag), la fila de cambios de fase va marcada 'k SIN VERIFICAR'; en el mundo, ninguna
+PASA  M38b el aviso 'k sin verificar' sale una vez por escenario y llega al .md; k_cambios dice aparte que no se sabe por dónde corre el brazo y que falta la plantilla
 PASA  M29 una versión publicada que no es la mediana: ERROR (politica_corredor_alta_vecinos_p3v2reg3med.pt: base_elegida 2042, pero la mediana por val_elegido de sus candidatas es 42 (B21))
 PASA  M30 un CSV con una semilla de más: ERROR (ciego/t2r/eval_red__v2reg_s42.csv: faltan las semillas [] y sobran [424399] (§7))
 PASA  M31 una decisión de promoción con otro sha256 que el registrado: ERROR (promocion: promocion/corredor_alta.json no coincide con el sha256 de promocion.json)
 PASA  M32 la enmienda de la prueba final: sus CSV no entran al veredicto (una línea de aviso), el sello nuevo sale sin problemas y no los sella
-PASA  M32c el sello nuevo solo le agrega la prueba final al primero (el manifiesto suma entradas de uso 'final'): se acepta
+PASA  M32c el sello nuevo solo le agrega la prueba final al del cierre (el manifiesto suma entradas de uso 'final'): se acepta
 PASA  M32b un sello con los CSV de la prueba final: se niega (lo sellado al cierre no coincide; no se corre: los CSV de la prueba final no se sellan al cierre (§13): ['ciego/f1r/eval_corredor__fijo.csv', 'ciego/f1r/eval...)
 PASA  M33 prueba final sin listo/holdout.ok: se niega (falta listo/holdout.ok (lo crea Fabian con la enmienda, §13))
 PASA  M33b holdout.ok sin el sha256 de la lista: se niega (listo/holdout.ok no tiene el sha256 de la lista: no es la lista de la enmienda)
 PASA  M33c con exigir_semillas, una tanda 'final' sin el bloque completo de su tipo de llegadas: se niega (prueba final: ciego/f1r/eval_corredor__v2reg_s42.csv no usa el bloque completo de llegadas regulares (§3, §13))
 PASA  M33d una métrica vacía: ERROR antes de cerrar el candado (retraso_total_prom vacio en la semilla 424301 (corredor, ref_fino))
 PASA  M33e otros vehículos en una semilla: ERROR antes de cerrar el candado (prueba final: ciego/f1r/eval_corredor__v2reg_s42.csv y ciego/f1r/eval_corredor__fino.csv no generan los mismos vehículos en 1 semilla (§7))
-PASA  M33g un CSV de la prueba final que ya estaba en una mañana anterior a listo/holdout.ok: se niega (prueba final: los CSV no son los de la enmienda (§13); no corre: ciego/f1r/eval_corredor__fijo.csv ya estaba en el manifiesto de la mañana <commit>, anterior...)
 PASA  M33h un CSV de la prueba final que cambió después de su mañana: se niega (prueba final: los CSV no son los de la enmienda (§13); no corre: ciego/f1r/eval_corredor__fino.csv: hoy no es el de su primera mañana (<commit>))
-PASA  M33i un CSV de la prueba final que está en el sello del cierre: se niega (prueba final: los CSV no son los de la enmienda (§13); no corre: ciego/f1r/eval_corredor__fino.csv está en el sello del cierre; ciego/f1r/eval_corredor__v2re...)
+PASA  M33i un sello con un CSV de la prueba final: --prueba-final también se niega (lo sellado al cierre no coincide; no se corre: los CSV de la prueba final no se sellan al cierre (§13): ['ciego/f1r/eval_corredor__fijo.csv', 'ciego/f1r/eval...)
+PASA  M33j el manifiesto editado sin sellar (un brazo de la lista apunta a otro CSV): se niega (lo sellado al cierre no coincide; no se corre: cola/manifiesto_esperado.json cambió después del cierre (sha256 distinto))
+PASA  M33k holdout.ok con otra línea, sin commitear: se niega (vale el primer commit) (listo/holdout.ok de hoy no es el que se commiteó)
 PASA  M33f ninguna de esas negativas cerró el candado
 PASA  M34 la prueba final corre una vez; el candado guarda el sha256 de la lista, de cada CSV y de la salida
 PASA  M34b no corre una segunda vez (la prueba final ya corrió (listo/holdout.candado): no corre una segunda vez)
-PASA  M35b un sello cuyo último manifiesto de la mañana no está en la historia de git: se niega (los CSV de ciego/ no son los de cada mañana (§14); no se corre: el cierre se hizo con el manifiesto de la mañana <commit>, que no está en la historia de git)
-PASA  M35 un CSV cuyo sha256 cambia de una mañana a otra: se niega (los CSV de ciego/ no son los de cada mañana (§14); no se corre: ciego/h1t1/eval_corredor__c0med.csv: su sha256 cambió en el manifiesto de la mañana <commit>)
-PASA  M35c un CSV de ciego/ de una tanda que no es de la prueba final, en una mañana y fuera del sello: se niega (los CSV de ciego/ no son los de cada mañana (§14); no se corre: ciego/h1t1/eval_corredor__c0med.csv: su sha256 cambió en el manifiesto de la mañana <commit>;...)
+PASA  M34c otra lista, sin el candado en disco y con su sha256 en holdout.ok sin commitear: se niega (listo/holdout.ok de hoy no es el que se commiteó)
+PASA  M34d la misma lista sin el candado en disco: se niega (el candado está en la historia) (la prueba final ya corrió (listo/holdout.candado está en disco o en la historia): no corre una segunda vez)
+PASA  M35b un sello cuyo último manifiesto de la mañana no está en la historia de git: se niega (los CSV de ciego/ no son los de cada mañana (§14); no se corre: el sello de hoy dice que su última mañana es <commit>, que no es una mañana de la historia de...)
+PASA  M35c un CSV de ciego/ de una tanda que no es de la prueba final, en una mañana y fuera del sello: se niega (los CSV de ciego/ no son los de cada mañana (§14); no se corre: ciego/t1r/eval_corredor__v2reg_s42_viejo.csv está en el manifiesto de la mañana <commit> y no...)
+PASA  M35d el mismo CSV declarado en cola/reemplazos.json (con su nuevo sellado): --final y manifiesto.py cierre lo aceptan; sin declarar, manifiesto.py cierre también lo rechaza
+PASA  M35 un CSV cuyo sha256 cambia de una mañana a otra: se niega (los CSV de ciego/ no son los de cada mañana (§14); no se corre: ciego/h1t1/eval_corredor__c0med.csv: su sha256 cambió en el manifiesto de la mañana <commit>;...)
 PASA  M36 caídas por corrida: veredicto3 da por caídas las mismas 9 bases que el generador deja de evaluar (la V2 con sus 400 episodios y sus dos derivadas, la V2 de la mezcla también en el arranque lento, los 400 episodios aleatorios con sus derivadas)
 PASA  M36b las mismas declaraciones sin corrida: veredicto3 la arma como el generador (gt.corrida_de_tipo) y da las mismas 9 bases
+PASA  M36c si caen las 5 bases de una familia, veredicto3 la da por caída: cayeron todas las bases de IPPO con mensajes corregido (entrenado con llegadas aleatorias)
+PASA  M39 manifiesto.py revisar dice qué CSV que falta es de una base caída declarada después (con la corrida de su trabajo y el caidas.json de la carpeta que revisa); sin la declaración, no [['ciego/t1r/eval_red__v2reg_s2042.csv (base caida declarada despues: regenerar el manifiesto)'], ['ciego/t1r/eval_red__v2reg_s2042.csv']]
+PASA  M40 un clon superficial (shallow) de la rama empujada: se niega (el repositorio es superficial (shallow): su historia no está completa; no se corre)
+PASA  M41 un push forzado desde otro clon (la rama empujada reescrita): el repositorio que la vio se niega en cada corrida, no solo en la primera; con la rama de vuelta, corre ['origin/plan3 se reescribió (push forzado)', 'origin/plan3 se reescribió (push forzado)']
 PASA  G01 git status --porcelain --ignored -- plan2 TESIS vacío después de las pruebas (git rc 0)
-=== 174 pasan, 0 fallan
+=== 190 pasan, 0 fallan

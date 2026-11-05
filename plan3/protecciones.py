@@ -13,7 +13,7 @@ Tres capas:
      '..' fuera del script de la raiz, operadores de consola ni --instalar. rl_ippo train con --etiqueta p3...,
      base de entrenamiento y semillas de validacion de la tabla; toda semilla dentro del bloque del uso declarado
      del trabajo y nunca en las prohibidas; las tandas decisivas escriben en ciego/; la prueba final exige
-     listo/holdout.ok.
+     listo/holdout.ok commiteado, igual al de HEAD y empujado a origin/plan3.
   2. Lista de trabajos (revisar_trabajos): ids unicos, dependencias que existen, sin ciclos, ninguna salida
      declarada por dos trabajos, ningun entrenamiento repetido fuera de su cadena de tramos.
   3. Git y archivos (estado_git y compañia): rama plan3; plan2/ y TESIS/ sin cambios, sin nuevos y sin ignorados;
@@ -121,6 +121,33 @@ def desenvolver(partes):
     return partes[1], partes[2:]
 
 
+_HOLDOUT = {}
+
+
+def holdout_listo():
+    """Problemas de listo/holdout.ok para lanzar la prueba final (segunda revision del 05.11, V1-L3): tiene que
+    existir, estar commiteado, ser igual al de HEAD y estar empujado (su primer commit esta en origin/plan3, despues de
+    git fetch). Asi la noche final no corre antes de que la lista quede fija: veredicto3 --prueba-final rechaza para
+    siempre una manana anterior al primer commit de holdout.ok que ya tenga sus CSV. Se calcula una vez por proceso."""
+    if "malos" not in _HOLDOUT:
+        rel = "plan3/listo/holdout.ok"
+        malos = []
+        if not os.path.exists(os.path.join(PLAN3, "listo", "holdout.ok")):
+            malos.append("la prueba final exige listo/holdout.ok")
+        elif git("ls-files", "--error-unmatch", "--", rel)[0] != 0:
+            malos.append("la prueba final exige listo/holdout.ok commiteado (y empujado) antes de la noche final")
+        elif git("diff", "--quiet", "HEAD", "--", rel)[0] != 0:
+            malos.append("listo/holdout.ok cambio desde su commit")
+        else:
+            git("fetch", "-q", "origin", "plan3")
+            rc, commits = git("rev-list", "--full-history", "--topo-order", "--reverse", "HEAD", "--", rel)
+            primero = commits.split()[0] if rc == 0 and commits.split() else None
+            if primero is None or git("merge-base", "--is-ancestor", primero, "origin/plan3")[0] != 0:
+                malos.append("listo/holdout.ok no esta empujado a origin/plan3: push antes de la noche final")
+        _HOLDOUT["malos"] = malos
+    return _HOLDOUT["malos"]
+
+
 def revisar_comando(t, existe=os.path.exists):
     """Problemas de un trabajo {"id", "cmd", "uso", ...}; lista vacia si esta bien."""
     cmd, malos = t.get("cmd", ""), []
@@ -217,8 +244,11 @@ def revisar_comando(t, existe=os.path.exists):
     salida = opcion(args, "--salida")
     if uso in USOS_CIEGOS and (salida is None or not salida.startswith("ciego/")):
         malos.append(f"uso '{uso}' debe escribir en ciego/: --salida {salida}")
-    if uso == "final" and not existe(os.path.join(PLAN3, "listo", "holdout.ok")):
-        malos.append("la prueba final exige listo/holdout.ok")
+    if uso == "final":
+        if existe is os.path.exists:            # al lanzar: commiteado, igual al de HEAD y empujado
+            malos += holdout_listo()
+        elif not existe(os.path.join(PLAN3, "listo", "holdout.ok")):
+            malos.append("la prueba final exige listo/holdout.ok")
     for k, a in enumerate(args):
         if a.startswith("--") and k + 1 < len(args) and ("/" in args[k + 1] or "." in args[k + 1]):
             for v in args[k + 1].split(","):          # una opcion puede llevar varias rutas separadas por comas
