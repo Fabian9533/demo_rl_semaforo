@@ -1,0 +1,29 @@
+ok  A y B hechos
+ok  C fallido
+ok  D bloqueado (no corrio)
+ok  E fallido por salidas incompletas
+ok  F matado con taskkill: fallido, no hecho
+ok  H hecho tras un reintento
+ok  I no corrio (no cabe antes del corte)
+ok  G figura corriendo en el estado guardado
+ok  G huerfano sin salidas: fallido, no hecho
+ok  un trabajo malo en la lista: la cola no lanza nada
+10 de 10 comprobaciones bien
+--- salida de la ronda 1 ---
+cola: 0 hechos, 0 fallidos al arrancar; cpus=4; commit 223f908dea; corte 08:20
+08:10:45 INICIO A (prio 1, 1/4 cpus)
+08:10:45 INICIO C (prio 1, 2/4 cpus)
+08:10:45 INICIO E (prio 1, 3/4 cpus)
+08:10:45 INICIO F (prio 1, 4/4 cpus)
+08:10:50 OK    A (5 s)
+08:10:50 FALLO C (1, 5 s)
+08:10:50 FALLO E (salidas incompletas, 5 s)
+08:10:50 FALLO F (1, 5 s)
+08:10:50 INICIO B (prio 1, 1/4 cpus)
+08:10:50 INICIO H (prio 1, 2/4 cpus)
+08:10:55 OK    B (5 s)
+08:10:55 REINTENTO H (1/2)
+08:10:55 INICIO H (prio 1, 1/4 cpus)
+08:11:00 OK    H (5 s)
+cola: fin; 3 hechos, 3 fallidos, 1 bloqueados, 1 pendientes
+  bloqueado: D

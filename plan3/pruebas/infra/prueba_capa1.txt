@@ -1,0 +1,31 @@
+ok  ACEPTADO  V2 regular P6 base 14042, 16 semillas
+ok  ACEPTADO  V2 Poisson por el lanzador
+ok  ACEPTADO  reanudar un tramo
+ok  ACEPTADO  evaluar3 T1 regular a ciegas
+ok  ACEPTADO  evaluar3 T2 regular a ciegas
+ok  ACEPTADO  evaluar3 extension H1
+ok  ACEPTADO  evaluar3 Poisson T1
+ok  ACEPTADO  barrido fino Poisson con ajuste
+ok  ACEPTADO  puente con evaluar.py
+ok  ACEPTADO  promocion
+ok  ACEPTADO  veredicto3 final
+ok  ACEPTADO  humo de entrenamiento con base 7
+ok  RECHAZADO rl_ippo train sin etiqueta: rl_ippo train sin --etiqueta p3...: pisaria los nombres de lo entregado
+ok  RECHAZADO rl_ippo con etiqueta que no empieza por p3: rl_ippo train sin --etiqueta p3...: pisaria los nombres de lo entregado
+ok  RECHAZADO base fuera de la tabla: base de entrenamiento fuera de la tabla: 6042
+ok  RECHAZADO base de humo en un trabajo de verdad: base de entrenamiento fuera de la tabla: 7
+ok  RECHAZADO validacion con semillas de examen: --val-seeds fuera del bloque 'entrenamiento': [8001, 8002]
+ok  RECHAZADO examen fuera de ciego/: uso 'examen_regular' debe escribir en ciego/: --salida parciales/x.csv
+ok  RECHAZADO examen con evaluar.py: las tandas decisivas se evaluan con evaluar3.py (a ciegas)
+ok  RECHAZADO examen regular con semillas aleatorias: --semillas fuera del bloque 'examen_regular': [7001, 7002, 7003, 7004, 7005]
+ok  RECHAZADO semillas prohibidas: --semillas usa semillas prohibidas: 5001-5030; --semillas fuera del bloque 'puente': [5001, 5002, 5003, 5004, 5005]
+ok  RECHAZADO barrido con semillas de examen: --semillas fuera del bloque 'ajuste': [8001, 8002, 8003, 8004, 8005]
+ok  RECHAZADO nombra plan2: nombra plan2/TESIS, una ruta absoluta, '\', cd, --instalar u operadores de consola; un argumento sube de carpeta ('..')
+ok  RECHAZADO ruta absoluta: nombra plan2/TESIS, una ruta absoluta, '\', cd, --instalar u operadores de consola; ruta absoluta en --salida: C:/tmp/x.csv
+ok  RECHAZADO barrer_fijo con --instalar: nombra plan2/TESIS, una ruta absoluta, '\', cd, --instalar u operadores de consola
+ok  RECHAZADO operador de consola: nombra plan2/TESIS, una ruta absoluta, '\', cd, --instalar u operadores de consola
+ok  RECHAZADO script no permitido: script no permitido: ../consolidar.py; solo se sube de carpeta para los scripts de la raiz: ../consolidar.py
+ok  RECHAZADO script local que sube de carpeta: script no permitido: ../veredicto.py; solo se sube de carpeta para los scripts de la raiz: ../veredicto.py
+ok  RECHAZADO prueba final sin holdout.ok: la prueba final exige listo/holdout.ok
+ok  RECHAZADO TESIS en un argumento: nombra plan2/TESIS, una ruta absoluta, '\', cd, --instalar u operadores de consola
+30 de 30 casos dan lo esperado
