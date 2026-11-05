@@ -251,6 +251,14 @@ en las dos tandas con probabilidad 0.025² ≈ 0.0006 [I].
 | MEJORA o FUNCIONA | FALLA | CONTRADICTORIO (no se concluye) |
 | PENDIENTE en cualquiera | | PENDIENTE |
 
+La tabla es simétrica: T1 y T2 son réplicas y cada fila vale con las tandas en cualquier orden. Por ejemplo, EMPATA en
+T1 y MEJORA en T2 da "EMPATA (mejora no confirmada)", y EMPATA con FALLA da "EMPATA (falla no confirmada)". Si falta el
+actuado ajustado de una celda, la etiqueta es PENDIENTE con ese motivo (la regla de `veredicto.py`, sin cambios). Todo
+PENDIENTE lleva su motivo y su etiqueta provisional; la frase de §17 "el entrenamiento no se estabilizó" se usa solo
+cuando el motivo es la convergencia. Si en una celda y tanda dos brazos no generan los mismos vehículos en alguna
+semilla, el examen no se cierra hasta corregir el error (§14); si aun así se llegara al veredicto, toda comparación entre
+esos brazos queda PENDIENTE con ese motivo.
+
 **Sentido entre entrenamientos** [A5]. Se exige en **toda afirmación de método**, además de la prueba con las
 versiones evaluadas:
 - para cada base (emparejada por semilla si se comparan dos brazos entrenados; frente a la referencia si se compara con
@@ -258,10 +266,26 @@ versiones evaluadas:
 - **con 5 bases, en 4 de 5; con 3 bases, en las 3; en T1 y en T2**;
 - en una no inferioridad, "del lado" quiere decir bajo el margen (+2 %).
 
+Dónde se exige: en todas las superioridades (H2, H7r, H7, H8a, H8b, H9, H14 y H15), en H3, H5 y H6, y en las no
+inferioridades H8c, H12 y H10 (cada base emparejada con cambio menor que +2 % en T1 y en T2). **H1 no lleva sentido:** su
+potencia (≥ 93 % con 120 semillas si V2 = C0, §10) se calculó sin él, y C0 por base solo se evalúa en P4 y en la malla
+con 6525 veh/h. Con la potencia disponible, H10 casi no puede pasar aunque la política por red iguale a la V2 de cada
+nivel (probabilidad 0.02-0.09 con el sentido, 0.10-0.29 sin él, sin diferencia real [I
+`analisis_mejora_2026-11-04` y revisión del 05.11]); se informa nivel por nivel.
+
+**Bases caídas.** El número de bases sale del diseño, no de lo que llegó: 5 en V2 regular (P1-P6, P6e, c2715 y D), en V2
+con llegadas aleatorias (los seis casos) y en la observación nueva de c2715 y D; 3 en lo demás. Una base caída (falla
+del método en dos intentos, §14) se declara en `plan3/cola/caidas.json` (versionado) y cuenta como una base que no va del
+lado de la afirmación; el mínimo no baja (4 de 5; 3 de 3), así que con 3 bases una caída hace que esa afirmación no pase.
+La versión evaluada sale de las bases que quedan (§6).
+
 La etiqueta de la versión evaluada no cambia por esto: se agrega la columna "se repite en k de n entrenamientos".
 
 **Número único.** Media geométrica, sobre P1-P6, del cociente modelo citado / fijo fino, con P6 (no P6e). Al lado, la
-misma frente al fijo entregado y, si el modelo citado no es V2 en todas las celdas, la de V2. Una cifra por tanda y por
+misma frente al fijo entregado y, si el modelo citado no es V2 en todas las celdas, la de V2 (la misma media frente al
+fijo fino, con V2 en las seis celdas). Usa siempre los seis casos, aunque alguna etiqueta citable sea PENDIENTE por
+convergencia, y la frase nombra esos casos ("provisional en [casos]"); si a un caso le falta un brazo en una tanda, el
+número de esa tanda queda PENDIENTE. Una cifra por tanda y por
 tipo de llegadas; nunca se mezclan tandas en una cifra ni en una frase, y nunca se cita una sola tanda sin la otra. Se calcula dentro de `veredicto3` con
 `sintesis_plan.indice_geo` [M l. 106]; nunca se corre `sintesis_plan.py`, que escribe en `plan2/` y `TESIS/`.
 
@@ -277,6 +301,14 @@ tipo de llegadas; nunca se mezclan tandas en una cifra ni en una frase, y nunca 
 - **Equivalencia ±1 %:** el IC95 del cambio queda dentro de [−1, +1] %.
 - **Pasa:** en T1 y en T2, cada una con su Holm dentro de la familia, **y** con el sentido entre entrenamientos (§7)
   cuando es una afirmación de método.
+- **Lectura de una no inferioridad en las dos tandas.** Pasa solo si T1 y T2 dan "no es peor" y, si lleva sentido, se
+  cumple en las dos. Si las dos dan "no es peor" pero falla el sentido, se escribe "la versión evaluada no es peor; el
+  método no se repite en k de n entrenamientos". Si no pasa, la lectura conjunta es "es peor" (las dos), "pérdida no
+  confirmada" ("es peor" y "no concluyente"), "contradictorio" ("no es peor" y "es peor") o "no concluyente" (el resto),
+  siempre con la lectura de cada tanda; en H1, toda tanda con "es peor" se nombra con su caso y su cifra.
+- **Hipótesis por caso.** H2, H6, H7r, H7, H8a, H8c, H9, H12, H14 y H15 no tienen regla global: cada caso pasa o no por
+  separado, con su Holm y su sentido, y se informa "pasa en k de n casos: [casos]". En §17, "[H] pasa" quiere decir al
+  menos un caso y nombra solo esos; "no pasa" quiere decir ninguno. Solo H1, H5, H8b y H10 tienen regla global.
 - Toda hipótesis se informa, pase o no.
 
 ### Etapa 0. Referencias (sin entrenar)
@@ -482,12 +514,16 @@ casos [I `plan3/final/potencia/potencia_plan3_salida.txt`].
   un análisis, se muestran las dos cifras.
 
 **Caídas y errores** (DECISIONES B22).
-- Una caída de infraestructura se relanza con el mismo id y la misma semilla, desde el último estado guardado; los
-  primeros episodios deben repetir los del intento anterior (el entrenamiento es determinista [M]).
-- Un error de código: se corrige y los trabajos afectados se corren con ids nuevos (`_r2`); las salidas viejas se
-  conservan.
+- Una caída de infraestructura se relanza con el mismo id y la misma semilla, desde el último estado guardado
+  (`rl_ippo.py --reanudar auto`; la reanudación da exactamente lo mismo que una corrida seguida [M
+  `plan3/pruebas/ent/salidas/`]).
+- Un error de código: se corrige y los trabajos afectados se corren con ids nuevos (`_r2`) y, si son entrenamientos,
+  con una etiqueta nueva (sufijo `r2`), para que no sigan desde los estados guardados antes de la corrección; las salidas
+  viejas se conservan.
 - Una falla del método en dos intentos (pérdida NaN, política que no se publica): la base cuenta como fallida y fuera
-  del sentido; la versión evaluada sale de las bases que quedan (§6).
+  del sentido (§7); se declara en `plan3/cola/caidas.json` (celda, escenario, tipo, base, los ids de los dos intentos con
+  su error y la fecha) en el commit de la mañana siguiente; la versión evaluada sale de las bases que quedan (§6). Una
+  base sin evaluaciones que no esté declarada ahí detiene el veredicto.
 
 **Antes y después de cada noche:** `protecciones.py`, con `git status` de `plan2/` y `TESIS/` limpio (con los
 ignorados), el manifiesto de checkpoints intacto, las versiones de Python, torch y SUMO, y el sha256 de este documento
@@ -561,7 +597,7 @@ sin V2 [M]).
 |---|---|---|
 | 1. Regulares | Alguna celda sube su etiqueta citable | "Con llegadas regulares, IPPO con mensajes corregido mejora en [casos] frente a un plan fijo ajustado al segundo: [cambio] en la tanda 1 y [cambio] en la tanda 2." |
 | | Ninguna sube | "Con llegadas regulares, la corrección no cambia lo entregado frente a un plan fijo ajustado al segundo; ese plan usa verdes que IPPO, al decidir cada 5 s, no puede dar." |
-| | H1 no concluyente | "En [casos] no se puede afirmar ni descartar una pérdida mayor que 2 % frente a lo entregado." |
+| | H1 no concluyente | "En [casos] no se puede afirmar ni descartar una pérdida mayor que 2 % frente al entrenamiento entregado con la selección nueva (C0)." |
 | | PENDIENTE | "En [caso] el entrenamiento no se estabilizó; la etiqueta provisional es [X]." |
 | 2. Aleatorias | H5 pasa | "Con llegadas al azar, IPPO con mensajes entrenado con ese desorden le gana a un plan fijo re-ajustado con el mismo desorden en [k] de 6 casos." |
 | | H5 no pasa | "Con llegadas al azar, IPPO con mensajes no le gana de forma repetida al plan fijo re-ajustado; [lo que sí se repitió]." |
