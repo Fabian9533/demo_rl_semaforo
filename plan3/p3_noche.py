@@ -15,6 +15,7 @@ Por la manana se commitean el estado, los logs, los manifiestos y los resultados
 import os
 import sys
 import csv
+import glob
 import json
 import time
 import shutil
@@ -104,6 +105,24 @@ def resumen(inicio):
         lineas.append(f"  bloqueados: {len(sal['bloqueados'])}: " + ", ".join(sal["bloqueados"][:20]))
     if sal.get("pendientes"):
         lineas.append(f"  pendientes para otra noche: {len(sal['pendientes'])}")
+    reintentos = {t: n for t, n in e.get("reintentos", {}).items() if t in de_hoy}
+    if reintentos:
+        lineas.append(f"  reintentados por archivo tomado: {len(reintentos)}: " + ", ".join(sorted(reintentos)[:20]))
+    # Prerregistro §14 (B22): un tramo relanzado debe repetir los episodios del intento anterior. rl_ippo deja las
+    # diferencias en checkpoints/<tag>_rehechos.json; aqui solo se avisa (sin metricas).
+    rehechos = [os.path.basename(p) for p in glob.glob(os.path.join(PLAN3, "checkpoints", "*_rehechos.json"))
+                if os.path.getmtime(p) >= inicio]
+    if rehechos:
+        lineas.append(f"  PROBLEMA (B22): episodios rehechos que no repiten el intento anterior: {', '.join(rehechos)}")
+    avisos = []
+    for t in de_hoy:
+        ruta_log = os.path.join(COLA, "logs", t + ".log")
+        if os.path.exists(ruta_log):
+            with open(ruta_log, encoding="utf-8", errors="replace") as f:
+                avisos += [f"{t}: {l.strip()[:160]}" for l in f if l.startswith("AVISO")]
+    if avisos:
+        lineas.append(f"  avisos en los logs ({len(avisos)}):")
+        lineas += [f"    {a}" for a in avisos[:30]]
     return "\n".join(lineas)
 
 
