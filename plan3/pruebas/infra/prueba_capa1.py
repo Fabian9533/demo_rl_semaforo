@@ -34,8 +34,7 @@ CASOS = [
      "--semillas 8031-8120 --salida ciego/h1/x.csv", True),
     ("evaluar3 Poisson T1", "examen_aleatorio",
      f"{L} evaluar3.py --escenario poi_corredor --brazo actuado --semillas 7001-7100 --salida ciego/t1a/x.csv", True),
-    ("barrido fino Poisson con ajuste", "ajuste",
-     f"{L} barrer_fino.py poi_corredor --semillas 2001-2030 --salida barridos/fino_poi_corredor.csv", True),
+    ("barrido fino Poisson por el lanzador", "ajuste", f"{L} barrer_fino.py poi_corredor --etapa gruesa", True),
     ("puente con evaluar.py", "puente",
      "python ../evaluar.py --escenario corredor --politica politica_corredor_vecinos_p3v2reg_s42.pt "
      "--semillas 1001-1030 --salida parciales/puente/x.csv", True),

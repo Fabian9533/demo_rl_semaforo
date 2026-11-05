@@ -5,7 +5,7 @@ ok  ACEPTADO  evaluar3 T1 regular a ciegas
 ok  ACEPTADO  evaluar3 T2 regular a ciegas
 ok  ACEPTADO  evaluar3 extension H1
 ok  ACEPTADO  evaluar3 Poisson T1
-MAL RECHAZADO barrido fino Poisson con ajuste: opciones de prueba en un barrido de verdad: ['--semillas']
+ok  ACEPTADO  barrido fino Poisson por el lanzador
 ok  ACEPTADO  puente con evaluar.py
 ok  ACEPTADO  promocion
 ok  ACEPTADO  veredicto3 final
@@ -42,4 +42,4 @@ ok  RECHAZADO barrido con --limite: opciones de prueba en un barrido de verdad: 
 ok  RECHAZADO actuado con --semillas-final: opciones de prueba en un barrido de verdad: ['--semillas-final']
 ok  ACEPTADO  barrido de humo con --limite
 ok  RECHAZADO --salida= : opcion escrita con '=' (va separada): --salida=../x.csv; un argumento sube de carpeta ('..')
-43 de 44 casos dan lo esperado
+44 de 44 casos dan lo esperado
