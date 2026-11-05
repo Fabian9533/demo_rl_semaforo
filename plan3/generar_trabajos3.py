@@ -84,10 +84,9 @@ class Lista:
         base_cmd = (f"{pre} ../rl_ippo.py train --escenario {esc} --variante {variante} --seed {base} "
                     f"--episodios {episodios} --eval-cada {EVAL_CADA} --val-seeds {VAL} --criterio-val total "
                     f"--guardar-estado --registro-extendido --etiqueta {etiqueta} {opciones}").strip()
-        desde = 0
+        desde, ruta_origen = 0, None
         if reanudar:                         # etiqueta nueva desde un estado de otra corrida (p. ej. 3b)
-            ruta, desde = reanudar
-            base_cmd += f" --reanudar {ruta}"
+            ruta_origen, desde = reanudar
         total = duracion_entreno(celda, episodios, desde=desde, factor=factor)
         n_tramos = max(1, -(-int(total) // TRAMO_MAX_S))
         paso = -(-(episodios - desde) // n_tramos)
@@ -96,9 +95,8 @@ class Lista:
         previo, inicio = list(requiere), desde
         for k, fin in enumerate(cortes):
             ultimo = fin == episodios
-            cmd = base_cmd
-            if not reanudar or k > 0:
-                cmd += " --reanudar auto"
+            # el primer tramo de una etiqueta nueva parte del estado de origen; los demas, de su propio ultimo estado
+            cmd = base_cmd + (f" --reanudar {ruta_origen}" if ruta_origen and k == 0 else " --reanudar auto")
             if not ultimo:
                 cmd += f" --hasta-ep {fin}"
             salidas = ([f"politica_{esc}_{variante}_{etiqueta}_s{base}.pt",
@@ -173,7 +171,78 @@ def c0(lista, celdas=None, etiqueta="p3c0", origen="insumos/c0_checkpoints", fue
                            "salidas": [f"politica_{esc}_vecinos_{etiqueta}_s{b}.pt"], "duracion": 30})
 
 
-PARTES = {"etapa1": etapa1, "c0": c0}
+def id_entreno(prefijo, esc, base, celda, episodios=EPISODIOS, desde=0, factor=1.0):
+    """Id del ultimo tramo de un entrenamiento (el que publica la politica), sin agregarlo."""
+    total = duracion_entreno(celda, episodios, desde=desde, factor=factor)
+    n = max(1, -(-int(total) // TRAMO_MAX_S))
+    return f"{prefijo}_{esc}_s{base}" + ("" if n == 1 else f"_t{n}")
+
+
+# ---------------- Etapa 2: llegadas aleatorias y P6e (PLAN3 1.3, 2.1 y 2.2) ----------------
+
+def etapa2(lista):
+    v2 = "--v2"
+    for c, e in P6E.items():                                                  # P6e: V2 regular, 5 bases
+        for b in BASES5:
+            lista.entrenamiento(f"e2_v2reg_{e}_s{b}", "2", 2, c, e, "p3v2reg", b, v2, lanzador=True)
+    trabajos = [(c, e, b, "vecinos") for c, e in POI.items() for b in BASES5]   # con mensajes, 5 bases
+    trabajos += [(c, e, b, "local") for c, e in POI.items() for b in BASES3]    # sin mensajes, 3 bases
+    for c, e, b, var in sorted(trabajos, key=lambda x: -duracion_entreno(x[0])):
+        pref = "e2_v2poi" if var == "vecinos" else "e2_v2poiloc"
+        lista.entrenamiento(f"{pref}_{e}_s{b}", "2", 2, c, e, "p3v2poi", b, v2, variante=var, lanzador=True,
+                            factor=POI_F)
+    # 2.2 C0 con llegadas aleatorias: los checkpoints de la V2 regular re-validados con llegadas aleatorias
+    # (en P6, los de P6e, para no mezclar el cambio de entrada).
+    origen_reg = {c: (P6E["P6e"] if c == "P6" else CASOS[c]) for c in CASOS}
+    celda_reg = {c: ("P6e" if c == "P6" else c) for c in CASOS}
+
+    def requiere(c, b):
+        pref = "e2_v2reg" if c == "P6" else "e1_v2reg"
+        return [f"trabajo:{id_entreno(pref, origen_reg[c], b, celda_reg[c])}"]
+    c0(lista, celdas=POI, etiqueta="p3c0poi", origen="checkpoints", etapa="2", requiere=requiere, uso_poi=True,
+       fuente=lambda c, b: f"{origen_reg[c]}_ippo_vecinos_p3v2reg_s{b}")
+
+
+# ---------------- Etapa 3b: 400 episodios, reanudando desde el 180 (PLAN3 3b; A4) ----------------
+DESDE_3B = 180
+
+
+def etapa3b(lista):
+    op = "--v2 --lr-horizonte 200 --lr-piso 0.1"
+    for tipo, celdas, et_v2, et, pref_v2 in (("reg", CASOS, "p3v2reg", "p3e400", "e1_v2reg"),
+                                            ("poi", POI, "p3v2poi", "p3e400poi", "e2_v2poi")):
+        for c, e in celdas.items():
+            f = POI_F if tipo == "poi" else 1.0
+            for b in BASES3:
+                origen = nombre_corrida(e, "vecinos", et_v2, b)
+                ult = lista.entrenamiento(
+                    f"e3b_{et}_{e}_s{b}", "3b", 3, c, e, et, b, op, lanzador=(tipo == "poi"), factor=f,
+                    episodios=400, reanudar=(f"checkpoints/{origen}_ep{DESDE_3B:03d}.estado.pt", DESDE_3B),
+                    requiere=[f"trabajo:{id_entreno(pref_v2, e, b, c, factor=f)}"])
+                corrida = nombre_corrida(e, "vecinos", et, b)
+                for regla, et_r in (("piso200", f"p3piso200{tipo}"), ("cada20", f"p3e400c20{tipo}")):
+                    lista.agregar({"id": f"e3b_elegir_{et_r}_{e}_s{b}", "etapa": "3b", "prioridad": 3,
+                                   "uso": "sin_semillas", "requiere": [f"trabajo:{ult}"],
+                                   "cmd": f"python p3_elegir.py regla --escenario {e} --corrida {corrida} "
+                                          f"--regla {regla} --etiqueta {et_r}",
+                                   "salidas": [f"politica_{e}_vecinos_{et_r}_s{b}.pt"], "duracion": 10})
+
+
+# ---------------- Etapa 1: V2 vieja (regla del 25.09 sobre los checkpoints de V2; PLAN3 1.6) ----------------
+
+def v2vieja(lista):
+    for c, e in {**CASOS, **NIVELES}.items():
+        for b in BASES3:
+            lista.agregar({"id": f"e1_elegir_p3v2vieja_{e}_s{b}", "etapa": "1", "prioridad": 2,
+                           "uso": "sin_semillas",
+                           "requiere": [f"trabajo:{id_entreno('e1_v2reg', e, b, c)}"],
+                           "cmd": f"python p3_elegir.py regla --escenario {e} "
+                                  f"--corrida {nombre_corrida(e, 'vecinos', 'p3v2reg', b)} --regla vieja "
+                                  f"--etiqueta p3v2vieja",
+                           "salidas": [f"politica_{e}_vecinos_p3v2vieja_s{b}.pt"], "duracion": 10})
+
+
+PARTES = {"etapa1": etapa1, "c0": c0, "v2vieja": v2vieja, "etapa2": etapa2, "etapa3b": etapa3b}
 
 
 def generar(partes):
