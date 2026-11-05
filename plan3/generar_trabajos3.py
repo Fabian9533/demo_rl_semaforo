@@ -41,7 +41,8 @@ POI = {c: f"poi_{e}" for c, e in CASOS.items()}
 # solo para evaluar (escenarios_plan3.ESTOCASTICOS).
 PERFIL = {"per1": "per_corredor", "per3": "per_red"}
 MEZCLA = {"mix1": "mix_corredor", "mix3": "mix_red"}
-MEZCLA_A = {"mix1": "mixa_corredor", "mix3": "mixa_red"}
+MEZCLA_A = {"mixa1": "mixa_corredor", "mixa3": "mixa_red"}
+ORIGEN_A = {"mixa1": "mix_corredor", "mixa3": "mix_red"}     # mixa_ juega lo de mix_
 
 BASES5 = [42, 2042, 4042, 14042, 16042]
 BASES3 = [42, 2042, 4042]
@@ -345,7 +346,17 @@ def leer_caidas():
     if not os.path.exists(CAIDAS_JSON):
         return set()
     with open(CAIDAS_JSON, encoding="utf-8") as f:
-        return {c["corrida"] for c in json.load(f)}
+        datos = json.load(f)
+    lista = datos.get("caidas", []) if isinstance(datos, dict) else datos
+    return {c.get("corrida") or corrida_de_tipo(c["escenario"], c["tipo"], int(c["base"])) for c in lista}
+
+
+def corrida_de_tipo(esc, tipo, base):
+    """Nombre de la corrida de una base declarada por su tipo del manifiesto (v2reg, v2poi, v2loc, p3obs...)."""
+    variante = "local" if tipo in ("v2loc", "v2poiloc") else "vecinos"
+    etiqueta = {"v2reg": "p3v2reg", "v2loc": "p3v2reg", "v2poi": "p3v2poi", "v2poiloc": "p3v2poi",
+                "v2per": "p3v2per", "v2mix": "p3v2mix", "c0": "p3c0"}.get(tipo, tipo)
+    return nombre_corrida(esc, variante, etiqueta, base)
 
 
 CAIDAS = leer_caidas()
@@ -662,7 +673,8 @@ def ref_salidas(esc, trabajo):
             "bloques": [f"{b}/bloques.csv", f"{b}/bloques.json", f"{esc}_bloques.add.xml"],
             "actuado_final": [f"{b}/actuado_final.csv", f"{b}/actuado_aj.json", f"{esc}_actuado_aj.add.xml"],
             "regla": [f"{b}/reglas_regla.csv", f"{b}/reglas_regla_final.csv", f"{b}/regla.json"],
-            "mp": [f"{b}/reglas_mp.csv", f"{b}/reglas_mp_final.csv", f"{b}/mp.json"]}[trabajo]
+            "mp": [f"{b}/reglas_mp.csv", f"{b}/reglas_mp_final.csv", f"{b}/mp.json"],
+            "reactiva": [f"{b}/reglas_reactiva.csv", f"{b}/reglas_reactiva_final.csv", f"{b}/reactiva.json"]}[trabajo]
 
 
 def ref_celda(lista, esc, completa=True, perfil=False, franja=True, mp=True, mult5=True):
@@ -681,15 +693,15 @@ def ref_celda(lista, esc, completa=True, perfil=False, franja=True, mp=True, mul
         if n > 1:
             trozos = []
             for k in range(n):
-                tid = f"r_{nombre}_{esc}_t{k}"
+                tid = f"r_{nombre}_{esc}_t{k}de{n}"
                 lista.agregar({"id": tid, "etapa": "0", "prioridad": 1, "uso": "ajuste", "requiere": list(requiere),
-                               "cmd": f"{base} --trozo {k}/{n}", "duracion": round(3600 * horas / n * EMPAQUE),
+                               "cmd": f"{base} --trozo {k}/{n}", "duracion": round(3600 * horas / n),
                                "salidas": [f"barridos/{esc}/trozos/{nombre}_t{k}de{n}.csv"]})
                 trozos.append(f"trabajo:{tid}")
             previos = trozos
         tid = f"r_{nombre}_{esc}"
         lista.agregar({"id": tid, "etapa": "0", "prioridad": 1, "uso": "ajuste", "requiere": previos, "cmd": base,
-                       "duracion": round(3600 * (horas if n == 1 else 0.05) * EMPAQUE),
+                       "duracion": round(3600 * (horas if n == 1 else max(0.05, 0.25 * horas / n))),
                        "salidas": ref_salidas(esc, nombre)})
         ids[nombre] = tid
         return f"trabajo:{tid}"
@@ -701,7 +713,8 @@ def ref_celda(lista, esc, completa=True, perfil=False, franja=True, mp=True, mul
     if completa and (franja or perfil):
         nombre = "bloques" if perfil else "franja"
         tid = f"r_{nombre}_{esc}"
-        lista.agregar({"id": tid, "etapa": "0", "prioridad": 1, "uso": "ajuste", "requiere": [d],
+        lista.agregar({"id": tid, "etapa": "0", "prioridad": 1, "uso": "ajuste",
+                       "requiere": [d, f] if perfil else [d],
                        "cmd": f"{pre} franja.py {esc}{' --bloques' if perfil else ''}",
                        "duracion": round(3600 * max(h["franja"], 0.05) * EMPAQUE), "salidas": ref_salidas(esc, nombre)})
         ids[nombre] = tid
@@ -712,16 +725,18 @@ def ref_celda(lista, esc, completa=True, perfil=False, franja=True, mp=True, mul
         b = f"barridos/{esc}"
         lista.agregar({"id": tid, "etapa": "0", "prioridad": 1, "uso": "ajuste", "requiere": req,
                        "cmd": f"{pre} actuado.py {esc} --paso {paso}",
-                       "duracion": round(3600 * max(h["actuado"], 0.07) / 7 * EMPAQUE),
+                       "duracion": round(3600 * max(h["actuado"], 0.07) * (
+                           (0.81 if esc.startswith(("poi_", "per_", "mix")) else 0.25) if paso == "final" else
+                           (0.19 if esc.startswith(("poi_", "per_", "mix")) else 0.75) / 6)),
                        "salidas": (ref_salidas(esc, "actuado_final") if paso == "final"
                                    else [f"{b}/actuado_paso{paso}.csv", f"{b}/actuado_paso{paso}.json"])})
         previo = [f"trabajo:{tid}"]
     ids["actuado"] = f"r_actuadofinal_{esc}"
     if completa:
-        familias = ("regla", "mp") if mp else ("regla",)
+        familias = ("regla", "reactiva", "mp") if mp else ("regla", "reactiva")
         for fam in familias:
             tid = f"r_{fam}_{esc}"
-            parte = 0.7 if fam == "regla" else 0.3
+            parte = {"regla": 0.5, "reactiva": 0.3, "mp": 0.3}[fam]
             lista.agregar({"id": tid, "etapa": "0", "prioridad": 1, "uso": "ajuste", "requiere": [],
                            "cmd": f"{pre} reglas.py {esc} --familia {fam}",
                            "duracion": round(3600 * max(h["reglas"] * parte, 0.05) * EMPAQUE),
@@ -766,6 +781,8 @@ def brazos_ref(esc, de=None):
         salida.append(("actuadoaj", f"--brazo actuado_aj{prog}", r["actuado"], "ref_actuadoaj"))
     if "regla" in r:
         salida.append(("regla", f"--regla-de barridos/{de}/regla.json", r["regla"], "ref_regla"))
+    if "reactiva" in r:
+        salida.append(("reactiva", f"--regla-de barridos/{de}/reactiva.json", r["reactiva"], "ref_reactiva"))
     if "mp" in r:
         salida.append(("mp", f"--regla-de barridos/{de}/mp.json", r["mp"], "ref_mp"))
     return salida
@@ -792,7 +809,7 @@ def evaluaciones_perfil_mezcla(lista):
     if not REFS:
         referencias(Lista())
     for celdas, et, tipo, origen in ((PERFIL, "p3v2per", "v2per", None), (MEZCLA, "p3v2mix", "v2mix", None),
-                                     (MEZCLA_A, "p3v2mix", "v2mix", MEZCLA)):
+                                     (MEZCLA_A, "p3v2mix", "v2mix", ORIGEN_A)):
         for c, e in celdas.items():
             e_pol = origen[c] if origen else e              # mixa_ juega las politicas y ajustes de mix_
             for b in BASES3:

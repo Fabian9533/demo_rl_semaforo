@@ -49,6 +49,23 @@ def borrar_tripinfo():
     return n
 
 
+def borrar_temporales():
+    """Temporales (*.tmp) que dejo un trabajo cortado: la cola ya termino, asi que ninguno esta en uso. Que queden es
+    senal de un corte; se cuentan en el resumen (revision del 05.11)."""
+    rutas = []
+    for raiz, dirs, archivos in os.walk(PLAN3):
+        if os.path.relpath(raiz, PLAN3).split(os.sep)[0] in ("insumos", ".git"):
+            dirs[:] = []
+            continue
+        rutas += [os.path.join(raiz, a) for a in archivos if a.endswith(".tmp")]
+    for r in rutas:
+        try:
+            os.remove(r)
+        except OSError:
+            pass
+    return [os.path.relpath(r, PLAN3) for r in rutas]
+
+
 def respaldar_checkpoints():
     """Copia a RESPALDO lo nuevo o cambiado de plan3/checkpoints y escribe cola/manifiesto_checkpoints.json."""
     man = protecciones.manifiesto_checkpoints()
@@ -154,6 +171,8 @@ def main():
     paso("cola", ["cola.py", "--hasta", args.hasta, "--cpus", str(args.cpus)])
     paso("protecciones despues", ["protecciones.py", "despues"])
     print(f"tripinfo borrados: {borrar_tripinfo()}", flush=True)
+    temporales = borrar_temporales()
+    print(f"temporales de trabajos cortados: {len(temporales)} {temporales[:10]}", flush=True)
     total, copiados = respaldar_checkpoints()
     print(f"checkpoints: {total} registrados, {copiados} copiados al respaldo", flush=True)
     print(f"manifiesto ciego: {manifiesto_ciego()} archivos", flush=True)
