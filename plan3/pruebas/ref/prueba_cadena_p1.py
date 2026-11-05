@@ -76,6 +76,12 @@ def main():
         [f"corredor_{x}.add.xml" for x in ("r10g", "r10f", "m5f", "franja", "actuado_aj")]
     faltan = [x for x in salidas if not os.path.exists(os.path.join(CARPETA, x))]
     inf.chequeo(not faltan, f"salidas de la cadena: {len(salidas) - len(faltan)}/{len(salidas)} (faltan {faltan})")
+    p6 = leer("barridos/corredor/actuado_paso6.json")
+    coord = sorted((bool(v.get("fin_fijo")), v["tipo"]) for v in p6["variantes"] if v.get("coordinado"))
+    inf.chequeo(coord == [(False, "actuated"), (True, "actuated")],
+                f"actuado paso 6: {len(p6['variantes'])} variantes, entre ellas las dos coordinadas (solo earliestEnd "
+                f"y earliestEnd = latestEnd en la avenida): {coord}; elegida {p6['elegida'].get('tipo')} "
+                f"coordinada={p6['elegida'].get('coordinado')} fin_fijo={p6['elegida'].get('fin_fijo', False)}")
 
     os.chdir(CARPETA)                      # los brazos leen el escenario de la carpeta actual
     import evaluar

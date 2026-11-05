@@ -10,7 +10,7 @@
   |---|---|---|
   | `plan3/barrer_fino.py` | 0.7 | Fijo fino (regla del prerregistro §5), fijo con verdes de 5 en 5 y el ganador de la gruesa ("fijo desde 10 s"), con puntaje por periodo |
   | `plan3/franja.py` | 0.8 | Fijo por franja (un plan por media hora) y fijo por bloques del perfil, con un WAUT por semáforo en su instante limpio |
-  | `plan3/actuado.py` | 0.9 | Actuado ajustado: descenso por coordenadas en cadena, `delay_based` y variante coordinada con el fijo fino |
+  | `plan3/actuado.py` | 0.9 | Actuado ajustado: descenso por coordenadas en cadena, `delay_based` y dos variantes coordinadas con el fijo fino |
   | `plan3/reglas.py` | 0.10 | Regla simple U × G y Max-Pressure por carril (con y sin ciclo máximo) para el gancho `decidir` de `rl_ippo`, y su barrido |
   | `plan3/p3_preparar.py` | 0.11 | Trabajo "preparar" de cada noche: `_actuado`, `_trivial` y `_actuado_aj` (punto de extensión para los E2) |
   | `comun.py` | 0.11 | `archivo_actuado` y `archivo_trivial` escriben en un temporal con el pid y reemplazan con reintentos (mismo contenido, byte a byte) |
@@ -34,10 +34,10 @@
   mueve algún número" compara cada variante con la que solo difiere en ese parámetro (antes la comparaba con el
   actuado por defecto, y una variante `delay_based` siempre difiere de él).
 - **Lo dudoso** está en la sección 6. Lo principal: en P6 el 10/10 no deja vehículos sin entrar a los 6000 s (la prueba
-  del lector se hizo además con P6 10/25 y P2 10/25, que sí dejan); la variante coordinada del actuado es la del
-  informe de referencias (solo `earliestEnd` en la avenida) y con llegadas regulares se comporta como un actuado
-  libre, no como un plan coordinado (sección 6, punto 4); y `p3_preparar.py` falta en la lista de scripts del
-  prerregistro §3.
+  del lector se hizo además con P6 10/25 y P2 10/25, que sí dejan); el actuado ajustado tiene dos variantes
+  coordinadas en el paso 6 (decisión del 05.11 tras la primera entrega de este informe: la del informe de
+  referencias se comporta como un actuado libre y la segunda es casi el fijo; sección 6, punto 4); y `p3_preparar.py`
+  falta en la lista de scripts del prerregistro §3.
 
 ---
 
@@ -79,7 +79,9 @@ Etapas (cada una lee lo que dejó la anterior en `barridos/<esc>/`):
   eso sumo corre con `--tripinfo-output.write-undeparted`, que **nunca** se pasa a `barrer_fijo.correr_sumo`. Las
   métricas de la hora se leen con `comun.leer_tripinfo` sobre el tripinfo sin las filas con depart < 0 (son las de
   `barrer_fijo`, comprobado); las filas con depart < 0 solo entran al periodo de su salida programada,
-  fin − departDelay (fin = `end` de las estadísticas).
+  fin − departDelay (fin = `end` de las estadísticas). Desde la fusión con `plan3-dev`, `comun.leer_tripinfo` también
+  ignora esas filas y `comun.ESCRIBIR_NO_INSERTADOS` (de `evaluar3`) agrega la misma opción en
+  `args_estadisticas`; `correr_periodos` no la repite si ya viene.
 - **Columnas:** las de `barrer_fijo` en el mismo orden (verde, izquierda, verde_transversal, offsets, esquema, 7
   métricas, 2 sd, semillas) y después ciclo, etapa, región, clave, mediana, peor, trabadas, `total_p<k>` y
   `noins_p<k>`.
@@ -123,7 +125,7 @@ Etapas (cada una lee lo que dejó la anterior en `barridos/<esc>/`):
   | 3 | `jam-threshold` | −1*, 10, 30 s |
   | 4 | `maxDur` del verde de avenida | 30, 45, 60* s |
   | 5 | `maxDur` del verde transversal | 20, 30, 60* s |
-  | 6 | familia | `delay_based` (detectorRange 50/100/200 m × minTimeLoss 1*/3 s, con los maxDur elegidos) y la variante coordinada del mejor actuado |
+  | 6 | familia | `delay_based` (detectorRange 50/100/200 m × minTimeLoss 1*/3 s, con los maxDur elegidos) y las dos variantes coordinadas del mejor actuado |
   | final | — | las 3 mejores de los 6 pasos con 2001-2010 (aleatorias: 10 con 2001-2030) |
 
 - `minDur` 10 s (5 en giros), fases y duración inicial del programa "0" de la red, desfase 0: la variante por defecto
@@ -132,9 +134,13 @@ Etapas (cada una lee lo que dejó la anterior en `barridos/<esc>/`):
 - **Ojo con `minTimeLoss`:** SUMO 1.25 lee la clave `minTimeloss` (así está en `sumo.exe`); con `minTimeLoss`, como
   dice su documentación, la ignora sin aviso (medido en P1: 0.01, 1, 3 y 1000 dan el mismo tripinfo; con
   `minTimeloss` dan 25.02, 22.37, 23.61 y 111.71 s/veh). `actuado.py` escribe `minTimeloss`.
-- **Variante coordinada:** `coordinated=true`, `cycleTime` y desfases del fijo fino (`barridos/<esc>/fijo_fino.json`),
-  las fases de su plantilla con sus duraciones, el verde de avenida con `earliestEnd` en su fin del plan fijo (la
-  propuesta de `plan3/referencias/informe.md` §4) y los parámetros del mejor actuado.
+- **Dos variantes coordinadas** (prerregistro §5): `coordinated=true`, `cycleTime` y desfases del fijo fino
+  (`barridos/<esc>/fijo_fino.json`), las fases de su plantilla con sus duraciones y los parámetros del mejor actuado;
+  (a) el verde de avenida con `earliestEnd` en su fin del plan fijo (la propuesta de `plan3/referencias/informe.md`
+  §4), y (b) "fin fijo": `latestEnd` = `earliestEnd` en la avenida **y** `latestEnd` en la transversal, cada uno en su
+  fin del plan fijo: la avenida termina siempre donde el plan fijo y la transversal puede cortar antes, nunca después
+  (clave `..._coord<hash>_finfijo`, columna `fin_fijo` de los CSV). El paso 6 las corre a las dos con las mismas
+  semillas y la misma regla; la elegida pasa al final como cualquier otra variante.
 - **Escribe** en `barridos/<esc>/`: `actuado_paso<k>.csv`, `actuado_paso<k>.json` (partida, variantes y elegida),
   `actuado_paso<k>_semillas.csv`, `actuado_final.csv`, `actuado_final_semillas.csv`, `actuado_aj.json`; y
   `<esc>_actuado_aj.add.xml`. `actuado.py <esc> --instalar` lo reescribe desde el JSON (lo usa `p3_preparar.py`).
@@ -323,16 +329,19 @@ Semillas de humo (424301-424360), salvo la reproducción del barrido entregado (
 | | B. Reproduce `plan2/barrido_<esc>.csv` con 2001-2003: P1, subrejilla completa por la línea de comandos (avenida 15/18/20/25 × transversal 10/15, todos sus desfases) y su ganador; P2-P6, 3 filas cada uno (P6: las tres del 15/10); el lector frente a `barrer_fijo.evaluar_config` | PASA (P1 65 de 65 filas y el ganador; P2-P6 3 de 3; lector = evaluar_config) |
 | | C. Dos corridas dan el mismo CSV: la subrejilla otra vez, en 2 trozos y la unión, con otros `--procesos` (sha256 de `gruesa.csv`, `gruesa_semillas.csv`, `fijo_grueso10.json` y `corredor_r10g.add.xml`) | PASA (4 de 4 archivos iguales) |
 | | D. Puntaje por periodo: P6 10/10 (se traba: 261 s/veh), P6 10/25 (541 sin entrar) y P2 10/25 (792 sin entrar): la suma por periodo es el total de `leer_tripinfo` sin write-undeparted, la hora es la misma, los no insertados por periodo suman los de las estadísticas y su salida programada es la de su flujo (error 0.000 s) | PASA (3 de 3) |
-| `prueba_cadena_p1.py` (0.7-0.11) | La cadena completa en P1 por la línea de comandos (fina, desfases, desempate, frágil, mult5, franja, actuado, reglas, preparar), con desempates y finales en semillas de humo; cada ganador jugado por TraCI reproduce su media (fijo fino, verdes de 5 en 5, franja, actuado ajustado, regla y MP); `evaluar.py --brazo fijo --programa ... --nombre fino` por la línea de comandos; `p3_preparar.py` reescribe el actuado ajustado con el mismo sha256 y deja actuado y ciclo mínimo iguales byte a byte a los del `comun.py` entregado | PASA (20 de 20): fijo fino 22/10 desfase 17 (20.90, frágil: desempate con 30 semillas), franja 20/10-0/25 → 22/10-0/13 (20.59), actuado ajustado coordinado (19.69), todos iguales por TraCI |
+| `prueba_cadena_p1.py` (0.7-0.11) | La cadena completa en P1 por la línea de comandos (fina, desfases, desempate, frágil, mult5, franja, actuado, reglas, preparar), con desempates y finales en semillas de humo; cada ganador jugado por TraCI reproduce su media (fijo fino, verdes de 5 en 5, franja, actuado ajustado, regla y MP); `evaluar.py --brazo fijo --programa ... --nombre fino` por la línea de comandos; `p3_preparar.py` reescribe el actuado ajustado con el mismo sha256 y deja actuado y ciclo mínimo iguales byte a byte a los del `comun.py` entregado | PASA (21 de 21, después de fusionar `plan3-dev`): el paso 6 del actuado corre 9 variantes, entre ellas las dos coordinadas; fijo fino 22/10 desfase 17 (20.90, frágil: desempate con 30 semillas), franja 20/10-0/25 → 22/10-0/13 (20.59), actuado ajustado coordinado (a) (19.69), todos iguales por TraCI |
 | `prueba_franja.py` (0.8) | 1. Franja con plan 2 = plan 1 = el fijo entregado, en P1, P3 y P6, por sumo directo y por TraCI: mismo tripinfo. 2. Cambio en el instante limpio y alineado con el plan 2 solo (P1 con tres pares, P3, P6). 3. 0 cortes de verde sin ámbar (con el cambio de todos a los 1800 s habría 6, 6, 8 y 24). 4. Sumo directo = TraCI. 5. Bloques de 6 programas en P1 y P6: cambios en sus instantes, 0 cortes, sumo directo = TraCI | PASA (41 de 41) |
-| `prueba_actuado.py` (0.9) | 1. La variante por defecto = el actuado entregado (mismo programa salvo `programID` y mismo tripinfo, P1-P6). 2. Cada parámetro mueve algún número frente a la variante que solo difiere en él (P2 o P6). 3. Sin avisos de SUMO en el log (defecto, `<param>`, `delay_based`, coordinada; P1-P6). 4. Sumo directo = TraCI con `<param>`, con `delay_based` y con la coordinada (P1, P3, P6) | PASA (22 de 22) |
+| `prueba_actuado.py` (0.9) | 1. La variante por defecto = el actuado entregado (mismo programa salvo `programID` y mismo tripinfo, P1-P6). 2. Cada parámetro mueve algún número frente a la variante que solo difiere en él (P2 o P6; la coordinada (b) frente a la (a)). 3. Sin avisos de SUMO en el log (defecto, `<param>`, `delay_based` y las dos coordinadas; P1-P6). 4. Sumo directo = TraCI con `<param>`, con `delay_based` y con las dos coordinadas (P1, P3, P6) | PASA (25 de 25). La (b) mueve frente a la (a) (P2 394.4 frente a 446.8; P6 82.6 frente a 115.9) y, con el fijo entregado como "fino", da el mismo tripinfo que ese fijo en P1, P3 y P6 (su transversal ya está en el mínimo y no puede cortar antes) |
 | `prueba_reglas.py` (0.10) | 1. U = ∞ da el mismo tripinfo que el ciclo mínimo (sha256) en P1 y P5. 2. Ninguna acción fuera de la máscara (6 reglas en P1, 2 en P6). 3. Presión 0 con la red vacía (P1 y P6) y no 0 con tráfico. 4. `evaluar.py --regla` escribe su CSV; una regla desconocida se rechaza | PASA (16 de 16) |
 | `prueba_atomica.py` (0.11) | 3 evaluaciones simultáneas de actuado y de ciclo mínimo (P1, 5 semillas) y de actuado (P6): código 0, CSV iguales, sin temporales y el `.add.xml` igual byte a byte al del `comun.py` entregado | PASA (3 de 3) |
 | `prueba_no_regresion.py` (0.12) | Fijo, actuado, ciclo mínimo e IPPO con mensajes (base 42) en P1-P6 con 1001-1002 por `evaluar.py`: todas las columnas iguales, como texto, a `insumos/puente/eval_<esc>_<brazo>.csv`; `veredicto.py --probar` pasa | 23 de 24 brazos iguales en las 34 columnas; `veredicto.py --probar` pasa. **IPPO en P6: 33 de 34**; `cambios_fase` da 1650 y 1592 y el CSV entregado 1654 y 1596 (ver la fila siguiente) |
 | `prueba_nr_p6.py` (0.12) | Por qué difiere IPPO en P6: (1) el código entregado (223f908, sacado con `git show`) corrido hoy da lo mismo que esta rama en las 34 columnas; (2) con la plantilla de P6 cambiada al 15/10 en ajedrez sale igual al CSV entregado en las 34 columnas | PASA (2 de 2): **no es una regresión**. El CSV entregado se corrió cuando `malla3_alta.add.xml` era otro plan (4 semáforos arrancan fuera del primer verde); IPPO no lo usa para el tráfico, pero su conteo de cambios de fase compara con la fase inicial de la plantilla y suma 1 por cada uno (sección 6) |
 | `prueba_aleatorias.py` (0.7-0.10) | Por el lanzador (copias de los prototipos en `tmp_ref`): `poi_corredor` y `per_corredor` registrados solo en el proceso; barrido fino aleatorio (umbral en errores estándar, 10 finalistas), franja con los 9 pares finalistas, perfil con 6 puntajes por bloque y su fijo por bloques jugado por TraCI con la misma media, actuado con 10 finalistas y MP con sus 4 | PASA (19 de 19) |
 
-Salidas en `plan3/pruebas/ref/salidas/<prueba>.txt`; `costos_ref.txt` es la estimación de la sección 2.
+Salidas en `plan3/pruebas/ref/salidas/<prueba>.txt`; `costos_ref.txt` es la estimación de la sección 2. Después de
+fusionar `plan3-dev` (17bd53a: protecciones, `rl_ippo.py` y `comun.py` de los otros bloques) y de agregar la segunda
+variante coordinada, volví a correr `prueba_actuado`, `prueba_reglas`, `prueba_fino` y `prueba_cadena_p1`: pasan.
+Las demás salidas son de antes de la fusión (la no regresión corrió con el `rl_ippo.py` de 223f908).
 
 ---
 
@@ -351,7 +360,7 @@ Salidas en `plan3/pruebas/ref/salidas/<prueba>.txt`; `costos_ref.txt` es la esti
 | Instante limpio | Mismo estado en t − 1, t y t + 1 (no solo en t) | Cubre el segundo de diferencia entre cuándo SUMO aplica el cambio (t + 1) y la convención del desfase; la prueba dio 0 cortes |
 | Bloques | Si dos bloques seguidos eligen el mismo plan, no hay cambio; si todos eligen uno, no hay WAUT | Menos cambios; mismo resultado |
 | Actuado: dependencias | Pasos 1-5 sin dependencias; el 6 depende del fijo fino | Solo la variante coordinada usa el fino; la cadena puede empezar antes |
-| Actuado coordinado | Solo `earliestEnd` en el verde de avenida (fin del plan fijo), como lo proponía el informe de referencias | Probé dos alternativas (sección 6, punto 4): con `latestEnd` también en la transversal, P2 se trabó (835 s/veh); con `earliestEnd` y `latestEnd` iguales en la avenida, el programa es casi el fijo |
+| Actuado coordinado | Dos candidatas en el paso 6: (a) solo `earliestEnd` en el verde de avenida (fin del plan fijo), como lo proponía el informe de referencias, y (b) `earliestEnd` = `latestEnd` en la avenida y `latestEnd` en la transversal, en sus fines del plan fijo | Decisión del 05.11 (lo conservador: una candidata más solo hace más fuerte la referencia que veta FUNCIONA). La (b) es la que se midió "casi el fijo"; sus dos mitades por separado son peores (sección 6, punto 4) |
 | Actuado y reglas con llegadas aleatorias | Barrido con 2001-2003 (como la tabla del prerregistro §5), finalistas 10 con 2001-2030 | La tabla de §5 lo dice así para el actuado y la regla |
 | Max-Pressure | 4 variantes (`mp`, `mp_det`, `mp_c60`, `mp_c90`), elegidas como la regla, aparte | Solo descriptivo; así se informa la mejor de cada familia |
 | Nombres de reglas | `regla_u<U>g<G>`, `mp`, `mp_det`, `mp_c<C>` | Contrato con `evaluar3` (nombre con los parámetros) |
@@ -370,19 +379,25 @@ Salidas en `plan3/pruebas/ref/salidas/<prueba>.txt`; `costos_ref.txt` es la esti
 3. **Opciones de prueba.** `--semillas`, `--semillas-desempate`, `--semillas-fragil`, `--semillas-final`,
    `--avenida`, `--transversal` y `--limite` existen para las pruebas (semillas de humo, subrejillas). La cola no las
    debe usar; la capa 1 podría rechazarlas en los trabajos de referencias.
-4. **Variante coordinada del actuado.** Quedó la del informe de referencias (solo `earliestEnd` en la avenida). Con el
-   fijo entregado como "fino" y la semilla 424301 (retraso total, s/veh; `tmp_ref/exp/coord`, no versionado):
+4. **Variantes coordinadas del actuado.** Quedaron dos candidatas en el paso 6 (decisión del 05.11): la del informe
+   de referencias, (a) solo `earliestEnd` en la avenida, y (b) `earliestEnd` = `latestEnd` en la avenida **y**
+   `latestEnd` en la transversal, cada uno en su fin del plan fijo. Con el fijo entregado como "fino" y la semilla
+   424301 (retraso total, s/veh; `tmp_ref/exp/coord` y `coord2`, no versionados):
 
-   | | fijo | actuado | coordinada (la que quedó) | + `latestEnd` en la transversal | `earliestEnd` = `latestEnd` en la avenida |
-   |---|---|---|---|---|---|
-   | P1 | 21.91 | 21.49 | 21.19 | 21.35 | 21.91 |
-   | P2 | 392.73 | 437.26 | 446.78 | **834.97** | 394.40 |
-   | P6 | 82.57 | 114.64 | 115.94 | 112.19 | 82.57 |
+   | | fijo | actuado | coordinada (a) | solo `latestEnd` en la transversal | solo `earliestEnd` = `latestEnd` en la avenida | coordinada (b), las dos cosas |
+   |---|---|---|---|---|---|---|
+   | P1 | 21.91 | 21.49 | 21.19 | 21.35 | 22.28 | 21.91 |
+   | P2 | 392.73 | 437.26 | 446.78 | **834.97** | 501.39 | 394.40 |
+   | P3 | 20.14 | 21.46 | 21.61 | — | 24.22 | 20.14 |
+   | P6 | 82.57 | 114.64 | 115.94 | 112.19 | 85.30 | 82.57 |
 
-   La que quedó se comporta como un actuado libre en P2 y P6 (no sostiene la onda verde); la última es casi el fijo
-   (la transversal solo puede cortar antes si su verde pasa del mínimo). Si Fabian quiere un actuado coordinado "de
-   verdad", la última es la candidata: es un cambio de una línea en `actuado.texto_actuado` y agrega una variante al
-   paso 6 (debe decidirse antes de la parte A del prerregistro).
+   La (a) se comporta como un actuado libre en P2 y P6 (no sostiene la onda verde); la (b) es casi el fijo (la
+   transversal solo puede cortar antes si su verde pasa del mínimo). Las dos corren en el paso 6 y el descenso elige
+   con las mismas semillas y la misma regla; con eso el actuado ajustado (la referencia que veta FUNCIONA) queda al
+   menos tan fuerte como la mejor de las dos. **Corrección:** en la primera entrega de este informe la (b) se describió
+   como "`earliestEnd` = `latestEnd` en la avenida", pero los números que se mostraron (los de la última columna)
+   eran con `latestEnd` también en la transversal. La línea del prerregistro §5 (commit 17bd53a) debe decir "y
+   `latestEnd` en la transversal": las dos mitades por separado (columnas 4 y 5) son peores que el fijo.
 5. **Trabajos largos.** Con llegadas aleatorias, el barrido de P3 y P4 (gruesa ~7-8 h-p), la fina de P5 (~11 h-p) y
    las reglas de P6 (~5.3 h-p) hay que partirlos: los barridos con `--trozo`, las reglas por `--familia`. El actuado
    y la verificación de franja/bloques no se parten (≤ 2.3 h-p).
