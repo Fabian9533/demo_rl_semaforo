@@ -1,0 +1,12 @@
+Prueba 5: V2 del corredor, base 42, ep 10, frente a la V2 del diagnostico (B12)
+05.11.2026 08:58; python 3.14.6, torch 2.14.0+cpu
+
+[OK] existe el checkpoint del diagnostico: plan3\insumos\v2diag_checkpoints\corredor_ippo_vecinos_v2_s42_ep010.pt
+rl_ippo.py train --escenario corredor --seed 42 --episodios 200 --hasta-ep 10 --eval-cada 5 --val-seeds 424301,424302 --v2 --criterio-val total --guardar-estado --registro-extendido --etiqueta p3prbdiag
+[OK] corrida: codigo 0
+[OK] ep 10: tensores iguales a los del diagnostico: 12/12 tensores iguales (torch.equal), claves iguales True
+   sha256 de los archivos (distinto por el nombre que guarda torch.save): de1f82661e4ff182 | cf925a08a19e3009
+[OK] filas 1-10 = las del diagnostico (salvo segundos, etiqueta y validacion): 10 filas, 48 columnas comunes (sin ['etiqueta', 'eval_espera', 'eval_timeloss', 'segundos', 'val', 'val_1999', 'val_999', 'val_total', 'val_total_1999', 'val_total_999']), 0 diferencias
+La validacion del ep 5 y las semillas de humo (en vez de 999 y 1999) no cambiaron el entrenamiento
+
+Resultado: todo OK

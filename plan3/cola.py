@@ -238,7 +238,9 @@ def main():
             reg = e["registro"].setdefault(tid, {})
             reg.update({"fin": ahora(), "codigo": proc.returncode})
             t = trabajos.get(tid, {})
-            if proc.returncode == 0 and salidas_completas(t, desde=inicio):
+            # salidas escritas desde el PRIMER intento: un tramo relanzado que ya habia dejado su estado sale con 0
+            # sin escribir nada nuevo, y eso es correcto (--reanudar auto)
+            if proc.returncode == 0 and salidas_completas(t, desde=reg.get("primer_inicio_epoch", inicio)):
                 hechos.add(tid)
                 fallidos.pop(tid, None)
                 print(f"{time.strftime('%H:%M:%S')} OK    {tid} ({dur} s)", flush=True)
@@ -264,7 +266,8 @@ def main():
                 for tid in list(huerfanos):
                     if huerfanos[tid] in vivas:
                         continue
-                    ini = e["registro"].get(tid, {}).get("inicio_epoch")
+                    reg = e["registro"].get(tid, {})
+                    ini = reg.get("primer_inicio_epoch", reg.get("inicio_epoch"))
                     if salidas_completas(trabajos[tid], desde=ini):
                         hechos.add(tid)
                         print(f"{time.strftime('%H:%M:%S')} OK    {tid} (huerfano, salidas completas)", flush=True)
@@ -313,7 +316,9 @@ def main():
                 proc = subprocess.Popen(cmd, cwd=RAIZ, shell=True, stdout=log, stderr=subprocess.STDOUT,
                                         env=entorno)
                 corriendo[t["id"]] = (proc, inicio, cpus, log)
+                previo = e["registro"].get(t["id"], {})
                 e["registro"][t["id"]] = {"inicio": ahora(), "inicio_epoch": inicio,
+                                          "primer_inicio_epoch": previo.get("primer_inicio_epoch", inicio),
                                           "commit": protecciones.git("rev-parse", "HEAD")[1].strip(),
                                           "intento": intentos.get(t["id"], 0)}
                 usados += cpus

@@ -1,0 +1,4 @@
+ok  leer_tripinfo igual con y sin las filas de los no insertados (78 no insertados, retraso total 80.08)
+ok  filas con depart < 0 = no insertados (78)
+ok  sin la opcion no hay filas con depart < 0
+ok  por_periodo: generados 905 = cargados 905; no insertados 78

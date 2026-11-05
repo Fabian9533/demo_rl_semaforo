@@ -140,6 +140,13 @@ tengan el mismo protocolo, ninguna decide con 1001-1030.
     relativo está diluido a la mitad; se informa también el de P6e.
 - El redondeo de `exp()` al segundo agrega +0.5 s/veh de espera con llegadas aleatorias, igual en todos los brazos
   [M `plan3/demanda/salidas/prueba_e_resumen.txt`].
+- **Cierre de la simulación.** Cada episodio cierra a más tardar a los 6000 s, como en lo entregado. Un vehículo que a
+  esa hora todavía espera entrar cuenta con la espera que llevaba: es una cota inferior de su retraso. Con llegadas
+  aleatorias en P2 la espera para entrar es larga (312 s/veh con el fijo instalado y el último vehículo llega a los
+  5724 s, en semillas de humo [M `plan3/pruebas/esc/salidas/cargas.txt`]), así que alguna semilla puede tocar el
+  cierre. Por celda y brazo se informan las semillas con no insertados al cerrar y cuántos vehículos. **Lectura
+  obligada:** si un brazo deja vehículos sin entrar, su retraso total está subestimado y la diferencia con un brazo
+  que no los deja es conservadora.
 
 ## 5. Referencias
 
@@ -164,8 +171,11 @@ llegadas aleatorias se re-ajustan con ellas. Los ganadores salen de estas reglas
 **Del fijo fino frente a IPPO.** El fijo fino puede usar verdes de 12 o 14 s. IPPO decide cada 5 s y solo da verdes de
 10, 15, 20... s [M `rl_ippo.py` l. 671-678]. Se declara. El fijo de verdes de 5 en 5 mide ese límite.
 
-**Inserción en los escenarios nuevos** [A2]: `departLane="best"` en los flujos o en el `.sumocfg`
-(`<default.departlane value="best"/>`).
+**Inserción en los escenarios nuevos** [A2]: `departLane="best"` en cada flujo de los escenarios nuevos
+(`plan3/demanda_estocastica.py`), no como opción por defecto de SUMO. En SUMO 1.25 las dos formas eligen el carril de
+manera distinta (el atributo del flujo usa el carril libre; la opción, el carril probable): en P6 regular, la espera
+para entrar del fijo es 0.28 s/veh con el atributo y 0.30 con la opción, y el retraso total 36.40 y 37.27 s/veh [M
+`plan3/pruebas/esc/salidas/`, 3 semillas de humo]. Las cifras del diseño citadas en §4 y §15 se midieron con la opción.
 
 ## 6. Versión evaluada, emparejamiento y convergencia
 

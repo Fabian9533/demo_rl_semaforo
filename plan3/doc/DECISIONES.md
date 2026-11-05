@@ -398,7 +398,7 @@ llegadas aleatorias.
 | Tema | Recomendada | Alternativas | Costo de la recomendada |
 |---|---|---|---|
 | Perfil | Bloques de 10 min con el mismo total, llegadas aleatorias, en P1 y P3. Decide el fijo de un plan; al lado, un fijo por bloques | El perfil de `corredor_var` (×1.5: mezcla más demanda con punta); no correrlo | ~33 h-p |
-| Composición | JICA 2013 sin camiones; transporte público repartido con la flota ATU 2021: autos 78.9 %, motos 4.4 %, combis 4.8 %, micros 5.7 %, buses 6.3 % [I: aritmética sobre [L]] | JICA con camiones; el aforo de La Bolichera (una intersección) | ~39 h-p (todo el bloque de mezcla) |
+| Composición | JICA 2013 sin camiones; transporte público repartido con la flota ATU 2021: autos 78.9 %, motos 4.4 %, combis 4.8 %, micros 5.64 % (errata corregida el 05.11 al implementar: el diseño decía 5.7 %), buses 6.3 % [I: aritmética sobre [L]] | JICA con camiones; el aforo de La Bolichera (una intersección) | ~39 h-p (todo el bloque de mezcla) |
 | Parámetros | Los de SUMO por clase; combi (6 m, 2.0 m/s²) y micro (8 m, 1.5 m/s²) son supuestos escritos [S] | — | — |
 | Demanda | Mismos vehículos equivalentes (×0.84 los veh/h) [I] | Mismos veh/h (mezcla carga con composición) | — |
 | Conductores | No se tocan al entrenar; arranque lento de 0.5 s solo al evaluar, como sensibilidad | Entrenar con 0.5 s (un valor sin fuente decidiría el resultado) | incluido |
