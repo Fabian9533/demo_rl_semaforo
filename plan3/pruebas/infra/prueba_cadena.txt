@@ -1,0 +1,12 @@
+cola: 0 hechos, 0 fallidos al arrancar; cpus=3; commit d10bad4c32; corte 10:55
+09:55:27 INICIO humo_t1 (prio 1, 1/3 cpus)
+09:56:02 OK    humo_t1 (35 s)
+09:56:02 INICIO humo_t2 (prio 1, 1/3 cpus)
+09:56:32 OK    humo_t2 (30 s)
+09:56:32 INICIO humo_ev (prio 1, 1/3 cpus)
+09:56:32 INICIO humo_3b (prio 1, 2/3 cpus)
+09:56:53 OK    humo_ev (20 s)
+09:57:28 OK    humo_3b (55 s)
+cola: fin; 4 hechos, 0 fallidos, 0 bloqueados, 0 pendientes
+ok  los 4 trabajos hechos, ninguno fallido
+ok  la corrida de etiqueta nueva registra su origen: [{'corrida': 'corredor_ippo_vecinos_p3humo_s7', 'episodio': 2}]
