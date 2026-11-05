@@ -1,0 +1,24 @@
+Cadena de las referencias en P1 (carpeta C:\Users\GAMER\Documents\demo_rl_semaforo\w3_ref\plan3\tmp_ref\fino\p1_a)
+OK    barrer_fino.py corredor --etapa fina --procesos 3: codigo 0; barrer_fino corredor fina: listo en 133 s
+OK    barrer_fino.py corredor --etapa desfases --procesos 3: codigo 0; barrer_fino corredor desfases: listo en 13 s
+OK    barrer_fino.py corredor --etapa desempate --procesos 3 --semillas-desempate 424301-424310 --semillas-fragil 424301-424330: codigo 0; barrer_fino corredor desempate: listo en 52 s
+OK    barrer_fino.py corredor --etapa fragil --procesos 3 --semillas-desempate 424301-424310 --semillas-fragil 424301-424330: codigo 0; barrer_fino corredor fragil: listo en 36 s
+OK    barrer_fino.py corredor --etapa mult5 --procesos 3 --semillas-desempate 424301-424310 --semillas-fragil 424301-424330: codigo 0; barrer_fino corredor mult5: listo en 130 s
+OK    franja.py corredor --procesos 3 --semillas-final 424301-424310: codigo 0; franja corredor: listo en 33 s
+OK    actuado.py corredor --paso todos --procesos 3 --semillas 424301-424303 --semillas-final 424301-424310: codigo 0; actuado corredor: listo en 46 s
+OK    reglas.py corredor --semillas 424301-424303 --semillas-final 424301-424310: codigo 0; reglas corredor: listo en 319 s
+OK    salidas de la cadena: 26/26 (faltan [])
+  fijo fino: v22_t10_o0_17 ciclo 38, 20.9 en 424301-424330; traza {'dos_primeros_a_2pct': True, 'semillas_trabadas_ganador': 0, 'fragil': True, 'semillas_desempate': '424301-424310', 'desempate_fragil': ['v22_t10_o0_17', 'v22_t10_o0_16', 'v22_t10_o0_15'], 'semillas_fragil': '424301-424330'}
+OK    TraCI fijo_fino (corredor_r10f.add.xml): media 20.9 en 424301-424330 = 20.9
+OK    TraCI fijo_mult5 (corredor_m5f.add.xml): media 21.16 en 424301-424330 = 21.16
+OK    evaluar.py --brazo fijo --programa corredor_r10f.add.xml --nombre fino: codigo 0, brazo ['fijo_fino', 'fijo_fino'], retraso total ['21.72', '20.48'] = ['21.72', '20.48']
+OK    TraCI franja (['v20_t10_o0_25', 'v22_t10_o0_13'], cambios {'semaforo_C1': [1814], 'semaforo_C2': [1813]}): media 20.59 = 20.59
+OK    TraCI actuado_aj (act_mg2_dg2_jt10_av60_tr60_coordd92b8a11): media 19.69 = 19.69
+OK    evaluar --regla regla_u1g60: media 35.31 = 35.31 (el barrido de reglas ya era TraCI)
+OK    evaluar --regla mp_c60: media 25.49 = 25.49 (el barrido de reglas ya era TraCI)
+OK    p3_preparar.py corredor: codigo 0; preparar: 3 archivos
+OK    p3_preparar reescribe corredor_actuado_aj.add.xml con el mismo sha256 (23ff4a8482dbb752)
+OK    p3_preparar corredor_actuado.add.xml = el del comun.py entregado, byte a byte (3035f0bae1f41011)
+OK    p3_preparar corredor_trivial.add.xml = el del comun.py entregado, byte a byte (feccd51cc73f082c)
+
+RESULTADO: PASA

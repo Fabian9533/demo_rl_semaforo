@@ -225,11 +225,25 @@ def fases_verdes(tls):
 
 
 # ---------------- Episodio ----------------
+def adicionales_con(modo, adicional):
+    """plan3 (0.7-0.9): --additional-files con el programa de un archivo. En franja, bloques y actuado_aj el archivo
+    (por defecto <esc>_<modo>.add.xml) va encima de los del .sumocfg; en baseline (fijo de otro programa, p. ej.
+    <esc>_r10f.add.xml) reemplaza a los del .sumocfg que traen programas, como barrer_fijo.Plantilla.extra."""
+    ruta = adicional or f"{ESCENARIO}_{modo}.add.xml"
+    if not os.path.exists(ruta):
+        raise SystemExit(f"No existe {ruta} (programa del modo {modo})")
+    _, adicionales = comun.leer_cfg(CFG)
+    if modo == "baseline":
+        adicionales = [a for a in adicionales if "<tlLogic" not in open(a, encoding="utf-8").read()]
+    return ",".join(adicionales + [ruta])
+
+
 def correr_episodio(modo, Q, eps, gui, delay, seed, tripinfo=None, serie=None,
-                    algoritmo="qlearning", tipo_recompensa="colas"):
+                    algoritmo="qlearning", tipo_recompensa="colas", adicional=None):
     """Corre una hora simulada. modo: baseline (fijo con offsets), actuado (SUMO), train o demo.
     algoritmo (qlearning/sarsa) y tipo_recompensa (colas/retraso) solo importan en train; por
-    defecto se comporta como antes del plan v2."""
+    defecto se comporta como antes del plan v2. plan3: modos franja, bloques y actuado_aj, y adicional (ruta
+    del programa; en baseline, el fijo de ese archivo); sin ellos nada cambia."""
     binario = sumolib.checkBinary("sumo-gui" if gui else "sumo")
     if tripinfo is None:
         tripinfo = f"tripinfo_{ESCENARIO}_{modo}.xml"
@@ -242,6 +256,8 @@ def correr_episodio(modo, Q, eps, gui, delay, seed, tripinfo=None, serie=None,
     elif modo == "trivial":
         cmd += ["--additional-files",
                 comun.archivo_trivial(CFG, ESCENARIO, list(SEMAFOROS), VERDE_MIN, VERDE_MIN_GIRO)]
+    elif modo in ("franja", "bloques", "actuado_aj") or (modo == "baseline" and adicional):
+        cmd += ["--additional-files", adicionales_con(modo, adicional)]
     if gui:
         cmd += ["--start", "--quit-on-end", "--delay", str(delay)]
         if os.path.exists(f"vista_{ESCENARIO}.xml"):
@@ -252,7 +268,7 @@ def correr_episodio(modo, Q, eps, gui, delay, seed, tripinfo=None, serie=None,
     aprende = modo == "train"
     sarsa = algoritmo == "sarsa"
     con_retraso = tipo_recompensa == "retraso"
-    if modo in ("actuado", "trivial"):
+    if modo in ("actuado", "trivial", "actuado_aj"):      # franja y bloques: los cambia su WAUT
         for tls in SEMAFOROS:
             traci.trafficlight.setProgram(tls, modo)
 

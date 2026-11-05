@@ -1,0 +1,24 @@
+Pruebas de 0.7: barrido fino con puntaje por periodo
+OK    A malla3 (plan2): minimos locales [(10, 10, 21.23), (25, 15, 21.28), (30, 10, 21.34), (20, 20, 22.61)]; a <= 2 %: [(10, 10), (25, 15), (30, 10)]
+OK    A llegadas aleatorias: +0.4 s con ee 0.24 pasa a la fina; +1.5 s con ee 0.06 no (aunque a 2 % pasaria); el mejor siempre
+OK    A llegadas regulares: 30.6 frente a 30.0 pasa (2 %), 30.61 no
+OK    A fragil: dos primeros a 3.3 % y sin semillas trabadas -> no fragil {'dos_primeros_a_2pct': False, 'semillas_trabadas_ganador': 0, 'fragil': False, 'semillas_desempate': 'x'}
+OK    A fragil: el ganador del desempate (a 30.0) tiene una semilla trabada -> 3 primeros con 6 semillas: gana b 30.0
+OK    B P1: subrejilla de 65 planes por la linea de comandos: 65/65 filas iguales a plan2/barrido_corredor.csv (14 columnas)
+OK    B P1: ganador 20/10 0/15 20.88 = ganador de plan2 20/10 0/15 20.88
+  C barridos/corredor/gruesa.csv: f2e6e126f56f123e / f2e6e126f56f123e
+  C barridos/corredor/gruesa_semillas.csv: fec9d4811f4113fd / fec9d4811f4113fd
+  C corredor_r10g.add.xml: e9d59a6289f279f1 / e9d59a6289f279f1
+  C barridos/corredor/fijo_grueso10.json: 9d03c509c31b9a18 / 9d03c509c31b9a18
+OK    C dos corridas (una con 3 hilos; otra en 2 trozos y la union) dan los mismos archivos: [True, True, True, True]
+OK    B P2: 3 de 3 filas de plan2/barrido_corredor_alta.csv reproducidas (25/15 0/25, 25/15 0/20, 25/15 0/10)
+OK    B P3: 3 de 3 filas de plan2/barrido_red.csv reproducidas (10/10 0/25/24, 10/10 0/0/0, 10/10 0/25/0)
+OK    B P4: 3 de 3 filas de plan2/barrido_red_alta.csv reproducidas (10/10 0/25/24, 10/10 0/23/23, 10/10 0/25/0)
+OK    B P5: 3 de 3 filas de plan2/barrido_malla3.csv reproducidas (10/10 cero, 25/15 ajedrez, 30/10 ajedrez)
+OK    B P6: 3 de 3 filas de plan2/barrido_malla3_alta.csv reproducidas (15/10 cero, 15/10 onda_eo, 15/10 ajedrez)
+OK    B P2 25/15 0/25: barrer_fijo.evaluar_config 384.97 = barrer_fino 384.97 en las 9 columnas: True
+OK    D malla3_alta 10/10 cero s424301: total sin write-undeparted 261.15 = suma por periodo 261.1544 (123.5796 y 398.7292); hora igual: True; no insertados 0 = 0 + 0; su salida programada (fin - departDelay) frente al flujo: error maximo 0.000 s en 0
+OK    D malla3_alta 10/25 cero s424301: total sin write-undeparted 912.12 = suma por periodo 912.1207 (672.9062 y 1151.3352); hora igual: True; no insertados 541 = 0 + 541; su salida programada (fin - departDelay) frente al flujo: error maximo 0.000 s en 541
+OK    D corredor_alta 10/25  s424301: total sin write-undeparted 1491.27 = suma por periodo 1491.2704 (1270.8909 y 1711.6499); hora igual: True; no insertados 792 = 69 + 723; su salida programada (fin - departDelay) frente al flujo: error maximo 0.000 s en 792
+
+RESULTADO: PASA

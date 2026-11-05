@@ -178,6 +178,25 @@ def vehiculos_tripinfo(archivo):
 
 
 # ---------------- Programa actuado de referencia ----------------
+def escribir_atomico(ruta, texto, intentos=10, espera=2.0):
+    """plan3 (0.11): escribe ruta en un temporal con el pid y lo reemplaza con reintentos (como
+    barrer_fijo.reemplazar). Varias evaluaciones del mismo escenario regeneran el mismo .add.xml: asi ninguna
+    lee un archivo a medio escribir y dos procesos no se pisan el temporal. En Windows os.replace falla si en
+    ese instante un sumo tiene abierto el destino. El contenido es el mismo de antes, byte a byte."""
+    import time
+    tmp = f"{ruta}.{os.getpid()}.tmp"
+    with open(tmp, "w") as f:
+        f.write(texto)
+    for k in range(intentos):
+        try:
+            os.replace(tmp, ruta)
+            return
+        except PermissionError:
+            if k == intentos - 1:
+                raise
+            time.sleep(espera)
+
+
 def leer_cfg(cfg):
     """Devuelve (net-file, lista de additional-files) del .sumocfg."""
     raiz = ET.parse(cfg).getroot()
@@ -214,8 +233,7 @@ def archivo_actuado(cfg, escenario, tls_ids, verde_min, verde_min_giro, verde_ma
                 lineas.append(f'        <phase duration="{int(fase.duration)}" state="{estado}"/>')
         lineas.append("    </tlLogic>")
     lineas.append("</additional>")
-    with open(salida, "w") as f:
-        f.write("\n".join(lineas) + "\n")
+    escribir_atomico(salida, "\n".join(lineas) + "\n")
     return ",".join(adicionales + [salida])
 
 
@@ -253,8 +271,7 @@ def archivo_trivial(cfg, escenario, tls_ids, verde_min, verde_min_giro):
             lineas.append(f'        <phase duration="{duracion}" state="{estado}"/>')
         lineas.append("    </tlLogic>")
     lineas.append("</additional>")
-    with open(salida, "w") as f:
-        f.write("\n".join(lineas) + "\n")
+    escribir_atomico(salida, "\n".join(lineas) + "\n")
     return ",".join(adicionales + [salida])
 
 

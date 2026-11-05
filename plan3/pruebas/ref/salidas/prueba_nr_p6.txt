@@ -1,0 +1,6 @@
+IPPO con mensajes (base 42) en P6, semillas 1001-1002
+OK    1 codigo entregado (223f908) corrido hoy = codigo de esta rama en las 34 columnas: True []
+  frente al CSV entregado (insumos/puente): [('1001', 'cambios_fase', '1654', '1650'), ('1002', 'cambios_fase', '1596', '1592')]
+OK    2 con la plantilla 15/10 en ajedrez ([0, 15, 0, 15, 0, 15, 0, 15, 0]) sale igual al CSV entregado en las 34 columnas: True []
+
+RESULTADO: PASA
