@@ -8,8 +8,12 @@ prueba_actuado.py - Pruebas de la tarea 0.9 (actuado.py, modo actuado_aj de rl_c
      P1-P6;
   4. sumo directo = TraCI (evaluar.brazo_referencia(esc, "actuado_aj", archivo)) tambien con <param>, con
      delay_based y con las dos variantes coordinadas (solo earliestEnd en la avenida, y earliestEnd = latestEnd), en
-     P1, P3 y P6.
-La variante coordinada usa un fijo fino de prueba (el fijo entregado, escrito como fijo_fino.json en tmp_ref).
+     P1, P3 y P6;
+  5. reinstalar (p3_preparar --piezas actuado_aj): con el instalado igual al congelado no lo toca (misma fecha); si
+     el instalado cambio o falta, lo reescribe con el sha256 congelado; si el texto de hoy no da el sha256 congelado,
+     error y el instalado queda igual, sin temporales; p3_preparar sin --piezas hace solo actuado y trivial.
+La variante coordinada usa un fijo fino de prueba (el fijo entregado, escrito como fijo_fino.json en tmp_ref, con la
+marca de prueba: la celda corre con permitir).
 Semillas de humo. Corre en una copia de los escenarios (tmp_ref/actuado/). Uso (cwd = plan3/):
   python pruebas/ref/prueba_actuado.py        Salida: pruebas/ref/salidas/prueba_actuado.txt
 """
@@ -46,7 +50,9 @@ def celda(esc):
     pl = c.plan(av, tr, [int(tl.get("offset")) for tl in c.p.tls])
     with open(os.path.join(c.carpeta, "fijo_fino.json"), "w", encoding="utf-8") as f:
         json.dump({"ids": c.p.ids, "ciclo": pl["ciclo"], "offsets": pl["offsets"], "verde": av,
-                   "verde_transversal": tr, "sha256": "prueba"}, f)
+                   "verde_transversal": tr, "sha256": "prueba",
+                   "registro": {"prueba": ["fijo fino de prueba: la plantilla (prueba_actuado)"]}}, f)
+    c.permitir = True                     # el fijo fino de prueba lleva la marca de prueba
     return c
 
 
@@ -152,8 +158,58 @@ def directo_traci(caso, esc):
                     f"{b['retraso_total_prom']}")
 
 
+def reinstalar():
+    import glob
+    import shutil
+    import subprocess
+    c = celda("corredor")
+    v = dict(actuado.DEFECTO, **{"max-gap": 2.0})
+    datos = {"escenario": "corredor", "llegadas": c.llegadas, "huella": c.huella, "clave": actuado.clave(v),
+             "variante": v, "variantes_probadas": 1, "semillas_pasos": "prueba", "finalistas": [actuado.clave(v)],
+             "retraso_total_prom": 0, "retraso_total_sd": 0, "timeloss_prom": 0, "mediana": 0, "peor": 0,
+             "trabadas": 0, "semillas": "prueba"}
+    datos = actuado.instalar(c, datos)
+    destino = "corredor_actuado_aj.add.xml"
+    f0 = os.stat(destino).st_mtime_ns
+    actuado.reinstalar("corredor", c.carpeta)
+    igual_sin_tocar = os.stat(destino).st_mtime_ns == f0 and up.sha256(destino) == datos["sha256"]
+    with open(destino, "a", encoding="utf-8") as f:
+        f.write("<!-- cambiado a mano -->" + os.linesep)
+    actuado.reinstalar("corredor", c.carpeta)
+    reescrito = up.sha256(destino) == datos["sha256"]
+    os.remove(destino)
+    actuado.reinstalar("corredor", c.carpeta)
+    recreado = up.sha256(destino) == datos["sha256"]
+    inf.chequeo(igual_sin_tocar and reescrito and recreado,
+                f"5 reinstalar: igual al congelado -> no lo toca (misma fecha): {igual_sin_tocar}; cambiado a mano -> "
+                f"reescrito con el sha256 congelado: {reescrito}; borrado -> recreado: {recreado}")
+    otra = os.path.join(CARPETA, "barridos", "corredor_sha_malo")
+    os.makedirs(otra, exist_ok=True)
+    with open(os.path.join(otra, "actuado_aj.json"), "w", encoding="utf-8") as f:
+        json.dump(dict(datos, sha256="0" * 64), f)
+    antes = up.sha256(destino)
+    try:
+        actuado.reinstalar("corredor", otra)
+        mensaje = "no se nego"
+    except SystemExit as e:
+        mensaje = str(e)
+    temporales = glob.glob(f"{destino}.*.tmp")
+    inf.chequeo("no se toca" in mensaje and up.sha256(destino) == antes and not temporales,
+                f"5 reinstalar con un sha256 congelado que el texto de hoy no da: error ({mensaje[:90]}...), el "
+                f"instalado queda igual: {up.sha256(destino) == antes}, temporales {temporales}")
+    f1 = os.stat(destino).st_mtime_ns
+    r = subprocess.run([sys.executable, os.path.join(up.PLAN3, "p3_preparar.py"), "corredor"], cwd=CARPETA,
+                       capture_output=True, text=True)
+    piezas = [x.split()[1].rstrip(":") for x in r.stdout.splitlines() if x.startswith("corredor ")]
+    inf.chequeo(r.returncode == 0 and piezas == ["actuado", "trivial"] and os.stat(destino).st_mtime_ns == f1,
+                f"5 p3_preparar corredor (sin --piezas): codigo {r.returncode}, piezas {piezas}; el actuado ajustado "
+                f"no se toca")
+    shutil.rmtree(otra, ignore_errors=True)
+
+
 def main():
     inf(f"Pruebas de 0.9: actuado ajustado (copia en {CARPETA}; semilla {S})")
+    reinstalar()
     for caso, esc in CASOS.items():
         defecto(caso, esc)
     movidos = {}

@@ -1,4 +1,9 @@
-No regresion de lo entregado (copia en C:\Users\GAMER\Documents\demo_rl_semaforo\w3_ref\plan3\tmp_ref\no_regresion): semillas 1001-1002, CSV de insumos/puente
+Codigo: commit d01c2a6774918b95dfa08ef9212bbf3dc6602a80 (rama plan3-ref); estos archivos sin cambios frente al commit
+  sha256 comun.py: 86efdfb0ed3737def7cf4a6c1309bb33549756476973bbeabad8e78afa5c5074
+  sha256 rl_ippo.py: 2182441fe238ca5de7fe7775ddc35574a384de4ba4e57f5c984fb0720c7cc78c
+  sha256 evaluar.py: 6b2fc91ee37c170f40107983ac1aa483e3e64118a1a78bce83d95c7e438474c3
+  sha256 rl_corredor.py: 7d6e38b9ef834a4022bd613fb5b3faec042743b16d79752701e9250523a1d059
+No regresion de lo entregado (copia en C:\Users\GAMER\Documents\demo_rl_semaforo\w3_ref\plan3\tmp_ref\no_regresion): semillas 1001-1002, CSV de insumos/puente; 3 evaluaciones a la vez
 OK    P1 fijo: 1001 y 1002 iguales a lo entregado en las 34 columnas
 OK    P1 actuado: 1001 y 1002 iguales a lo entregado en las 34 columnas
 OK    P1 trivial: 1001 y 1002 iguales a lo entregado en las 34 columnas
@@ -22,8 +27,8 @@ OK    P5 ippo_vecinos_s42: 1001 y 1002 iguales a lo entregado en las 34 columnas
 OK    P6 fijo: 1001 y 1002 iguales a lo entregado en las 34 columnas
 OK    P6 actuado: 1001 y 1002 iguales a lo entregado en las 34 columnas
 OK    P6 trivial: 1001 y 1002 iguales a lo entregado en las 34 columnas
-FALLA P6 ippo_vecinos_s42: 1001 y 1002 iguales a lo entregado en las 34 columnas; distintas: [('1001', 'cambios_fase', '1650', '1654'), ('1002', 'cambios_fase', '1592', '1596')]
-  23 de 24 brazos iguales
+OK    P6 ippo_vecinos_s42: 1001 y 1002 iguales a lo entregado salvo la diferencia CONOCIDA (cambios_fase, entregado = hoy + 4; prueba_nr_p6.py): [('1001', 'cambios_fase', '1650', '1654'), ('1002', 'cambios_fase', '1592', '1596')]
+  23 de 24 brazos iguales en todas las columnas (y P6 IPPO con la diferencia conocida)
 OK    veredicto.py --probar (cwd plan3/): codigo 0; veredicto.py --probar: todas las pruebas pasan
 
-RESULTADO: 1 FALLAS
+RESULTADO: PASA

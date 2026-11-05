@@ -4,6 +4,9 @@ prueba_atomica.py - Prueba de la tarea 0.11: escritura atomica de comun.archivo_
   regenera el .add.xml al empezar cada semilla mientras los sumo de las otras lo leen) terminan sin error, dan los
   mismos numeros, no dejan temporales y el .add.xml queda igual byte a byte al que escribe el comun.py entregado
   (223f908). En P1 (5 semillas cada una) y en P6 (2 semillas).
+  Y sin sumo: si el reemplazo no llega a hacerse (Windows niega el acceso en todos los intentos), escribir_atomico
+  borra su temporal y el destino queda como estaba (comun y barrer_fino); comun.leer_cfg quita los espacios de las
+  rutas ('a.add.xml, b.add.xml') y con todos los .sumocfg del repositorio da la misma lista que antes.
 Corre en una copia (tmp_ref/atomica/). Semillas de humo. Uso (cwd = plan3/): python pruebas/ref/prueba_atomica.py
 Salida: pruebas/ref/salidas/prueba_atomica.txt
 """
@@ -70,8 +73,61 @@ def simultaneas(esc, brazo, semillas):
             inf(t[-2000:])
 
 
+def sin_reemplazo():
+    """os.replace niega el acceso siempre: escribir_atomico agota sus reintentos, borra su temporal y el destino
+    queda igual (comun.escribir_atomico y barrer_fino.escribir_atomico)."""
+    import comun
+    import barrer_fino as bfn
+    destino = os.path.join(CARPETA, "destino_atomico.txt")
+    with open(destino, "w", encoding="utf-8") as f:
+        f.write("original")
+    real = os.replace
+
+    def niega(a, b):
+        raise PermissionError(13, "acceso denegado (prueba)")
+    resultados = []
+    for nombre, escribir in (("comun.escribir_atomico", lambda: comun.escribir_atomico(destino, "nuevo", 2, 0.01)),
+                             ("barrer_fino.escribir_atomico", lambda: bfn.escribir_atomico(destino, "nuevo"))):
+        os.replace = niega
+        try:
+            escribir()
+            fallo = False
+        except PermissionError:
+            fallo = True
+        finally:
+            os.replace = real
+        temporales = glob.glob(destino + ".*.tmp")
+        igual = open(destino, encoding="utf-8").read() == "original"
+        resultados.append((nombre, fallo, temporales, igual))
+    inf.chequeo(all(f and not tm and ig for _, f, tm, ig in resultados),
+                f"sin reemplazo: (funcion, levanta PermissionError, temporales que quedan, destino intacto) "
+                f"{resultados}")
+
+
+def leer_cfg_con_espacios():
+    import comun
+    import xml.etree.ElementTree as ET
+    cfg = os.path.join(CARPETA, "con_espacios.sumocfg")
+    with open(cfg, "w", encoding="utf-8") as f:
+        f.write('<configuration><input><net-file value="corredor.net.xml"/>'
+                '<additional-files value="det.add.xml, corredor.add.xml"/></input></configuration>')
+    _, adic = comun.leer_cfg(cfg)
+    cambian = []
+    todos = sorted(glob.glob(os.path.join(up.RAIZ, "*.sumocfg")) + glob.glob(os.path.join(up.PLAN3, "*.sumocfg")))
+    for c in todos:
+        nodo = ET.parse(c).getroot().find("input/additional-files")
+        antes = nodo.get("value").split(",") if nodo is not None else []
+        if comun.leer_cfg(c)[1] != antes:
+            cambian.append(os.path.basename(c))
+    inf.chequeo(adic == ["det.add.xml", "corredor.add.xml"] and not cambian,
+                f"leer_cfg: 'det.add.xml, corredor.add.xml' -> {adic}; con los {len(todos)} .sumocfg de la raiz y de "
+                f"plan3 la lista es la de antes (distintas: {cambian})")
+
+
 def main():
     inf(f"Prueba de 0.11: escritura atomica (copia en {CARPETA})")
+    sin_reemplazo()
+    leer_cfg_con_espacios()
     simultaneas("corredor", "actuado", f"{up.HUMO[0]}-{up.HUMO[4]}")
     simultaneas("corredor", "trivial", f"{up.HUMO[0]}-{up.HUMO[4]}")
     simultaneas("malla3_alta", "actuado", f"{up.HUMO[0]}-{up.HUMO[1]}")

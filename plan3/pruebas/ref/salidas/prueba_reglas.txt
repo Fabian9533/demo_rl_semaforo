@@ -1,4 +1,4 @@
-Pruebas de 0.10: regla simple y Max-Pressure por el gancho decidir (copia en C:\Users\GAMER\Documents\demo_rl_semaforo\w3_ref\plan3\tmp_ref\reglas)
+Pruebas de 0.10: regla simple, reactiva y Max-Pressure por el gancho decidir (copia en C:\Users\GAMER\Documents\demo_rl_semaforo\w3_ref\plan3\tmp_ref\reglas)
 OK    1 corredor s424301: regla_uinfg60 tripinfo ('479ce631d3e55d1f', 1810) = ciclo minimo ('479ce631d3e55d1f', 1810); retraso total 97.28 = 97.28, timeLoss 95.76 = 95.76
 OK    1 malla3 s424301: regla_uinfg60 tripinfo ('070e057a692adf46', 4350) = ciclo minimo ('070e057a692adf46', 4350); retraso total 21.34 = 21.34, timeLoss 20.87 = 20.87
 OK    2 corredor regla_u2g30: 1179 decisiones (634 libres, 0 forzadas por el verde maximo, 542 cambios), fuera de la mascara: 0; retraso total 40.63
@@ -15,5 +15,14 @@ OK    3 malla3_alta: red vacia (0 vehiculos): presion 0 en las 36 (semaforo, fas
 OK    3 malla3_alta: a los 900 s (319 vehiculos) la presion no es 0 en 32 de 36
 OK    4 evaluar.py --regla regla_u2g30: codigo 0, filas [('regla_u2g30', '424301', '40.63'), ('regla_u2g30', '424302', '39.35')]
 OK    4 una regla desconocida se rechaza (codigo 1)
+OK    5 nombres: ['reactiva_d15', 'reactiva_d25', 'reactiva_d35', 'reactiva_d50', 'reactiva_d70'] validos; rechazados ['reactiva_d', 'reactiva_dx', 'reactiva25', 'reactiva_d25_c60']; familias ['regla', 'reactiva', 'mp']
+OK    5 reglas.py corredor --familia reactiva (humo): codigo 0; 5 reglas, 3 finalistas, reactiva.json gana reactiva_d35 23.16 (424301-424302), marca de prueba ['--semillas 424301', '--semillas-final 424301-424302']
+OK    5 evaluar.py --regla reactiva_d25: codigo 0, filas [('reactiva_d25', '424301', '23.59')]
+OK    5 corredor reactiva_d25: 1248 decisiones (856 libres: alarga 473, cambia 383), fuera de la mascara 0, con la mascara libre alarga si y solo si hay un vehiculo a <= 25 m en un carril con verde: True; retraso total 23.59, cambios de fase 387
+OK    5 corredor reactiva_d25 = logica del prototipo por el mismo bucle: tripinfo ('b8aa84e99d7d77b8', 1810) = ('b8aa84e99d7d77b8', 1810); retraso total 23.59 = 23.59
+OK    5 malla3_alta reactiva_d50: 6790 decisiones (5468 libres: alarga 4645, cambia 823), fuera de la mascara 0, con la mascara libre alarga si y solo si hay un vehiculo a <= 50 m en un carril con verde: True; retraso total 119.81, cambios de fase 1066
+OK    5 malla3_alta reactiva_d50 = logica del prototipo por el mismo bucle: tripinfo ('7b88fa21395ece6b', 8700) = ('7b88fa21395ece6b', 8700); retraso total 119.81 = 119.81
+OK    6 API de evaluar.py: [('brazo_referencia(corredor, fijo, adicional)', 'rechazada'), ('brazo_referencia(corredor, actuado, adicional)', 'rechazada'), ('brazo_referencia(corredor, trivial, adicional)', 'rechazada'), ('brazo_referencia(cruce, franja)', 'rechazada'), ('brazo_referencia(cruce2, actuado_aj)', 'rechazada'), ('brazo_programa(cruce, ...)', 'rechazada'), ('brazo_regla(cruce2, mp)', 'rechazada')]; brazo_referencia(corredor, franja, adicional) sigue valiendo
+OK    6 linea de comandos sin --semillas (se usaria 1001-1030): [('--brazo franja', 2, True), ('--brazo actuado_aj', 2, True), ('--brazo fijo --programa x.add.xml --nombre fino', 2, True), ('--regla mp', 2, True)]
 
 RESULTADO: PASA

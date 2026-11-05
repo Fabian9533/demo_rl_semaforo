@@ -1,4 +1,7 @@
 Pruebas de 0.9: actuado ajustado (copia en C:\Users\GAMER\Documents\demo_rl_semaforo\w3_ref\plan3\tmp_ref\actuado; semilla 424301)
+OK    5 reinstalar: igual al congelado -> no lo toca (misma fecha): True; cambiado a mano -> reescrito con el sha256 congelado: True; borrado -> recreado: True
+OK    5 reinstalar con un sha256 congelado que el texto de hoy no da: error (corredor_actuado_aj.add.xml: el programa de hoy no coincide con el sha256 de C:\Users\GAME...), el instalado queda igual: True, temporales []
+OK    5 p3_preparar corredor (sin --piezas): codigo 0, piezas ['actuado', 'trivial']; el actuado ajustado no se toca
 OK    1 P1: defecto = actuado entregado: programa igual True; tripinfo ('f6488be90c3d9ade', 1810) = ('f6488be90c3d9ade', 1810); retraso total 21.49 = 21.49
 OK    1 P2: defecto = actuado entregado: programa igual True; tripinfo ('f6dda614078ca34b', 3620) = ('f6dda614078ca34b', 3620); retraso total 437.26 = 437.26
 OK    1 P3: defecto = actuado entregado: programa igual True; tripinfo ('71d4cab49d833b0e', 2152) = ('71d4cab49d833b0e', 2152); retraso total 21.46 = 21.46

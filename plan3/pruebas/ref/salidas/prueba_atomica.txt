@@ -1,4 +1,6 @@
 Prueba de 0.11: escritura atomica (copia en C:\Users\GAMER\Documents\demo_rl_semaforo\w3_ref\plan3\tmp_ref\atomica)
+OK    sin reemplazo: (funcion, levanta PermissionError, temporales que quedan, destino intacto) [('comun.escribir_atomico', True, [], True), ('barrer_fino.escribir_atomico', True, [], True)]
+OK    leer_cfg: 'det.add.xml, corredor.add.xml' -> ['det.add.xml', 'corredor.add.xml']; con los 40 .sumocfg de la raiz y de plan3 la lista es la de antes (distintas: [])
 OK    corredor actuado: 3 evaluaciones simultaneas (424301-424305): codigos [0, 0, 0], CSV iguales True, temporales [], corredor_actuado.add.xml igual al del comun.py entregado: True
 OK    corredor trivial: 3 evaluaciones simultaneas (424301-424305): codigos [0, 0, 0], CSV iguales True, temporales [], corredor_trivial.add.xml igual al del comun.py entregado: True
 OK    malla3_alta actuado: 3 evaluaciones simultaneas (424301-424302): codigos [0, 0, 0], CSV iguales True, temporales [], malla3_alta_actuado.add.xml igual al del comun.py entregado: True

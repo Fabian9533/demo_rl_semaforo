@@ -182,27 +182,36 @@ def escribir_atomico(ruta, texto, intentos=10, espera=2.0):
     """plan3 (0.11): escribe ruta en un temporal con el pid y lo reemplaza con reintentos (como
     barrer_fijo.reemplazar). Varias evaluaciones del mismo escenario regeneran el mismo .add.xml: asi ninguna
     lee un archivo a medio escribir y dos procesos no se pisan el temporal. En Windows os.replace falla si en
-    ese instante un sumo tiene abierto el destino. El contenido es el mismo de antes, byte a byte."""
+    ese instante un sumo tiene abierto el destino. El contenido es el mismo de antes, byte a byte. Si no llega
+    a reemplazar (se agotan los reintentos u otro error), borra su temporal; el destino queda como estaba."""
     import time
     tmp = f"{ruta}.{os.getpid()}.tmp"
-    with open(tmp, "w") as f:
-        f.write(texto)
-    for k in range(intentos):
-        try:
-            os.replace(tmp, ruta)
-            return
-        except PermissionError:
-            if k == intentos - 1:
-                raise
-            time.sleep(espera)
+    try:
+        with open(tmp, "w") as f:
+            f.write(texto)
+        for k in range(intentos):
+            try:
+                os.replace(tmp, ruta)
+                return
+            except PermissionError:
+                if k == intentos - 1:
+                    raise
+                time.sleep(espera)
+    finally:
+        if os.path.exists(tmp):
+            try:
+                os.remove(tmp)
+            except OSError:
+                pass
 
 
 def leer_cfg(cfg):
-    """Devuelve (net-file, lista de additional-files) del .sumocfg."""
+    """Devuelve (net-file, lista de additional-files) del .sumocfg. plan3: sin espacios alrededor de cada ruta
+    ('a.add.xml, b.add.xml' es valido en SUMO); con los .sumocfg de siempre la lista es la misma."""
     raiz = ET.parse(cfg).getroot()
     net = raiz.find("input/net-file").get("value")
     add = raiz.find("input/additional-files")
-    adicionales = add.get("value").split(",") if add is not None else []
+    adicionales = [a.strip() for a in add.get("value").split(",") if a.strip()] if add is not None else []
     return net, adicionales
 
 
