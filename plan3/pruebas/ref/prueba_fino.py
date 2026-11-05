@@ -101,6 +101,11 @@ def fragil_con_datos():
             c.conocidas[(clave, s)] = {m: v for m in bfn.METRICAS} | {
                 **{f"total_p{k}": v for k in (1, 2)}, **{f"noins_p{k}": 0 for k in (1, 2)}}
     pls = [c.plan(20, 10, [0, 15]) | {"clave": k} for k in ("a", "b", "x")]
+    os.makedirs(c.tmp, exist_ok=True)              # los resultados inventados valen para el programa de esos planes
+    ruta = os.path.join(c.tmp, "inventado.add.xml")
+    c.escribir_plan(ruta, pls[0])
+    for clave, s in list(c.conocidas):
+        c.programa[(clave, s)] = up.sha256(ruta)[:12]
     filas, planes = c.escribir_etapa("desempate", pls, c.semillas["desempate"], "desempate")
     fila, pl, traza = bfn.regla_fragil(c, filas, planes, "fragil")
     inf.chequeo(traza["fragil"] and traza["semillas_trabadas_ganador"] == 1 and pl["clave"] == "b",

@@ -47,8 +47,10 @@ Trozos y reanudacion: --trozo k/n corre solo los planes de indice = k (mod n) de
 barridos/<esc>/trozos/<etapa>_t<k>de<n>.csv.
 La etapa sin --trozo junta lo ya corrido (trozos, etapas anteriores y la cache tmp_fino/<esc>/*.jsonl, que se
 escribe corrida a corrida y sirve para reanudar), corre lo que falte y escribe la salida. Los resultados se guardan
-por (programa, semilla) con la huella del escenario (sha256 de cfg, red, rutas y adicionales): el CSV no depende de
---procesos ni de los trozos. Todo CSV, JSON y .add.xml se escribe en un temporal con el pid y se reemplaza.
+por (plan, semilla) con la huella del escenario (sha256 de cfg, red, rutas, adicionales, cortes y del codigo que corre
+y lee) y el sha256 del programa con que se corrieron: un resultado solo se reutiliza si los dos coinciden, asi un
+arreglo del codigo no hereda numeros viejos. El CSV no depende de --procesos ni de los trozos. Todo CSV, JSON y
+.add.xml se escribe en un temporal con el pid y se reemplaza.
 
 Salidas en barridos/<esc>/: <etapa>.csv (una fila por plan, ordenada por retraso total), <etapa>_semillas.csv (una
 fila por plan y semilla), fijo_grueso10.json, fijo_fino.json y fijo_mult5.json (el ganador, la traza de la regla y
@@ -176,8 +178,9 @@ def llegadas_aleatorias(cfg):
 
 
 def huella_escenario(cfg, extras=(), cortes=()):
-    """sha256 (12 hex) de los archivos que definen la simulacion de un barrido y de los cortes de periodo. Una
-    corrida guardada solo se reutiliza con la misma huella."""
+    """sha256 (12 hex) de los archivos que definen la simulacion de un barrido, de los cortes de periodo y del codigo
+    que corre y lee cada corrida (leer_periodos y correr_periodos). Una corrida guardada solo se reutiliza con la
+    misma huella (y con el mismo programa: Celda.asegurar)."""
     net, rutas, adic = rutas_cfg(cfg)
     h = hashlib.sha256()
     for ruta in [cfg, net] + rutas + adic + [e for e in extras if e not in adic]:
@@ -185,6 +188,8 @@ def huella_escenario(cfg, extras=(), cortes=()):
         with open(ruta, "rb") as f:
             h.update(f.read())
     h.update(f"fin={bf.FIN_SIM};cortes={list(cortes)}".encode())
+    import inspect
+    h.update((inspect.getsource(leer_periodos) + inspect.getsource(correr_periodos)).encode())
     return h.hexdigest()[:12]
 
 
@@ -281,11 +286,13 @@ class Celda:
         self.lock = threading.Lock()
         self.contador = itertools.count()
         self.conocidas = {}
+        self.programa = {}          # (clave, semilla) -> sha256 (12 hex) del programa con que se corrio
         self.cargar()
 
     # ---------------- resultados guardados
     def campos_corrida(self):
-        return (["clave", "semilla", "huella"] + list(METRICAS) + list(EXTRA_CORRIDA) + ["fin", "total_periodos"]
+        return (["clave", "semilla", "huella", "programa"] + list(METRICAS) + list(EXTRA_CORRIDA)
+                + ["fin", "total_periodos"]
                 + [f"{c}_p{k}" for k in range(1, self.k + 1) for c in ("total", "n", "noins")])
 
     def cargar(self):
@@ -300,13 +307,14 @@ class Celda:
         for ruta in rutas:
             with open(ruta, newline="", encoding="utf-8") as f:
                 for fila in csv.DictReader(f):
-                    if fila.get("huella") != self.huella:
+                    if fila.get("huella") != self.huella or not fila.get("programa"):
                         continue
                     r = {}
-                    for c in self.campos_corrida()[3:]:
+                    for c in self.campos_corrida()[4:]:
                         v = fila[c]
                         r[c] = int(v) if c in enteros else float(v)
                     self.conocidas[(fila["clave"], int(fila["semilla"]))] = r
+                    self.programa[(fila["clave"], int(fila["semilla"]))] = fila["programa"]
         for pre in self.prefijos:
             for ruta in sorted(glob.glob(os.path.join(self.tmp, f"{pre}*.jsonl"))):
                 with open(ruta, encoding="utf-8") as f:
@@ -315,11 +323,13 @@ class Celda:
                             d = json.loads(linea)
                         except ValueError:
                             continue
-                        if d.get("h") == self.huella and "r" in d:
+                        if d.get("h") == self.huella and "r" in d and d.get("p"):
                             self.conocidas[(d["clave"], int(d["s"]))] = d["r"]
+                            self.programa[(d["clave"], int(d["s"]))] = d["p"]
 
     def fila_corrida(self, clave, semilla):
-        return {"clave": clave, "semilla": semilla, "huella": self.huella, **self.conocidas[(clave, semilla)]}
+        return {"clave": clave, "semilla": semilla, "huella": self.huella,
+                "programa": self.programa[(clave, semilla)], **self.conocidas[(clave, semilla)]}
 
     # ---------------- planes
     def plan(self, verde_av, verde_tr, offsets, esquema=""):
@@ -349,18 +359,12 @@ class Celda:
     # ---------------- corridas
     def asegurar(self, planes, semillas, nombre_cache, extra_de=None):
         """Corre las (plan, semilla) que faltan, con --procesos hilos; cada resultado va a la cache al terminar.
+        Un resultado guardado vale solo si se corrio con el mismo programa (sha256 del .add.xml del plan): un arreglo
+        del codigo que cambie un programa sin cambiar su clave no reutiliza nada viejo.
         extra_de(plan, ruta) -> argumentos de sumo; por defecto el programa reemplaza a la plantilla."""
-        faltan, vistos = [], set()
-        for pl in planes:
-            for s in semillas:
-                if (pl["clave"], s) not in self.conocidas and (pl["clave"], s) not in vistos:
-                    vistos.add((pl["clave"], s))
-                    faltan.append((pl, s))
-        if not faltan:
-            return 0
         os.makedirs(self.tmp, exist_ok=True)
-        rutas = {}
-        for pl, _ in faltan:
+        rutas, huellas = {}, {}
+        for pl in planes:
             if pl["clave"] not in rutas:         # nombre corto con el pid: otro proceso puede correr el mismo plan
                 ruta = os.path.join(self.tmp, f"p{os.getpid()}_{next(self.contador)}.add.xml")
                 if "escribir" in pl:
@@ -368,6 +372,17 @@ class Celda:
                 else:
                     self.escribir_plan(ruta, pl)
                 rutas[pl["clave"]] = ruta
+                huellas[pl["clave"]] = sha256_archivo(ruta)[:12]
+        faltan, vistos = [], set()
+        for pl in planes:
+            for s in semillas:
+                clave = (pl["clave"], s)
+                if self.programa.get(clave) != huellas[pl["clave"]] and clave not in vistos:
+                    vistos.add(clave)
+                    faltan.append((pl, s))
+        if not faltan:
+            self.borrar(rutas)
+            return 0
         cache = os.path.join(self.tmp, f"{nombre_cache}.jsonl")
         extra_de = extra_de or (lambda pl, ruta: self.p.extra(ruta))
 
@@ -376,10 +391,12 @@ class Celda:
                 n = next(self.contador)
             ti = os.path.join(self.tmp, f"ti_{os.getpid()}_{n}.xml")
             r = correr_periodos(self.cfg, extra_de(pl, rutas[pl["clave"]]), s, ti, self.cortes)
+            p = huellas[pl["clave"]]
             with self.lock:
                 self.conocidas[(pl["clave"], s)] = r
+                self.programa[(pl["clave"], s)] = p
                 with open(cache, "a", encoding="utf-8") as f:
-                    f.write(json.dumps({"h": self.huella, "clave": pl["clave"], "s": s, "r": r}) + "\n")
+                    f.write(json.dumps({"h": self.huella, "p": p, "clave": pl["clave"], "s": s, "r": r}) + "\n")
             return r
 
         t0 = time.time()
@@ -389,13 +406,17 @@ class Celda:
                 r = fut.result()
                 print(f"  {pl.get('nombre', pl['clave']):40s} s{s}: total={r['retraso_total_prom']:7.2f} "
                       f"timeLoss={r['timeloss_prom']:7.2f} no_insertados={r['no_insertados']}", flush=True)
+        self.borrar(rutas)
+        print(f"  {len(faltan)} corridas en {time.time() - t0:.0f} s", flush=True)
+        return len(faltan)
+
+    @staticmethod
+    def borrar(rutas):
         for ruta in rutas.values():
             try:
                 os.remove(ruta)
             except OSError:
                 pass
-        print(f"  {len(faltan)} corridas en {time.time() - t0:.0f} s", flush=True)
-        return len(faltan)
 
     # ---------------- filas
     def metricas(self, clave, semillas):
