@@ -4,9 +4,11 @@ prueba_actuado.py - Pruebas de la tarea 0.9 (actuado.py, modo actuado_aj de rl_c
      programID) y el mismo tripinfo, sumo directo frente al brazo actuado de evaluar (TraCI), en P1-P6;
   2. cada parametro mueve algun numero (tripinfo distinto del de la variante que solo difiere en ese parametro) en
      P2 o P6;
-  3. el log de SUMO no trae avisos con cada tipo de variante (defecto, <param>, delay_based, coordinada) en P1-P6;
+  3. el log de SUMO no trae avisos con cada tipo de variante (defecto, <param>, delay_based y las dos coordinadas) en
+     P1-P6;
   4. sumo directo = TraCI (evaluar.brazo_referencia(esc, "actuado_aj", archivo)) tambien con <param>, con
-     delay_based y con la variante coordinada, en P1, P3 y P6.
+     delay_based y con las dos variantes coordinadas (solo earliestEnd en la avenida, y earliestEnd = latestEnd), en
+     P1, P3 y P6.
 La variante coordinada usa un fijo fino de prueba (el fijo entregado, escrito como fijo_fino.json en tmp_ref).
 Semillas de humo. Corre en una copia de los escenarios (tmp_ref/actuado/). Uso (cwd = plan3/):
   python pruebas/ref/prueba_actuado.py        Salida: pruebas/ref/salidas/prueba_actuado.txt
@@ -85,7 +87,8 @@ def variantes(c):
                                        minTimeLoss=1, coordinado=False),
               "delay_based minTimeLoss 3": dict(maxdur_av=60, maxdur_tr=60, tipo="delay_based", detectorRange=100,
                                                 minTimeLoss=3, coordinado=False),
-              "coordinada": actuado.coordinada(c, base)}
+              "coordinada": actuado.coordinada(c, base),
+              "coordinada fin fijo": actuado.coordinada(c, base, fin_fijo=True)}
     return salida
 
 
@@ -94,6 +97,7 @@ def variantes(c):
 # "minTimeloss" y no "minTimeLoss")
 PAREJAS = {"max-gap 1": "defecto", "detector-gap 4": "defecto", "jam-threshold 30": "defecto",
            "maxDur avenida 30": "defecto", "maxDur transversal 20": "defecto", "coordinada": "defecto",
+           "coordinada fin fijo": "coordinada",
            "delay_based 50 m": "delay_based 100 m", "delay_based minTimeLoss 3": "delay_based 100 m"}
 
 
@@ -118,7 +122,8 @@ def mueve(caso, esc):
 def avisos(caso, esc):
     c = celda(esc)
     vs = {"defecto": dict(actuado.DEFECTO), **variantes(c)}
-    vs = {k: vs[k] for k in ("defecto", "max-gap 1", "jam-threshold 30", "delay_based 50 m", "coordinada")}
+    vs = {k: vs[k] for k in ("defecto", "max-gap 1", "jam-threshold 30", "delay_based 50 m", "coordinada",
+                             "coordinada fin fijo")}
 
     def una(item):
         nombre, v = item
@@ -136,7 +141,7 @@ def avisos(caso, esc):
 def directo_traci(caso, esc):
     c = celda(esc)
     vs = variantes(c)
-    for nombre in ("max-gap 1", "delay_based minTimeLoss 3", "coordinada"):
+    for nombre in ("max-gap 1", "delay_based minTimeLoss 3", "coordinada", "coordinada fin fijo"):
         ruta = archivo(c, vs[nombre], "t_" + nombre.replace(" ", "_"))
         a = up.sumo_directo(c.cfg, encima(c, ruta), S, f"ti_d_{esc}.xml")
         _, _, _, correr = evaluar.brazo_referencia(esc, "actuado_aj", ruta)

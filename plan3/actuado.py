@@ -6,7 +6,7 @@ Uso (cwd = plan3/; con llegadas aleatorias, a traves de ../con_escenarios.py):
   python actuado.py <esc> --instalar     (reescribe <esc>_actuado_aj.add.xml desde barridos/<esc>/actuado_aj.json;
                                           lo usa p3_preparar.py)
 
-El actuado de SUMO 1.25 con <param>, la variante delay_based y una variante coordinada con el ciclo y los desfases
+El actuado de SUMO 1.25 con <param>, la variante delay_based y dos variantes coordinadas con el ciclo y los desfases
 del fijo fino. Descenso por coordenadas en cadena (un paso por coordenada; cada paso parte del mejor de los
 anteriores, por la media del retraso total en 2001-2003; en un empate se queda el punto de partida), sin TraCI: sumo
 directo con el programa cargado encima de los adicionales del .sumocfg (queda activo por ser el ultimo; la prueba
@@ -16,10 +16,14 @@ sumo directo = TraCI esta en pruebas/ref). Rejillas fijas, con el defecto de SUM
   paso 3  jam-threshold              -1*, 10, 30 s
   paso 4  maxDur del verde de avenida      30, 45, 60* s
   paso 5  maxDur del verde transversal     20, 30, 60* s
-  paso 6  familia: delay_based (detectorRange 50, 100, 200 m x minTimeLoss 1*, 3 s, con los maxDur elegidos) y la
-          variante coordinada del mejor actuado: coordinated=true, cycleTime y desfases del fijo fino, las fases de
-          su plantilla con sus duraciones y el verde de avenida con earliestEnd en su fin del plan fijo (como la
-          propuso plan3/referencias/informe.md 4; con latestEnd tambien en la transversal, P2 se trababa: 835 s/veh)
+  paso 6  familia: delay_based (detectorRange 50, 100, 200 m x minTimeLoss 1*, 3 s, con los maxDur elegidos) y dos
+          variantes coordinadas del mejor actuado (prerregistro 5): coordinated=true, cycleTime y desfases del fijo
+          fino, las fases de su plantilla con sus duraciones y el verde de avenida con earliestEnd en su fin del plan
+          fijo (como la propuso plan3/referencias/informe.md 4), y "fin fijo": latestEnd = earliestEnd en la
+          avenida y latestEnd en la transversal, cada uno en su fin del plan fijo (la avenida termina siempre donde
+          el plan fijo; la transversal puede cortar antes, nunca despues). Solo latestEnd en la transversal (sin el
+          de la avenida) trababa P2 (835 s/veh); solo latestEnd = earliestEnd en la avenida (sin el de la
+          transversal) quedaba peor que el fijo en P1, P2, P3 y P6: ninguna de las dos se usa
   final   las 3 mejores variantes de los 6 pasos con 2001-2010 (con llegadas aleatorias, las 10 mejores con
           2001-2030); gana la menor media
 minDur 10 s (5 en giros) y la fase y la duracion inicial del programa "0" de la red, como comun.archivo_actuado:
@@ -80,6 +84,8 @@ def clave(v):
     if v["coordinado"]:
         fino = json.dumps([v["ciclo"], v["offsets"], v["verde"], v["verde_transversal"]])
         s += "_coord" + hashlib.sha256(fino.encode()).hexdigest()[:8]
+        if v.get("fin_fijo"):                 # latestEnd = earliestEnd en la avenida y latestEnd en la transversal
+            s += "_finfijo"
     return s
 
 
@@ -137,8 +143,13 @@ def texto_actuado(c, v, comentario=None):
                 extra = ""
                 if v["coordinado"]:
                     dur = min(max(dur, minimo), maximo)
+                    fin = (inicio + fases[k][0]) % v["ciclo"]          # fin de ese verde en el plan fijo
                     if k == fase_av:           # la avenida no termina antes de su fin en el plan fijo
-                        extra = f' earliestEnd="{(inicio + fases[k][0]) % v["ciclo"]}"'
+                        extra = f' earliestEnd="{fin}"'
+                        if v.get("fin_fijo"):  # ni despues: termina en su fin del plan fijo
+                            extra += f' latestEnd="{fin}"'
+                    elif v.get("fin_fijo"):    # y la transversal no pasa del suyo (puede cortar antes)
+                        extra = f' latestEnd="{fin}"'
                 lineas.append(f'        <phase duration="{dur}" minDur="{minimo}" maxDur="{maximo}" '
                               f'state="{estado}"{extra}/>')
             else:
@@ -169,8 +180,9 @@ def plan_variante(c, v):
     return {"clave": clave(v), "escribir": escribir, "var": v}
 
 
-def coordinada(c, v):
-    """La variante coordinada de v con el fijo fino de la celda."""
+def coordinada(c, v, fin_fijo=False):
+    """La variante coordinada de v con el fijo fino de la celda (fin_fijo: ademas latestEnd = earliestEnd en el verde
+    de la avenida y latestEnd en el transversal, cada uno en su fin del plan fijo)."""
     ruta = os.path.join(c.carpeta, "fijo_fino.json")
     if not os.path.exists(ruta):
         raise SystemExit(f"Falta {ruta}: la variante coordinada usa el fijo fino (barrer_fino --etapa fragil)")
@@ -178,8 +190,11 @@ def coordinada(c, v):
         fino = json.load(f)
     if fino["ids"] != c.p.ids:
         raise SystemExit(f"{ruta}: semaforos en otro orden que la plantilla")
-    return dict(v, coordinado=True, ciclo=fino["ciclo"], offsets=fino["offsets"], verde=fino["verde"],
-                verde_transversal=fino["verde_transversal"], fino_sha256=fino["sha256"])
+    salida = dict(v, coordinado=True, ciclo=fino["ciclo"], offsets=fino["offsets"], verde=fino["verde"],
+                  verde_transversal=fino["verde_transversal"], fino_sha256=fino["sha256"])
+    if fin_fijo:
+        salida["fin_fijo"] = True
+    return salida
 
 
 def fila_variante(c, pl, semillas, etapa):
@@ -187,14 +202,14 @@ def fila_variante(c, pl, semillas, etapa):
     fila = {"etapa": etapa, "clave": pl["clave"], "tipo": v["tipo"],
             **{k: v.get(k, "") for k in PARAMS_ACTUADO + ("maxdur_av", "maxdur_tr")},
             "detectorRange": v.get("detectorRange", ""), "minTimeLoss": v.get("minTimeLoss", ""),
-            "coordinado": int(v["coordinado"])}
+            "coordinado": int(v["coordinado"]), "fin_fijo": int(bool(v.get("fin_fijo")))}
     fila.update(c.metricas(pl["clave"], semillas))
     return fila
 
 
 def campos_variante(c):
     return (["etapa", "clave", "tipo"] + list(PARAMS_ACTUADO) + ["maxdur_av", "maxdur_tr", "detectorRange",
-                                                                "minTimeLoss", "coordinado"]
+                                                                "minTimeLoss", "coordinado", "fin_fijo"]
             + c.campos_metricas())
 
 
@@ -224,7 +239,7 @@ def paso(c, k):
         base = {kk: actual[kk] for kk in ("maxdur_av", "maxdur_tr")}
         variantes = [actual] + [dict(base, tipo="delay_based", detectorRange=r, minTimeLoss=m, coordinado=False)
                                 for r, m in DELAY]
-        variantes.append(coordinada(c, actual))
+        variantes += [coordinada(c, actual), coordinada(c, actual, fin_fijo=True)]   # prerregistro 5: las dos
     planes = bfn.unicos([plan_variante(c, v) for v in variantes])
     semillas = c.semillas["barrido"]
     c.asegurar(planes, semillas, f"actuado_paso{k}", c.encima())
