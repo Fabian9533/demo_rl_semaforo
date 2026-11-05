@@ -1,0 +1,13 @@
+PASA  1a. BLOQUES_CIEGOS = examen_regular + examen_h1 + examen_aleatorio + final del prerregistro (570 semillas)
+PASA  1b. USOS_CIEGOS = protecciones.USOS_CIEGOS
+PASA  2a. sin P3_USO se niegan los bordes de cada bloque: [7001, 7100, 8001, 8030, 8120, 10001, 10100, 11001, 11030, 12001, 12100, 13001, 13120]
+PASA  2b. con un uso que no es ciego (entrenamiento, ajuste, validacion, humo, sin_semillas, vacio) se niega 8001
+PASA  2c. en un trabajo ciego (examen_regular, examen_h1, examen_aleatorio, final) pasa
+PASA  2d. pasan las de humo, validacion, promocion, ajuste y puente y los vecinos de cada bloque: [7, 999, 1001, 1030, 2001, 2030, 7000, 7999, 8000, 8121, 8999, 9999, 10000, 10101, 11000, 11031, 12000, 12101, 13000, 13121, 15001, 15024, 424301, 424360]
+PASA  2e. ninguna semilla de entrenamiento (base 7, 42, 2042, 4042, 14042, 16042 + episodio 1-600) cae en un bloque
+PASA  2f. un comando sin --seed pasa
+PASA  3. iniciar_sumo con --seed 8001 y sin P3_USO sale con el mensaje de la guarda (codigo 1) y no llega a SUMO
+PASA  4. cola.py lanza cada trabajo con P3_USO = su uso
+PASA  5. barrer_fijo.correr_sumo con --seed 8001 y sin P3_USO sale con el mensaje de la guarda (codigo 1)
+
+11 de 11 pasan

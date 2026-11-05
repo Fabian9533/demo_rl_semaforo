@@ -108,6 +108,7 @@ def correr_sumo(cfg, extra, seed, tripinfo, intentos=5):
            "--tripinfo-output.write-unfinished", "true", "--device.emissions.probability", "1",
            "--no-step-log", "true", "--no-warnings", "true", "--end", str(FIN_SIM)] + \
         comun.args_estadisticas(tripinfo) + extra
+    comun.revisar_semilla_ciega(cmd)            # plan3: semillas a ciegas solo desde la cola
     for k in range(intentos):
         try:
             subprocess.run(cmd, check=True, **SILENCIO)
