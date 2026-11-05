@@ -38,6 +38,8 @@ SCRIPTS_RAIZ = {"../rl_ippo.py", "../evaluar.py", "../barrer_fijo.py"}
 PROHIBIDO = re.compile(r"\bplan2\b|\bTESIS\b|[A-Za-z]:[\\/]|\\|[&|<>;`$]|(^|\s)cd(\s|$)|--instalar", re.IGNORECASE)
 OPCION_SEMILLAS = re.compile(r"^--[a-z-]*(semilla|seed)[a-z-]*$")
 CON_REGLAS = ("--semillas", "--seed", "--val-seeds", "--instalar", "--salida", "--etiqueta", "--csv", "--reanudar")
+AJUSTE = ("barrer_fino.py", "franja.py", "actuado.py", "reglas.py")       # barridos de las referencias
+OPCIONES_PRUEBA = ("--avenida", "--transversal", "--limite")
 # Lo que no puede tener cambios sin commit al lanzar: el codigo, el prerregistro y los escenarios (rutas y
 # configuraciones; los .add.xml no, porque de noche se escriben los del actuado, el ciclo minimo y las referencias).
 SIN_CAMBIOS = ("*.py", "plan3/PRERREGISTRO.md", "plan3/*.rou.xml", "plan3/*.sumocfg")
@@ -199,6 +201,12 @@ def revisar_comando(t, existe=os.path.exists):
             malos.append("rl_ippo train sin --val-seeds")
         if opcion(args, "--csv") is not None:
             malos.append("--csv no se usa: el nombre lo da la etiqueta")
+    if prog in AJUSTE and uso != "humo":
+        # las semillas y la rejilla de los barridos son las de la regla del prerregistro §5, escritas en el script;
+        # estas opciones solo sirven para probar (informe_ref §6)
+        de_prueba = [a for a in args if a in OPCIONES_PRUEBA or a.startswith("--semilla")]
+        if de_prueba:
+            malos.append(f"opciones de prueba en un barrido de verdad: {de_prueba}")
     if prog == "../evaluar.py" and uso in USOS_CIEGOS:
         malos.append("las tandas decisivas se evaluan con evaluar3.py (a ciegas)")
     salida = opcion(args, "--salida")

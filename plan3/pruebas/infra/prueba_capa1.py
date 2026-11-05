@@ -91,6 +91,16 @@ CASOS = [
     ("--inst abreviada", "ajuste", "python ../barrer_fijo.py corredor --semillas 2001-2003 --inst", False),
     ("--et abreviada", "entrenamiento", f"python ../rl_ippo.py train --escenario corredor --seed 42 "
      f"--val-seeds {VAL16} --et p3v2reg", False),
+    ("barrido fino de verdad", "ajuste", "python ../con_escenarios.py barrer_fino.py poi_malla3_alta --etapa fina "
+     "--trozo 0/3", True),
+    ("actuado paso 6", "ajuste", "python actuado.py corredor --paso 6", True),
+    ("reglas por familia", "ajuste", "python reglas.py malla3_alta --familia mp", True),
+    ("barrido con semillas de prueba", "ajuste", "python barrer_fino.py corredor --etapa gruesa --semillas 2001-2003",
+     False),
+    ("barrido con --limite", "ajuste", "python barrer_fino.py corredor --etapa gruesa --limite 3", False),
+    ("actuado con --semillas-final", "ajuste", "python actuado.py corredor --paso final --semillas-final 2001-2002",
+     False),
+    ("barrido de humo con --limite", "humo", "python barrer_fino.py corredor --etapa gruesa --limite 3", True),
     ("--salida= ", "puente", "python evaluar3.py --escenario corredor --brazo fijo --semillas 1001-1030 "
      "--salida=../x.csv", False),
 ]
