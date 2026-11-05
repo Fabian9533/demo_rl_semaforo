@@ -5,6 +5,7 @@ Uso (desde <worktree de ejecucion>/plan3):  python chequeos_previos.py [--sin-id
 Pasos (si alguno falla, no escribe lanzamiento.sha256 y la cola no arranca):
   1. identidad: rl_ippo con todo apagado (P1, base de humo 7, 10 episodios, validacion cada 5 en 2 semillas de humo)
      da el mismo CSV (salvo la columna 'segundos') y los mismos tensores que el codigo del tag entregado-2026-10-25;
+     y V2 con --guardar-estado --registro-extendido (el camino de los trabajos) da lo mismo que V2 del tag;
   2. lista de trabajos: capas 1 y 2 de protecciones.py (comandos, nombres y salidas unicos, dependencias), y que
      cola/trabajos.jsonl y cola/manifiesto_esperado.json son los que escribe el generador con cola/partes.txt;
   3. semillas: ningun CSV fuera de ciego/ e insumos/ tiene semillas de las tandas decisivas o de la prueba final;
@@ -33,21 +34,28 @@ CMD = ["train", "--escenario", "corredor", "--seed", "7", "--episodios", "10", "
 CSV_ID = "resultados_corredor_ippo_vecinos_s7.csv"
 
 
-def correr(codigo, carpeta):
+def correr(codigo, carpeta, extra=()):
     """Entrena con el rl_ippo.py de `codigo` en `carpeta` (con los archivos del escenario)."""
     os.makedirs(carpeta, exist_ok=True)
     for a in ESCENARIO:
         shutil.copy(os.path.join(PLAN3, a), carpeta)
     entorno = dict(os.environ, OMP_NUM_THREADS="1", MKL_NUM_THREADS="1", PYTHONIOENCODING="utf-8")
-    r = subprocess.run([sys.executable, os.path.join(codigo, "rl_ippo.py")] + CMD, cwd=carpeta,
+    r = subprocess.run([sys.executable, os.path.join(codigo, "rl_ippo.py")] + CMD + list(extra), cwd=carpeta,
                        capture_output=True, text=True, env=entorno)
     if r.returncode != 0:
         raise RuntimeError(f"rl_ippo fallo en {carpeta}:\n{r.stdout[-2000:]}\n{r.stderr[-2000:]}")
 
 
-def filas(ruta):
+def filas(ruta, columnas=None):
+    """Filas del CSV sin 'segundos' (y, si se da, solo esas columnas)."""
     with open(ruta, encoding="utf-8", newline="") as f:
-        return [{k: v for k, v in r.items() if k != "segundos"} for r in csv.DictReader(f)]
+        return [{k: v for k, v in r.items() if k != "segundos" and (columnas is None or k in columnas)}
+                for r in csv.DictReader(f)]
+
+
+def encabezado(ruta):
+    with open(ruta, encoding="utf-8", newline="") as f:
+        return next(csv.reader(f))
 
 
 def tensores_iguales(a, b):
@@ -102,6 +110,42 @@ def identidad():
     pol = "politica_corredor_vecinos_s7.pt"
     if not tensores_iguales(os.path.join(a, pol), os.path.join(b, pol)):
         malos.append("identidad: la politica publicada difiere")
+    malos += identidad_v2(tag)
+    return malos
+
+
+def identidad_v2(tag):
+    """El camino que usan los trabajos (revision del 05.11): V2 del tag frente a V2 de hoy con --guardar-estado y
+    --registro-extendido. El CSV de hoy solo agrega columnas al final; en las del tag, las filas son iguales; los
+    checkpoints, la politica y su eleccion tienen los mismos tensores; hay un estado por checkpoint."""
+    base = ["--v2", "--criterio-val", "total", "--etiqueta", "p3id"]
+    a, b = os.path.join(TMP, "v2_tag"), os.path.join(TMP, "v2_actual")
+    correr(tag, a, base)
+    correr(RAIZ, b, base + ["--guardar-estado", "--registro-extendido"])
+    malos = []
+    csv_id = "resultados_corredor_ippo_vecinos_p3id_s7.csv"
+    cab_a, cab_b = encabezado(os.path.join(a, csv_id)), encabezado(os.path.join(b, csv_id))
+    if cab_b[:len(cab_a)] != cab_a:
+        malos.append("identidad V2: el CSV de hoy no empieza con las columnas del tag")
+    if filas(os.path.join(a, csv_id)) != filas(os.path.join(b, csv_id), set(cab_a)):
+        malos.append("identidad V2: las filas difieren en las columnas del tag")
+    ckpt = lambda d, fin: sorted(x for x in os.listdir(os.path.join(d, "checkpoints")) if x.endswith(fin))
+    pts_a = [x for x in ckpt(a, ".pt") if not x.endswith(".estado.pt")]
+    pts_b = [x for x in ckpt(b, ".pt") if not x.endswith(".estado.pt")]
+    if pts_a != pts_b:
+        malos.append(f"identidad V2: checkpoints distintos: {pts_a} frente a {pts_b}")
+    for x in pts_a:
+        if x in pts_b and not tensores_iguales(os.path.join(a, "checkpoints", x), os.path.join(b, "checkpoints", x)):
+            malos.append(f"identidad V2: tensores distintos en {x}")
+    if len(ckpt(b, ".estado.pt")) < len(pts_b):
+        malos.append("identidad V2: falta un estado por checkpoint")
+    pol = "politica_corredor_vecinos_p3id_s7.pt"
+    if not tensores_iguales(os.path.join(a, pol), os.path.join(b, pol)):
+        malos.append("identidad V2: la politica publicada difiere")
+    import json
+    ma, mb = (json.load(open(os.path.join(d, pol[:-3] + ".json"), encoding="utf-8")) for d in (a, b))
+    if (ma["ep_elegido"], ma["val_elegido"]) != (mb["ep_elegido"], mb["val_elegido"]):
+        malos.append("identidad V2: la eleccion del checkpoint difiere")
     return malos
 
 

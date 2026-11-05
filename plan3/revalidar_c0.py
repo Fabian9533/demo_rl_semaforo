@@ -46,6 +46,23 @@ def validar(a, rl_ippo):
         assert res["val_seeds"] == semillas and res["corrida"] == a.corrida, "otra validacion en el mismo archivo"
     hechos = {c["ep"] for c in res["checkpoints"]}
     rl_ippo.preparar(a.escenario)
+    # Tripinfo propio de este trabajo y este proceso: los grupos de una misma corrida corren a la vez (revision del
+    # 05.11: con un nombre comun, varios SUMO escribian el mismo archivo y el XML se corrompia).
+    carpeta_tmp = os.path.join(PLAN3, f"tmp_c0_{os.getpid()}")
+    os.makedirs(carpeta_tmp, exist_ok=True)
+    tripinfo = os.path.join(carpeta_tmp, f"tripinfo_{os.path.splitext(os.path.basename(a.salida))[0]}_val.xml")
+    try:
+        _validar_checkpoints(a, rl_ippo, res, hechos, eps, semillas, tripinfo)
+    finally:
+        import shutil
+        shutil.rmtree(carpeta_tmp, ignore_errors=True)
+    faltan = sorted(set(eps) - {c["ep"] for c in res["checkpoints"]})
+    if faltan:
+        sys.exit(f"faltan checkpoints: {faltan}")
+    escribir_json(a.salida, res)
+
+
+def _validar_checkpoints(a, rl_ippo, res, hechos, eps, semillas, tripinfo):
     for ep in eps:
         if ep in hechos:
             continue
@@ -54,7 +71,7 @@ def validar(a, rl_ippo):
         assert meta["dim_obs"] == rl_ippo.C["dim_obs"], (meta["dim_obs"], rl_ippo.C["dim_obs"])
         rl_ippo.configurar_obs_insercion(meta.get("opciones", {}).get("obs_insercion", False))
         t0 = time.time()
-        fila = rl_ippo.validar(politica, semillas, meta["variante"], f"tripinfo_c0_{a.corrida}_val.xml")
+        fila = rl_ippo.validar(politica, semillas, meta["variante"], tripinfo)
         # Control de reproduccion: solo si se valida en el escenario de entrenamiento.
         control = {}
         if meta.get("escenario", a.escenario) == a.escenario:
@@ -70,10 +87,6 @@ def validar(a, rl_ippo):
         escribir_json(a.salida, res)
         print(f"{a.corrida} ep{ep:03d} en {a.escenario}: validado ({res['checkpoints'][-1]['segundos']} s; "
               f"control {sorted(control) or 'no aplica'})", flush=True)
-    faltan = sorted(set(eps) - {c["ep"] for c in res["checkpoints"]})
-    if faltan:
-        sys.exit(f"faltan checkpoints: {faltan}")
-    escribir_json(a.salida, res)
 
 
 def publicar(a, rl_ippo):

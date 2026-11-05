@@ -42,7 +42,8 @@ ESTADO = os.path.join(DIR, "estado.json")
 LOGS = os.path.join(DIR, "logs")
 LANZAMIENTO = os.path.join(RAIZ, "lanzamiento.sha256")
 # Fallos de Windows o de SUMO que no dicen nada del trabajo: se reintenta (los entrenamientos reanudan solos).
-MARCAS = ("Could not build output file", "Connection closed by SUMO", "WinError 32", "WinError 5]")
+MARCAS = ("Could not build output file", "Connection closed by SUMO", "WinError 32", "WinError 5]",
+          "Errno 13] Permission denied", "error code: 32")   # archivo tomado (antivirus, respaldo) al escribir
 MAX_REINTENTOS = 2
 
 
@@ -309,7 +310,16 @@ def main():
                     print(f"{time.strftime('%H:%M:%S')} cola: se detiene el lanzamiento: {motivo}", flush=True)
                     open(os.path.join(DIR, "pausa"), "w").close()
                     break
-                log = open(os.path.join(LOGS, t["id"] + ".log"), "w", encoding="utf-8")
+                ruta_log = os.path.join(LOGS, t["id"] + ".log")
+                if os.path.exists(ruta_log):            # se guarda el log del intento anterior (su error)
+                    k = 1
+                    while os.path.exists(os.path.join(LOGS, f"{t['id']}.intento{k}.log")):
+                        k += 1
+                    try:
+                        os.replace(ruta_log, os.path.join(LOGS, f"{t['id']}.intento{k}.log"))
+                    except OSError:
+                        pass
+                log = open(ruta_log, "w", encoding="utf-8")
                 cmd = t["cmd"].replace("python ", f'"{sys.executable}" ', 1)
                 inicio = time.time()
                 proc = subprocess.Popen(cmd, cwd=RAIZ, shell=True, stdout=log, stderr=subprocess.STDOUT,

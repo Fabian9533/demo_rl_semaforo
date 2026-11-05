@@ -77,6 +77,15 @@ def duracion_entreno(celda, episodios=EPISODIOS, desde=0, hasta=None, factor=1.0
     return EMPAQUE * ((hasta - desde) * tr * ftr + n_val * len(VAL16) * val * fval)
 
 
+def cortes_tramos(celda, episodios=EPISODIOS, desde=0, factor=1.0):
+    """Episodios donde termina cada tramo de <= 5 h (multiplos de EVAL_CADA, para cortar en un checkpoint)."""
+    total = duracion_entreno(celda, episodios, desde=desde, factor=factor)
+    n_tramos = max(1, -(-int(total) // TRAMO_MAX_S))
+    paso = -(-(episodios - desde) // n_tramos)
+    paso = -(-paso // EVAL_CADA) * EVAL_CADA
+    return list(range(desde + paso, episodios, paso)) + [episodios]
+
+
 class Lista:
     def __init__(self):
         self.trabajos = []
@@ -101,11 +110,7 @@ class Lista:
         desde, ruta_origen = 0, None
         if reanudar:                         # etiqueta nueva desde un estado de otra corrida (p. ej. 3b)
             ruta_origen, desde = reanudar
-        total = duracion_entreno(celda, episodios, desde=desde, factor=factor)
-        n_tramos = max(1, -(-int(total) // TRAMO_MAX_S))
-        paso = -(-(episodios - desde) // n_tramos)
-        paso = -(-paso // EVAL_CADA) * EVAL_CADA          # los cortes caen en un checkpoint
-        cortes = list(range(desde + paso, episodios, paso)) + [episodios]
+        cortes = cortes_tramos(celda, episodios, desde, factor)
         previo, inicio = list(requiere), desde
         for k, fin in enumerate(cortes):
             ultimo = fin == episodios
@@ -186,9 +191,9 @@ def c0(lista, celdas=None, etiqueta="p3c0", origen="insumos/c0_checkpoints", fue
 
 
 def id_entreno(prefijo, esc, base, celda, episodios=EPISODIOS, desde=0, factor=1.0):
-    """Id del ultimo tramo de un entrenamiento (el que publica la politica), sin agregarlo."""
-    total = duracion_entreno(celda, episodios, desde=desde, factor=factor)
-    n = max(1, -(-int(total) // TRAMO_MAX_S))
+    """Id del ultimo tramo de un entrenamiento (el que publica la politica), sin agregarlo. Usa los mismos cortes que
+    Lista.entrenamiento (revision del 05.11: con dos calculos podian no coincidir)."""
+    n = len(cortes_tramos(celda, episodios, desde, factor))
     return f"{prefijo}_{esc}_s{base}" + ("" if n == 1 else f"_t{n}")
 
 
