@@ -261,17 +261,17 @@ def brazo_profundo(esc, ruta, latencia, perdida):
         modelo = "ippo_" + meta["variante"]
         if meta.get("etiqueta"):        # 25.10.2026: correcciones del diagnostico (rl_ippo.py --etiqueta)
             modelo += "_" + meta["etiqueta"]
-        # Enmienda 2 del diagnostico (rl_ippo.py --obs-insercion): la observacion con la que se entreno
-        obs_ins = meta.get("opciones", {}).get("obs_insercion", False)
+        # La observacion, el reloj y los mensajes con que se entreno, de las opciones del meta: --obs-insercion
+        # (Enmienda 2 del diagnostico) y, del plan 3, --obs-cercana, --paso-decision y --msg-cada-paso
 
         def correr(semilla, tripinfo, serie):
-            rl_ippo.configurar_obs_insercion(obs_ins)
+            rl_ippo.configurar_desde_meta(meta)
             try:
                 return rl_ippo.correr_episodio("demo", politica, False, 0, semilla, tripinfo=tripinfo,
                                                serie=serie, latencia=latencia, perdida=perdida,
                                                variante=meta["variante"])
             finally:
-                rl_ippo.configurar_obs_insercion(False)
+                rl_ippo.configurar_desde_meta({})
     elif alg in ("dqn", "mappo"):
         import importlib
         mod = importlib.import_module("rl_" + alg)

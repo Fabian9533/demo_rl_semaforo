@@ -1,5 +1,5 @@
 Prueba 5: V2 del corredor, base 42, ep 10, frente a la V2 del diagnostico (B12)
-05.11.2026 11:44; python 3.14.6, torch 2.14.0+cpu
+05.11.2026 12:03; python 3.14.6, torch 2.14.0+cpu
 
 [OK] existe el checkpoint del diagnostico: plan3\insumos\v2diag_checkpoints\corredor_ippo_vecinos_v2_s42_ep010.pt
 rl_ippo.py train --escenario corredor --seed 42 --episodios 200 --hasta-ep 10 --eval-cada 5 --val-seeds 424301,424302 --v2 --criterio-val total --guardar-estado --registro-extendido --etiqueta p3prbdiag

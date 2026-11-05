@@ -232,6 +232,8 @@ def comparar_estados(a, b, ignorar=()):
     partes.append(("numpy global", gx["numpy"] == gy["numpy"]))
     partes.append(("torch", torch.equal(gx["torch"], gy["torch"])))
     partes.append(("default_rng de sembrar", gx["rng"] == gy["rng"]))
+    if "escala" in gx or "escala" in gy:          # --escala-demanda (Etapa 4)
+        partes.append(("generador de la escala", gx.get("escala") == gy.get("escala")))
 
     def sin_seg(texto):
         filas = list(csv.reader(io.StringIO(texto, newline="")))

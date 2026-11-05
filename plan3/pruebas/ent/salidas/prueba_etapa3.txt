@@ -1,0 +1,64 @@
+Etapa 3 de rl_ippo.py (PLAN3 3.1-3.4) y colas en cero (a3)
+05.11.2026 11:53; python 3.14.6, torch 2.14.0+cpu
+
+1. --obs-cercana 75: los E2 no cambian la simulacion, costo por episodio y marca de giro en 2715
+[OK] las corridas terminan: 23 de 23
+[OK] t2715_424301: misma simulacion con y sin E2 (todas las metricas y los 2724 viajes): dimension 31 -> 49; distintas: []
+[OK] p6_424301: misma simulacion con y sin E2 (todas las metricas y los 8700 viajes): dimension 53 -> 73; distintas: []
+[OK] la espera del primero leida solo con alguien en la zona = leida en todos los carriles: 0 distintas de 133872 lecturas (2715 y P6)
+[OK] costo_t2715: costo por episodio <= x1.35 (mediana de 3 parejas alternadas): sin [4.6, 4.6, 4.5] s, con [5.8, 5.8, 5.9] s, razones [1.26, 1.28, 1.31]
+[OK] costo_p6: costo por episodio <= x1.35 (mediana de 3 parejas alternadas): sin [20.6, 20.5, 22.3] s, con [26.8, 27.5, 30.0] s, razones [1.3, 1.34, 1.34]
+   Marca giro_izq en 2715 (V2 del diagnostico, base 42), periodo 2: % de los segundos de verde del acceso | % de sus decisiones
+   424301: C2_C1  16.2 |  12.7 % | W_C1  21.4 |  20.1 % | S2_C2   4.7 |   4.3 %
+   424302: C2_C1   7.2 |   6.6 % | W_C1  10.2 |  14.3 % | S2_C2   2.9 |   2.8 %
+   424303: C2_C1  10.9 |   9.6 % | W_C1  22.1 |  21.5 % | S2_C2   3.7 |   3.7 %
+   424304: C2_C1  13.9 |  12.8 % | W_C1  23.6 |  22.1 % | S2_C2   6.2 |   8.5 %
+   424305: C2_C1   9.3 |   8.6 % | W_C1  17.9 |  19.8 % | S2_C2   4.9 |   8.0 %
+   424306: C2_C1  12.0 |  10.2 % | W_C1  15.5 |  16.1 % | S2_C2   1.3 |   1.9 %
+   424307: C2_C1   9.5 |   7.8 % | W_C1  12.6 |  13.8 % | S2_C2   4.4 |   7.1 %
+   424308: C2_C1  10.0 |   8.1 % | W_C1  16.1 |  17.8 % | S2_C2   3.1 |   4.6 %
+   424309: C2_C1  10.2 |  10.0 % | W_C1  11.8 |  13.3 % | S2_C2   0.4 |   2.8 %
+   424310: C2_C1   9.7 |   7.9 % | W_C1  14.3 |  15.4 % | S2_C2   2.7 |   2.8 %
+   424311: C2_C1  13.4 |  12.1 % | W_C1  12.6 |  13.5 % | S2_C2   5.2 |   6.1 %
+   424312: C2_C1   8.7 |   7.7 % | W_C1  17.6 |  17.7 % | S2_C2   4.2 |   3.7 %
+   424313: C2_C1  12.8 |  11.0 % | W_C1  24.7 |  23.5 % | S2_C2   2.1 |   2.8 %
+   424314: C2_C1  10.5 |   8.9 % | W_C1  14.9 |  16.2 % | S2_C2   2.9 |   4.5 %
+   424315: C2_C1  10.7 |   8.8 % | W_C1  18.4 |  18.3 % | S2_C2   5.1 |   7.1 %
+   424316: C2_C1  15.1 |  12.9 % | W_C1  32.6 |  29.5 % | S2_C2   6.2 |   9.6 %
+   424317: C2_C1  11.8 |  10.7 % | W_C1  12.2 |  13.2 % | S2_C2   3.3 |   2.7 %
+   424318: C2_C1  13.9 |  13.6 % | W_C1  16.3 |  17.3 % | S2_C2   3.5 |   5.6 %
+   424319: C2_C1  13.0 |  10.9 % | W_C1  19.7 |  20.3 % | S2_C2   5.2 |   6.0 %
+   424320: C2_C1   9.2 |   9.5 % | W_C1  14.5 |  15.8 % | S2_C2   3.2 |   4.7 %
+   20 semillas juntas: C2_C1 11.4 % del verde (por semilla 7.2-16.2; de las decisiones 10.1 %; bloqueo.md 12 %) | W_C1 17.4 % del verde (por semilla 10.2-32.6; de las decisiones 18.0 %; bloqueo.md 14 %) | S2_C2 3.8 % del verde (por semilla 0.4-6.2; de las decisiones 5.0 %; bloqueo.md 5 %)
+[OK] 2715: la marca se activa en el 11-13 % del verde de C2_C1 (segundos de verde, periodo 2, 20 semillas): 11.4 % (de las decisiones: 10.1 %)
+[OK] 2715: la marca no se activa en el periodo 1: 0 de 51795 segundos de verde; 0 de 10356 decisiones
+
+2-4. --sin-forzadas, --paso-decision 2 y la recompensa por segundo (P1, semilla 424301)
+[OK] las corridas terminan: {'intervalos_5': 0, 'intervalos_2': 0, 'verdes_5': 0, 'verdes_2': 0, 'recompensa': 0}
+[OK] --sin-forzadas con reloj de 5 s: intervalos del lote en [5, 13, 18] (salvo el cierre): {5: 432, 13: 462}; cierres {'semaforo_C1': 5, 'semaforo_C2': 5}; frac_forzadas no aplica (lote sin forzadas)
+[OK] --sin-forzadas con reloj de 2 s: intervalos del lote en [2, 13, 15] (salvo el cierre): {2: 542, 13: 533}; cierres {'semaforo_C1': 2, 'semaforo_C2': 11}; frac_forzadas no aplica (lote sin forzadas)
+[OK] --paso-decision 5: los verdes duran 10, 15, 20... s: 321 verdes; duraciones [10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60]
+[OK] --paso-decision 2: los verdes duran 10, 12, 14... s: 454 verdes; duraciones [10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36] ...
+[OK] el decisor 'mantener' da la misma simulacion con los dos relojes: timeLoss 87.76 | 87.76; cambios 131 | 131
+[OK] la recompensa por segundo es la misma con los dos relojes: suma de las transiciones x5/0.02: -180441.503 (reloj 5 s, 1578 decisiones) | -180441.503 (reloj 2 s, 3946 decisiones); ret_retraso -180441.5; por decision: -114.35 | -45.73
+
+5. configurar_colas_cero (a3): P1, ciclo minimo, --obs-cercana 75, semilla 424301
+[OK] la corrida termina
+[OK] mismas decisiones (mismas metricas): 1274 decisiones
+[OK] con colas en cero: esas entradas valen 0 y las demas son iguales: 14 entradas en cero: ['cola_o', 'cola_e', 'cola_n', 'cola_s', 'oeste_cola_alimentadora', 'oeste_cola_mi_salida', 'este_cola_alimentadora', 'este_cola_mi_salida', 'cerca_det_o', 'cerca_det_e', 'cerca_det_n', 'cerca_det_s', 'salida_ocup_oeste', 'salida_ocup_este']
+[OK] sin colas en cero, esas entradas no son todas cero (la prueba mide algo): maximo 1.000
+
+6. Entrenamiento corto con todas las opciones de la Etapa 3 (P1, base 7, 4 episodios, validacion cada 2)
+   rl_ippo.py train --escenario corredor --seed 7 --episodios 4 --eval-cada 2 --val-seeds 424301,424302 --v2 --criterio-val total --etiqueta p3prbe3 --guardar-estado --registro-extendido --obs-cercana 75 --norm-valor --sin-forzadas --msg-cada-paso --hiper ent=0.03 --ent-final 0.003 --paso-decision 2
+[OK] entrena y publica: codigo 0
+[OK] --msg-cada-paso: edad del mensaje al decidir 0.0 s: ['0.0', '0.0', '0.0', '0.0']
+   sin --msg-cada-paso (prueba_identidad, V2): 1.949-2.063 s
+[OK] ent_coef sigue el calendario (0.03 -> 0.003 en el horizonte de 4 episodios): ['0.03', '0.020999999999999998', '0.012', '0.002999999999999999']
+[OK] --norm-valor: columnas vn_media y vn_desv: vn_media ['-4.0462', '-4.4926', '-4.5899', '-4.3158']
+[OK] --sin-forzadas con reloj de 2 s: frac_forzadas en el CSV: ['0.6714', '0.6456', '0.6358', '0.605']
+   meta: dim_obs 49; opciones {'v2': True, 'recompensa_insercion': False, 'etiqueta': 'p3prbe3', 'criterio_val': 'total', 'obs_cercana': 75.0, 'msg_cada_paso': True, 'sin_forzadas': True, 'paso_decision': 2, 'norm_valor': True, 'norm_beta': 0.99999, 'ent_final': 0.003}
+[OK] la politica publicada es de dimension 49 y su meta trae las opciones
+[OK] evaluar.py juega la politica de dimension 49 igual que su validacion (semilla por semilla): 424301: timeLoss 105.81 | 105.81, total 106.18 | 106.18; 424302: timeLoss 104.61 | 104.61, total 104.99 | 104.99
+[OK] evaluar3.py --colas-cero la juega (brazo ..._colas0): brazo ippo_vecinos_p3prbe3_s7_colas0, timeLoss 93.61
+
+Resultado: todo OK
