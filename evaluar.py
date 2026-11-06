@@ -190,7 +190,7 @@ def leer_json(ruta):
 def solo_plan3(esc, que):
     """plan3: sus brazos corren con rl_corredor o rl_ippo; en cruce y cruce2 (rl_semaforo) correrian otra cosa."""
     if esc in ("cruce", "cruce2"):
-        raise SystemExit(f"{que} es de plan3 y no corre en {esc} (rl_semaforo no lo conoce)")
+        raise SystemExit(f"{que} no corre en {esc} (rl_semaforo no lo conoce)")
 
 
 def brazo_referencia(esc, brazo, adicional=None):
@@ -201,7 +201,7 @@ def brazo_referencia(esc, brazo, adicional=None):
     if adicional and brazo not in BRAZOS_PLAN3:
         raise SystemExit(f"adicional ({adicional}) solo vale con {', '.join(BRAZOS_PLAN3)}, no con {brazo} (el fijo "
                          f"de otro archivo es brazo_programa)")
-    if brazo in BRAZOS_PLAN3:
+    if brazo in BRAZOS_PLAN3 + ("trivial",):      # trivial: rl_semaforo no lo conoce (correria el fijo con su nombre)
         solo_plan3(esc, f"el brazo {brazo}")
     mod = configurar(esc)
     opcion = {"adicional": adicional} if adicional else {}

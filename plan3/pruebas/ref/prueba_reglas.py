@@ -11,8 +11,14 @@ prueba_reglas.py - Pruebas de la tarea 0.10 (reglas.py y evaluar.py --regla):
      prototipo (reloj_reactivo.py, copiada aqui) por el mismo rl_ippo.correr_episodio en P1 y P6, el barrido
      --familia reactiva (reglas_reactiva.csv, reglas_reactiva_final.csv y reactiva.json con la ganadora y la marca de
      prueba) y evaluar.py --regla reactiva_d25;
-  6. protecciones de evaluar.py: adicional solo con franja, bloques y actuado_aj; nada de plan3 en cruce ni cruce2;
-     --semillas obligatorio con los brazos de plan3 (sin el se usaria 1001-1030).
+  6. protecciones de evaluar.py: adicional solo con franja, bloques y actuado_aj; nada de plan3 (ni trivial) en cruce
+     ni cruce2; --semillas obligatorio con los brazos de plan3 (sin el se usaria 1001-1030);
+  7. la reactiva frente a un oraculo independiente (traci.vehicle.getNextTLS: con la mascara libre alarga si y solo
+     si algun vehiculo cuyo proximo semaforo es este esta a <= D m de su linea con su propio enlace en G o g) y su
+     reloj: cada verde dura 10-60 s en pasos de 5 s, la decision siguiente llega 5 s despues de alargar y 8 s despues
+     de cambiar (3 de ambar), nunca en ambar (P1 con D 25 y P6 con D 50);
+  8. la huella de la cache de las reglas cambia si cambia rl_ippo.py, rl_corredor.py, reglas.py, escenarios_plan3.py
+     o con_escenarios.py (con copias cambiadas, sin tocar los de verdad).
 Semillas de humo. Corre en una copia de los escenarios (tmp_ref/reglas/): el brazo trivial regenera su .add.xml en la
 carpeta actual. Uso (cwd = plan3/): python pruebas/ref/prueba_reglas.py
 Salida: pruebas/ref/salidas/prueba_reglas.txt
@@ -154,13 +160,14 @@ def reactiva(esc, d, semilla):
 def reactiva_nombres_y_barrido():
     ok = all(reglas.validar(r) == {"tipo": "reactiva", "d": int(r.split("_d")[1])} for r in reglas.REACTIVAS)
     rechazadas = []
-    for malo in ("reactiva_d", "reactiva_dx", "reactiva25", "reactiva_d25_c60"):
+    for malo in ("reactiva_d", "reactiva_dx", "reactiva25", "reactiva_d25_c60", "reactiva_d26", "reactiva_d025",
+                 "reactiva_d25\n"):
         try:
             reglas.validar(malo)
         except SystemExit:
             rechazadas.append(malo)
     inf.chequeo(ok and reglas.REACTIVAS == [f"reactiva_d{d}" for d in (15, 25, 35, 50, 70)]
-                and len(rechazadas) == 4 and set(reglas.FAMILIAS) == {"regla", "reactiva", "mp"},
+                and len(rechazadas) == 7 and set(reglas.FAMILIAS) == {"regla", "reactiva", "mp"},
                 f"5 nombres: {reglas.REACTIVAS} validos; rechazados {rechazadas}; familias {list(reglas.FAMILIAS)}")
     r = subprocess.run([sys.executable, os.path.join(up.PLAN3, "reglas.py"), "corredor", "--familia", "reactiva",
                         "--semillas", str(up.HUMO[0]), "--semillas-final", f"{up.HUMO[0]}-{up.HUMO[1]}"],
@@ -204,7 +211,8 @@ def protecciones_evaluar():
             ("brazo_referencia(cruce, franja)", lambda: evaluar.brazo_referencia("cruce", "franja")),
             ("brazo_referencia(cruce2, actuado_aj)", lambda: evaluar.brazo_referencia("cruce2", "actuado_aj")),
             ("brazo_programa(cruce, ...)", lambda: evaluar.brazo_programa("cruce", "x.add.xml", "fino")),
-            ("brazo_regla(cruce2, mp)", lambda: evaluar.brazo_regla("cruce2", "mp"))):
+            ("brazo_regla(cruce2, mp)", lambda: evaluar.brazo_regla("cruce2", "mp")),
+            ("brazo_referencia(cruce, trivial)", lambda: evaluar.brazo_referencia("cruce", "trivial"))):
         try:
             llamada()
             casos.append((nombre, "aceptada"))
@@ -223,6 +231,72 @@ def protecciones_evaluar():
                 f"6 linea de comandos sin --semillas (se usaria 1001-1030): {codigos}")
 
 
+def oraculo(esc, d, semilla):
+    """La reactiva frente a un oraculo hecho con getNextTLS (otra forma de medir la distancia a la linea y el verde:
+    la del propio vehiculo) y el reloj de sus decisiones."""
+    rl_ippo.preparar(esc)
+    registro, comparaciones = [], []
+    regla = reglas.hacer_decidir(f"reactiva_d{d}", registro)
+
+    def decidir(deciden, obs, masc, modo, info):
+        acciones, extras = regla(deciden, obs, masc, modo, info)
+        cerca = set()
+        for v in traci.vehicle.getIDList():
+            prox = traci.vehicle.getNextTLS(v)
+            if prox and prox[0][2] <= d and prox[0][3] in "Gg":
+                cerca.add(prox[0][0])
+        for k, tls in enumerate(deciden):
+            if masc[k][0] > 0 and masc[k][1] > 0:
+                comparaciones.append((tls, info["t"], 0 if tls in cerca else 1, int(acciones[k])))
+        return acciones, extras
+    rl_ippo.correr_episodio("demo", None, False, 0, semilla, tripinfo=f"ti_oraculo_{esc}.xml", variante="local",
+                            decidir=decidir)
+    distintas = [x for x in comparaciones if x[2] != x[3]]
+    reloj_malo, verdes = [], []
+    for tls in {r[1] for r in registro}:
+        mias = sorted((r[0], r[3], r[2]) for r in registro if r[1] == tls)
+        largo = 5                                          # la primera decision de cada verde llega a los 5 s
+        for (t0, a0, m0), (t1, a1, m1) in zip(mias, mias[1:]):
+            esperado = 8 if a0 == 1 else 5
+            if t1 - t0 != esperado:
+                reloj_malo.append((tls, t0, a0, t1))
+            if a0 == 1:
+                verdes.append(largo)
+                largo = 5
+            else:
+                largo += 5
+    fuera = sorted({v for v in verdes if v not in range(10, 61, 5)})
+    inf.chequeo(comparaciones and not distintas and not reloj_malo and not fuera,
+                f"7 {esc} reactiva_d{d} frente al oraculo getNextTLS: {len(comparaciones)} decisiones libres, "
+                f"distintas {len(distintas)} {distintas[:2]}; reloj: {len(registro)} decisiones, separaciones fuera de "
+                f"5 s (tras alargar) u 8 s (tras cambiar): {len(reloj_malo)} {reloj_malo[:2]}; {len(verdes)} verdes, "
+                f"todos de 10-60 s en pasos de 5: {not fuera} {fuera[:3]}")
+
+
+def huella_reglas():
+    """La huella de las reglas cambia con cada archivo de codigo que la forma (con copias cambiadas)."""
+    import shutil
+    import rl_corredor
+    import barrer_fino as bfn
+    base = reglas.codigo_de_reglas(rl_ippo, rl_corredor)
+    cfg = "corredor.sumocfg"
+    h0 = bfn.huella_escenario(cfg, codigo=base)
+    cambian = {}
+    carpeta = os.path.join(CARPETA, "huella_reglas")
+    os.makedirs(carpeta, exist_ok=True)
+    for i, ruta in enumerate(base):
+        copia_ruta = os.path.join(carpeta, os.path.basename(ruta))
+        shutil.copyfile(ruta, copia_ruta)
+        with open(copia_ruta, "a", encoding="utf-8") as f:
+            f.write("# cambio de prueba (prueba_reglas 8)" + os.linesep)
+        cambiadas = base[:i] + [copia_ruta] + base[i + 1:]
+        cambian[os.path.basename(ruta)] = bfn.huella_escenario(cfg, codigo=cambiadas) != h0
+    nombres = {os.path.basename(r) for r in base}
+    inf.chequeo(all(cambian.values()) and {"rl_ippo.py", "rl_corredor.py", "reglas.py", "escenarios_plan3.py",
+                                           "con_escenarios.py"} <= nombres,
+                f"8 huella de las reglas ({h0}): cambia con cada archivo {cambian}")
+
+
 def main():
     inf(f"Pruebas de 0.10: regla simple, reactiva y Max-Pressure por el gancho decidir (copia en {CARPETA})")
     for esc in ("corredor", "malla3"):
@@ -238,6 +312,9 @@ def main():
     reactiva("corredor", 25, up.HUMO[0])
     reactiva("malla3_alta", 50, up.HUMO[0])
     protecciones_evaluar()
+    oraculo("corredor", 25, up.HUMO[0])
+    oraculo("malla3_alta", 50, up.HUMO[0])
+    huella_reglas()
     os.chdir(up.PLAN3)
     sys.exit(1 if inf.cerrar() else 0)
 

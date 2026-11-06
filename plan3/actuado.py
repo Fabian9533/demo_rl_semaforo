@@ -28,7 +28,15 @@ sumo directo = TraCI esta en pruebas/ref). Rejillas fijas, con el defecto de SUM
           avenida y latestEnd en la transversal, cada uno en su fin del plan fijo (la avenida termina siempre donde
           el plan fijo; la transversal puede cortar antes, nunca despues). Solo latestEnd en la transversal (sin el
           de la avenida) trababa P2 (835 s/veh); solo latestEnd = earliestEnd en la avenida (sin el de la
-          transversal) quedaba peor que el fijo en P1, P2, P3 y P6: ninguna de las dos se usa
+          transversal) quedaba peor que el fijo en P1, P2, P3 y P6: ninguna de las dos se usa.
+          En las dos, el ciclo de SUMO (timeInCycle) se cuenta desde el inicio del verde transversal del plan fijo
+          (offset = el del fijo fino + ese inicio; earliestEnd y latestEnd son los mismos instantes del plan fijo):
+          SUMO solo pasa un earliestEnd/latestEnd al ciclo siguiente si el verde ya empezo y termino en el ciclo
+          actual, asi que un verde de avenida que cruzaba el 0 del ciclo (plantillas con la avenida en la fase 0:
+          red, malla y sus derivados) dejaba sin efecto la coordinacion en la mitad de los ciclos (referencia_
+          coordinada). Y el maxDur de la avenida no baja de lo que necesita: el ciclo en (b), que su latestEnd corta
+          igual; en (a), el ciclo menos los ambares y los minDur de los otros verdes. Medido en
+          pruebas/ref/medir_coordinada.txt y tabla_coordinadas.txt
   final   las 3 mejores variantes de los 6 pasos con 2001-2010 (con llegadas aleatorias, las 10 mejores con
           2001-2030); gana la menor media
 minDur 10 s (5 en giros) y la fase y la duracion inicial del programa "0" de la red, como comun.archivo_actuado:
@@ -133,7 +141,9 @@ def texto_actuado(c, v, comentario=None):
     for i, tls in enumerate(c.p.ids):
         if v["coordinado"]:                # fases de la plantilla con las duraciones del fijo fino
             fases = [(d, e) for d, e in fases_plantilla(c, i, v)]
-            fase_av, offset = c.p.fases_av[i], v["offsets"][i]
+            fase_av = c.p.fases_av[i]
+            ref, max_av = referencia_coordinada(fases, fase_av)
+            offset = (v["offsets"][i] + ref) % v["ciclo"]
         else:
             programas = net.getTLS(tls).getPrograms()
             programa = programas.get("0", next(iter(programas.values())))
@@ -149,8 +159,13 @@ def texto_actuado(c, v, comentario=None):
                 maximo = v["maxdur_av"] if k == fase_av else v["maxdur_tr"]
                 extra = ""
                 if v["coordinado"]:
+                    if k == fase_av:               # la avenida llega a su fin aunque la transversal corte antes
+                        # (b): el ciclo entero (su latestEnd la corta igual en su fin; asi se recupera en un ciclo si
+                        # un arranque la dejo corta); (a): lo que necesita en regimen (sin latestEnd puede alargar)
+                        maximo = max(maximo, v["ciclo"] if v.get("fin_fijo") else max_av)
                     dur = min(max(dur, minimo), maximo)
-                    fin = (inicio + fases[k][0]) % v["ciclo"]          # fin de ese verde en el plan fijo
+                    # fin de ese verde en el plan fijo, contado desde el inicio de la transversal (ref)
+                    fin = (inicio + fases[k][0] - ref) % v["ciclo"]
                     if k == fase_av:           # la avenida no termina antes de su fin en el plan fijo
                         extra = f' earliestEnd="{fin}"'
                         if v.get("fin_fijo"):  # ni despues: termina en su fin del plan fijo
@@ -165,6 +180,31 @@ def texto_actuado(c, v, comentario=None):
         lineas.append("    </tlLogic>")
     lineas.append("</additional>")
     return "\n".join(lineas) + "\n"
+
+
+def minimo_de(estado):
+    """minDur de un verde: 10 s (5 en giros), como el agente y el actuado entregado."""
+    return VERDE_MIN if sum(1 for x in estado if x in "Gg") > 2 else VERDE_MIN_GIRO
+
+
+def referencia_coordinada(fases, fase_av):
+    """(ref, max_av) de una variante coordinada sobre las fases [(duracion, estado)] del plan fijo.
+    ref: el instante del ciclo (desde el inicio de la fase 0) en que empieza el verde que sigue al de la avenida (la
+    transversal). SUMO cuenta timeInCycle = (t - offset) mod cycleTime y, para un verde con earliestEnd y latestEnd,
+    solo corre la cuenta al ciclo siguiente si el verde ya empezo Y termino en el ciclo actual: si el verde de avenida
+    cruza el 0 del ciclo (empieza antes y termina despues), el siguiente, que empieza antes del 0 porque la transversal
+    corto antes, ya no tiene su earliestEnd por delante y puede cortar antes de su fin (medido: en dem_red_t3620 solo la
+    mitad de las salidas en el fin fijo, con ciclos ~25 % mas cortos). Con el 0 en el inicio de la transversal, la
+    avenida empieza y termina siempre dentro del mismo ciclo: el offset del programa pasa a ser el del fijo fino mas ref
+    y los earliestEnd/latestEnd se cuentan desde ref (son los mismos instantes del plan fijo).
+    max_av: lo que la avenida necesita para llegar a su fin si la transversal corta en su minimo: el ciclo menos los
+    ambares y los minDur de los otros verdes (su verde fijo mas lo que los otros pueden cortar antes)."""
+    verdes = [k for k, (_, e) in enumerate(fases) if bf.es_verde(e)]
+    siguiente = next(k for k in verdes[verdes.index(fase_av) + 1:] + verdes if k != fase_av)
+    ref = sum(d for d, _ in fases[:siguiente])
+    max_av = fases[fase_av][0] + sum(max(0, d - minimo_de(e)) for k, (d, e) in enumerate(fases)
+                                     if k in verdes and k != fase_av)
+    return ref, max_av
 
 
 def fases_plantilla(c, i, v):
@@ -193,7 +233,7 @@ def coordinada(c, v, fin_fijo=False):
     ruta = os.path.join(c.carpeta, "fijo_fino.json")
     if not os.path.exists(ruta):
         raise SystemExit(f"Falta {ruta}: la variante coordinada usa el fijo fino (barrer_fino --etapa fragil)")
-    fino = c.comprobar_marca(ruta)
+    fino = c.comprobar_fino(ruta)
     if fino["ids"] != c.p.ids:
         raise SystemExit(f"{ruta}: semaforos en otro orden que la plantilla")
     salida = dict(v, coordinado=True, ciclo=fino["ciclo"], offsets=fino["offsets"], verde=fino["verde"],
@@ -348,7 +388,7 @@ def reinstalar(esc, carpeta=None):
     return destino
 
 
-def main():
+def construir_parser():
     ap = argparse.ArgumentParser(description="Actuado ajustado por descenso por coordenadas (plan3, 0.9)",
                                  allow_abbrev=False)
     ap.add_argument("escenario")
@@ -361,13 +401,30 @@ def main():
     ap.add_argument("--semillas-final", help="(pruebas) en vez de 2001-2010 / 2001-2030")
     ap.add_argument("--permitir-prueba", action="store_true",
                     help="(pruebas) acepta entradas que no son de la regla y marca la salida como de prueba")
-    args = ap.parse_args()
+    return ap
+
+
+def validar_args(argv):
+    """Lee y revisa los argumentos (argv sin el nombre del programa): parse_args y todos los ap.error, sin leer el
+    escenario ni tocar archivos. Devuelve args o sale como argparse (SystemExit(2), motivo en stderr).
+    chequeos_previos la llama para cada comando de este script en la lista de trabajos."""
+    ap = construir_parser()
+    args = ap.parse_args(argv)
+    if args.instalar and args.paso:
+        ap.error("--instalar y --paso son excluyentes")
+    if not args.instalar and not args.paso:
+        ap.error("falta --paso (o --instalar)")
+    if args.procesos < 1:
+        ap.error("--procesos va desde 1")
+    return args
+
+
+def main():
+    args = validar_args(sys.argv[1:])
     if args.instalar:
         bfn.exigir_cwd()
         print(f"Reescrito {reinstalar(args.escenario)}")
         return
-    if not args.paso:
-        ap.error("falta --paso (o --instalar)")
     t0 = time.time()
     c = bfn.Celda(args.escenario, args.llegadas, procesos=args.procesos,
                   semillas={"barrido": args.semillas or SEMILLAS_PASOS, "desempate": args.semillas_final},

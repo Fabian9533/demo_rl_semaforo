@@ -18,7 +18,8 @@ prueba_fino.py - Pruebas de la tarea 0.7 (barrer_fino.py):
   F. la cadena de etapas (sin sumo, con resultados inventados): la fina se niega a leer una gruesa con opciones de
      prueba y la acepta con --permitir-prueba (y su salida queda marcada); una gruesa con el registro de la regla pero
      otras semillas tambien se niega; la etapa fragil lee el desempate sin reescribirlo (mismo sha256 y misma fecha) y
-     se niega si desempate.csv no es el de las etapas o si sus semillas no son las de la regla; desde la raiz se niega
+     se niega si desempate.csv no es el de las etapas o si sus semillas no son las de la regla; el paso 6 del actuado
+     y bloques leen fijo_fino.json con su huella (con sus propios cortes) y se niegan si es de otra; desde la raiz se niega
      (cwd) y una opcion abreviada no se acepta; correr_periodos niega las semillas del examen y de la final antes de
      lanzar sumo (con sumo reemplazado: no se simula ninguna).
 Uso (cwd = plan3/): python pruebas/ref/prueba_fino.py      Salida: pruebas/ref/salidas/prueba_fino.txt
@@ -107,7 +108,8 @@ def prueba_regla():
             viejos += not (dentro - mejor <= 0.02 * mejor)
     inf.chequeo(not malos, f"A a_2pct en el borde: con el mejor de 5.00 a 99.99 s (9500 casos), el mayor valor a "
                            f"<= 2 % entra y el centesimo siguiente no: fallas {malos[:3]}; la comparacion de antes "
-                           f"(segundo - primero <= 0.02 x primero) dejaba fuera {viejos} de los {bordes} bordes exactos")
+                           f"(segundo - primero <= 0.02 x primero) dejaba fuera {viejos} de los {bordes} bordes "
+                           f"exactos")
     ejemplos = [(20.50, 20.91, True), (20.50, 20.92, False), (30.00, 30.60, True), (30.00, 30.61, False)]
     inf.chequeo(all(bfn.a_2pct(v, m) == e for m, v, e in ejemplos),
                 f"A ejemplos de la revision (mejor, valor, a <= 2 %): "
@@ -457,6 +459,23 @@ def fragil_lee_el_desempate():
     except SystemExit as e:
         mensaje = str(e)
     inf.chequeo("otras semillas" in mensaje, f"F desempate sin la semilla 2010: fragil se niega: {mensaje[:200]}")
+    # la huella de fijo_fino.json al leerlo (paso 6 del actuado; bloques hace lo mismo con comprobar_fino)
+    import actuado
+    ca = bfn.Celda("corredor", prefijos=("actuado",))
+    v = actuado.coordinada(ca, dict(actuado.DEFECTO))
+    ruta = os.path.join(ca.carpeta, "fijo_fino.json")
+    fino = bfn.leer_json(ruta)
+    otro_bloque = ca.huella_con_cortes([600, 1200, 1800, 2400, 3000]) != fino["huella"]
+    bfn.escribir_json(ruta, dict(fino, huella="000000000000"))
+    try:
+        actuado.coordinada(ca, dict(actuado.DEFECTO))
+        mensaje = "no se nego"
+    except SystemExit as e:
+        mensaje = str(e)
+    inf.chequeo(v["ciclo"] == fino["ciclo"] and otro_bloque and "otra huella" in mensaje,
+                f"F el paso 6 del actuado lee fijo_fino.json con su huella (la de sus cortes; con otros cortes seria "
+                f"otra: {otro_bloque}) y se niega si es de otra: {mensaje[:120]}")
+    bfn.escribir_json(ruta, fino)
     os.chdir(up.PLAN3)
 
 
@@ -502,7 +521,8 @@ def semillas_ciegas():
             os.environ["P3_USO"] = uso
     inf.chequeo(resultados == [(7001, "negada"), (8001, "negada"), (13120, "negada"), (up.HUMO[0], "llega a sumo")]
                 and llamadas == [str(up.HUMO[0])],
-                f"F semillas del examen y de la final: correr_periodos las niega antes de lanzar sumo (sumo reemplazado: "
+                f"F semillas del examen y de la final: correr_periodos las niega antes de lanzar sumo (sumo "
+                f"reemplazado: "
                 f"nada se simula): {resultados}")
 
 

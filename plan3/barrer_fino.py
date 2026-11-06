@@ -51,7 +51,8 @@ barridos/<esc>/trozos/<etapa>_t<k>de<n>.csv.
 La etapa sin --trozo junta lo ya corrido (trozos, etapas anteriores y la cache tmp_fino/<esc>/*.jsonl, que se
 escribe corrida a corrida y sirve para reanudar), corre lo que falte y escribe la salida. Los resultados se guardan
 por (plan, semilla) con la huella del escenario y el sha256 del programa con que se corrieron: un resultado solo se
-reutiliza si los dos coinciden. La huella cubre los archivos del escenario (cfg, red, rutas, adicionales y plantilla),
+reutiliza si los dos coinciden. La huella cubre los archivos del escenario (cfg, red, rutas, adicionales y plantilla,
+con los fines de linea normalizados),
 los cortes, el sha256 completo del codigo que arma, corre y lee cada corrida (barrer_fino.py, barrer_fijo.py, comun.py
 y escenarios_plan2.py, con los fines de linea normalizados: el mismo commit da la misma huella en cualquier worktree)
 y los interruptores de comun que cambian lo que se escribe o se lee (ESCRIBIR_NO_INSERTADOS, QUITAR_BLOQUE):
@@ -276,8 +277,8 @@ def huella_escenario(cfg, extras=(), cortes=(), codigo=()):
     h = hashlib.sha256()
     for ruta in [cfg, net] + rutas + adic + [e for e in extras if e not in adic]:
         h.update(ruta.encode())
-        with open(ruta, "rb") as f:
-            h.update(f.read())
+        with open(ruta, "rb") as f:                # fines de linea normalizados, como el codigo
+            h.update(f.read().replace(b"\r\n", b"\n"))
     h.update(f"fin={bf.FIN_SIM};cortes={list(cortes)}".encode())
     for ruta in archivos_codigo() + [os.path.abspath(r) for r in codigo]:
         h.update(f"{os.path.basename(ruta)}={sha256_codigo(ruta)};".encode())
@@ -438,6 +439,23 @@ class Celda:
             self.fuera_de_regla(ruta, ["sin registro (salida de una version anterior del codigo)"])
         elif registro.get("prueba"):
             self.fuera_de_regla(ruta, [f"opciones de prueba {registro['prueba']}"])
+        return datos
+
+    def huella_con_cortes(self, cortes):
+        """La huella de este escenario con otros cortes de periodo (la del barrido que dejo un JSON)."""
+        extras = [self.p.ruta] if self.p.ruta else []
+        return huella_escenario(self.cfg, extras, list(cortes))
+
+    def comprobar_fino(self, ruta):
+        """fijo_fino.json para el paso 6 del actuado y para bloques: la marca de prueba y la huella de hoy, con los
+        cortes de su propio barrido (el del perfil usa --bloque 600 y el actuado siempre 1800). Una huella vieja (otro
+        codigo, otro escenario: un relanzamiento a medias) se niega siempre."""
+        datos = self.comprobar_marca(ruta)
+        if "cortes" not in datos:
+            self.fuera_de_regla(ruta, ["sin los cortes de su barrido (salida de una version anterior del codigo)"])
+        elif datos.get("huella") != self.huella_con_cortes(datos["cortes"]):
+            raise SystemExit(f"{ruta} es de otra huella ({datos.get('huella')}; con este codigo y este escenario: "
+                             f"{self.huella_con_cortes(datos['cortes'])}): repita la etapa fragil")
         return datos
 
     # ---------------- resultados guardados
@@ -969,7 +987,7 @@ def instalar(c, pl, fila, sufijo, nombre_json, comentario, traza, registro=None)
     c.escribir_plan(tmp, pl, comentario.replace("--", "- -"))     # un comentario XML no puede llevar "--"
     reemplazar(tmp, destino)
     datos = {"escenario": c.esc, "llegadas": c.llegadas, "archivo": destino, "sha256": sha256_archivo(destino),
-             "huella": c.huella, "verde": pl["verde"], "verde_transversal": pl["verde_transversal"],
+             "huella": c.huella, "cortes": c.cortes, "verde": pl["verde"], "verde_transversal": pl["verde_transversal"],
              "offsets": pl["offsets"], "esquema": pl["esquema"], "ciclo": pl["ciclo"], "clave": pl["clave"],
              "ids": c.p.ids, "fases_avenida": c.p.fases_av,
              **{k: fila[k] for k in ("retraso_total_prom", "retraso_total_sd", "timeloss_prom", "mediana", "peor",
@@ -1081,7 +1099,7 @@ def opciones_de_prueba(args, nombres):
     return [f"--{n.replace('_', '-')} {getattr(args, n)}" for n in nombres if getattr(args, n, None) is not None]
 
 
-def main():
+def construir_parser():
     ap = argparse.ArgumentParser(description="Barrido fino del fijo con puntaje por periodo (plan3, 0.7)",
                                  allow_abbrev=False)
     ap.add_argument("escenario")
@@ -1100,15 +1118,36 @@ def main():
     ap.add_argument("--limite", type=int, help="(pruebas) solo los primeros N planes de la gruesa, sin extension")
     ap.add_argument("--permitir-prueba", action="store_true",
                     help="(pruebas) acepta entradas que no son de la regla y marca la salida como de prueba")
-    args = ap.parse_args()
+    return ap
+
+
+def validar_args(argv):
+    """Lee y revisa los argumentos (argv sin el nombre del programa): parse_args y todos los ap.error, sin leer el
+    escenario ni tocar archivos. Devuelve args o sale como argparse (SystemExit(2), motivo en stderr).
+    chequeos_previos la llama para cada comando de este script en la lista de trabajos."""
+    ap = construir_parser()
+    args = ap.parse_args(argv)
     if args.etapa in ("desempate", "fragil", "fino", "todo") and args.trozo:
         ap.error("--trozo solo en gruesa, fina, desfases y mult5")
-    trozo = None
+    args.trozo_kn = None
     if args.trozo:
-        k, n = (int(x) for x in args.trozo.split("/"))
+        try:
+            k, n = (int(x) for x in args.trozo.split("/"))
+        except ValueError:
+            ap.error("--trozo k/n con k y n enteros")
         if not 0 <= k < n:
             ap.error("--trozo k/n con 0 <= k < n")
-        trozo = (k, n)
+        args.trozo_kn = (k, n)
+    if args.procesos < 1:
+        ap.error("--procesos va desde 1")
+    if args.bloque < 1 or FIN_HORA % args.bloque:
+        ap.error(f"--bloque debe dividir la hora ({FIN_HORA} s)")
+    return args
+
+
+def main():
+    args = validar_args(sys.argv[1:])
+    trozo = args.trozo_kn
     c = Celda(args.escenario, args.llegadas, args.bloque, args.procesos,
               {"barrido": args.semillas, "desempate": args.semillas_desempate, "fragil": args.semillas_fragil},
               prueba=opciones_de_prueba(args, OPCIONES_PRUEBA), permitir=args.permitir_prueba)

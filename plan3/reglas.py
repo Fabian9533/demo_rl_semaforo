@@ -1,8 +1,8 @@
 """
 reglas.py - Regla simple, regla reactiva y Max-Pressure para el gancho decidir de rl_ippo.correr_episodio (plan3,
-tarea 0.10; DECISIONES B10; prerregistro, seccion 5). No cambia rl_ippo.py: usa la interfaz para decisores externos (mismo reloj
-de 5 s desde el inicio de cada verde, misma mascara de verde minimo 10 s y maximo 60 s, mismo ambar y mismas
-metricas que IPPO; con variante "local" no hay mensajes y la politica puede ser None).
+tarea 0.10; DECISIONES B10; prerregistro, seccion 5). No cambia rl_ippo.py: usa la interfaz para decisores externos
+(mismo reloj de 5 s desde el inicio de cada verde, misma mascara de verde minimo 10 s y maximo 60 s, mismo ambar y
+mismas metricas que IPPO; con variante "local" no hay mensajes y la politica puede ser None).
 
 Nombres (evaluar.py --regla NOMBRE; evaluar.brazo_regla):
   regla_u<U>g<G>       ciclo minimo, pero en el verde de la avenida se mantiene mientras la cola de la avenida
@@ -34,7 +34,8 @@ Barrido (cwd = plan3/ o una carpeta dentro de ella; con llegadas aleatorias, a t
   TraCI y en un solo proceso (rl_ippo usa una conexion global).
   Cache: tmp_fino/<esc>/reglas_<pid>.jsonl. Una corrida guardada vale solo con la misma huella: la del escenario de
   barrer_fino (archivos del escenario, barrer_fino.py, barrer_fijo.py, comun.py, escenarios_plan2.py y los
-  interruptores de comun) con reglas.py, rl_ippo.py y rl_corredor.py.
+  interruptores de comun) con reglas.py, rl_ippo.py, rl_corredor.py y, si estan, escenarios_plan3.py y
+  con_escenarios.py (codigo_de_reglas).
 """
 import os
 import re
@@ -55,7 +56,10 @@ import numpy as np  # noqa: E402
 
 AMBAR = 3                  # ambar de todos los escenarios (3 s)
 VERDE_MIN = 10             # verde minimo del agente (la mascara)
-PATRON = re.compile(r"^(regla_u(?P<u>\d+|inf)g(?P<g>\d+)|reactiva_d(?P<d>\d+)|mp(?P<det>_det)?(_c(?P<c>\d+))?)$")
+# Nombres canonicos (sin ceros a la izquierda; validar usa fullmatch: tampoco pasa un salto de linea al final). La
+# reactiva solo con D de su rejilla (15, 25, 35, 50, 70), como la lee veredicto3.
+PATRON = re.compile(r"(regla_u(?P<u>0|[1-9]\d*|inf)g(?P<g>[1-9]\d*)|reactiva_d(?P<d>[1-9]\d*)|"
+                    r"mp(?P<det>_det)?(_c(?P<c>[1-9]\d*))?)")
 REGLAS = [f"regla_u{u}g{g}" for u in (1, 2, 3, 4, 6) for g in (30, 60)]
 REACTIVAS = [f"reactiva_d{d}" for d in (15, 25, 35, 50, 70)]
 MAX_PRESSURE = ["mp", "mp_det", "mp_c60", "mp_c90"]
@@ -69,10 +73,10 @@ METRICAS = ("retraso_total_prom", "timeloss_prom", "retraso_insercion_prom", "es
 def validar(regla):
     """Parametros de un nombre de regla: {"tipo": "regla"|"reactiva"|"mp", "u", "g", "d", "medida", "ciclo"}; error
     si no existe."""
-    m = PATRON.match(regla)
-    if not m:
-        raise SystemExit(f"Regla desconocida: {regla} (regla_u<U>g<G>, reactiva_d<D>, mp, mp_det, mp_c<C>, "
-                         f"mp_det_c<C>)")
+    m = PATRON.fullmatch(regla)
+    if not m or (regla.startswith("reactiva_") and regla not in REACTIVAS):
+        raise SystemExit(f"Regla desconocida: {regla!r} (regla_u<U>g<G>, reactiva_d<D> con D en 15, 25, 35, 50 o 70, "
+                         f"mp, mp_det, mp_c<C>, mp_det_c<C>)")
     if regla.startswith("regla_"):
         return {"tipo": "regla", "u": float("inf") if m["u"] == "inf" else int(m["u"]), "g": int(m["g"])}
     if regla.startswith("reactiva_"):
@@ -204,7 +208,7 @@ def correr(esc, regla, semilla, tripinfo, serie=None, registro=None):
 
 
 # ---------------------------------------------------------------- barrido
-def main():
+def construir_parser():
     ap = argparse.ArgumentParser(description="Barrido de la regla simple, la reactiva y Max-Pressure (plan3, 0.10)",
                                  allow_abbrev=False)
     ap.add_argument("escenario")
@@ -213,7 +217,27 @@ def main():
                     help="(pruebas) auto: aleatorias si las rutas tienen period=\"exp(...)\"")
     ap.add_argument("--semillas", help="(pruebas) en vez de 2001-2003")
     ap.add_argument("--semillas-final", help="(pruebas) en vez de 2001-2010 / 2001-2030")
-    args = ap.parse_args()
+    return ap
+
+
+def codigo_de_reglas(rl_ippo, rl_corredor):
+    """Codigo que corre un episodio de una regla, ademas del de barrer_fino.archivos_codigo: este archivo, rl_ippo.py
+    y rl_corredor.py (el bucle TraCI) y, si estan, escenarios_plan3.py y con_escenarios.py (los escenarios del plan 3
+    y su registro)."""
+    salida = [os.path.abspath(__file__), rl_ippo.__file__, rl_corredor.__file__]
+    return salida + [r for r in (os.path.join(RAIZ, "escenarios_plan3.py"), os.path.join(RAIZ, "con_escenarios.py"))
+                     if os.path.exists(r)]
+
+
+def validar_args(argv):
+    """Lee y revisa los argumentos (argv sin el nombre del programa): parse_args y todos los ap.error, sin leer el
+    escenario ni tocar archivos. Devuelve args o sale como argparse (SystemExit(2), motivo en stderr).
+    chequeos_previos la llama para cada comando de este script en la lista de trabajos."""
+    return construir_parser().parse_args(argv)
+
+
+def main():
+    args = validar_args(sys.argv[1:])
     import comun
     import rl_ippo
     import rl_corredor
@@ -231,7 +255,7 @@ def main():
         ([f"--llegadas {llegadas}"] if llegadas != detectadas else [])
     familias = dict(FAMILIAS) if args.familia == "todas" else {args.familia: FAMILIAS[args.familia]}
     # una corrida guardada vale con el mismo escenario y el mismo codigo (este archivo y el bucle de rl_ippo)
-    huella = bfn.huella_escenario(cfg, codigo=[os.path.abspath(__file__), rl_ippo.__file__, rl_corredor.__file__])
+    huella = bfn.huella_escenario(cfg, codigo=codigo_de_reglas(rl_ippo, rl_corredor))
     carpeta = os.path.join("barridos", esc)
     tmp = os.path.join(bfn.CARPETA_TMP, esc)
     os.makedirs(tmp, exist_ok=True)

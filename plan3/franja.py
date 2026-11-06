@@ -24,14 +24,17 @@ primero desde el corte (y despues del cambio anterior) que cumple, en este orden
             el cambio no se ve (la regla de siempre);
   relajada  si no hay estricta en un hiperperiodo: el paso del estado del plan viejo al del nuevo es uno que un plan
             normal haria: ningun verde pasa a rojo sin ambar, ningun ambar queda mas corto que el del plan, ningun
-            rojo pasa a ambar ni ningun ambar a verde (el verde que toca el cambio puede quedar corto);
+            rojo pasa a ambar ni ningun ambar a verde, y ningun verde que toca el cambio queda por debajo del verde
+            minimo (10 s, el del agente y del actuado);
   respaldo  si tampoco: el primer fin de un ambar del plan viejo en que ningun verde pasa a rojo ni queda un ambar
             corto (los enlaces que terminaron su ambar pueden seguir en ambar o pasar a verde, y uno en rojo puede
             ver un ambar: nada de eso corta un verde);
   forzado   si ni eso (no pasa con las plantillas de P1-P6, cuyos ambares no tienen verdes): el primer fin de ambar
             del plan viejo, con los problemas anotados.
 franja.json y bloques.json registran por semaforo y por cambio la regla usada, el instante nominal, el instante y el
-retraso (instante - nominal), mas un aviso si alguna no fue la estricta. Programas "franja1"/"franja2" o
+retraso (instante - nominal), mas un aviso si alguna no fue la estricta o si un cambio llega tarde: mas de 300 s
+despues de su instante nominal, despues del instante nominal del cambio siguiente o despues de la hora (3600 s). Un
+tope al retraso de la estricta seria una enmienda de B8: solo se avisa. Programas "franja1"/"franja2" o
 "bloque1".."bloqueN" (los mismos verdes y fases de la plantilla); el archivo se carga ENCIMA de los adicionales del
 .sumocfg (el WAUT activa su startProg desde 0 s): asi lo hacen el barrido y el brazo franja/bloques de rl_corredor y
 evaluar.py. Nunca va dentro de un .sumocfg: un entrenamiento quedaria bajo el WAUT.
@@ -92,6 +95,8 @@ def estado_en(fases, ciclo, desfase, t):
 
 
 REGLAS_CAMBIO = ("estricta", "relajada", "respaldo", "forzado")
+VERDE_MINIMO = 10            # la relajada no deja un verde mas corto (el minimo del agente y del actuado)
+TARDE = 300                  # aviso si un cambio llega mas de 300 s despues de su instante nominal
 SE_TOLERA_EN_RESPALDO = ("ambar_tras_rojo", "verde_tras_ambar")
 
 
@@ -133,6 +138,27 @@ def problemas_del_cambio(a, b, t):
     return salida
 
 
+def racha_verde(prog, x, i, paso):
+    """Segundos seguidos en que el enlace i del programa prog muestra verde (G o g), desde x hacia adelante (paso 1) o
+    hacia atras (paso -1), contando x; 0 si en x no hay verde."""
+    n = 0
+    while n < prog[1] and estado_en(*prog, x + paso * n)[i] in "Gg":
+        n += 1
+    return n
+
+
+def verdes_cortos(a, b, t, minimo=VERDE_MINIMO):
+    """Enlaces cuyo verde que toca el cambio en t (lo que mostro a hasta t-1 mas lo que muestra b desde t) dura menos
+    que minimo: [(enlace, segundos)]."""
+    viejo, nuevo = estado_en(*a, t - 1), estado_en(*b, t)
+    salida = []
+    for i, (x, y) in enumerate(zip(viejo, nuevo)):
+        largo = (racha_verde(a, t - 1, i, -1) if x in "Gg" else 0) + (racha_verde(b, t, i, 1) if y in "Gg" else 0)
+        if (x in "Gg" or y in "Gg") and largo < minimo:
+            salida.append((i, largo))
+    return salida
+
+
 def fin_de_ambar(a, t):
     """True si en t-1 termina un ambar del programa a (en t ya esta en la fase siguiente)."""
     antes = estado_en(*a, t - 1)
@@ -142,7 +168,8 @@ def fin_de_ambar(a, t):
 def instante_limpio(a, b, desde):
     """(t, regla, problemas) del cambio del programa a al b (fases, ciclo, desfase) desde t >= desde. Con el WAUT en
     t, el semaforo muestra a hasta la posicion t-1 y b desde t (estado_en; SUMO lo ve un segundo despues). Reglas, en
-    orden (docstring del modulo): estricta (el mismo estado en t-1, t y t+1), relajada (problemas_del_cambio vacio),
+    orden (docstring del modulo): estricta (el mismo estado en t-1, t y t+1), relajada (problemas_del_cambio y
+    verdes_cortos vacios),
     respaldo (fin de un ambar de a sin verde_a_rojo ni ambar_corto) y forzado (el primer fin de ambar de a). Las tres
     primeras se buscan en un hiperperiodo; nunca termina el proceso."""
     hasta = desde + math.lcm(a[1], b[1]) + max(a[1], b[1])
@@ -150,7 +177,7 @@ def instante_limpio(a, b, desde):
         if all(estado_en(*a, x) == estado_en(*b, x) for x in (t - 1, t, t + 1)):
             return t, "estricta", []
     for t in range(desde, hasta + 1):
-        if not problemas_del_cambio(a, b, t):
+        if not problemas_del_cambio(a, b, t) and not verdes_cortos(a, b, t):
             return t, "relajada", []
     for t in range(desde, hasta + 1):
         if fin_de_ambar(a, t):
@@ -184,18 +211,46 @@ def cambios_tls(p, secuencia, i):
     return [d["instante"] for d in detalle_cambios(p, secuencia, i)]
 
 
+def tardios(secuencia, por_tls, fin_hora=3600):
+    """Cambios que llegan tarde: [(tls, nominal, instante, motivo)] (mas de TARDE s despues de su nominal, despues
+    del nominal del cambio siguiente o despues de la hora)."""
+    nominales = [t for t, _ in secuencia[1:]]
+    salida = []
+    for tls, lista in por_tls.items():
+        for k, d in enumerate(lista):
+            motivos = []
+            if d["retraso"] > TARDE:
+                motivos.append(f"{d['retraso']} s tarde")
+            if k + 1 < len(nominales) and d["instante"] >= nominales[k + 1]:
+                motivos.append(f"despues del cambio siguiente ({nominales[k + 1]} s)")
+            if d["instante"] >= fin_hora:
+                motivos.append("despues de la hora")
+            if motivos:
+                salida.append((tls, d["nominal"], d["instante"], ", ".join(motivos)))
+    return salida
+
+
 def resumen_cambios(p, secuencia):
-    """{"por_semaforo": {tls: [detalle]}, "reglas": {regla: cuantos}, "aviso": texto o None} de una secuencia."""
+    """{"por_semaforo": {tls: [detalle]}, "reglas": {regla: cuantos}, "retraso_maximo", "tardios": [...],
+    "aviso": texto o None} de una secuencia."""
     por_tls = {tls: detalle_cambios(p, secuencia, i) for i, tls in enumerate(p.ids)} if len(secuencia) > 1 else \
         {tls: [] for tls in p.ids}
     cuenta = {r: sum(1 for lista in por_tls.values() for d in lista if d["regla"] == r) for r in REGLAS_CAMBIO}
     otras = {r: n for r, n in cuenta.items() if n and r != "estricta"}
-    aviso = None
+    tarde = tardios(secuencia, por_tls)
+    avisos = []
     if otras:
-        aviso = (f"cambios sin instante estricto: {otras} (ver por_semaforo; la regla relajada no corta verdes ni "
-                 f"ambares; el respaldo puede dejar un ambar tras un rojo o un verde tras un ambar)")
+        avisos.append(f"cambios sin instante estricto: {otras} (ver por_semaforo; la regla relajada no corta verdes ni "
+                      f"ambares ni deja un verde de menos de {VERDE_MINIMO} s; el respaldo puede dejar un ambar tras "
+                      f"un "
+                      f"rojo o un verde tras un ambar)")
+    if tarde:
+        avisos.append(f"cambios tardios: {len(tarde)} (p. ej. {tarde[0][0]}: nominal {tarde[0][1]} s, instante "
+                      f"{tarde[0][2]} s, {tarde[0][3]})")
     return {"por_semaforo": por_tls, "reglas": cuenta, "retraso_maximo": max(
-        (d["retraso"] for lista in por_tls.values() for d in lista), default=0), "aviso": aviso}
+        (d["retraso"] for lista in por_tls.values() for d in lista), default=0),
+            "tardios": [{"semaforo": x, "nominal": n, "instante": i, "motivo": m} for x, n, i, m in tarde],
+            "aviso": "; ".join(avisos) or None}
 
 
 def texto_waut(p, secuencia, prefijo_pid, wid, comentario=None):
@@ -338,7 +393,7 @@ def bloques(c):
     extra = {}
     ruta_fino = os.path.join(c.carpeta, "fijo_fino.json")
     if os.path.exists(ruta_fino):              # al lado: el fijo fino con las mismas semillas de la verificacion
-        fino = c.comprobar_marca(ruta_fino)
+        fino = c.comprobar_fino(ruta_fino)
         pl_fino = c.plan(fino["verde"], fino["verde_transversal"], fino["offsets"], fino["esquema"])
         if pl_fino["clave"] != fino["clave"]:
             raise SystemExit(f"{ruta_fino}: la clave {fino['clave']} no sale de sus verdes y desfases")
@@ -374,7 +429,7 @@ def instalar(c, pl, fila, sufijo, nombre_json, comentario, extra=None):
     return datos
 
 
-def main():
+def construir_parser():
     ap = argparse.ArgumentParser(description="Fijo por franja y por bloques con WAUT (plan3, 0.8)", allow_abbrev=False)
     ap.add_argument("escenario")
     ap.add_argument("--bloques", action="store_true", help="perfil: un plan por bloque de 600 s")
@@ -385,7 +440,22 @@ def main():
     ap.add_argument("--semillas-final", help="(pruebas) en vez de 2001-2010 / 2001-2030")
     ap.add_argument("--permitir-prueba", action="store_true",
                     help="(pruebas) acepta entradas que no son de la regla y marca la salida como de prueba")
-    args = ap.parse_args()
+    return ap
+
+
+def validar_args(argv):
+    """Lee y revisa los argumentos (argv sin el nombre del programa): parse_args y todos los ap.error, sin leer el
+    escenario ni tocar archivos. Devuelve args o sale como argparse (SystemExit(2), motivo en stderr).
+    chequeos_previos la llama para cada comando de este script en la lista de trabajos."""
+    ap = construir_parser()
+    args = ap.parse_args(argv)
+    if args.procesos < 1:
+        ap.error("--procesos va desde 1")
+    return args
+
+
+def main():
+    args = validar_args(sys.argv[1:])
     t0 = time.time()
     bloque = BLOQUE if args.bloques else CORTE_FRANJA
     semillas = {"barrido": args.semillas,
