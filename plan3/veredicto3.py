@@ -57,7 +57,6 @@ import hashlib
 import argparse
 import tempfile
 import statistics
-import subprocess
 import time
 import xml.etree.ElementTree as ET
 
@@ -76,6 +75,7 @@ import consolidar                       # noqa: E402  solo consolidar.comparar
 import sintesis_plan                    # noqa: E402  solo sintesis_plan.indice_geo
 import generar_trabajos3 as gt          # noqa: E402  celdas, bases y tandas del generador (importarlo no escribe)
 import protecciones                     # noqa: E402  tabla de semillas del prerregistro y git (importarlo no escribe)
+import anclaje                          # noqa: E402  historia de git anclada a origin/plan3 (no escribe)
 import manifiesto as mf                 # noqa: E402  lo que sella el cierre (OTROS; importarlo no escribe)
 
 METRICA = "retraso_total_prom"          # principal (§4)
@@ -2477,6 +2477,17 @@ def texto_md(res, titulo_extra=""):
              "(§11, §14); veredicto3 no los calcula.")
     if res.get("diag"):
         L += ["", "## V2 del diagnóstico del corredor (§6)", ""] + [f"- {x}." for x in res["diag"]]
+    if res.get("reemplazos"):
+        L += ["", "## Corridas rehechas (§14, cola/reemplazos.json)", ""]
+        L += [f"- {r['viejo']} -> {r['nuevo']}: {r['motivo']} ({r['fecha']}; declarado en el commit "
+              f"{r['commit'][:10]}, la vieja en la mañana {r['manana_viejo'][:10]}, la nueva en la "
+              f"{r['manana_nuevo'][:10]})." for r in res["reemplazos"]]
+    if res.get("procedencia"):
+        pr = res["procedencia"]
+        L += ["", "## Procedencia", "",
+              f"- Código: commit {pr['commit']}; rama empujada {pr['ancla']}; sello sha256 {pr['sha256_sello']}.",
+              "- Blobs de git del código del análisis: " + "; ".join(f"{k} {v[:12]}" for k, v in pr["codigo"].items())
+              + ".", "- El sha256 de cada salida está en veredicto3_procedencia.json."]
     if res["avisos"]:
         L += ["", "## Avisos", ""] + [f"- {a}" for a in res["avisos"]]
     L += ["", "La predicción de §15 del prerregistro va al lado de estos resultados para medir la sorpresa. El detalle "
@@ -2499,6 +2510,11 @@ def escribir_salidas(res, carpeta, titulo_extra=""):
         "veredicto3.md": texto_md(res, titulo_extra)}
     for nombre_arch, texto in rutas.items():
         escribir(os.path.join(carpeta, nombre_arch), texto)
+    if res.get("procedencia"):          # P1-M3: el codigo, el ancla, el sello y el sha256 de cada salida
+        datos = dict(res["procedencia"], salidas={n: hashlib.sha256(x.encode("utf-8")).hexdigest()
+                                                  for n, x in rutas.items()})
+        escribir(os.path.join(carpeta, os.path.basename(PROCEDENCIA)), json.dumps(datos, indent=1) + "\n")
+        rutas[os.path.basename(PROCEDENCIA)] = ""
     return [os.path.join(carpeta, n) for n in rutas]
 
 
@@ -2582,128 +2598,54 @@ def comprobar_cierre(raiz):
     return sello
 
 
-# ------- Historia de git anclada a la rama empujada (segunda revision del 05.11: V1-H1 a V1-H4, V1-M3, V1-M4) -------
-# Nadie, por error o a proposito, puede hacer aceptar otro resultado sellado reescribiendo la historia de git, editando
-# archivos sin sellar o repitiendo la prueba final. Todo se ancla a la historia EMPUJADA: despues de git fetch, el
-# commit del sello fijo, cada manana y el primer commit de listo/holdout.ok tienen que ser ancestros de origin/plan3.
-REMOTO, RAMA = "origin", "plan3"
-VISTO = "refs/veredicto3/visto"         # la ultima ancla aceptada (contra un push forzado; git push no la sube)
-ENTORNO_GIT = dict(os.environ, GIT_NO_REPLACE_OBJECTS="1", GIT_TERMINAL_PROMPT="0")
+# ------- Historia de git anclada a la rama empujada (segunda y tercera revision del 05.11) -------
+# Amenaza (PLAN3 §5). (a) Ningun error honesto deja el cierre o la prueba final imposibles para siempre: cada paso
+# irreversible (el push del commit del cierre y el de listo/holdout.ok) tiene su preflight (--preflight cierre|holdout),
+# que corre estas mismas comprobaciones con HEAD como ancla antes del push y nombra el error; un merge de codigo en
+# plan3 no rompe nada (solo cuentan los commits que cambian lo protegido). (b) Una manipulacion la puede ver alguien de
+# afuera con la historia protegida de GitHub y los hashes que Fabian manda al asesor en cada paso clave (las
+# herramientas imprimen el texto). Un operador decidido con todo el control local es un limite declarado (§14: "nada
+# demuestra que nadie miro").
 SELLO, MANANA, CIERRE_OK, HOLDOUT_OK = ("cola/manifiesto_cierre.json", "cola/manifiesto_ciego.json",
                                         "listo/cierre.ok", "listo/holdout.ok")
 CANDADO, SALIDA_FINAL = "listo/holdout.candado", "salidas/veredicto3_prueba_final.csv"
+REEMPLAZOS, ENMIENDAS, ESTADO = "cola/reemplazos.json", "cola/enmiendas.json", "cola/estado.json"
+PROCEDENCIA = "salidas/veredicto3_procedencia.json"
+# los commits que cambian estos archivos forman una sola cadena (los merges que no los cambian no cuentan)
+CADENA = (SELLO, CIERRE_OK, MANANA, HOLDOUT_OK, REEMPLAZOS, ENMIENDAS)
+# lo que el disco no puede tener distinto del ancla al correr --final o --prueba-final (commiteado y empujado)
+# (listo/holdout.ok y la lista se cotejan por contenido en comprobar_holdout; el candado y la salida de la prueba
+# final, en comprobar_holdout y verificar_prueba_final)
+PROTEGIDOS = (SELLO, MANANA, REEMPLAZOS, ENMIENDAS, "cola/caidas.json",
+              "cola/manifiesto_esperado.json", "cola/trabajos.jsonl", "cola/partes.txt", "promocion.json", "promocion",
+              "referencias_congeladas.json", "insumos/manifiesto.json")
+# el codigo del analisis (relativo a plan3/): sin cambios sin commitear en --final y --prueba-final; su blob va en las
+# salidas
+CODIGO = ("veredicto3.py", "manifiesto.py", "generar_trabajos3.py", "protecciones.py", "anclaje.py", "p3_promocion.py",
+          "PRERREGISTRO.md", "../veredicto.py", "../consolidar.py", "../sintesis_plan.py")
+VISTO, TAG = anclaje.VISTO, anclaje.TAG
 
 
 def git_bytes(*args, cwd):
-    """(rc, stdout en bytes, stderr) de git: sin objetos de reemplazo (GIT_NO_REPLACE_OBJECTS=1), sin locks opcionales y
-    con rutas largas."""
-    r = subprocess.run(["git", "-c", "core.longpaths=true", "--no-optional-locks", *args], cwd=cwd,
-                       capture_output=True, env=ENTORNO_GIT)
-    return r.returncode, r.stdout, r.stderr.decode("utf-8", "replace")
+    """(rc, stdout en bytes, stderr) de git con el entorno limpio de anclaje: sin objetos de reemplazo, sin GIT_DIR ni
+    GIT_CONFIG_*, sin preguntar credenciales, con rutas largas y un tiempo maximo."""
+    return anclaje.git(*args, cwd=cwd)
 
 
-class Historia:
-    """La historia de git de una carpeta plan3 anclada a la rama empujada: el ancla es REMOTO/RAMA tal como esta en el
-    remoto (git fetch a FETCH_HEAD, sin mover ninguna rama). Se niega con un repositorio superficial y si la rama
-    empujada se reescribio (push forzado): lo que este repositorio ya vio de ella (refs/remotes/REMOTO/RAMA, que mueven
-    los push, y VISTO, la ultima ancla aceptada) tiene que ser ancestro del ancla. El fetch no mueve
-    refs/remotes/REMOTO/RAMA, asi que la negativa se repite en cada corrida. Lee toda la historia de cada archivo
-    (rev-list --full-history --topo-order --reverse HEAD: un merge no esconde nada) y cada version con cat-file; una
-    lectura que falla es un ERROR, no un borrado. Limite: un push forzado hecho desde un repositorio que no vio la rama
-    de antes no se ve aqui; eso lo cierra la proteccion de la rama en el remoto (sin push forzado ni borrado)."""
+def misma_carpeta(a, b):
+    return os.path.normcase(os.path.abspath(a)) == os.path.normcase(os.path.abspath(b))
 
-    def __init__(self, raiz, remoto=REMOTO, rama=RAMA, traer=True):
-        self.raiz = raiz
-        rc, top, err = git_bytes("rev-parse", "--show-toplevel", cwd=raiz)
-        if rc != 0:
-            raise ErrorVeredicto(f"{raiz} no está en un repositorio git ({err.strip()[:120]}); no se corre")
-        self.top = top.decode().strip()
-        rc, prefijo, err = git_bytes("rev-parse", "--show-prefix", cwd=raiz)
-        self.prefijo = prefijo.decode().strip()
-        rc, sup, err = git_bytes("rev-parse", "--is-shallow-repository", cwd=raiz)
-        if rc != 0 or sup.decode().strip() != "false":
-            raise ErrorVeredicto("el repositorio es superficial (shallow): su historia no está completa; no se corre")
-        ref = f"refs/remotes/{remoto}/{rama}"
-        vistos = [v for v in (self.rev(ref), self.rev(VISTO)) if v]
-        if traer:
-            rc, _, err = git_bytes("fetch", "--quiet", "--no-tags", "--refmap=", remoto, rama, cwd=raiz)
-            if rc != 0:
-                raise ErrorVeredicto(f"no se pudo traer {remoto}/{rama} (git fetch: {err.strip()[:160]}); no se corre")
-        ancla = self.rev("FETCH_HEAD" if traer else ref)
-        if ancla is None:
-            raise ErrorVeredicto(f"no hay {remoto}/{rama}: la historia tiene que estar empujada; no se corre")
-        self.ancla, self.nombre_ancla = ancla, f"{remoto}/{rama}"
-        self._ancestro = {}
-        for v in vistos:
-            if not self.es_ancestro(v, self.ancla):
-                raise ErrorVeredicto(f"{remoto}/{rama} se reescribió (push forzado): {v[:10]}, que este repositorio ya "
-                                     f"vio en la rama empujada, no está en ella; no se corre")
-        if traer and git_bytes("update-ref", VISTO, self.ancla, cwd=raiz)[0] != 0:
-            raise ErrorVeredicto(f"no se pudo guardar {VISTO}; no se corre")
 
-    def rev(self, nombre):
-        """El commit de nombre (una referencia), o None si no existe."""
-        rc, out, _ = git_bytes("rev-parse", "--verify", "--quiet", f"{nombre}^{{commit}}", cwd=self.raiz)
-        return out.decode().strip() if rc == 0 else None
+class Historia(anclaje.Ancla):
+    """anclaje.Ancla con los errores de veredicto3. url='auto': la de PLAN3.md §5 si la carpeta es la de este codigo
+    (--final y --prueba-final de verdad); en un mundo de prueba (otra carpeta, con su origin desnudo), no se coteja."""
 
-    def commits(self, *rels, desde="HEAD"):
-        """Los commits que cambian alguno de rels, del mas viejo al mas nuevo (toda la historia de desde)."""
-        rc, out, err = git_bytes("rev-list", "--full-history", "--topo-order", "--reverse", desde, "--",
-                                 *[self.prefijo + r for r in rels], cwd=self.top)
-        if rc != 0:
-            raise ErrorVeredicto(f"no se pudo leer la historia de git de {', '.join(rels)}: {err.strip()[:160]}")
-        return out.decode().split()
+    Error = Red = ErrorVeredicto
 
-    def en_algun_lado(self, rel):
-        """Algun commit de cualquier rama, tag o reflog de este repositorio cambia rel."""
-        rc, out, err = git_bytes("rev-list", "--all", "--reflog", "--full-history", "--", self.prefijo + rel,
-                                 cwd=self.top)
-        if rc != 0:
-            raise ErrorVeredicto(f"no se pudo leer la historia de git de {rel}: {err.strip()[:160]}")
-        return bool(out.strip())
-
-    def leer(self, c, rel):
-        """El contenido (bytes) de rel en el commit c, o None si no esta en ese commit. Cualquier otra falla: ERROR."""
-        ruta = self.prefijo + rel
-        rc, out, err = git_bytes("cat-file", "-p", f"{c}:{ruta}", cwd=self.raiz)
-        if rc == 0:
-            return out
-        rc2, ls, err2 = git_bytes("ls-tree", c, "--", ruta, cwd=self.top)
-        if rc2 == 0 and not ls.strip():
-            return None
-        raise ErrorVeredicto(f"no se pudo leer {rel} en el commit {c[:10]}: {(err or err2).strip()[:160]}")
-
-    def es_ancestro(self, a, b):
-        """a es ancestro de b o el mismo commit."""
-        if (a, b) not in self._ancestro:
-            rc, _, err = git_bytes("merge-base", "--is-ancestor", a, b, cwd=self.raiz)
-            if rc not in (0, 1):
-                raise ErrorVeredicto(f"git merge-base falló con {a[:10]} y {b[:10]}: {err.strip()[:160]}")
-            self._ancestro[(a, b)] = rc == 0
-        return self._ancestro[(a, b)]
-
-    def anclado(self, c):
-        return self.es_ancestro(c, self.ancla)
-
-    def versiones(self, rel):
-        """[(commit, bytes)] de cada version commiteada de rel; ERROR si un commit lo borra."""
-        salida = []
-        for c in self.commits(rel):
-            contenido = self.leer(c, rel)
-            if contenido is None:
-                raise ErrorVeredicto(f"{rel} se borró en el commit {c[:10]}; no se corre")
-            salida.append((c, contenido))
-        return salida
-
-    def cadena(self):
-        """Los commits que tocan el sello, cierre.ok, las mananas y holdout.ok forman una sola cadena de ascendencia
-        (cada uno es ancestro del siguiente): una manana o un sello en una rama lateral no entra. Si no, ERROR."""
-        cs = self.commits(SELLO, CIERRE_OK, MANANA, HOLDOUT_OK)
-        for a, b in zip(cs, cs[1:]):
-            if not self.es_ancestro(a, b):
-                raise ErrorVeredicto(f"los commits del sello, de las mañanas y de holdout.ok no forman una sola cadena "
-                                     f"({a[:10]} y {b[:10]} están en ramas distintas); no se corre")
-        return cs
+    def __init__(self, raiz, url="auto", **kw):
+        if url == "auto":
+            url = "plan" if misma_carpeta(raiz, PLAN3) else None
+        super().__init__(raiz, url=url, **kw)
 
 
 def sin_cr(b):
@@ -2722,84 +2664,185 @@ def es_version(b, h):
                  hashlib.sha256(lf.replace(b"\n", b"\r\n")).hexdigest())
 
 
+def texto_de(b, donde):
+    """El texto de un archivo con o sin BOM, en UTF-8 o en UTF-16 (como lo deja '>' en PowerShell 5.1); ERROR si no
+    se puede leer."""
+    for bom, cod in ((b"\xff\xfe", "utf-16"), (b"\xfe\xff", "utf-16"), (b"", "utf-8-sig")):
+        if b.startswith(bom):
+            try:
+                return b.decode(cod)
+            except UnicodeDecodeError:
+                break
+    raise ErrorVeredicto(f"{donde}: no se puede leer como texto (UTF-8 o UTF-16)")
+
+
+def json_igual(a, b):
+    """Dos versiones (bytes) de un JSON con el mismo contenido, sin importar los fines de linea, el BOM ni el
+    formato."""
+    try:
+        return json.loads(texto_de(a, "")) == json.loads(texto_de(b, ""))
+    except (ValueError, ErrorVeredicto):
+        return sin_cr(a).strip() == sin_cr(b).strip()
+
+
+def uso_de(tanda):
+    return gt.TANDAS.get(tanda, ("",))[0]
+
+
+def ruta_canonica(e):
+    """La ruta del CSV de una entrada del manifiesto como la escribe generar_trabajos3.evaluacion (mf.ruta_canonica)."""
+    return mf.ruta_canonica(e)
+
+
+def comprobar_rutas(man, trabajos):
+    """P1-H2: cada CSV del manifiesto esta en su ruta canonica (sin './', sin '\\', sin cambios de mayusculas), es la
+    --salida de su trabajo y no se repite (mf.rutas_canonicas, la misma regla de manifiesto.py cierre)."""
+    problemas = mf.rutas_canonicas(man, trabajos)
+    if problemas:
+        raise ErrorVeredicto("rutas del manifiesto que no son las del generador; no se corre: "
+                             + "; ".join(problemas[:5])
+                             + (f" (y {len(problemas) - 5} más)" if len(problemas) > 5 else ""))
+
+
+def comprobar_listas(raiz):
+    """P1-H2: cola/trabajos.jsonl y cola/manifiesto_esperado.json son los que escribe generar_trabajos3 (el codigo de
+    hoy) con cola/partes.txt y cola/caidas.json de la carpeta, como 'generar_trabajos3.py --comprobar'
+    (mf.listas_del_generador, lo mismo que exige manifiesto.py cierre)."""
+    try:
+        malos = mf.listas_del_generador(raiz)
+    except ValueError as ex:
+        raise ErrorVeredicto(f"generar_trabajos3: {ex}; no se corre")
+    if malos:
+        raise ErrorVeredicto(f"{', '.join(malos)} no son los que escribe el generador con cola/partes.txt "
+                             f"(generar_trabajos3.py --comprobar); no se corre")
+
+
+def tabla_del_tag(raiz=PLAN3):
+    """P1-M1: la tabla JSON de §3 del PRERREGISTRO.md del tag de la parte A, y la del disco tiene que tener las mismas
+    semillas. Devuelve la del tag."""
+    rc, prefijo, _ = git_bytes("rev-parse", "--show-prefix", cwd=raiz)
+    rc, texto, err = git_bytes("cat-file", "-p", f"{TAG}:{prefijo.decode().strip()}PRERREGISTRO.md", cwd=raiz)
+    if rc != 0:
+        raise ErrorVeredicto(f"no se pudo leer PRERREGISTRO.md del tag {TAG} ({err.strip()[:120]}); no se corre")
+    tag = protecciones.tabla_prerregistro(texto.decode("utf-8-sig"))
+    if protecciones.tabla_prerregistro()["semillas"] != tag["semillas"]:
+        raise ErrorVeredicto(f"la tabla de semillas de PRERREGISTRO.md no es la del tag {TAG} (§3); no se corre")
+    return tag
+
+
+def procedencia(raiz, hist, sello, exigir):
+    """P1-M3: el commit de HEAD, el ancla, el sha256 del sello y el blob de git de cada archivo del codigo del
+    analisis (CODIGO); con exigir, ERROR si alguno tiene cambios sin commitear."""
+    rutas = [os.path.normpath(os.path.join(PLAN3, r)) for r in CODIGO]
+    rc, st, _ = git_bytes("status", "--porcelain", "--untracked-files=no", "--", *rutas, cwd=PLAN3)
+    sucios = [x.strip() for x in st.decode("utf-8", "replace").splitlines() if x.strip()]
+    if exigir and sucios:
+        raise ErrorVeredicto(f"el código del análisis tiene cambios sin commitear ({'; '.join(sucios[:3])}): commit "
+                             f"(y push) antes; no se corre")
+    blobs = {}
+    for rel, ruta in zip(CODIGO, rutas):
+        rc, out, _ = git_bytes("hash-object", "--", ruta, cwd=PLAN3)
+        blobs[rel] = out.decode().strip() if rc == 0 else ""
+    ruta_s = os.path.join(raiz, SELLO)
+    return {"commit": hist.head, "ancla": hist.ancla, "nombre_ancla": hist.nombre_ancla,
+            "sha256_sello": sha_texto(open(ruta_s, "rb").read()) if os.path.exists(ruta_s) else "",
+            "codigo": blobs, "sin_commitear": sucios}
+
+
 def sello_fijado(hist):
-    """V1-M4: (commit, sello) del cierre. Vale la version de cola/manifiesto_cierre.json del primer commit que contiene
-    listo/cierre.ok (un sello commiteado antes no fija nada); ese commit tiene que estar empujado y el sello tiene que
-    decir el commit de su ultima manana (manifiesto_ciego_commit). Antes, la cadena (Historia.cadena): con un sello o
-    una manana en una rama lateral no hay 'primer commit' que valga."""
-    hist.cadena()
-    c = next((x for x in hist.commits(CIERRE_OK) if hist.leer(x, CIERRE_OK) is not None), None)
-    if c is None:
-        raise ErrorVeredicto("listo/cierre.ok no está commiteado: el cierre es el commit que lo agrega junto con el "
-                             "sello (§14); no se corre")
-    contenido = hist.leer(c, SELLO)
-    if contenido is None:
-        raise ErrorVeredicto(f"el commit que agrega listo/cierre.ok ({c[:10]}) no tiene cola/manifiesto_cierre.json: "
-                             f"el sello y cierre.ok se commitean juntos; no se corre")
-    if not hist.anclado(c):
-        raise ErrorVeredicto(f"el commit del cierre ({c[:10]}) no está en {hist.nombre_ancla} (sin empujar o con la "
-                             f"historia reescrita); no se corre")
-    sello0 = json_de(contenido, f"{SELLO} en el commit del cierre")
-    if not sello0.get("manifiesto_ciego_commit"):
-        raise ErrorVeredicto("el sello del cierre no dice su última mañana (manifiesto_ciego_commit); no se corre")
-    return c, sello0
+    """V1-M4 (y tercera revision, recuperable): (commit, sello) del cierre. Vale el primer commit de la cadena (desde el
+    ancla) que tiene listo/cierre.ok y un sello que cubre su ultima manana: su manifiesto_ciego_commit es una manana
+    anterior de la historia y el manifiesto de la manana de ese commit es el mismo que el del commit del cierre (no
+    hubo otra manana entre el sello y el cierre; por contenido: un merge de codigo no lo cambia). Un sello commiteado
+    antes, temprano, no fija nada; un commit con cierre.ok sin un sello asi tampoco: el cierre es el siguiente que lo
+    traiga (un error honesto, como barrer cierre.ok a una manana, se corrige con el commit del cierre de PLAN3 5.1)."""
+    cs = hist.cadena(*CADENA)
+    mananas = set(hist.commits(MANANA))
+    hay_ok, motivo = False, None
+    for c in cs:
+        if hist.leer(c, CIERRE_OK) is None:
+            continue
+        hay_ok = True
+        contenido = hist.leer(c, SELLO)
+        if contenido is None:
+            motivo = motivo or f"el commit {c[:10]} tiene listo/cierre.ok pero no el sello cola/manifiesto_cierre.json"
+            continue
+        sello0 = json_de(contenido, f"{SELLO} en {c[:10]}")
+        m = sello0.get("manifiesto_ciego_commit") if isinstance(sello0, dict) else None
+        if not m or m not in mananas or not hist.es_ancestro(m, c):
+            motivo = motivo or (f"el sello del commit {c[:10]} dice que su última mañana es {str(m)[:10]}, que no es "
+                                f"una mañana anterior de la historia de git")
+            continue
+        if not json_igual(hist.leer(m, MANANA), hist.leer(c, MANANA) or b"{}"):
+            motivo = motivo or (f"el sello del commit {c[:10]} es de la mañana {m[:10]} y antes del cierre hubo otra: "
+                                f"es un sello viejo")
+            continue
+        return c, sello0
+    if not hay_ok:
+        raise ErrorVeredicto(f"listo/cierre.ok no está commiteado en {hist.nombre_ancla}: el cierre es el commit que "
+                             f"lo agrega junto con el sello (PLAN3 5.1); no se corre")
+    raise ErrorVeredicto(f"no hay un commit de cierre que valga: {motivo}; manifiesto.py cierre va después de la "
+                         f"última mañana y el sello se commitea con cierre.ok (PLAN3 5.1); no se corre")
 
 
-def comprobar_ciego(raiz, sello, hist=None, fijado=None):
-    """Segunda barrera del a ciegas (§14, A5 #8), sobre la historia empujada: el sello, cierre.ok, las mananas y
-    holdout.ok forman una sola cadena; cada manana esta empujada; la ultima manana que dice el sello fijo es una de
-    ellas y es anterior al cierre; ningun CSV cambio su sha256 de una manana a otra; cada CSV sellado de ciego/ aparece
-    en alguna con su primer sha256; y todo CSV de ciego/ de una tanda que no es de la prueba final que aparece en una
-    manana esta sellado o declarado en cola/reemplazos.json (con su nuevo sellado o su trabajo en la lista). Devuelve
-    {csv: (commit, sha256)} de la primera manana de cada CSV."""
+def comprobar_reemplazos(raiz, hist, primero, man):
+    """P1-H4: cola/reemplazos.json con las reglas de mf.validar_reemplazos (las mismas de manifiesto.py cierre), sobre
+    la historia del ancla: cada entrada es una corrida rehecha por un error de codigo (misma tanda y escenario, la clave
+    con un sufijo _r<N> mayor: una sola direccion), con la rehecha en el manifiesto y la vieja fuera; el commit que la
+    agrego (empujado) es posterior a la primera manana de la vieja y anterior a la primera de la nueva; ninguna entrada
+    se borra ni cambia. Devuelve las entradas con su commit y sus mananas (van en las salidas)."""
+    try:
+        actuales = mf.leer_reemplazos(raiz)
+    except ValueError as ex:
+        raise ErrorVeredicto(str(ex))
+    versiones = [(c, json_de(x, f"{REEMPLAZOS} en {c[:10]}")) for c, x in hist.versiones(REEMPLAZOS)]
+    if not actuales and not versiones:
+        return []
+    problemas, salida = mf.validar_reemplazos(actuales, versiones, primero, {e["csv"] for e in man}, hist.es_ancestro)
+    if problemas:
+        raise ErrorVeredicto(f"{REEMPLAZOS} no vale (§14); no se corre: " + "; ".join(problemas[:5]))
+    return salida
+
+
+def comprobar_ciego(raiz, sello, hist=None, fijado=None, man=None):
+    """Segunda barrera del a ciegas (§14, A5 #8), sobre la historia del ancla: el sello, cierre.ok, las mananas,
+    holdout.ok, los reemplazos y las enmiendas forman una sola cadena (sello_fijado); la ultima manana que dice el sello
+    de hoy es una manana de la historia; ningun CSV cambio su sha256 de una manana a otra; cada CSV de una tanda ciega
+    del manifiesto (por su uso, no por el prefijo de la ruta) que esta sellado aparece en alguna manana con su primer
+    sha256, y esa manana es anterior al cierre; los reemplazos valen (comprobar_reemplazos); y todo CSV de ciego/ de una
+    tanda que no es de la prueba final que aparece en una manana esta sellado o reemplazado. Devuelve {csv: (commit,
+    sha256)} de la primera manana de cada CSV; hist.reemplazos, los reemplazos."""
     hist = hist or Historia(raiz)
     c_sello, sello0 = fijado or sello_fijado(hist)
-    hist.cadena()
     versiones = [(h, json_de(t, f"{MANANA} en {h[:10]}")) for h, t in hist.versiones(MANANA)]
     if not versiones:
         raise ErrorVeredicto("no hay ninguna versión commiteada de cola/manifiesto_ciego.json (§14); no se corre")
-    problemas = [f"la mañana {h[:10]} no está en {hist.nombre_ancla}" for h, _ in versiones if not hist.anclado(h)]
+    problemas = []
     mananas = {h for h, _ in versiones}
-    for s, quien in ((sello0, "el sello del cierre"), (sello, "el sello de hoy")):
-        commit = s.get("manifiesto_ciego_commit")
-        if not commit or commit not in mananas:
-            problemas.append(f"{quien} dice que su última mañana es {str(commit)[:10]}, que no es una mañana de la "
-                             f"historia de git")
-    if sello0.get("manifiesto_ciego_commit") in mananas and not hist.es_ancestro(sello0["manifiesto_ciego_commit"],
-                                                                                c_sello):
-        problemas.append("la última mañana del sello no es anterior al commit del cierre")
-    antes = [h for h, _ in versiones if hist.es_ancestro(h, c_sello)]
-    if antes and sello0.get("manifiesto_ciego_commit") in mananas and sello0["manifiesto_ciego_commit"] != antes[-1]:
-        # un sello viejo: se hizo antes de la ultima manana anterior al cierre (p. ej. uno temprano, barrido a una
-        # manana, y un commit del cierre que no trae el nuevo)
-        trae = c_sello in set(hist.commits(SELLO))
-        problemas.append(f"el sello del cierre es de la mañana {sello0['manifiesto_ciego_commit'][:10]} y antes del "
-                         f"cierre hubo otra ({antes[-1][:10]}): es un sello viejo"
-                         + ("" if trae else " (el commit del cierre no trae el sello: el de su árbol es de un commit "
-                                            "anterior)")
-                         + "; manifiesto.py cierre va después de la última mañana y el sello se commitea con cierre.ok")
+    commit = sello.get("manifiesto_ciego_commit")
+    if not commit or commit not in mananas:
+        problemas.append(f"el sello de hoy dice que su última mañana es {str(commit)[:10]}, que no es una mañana de la "
+                         f"historia de git")
     primero = {}
-    for h, man in versiones:
-        for rel, info in man.items():
+    for h, mv in versiones:
+        for rel, info in mv.items():
             if rel in primero and info.get("sha256") != primero[rel][1]:
                 problemas.append(f"{rel}: su sha256 cambió en el manifiesto de la mañana {h[:10]}")
             primero.setdefault(rel, (h, info.get("sha256")))
+    man = man if man is not None else leer_json(os.path.join(raiz, "cola", "manifiesto_esperado.json"))
+    ciegos = {e["csv"] for e in man if uso_de(e["tanda"]) in gt.CIEGAS and not es_final(e["tanda"])}
     for rel, h_sello in sorted(sello["csv"].items()):
-        if not rel.startswith("ciego/"):
+        if rel not in ciegos and not rel.startswith("ciego/"):
             continue
         if rel not in primero:
             problemas.append(f"{rel} no aparece en ningún manifiesto de la mañana")
         elif primero[rel][1] != h_sello:
             problemas.append(f"{rel}: el sha256 del cierre no es el de la primera mañana ({primero[rel][0][:10]})")
-    try:
-        reemplazos = mf.leer_reemplazos(raiz)
-    except ValueError as ex:
-        raise ErrorVeredicto(str(ex))
-    trabajos = set()
-    if os.path.exists(os.path.join(raiz, "cola", "trabajos.jsonl")):
-        with open(os.path.join(raiz, "cola", "trabajos.jsonl"), encoding="utf-8-sig") as f:
-            trabajos = {json.loads(x)["id"] for x in f if x.strip()}
-    for rel in mf.huerfanos(set(primero), set(sello["csv"]), reemplazos, trabajos):
+        elif not hist.es_ancestro(primero[rel][0], c_sello):
+            problemas.append(f"{rel}: su primera mañana ({primero[rel][0][:10]}) no es anterior al cierre")
+    hist.reemplazos = comprobar_reemplazos(raiz, hist, primero, man)
+    reemplazos = {r["viejo"]: r for r in hist.reemplazos}
+    for rel in mf.huerfanos(set(primero), set(sello["csv"]), reemplazos, set()):
         problemas.append(f"{rel} está en el manifiesto de la mañana {primero[rel][0][:10]} y no en el sello ni en "
                          f"cola/reemplazos.json")
     if problemas:
@@ -2868,6 +2911,122 @@ def comprobar_sello_fijo(raiz, sello, hist=None, fijado=None):
     return c0, s0
 
 
+def enmiendas_de(hist):
+    """{archivo: [commits]}: los commits en que cola/enmiendas.json agrego una entrada {archivo, motivo, fecha} (una
+    decision que cambia despues de su primer commit, declarada antes del cambio y empujada)."""
+    salida = {}
+    for c, t in hist.versiones(ENMIENDAS):
+        datos = json_de(t, f"{ENMIENDAS} en {c[:10]}")
+        for x in (datos.get("enmiendas", []) if isinstance(datos, dict) else datos or []):
+            if isinstance(x, dict) and x.get("archivo") and x.get("motivo") and x.get("fecha"):
+                salida.setdefault(x["archivo"], [])
+                if c not in salida[x["archivo"]]:
+                    salida[x["archivo"]].append(c)
+    return salida
+
+
+def comprobar_decisiones(raiz, hist, c_sello, trabajos, man):
+    """P1-H6: las decisiones que lee veredicto3 no cambian despues de tomarse. promocion.json y cada
+    promocion/<esc>.json estan commiteados antes del commit del cierre y no cambian despues de su primer commit; cada
+    decision es la que da p3_promocion con los CSV de su trabajo (se vuelve a calcular); los metas de politica_*.json
+    commiteados no cambian despues de su primer commit; cola/caidas.json solo suma declaraciones. Un cambio vale solo si
+    cola/enmiendas.json lo declaro en un commit anterior (empujado)."""
+    problemas = []
+    enm = enmiendas_de(hist)
+
+    def declarado(rel, c):
+        return any(e != c and hist.es_ancestro(e, c) for e in enm.get(rel, []))
+    decisiones = ["promocion.json"] + sorted(os.path.relpath(p, raiz).replace(os.sep, "/")
+                                             for p in glob.glob(os.path.join(raiz, "promocion", "*.json")))
+    for rel in decisiones:
+        if not os.path.exists(os.path.join(raiz, rel)):
+            continue
+        vers = hist.versiones(rel)
+        if not vers:
+            problemas.append(f"{rel} no está commiteado: la decisión se registra antes de cierre.ok (§12)")
+            continue
+        if vers[0][0] == c_sello or not hist.es_ancestro(vers[0][0], c_sello):
+            problemas.append(f"{rel}: su primer commit ({vers[0][0][:10]}) no es anterior al commit del cierre")
+        for c, t in vers[1:]:
+            if not json_igual(t, vers[0][1]) and not declarado(rel, c):
+                problemas.append(f"{rel} cambió en el commit {c[:10]} sin una enmienda anterior en {ENMIENDAS}")
+    problemas += recalcular_promocion(raiz, trabajos, man)
+    cambios = hist.cambios_por_archivo("politica_*.json")
+    for rel, cs in sorted(cambios.items()):
+        if len(cs) < 2 or "/" in rel:
+            continue
+        vers = hist.versiones(rel)
+        for c, t in vers[1:]:
+            if not json_igual(t, vers[0][1]) and not declarado(rel, c):
+                problemas.append(f"{rel} (meta) cambió en el commit {c[:10]} sin una enmienda anterior en {ENMIENDAS}")
+    vers_c = hist.versiones("cola/caidas.json")
+    for (c1, t1), (c2, t2) in zip(vers_c, vers_c[1:]):
+        antes = {json.dumps(x, sort_keys=True) for x in (json_de(t1, "cola/caidas.json") or [])}
+        despues = {json.dumps(x, sort_keys=True) for x in (json_de(t2, "cola/caidas.json") or [])}
+        if not antes <= despues and not declarado("cola/caidas.json", c2):
+            problemas.append(f"cola/caidas.json perdió o cambió una declaración en el commit {c2[:10]} sin una "
+                             f"enmienda anterior en {ENMIENDAS}")
+    if problemas:
+        raise ErrorVeredicto("decisiones que cambiaron después de tomarse (§12, §14); no se corre: "
+                             + "; ".join(problemas[:5]) + (f" (y {len(problemas) - 5} más)" if len(problemas) > 5
+                                                          else ""))
+
+
+def recalcular_promocion(raiz, trabajos, man):
+    """Cada promocion/<esc>.json y promocion.json son los que escriben p3_promocion decidir y juntar con los argumentos
+    de su trabajo (cola/trabajos.jsonl) y los CSV de hoy (sellados): se recalculan en tmp_ver/ y se comparan."""
+    import contextlib
+    import p3_promocion
+    problemas = []
+    tmp = carpeta_limpia(os.path.join(PLAN3, "tmp_ver", "recalculo_promocion"))
+    semillas = sorted({s for e in man if e["tanda"] == "promo" for s in rango(e["semillas"])})
+    viejas = p3_promocion.SEMILLAS
+    previa = os.getcwd()
+    try:
+        if semillas:
+            p3_promocion.SEMILLAS = semillas
+        os.chdir(raiz)
+        for t in trabajos.values():
+            partes_t = partes_de(t)
+            if "p3_promocion.py" not in " ".join(partes_t) or len(partes_t) < 3:
+                continue
+            k = next(i for i, p in enumerate(partes_t) if p.endswith("p3_promocion.py"))
+            ap = argparse.ArgumentParser(add_help=False)
+            ap.add_argument("modo")
+            ap.add_argument("--celda")
+            ap.add_argument("--v2")
+            ap.add_argument("--candidatos", default="")
+            ap.add_argument("--entradas")
+            ap.add_argument("--salida")
+            try:
+                a = ap.parse_args(partes_t[k + 1:])
+            except SystemExit:
+                problemas.append(f"{t['id']}: no se pudo leer su comando")
+                continue
+            if not a.salida or not os.path.exists(a.salida):
+                continue
+            destino = os.path.join(tmp, a.salida.replace("/", "_"))
+            try:
+                with contextlib.redirect_stdout(io.StringIO()):
+                    if a.modo == "decidir":
+                        p3_promocion.decidir(argparse.Namespace(celda=a.celda, v2=a.v2, candidatos=a.candidatos,
+                                                                salida=destino))
+                    elif a.modo == "juntar":
+                        p3_promocion.juntar(argparse.Namespace(entradas=a.entradas, salida=destino))
+                    else:
+                        continue
+            except SystemExit as ex:
+                problemas.append(f"{a.salida}: p3_promocion no la puede recalcular ({ex})")
+                continue
+            if not json_igual(open(destino, "rb").read(), open(a.salida, "rb").read()):
+                problemas.append(f"{a.salida} no es la que da p3_promocion {a.modo} con los CSV de su trabajo "
+                                 f"({t['id']})")
+    finally:
+        os.chdir(previa)
+        p3_promocion.SEMILLAS = viejas
+    return problemas
+
+
 def sha_lista(ruta):
     """sha256 de la lista de la prueba final, sin los CR de Windows: el que va en listo/holdout.ok
     (python veredicto3.py --sha-lista LISTA.json)."""
@@ -2875,29 +3034,45 @@ def sha_lista(ruta):
         return sha_texto(f.read())
 
 
-def comprobar_holdout(raiz, lista, hist):
-    """V1-H2: listo/holdout.ok se fija en su primer commit, empujado y sin cambios despues: tiene exactamente un
-    sha256, el de la lista (sha_lista), y el archivo de hoy es esa version. La lista esta commiteada en ese commit (o
-    antes) con ese sha256. La prueba final no corrio nunca: ni listo/holdout.candado ni su salida estan en disco ni en
-    la historia (de HEAD, de la rama empujada ni de ninguna rama o reflog de este repositorio: un reset o un amend
-    dejan el commit del candado en el reflog). Devuelve el commit de holdout.ok."""
+def lineas_holdout(b, donde, estricto=False):
+    """Las lineas no vacias de un listo/holdout.ok. Se lee con o sin BOM, en UTF-8 o UTF-16 (un holdout.ok ya empujado
+    en UTF-16 no se pierde); con estricto (preflight, protecciones), ERROR si no es UTF-8 sin BOM con una sola linea."""
+    if estricto:
+        if b.startswith((b"\xff\xfe", b"\xfe\xff")):
+            raise ErrorVeredicto(f"{donde} está en UTF-16 (lo deja así '>' en PowerShell 5.1): escríbalo con "
+                                 f"python veredicto3.py --holdout LISTA")
+        if b.startswith(b"\xef\xbb\xbf"):
+            raise ErrorVeredicto(f"{donde} tiene BOM: escríbalo con python veredicto3.py --holdout LISTA")
+    lineas = [x.strip() for x in texto_de(b, donde).splitlines() if x.strip()]
+    if estricto and (len(lineas) != 1 or not re.fullmatch(r"[0-9a-f]{64}", lineas[0])):
+        raise ErrorVeredicto(f"{donde} tiene que tener una sola línea con el sha256 de la lista: escríbalo con "
+                             f"python veredicto3.py --holdout LISTA")
+    return lineas
+
+
+def comprobar_holdout(raiz, lista, hist, estricto=False):
+    """V1-H2: listo/holdout.ok vale en su primer commit (en la historia del ancla: empujado) y no cambia despues (por
+    contenido: el mismo hash reescrito con otra codificacion no es un cambio, y un merge de codigo no cuenta); tiene
+    exactamente un sha256, el de la lista (sha_lista), y el archivo de hoy es ese. La lista esta commiteada en ese
+    commit (o antes) con ese sha256. La prueba final no corrio nunca: listo/holdout.candado no esta en disco ni en la
+    historia (de la rama empujada, de HEAD ni de ninguna rama o reflog de este repositorio) y su salida no esta
+    commiteada (sin candado, una salida en disco es una corrida cortada: se vuelve a correr). Devuelve el commit."""
     rel_lista = os.path.relpath(os.path.abspath(lista), os.path.abspath(raiz)).replace(os.sep, "/")
     if rel_lista.startswith(".."):
         raise ErrorVeredicto("prueba final: la lista tiene que estar dentro de plan3/ (commiteada)")
     versiones = hist.versiones(HOLDOUT_OK)
     if not versiones:
-        raise ErrorVeredicto("listo/holdout.ok no está commiteado: se commitea y se empuja antes de la noche final "
-                             "(§13)")
-    c_ok, contenido = versiones[0]
-    if not hist.anclado(c_ok):
-        raise ErrorVeredicto(f"el primer commit de listo/holdout.ok ({c_ok[:10]}) no está en {hist.nombre_ancla}")
-    if len(versiones) > 1:
+        raise ErrorVeredicto(f"listo/holdout.ok no está commiteado en {hist.nombre_ancla}: se commitea y se empuja "
+                             f"antes de la noche final (§13)")
+    contenidos = [(c, lineas_holdout(t, f"listo/holdout.ok en {c[:10]}", estricto and k == len(versiones) - 1))
+                  for k, (c, t) in enumerate(versiones)]
+    c_ok, lineas = contenidos[0]
+    if any(x != lineas for _, x in contenidos[1:]):
         raise ErrorVeredicto("listo/holdout.ok cambió después de su primer commit: vale una sola lista (§13)")
-    lineas = [x.strip() for x in contenido.decode("utf-8-sig").splitlines() if x.strip()]
     if len(lineas) != 1 or not re.fullmatch(r"[0-9a-f]{64}", lineas[0]):
         raise ErrorVeredicto("listo/holdout.ok tiene que tener exactamente un sha256: el de la lista (§13)")
     with open(os.path.join(raiz, HOLDOUT_OK), "rb") as f:
-        if sin_cr(f.read()).strip() != sin_cr(contenido).strip():
+        if lineas_holdout(f.read(), HOLDOUT_OK) != lineas:
             raise ErrorVeredicto("listo/holdout.ok de hoy no es el que se commiteó")
     if sha_lista(lista) != lineas[0]:
         raise ErrorVeredicto("listo/holdout.ok no tiene el sha256 de la lista: no es la lista de la enmienda")
@@ -2905,11 +3080,13 @@ def comprobar_holdout(raiz, lista, hist):
     if commiteada is None or sha_texto(commiteada) != lineas[0]:
         raise ErrorVeredicto(f"la lista {rel_lista} no está commiteada (con ese sha256) en el commit de "
                              f"listo/holdout.ok o antes")
-    for rel in (CANDADO, SALIDA_FINAL):
-        if (os.path.exists(os.path.join(raiz, rel)) or hist.commits(rel)
-                or hist.commits(rel, desde=hist.ancla) or hist.en_algun_lado(rel)):
-            raise ErrorVeredicto(f"la prueba final ya corrió ({rel} está en disco o en la historia): no corre una "
-                                 f"segunda vez")
+    if (os.path.exists(os.path.join(raiz, CANDADO)) or hist.commits(CANDADO) or hist.commits(CANDADO, desde="HEAD")
+            or hist.en_algun_lado(CANDADO)):
+        raise ErrorVeredicto(f"la prueba final ya corrió ({CANDADO} está en disco o en la historia): no corre una "
+                             f"segunda vez")
+    if hist.commits(SALIDA_FINAL) or hist.en_algun_lado(SALIDA_FINAL):
+        raise ErrorVeredicto(f"la prueba final ya corrió ({SALIDA_FINAL} está en la historia): no corre una segunda "
+                             f"vez")
     return c_ok
 
 
@@ -2961,10 +3138,40 @@ def comprobar_ciego_final(raiz, csvs, hist, c_ok):
                              + (f" (y {len(problemas) - 5} más)" if len(problemas) > 5 else ""))
 
 
-def comprobar_semillas(manifiesto, texto_prerregistro=None):
+def comprobar_trabajos_finales(hist, entradas, c_ok):
+    """P1-H5: cada CSV de la prueba final lo escribio un trabajo de la cola lanzado despues de listo/holdout.ok: en el
+    cola/estado.json de la rama empujada (lo commitea la manana de la noche final), su registro tiene el commit en que
+    se lanzo, descendiente del primer commit de holdout.ok, una hora de inicio posterior a la de ese commit y codigo 0.
+    Devuelve {trabajo: commit de lanzamiento}. Limite declarado: una corrida a mano con P3_USO puesto a mano."""
+    texto = hist.leer(hist.ancla, ESTADO)
+    if texto is None:
+        raise ErrorVeredicto(f"prueba final: {ESTADO} no está commiteado en {hist.nombre_ancla} (lo commitea la mañana "
+                             f"de la noche final); no corre")
+    registro = (json_de(texto, ESTADO) or {}).get("registro", {})
+    t_ok = hist.fecha(c_ok) or 0
+    problemas, salida = [], {}
+    for e in entradas:
+        r = registro.get(e["trabajo"])
+        if not isinstance(r, dict) or not r.get("commit"):
+            problemas.append(f"{e['trabajo']} no lo lanzó la cola (no está en el registro de {ESTADO})")
+            continue
+        if not hist.es_ancestro(c_ok, r["commit"]):
+            problemas.append(f"{e['trabajo']} se lanzó en {r['commit'][:10]}, que no es posterior a listo/holdout.ok")
+        if float(r.get("primer_inicio_epoch", r.get("inicio_epoch", 0)) or 0) < t_ok:
+            problemas.append(f"{e['trabajo']} empezó antes del commit de listo/holdout.ok")
+        if r.get("codigo") != 0:
+            problemas.append(f"{e['trabajo']} no terminó bien (código {r.get('codigo')})")
+        salida[e["trabajo"]] = r["commit"]
+    if problemas:
+        raise ErrorVeredicto("prueba final: sus CSV no los escribió la cola después de listo/holdout.ok (§13); no "
+                             "corre: " + "; ".join(problemas[:5]))
+    return salida
+
+
+def comprobar_semillas(manifiesto, texto_prerregistro=None, tabla=None):
     """Cada CSV del manifiesto tiene las semillas de su tanda (generar_trabajos3.TANDAS) y caen en el bloque de su uso
-    en la tabla JSON del prerregistro (§3)."""
-    tabla = protecciones.tabla_prerregistro(texto_prerregistro)["semillas"]
+    en la tabla JSON del prerregistro (§3; en --final, la del tag de la parte A)."""
+    tabla = (tabla or protecciones.tabla_prerregistro(texto_prerregistro))["semillas"]
     problemas = []
     for e in manifiesto:
         if e["tanda"] not in gt.TANDAS:
@@ -2980,64 +3187,105 @@ def comprobar_semillas(manifiesto, texto_prerregistro=None):
         raise ErrorVeredicto("semillas del manifiesto distintas de las del prerregistro: " + "; ".join(problemas[:5]))
 
 
-def correr_final(raiz=PLAN3, exigir_semillas=True, carpeta=None, hist=None):
-    """--final: sello del cierre, historia empujada (sello fijo, cadena, mananas), un sello que solo le agrega la prueba
-    final, datos en modo estricto (con el sello y las mananas), semillas del prerregistro; recien entonces el
-    analisis y las salidas."""
-    hist = hist or Historia(raiz)               # primero la historia: un clon superficial se niega por eso
+def leer_trabajos_de(raiz):
+    ruta = os.path.join(raiz, "cola", "trabajos.jsonl")
+    if not os.path.exists(ruta):
+        return {}
+    with open(ruta, encoding="utf-8-sig") as f:
+        return {t["id"]: t for t in (json.loads(x) for x in f if x.strip())}
+
+
+def comprobaciones(raiz, hist, listas):
+    """Lo comun a --final, --prueba-final y los preflight, en orden: el sello del disco, la cadena y el commit del
+    cierre, las rutas y las listas del generador, las mananas y los reemplazos, el sello que vale, las decisiones y, al
+    final, lo protegido del disco igual a lo del ancla (commiteado y empujado; ningun HEAD de una rama lateral).
+    Devuelve (sello, fijado, primero, manifiesto, trabajos)."""
     sello = comprobar_cierre(raiz)
     fijado = sello_fijado(hist)
-    primero = comprobar_ciego(raiz, sello, hist, fijado)
+    man = leer_json(os.path.join(raiz, "cola", "manifiesto_esperado.json"))
+    trabajos = leer_trabajos_de(raiz)
+    comprobar_rutas(man, trabajos)
+    if listas:
+        comprobar_listas(raiz)
+    primero = comprobar_ciego(raiz, sello, hist, fijado, man)
     comprobar_sello_fijo(raiz, sello, hist, fijado)
+    comprobar_decisiones(raiz, hist, fijado[0], trabajos, man)
+    cambiados = hist.protegido_cambiado(PROTEGIDOS)
+    if cambiados:
+        raise ErrorVeredicto(f"lo protegido en el disco no es lo de {hist.nombre_ancla} ({'; '.join(cambiados[:4])}): "
+                             f"commit y push primero, sin cambios después; no se corre")
+    return sello, fijado, primero, man, trabajos
+
+
+def correo(que, datos):
+    """El texto que Fabian manda al asesor despues del push de un paso clave (PLAN3 §5)."""
+    L = [f"Para el asesor (copiar tal cual, después del push): {que} del bloque plan3, "
+         f"{time.strftime('%Y-%m-%d %H:%M')}"]
+    L += [f"  {k}: {v}" for k, v in datos.items()]
+    return "\n".join(L)
+
+
+def datos_cierre(hist, fijado):
+    c, s = fijado
+    return {"origin": anclaje.git("remote", "get-url", anclaje.REMOTO, cwd=hist.raiz)[1].decode().strip(),
+            "commit del cierre": c, "rama plan3 (ancla)": hist.ancla,
+            "sha256 del sello del cierre": sha_texto(hist.leer(c, SELLO)),
+            "última mañana del sello": s.get("manifiesto_ciego_commit", "")}
+
+
+def correr_final(raiz=PLAN3, exigir_semillas=True, carpeta=None, hist=None, listas=None, salidas=True):
+    """--final: la historia anclada (Historia), el sello y lo comun (comprobaciones), los datos en modo estricto, las
+    semillas del prerregistro (la tabla del tag), la prueba final ya corrida (si su candado esta en la rama empujada, se
+    verifica); recien entonces el analisis y las salidas, con su procedencia (P1-M3). En una carpeta que no es la de
+    este codigo (los mundos de prueba) no se cotejan las listas del generador ni el codigo sin commitear."""
+    real = misma_carpeta(raiz, PLAN3)
+    hist = hist or Historia(raiz)               # primero la historia: un clon superficial se niega por eso
+    sello, fijado, primero, man, trabajos = comprobaciones(raiz, hist, real if listas is None else listas)
+    proc = procedencia(raiz, hist, sello, exigir=real)
     d = Datos(raiz, estricto=True, sello=sello, mananas=primero)
     if exigir_semillas:
-        comprobar_semillas(d.manifiesto)
+        comprobar_semillas(d.manifiesto, tabla=tabla_del_tag(raiz) if real else None)
+    if hist.commits(CANDADO):
+        verificar_prueba_final(raiz, hist, d, exigir_semillas)
     res = analizar(d)
+    res["reemplazos"] = list(getattr(hist, "reemplazos", []))
+    if real:
+        res["procedencia"] = proc
+        res["correo"] = correo("cierre", datos_cierre(hist, fijado))
+    if not salidas:
+        return res, []
     rutas = escribir_salidas(res, carpeta or os.path.join(raiz, "salidas"))
     return res, rutas
 
 
-def correr_prueba_final(lista, raiz=PLAN3, exigir_semillas=True, hist=None):
-    """Prueba final reservada (§13): una sola vez, con la lista exacta de la enmienda. Antes de cerrar el candado se
-    valida TODO: el sello (comprobar_cierre) y la historia empujada como en --final; el sello de hoy es el del cierre
-    mas la prueba final, commiteado antes de listo/holdout.ok; holdout.ok fijo en su primer commit con el sha256 de la
-    lista commiteada (comprobar_holdout) y la prueba final nunca corrida; cada brazo de la lista, su CSV y su trabajo
-    (clave, ruta y base de la politica); cada CSV en una tanda de uso 'final' con el bloque completo de su tipo de
-    llegadas (11001-11030 regulares, 12001-12100 aleatorias; tabla JSON de §3), la metrica en cada semilla, las mismas
-    semillas y los mismos vehiculos en los dos brazos (§7), la comparacion misma, y los CSV frente a las mananas
-    (comprobar_ciego_final). El candado listo/holdout.candado se crea en exclusiva con el sha256 de la lista, de
-    holdout.ok, de cada CSV leido y de la salida; despues se commitea. Lista: {"comparaciones": [{"celda",
-    "escenario", "tanda", "a": {"tipo", "base"?}, "b": {"tipo", "base"?}}]}. Lo que se cite de aqui dice 'elegido
-    despues de ver T1 y T2; una tanda'."""
-    if not os.path.exists(os.path.join(raiz, "listo", "cierre.ok")):
-        raise ErrorVeredicto("la prueba final va después del cierre: falta listo/cierre.ok")
-    ok = os.path.join(raiz, HOLDOUT_OK)
-    if not os.path.exists(ok):
-        raise ErrorVeredicto("falta listo/holdout.ok (lo crea Fabian con la enmienda, §13)")
-    with open(ok, encoding="utf-8-sig") as f:
-        if sha_lista(lista) not in f.read():
-            raise ErrorVeredicto("listo/holdout.ok no tiene el sha256 de la lista: no es la lista de la enmienda")
-    candado = os.path.join(raiz, CANDADO)
-    if os.path.exists(candado):
-        raise ErrorVeredicto("la prueba final ya corrió (listo/holdout.candado): no corre una segunda vez")
-    hist = hist or Historia(raiz)               # primero la historia: un clon superficial se niega por eso
-    sello = comprobar_cierre(raiz)
-    fijado = sello_fijado(hist)
-    primero = comprobar_ciego(raiz, sello, hist, fijado)
-    comprobar_sello_fijo(raiz, sello, hist, fijado)
-    c_ok = comprobar_holdout(raiz, lista, hist)
-    comprobar_sellos_final(raiz, sello, hist, c_ok)
-    d = Datos(raiz, estricto=True, sello=sello, mananas=primero)
-    bloques = protecciones.tabla_prerregistro()["semillas"]["final"]      # [regulares, aleatorias] (§3)
+def validar_lista(lista, raiz=PLAN3, d=None, exigir_semillas=True):
+    """P2-M1: lo que --prueba-final comprueba de la lista sin leer CSV, para que un error salga antes de fijarla con
+    holdout.ok: {"comparaciones": [{"celda", "escenario", "tanda", "a": {"tipo", "base"?}, "b": {...}}]}; cada brazo
+    esta en el manifiesto en esa celda y esa tanda (la base, un numero), con el CSV y el trabajo del generador
+    (comprobar_brazo_final); la tanda es de uso 'final' y sus semillas son el bloque completo de su tipo de llegadas
+    (tabla del tag). Devuelve [(item, (entrada a, entrada b), llegadas)]."""
+    datos = leer_json(lista)
+    comps = datos.get("comparaciones") if isinstance(datos, dict) else None
+    if not isinstance(comps, list) or not comps:
+        raise ErrorVeredicto(f"{os.path.basename(lista)}: tiene que ser {{\"comparaciones\": [...]}} con al menos una")
+    d = d or Datos(raiz)
+    tabla = tabla_del_tag(raiz) if misma_carpeta(raiz, PLAN3) else protecciones.tabla_prerregistro()
+    bloques = tabla["semillas"]["final"]                               # [regulares, aleatorias] (§3)
     bloque = {"regulares": list(range(bloques[0][0], bloques[0][1] + 1)),
               "aleatorias": list(range(bloques[1][0], bloques[1][1] + 1))}
-    filas, leidos, finales = [], {}, set()
-    for item in leer_json(lista)["comparaciones"]:
+    salida = []
+    for k, item in enumerate(comps, 1):
+        if not isinstance(item, dict) or not {"celda", "escenario", "tanda", "a", "b"} <= set(item):
+            raise ErrorVeredicto(f"comparación {k}: lleva celda, escenario, tanda, a y b")
         ck = (item["celda"], item["escenario"])
         lleg = (d.celdas[ck]["llegadas"] if ck in d.celdas
                 else "aleatorias" if ck[1].startswith(("poi_", "per_", "mix")) else "regulares")
         lados = []
         for x in (item["a"], item["b"]):
+            if not isinstance(x, dict) or not x.get("tipo"):
+                raise ErrorVeredicto(f"comparación {k}: cada brazo es {{\"tipo\", \"base\"?}}")
+            if "base" in x and not isinstance(x["base"], int):
+                raise ErrorVeredicto(f"comparación {k}: la base va como número (42), no {x['base']!r}")
             e = d.todas.get((ck[0], ck[1], x["tipo"], x.get("base"), item["tanda"]))
             if e is None:
                 raise ErrorVeredicto(f"prueba final: no hay CSV de {x} en {ck} ({item['tanda']})")
@@ -3046,13 +3294,27 @@ def correr_prueba_final(lista, raiz=PLAN3, exigir_semillas=True, hist=None):
                 raise ErrorVeredicto(f"prueba final: la tanda {e['tanda']} no es de uso 'final' (generar_trabajos3)")
             if exigir_semillas and rango(e["semillas"]) != bloque[lleg]:
                 raise ErrorVeredicto(f"prueba final: {e['csv']} no usa el bloque completo de llegadas {lleg} (§3, §13)")
+            lados.append(e)
+        if item["a"] == item["b"]:
+            raise ErrorVeredicto(f"comparación {k}: a y b son el mismo brazo")
+        salida.append((item, tuple(lados), lleg))
+    return salida
+
+
+def filas_prueba_final(comps, d, raiz):
+    """Las filas de la prueba final (la comparacion de cada item de validar_lista) y los CSV leidos."""
+    filas, leidos = [], {}
+    for item, (ea, eb), _ in comps:
+        ck = (item["celda"], item["escenario"])
+        lados = []
+        for e, x in ((ea, item["a"]), (eb, item["b"])):
             leido = d.filas_csv(e)
             if leido is None:
                 raise ErrorVeredicto(f"prueba final: falta {e['csv']}")
             valores, filas_csv = Datos._valores(leido[0], METRICA, ck, ("pub", x["tipo"]))
             leidos[e["csv"]] = sha256(os.path.join(raiz, e["csv"]))
-            lados.append((e, valores, filas_csv))
-        (ea, va, fa), (eb, vb, fb) = lados
+            lados.append((valores, filas_csv))
+        (va, fa), (vb, fb) = lados
         if set(rango(ea["semillas"])) != set(rango(eb["semillas"])):
             raise ErrorVeredicto(f"prueba final: semillas distintas en {ck}")
         malas = generados_iguales({"a": fa, "b": fb})
@@ -3062,34 +3324,101 @@ def correr_prueba_final(lista, raiz=PLAN3, exigir_semillas=True, hist=None):
         comp = comparar(va, vb, set(rango(ea["semillas"])))
         if comp is None:
             raise ErrorVeredicto(f"prueba final: sin cambio en {ck} (la media de la referencia es 0)")
-        finales.update({ea["csv"], eb["csv"]})
         filas.append({"celda": ck[0], "escenario": ck[1], "tanda": item["tanda"], "brazo": json.dumps(item["a"]),
                       "referencia": json.dumps(item["b"]), "metrica": METRICA, "n": comp["n"],
                       "cambio": txt(comp["cambio"]), "ic": txt_ic(comp["ic"]), "p": txt_p(comp["p"]),
                       "nota": "elegido después de ver T1 y T2; una tanda (§13)"})
-    comprobar_ciego_final(raiz, sorted(finales), hist, c_ok)
-    texto = texto_csv(filas, ["celda", "escenario", "tanda", "brazo", "referencia", "metrica", "n", "cambio", "ic",
-                              "p", "nota"])
-    registro = {"lista": os.path.basename(lista), "sha256_lista": sha_lista(lista), "sha256_holdout_ok": sha256(ok),
-                "csv": leidos, "salida": {SALIDA_FINAL: hashlib.sha256(texto.encode("utf-8")).hexdigest()}}
-    real = dentro_de_plan3(candado)
-    os.makedirs(os.path.dirname(real), exist_ok=True)
+    return filas, leidos
+
+
+CAMPOS_FINAL = ["celda", "escenario", "tanda", "brazo", "referencia", "metrica", "n", "cambio", "ic", "p", "nota"]
+
+
+def correr_prueba_final(lista, raiz=PLAN3, exigir_semillas=True, hist=None, listas=None, exigir_cola=True):
+    """Prueba final reservada (§13): una sola vez, con la lista exacta de la enmienda. Antes de escribir nada se valida
+    TODO: lo comun de --final (comprobaciones); holdout.ok fijo con el sha256 de la lista commiteada y la prueba final
+    nunca corrida (comprobar_holdout); el sello que suma la prueba final, anterior a holdout.ok; la lista
+    (validar_lista); los CSV frente a las mananas (comprobar_ciego_final); y que los escribio la cola despues de
+    holdout.ok (comprobar_trabajos_finales). Despues, P1-M5: primero la salida y recien entonces el candado, creado en
+    exclusiva con las filas, el sha256 de la salida, de la lista, de holdout.ok y de cada CSV, la procedencia y los
+    commits de lanzamiento (un corte antes del candado deja volver a correr; despues, no). El candado se commitea y se
+    empuja enseguida (PLAN3 5.3). Lo que se cite de aqui dice 'elegido despues de ver T1 y T2; una tanda'."""
+    real = misma_carpeta(raiz, PLAN3)
+    if not os.path.exists(os.path.join(raiz, "listo", "cierre.ok")):
+        raise ErrorVeredicto("la prueba final va después del cierre: falta listo/cierre.ok")
+    ok = os.path.join(raiz, HOLDOUT_OK)
+    if not os.path.exists(ok):
+        raise ErrorVeredicto("falta listo/holdout.ok (python veredicto3.py --holdout LISTA, §13)")
+    if sha_lista(lista) not in lineas_holdout(open(ok, "rb").read(), HOLDOUT_OK):
+        raise ErrorVeredicto("listo/holdout.ok no tiene el sha256 de la lista: no es la lista de la enmienda")
+    candado = os.path.join(raiz, CANDADO)
+    if os.path.exists(candado):
+        raise ErrorVeredicto("la prueba final ya corrió (listo/holdout.candado): no corre una segunda vez")
+    hist = hist or Historia(raiz)               # primero la historia: un clon superficial se niega por eso
+    sello, fijado, primero, man, trabajos = comprobaciones(raiz, hist, real if listas is None else listas)
+    c_ok = comprobar_holdout(raiz, lista, hist)
+    comprobar_sellos_final(raiz, sello, hist, c_ok)
+    proc = procedencia(raiz, hist, sello, exigir=real)
+    d = Datos(raiz, estricto=True, sello=sello, mananas=primero)
+    comps = validar_lista(lista, raiz, d, exigir_semillas)
+    filas, leidos = filas_prueba_final(comps, d, raiz)
+    entradas = [e for _, lados, _ in comps for e in lados]
+    comprobar_ciego_final(raiz, sorted({e["csv"] for e in entradas}), hist, c_ok)
+    lanzados = comprobar_trabajos_finales(hist, entradas, c_ok) if exigir_cola else {}
+    texto = texto_csv(filas, CAMPOS_FINAL)
+    salida = os.path.join(raiz, SALIDA_FINAL)
+    if os.path.exists(salida) and sin_cr(open(salida, "rb").read()) != texto.encode("utf-8"):
+        raise ErrorVeredicto(f"{SALIDA_FINAL} ya existe (una corrida cortada antes del candado) y no es lo que da hoy "
+                             f"la misma lista: algo cambió; no corre")
+    escribir(salida, texto)
+    registro = {"lista": os.path.relpath(os.path.abspath(lista), os.path.abspath(raiz)).replace(os.sep, "/"),
+                "sha256_lista": sha_lista(lista), "holdout_ok": lineas_holdout(open(ok, "rb").read(), HOLDOUT_OK)[0],
+                "holdout_commit": c_ok, "csv": leidos, "filas": filas,
+                "salida": {SALIDA_FINAL: hashlib.sha256(texto.encode("utf-8")).hexdigest()},
+                "trabajos": lanzados, "procedencia": proc}
+    real_c = dentro_de_plan3(candado)
+    os.makedirs(os.path.dirname(real_c), exist_ok=True)
     try:
-        with open(real, "x", encoding="utf-8") as f:                  # creacion exclusiva: una sola corrida
-            f.write(json.dumps(registro, indent=1) + "\n")
+        with open(real_c, "x", encoding="utf-8", newline="\n") as f:      # creacion exclusiva: una sola corrida
+            f.write(json.dumps(registro, indent=1, ensure_ascii=False) + "\n")
     except FileExistsError:
         raise ErrorVeredicto("la prueba final ya corrió (listo/holdout.candado): no corre una segunda vez")
-    escribir(os.path.join(raiz, SALIDA_FINAL), texto)
+    return filas
+
+
+def verificar_prueba_final(raiz, hist, d=None, exigir_semillas=True):
+    """P1-M4: si el candado esta commiteado en la rama empujada, la prueba final se vuelve a calcular con la lista y
+    los CSV commiteados (sin escribir nada) y tiene que dar las filas del candado y de la salida commiteada; y el
+    sha256 de cada CSV y de la salida es el del candado. Si no, ERROR. Devuelve las filas."""
+    texto_c = hist.leer(hist.ancla, CANDADO)
+    if texto_c is None:
+        raise ErrorVeredicto(f"{CANDADO} no está commiteado en {hist.nombre_ancla}")
+    reg = json_de(texto_c, CANDADO)
+    if not isinstance(reg, dict) or "filas" not in reg or "lista" not in reg:
+        raise ErrorVeredicto(f"{CANDADO} no tiene las filas ni la lista de la prueba final")
+    texto_s = hist.leer(hist.ancla, SALIDA_FINAL)
+    if texto_s is None:
+        raise ErrorVeredicto(f"{SALIDA_FINAL} no está commiteada con el candado")
+    if sha_texto(texto_s) != list(reg["salida"].values())[0]:
+        raise ErrorVeredicto(f"{SALIDA_FINAL} commiteada no es la que guardó el candado")
+    d = d or Datos(raiz)
+    comps = validar_lista(os.path.join(raiz, reg["lista"]), raiz, d, exigir_semillas)
+    filas, leidos = filas_prueba_final(comps, d, raiz)
+    malos = [rel for rel, h in leidos.items() if not es_version(open(os.path.join(raiz, rel), "rb").read(),
+                                                                  reg["csv"].get(rel, ""))]
+    if malos:
+        raise ErrorVeredicto(f"prueba final: {malos[0]} no es el CSV que leyó la prueba final (sha256 del candado)")
+    if filas != reg["filas"] or texto_csv(filas, CAMPOS_FINAL).encode("utf-8") != sin_cr(texto_s):
+        raise ErrorVeredicto("prueba final: volver a calcularla no da las filas del candado y de su salida "
+                             "commiteada; no se corre")
     return filas
 
 
 def comprobar_brazo_final(d, e, x):
     """V1-H3: un brazo de la lista de la prueba final y su CSV son los del generador: la ruta y el trabajo de su clave
     (generar_trabajos3.evaluacion), y con base, la clave <tipo>_s<base> y la politica de esa base."""
-    uso = gt.TANDAS.get(e["tanda"], ("",))[0]
     clave = e.get("clave", "")
-    ruta = f"{'ciego' if uso in gt.CIEGAS else 'parciales'}/{e['tanda']}/eval_{e['escenario']}__{clave}.csv"
-    if e["csv"] != ruta or e.get("trabajo") != f"ev_{e['tanda']}_{e['escenario']}__{clave}" \
+    if e["csv"] != ruta_canonica(e) or e.get("trabajo") != f"ev_{e['tanda']}_{e['escenario']}__{clave}" \
             or e.get("trabajo") not in d.trabajos:
         raise ErrorVeredicto(f"prueba final: {e['csv']} no es el CSV ni el trabajo de la clave {clave} en "
                              f"{e['escenario']} ({e['tanda']})")
@@ -3097,6 +3426,56 @@ def comprobar_brazo_final(d, e, x):
         corrida = gt.corrida_de_politica(politica_de(d.trabajos[e["trabajo"]]))
         if clave != f"{x['tipo']}_s{x['base']}" or corrida is None or corrida[3] != x["base"]:
             raise ErrorVeredicto(f"prueba final: {e['csv']} no juega la base {x['base']} de {x['tipo']}")
+
+
+def escribir_holdout(lista, raiz=PLAN3):
+    """P2-H4 y P2-M1 (--holdout LISTA): valida la lista (validar_lista) y escribe listo/holdout.ok en UTF-8, sin BOM,
+    con una sola linea: el sha256 de la lista. Si holdout.ok ya esta commiteado con otro hash, no lo toca."""
+    validar_lista(lista, raiz)
+    sha = sha_lista(lista)
+    ruta = os.path.join(raiz, HOLDOUT_OK)
+    rc, prefijo, _ = git_bytes("rev-parse", "--show-prefix", cwd=raiz)
+    rc, viejo, _ = git_bytes("cat-file", "-p", f"HEAD:{prefijo.decode().strip()}{HOLDOUT_OK}", cwd=raiz)
+    if rc == 0 and lineas_holdout(viejo, HOLDOUT_OK) != [sha]:
+        raise ErrorVeredicto("listo/holdout.ok ya está commiteado con otro contenido: no se cambia (§13)")
+    escribir(ruta, sha + "\n")
+    return sha
+
+
+def preflight(que, raiz=PLAN3, lista="listo/lista_final.json"):
+    """Antes de un push que no se puede deshacer (PLAN3 §5): corre con HEAD como ancla (y lo del remoto, ancestro de
+    HEAD) las mismas comprobaciones que despues. 'cierre': las de --final, con el analisis y sin escribir salidas.
+    'holdout': las de --prueba-final que no leen CSV de la prueba final, holdout.ok en UTF-8 sin BOM con una sola
+    linea, la lista (por defecto listo/lista_final.json) valida y ninguna manana con CSV de la prueba final todavia.
+    Devuelve el texto para el asesor."""
+    hist = Historia(raiz, en_head=True)
+    if que == "cierre":
+        res, _ = correr_final(raiz, hist=hist, salidas=False)
+        return res.get("correo") or correo("cierre", datos_cierre(hist, sello_fijado(hist)))
+    if que != "holdout":
+        raise ErrorVeredicto(f"--preflight {que}: es 'cierre' o 'holdout'")
+    sello, fijado, primero, man, trabajos = comprobaciones(raiz, hist, misma_carpeta(raiz, PLAN3))
+    ruta_lista = lista if os.path.isabs(lista) else os.path.join(raiz, lista)
+    if not os.path.exists(ruta_lista):
+        raise ErrorVeredicto(f"falta la lista {lista}")
+    versiones = hist.versiones(HOLDOUT_OK)
+    if not versiones:
+        raise ErrorVeredicto("listo/holdout.ok no está commiteado (python veredicto3.py --holdout LISTA y commit)")
+    lineas = lineas_holdout(versiones[-1][1], "listo/holdout.ok commiteado", estricto=True)
+    if sha_lista(ruta_lista) != lineas[0]:
+        raise ErrorVeredicto(f"listo/holdout.ok no tiene el sha256 de {lista}")
+    c_ok = comprobar_holdout(raiz, ruta_lista, hist, estricto=True)
+    comprobar_sellos_final(raiz, sello, hist, c_ok)
+    procedencia(raiz, hist, sello, exigir=misma_carpeta(raiz, PLAN3))
+    comps = validar_lista(ruta_lista, raiz)
+    finales = {e["csv"] for _, lados, _ in comps for e in lados}
+    con_finales = [h for h, t in hist.versiones(MANANA) if finales & set(json_de(t, MANANA))]
+    if con_finales:
+        raise ErrorVeredicto(f"la mañana {con_finales[0][:10]} ya tiene CSV de la prueba final: holdout.ok tiene que "
+                             f"ir antes de la noche final")
+    return correo("holdout.ok de la prueba final", {
+        "commit de holdout.ok": c_ok, f"sha256 de la lista ({lista})": lineas[0],
+        "rama plan3 después del push": hist.head})
 
 
 # ---------------- Pruebas (--probar) ----------------
@@ -3254,7 +3633,7 @@ def csv_sintetico(ruta, e, lleg, brazo, roto=None, no_ins=None):
                       "no_insertados": n_ins, "cambios_fase": 400 + zlib.crc32(f"c|{clave}|{s}".encode()) % 20,
                       "generados": gen, "vehiculos": gen - n_ins, "retraso_total_p1": round(0.95 * r, 4),
                       "retraso_total_p2": round(1.05 * r, 4), "no_insertados_p1": 0, "no_insertados_p2": n_ins})
-    escribir(ruta, texto_csv(filas, list(filas[0])))
+    escribir(ruta, texto_csv(filas, list(filas[0])).replace("\n", "\r\n"))     # CRLF, como evaluar3 (csv)
 
 
 def manifiesto_ciego_de(raiz, manifiesto, filtro):
@@ -3339,7 +3718,7 @@ def mundo_sintetico(raiz):
     politicas_mundo(raiz, trabajos)
     csv_mundo(raiz, manifiesto, trabajos)
     puente_mundo(raiz, SEMILLAS_PRUEBA["puente"])
-    promocion_mundo(raiz, manifiesto, rango(SEMILLAS_PRUEBA["promo"]))
+    promocion_mundo(raiz, trabajos, rango(SEMILLAS_PRUEBA["promo"]))
     escribir(os.path.join(raiz, "listo", "cierre.ok"), "cierre sintetico\n")
     # repositorio git anidado y temporal en la rama plan3, con su origin (un repositorio desnudo al lado): dos mananas
     # de cola/manifiesto_ciego.json, commiteadas y empujadas; despues, el sello y el commit del cierre (con cierre.ok)
@@ -3352,7 +3731,8 @@ def mundo_sintetico(raiz):
     for n, filtro in ((1, lambda e: e["tanda"] in ("t1r", "t2r")), (2, lambda e: True)):
         escribir(os.path.join(raiz, "cola", "manifiesto_ciego.json"),
                  json.dumps(manifiesto_ciego_de(raiz, manifiesto, filtro), indent=1, sort_keys=True))
-        commit_mundo(raiz, f"manana {n}", "cola/manifiesto_ciego.json")
+        commit_mundo(raiz, f"manana {n}", "cola/manifiesto_ciego.json",
+                     *(["promocion.json", "promocion"] if n == 1 else []))
     malos = sellar_mundo(raiz, manifiesto)
     if malos:
         raise ErrorVeredicto(f"mundo sintetico: manifiesto.revisar_historia encontró problemas: {malos[:3]}")
@@ -3385,8 +3765,8 @@ def politicas_mundo(raiz, trabajos):
             et = m.group(3)
             eps = 400 if et.startswith(("p3e400", "p3completo")) else 200
             meta = meta_sintetico(r, m.group(1), m.group(2), et, int(m.group(4)), eps)
-            escribir(os.path.join(raiz, r), f"politica sintetica {r}\n")
-        escribir(os.path.join(raiz, r[:-3] + ".json"), json.dumps(meta) + "\n")
+            escribir(os.path.join(raiz, r), f"\x00politica sintetica {r}\n")        # binario, como un .pt
+        escribir(os.path.join(raiz, r[:-3] + ".json"), json.dumps(meta) + "\r\n")    # CRLF, como rl_ippo
     for cand, salida, et in medianas_pub:
         metas = {r: leer_json(os.path.join(raiz, r[:-3] + ".json")) for r in cand
                  if os.path.exists(os.path.join(raiz, r[:-3] + ".json"))}
@@ -3395,8 +3775,8 @@ def politicas_mundo(raiz, trabajos):
         meta = dict(elegida, etiqueta=et, version_evaluada=True, base_elegida=b,
                     candidatas=[{"base": m["base"], "val_elegido": m["val_elegido"], "politica": r}
                                 for r, m in metas.items()])
-        escribir(os.path.join(raiz, salida[:-3] + ".json"), json.dumps(meta) + "\n")
-        escribir(os.path.join(raiz, salida), f"politica sintetica {salida} (copia de la base {b})\n")
+        escribir(os.path.join(raiz, salida[:-3] + ".json"), json.dumps(meta) + "\r\n")  # como p3_elegir
+        escribir(os.path.join(raiz, salida), f"\x00politica sintetica {salida} (copia de la base {b})\n")
 
 
 def csv_mundo(raiz, manifiesto, trabajos, filtro=None, anomalias=True):
@@ -3428,35 +3808,36 @@ def puente_mundo(raiz, semillas):
         for nombre_csv, tipo in (("fijo", "ref_fijo"), ("ippo_vecinos_s42", "entmed")):
             csv_sintetico(os.path.join(raiz, "insumos", "puente", f"eval_{esc}_{nombre_csv}.csv"),
                           dict(e, tipo=tipo), "regulares", nombre_csv)
-    escribir(os.path.join(raiz, "insumos", "manifiesto.json"), json.dumps({
+    escribir(os.path.join(raiz, "insumos", "manifiesto.json"), (json.dumps({         # CRLF, como p3_insumos
         g: {os.path.basename(p): [os.path.getsize(p), sha256(p)] for p in glob.glob(os.path.join(raiz, g, "*"))}
-        for g in ("insumos/entregado", "insumos/puente")}, indent=0) + "\n")
+        for g in ("insumos/entregado", "insumos/puente")}, indent=0) + "\n").replace("\n", "\r\n"))
 
 
-def promocion_mundo(raiz, manifiesto, semillas):
-    """Promocion con p3_promocion (decidir y juntar), con las semillas dadas; D queda sin decision."""
+def promocion_mundo(raiz, trabajos, semillas):
+    """Promocion como la corre la cola: cada trabajo de p3_promocion (decidir y despues juntar) con su comando tal cual
+    (rutas relativas a plan3/, cwd = la carpeta), con las semillas dadas."""
     import contextlib
     import p3_promocion
     viejas = p3_promocion.SEMILLAS
+    previa = os.getcwd()
     p3_promocion.SEMILLAS = semillas
     try:
-        por_esc, salidas = {}, []
-        for e in manifiesto:
-            if e["tanda"] == "promo":
-                por_esc.setdefault(e["escenario"], []).append(e)
-        with contextlib.redirect_stdout(io.StringIO()):
-            for esc, ents in sorted(por_esc.items()):
-                if esc == gt.D["D"]:
+        os.chdir(raiz)
+        promo = [t for t in trabajos if "p3_promocion.py" in t.get("cmd", "")]
+        for modo in ("decidir", "juntar"):
+            for t in promo:
+                partes_t = partes_de(t)
+                k = next(i for i, x in enumerate(partes_t) if x.endswith("p3_promocion.py"))
+                if partes_t[k + 1] != modo:
                     continue
-                v2 = next(x for x in ents if x["tipo"] in ("promo_p3v2reg", "promo_p3v2poi"))
-                salida = os.path.join(raiz, "promocion", f"{esc}.json")
-                p3_promocion.decidir(argparse.Namespace(
-                    celda=esc, v2=os.path.join(raiz, v2["csv"]), salida=salida,
-                    candidatos=",".join(os.path.join(raiz, x["csv"]) for x in ents if x is not v2)))
-                salidas.append(salida)
-            p3_promocion.juntar(argparse.Namespace(entradas=",".join(salidas),
-                                                   salida=os.path.join(raiz, "promocion.json")))
+                ap = argparse.ArgumentParser(add_help=False)
+                for op in ("--celda", "--v2", "--candidatos", "--entradas", "--salida"):
+                    ap.add_argument(op, default="")
+                a = ap.parse_args(partes_t[k + 2:])
+                with contextlib.redirect_stdout(io.StringIO()):
+                    getattr(p3_promocion, modo)(a)
     finally:
+        os.chdir(previa)
         p3_promocion.SEMILLAS = viejas
 
 
@@ -3954,6 +4335,61 @@ def probar():
            and not any("politica_poi_red_vecinos_p3v2poimed.pt" in x["cmd"] for x in trabajos_t),
            "N25 si caen todas las bases de una familia, el generador no publica su versión evaluada ni la evalúa (y "
            "esa celda queda sin decisión de promoción)")
+        # tercera revision del 05.11: reemplazos (P1-H4), holdout.ok (P2-H4), rutas (P1-H2) y el origin (P1-H1)
+        orden = {c: k for k, c in enumerate(("m1", "e", "m2", "m3"))}
+        anc = lambda a, b: orden[a] <= orden[b]                               # noqa: E731
+        viejo_r, nuevo_r = "ciego/t1r/eval_corredor__fino.csv", "ciego/t1r/eval_corredor__fino_r2.csv"
+        entrada_r = {"viejo": viejo_r, "nuevo": nuevo_r, "motivo": "error de código", "fecha": "2026-11-20"}
+        casos_r = {
+            "bien": ({viejo_r: entrada_r}, [("e", [entrada_r])], {viejo_r: ("m1", ""), nuevo_r: ("m2", "")}, {nuevo_r}),
+            "al revés": ({nuevo_r: dict(entrada_r, viejo=nuevo_r, nuevo=viejo_r)},
+                         [("e", [dict(entrada_r, viejo=nuevo_r, nuevo=viejo_r)])],
+                         {viejo_r: ("m1", ""), nuevo_r: ("m2", "")}, {viejo_r}),
+            "tarde": ({viejo_r: entrada_r}, [("e", [entrada_r])], {viejo_r: ("m1", ""), nuevo_r: ("m1", "")},
+                      {nuevo_r}),
+            "otra clave": ({viejo_r: dict(entrada_r, nuevo="ciego/t1r/eval_corredor__fijo_r2.csv")},
+                           [("e", [dict(entrada_r, nuevo="ciego/t1r/eval_corredor__fijo_r2.csv")])],
+                           {viejo_r: ("m1", "")}, {"ciego/t1r/eval_corredor__fijo_r2.csv"}),
+            "borrada": ({}, [("e", [entrada_r]), ("m3", [])], {viejo_r: ("m1", ""), nuevo_r: ("m2", "")}, {nuevo_r})}
+        res_r = {k: mf.validar_reemplazos(a, v, pr, vig, anc)[0] for k, (a, v, pr, vig) in casos_r.items()}
+        ok(res_r["bien"] == [] and any("no es una corrida rehecha" in m for m in res_r["al revés"])
+           and any("posterior al commit que declara" in m for m in res_r["tarde"])
+           and any("no es una corrida rehecha" in m for m in res_r["otra clave"])
+           and any("se borro o cambio" in m for m in res_r["borrada"]),
+           "N26 cola/reemplazos.json: vale una corrida rehecha (_r<N>) declarada después de la mañana de la vieja y "
+           "antes de la de la nueva; al revés, con otra clave, declarada tarde o borrada después: no")
+        sha_n = "a" * 64
+        lecturas = []
+        for crudo in ((sha_n + "\n").encode("utf-16"), b"\xef\xbb\xbf" + (sha_n + "\r\n").encode(),
+                      (sha_n + "\n" + "b" * 64 + "\n").encode()):
+            fila = [lineas_holdout(crudo, "h")]
+            try:
+                lineas_holdout(crudo, "h", estricto=True)
+                fila.append("acepta")
+            except ErrorVeredicto as ex:
+                fila.append(str(ex).split(":")[0])
+            lecturas.append(fila)
+        ok(lecturas[0] == [[sha_n], "h está en UTF-16 (lo deja así '>' en PowerShell 5.1)"]
+           and lecturas[1] == [[sha_n], "h tiene BOM"] and lecturas[2][1] == "h tiene que tener una sola línea con el "
+           "sha256 de la lista", f"N27 holdout.ok en UTF-16 o con BOM se lee igual (lo empujado no se pierde) y el "
+           f"preflight lo rechaza antes del push; con dos líneas, también {[x[1] for x in lecturas]}")
+        e_r = {"csv": "ciego/t1r/eval_corredor__v2reg_s42.csv", "tanda": "t1r", "escenario": "corredor",
+               "clave": "v2reg_s42", "trabajo": "ev_t1r_corredor__v2reg_s42"}
+        t_r = {"ev_t1r_corredor__v2reg_s42": {"id": "ev_t1r_corredor__v2reg_s42", "cmd": "python evaluar3.py "
+               "--escenario corredor --semillas 8001-8030 --salida ciego/t1r/eval_corredor__v2reg_s42.csv "
+               "--brazo fijo"}}
+        alias = [mf.rutas_canonicas([dict(e_r, csv=c)], t_r) for c in
+                 ("ciego/t1r/eval_corredor__v2reg_s42.csv", "./ciego/t1r/eval_corredor__v2reg_s42.csv",
+                  "ciego\\t1r\\eval_corredor__v2reg_s42.csv", "Ciego/t1r/eval_corredor__v2reg_s42.csv")]
+        ok(alias[0] == [] and all(any("no es la ruta canonica" in m for m in a) for a in alias[1:]),
+           "N28 un CSV del manifiesto con './', '\\' o con otra mayúscula no es su ruta canónica: se niega (P1-H2)")
+        urls = [anclaje.url_normal(u) for u in ("https://github.com/Fabian9533/demo_rl_semaforo.git",
+                                                "git@github.com:Fabian9533/demo_rl_semaforo.git",
+                                                "https://github.com/fabian9533/demo_rl_semaforo",
+                                                "https://github.com/otro/demo_rl_semaforo.git")]
+        ok(urls[0] == urls[1] == urls[2] != urls[3] and anclaje.url_del_plan() is not None
+           and anclaje.url_normal(anclaje.url_del_plan()) == urls[0],
+           "N29 el origin se compara con el de PLAN3.md §5 (https o ssh, con o sin .git; otro dueño no)")
 
     # ===== 3. Mundo sintetico de punta a punta =====
     raiz = os.path.join(TMP_VER, "mundo", "plan3")          # su repositorio git: tmp_ver/mundo (como el worktree)
@@ -4194,10 +4630,16 @@ def probar():
            f"M06b perfil, mezcla y arranque lento (las celdas del generador: per1, per3, mix1, mix3, mixa1 y mixa3): "
            f"{estoc}")
         f = cel[("D", "regulares")]
-        ok(f["etiqueta_v2_citable"] == "MEJORA" and palabra(f["etiqueta_citable"]) == "PENDIENTE"
-           and "promoción" in f["etiqueta_citable"],
-           f"M07 D: veto del actuado ajustado (V2 MEJORA) y sin decisión de promoción el citado queda "
-           f"{f['etiqueta_citable']}")
+        ok(f["etiqueta_v2_citable"] == "MEJORA" and f["etiqueta_citable"] == "MEJORA" and f["promovido"] == "no",
+           f"M07 D: veto del actuado ajustado (V2 MEJORA); con su decisión de promoción (la del trabajo de la cola: "
+           f"V2), el citado queda {f['etiqueta_citable']}")
+        sin_d = json.loads(open(os.path.join(raiz, "promocion.json"), encoding="utf-8").read())
+        sin_d["celdas"].pop(gt.D["D"], None)
+        citado_d = []
+        con_cambio("promocion.json", json.dumps(sin_d), lambda: citado_d.append(
+            Datos(raiz).citado(("D", gt.D["D"]), "v2reg")))
+        ok(citado_d and citado_d[0][0] is None and "falta la decisión de promoción" in citado_d[0][3],
+           f"M07b sin la decisión de promoción de la celda, el modelo citado queda PENDIENTE: {citado_d[0][3]}")
         f = cel[("P1", "regulares")]
         ok(f["modelo_citado"] == "observación nueva" and f["promovido"] == "sí" and f["etiqueta_citable"] == "FUNCIONA"
            and "El modelo citado no es IPPO" in f["lecturas"],
@@ -4431,10 +4873,10 @@ def probar():
         # --- prueba final: tanda de uso 'final' (simulada con humo), todo validado antes del candado exclusivo ---
         gt.TANDAS["f1r"] = ("final", SEMILLAS_PRUEBA["t1r"])
 
-        def manana(nombre_m, filtro, man):
+        def manana(nombre_m, filtro, man, *otros):
             escribir(os.path.join(raiz, "cola", "manifiesto_ciego.json"),
                      json.dumps(manifiesto_ciego_de(raiz, man, filtro), indent=1, sort_keys=True))
-            commit_mundo(raiz, nombre_m, "cola/manifiesto_ciego.json")
+            commit_mundo(raiz, nombre_m, "cola/manifiesto_ciego.json", *otros)
         try:
             # la enmienda como la escribiria el generador: los mismos brazos de t1r en la tanda final, con sus
             # trabajos (uso 'final') y sus CSV (gt.evaluacion)
@@ -4484,7 +4926,13 @@ def probar():
                          "cola/manifiesto_cierre.json")
             escribir(os.path.join(raiz, "listo", "holdout.ok"), f"{sha_lista(lista)}\n")
             commit_mundo(raiz, "holdout", "listo/holdout.ok", "listo/lista_final.json")
-            manana("manana 3", lambda e: True, manifiesto + extra)
+            # la noche final la corre la cola: cola/estado.json registra cada trabajo con el commit en que se lanzo
+            # (despues de holdout.ok) y se commitea con la manana
+            lanzado = git_mundo(raiz, "rev-parse", "HEAD").strip()
+            escribir(os.path.join(raiz, "cola", "estado.json"), json.dumps({"registro": {
+                x["id"]: {"commit": lanzado, "inicio_epoch": time.time() + 1, "primer_inicio_epoch": time.time() + 1,
+                          "codigo": 0} for x in lista_f.trabajos}}, indent=1))
+            manana("manana 3", lambda e: True, manifiesto + extra, "cola/estado.json")
             candado = os.path.join(raiz, "listo", "holdout.candado")
             negarse("M33c con exigir_semillas, una tanda 'final' sin el bloque completo de su tipo de llegadas: se "
                     "niega", lambda: correr_prueba_final(lista, raiz, exigir_semillas=True), "bloque completo")
@@ -4565,14 +5013,16 @@ def probar():
                     "sello: se niega", lambda: comprobar_ciego(raiz, sello_v),
                     "eval_corredor__v2reg_s42_viejo.csv está")
             malos_h, _ = mf.revisar_historia(manifiesto, raiz)
+            # tercera revision (P1-H4): declararlo reemplazado por un CSV que no es su corrida rehecha (_r<N>) ya no
+            # vale; el camino de verdad (la enmienda antes de la corrida rehecha) esta en pruebas/ver/prueba_protocolo
             reemplazo = [{"viejo": otro_csv, "nuevo": "ciego/t1r/eval_corredor__v2reg_s42.csv", "fecha": "2026-11-20",
                           "motivo": "error de código: rehecho con _r2 (§14)"}]
             escribir(os.path.join(raiz, "cola", "reemplazos.json"), json.dumps(reemplazo, indent=1))
-            comprobar_ciego(raiz, sello_v)
+            negarse("M35d el mismo CSV declarado en cola/reemplazos.json con un nuevo que no es su corrida rehecha "
+                    "(_r<N>): se niega", lambda: comprobar_ciego(raiz, sello_v), "no es una corrida rehecha")
             malos_r, _ = mf.revisar_historia(manifiesto, raiz)
-            ok(any(otro_csv in m for m in malos_h) and not malos_r,
-               "M35d el mismo CSV declarado en cola/reemplazos.json (con su nuevo sellado): --final y manifiesto.py "
-               "cierre lo aceptan; sin declarar, manifiesto.py cierre también lo rechaza")
+            ok(any(otro_csv in m for m in malos_h) and any("no es una corrida rehecha" in m for m in malos_r),
+               "M35e manifiesto.py cierre rechaza lo mismo: sin declarar y con una declaración que no vale")
             os.remove(os.path.join(raiz, "cola", "reemplazos.json"))
             # una manana mas con un sha256 distinto para un CSV ya registrado: --final se niega
             man_c[clave_c] = dict(man_c[clave_c], sha256="f" * 64)
@@ -4695,6 +5145,13 @@ def main():
     modo.add_argument("--final", action="store_true", help="el veredicto (exige listo/cierre.ok y el sello)")
     modo.add_argument("--prueba-final", metavar="LISTA", help="prueba final reservada (exige listo/holdout.ok)")
     modo.add_argument("--sha-lista", metavar="LISTA", help="el sha256 de la lista que va en listo/holdout.ok")
+    modo.add_argument("--holdout", metavar="LISTA",
+                      help="valida la lista y escribe listo/holdout.ok (UTF-8, una linea)")
+    modo.add_argument("--preflight", choices=["cierre", "holdout"],
+                      help="antes del push del cierre o de holdout.ok: las mismas comprobaciones, con HEAD como ancla")
+    modo.add_argument("--verificar-prueba-final", action="store_true",
+                      help="vuelve a calcular la prueba final commiteada y la compara con su candado y su salida")
+    ap.add_argument("--lista", default="listo/lista_final.json", help="la lista para --preflight holdout")
     a = ap.parse_args()
     try:
         if a.probar:
@@ -4706,12 +5163,46 @@ def main():
             for f in res["numero"]:
                 print(f"numero unico {f['llegadas']} {f['tanda']} {f['modelo']} frente al {f['referencia']}: "
                       f"{f['cambio'] or f['nota']} {f['ic']}")
+            if res.get("correo"):
+                print(res["correo"])
+            return
+        if a.preflight:
+            texto = preflight(a.preflight, lista=a.lista)
+            print(f"preflight {a.preflight}: todo bien; ahora git push origin plan3 (sin forzar)")
+            print(texto)
+            return
+        if a.holdout:
+            sha = escribir_holdout(os.path.abspath(a.holdout))
+            print(f"escrito listo/holdout.ok (UTF-8, una línea): {sha}")
+            print("siguiente (PLAN3 5.3): git add plan3/listo/holdout.ok; git commit; python veredicto3.py "
+                  "--preflight holdout; git push origin plan3; recién entonces la noche final")
+            return
+        if a.verificar_prueba_final:
+            hist = Historia(PLAN3)
+            filas = verificar_prueba_final(PLAN3, hist)
+            print(f"prueba final verificada: {len(filas)} comparaciones iguales a su candado y a su salida")
+            c_cand = hist.commits(CANDADO)[0]
+            print(correo("candado de la prueba final", {
+                "commit del candado": c_cand, "rama plan3 (ancla)": hist.ancla,
+                "sha256 del candado": sha_texto(hist.leer(c_cand, CANDADO)),
+                "sha256 de la salida": sha_texto(hist.leer(hist.ancla, SALIDA_FINAL)),
+                "filas": "; ".join(f"{f['escenario']} {f['tanda']} {f['cambio']} % {f['ic']}" for f in filas)}))
             return
         if a.sha_lista:
             print(sha_lista(a.sha_lista))
             return
         filas = correr_prueba_final(os.path.abspath(a.prueba_final))
         print(f"prueba final: {len(filas)} comparaciones en salidas/veredicto3_prueba_final.csv")
+        for f in filas:
+            print(f"  {f['celda']} {f['escenario']} {f['tanda']}: {f['brazo']} frente a {f['referencia']}: "
+                  f"{f['cambio']} % {f['ic']}")
+        with open(os.path.join(PLAN3, CANDADO), "rb") as fc:
+            sha_c = sha_texto(fc.read())
+        print("siguiente (PLAN3 5.3), enseguida: git add plan3/listo/holdout.candado "
+              "plan3/salidas/veredicto3_prueba_final.csv; git add -f plan3/ciego/<tandas de la prueba final>; git "
+              "commit; git push origin plan3; python veredicto3.py --verificar-prueba-final (imprime el correo)")
+        print(correo("prueba final", {"sha256 del candado": sha_c, "sha256 de la salida": sha_texto(
+            texto_csv(filas, CAMPOS_FINAL).encode("utf-8")), "filas": len(filas)}))
     except ErrorVeredicto as ex:
         sys.exit(f"veredicto3: {ex}")
 

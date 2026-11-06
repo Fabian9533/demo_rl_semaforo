@@ -74,6 +74,10 @@ PASA  N22 cambio_desde_tag: el mismo archivo, False; cambiado, True; sin seguimi
 PASA  N23 un JSON con BOM se lee (caidas.json en veredicto3 y en el generador); uno inválido es ERROR que nombra el archivo, no un traceback
 PASA  N24 el sha256 de la lista de la prueba final no depende de los fines de línea (--sha-lista)
 PASA  N25 si caen todas las bases de una familia, el generador no publica su versión evaluada ni la evalúa (y esa celda queda sin decisión de promoción)
+PASA  N26 cola/reemplazos.json: vale una corrida rehecha (_r<N>) declarada después de la mañana de la vieja y antes de la de la nueva; al revés, con otra clave, declarada tarde o borrada después: no
+PASA  N27 holdout.ok en UTF-16 o con BOM se lee igual (lo empujado no se pierde) y el preflight lo rechaza antes del push; con dos líneas, también ["h está en UTF-16 (lo deja así '>' en PowerShell 5.1)", 'h tiene BOM', 'h tiene que tener una sola línea con el sha256 de la lista']
+PASA  N28 un CSV del manifiesto con './', '\' o con otra mayúscula no es su ruta canónica: se niega (P1-H2)
+PASA  N29 el origin se compara con el de PLAN3.md §5 (https o ssh, con o sin .git; otro dueño no)
 --- 3. Mundo sintético de punta a punta (tmp_ver/mundo; semillas de humo)
 PASA  M00 el mundo usa el manifiesto del generador (1710 CSV) sin duplicados: agrega solo lo que falta (30, la política por red del corredor; una segunda vez, nada) y quita 4 (dos referencias)
 PASA  M00b el generador no evalúa las bases caídas (gt.CAIDAS) y el sello es el de manifiesto.py (CSV, cada .pt y .json, otros y el commit de la última mañana)
@@ -126,7 +130,8 @@ PASA  M06 P3 aleatorias: etiqueta citable de V2 PENDIENTE (no convergió; provis
 PASA  M06 P4 aleatorias: etiqueta citable de V2 FUNCIONA (esperada FUNCIONA)
 PASA  M06 P6 aleatorias: etiqueta citable de V2 FUNCIONA (esperada FUNCIONA)
 PASA  M06b perfil, mezcla y arranque lento (las celdas del generador: per1, per3, mix1, mix3, mixa1 y mixa3): {'per_corredor': 'FUNCIONA', 'per_red': 'FUNCIONA', 'mix_corredor': 'FUNCIONA', 'mix_red': 'FUNCIONA', 'mixa_corredor': 'FUNCIONA', 'mixa_red': 'FUNCIONA'}
-PASA  M07 D: veto del actuado ajustado (V2 MEJORA) y sin decisión de promoción el citado queda PENDIENTE (falta la decisión de promoción de dem_corredor_t2715_der)
+PASA  M07 D: veto del actuado ajustado (V2 MEJORA); con su decisión de promoción (la del trabajo de la cola: V2), el citado queda MEJORA
+PASA  M07b sin la decisión de promoción de la celda, el modelo citado queda PENDIENTE: falta la decisión de promoción de dem_corredor_t2715_der
 PASA  M08 P1: la promoción (p3_promocion, -3 % en la validación) cita la observación nueva (FUNCIONA) con la etiqueta de V2 al lado
 PASA  M09 P6: se repite en 4 de 5 y lleva la lectura de la espera de inserción
 PASA  M10 m3620: V2 igual al ciclo mínimo -> 'Reproduce el ciclo mínimo'
@@ -163,7 +168,7 @@ PASA  M28h una celda sin modelo principal: fila PENDIENTE con motivo y aviso
 PASA  M28i en --final, una celda sin modelo principal: ERROR (la celda zz (poi_zz) no tiene modelo principal: sin modelo principal (v2reg, v2poi, v2per, v2mix); tipos: ref_fino)
 PASA  M28j regla reactiva al lado (§5, §11): en P3 regular V2 no le gana y la celda lleva la lectura de la regla; en P1 el citado le gana; H0 la cuenta entre los controles que reaccionan (6 casos y su resumen: MEJORA o FUNCIONA en 6 de 6 casos; y en el detalle de 'algún control')
 PASA  M37 cambios de fase (hallazgo 10): a los brazos de rl_ippo (V2, regla) se les resta k de su plantilla (P1: 1; P3: 0) y a los de rl_corredor (fijo fino) no; la fila de comparaciones lo dice
-PASA  M37b en cada fila de cambios de fase (62) lo que se le resta al modelo citado, semilla por semilla frente a su CSV, es el k de la nota, y ninguna va marcada sin verificar []
+PASA  M37b en cada fila de cambios de fase (64) lo que se le resta al modelo citado, semilla por semilla frente a su CSV, es el k de la nota, y ninguna va marcada sin verificar []
 PASA  M38 en --final, si un archivo de la plantilla no es el de insumos/manifiesto.json (o un .sumocfg derivado cambió desde el tag), la fila de cambios de fase va marcada 'k SIN VERIFICAR'; en el mundo, ninguna
 PASA  M38b el aviso 'k sin verificar' sale una vez por escenario y llega al .md; k_cambios dice aparte que no se sabe por dónde corre el brazo y que falta la plantilla
 PASA  M29 una versión publicada que no es la mediana: ERROR (politica_corredor_alta_vecinos_p3v2reg3med.pt: base_elegida 2042, pero la mediana por val_elegido de sus candidatas es 42 (B21))
@@ -172,7 +177,7 @@ PASA  M31 una decisión de promoción con otro sha256 que el registrado: ERROR (
 PASA  M32 la enmienda de la prueba final: sus CSV no entran al veredicto (una línea de aviso), el sello nuevo sale sin problemas y no los sella
 PASA  M32c el sello nuevo solo le agrega la prueba final al del cierre (el manifiesto suma entradas de uso 'final'): se acepta
 PASA  M32b un sello con los CSV de la prueba final: se niega (lo sellado al cierre no coincide; no se corre: los CSV de la prueba final no se sellan al cierre (§13): ['ciego/f1r/eval_corredor__fijo.csv', 'ciego/f1r/eval...)
-PASA  M33 prueba final sin listo/holdout.ok: se niega (falta listo/holdout.ok (lo crea Fabian con la enmienda, §13))
+PASA  M33 prueba final sin listo/holdout.ok: se niega (falta listo/holdout.ok (python veredicto3.py --holdout LISTA, §13))
 PASA  M33b holdout.ok sin el sha256 de la lista: se niega (listo/holdout.ok no tiene el sha256 de la lista: no es la lista de la enmienda)
 PASA  M33c con exigir_semillas, una tanda 'final' sin el bloque completo de su tipo de llegadas: se niega (prueba final: ciego/f1r/eval_corredor__v2reg_s42.csv no usa el bloque completo de llegadas regulares (§3, §13))
 PASA  M33d una métrica vacía: ERROR antes de cerrar el candado (retraso_total_prom vacio en la semilla 424301 (corredor, ref_fino))
@@ -188,7 +193,8 @@ PASA  M34c otra lista, sin el candado en disco y con su sha256 en holdout.ok sin
 PASA  M34d la misma lista sin el candado en disco: se niega (el candado está en la historia) (la prueba final ya corrió (listo/holdout.candado está en disco o en la historia): no corre una segunda vez)
 PASA  M35b un sello cuyo último manifiesto de la mañana no está en la historia de git: se niega (los CSV de ciego/ no son los de cada mañana (§14); no se corre: el sello de hoy dice que su última mañana es <commit>, que no es una mañana de la historia de...)
 PASA  M35c un CSV de ciego/ de una tanda que no es de la prueba final, en una mañana y fuera del sello: se niega (los CSV de ciego/ no son los de cada mañana (§14); no se corre: ciego/t1r/eval_corredor__v2reg_s42_viejo.csv está en el manifiesto de la mañana <commit> y no...)
-PASA  M35d el mismo CSV declarado en cola/reemplazos.json (con su nuevo sellado): --final y manifiesto.py cierre lo aceptan; sin declarar, manifiesto.py cierre también lo rechaza
+PASA  M35d el mismo CSV declarado en cola/reemplazos.json con un nuevo que no es su corrida rehecha (_r<N>): se niega (cola/reemplazos.json no vale (§14); no se corre: ciego/t1r/eval_corredor__v2reg_s42.csv no es una corrida rehecha de ciego/t1r/eval_corredor__v2reg_s42_viejo...)
+PASA  M35e manifiesto.py cierre rechaza lo mismo: sin declarar y con una declaración que no vale
 PASA  M35 un CSV cuyo sha256 cambia de una mañana a otra: se niega (los CSV de ciego/ no son los de cada mañana (§14); no se corre: ciego/h1t1/eval_corredor__c0med.csv: su sha256 cambió en el manifiesto de la mañana <commit>;...)
 PASA  M36 caídas por corrida: veredicto3 da por caídas las mismas 9 bases que el generador deja de evaluar (la V2 con sus 400 episodios y sus dos derivadas, la V2 de la mezcla también en el arranque lento, los 400 episodios aleatorios con sus derivadas)
 PASA  M36b las mismas declaraciones sin corrida: veredicto3 la arma como el generador (gt.corrida_de_tipo) y da las mismas 9 bases
@@ -197,4 +203,4 @@ PASA  M39 manifiesto.py revisar dice qué CSV que falta es de una base caída de
 PASA  M40 un clon superficial (shallow) de la rama empujada: se niega (el repositorio es superficial (shallow): su historia no está completa; no se corre)
 PASA  M41 un push forzado desde otro clon (la rama empujada reescrita): el repositorio que la vio se niega en cada corrida, no solo en la primera; con la rama de vuelta, corre ['origin/plan3 se reescribió (push forzado)', 'origin/plan3 se reescribió (push forzado)']
 PASA  G01 git status --porcelain --ignored -- plan2 TESIS vacío después de las pruebas (git rc 0)
-=== 190 pasan, 0 fallan
+=== 196 pasan, 0 fallan
