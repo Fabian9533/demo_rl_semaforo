@@ -1,64 +1,73 @@
 # Referencias del plan 3 (tareas 0.7-0.12): informe de implementación
 
-05.11.2026. Rama `plan3-ref` (nació de `plan3-dev` en 223f908). Segunda vuelta, la tarde del 05.11: los arreglos de
-la revisión de 0cea683 (32 hallazgos confirmados; aquí, los de las referencias) y la regla reactiva (4faffb7, sobre
-`plan3-dev` fusionado en d2501e5); después, `plan3-dev` otra vez (a742e1b: las semillas del examen y de la final
-solo desde la cola) y la misma guarda antes del sumo directo de `barrer_fino.py` (d01c2a6). Las pruebas corrieron
-enteras en 4faffb7 y otra vez en d01c2a6, el código final; este informe y esas salidas van en el commit siguiente.
+05.11.2026. Rama `plan3-ref` (nació de `plan3-dev` en 223f908). Tres vueltas:
+- la primera, las tareas 0.7-0.12 (hasta eeb82f7);
+- la segunda, la tarde del 05.11: los arreglos de la revisión de 0cea683 y la regla reactiva (4faffb7, d01c2a6);
+- la tercera, la noche del 05.11: la verificación adversarial de 6e8cfab (`plan3-dev` fusionado en d46cc40). Código
+  en 7714544; este informe, `desviaciones.md` §3 y las salidas de las pruebas en el commit siguiente.
 
 ## Respuesta corta
 
-- **Qué hay.** Cinco scripts nuevos en `plan3/` y cambios mínimos, apagados por defecto, en tres archivos entregados:
+- **Qué hay.** Seis scripts nuevos en `plan3/` y cambios mínimos, apagados por defecto, en tres archivos entregados:
 
   | Archivo | Tarea | Qué hace |
   |---|---|---|
   | `plan3/barrer_fino.py` | 0.7 | Fijo fino (regla del prerregistro §5), fijo con verdes de 5 en 5 y el ganador de la gruesa ("fijo desde 10 s"), con puntaje por periodo |
   | `plan3/franja.py` | 0.8 | Fijo por franja (un plan por media hora) y fijo por bloques del perfil, con un WAUT por semáforo en su instante de cambio |
   | `plan3/actuado.py` | 0.9 | Actuado ajustado: descenso por coordenadas en cadena, `delay_based` y dos variantes coordinadas con el fijo fino |
-  | `plan3/reglas.py` | 0.10 | Regla simple U × G, **regla reactiva** (D m) y Max-Pressure para el gancho `decidir` de `rl_ippo`, y su barrido por familia |
+  | `plan3/reglas.py` | 0.10 | Regla simple U × G, regla reactiva (D m) y Max-Pressure para el gancho `decidir` de `rl_ippo`, y su barrido por familia |
   | `plan3/p3_preparar.py` | 0.11 | Trabajo "preparar" de cada noche: `_actuado` y `_trivial` (y `_actuado_aj` solo si se pide) |
-  | `comun.py` | 0.11 | `archivo_actuado` y `archivo_trivial` escriben en un temporal y reemplazan (mismo contenido, byte a byte); `leer_cfg` quita espacios de las rutas (la misma lista con los `.sumocfg` de siempre) |
+  | `plan3/p3_congelar.py` | 0.17 | Parte B: escribe `referencias_congeladas.json` (archivo y sha256 de cada referencia) después de comprobar que cada una es la de su barrido |
+  | `comun.py` | 0.11 | `archivo_actuado` y `archivo_trivial` escriben en un temporal y reemplazan (mismo contenido); `leer_cfg` quita espacios de las rutas |
   | `rl_corredor.py` | 0.7-0.9 | Modos `franja`, `bloques` y `actuado_aj`, y `adicional=` (fijo de otro archivo); sin ellos nada cambia |
   | `evaluar.py` | 0.7-0.10 | `--brazo franja`, `bloques` o `actuado_aj`, `--brazo fijo --programa --nombre`, `--regla`; funciones para `evaluar3` |
 
-- **Lo que cambió con la revisión:**
+  Y en archivos de otros bloques, a pedido: `evaluar3.py` (un brazo por comando, `sha_ref`, referencias congeladas),
+  `generar_trabajos3.py` (salidas, presupuestos, `requiere`) y `chequeos_previos.py` (cada comando con el parser de su
+  script; las referencias congeladas contra el disco).
 
-  | Hallazgo | Arreglo |
+- **Lo más importante de la tercera vuelta: la variante coordinada (b) del actuado no coordinaba en red y malla.**
+  SUMO cuenta su ciclo desde el desfase del programa y solo corre `earliestEnd`/`latestEnd` al ciclo siguiente si el
+  verde ya empezó **y** terminó en el ciclo actual. Con la avenida en la fase 0 de la plantilla (red, malla y sus
+  derivados), cuando la transversal cortaba antes el verde de la avenida empezaba antes del 0 y terminaba después:
+  en el ciclo siguiente su `earliestEnd` ya había pasado y podía cortar antes. Medido con el plan 25/15 de
+  `dem_red_t3620` y la semilla 424301: (b) terminaba la avenida en el fin del plan fijo en 84 de 166 salidas, con
+  ciclos ~25 % más cortos, aun con `maxDur` 60. El `maxDur` heredado de la cadena era una segunda causa (en el
+  corredor, la única). **Sí se puede hacer exactamente lo que dice §5**: el ciclo se cuenta desde el inicio del verde
+  transversal del plan fijo (los mismos instantes del plan fijo; el desfase del programa es el del fino más ese
+  inicio) y la avenida tiene `maxDur` suficiente. Ahora (b) termina la avenida en el fin fijo en 128 de 129 salidas
+  (la otra es el arranque), en P2, P3 y P6 también con `maxDur` = los verdes fijos. La variante (a) tenía el mismo
+  defecto y lleva el mismo arreglo. Cambia el actuado ajustado que veta FUNCIONA: se declara en `desviaciones.md` §3
+  (borrador para la parte B). Detalle en 1.3 y 6.5.
+
+- **Lo demás de la tercera vuelta** (verificación de 6e8cfab):
+
+  | Punto | Arreglo |
   |---|---|
-  | [0, 7, 19] La caché reutilizaba números viejos si cambiaba el código | La huella lleva el sha256 completo de `barrer_fino.py`, `barrer_fijo.py`, `comun.py` y `escenarios_plan2.py` (en `reglas.py`, también `reglas.py`, `rl_ippo.py` y `rl_corredor.py`) y los interruptores `ESCRIBIR_NO_INSERTADOS` y `QUITAR_BLOQUE` de `comun` |
-  | [1] La regla frágil fallaba en el borde exacto del 2 % | Una sola función, `a_2pct`, en centésimas enteras, para la fina y la frágil |
-  | [3] Las etapas seguían sin mirar con qué semillas y qué rejilla corrió la anterior | La gruesa registra llegadas, semillas, rejilla, `--limite` y opciones de prueba; cada etapa compara lo que lee con la regla y se niega si no lo es (salvo `--permitir-prueba`) |
-  | [5] El instante limpio del WAUT a veces no existía y abortaba la franja | Ya no aborta: regla estricta (la de siempre), relajada, respaldo y forzado; `franja.json` y `bloques.json` anotan la regla y el retraso de cada cambio |
-  | [6] `detector-gap` 4 queda topado | Declarado: SUMO lo deja en 43.2 m (≈ 3.1 s) |
-  | [9] La no regresión se había corrido con otro código | Corrida otra vez sobre el código fusionado; la salida dice commit y sha256 |
-  | [12, 13, 16] `evaluar.py` aceptaba combinaciones sin sentido | `adicional` solo con franja, bloques y actuado_aj; nada de plan3 en `cruce`/`cruce2`; `--semillas` obligatorio en sus brazos |
-  | [14] `comun.leer_cfg` sin `strip` | Con `strip` |
-  | [15] `escribir_atomico` dejaba su temporal | Lo borra si no llega a reemplazar |
-  | [17, 22] `reinstalar` pisaba el archivo antes de comprobarlo | Temporal, sha256 y solo entonces reemplazo; si ya es igual, no lo toca; `actuado_aj` fuera de las piezas por defecto |
-  | [20] Abreviaturas de opciones | `allow_abbrev=False` en los cinco scripts |
-  | [24] Bloques no dependía de frágil | `bloques` exige `fijo_fino.json` (y lo pone al lado con las mismas semillas) |
-  | [27] Frágil reescribía el desempate | Lo lee y comprueba que sea el de las etapas; `Celda.cargar` reintenta si Windows niega el acceso |
-  | [29] Sin comprobar el cwd | Se niegan fuera de `plan3/` |
-  | [31] Informe desactualizado | Este |
-  | Nuevo | Familia `reactiva` en `reglas.py` |
-  | Nuevo (de `plan3-dev`, 682b6c2) | `barrer_fino.correr_periodos` llama a `comun.revisar_semilla_ciega` antes de cada sumo: una semilla del examen o de la final sale con error si el proceso no es un trabajo ciego de la cola (`franja.py` y `actuado.py` corren por ahí; `reglas.py` por `rl_ippo` → `comun.iniciar_sumo`, que ya la llama) |
+  | Ensayo de la cadena real | El corredor por la cola, con los comandos del generador, sin opciones de prueba y las semillas de la regla (2 CPU); después `evaluar3` con cada brazo de referencia, semilla por semilla contra el barrido: 17 trabajos, 0 fallidos, 25 min de reloj (0.93 h-p estimadas); los 9 brazos dan, semilla por semilla, lo mismo que el barrido (2.8) |
+  | [21] Referencias congeladas (G1-F2) | `evaluar3` anota `sha_ref`; a ciegas se niega antes de simular si la referencia no es la de `referencias_congeladas.json`; las evaluaciones decisivas de referencias lo tienen en `requiere`; `chequeos_previos` compara el disco con el JSON; `p3_congelar.py` lo escribe |
+  | Código del tag (G1-F3) y B22 de las referencias (G1-F7) | Borrador de `desviaciones.md` §3: commit y blobs del código que corre, cada diferencia de comportamiento con el tag y el procedimiento B22 de las referencias (salidas viejas a `barridos_viejos/`, ids `_r2`) |
+  | Huella del fijo fino (G3-2, G1-F10) | El paso 6 del actuado y `franja --bloques` leen `fijo_fino.json` con su huella (calculada con los cortes de su propio barrido) |
+  | Generador ↔ scripts (G1-F4) | `validar_args(argv)` en los cinco scripts y en `evaluar3`; `chequeos_previos` valida cada comando de la lista con el parser de su script |
+  | Barridos de reglas en otras familias | `--familia reactiva` (humo) en `per_corredor`, `mix_corredor`, `malla3_alta_e`, `poi_red`, `dem_corredor_t2715_der` y `red`: 6 de 6 con código 0 y un `reactiva.json` correcto (ganadora de la rejilla, su familia y escenario, 3 finalistas con llegadas regulares y las 5 con aleatorias, la marca de prueba) |
+  | WAUT (G3-1, G3-3) | La relajada solo si ningún verde que toca el cambio queda por debajo de 10 s; aviso de los cambios estrictos tardíos (más de 300 s, después del cambio siguiente o de la hora) |
+  | Reglas (G1-F6, G2-4) | La huella de las reglas cubre también `escenarios_plan3.py` y `con_escenarios.py`; nombres de la reactiva solo de su rejilla (`fullmatch`) |
+  | `evaluar3` (G2-1, G3-6, G3-7) | Un solo brazo por comando; `--regla-de` se niega con la marca de prueba, otra familia u otro escenario |
+  | Presupuestos y salidas (G1-F5, G2-5) | Reglas por familia y llegadas (51/36/33 de 84 o 300/150/120 de 420), sin EMPAQUE doble, pasos del actuado por sus corridas; los `*_semillas.csv` declarados |
+  | Escenario en la huella (G3-4) | Los XML del escenario se hashean con los fines de línea normalizados |
+  | Pruebas nuevas | Oráculo independiente de la reactiva (`getNextTLS`) y su reloj (G2-2); posición de los detectores (G1-F9); identidad barrido = evaluación con WAUT no estricto; huella de las reglas; ids de los trozos; huérfanos por pid (unitaria) |
+  | `trivial` en `cruce`/`cruce2` (G3-8) | Rechazado |
+  | Los 32 hallazgos de 0cea683 | Punto por punto en la sección 7 |
 
-- **Números:** ningún número de lo entregado ni de las pruebas anteriores cambia. Cambian las huellas (y por eso se
-  vuelve a correr todo lo guardado, con los mismos resultados) y aparecen números nuevos donde antes no había: la
-  familia reactiva y los pares de franja sin instante estricto (antes abortaban).
-- **Pruebas: pasan las nueve** (210 chequeos; sección 4), en el código final (d01c2a6) y antes en 4faffb7. Lo
-  nuevo: la regla reactiva da el mismo tripinfo que la lógica del prototipo (P1 y P6) y respeta la máscara; la huella
-  cambia si cambia `comun.py` (y entonces se vuelve a correr todo, con los mismos números) y no si solo cambian sus
-  fines de línea; las etapas se niegan a leer entradas de prueba; frágil lee el desempate sin tocarlo; los pares de
-  franja sin instante estricto ya no abortan y no cortan verdes; `reinstalar` no pisa nada que no sea el congelado.
-- **No regresión** (código final, d01c2a6; la salida dice commit y sha256 de `comun.py`, `rl_ippo.py`, `evaluar.py` y
-  `rl_corredor.py`): 23 de 24 brazos repiten dígito a dígito sus CSV entregados; el 24.º, IPPO en P6, difiere solo en
-  `cambios_fase` (4 menos que el entregado en cada semilla), la diferencia ya explicada: el código entregado corrido
-  hoy da lo mismo y el CSV entregado se corrió con otra plantilla (`prueba_nr_p6`, 2 de 2). `veredicto.py --probar`
-  pasa.
-- **Lo dudoso** está en la sección 6. Lo principal: el instante estricto del WAUT puede llegar tarde (hasta 708 s en
-  3000 pares al azar; ahora queda anotado); y para que la cola rechace `--permitir-prueba` hay que sumarlo a las
-  opciones de prueba de `protecciones.py`.
+- **Números.** Cambian, y se declara: la variante coordinada (a) en P3 y P6 (21.61 → 22.55 y 115.94 → 118.13 s/veh
+  con el fijo entregado como fino; la (b) no cambia ahí porque la transversal del plan entregado está en su mínimo) y
+  los programas de la franja en los pares sin instante estricto con verdes cortos (de relajada a respaldo). Nada de lo
+  entregado cambia.
+- **Pruebas:** pasan las 12 (245 chequeos; sección 4), todas en el código final. Los números de antes no cambian, salvo la variante (a) en P3 y P6, que el arreglo implica.
+- **No regresión** (código final; la salida dice commit y sha256 de `comun.py`, `rl_ippo.py`, `evaluar.py` y
+  `rl_corredor.py`): 23 de 24 brazos repiten dígito a dígito sus CSV entregados; el 24.º, IPPO en P6, difiere solo en `cambios_fase` (4 menos que el entregado en cada semilla), la diferencia ya explicada (`prueba_nr_p6`, 2 de 2). `veredicto.py --probar` pasa.
+- **Lo dudoso** está en la sección 6. Lo principal: la variante coordinada cambió después del tag (declarado); el
+  instante estricto del WAUT puede llegar muy tarde (se avisa; un tope sería una enmienda de B8).
 
 ---
 
@@ -93,7 +102,8 @@ anotadas en el `registro` del JSON de cada salida (`"prueba": [...]`; vacío = l
 - donde se usa el fijo fino (paso 6 del actuado, bloques) o un paso anterior del actuado: su marca de prueba.
 
 Si algo no es de la regla se niega y dice qué; con `--permitir-prueba` (solo pruebas) sigue con un aviso y su propia
-salida queda marcada como de prueba. La cola no debe pasar `--permitir-prueba` (sección 6).
+salida queda marcada como de prueba. La cola rechaza `--permitir-prueba` como las demás opciones de prueba
+(capa 1 de `protecciones.py`, desde 7192185).
 
 ### 1.1 `barrer_fino.py` (0.7)
 
@@ -146,8 +156,9 @@ Etapas (cada una lee lo que dejó la anterior en `barridos/<esc>/`):
   con las semillas del barrido; finalistas como en la tabla de semillas; gana la menor media.
 - **Bloques (perfil):** el mejor plan de cada bloque de 600 s según su puntaje por bloque (el barrido del perfil se
   corre con `--bloque 600`), una secuencia de hasta 6 programas (un bloque con el mismo plan que el anterior no
-  cambia), verificada con 2001-2030. Va después de `fragil`: exige `fijo_fino.json` y pone al lado el fijo fino con
-  las mismas semillas (`fijo_fino_mismas_semillas`), así `bloques.json` no depende del orden en que corra la cola.
+  cambia), verificada con 2001-2030. Va después de `fragil`: exige `fijo_fino.json`, con su huella (la de su propio
+  barrido, con sus cortes), y pone al lado el fijo fino con las mismas semillas (`fijo_fino_mismas_semillas`); así
+  `bloques.json` no depende del orden en que corra la cola ni de un fijo fino viejo.
 - **WAUT (B8):** un `<WAUT>` por semáforo, sin `procedure`; el plan nuevo entra alineado con su propio desfase. El
   instante de cambio de cada semáforo es el primero desde el corte (y después del cambio anterior) que cumple, en
   este orden:
@@ -155,13 +166,16 @@ Etapas (cada una lee lo que dejó la anterior en `barridos/<esc>/`):
   | Regla | Cuándo | Qué se ve en el semáforo |
   |---|---|---|
   | estricta | los dos planes muestran el mismo estado en t − 1, t y t + 1 (la de siempre) | nada: el cambio no se nota |
-  | relajada | si no hay estricta en un hiperperíodo: el paso del estado viejo al nuevo es uno que haría un plan normal | ningún verde pasa a rojo sin ámbar, ningún ámbar queda corto, ningún rojo pasa a ámbar ni ningún ámbar a verde; el verde que toca el cambio puede quedar corto |
+  | relajada | si no hay estricta en un hiperperíodo: el paso del estado viejo al nuevo es uno que haría un plan normal y ningún verde que lo toca dura menos de 10 s | ningún verde pasa a rojo sin ámbar, ningún ámbar queda corto, ningún rojo pasa a ámbar ni ningún ámbar a verde, ningún verde de menos de 10 s |
   | respaldo | si tampoco: el primer fin de un ámbar del plan viejo sin verde a rojo ni ámbar corto | los enlaces que terminaron su ámbar pueden seguir en ámbar o pasar a verde, y uno en rojo puede ver un ámbar; ninguno corta un verde |
   | forzado | si ni eso (no pasa con las plantillas de P1-P6: sus ámbares no tienen verdes) | el primer fin de ámbar del plan viejo, con los problemas anotados |
 
   `franja.json` y `bloques.json` traen `cambios`: por semáforo y por cambio, la regla, el instante nominal, el
-  instante y el retraso (instante − nominal), la cuenta por regla, el retraso máximo y un aviso si alguno no fue
-  estricto (el aviso va también en el comentario del `.add.xml`; con todos estrictos el archivo es el de siempre).
+  instante y el retraso (instante − nominal), la cuenta por regla, el retraso máximo, los cambios tardíos (más de
+  300 s después del nominal, después del nominal del cambio siguiente o después de la hora) y un aviso si alguno no
+  fue estricto o llegó tarde (el aviso va también en el comentario del `.add.xml`; con todos estrictos y a tiempo el
+  archivo es el de siempre). En 3000 pares al azar de P1, P3 y P6, la estricta llegó hasta 708 s tarde: un tope sería
+  una enmienda de B8, así que solo se avisa.
   El archivo se carga **encima** de los adicionales del `.sumocfg` (el WAUT activa `franja1`/`bloque1` desde 0 s);
   nunca va dentro de un `.sumocfg`.
 - **Escribe** en `barridos/<esc>/`: `franja.csv` (los 9 pares), `franja_final.csv`, `franja_semillas.csv`,
@@ -193,10 +207,28 @@ Etapas (cada una lee lo que dejó la anterior en `barridos/<esc>/`):
   difieren del defecto de SUMO (`delay_based` los escribe siempre).
 - **Ojo con `minTimeLoss`:** SUMO 1.25 lee la clave `minTimeloss` (así está en `sumo.exe`); con `minTimeLoss`, como
   dice su documentación, la ignora sin aviso. `actuado.py` escribe `minTimeloss`.
-- **Dos variantes coordinadas** (prerregistro §5): `coordinated=true`, `cycleTime` y desfases del fijo fino, las fases
-  de su plantilla con sus duraciones y los parámetros del mejor actuado; (a) el verde de avenida con `earliestEnd` en
-  su fin del plan fijo, y (b) "fin fijo": `latestEnd` = `earliestEnd` en la avenida **y** `latestEnd` en la
-  transversal, cada uno en su fin del plan fijo. El paso 6 corre las dos.
+- **Dos variantes coordinadas** (prerregistro §5): `coordinated=true`, `cycleTime` del fijo fino, las fases de su
+  plantilla con sus duraciones y los parámetros del mejor actuado; (a) el verde de avenida con `earliestEnd` en su fin
+  del plan fijo, y (b) "fin fijo": `latestEnd` = `earliestEnd` en la avenida **y** `latestEnd` en la transversal, cada
+  uno en su fin del plan fijo. El paso 6 corre las dos (paso 6 con 2001-2003, como los demás).
+- **Cómo cuenta SUMO el ciclo, y por qué importa** (verificación de 6e8cfab). `timeInCycle = (t − offset) mod
+  cycleTime`, y un verde con `earliestEnd` y `latestEnd` solo pasa esos valores al ciclo siguiente si ya empezó **y**
+  terminó en el ciclo actual. Si el verde de la avenida cruza el 0 del ciclo (empieza antes porque la transversal cortó
+  antes, y termina después), en el ciclo siguiente su `earliestEnd` ya pasó: corta antes y el ciclo se acorta. Pasa
+  cuando la avenida es la fase 0 de la plantilla: red, malla y todos sus derivados. Por eso el ciclo se cuenta desde el
+  inicio del verde transversal del plan fijo (`referencia_coordinada`): los `earliestEnd`/`latestEnd` son los mismos
+  instantes del plan fijo, contados desde ahí, y el desfase del programa es el del fino más ese inicio. Así la avenida
+  empieza y termina siempre dentro del mismo ciclo. En el corredor (la avenida es la fase 2 y la transversal la 0) el
+  programa no cambia.
+- **`maxDur` de la avenida en las coordinadas:** no menor que lo que necesita para llegar a su fin. En (b), el ciclo
+  entero (su `latestEnd` la corta igual en su fin; con menos, un arranque corto se perpetuaba). En (a), el ciclo menos
+  los ámbares y los `minDur` de los otros verdes (lo que necesita si la transversal corta en su mínimo; sin `latestEnd`
+  puede alargar). Los pasos 1-5 siguen con los `maxDur` de la cadena.
+- **Lo medido** (`pruebas/ref/medir_coordinada.txt`, semilla 424301): con el plan 25/15 de `dem_red_t3620`, (b) antes
+  terminaba la avenida en el fin fijo en 84-91 de 164-167 salidas (el plan fijo tiene 130) con `maxDur` 60, y en 24-29
+  de 176-177 con `maxDur` = los verdes fijos; ahora, 128-130 de 129-130 salidas en los dos casos (lo que falta es el
+  arranque). En el corredor (22/15) antes fallaba solo con `maxDur` = los verdes fijos (22-27 de 163); ahora 138-139 de
+  139-140. `prueba_actuado` 6 lo comprueba en P2, P3 y P6 con un plan con holgura y `maxDur` = los verdes fijos.
 - **Escribe** en `barridos/<esc>/`: `actuado_paso<k>.csv`, `actuado_paso<k>.json` (partida, variantes, elegida y
   registro), `actuado_paso<k>_semillas.csv`, `actuado_final.csv`, `actuado_final_semillas.csv`, `actuado_aj.json`; y
   `<esc>_actuado_aj.add.xml`.
@@ -210,13 +242,19 @@ Etapas (cada una lee lo que dejó la anterior en `barridos/<esc>/`):
 - `hacer_decidir(regla)` da la función `decidir` para `rl_ippo.correr_episodio(..., variante="local", decidir=...)`:
   las tres familias corren por `reglas.correr` → `rl_ippo.correr_episodio` con el gancho `decidir` (mismo reloj de
   5 s, máscara, ámbar y métricas que IPPO; sin tocar `rl_ippo.py`). Crear una por episodio.
-- Nombres (patrón `^(regla_u(\d+|inf)g\d+|reactiva_d\d+|mp(_det)?(_c\d+)?)$`):
+- Nombres (con `fullmatch`, sin ceros a la izquierda; la reactiva solo con D de su rejilla):
   - `regla_u<U>g<G>` (U entero o `inf`; `regla_uinfg60` es el ciclo mínimo);
   - `reactiva_d<D>`: **regla reactiva**, alarga cualquier verde mientras haya un vehículo a ≤ D m de la línea de
     detención en algún carril con verde (enlace `G` o `g` en el estado del semáforo; distancia = largo del carril −
-    posición del vehículo); si no hay ninguno, cambia. Es la lógica del prototipo
-    `analisis_mejora_2026-11-04/plan3/critica_resultados/reloj_reactivo.py` con el reloj de 5 s (la prueba lo
-    comprueba tripinfo a tripinfo);
+    posición del vehículo; los vehículos que ya entraron al cruce no cuentan); si no hay ninguno, cambia; D ∈ {15,
+    25, 35, 50, 70} (`reactiva_d26` o `reactiva_d025` se rechazan). Qué cubre la comparación con el prototipo
+    (`analisis_mejora_2026-11-04/plan3/critica_resultados/reloj_reactivo.py`): `prueba_reglas` 5 corre una copia de
+    su lógica (`hacer_decidir`) y esta regla por el mismo bucle de `rl_ippo`, con el reloj de 5 s, en el corredor y
+    `malla3_alta` regulares, y da el mismo tripinfo; y `prueba_reglas` 7 la compara con un oráculo independiente
+    (`traci.vehicle.getNextTLS`: distancia y estado del propio enlace de cada vehículo), sin diferencias en 856 y 5468
+    decisiones libres. Las cifras del prototipo en P1 (`poi_corredor`) se reproducen; las de P6 no, porque el
+    prototipo armó la entrada de P6 con la opción `departLane best` y plan3 con el atributo del flujo (prerregistro §5,
+    "Inserción en los escenarios nuevos"); con la misma forma de entrada salen iguales (verificación de 6e8cfab);
   - `mp`, `mp_det`, `mp_c<C>`, `mp_det_c<C>` (Max-Pressure).
 
   Toda acción respeta la máscara (hay un `assert`).
@@ -227,7 +265,9 @@ Etapas (cada una lee lo que dejó la anterior en `barridos/<esc>/`):
   `<familia>.json` (`regla.json`, `reactiva.json` o `mp.json`): su campo `"regla"` es el nombre de la ganadora (p. ej.
   `reactiva_d25`), lo que lee `evaluar3 --regla-de`.
 - Caché `tmp_fino/<esc>/reglas_<pid>.jsonl`: una corrida guardada vale con la misma huella, la del escenario (como
-  `barrer_fino`) más el sha256 de `reglas.py`, `rl_ippo.py` y `rl_corredor.py`.
+  `barrer_fino`) más el sha256 de `reglas.py`, `rl_ippo.py`, `rl_corredor.py` y, si están, `escenarios_plan3.py` y
+  `con_escenarios.py` (`codigo_de_reglas`; `prueba_reglas` 8 comprueba que cambia con cada uno).
+- El JSON de cada familia trae `registro` (llegadas, semillas y `prueba`): `evaluar3 --regla-de` lo revisa (3).
 
 ### 1.5 `p3_preparar.py`, la escritura atómica y `leer_cfg` (0.11)
 
@@ -240,6 +280,31 @@ Etapas (cada una lee lo que dejó la anterior en `barridos/<esc>/`):
   `<esc>_trivial.add.xml`; `--piezas actuado_aj` agrega `<esc>_actuado_aj.add.xml` (con `reinstalar`, 1.3). Relee cada
   archivo como XML e imprime su sha256. **Punto de extensión:** el diccionario `PIEZAS`
   (`{nombre: función(esc) -> ruta}`); los E2 de la observación nueva (3.1) entran como otra pieza.
+
+### 1.6 Referencias congeladas: `p3_congelar.py`, `evaluar3` y `chequeos_previos` (parte B; [21])
+
+- **`p3_congelar.py [--comprobar]`** (cwd = `plan3/`, día 14, a mano): arma la lista de todas las referencias que
+  evalúa la cola (`generar_trabajos3.brazos_ref` de cada celda con referencias: 154 archivos) y, para cada una,
+  comprueba que el programa tenga el sha256 que anotó el JSON de su barrido (`fijo_fino.json`, `fijo_mult5.json`,
+  `fijo_grueso10.json`, `franja.json`, `bloques.json`, `actuado_aj.json`), que ningún JSON traiga la marca de prueba y
+  que los JSON de las reglas sean de su familia. Si todo cuadra escribe `referencias_congeladas.json`:
+  `{"version": 1, "commit", "escrito", "referencias": {archivo relativo a plan3/: {"sha256", "celda", "referencia",
+  "tipo", "escenario", ...}}}`. Con un solo problema no escribe nada (código 1).
+- **`evaluar3`**: la columna `sha_ref` lleva el sha256 del archivo de la referencia que carga (el `--programa`, el
+  `<esc>_<brazo>.add.xml` de franja, bloques y actuado_aj, o el JSON de `--regla-de`). Con `--salida ciego/...`, si
+  falta el JSON congelado, no lista el archivo o el sha256 no coincide, sale antes de simular.
+- **El generador**: las evaluaciones a ciegas de las referencias ajustadas tienen `referencias_congeladas.json` en
+  `requiere` (la cola no las lanza antes de la parte B).
+- **`chequeos_previos`**: desde que existe el JSON, cada tarde compara el disco con él (un archivo que falta o cambió
+  es un problema y la noche no arranca).
+
+### 1.7 Cada comando con el parser de su script (G1-F4)
+
+`barrer_fino`, `franja`, `actuado`, `reglas`, `p3_preparar` y `evaluar3` tienen `validar_args(argv)`: el `parse_args` y
+todos los `ap.error` del script, sin leer el escenario ni tocar archivos. `chequeos_previos` valida con ellos (y con el
+de `rl_ippo`) cada comando de la lista de trabajos, en otro proceso y después de registrar los escenarios del plan 3;
+así un desajuste entre el generador y un script (una familia o una opción que el script no conoce) para la noche en
+la tarde. Con la lista de referencias y sus evaluaciones: 894 comandos, 0 rechazados (`prueba_comandos_ref` 1).
 
 ---
 
@@ -278,9 +343,10 @@ python reglas.py <esc> --familia mp
 | P6 malla3_alta (y P6e) | 1.12 | 1.69 | 0 | 0.36 | 0.31 | 0.72 | 0.25 | 0.55 | 1.00 |
 | D | 0.64 | 0.62 | 0.04 | 0.11 | 0.09 | 0.32 | 0.07 | 0.16 | 0.27 |
 
-(frágil: cota, si se activa; si no, 0. La reactiva no está en la columna "reglas": son 5 reglas × 3 semillas y sus 3
-finalistas × 10, contra 14 × 3 y 6 × 10 de regla + MP. Medido en la cadena de prueba de P1: regla + MP 322 s, las
-tres familias 417 s, o sea la reactiva ≈ 0.3 de la columna, lo que le da el generador.)
+(frágil: cota, si se activa; si no, 0. La columna "reglas" cuesta regla + MP; el generador la reparte por familia según
+sus corridas: con llegadas regulares, regla 51, reactiva 36 y MP 33 de 84; con aleatorias, 300, 150 y 120 de 420 (la
+reactiva va aparte de la columna). Franja y reglas sin el EMPAQUE que ya trae REF_H, y los pasos del actuado por sus
+corridas: 5, 3, 2, 2, 2 y 8 de 22. En el ensayo del corredor (2.8): regla 205 s, reactiva 155 s y MP 150 s de reloj.)
 
 ### 2.2 Los 12 niveles `dem_*`
 
@@ -383,6 +449,29 @@ python ../con_escenarios.py reglas.py poi_malla3_alta --familia regla   (y --fam
   (archivo por defecto `<esc>_<brazo>.add.xml`, o `--programa`); `--regla <"regla" de regla.json, reactiva.json o
   mp.json>`. Las tandas decisivas van por `evaluar3.py` (a ciegas; `--regla-de barridos/<esc>/<familia>.json`).
 
+### 2.8 Ensayo de la cadena real (corredor, 05.11, verificación de 6e8cfab)
+
+En un worktree aparte (`w3_ensayo_ref`, commit 1884c93, cuyo código de las referencias es el de 7714544 salvo
+`evaluar3` y `p3_congelar`, que solo cambiaron de dónde leen el JSON congelado), con `cwd = plan3/`: los trabajos de
+referencias del corredor tal como los arma `generar_trabajos3.generar(["referencias"])`, sin opciones de prueba y con
+las semillas de la regla, por `cola.py --cpus 2 --sin-git`.
+
+- **La cola:** 17 trabajos (gruesa, fina, desfases, desempate, frágil, mult5, franja, actuado 1-6 y final, regla,
+  reactiva y MP; el corredor no tiene trozos), 0 fallidos, todos con sus salidas declaradas, de 17:13 a 17:38 (25 min de
+  reloj con 2 CPU; el generador estima 0.93 h-p). Todos los JSON salen sin marca de prueba.
+- **Los ganadores** (semillas de ajuste; no deciden nada): fijo fino 22/10, desfases 0/17 (los dos primeros quedaron a
+  ≤ 2 %: desempate de los 3 primeros con 2001-2030, 20.87 s/veh); verdes de 5 en 5 25/10, 0/24 (21.13); fijo desde 10 s
+  20/10, 0/15 (20.88, el de `plan2`); franja 20/10 0/25 → 22/10 0/13 (20.48 en 2001-2010; los dos cambios estrictos,
+  14 s tarde a lo sumo); actuado ajustado, la coordinada (a) con `detector-gap` 3 (19.66 en 2001-2010); `regla_u1g60`
+  (35.68), `reactiva_d25` (22.87), `mp_c60` (25.43).
+- **`evaluar3` frente al barrido:** cada brazo de `brazos_ref("corredor")` (fino, fino5, franja, actuado_aj, regla,
+  reactiva, MP), más el fijo desde 10 s y el actuado ajustado con `--programa` (como en `mixa_`), con 2001-2003: el
+  retraso total de cada semilla es el de la fila del ganador en `barridos/corredor/*_semillas.csv`, en los 9 brazos.
+  `sha_ref` sale en cada CSV. (Bloques no entra: es del perfil.)
+- **Las reglas en las otras familias** (humo, `--familia reactiva --semillas 424301 --semillas-final
+  424301-424302`): `per_corredor`, `mix_corredor`, `malla3_alta_e` y `poi_red` por el lanzador, y
+  `dem_corredor_t2715_der` y `red` directo: 6 de 6 con código 0 y un `reactiva.json` correcto.
+
 ---
 
 ## 3. Contrato para `evaluar3.py`
@@ -404,14 +493,20 @@ evaluar.brazo_regla(esc, regla)
     # mp_det_c<C>. Brazo = regla. Corre por rl_ippo (gancho decidir): cambios_fase con el +k de la plantilla (6.10).
 ```
 
-Los brazos de plan3 (franja, bloques, actuado_aj, `brazo_programa` y `brazo_regla`) se niegan en `cruce` y `cruce2`
-(`rl_semaforo` no conoce esos modos). Por debajo: `rl_corredor.correr_episodio(modo, ..., adicional=None)` con los
+Los brazos de plan3 (franja, bloques, actuado_aj, `brazo_programa` y `brazo_regla`), y también `trivial`, se niegan en
+`cruce` y `cruce2` (`rl_semaforo` no conoce esos modos). Por debajo: `rl_corredor.correr_episodio(modo, ..., adicional=None)` con los
 modos `franja`, `bloques` (sin `setProgram`: los cambia su WAUT) y `actuado_aj` (`setProgram("actuado_aj")`); en
 `baseline`, `adicional` da el fijo de ese archivo. Sin modos nuevos ni `adicional`, el comando de sumo es el de antes.
 
-Para `veredicto3`: los nombres de la reactiva siguen `reactiva_d<D>` (regex `reactiva_d\d+`); su ganadora queda en
-`barridos/<esc>/reactiva.json`, clave `"regla"`; el generador la evalúa con el tipo `ref_reactiva`
-(`brazos_ref` de `generar_trabajos3.py`).
+Para `veredicto3`: los nombres de la reactiva siguen `reactiva_d<D>` con D en 15, 25, 35, 50 o 70 (`reglas.validar`
+usa `fullmatch` y rechaza los que no son de la rejilla); su ganadora queda en `barridos/<esc>/reactiva.json`, clave
+`"regla"`; el generador la evalúa con el tipo `ref_reactiva` (`brazos_ref` de `generar_trabajos3.py`).
+
+`evaluar3.py` (tercera vuelta): un solo brazo por comando (`--brazo`, `--politica`, `--regla` y `--regla-de` son
+excluyentes; `--programa` solo con fijo, franja, bloques o actuado_aj; `--nombre` solo con `--brazo fijo
+--programa`; opciones completas); `--regla-de` se niega si el JSON trae la marca de prueba, si su familia no es la del
+nombre del archivo o si es de otro escenario (`mixa_<x>` juega el de `mix_<x>`); la columna `sha_ref` y la negativa a
+ciegas de 1.6; y `validar_args(argv)` para `chequeos_previos`.
 
 ---
 
@@ -421,30 +516,29 @@ Todas corren con `cwd = plan3/` y escriben solo en `plan3/tmp_ref/` (ignorada) y
 Semillas: de humo (424301-424360) salvo (1) la reproducción del barrido entregado (2001-2003, las suyas), (2) la no
 regresión (1001-1002, solo controles entregados) y (3) `prueba_cadena_p1`, que corre en su copia la fina, los
 desfases, el barrido de mult5 y los 9 pares de la franja de P1 con 2001-2003 (las del barrido de P1; sus desempates y
-finales van con humo, y nada de esa copia se instala ni se usa después). A lo sumo 3 sumo a la vez (2 de 21:00 a
-07:30).
+finales van con humo, y nada de esa copia se instala ni se usa después), y (4) el ensayo de 2.8, en un worktree
+aparte, con las semillas de ajuste de la regla (2001-2030). Las semillas del examen y de la final (7001, 8001 y 13120)
+solo aparecen en la prueba de la guarda de `prueba_fino` F, con `subprocess.run` reemplazado: no se simula ninguna. A
+lo sumo 3 sumo a la vez, y las corridas pesadas solo de 07:30 a 20:30.
 
 | Prueba (tarea) | Qué comprueba | Resultado |
 |---|---|---|
-| `prueba_fino.py` (0.7) | A. La regla con datos inventados: mínimos locales de la gruesa entregada de malla3 (10/10, 25/15 y 30/10 a ≤ 2 %), umbral de 2 errores estándar, regla de frágiles (dos casos) y el borde del 2 %: `a_2pct` en 9500 casos, los ejemplos de la revisión y la frágil con 20.50 y 20.91 | PASA |
-| | B. Reproduce `plan2/barrido_<esc>.csv` con 2001-2003: P1, subrejilla completa por la línea de comandos, y su ganador; P2-P6, 3 filas cada uno; el lector frente a `barrer_fijo.evaluar_config` | PASA (P1 65 de 65 filas y el ganador; P2-P6 3 de 3) |
-| | C. Dos corridas (una en 2 trozos y la unión, con otros `--procesos`) dan los mismos archivos | PASA (4 de 4) |
-| | D. Puntaje por periodo en P6 10/10, P6 10/25 y P2 10/25: la suma por periodo es el total de `leer_tripinfo`, los no insertados cuadran y su salida programada es la de su flujo | PASA (3 de 3) |
-| | E. Huella, en una copia del código: repetir no corre nada; cambiar solo los fines de línea de `comun.py` tampoco; un comentario en `comun.py` cambia la huella y se vuelve a correr todo, con el mismo `gruesa.csv`; los dos interruptores de `comun` la cambian | PASA (4 de 4) |
-| | F. Cadena: la fina se niega a leer una gruesa con opciones de prueba; con `--permitir-prueba` la lee y marca su salida; una gruesa con el registro de la regla pero otras semillas también se niega; frágil lee el desempate sin tocarlo (mismo sha256 y fecha) y se niega si `desempate.csv` cambió de orden o le falta una semilla; desde la raíz se niega; `--sem` no se acepta; las semillas del examen y de la final se niegan antes de lanzar sumo (con sumo reemplazado: no se simula ninguna) | PASA (9 de 9) |
-| | Total | **33 de 33** |
-| `prueba_cadena_p1.py` (0.7-0.11) | La cadena completa en P1 por la línea de comandos sobre la gruesa de la subrejilla de B: sin `--permitir-prueba` la fina se niega; con él, cada paso termina con código 0 (fina, desfases, desempate, frágil, mult5, franja, actuado, reglas con las tres familias, preparar); frágil no reescribe el desempate; las 29 salidas existen y todas quedan marcadas como de prueba; cada ganador jugado por TraCI reproduce su media (fijo fino, verdes de 5 en 5, franja, actuado ajustado, regla, reactiva y MP); `evaluar.py --brazo fijo --programa ... --nombre fino`; `p3_preparar` no toca el actuado ajustado igual al congelado y lo recrea igual si falta; actuado y ciclo mínimo iguales byte a byte a los del `comun.py` entregado | PASA (27 de 27). Los mismos números que antes: fijo fino 22/10 desfase 17 (20.90), franja 20/10-0/25 → 22/10-0/13 (20.59; los dos cambios, estrictos), actuado ajustado con el mismo sha256 (817e3add…); la reactiva gana `reactiva_d25` (22.71) |
-| `prueba_franja.py` (0.8) | 1. Franja con plan 2 = plan 1 = el fijo entregado (P1, P3, P6): mismo tripinfo por sumo directo y por TraCI. 2. Cambio en su instante y alineado con el plan 2 solo. 3. 0 cortes de verde (con el cambio de todos a los 1800 s habría 6, 6, 8 y 24). 4. Sumo directo = TraCI. 5. Bloques de 6 programas en P1 y P6. 6. Cuatro pares que antes abortaban (P1 con la relajada en un semáforo, P1 en contrafase con el respaldo, P3 relajada, P6 con 1 relajada y 2 respaldos): cambian en el instante anotado, entran alineados, 0 verdes cortados y 0 ámbares cortos tras un verde. 7. Sin sumo, 3000 pares al azar de P1, P3 y P6: el instante estricto es el de antes en todos los pares donde existía; 13993 cambios estrictos, 1 relajado, 6 de respaldo, 0 forzados; ninguno corta un verde ni deja un ámbar corto | PASA (46 de 46); 1-5 con los mismos números que antes |
-| `prueba_actuado.py` (0.9) | 1. La variante por defecto = el actuado entregado (P1-P6). 2. Cada parámetro mueve algún número frente a la variante que solo difiere en él. 3. Sin avisos de SUMO en el log. 4. Sumo directo = TraCI con `<param>`, `delay_based` y las dos coordinadas. 5. `reinstalar`: igual al congelado → no lo toca; cambiado o borrado → lo reescribe con el sha256 congelado; sha256 que el texto de hoy no da → error, el instalado queda igual y sin temporales; `p3_preparar` sin `--piezas` hace solo actuado y trivial | PASA (28 de 28); 1-4 con los mismos números que antes |
-| `prueba_reglas.py` (0.10) | 1. U = ∞ da el mismo tripinfo que el ciclo mínimo (P1, P5). 2. Ninguna acción fuera de la máscara. 3. Presión 0 con la red vacía y no 0 con tráfico. 4. `evaluar.py --regla` escribe su CSV; una regla desconocida se rechaza. 5. Reactiva: sus 5 nombres y los inválidos; el barrido `--familia reactiva` (las 5 reglas, 3 finalistas, `reactiva.json` con la ganadora y la marca de prueba); `evaluar.py --regla reactiva_d25`; en P1 (D 25) y P6 (D 50) respeta la máscara y con la máscara libre alarga si y solo si hay un vehículo a ≤ D m en un carril con verde; y da el mismo tripinfo que la lógica del prototipo por el mismo bucle. 6. `evaluar.py`: `adicional` con fijo, actuado o trivial, y los brazos de plan3 en `cruce`/`cruce2`, se rechazan; sin `--semillas` sus brazos no arrancan | PASA (25 de 25) |
-| `prueba_atomica.py` (0.11) | 3 evaluaciones simultáneas de actuado y de ciclo mínimo (P1) y de actuado (P6): código 0, CSV iguales, sin temporales y el `.add.xml` del `comun.py` entregado; si el reemplazo falla siempre, `escribir_atomico` (de `comun` y de `barrer_fino`) borra su temporal y el destino queda igual; `leer_cfg` con espacios, y la misma lista que antes en los 40 `.sumocfg` | PASA (5 de 5) |
-| `prueba_aleatorias.py` (0.7-0.10) | Por el lanzador: `poi_corredor` y `per_corredor`; barrido fino aleatorio (umbral en errores estándar, 10 finalistas), franja con los 9 pares, perfil con 6 puntajes por bloque y su fijo por bloques jugado por TraCI, actuado con 10 finalistas y MP con sus 4 (las etapas con `--permitir-prueba`: las gruesas son subrejillas) | PASA (19 de 19), con los mismos números (bloques 230.88) |
-| `prueba_no_regresion.py` (0.12) | Fijo, actuado, ciclo mínimo e IPPO con mensajes (base 42) en P1-P6 con 1001-1002 por `evaluar.py`: todas las columnas iguales, como texto, a `insumos/puente/eval_<esc>_<brazo>.csv`; `veredicto.py --probar`. La salida empieza con el commit y el sha256 de `comun.py`, `rl_ippo.py`, `evaluar.py` y `rl_corredor.py` | PASA (25 de 25): 23 brazos iguales en las 34 columnas; IPPO en P6 con la diferencia conocida (`cambios_fase` 1650 y 1592 frente a 1654 y 1596), que se informa aparte y fallaría si fuera otra |
-| `prueba_nr_p6.py` (0.12) | Por qué difiere IPPO en P6: el código entregado (223f908) corrido hoy da lo mismo que el de esta rama, y con la plantilla de P6 cambiada al 15/10 en ajedrez sale igual al CSV entregado | PASA (2 de 2): no es una regresión |
+| `prueba_fino.py` (0.7) | A. La regla con datos inventados (mínimos locales, umbral de 2 errores estándar, frágiles) y el borde del 2 % (`a_2pct` en 9500 casos, los ejemplos de la revisión, la frágil con 20.50 y 20.91). B. Reproduce `plan2/barrido_<esc>.csv` con 2001-2003 (P1 65 de 65 filas y el ganador; P2-P6 3 de 3) y el lector = `evaluar_config`. C. Dos corridas (una en 2 trozos y la unión) dan los mismos archivos. D. Puntaje por periodo en tres casos con vehículos sin entrar. E. Huella: repetir no corre nada; los fines de línea de `comun.py` no la cambian; un comentario en `comun.py` sí, y se vuelve a correr todo con el mismo `gruesa.csv`; los interruptores de `comun`. F. Cadena: entradas de prueba, otras semillas, frágil sin reescribir el desempate y con sus negativas, el paso 6 del actuado con la huella de `fijo_fino.json`, cwd, abreviaturas y las semillas del examen negadas antes de lanzar sumo | PASA (34 de 34) |
+| `prueba_cadena_p1.py` (0.7-0.11) | La cadena completa en P1 por la línea de comandos sobre la gruesa de una subrejilla (con `--permitir-prueba`; sin él la fina se niega); cada ganador jugado por TraCI reproduce su media (fijo fino, verdes de 5 en 5, franja, actuado ajustado, regla, reactiva y MP); `p3_preparar` no toca el actuado ajustado congelado y lo recrea igual; actuado y ciclo mínimo = el `comun.py` entregado | PASA (27 de 27), con los mismos números que en d01c2a6 (fijo fino 22/10 0/17, 20.90; franja 20.59; el mismo sha256 del actuado ajustado; `reactiva_d25` 22.71) |
+| `prueba_franja.py` (0.8) | 1-5 como antes (franja = fijo con el mismo plan; cambio alineado; 0 cortes; sumo directo = TraCI; bloques). 6. Cuatro pares que antes abortaban: cambian en su instante, entran alineados, 0 verdes cortados, 0 ámbares cortos tras un verde, ningún verde relajado de menos de 10 s, y sumo directo (el barrido) = TraCI (el brazo franja) también con estos programas no estrictos. 7. 3000 pares al azar: el instante estricto es el de antes donde existía; 13993 estrictos, 0 relajados, 7 respaldos, 0 forzados; ninguno corta un verde ni deja un ámbar corto; los 5 estrictos de más de 300 s se avisan | PASA (50 de 50) |
+| `prueba_actuado.py` (0.9) | 1-4 como antes (defecto = actuado entregado; cada parámetro mueve; sin avisos de SUMO; sumo directo = TraCI, también con las dos coordinadas). 5. `reinstalar` y `p3_preparar`. 6. La coordinada (b) con un plan con holgura y `maxDur` = los verdes fijos termina la avenida en el fin fijo (P2, P3 y P6: tantas salidas como el plan fijo y a lo sumo 2 fuera, el arranque). 7. Los detectores: 27.8 m con `detector-gap` 2 y 43.2 m con 4 (P1 y P6) | PASA (33 de 33); en 4, la (a) de P3 y P6 cambió (22.55 y 118.13, antes 21.61 y 115.94) por el arreglo de la coordinación |
+| `prueba_reglas.py` (0.10) | 1-4 como antes (U = ∞ = ciclo mínimo; máscara; presión; `evaluar.py --regla`). 5. La reactiva: nombres (y los de fuera de la rejilla, con ceros o con un salto de línea, rechazados), barrido `--familia reactiva`, `evaluar.py --regla reactiva_d25`, máscara y lógica, mismo tripinfo que la lógica del prototipo (P1 y P6). 6. Protecciones de `evaluar.py` (también `trivial` en `cruce`). 7. Oráculo independiente (`getNextTLS`): 0 diferencias en 856 y 5468 decisiones libres; reloj: separaciones de 5 s tras alargar y 8 s tras cambiar, verdes de 10-60 s en pasos de 5. 8. La huella de las reglas cambia con cada uno de sus archivos | PASA (28 de 28) |
+| `prueba_atomica.py` (0.11) | 3 evaluaciones simultáneas; temporal borrado si el reemplazo falla; `leer_cfg` con espacios | PASA (5 de 5) |
+| `prueba_aleatorias.py` (0.7-0.10) | Las referencias con llegadas aleatorias y con el perfil, por el lanzador | PASA (19 de 19), con los mismos números (bloques 230.88) |
+| `prueba_comandos_ref.py` (G1-F4 y otros) | 894 comandos del generador pasan el parser de su script; 8 errados se rechazan con su motivo; ids, `--trozo k/n`, salidas y uniones de los 51 trozos; presupuestos y salidas declaradas; `referencias_congeladas.json` en las evaluaciones a ciegas de referencias; huérfanos por pid (unitaria) | PASA (6 de 6) |
+| `prueba_congeladas.py` ([21]) | `sha_ref`; a ciegas, las tres negativas antes de simular y la corrida con la referencia congelada; `--regla-de` y sus negativas (y `mixa_`); `p3_congelar` y `chequeos_previos` | PASA (6 de 6) |
+| `prueba_no_regresion.py` (0.12) | Fijo, actuado, ciclo mínimo e IPPO (base 42) en P1-P6 con 1001-1002, todas las columnas, en el código final (la cabecera dice commit y sha256 de `comun.py`, `rl_ippo.py`, `evaluar.py` y `rl_corredor.py`); `veredicto.py --probar` | PASA (25 de 25): 23 brazos iguales en las 34 columnas y P6 IPPO con la diferencia conocida (`cambios_fase` −4) |
+| `prueba_nr_p6.py` (0.12) | La diferencia de P6 IPPO no es una regresión | PASA (2 de 2) |
+| `ensayo_comparar.py` (ensayo, 2.8) | Los JSON del barrido del ensayo sin marca de prueba; cada brazo de referencia del corredor por `evaluar3` = la fila del ganador, semilla por semilla | PASA (10 de 10) |
+| `tabla_coordinadas.py`, `medir_coordinada.py` | Mediciones (sin chequeos): la tabla de 6.5 y los histogramas de 1.3 | `salidas/tabla_coordinadas.txt`, `salidas/medir_coordinada.txt` |
 
-En total, 210 chequeos. Salidas en `plan3/pruebas/ref/salidas/<prueba>.txt`; `costos_ref.txt` es la estimación de la
-sección 2. Las nueve pruebas corrieron enteras dos veces: en 4faffb7 y en d01c2a6 (el código final, con `plan3-dev`
-fusionado); las salidas versionadas son las de d01c2a6.
+En total, 245 chequeos en 12 scripts, todos sobre el código final (7714544; `ensayo_comparar` sobre la cola del
+ensayo, 1884c93). Salidas en `plan3/pruebas/ref/salidas/<prueba>.txt`.
 
 ---
 
@@ -472,38 +566,54 @@ fusionado); las salidas versionadas son las de d01c2a6.
 | Max-Pressure y reactiva | Familias aparte, elegidas como la regla | Solo descriptivas o al lado; así se informa la mejor de cada una |
 | Nombres de reglas | `regla_u<U>g<G>`, `reactiva_d<D>`, `mp`, `mp_det`, `mp_c<C>` | Contrato con `evaluar3` (nombre con los parámetros) |
 | Programa del fijo fino | `programID="fijo"`; reemplaza a la plantilla en `--additional-files` | Es lo que habría instalado `barrer_fijo --instalar` |
+| Ciclo de las variantes coordinadas | Contado desde el inicio del verde transversal del plan fijo (`offset` = el del fino + ese inicio) | Con la avenida en la fase 0, SUMO dejaba sin efecto `earliestEnd`/`latestEnd` en la mitad de los ciclos (1.3); son los mismos instantes del plan fijo |
+| `maxDur` de la avenida en las coordinadas | (b): el ciclo; (a): el ciclo menos los ámbares y los `minDur` de los otros verdes | (b) no puede pasar de su fin (`latestEnd`) y con menos un arranque corto se perpetuaba; (a) puede alargar, así que solo se le da lo que necesita para llegar a su fin |
+| WAUT relajada | Solo si ningún verde que toca el cambio dura menos de 10 s; si no, respaldo | Pedido de la verificación (G3-1); la estricta no cambia |
+| WAUT tardío | Se avisa (JSON, comentario y consola), no se topa | Un tope cambiaría la regla de B8: enmienda |
+| Huella del fijo fino al leerlo | La de su propio barrido (sus cortes, anotados en el JSON) | El actuado corre siempre con cortes de 1800 s y el perfil barre con 600: compararla con la del lector la negaría siempre |
+| `referencias_congeladas.json` | Clave: la ruta, relativa a `plan3/`, del archivo que carga cada brazo; lo escribe `p3_congelar.py` solo si todo cuadra | Es lo que `evaluar3` puede resolver sin leer el generador; un solo problema impide escribirlo |
+| `validar_args` | El parser y sus `ap.error`, sin leer el escenario ni tocar archivos | `chequeos_previos` lo corre para cada comando de la lista, como ya hacía con `rl_ippo` |
 
 ## 6. Pendiente o dudoso
 
-1. **`--permitir-prueba` en las protecciones.** La capa 1 de `protecciones.py` rechaza `--avenida`, `--transversal`,
-   `--limite`, `--semilla*` y `--llegadas` en los barridos; falta `--permitir-prueba`, que en la cola dejaría seguir
-   una cadena con entradas de prueba. Es de `protecciones.py` (no lo toqué): sumarlo a `OPCIONES_PRUEBA`.
-2. **Un cambio de código repite la celda entera.** Con la huella nueva, tocar `comun.py`, `barrer_fijo.py`,
-   `escenarios_plan2.py` o `barrer_fino.py` (o, en las reglas, `rl_ippo.py`, `rl_corredor.py` o `reglas.py`) invalida
-   todo lo guardado de todas las celdas; las etapas siguientes se niegan a leer salidas de la huella vieja, así que la
-   cadena hay que relanzarla desde la gruesa. Para B22 en las referencias: si hay que conservar las salidas viejas,
-   mover antes `barridos/<esc>/` y `tmp_fino/<esc>/` a una carpeta de archivo (los scripts no tienen opción de carpeta
-   ni sufijo, así que un id `_r2` declararía las mismas salidas); si no, relanzar los mismos ids. Conviene no tocar esos
-   archivos desde la primera noche de referencias.
-3. **El instante estricto puede llegar tarde.** La regla estricta busca en un hiperperíodo: con ciclos que difieren
-   en pocos segundos el primer instante limpio puede caer minutos después del corte (en 3000 pares al azar de P1, P3 y
-   P6, hasta 708 s; la relajada hasta 49 s y el respaldo hasta 3 s). No lo cambié (cambiaría programas que hoy existen):
-   ahora queda anotado (`cambios` en `franja.json` y `bloques.json`). Si se quiere un tope (por ejemplo, preferir la
-   relajada si la estricta llega más de un ciclo tarde), es una enmienda de B8.
+1. **La variante coordinada cambió después del tag** (1.3): el actuado ajustado veta FUNCIONA, así que el cambio se
+   declara (`desviaciones.md` §3, borrador para la parte B, con el commit y los blobs del código que corre). Es lo que
+   §5 describe; lo que el tag hacía no lo era.
+2. **Un cambio de código repite la celda entera.** Con la huella, tocar `comun.py`, `barrer_fijo.py`,
+   `escenarios_plan2.py` o `barrer_fino.py` (o, en las reglas, `rl_ippo.py`, `rl_corredor.py`, `reglas.py`,
+   `escenarios_plan3.py` o `con_escenarios.py`) invalida todo lo guardado; las etapas siguientes se niegan a leer
+   salidas de la huella vieja (también `fijo_fino.json`), así que la cadena se relanza desde la gruesa. El procedimiento
+   B22 de las referencias (salidas viejas a `barridos_viejos/<esc>_<fecha>/` y ids `_r2`, que el generador tendría que
+   dar a esa celda en lugar de los viejos) está en `desviaciones.md` §3. Conviene no tocar esos archivos desde la
+   primera noche de referencias. La versión de SUMO no está en la huella: la vigila la capa 3 de `protecciones.py`.
+3. **El instante estricto puede llegar tarde.** La regla estricta busca en un hiperperíodo: con ciclos que difieren en
+   pocos segundos el primer instante limpio puede caer minutos después del corte (en 3000 pares al azar de P1, P3 y
+   P6, hasta 708 s; el respaldo hasta 33 s; con ciclos más largos o más parecidos puede pasar de 1300 s). No lo cambié
+   (cambiaría programas que hoy existen): ahora se anota y se avisa (más de 300 s, después del cambio siguiente o de
+   la hora). Un tope (por ejemplo, preferir la relajada si la estricta llega más de un ciclo tarde) es una enmienda de
+   B8.
 4. **P6 10/10 no deja vehículos sin entrar a los 6000 s.** La prueba del lector se hizo además con P6 10/25 (541 sin
    entrar) y P2 10/25 (792): mismo total, y la salida programada de cada no insertado es la de su flujo.
-5. **Variantes coordinadas del actuado.** Quedaron dos candidatas en el paso 6 (decisión del 05.11): (a) solo
-   `earliestEnd` en la avenida, y (b) `earliestEnd` = `latestEnd` en la avenida **y** `latestEnd` en la transversal.
-   Con el fijo entregado como "fino" y la semilla 424301 (retraso total, s/veh):
+5. **Variantes coordinadas del actuado.** Dos candidatas en el paso 6 (decisión del 05.11): (a) solo `earliestEnd` en
+   la avenida, y (b) `earliestEnd` = `latestEnd` en la avenida **y** `latestEnd` en la transversal. Retraso total
+   (s/veh) con la semilla 424301; entre paréntesis, salidas del verde de avenida en el fin del plan fijo / salidas, en
+   el semáforo que peor sale (`pruebas/ref/tabla_coordinadas.py`; antes = el código de 6e8cfab):
 
-   | | fijo | actuado | coordinada (a) | solo `latestEnd` en la transversal | solo `earliestEnd` = `latestEnd` en la avenida | coordinada (b) |
+   | | fijo | actuado | (a) antes | (a) ahora | (b) antes | (b) ahora |
    |---|---|---|---|---|---|---|
-   | P1 | 21.91 | 21.49 | 21.19 | 21.35 | 22.28 | 21.91 |
-   | P2 | 392.73 | 437.26 | 446.78 | **834.97** | 501.39 | 394.40 |
-   | P3 | 20.14 | 21.46 | 21.61 | — | 24.22 | 20.14 |
-   | P6 | 82.57 | 114.64 | 115.94 | 112.19 | 85.30 | 82.57 |
+   | P1, fijo entregado | 21.91 | 21.49 | 21.19 (75/164) | 21.19 (75/164) | 21.91 (166/166) | 21.91 (166/166) |
+   | P2, fijo entregado | 392.73 | 437.26 | 446.78 (12/73) | 446.78 (12/73) | 394.4 (128/129) | 394.4 (128/129) |
+   | P3, fijo entregado | 20.14 | 21.46 | 21.61 (2/216) | 22.55 (11/209) | 20.14 (231/231) | 20.14 (230/230) |
+   | P6, fijo entregado | 82.57 | 114.64 | 115.94 (60/143) | 118.13 (69/144) | 82.57 (194/194) | 82.57 (193/193) |
+   | P1, plan 22/15 0/17 | 26.4 | 21.49 | 21.29 (71/139) | 21.29 (71/139) | 21.6 (139/139) | 21.6 (139/139) |
+   | `dem_red_t3620`, plan 25/15 0/23/0 | 104.19 | 106.9 | 107.8 (39/146) | 103.64 (51/121) | 106.17 (84/166) | 103.32 (128/129) |
 
-   La (a) se comporta como un actuado libre en P2 y P6; la (b) es casi el fijo. Las dos corren en el paso 6.
+   Con el fijo entregado la (b) ya salía bien: su transversal está en el mínimo y no puede cortar antes, así que la
+   avenida nunca empezaba antes. El defecto aparece cuando la transversal tiene holgura (lo normal en un fijo fino), y
+   en red y malla: última fila. La (a) se comporta como un actuado libre (alarga después del fin fijo: lo dejan sus
+   `earliestEnd` sin `latestEnd`); ahora su `earliestEnd` vale en todos los ciclos. Las columnas "solo `latestEnd` en
+   la transversal" y "solo `earliestEnd` = `latestEnd` en la avenida" de la primera entrega (las dos mitades de la (b)
+   por separado, peores que el fijo) se midieron con el código de antes.
 6. **Trabajos largos.** Con llegadas aleatorias, el barrido de P3 y P4 (gruesa ~7-8 h-p), la fina de P5 (~11 h-p) y
    las reglas de P6 hay que partirlos: los barridos con `--trozo`, las reglas por `--familia`.
 7. **El perfil** necesita `--bloque 600` en todas las etapas de `barrer_fino.py`; si una etapa se corre con otro
@@ -520,3 +630,44 @@ fusionado); las salidas versionadas son las de d01c2a6.
     familias de `reglas.py`; los brazos de `rl_corredor` (fijos, actuados, franja, bloques, ciclo mínimo) no lo suman.
     Por eso el CSV entregado de IPPO en P6 (otra plantilla) tiene +4 frente a hoy (`prueba_nr_p6`). `veredicto3`
     corrige k en los brazos de `rl_ippo`.
+
+## 7. Los 32 hallazgos de la revisión de 0cea683, punto por punto
+
+Con el texto completo de cada arreglo pedido (`result.confirmados[*].arreglo` de la revisión; los extractos que se
+cortaban eran los de la verificación). Estado en el código final de esta rama. ✓ hecho; ◐ hecho en parte; — no se hizo
+(con el motivo); "otro" = lo hizo otro bloque.
+
+| # | Qué pedía | Estado |
+|---|---|---|
+| 0 | Huella con el lector: sha256 de `comun.py` y `barrer_fijo.py`; `sumo --version`; opcional, cómo se carga el programa | ✓ sha256 completo de `barrer_fino`, `barrer_fijo`, `comun`, `escenarios_plan2` (fines de línea normalizados) y de los XML del escenario. — `sumo --version` no entra en la huella: lo comprueba la capa 3 de `protecciones.py` (versión de SUMO). La forma de cargar el programa es código de `barrer_fino.py`, que ya está en la huella |
+| 1 | Frágil en el borde del 2 %: misma forma que la fina o centésimas enteras | ✓ `a_2pct` para las dos; prueba en 9500 casos |
+| 2 | Escribir en §5 radios, vecindad, patrones y desfases | otro ✓ (prerregistro §5, "Detalles operativos") |
+| 3 | Cada etapa registra semillas, rejilla y opciones de prueba; la siguiente se niega; o rechazarlas en la cola | ✓ registro en `fijo_grueso10.json` y en cada JSON; semillas por plan en cada `_semillas.csv`; `--permitir-prueba`; la cola rechaza las opciones de prueba (otro, 7192185) |
+| 4 | Variante F (`earliestEnd` = `latestEnd` en la avenida); `maxDur` no menor que los verdes del fino; escribir en §5 qué es "coordinada" | ✓ (b) con `latestEnd` también en la transversal (decisión del 05.11); `maxDur` de la avenida: el ciclo en (b), lo que necesita en (a); y el ciclo de SUMO contado desde la transversal (sin eso (b) no coordinaba en red y malla). §5 lo dice (otro) |
+| 5 | WAUT sin abortar: relajada y respaldo con aviso; opcional verde ≥ 10 s | ✓ estricta, relajada (sin verdes de menos de 10 s), respaldo, forzado; aviso y registro por semáforo; aviso de tardíos |
+| 6 | Declarar el tope de `detector-gap` o subir `passing-time` | ✓ declarado (docstring, informe, prerregistro) y medido: 27.8 y 43.2 m (`prueba_actuado` 7) |
+| 7 | Huella de las reglas con `rl_ippo`, `rl_corredor`, `comun` | ✓ y además `reglas`, `escenarios_plan3`, `con_escenarios` (`prueba_reglas` 8) |
+| 8 | Regla simple débil: opcional, contar vehículos o alargar la transversal | otro: prerregistrada tal cual; la reactiva va al lado ✓ |
+| 9 | No regresión en el código fusionado | ✓ en el código final (cabecera con commit y sha256) |
+| 10 | Declarar el +k de `cambios_fase` y restarlo en `veredicto3`, o leer la fase después de `setPhase` | otro ✓ (`veredicto3` resta k; desviaciones §2) |
+| 11 | La noche usa el `evaluar3` de `plan3-dev` | otro ✓ |
+| 12 | `brazo_referencia`: `adicional` solo con franja, bloques y actuado_aj | ✓ |
+| 13 | Rechazar los brazos de plan3 en `cruce`/`cruce2` | ✓ y también `trivial` (G3-8) |
+| 14 | `strip` en `comun.leer_cfg`; E2 en su propio archivo | ✓ `strip` (la misma lista en los 40 `.sumocfg`); los E2 van como pieza propia de `p3_preparar` |
+| 15 | `escribir_atomico` borra su temporal si no reemplaza | ✓ (`comun` y `barrer_fino`) |
+| 16 | `--semillas` obligatorio con los brazos nuevos de `evaluar.py` (o en los ejemplos) | ✓ las dos cosas |
+| 17 | `reinstalar`: comprobar el sha256 antes de escribir | ✓ temporal, sha256 y luego reemplazo; si ya es igual no lo toca |
+| 18 | Segunda variante coordinada en el paso 6 | ✓ (desde eeb82f7) |
+| 19 | Huella con `comun`, `barrer_fijo`, `rl_corredor` (y `rl_ippo` en reglas), `sumo --version`; procedimiento B22 de las referencias | ✓ huella; procedimiento escrito en `desviaciones.md` §3 (borrador para la parte B): mover las salidas viejas a `barridos_viejos/<esc>_<fecha>/` y correr con ids `_r2` (no "los mismos ids", que chocaría con B22). — `sumo --version`: ver 0 |
+| 20 | Capa 1 con lista blanca de opciones en los barridos; `uso` "ajuste"; humos fuera de la cola | otro ◐: rechaza `--avenida`, `--transversal`, `--limite`, `--semilla*`, `--llegadas` y `--permitir-prueba` y exige "ajuste" (lista negra, no blanca); los scripts no aceptan abreviaturas; `--bloque` solo se valida como divisor de la hora (no "600 y solo en per_") |
+| 21 | `evaluar3` y `chequeos_previos` comparan con `referencias_congeladas.json`; el JSON en `requiere` | ✓ `sha_ref`, negativa a ciegas, `requiere`, comparación diaria y `p3_congelar.py` (formato del JSON) |
+| 22 | `reinstalar` con temporal; `actuado_aj` fuera de las piezas por defecto | ✓ |
+| 23 | Duraciones con las fórmulas del resumen | otro ✓ (05e8feb) y ✓ aquí el reparto de las reglas por familia y llegadas, sin EMPAQUE doble, y los pasos del actuado por sus corridas (G1-F5) |
+| 24 | `r_bloques` requiere `r_fragil` | otro ✓ (generador) y ✓ `bloques` exige `fijo_fino.json` con su huella |
+| 25 | Huérfanos por pid en la cola | otro ✓ (05e8feb); ✓ prueba unitaria con comandos prefijo y pid reusado (`prueba_comandos_ref` 6). — La prueba de integración (matar la cola con dos trabajos así y relanzarla) no se hizo |
+| 26 | Ids de los trozos con n | otro ✓; ✓ chequeo estático de ids, `--trozo k/n`, salidas y uniones (`prueba_comandos_ref` 3) |
+| 27 | Frágil lee el desempate; declarar los `*_semillas.csv` | ✓ las dos |
+| 28 | `*.tmp` en `.gitignore` y limpieza en `p3_noche` | otro ✓ |
+| 29 | Abortar fuera de `plan3/` | ✓ |
+| 30 | Capa 1 exige `--semillas` en `../evaluar.py` y `evaluar3.py`; ejemplos con `--semillas` | otro ✓ en `../evaluar.py` (capa 1); `evaluar3` lo exige su parser y ahora `chequeos_previos` valida cada comando con ese parser (G1-F4); ✓ ejemplos |
+| 31 | Informe al día | ✓ |

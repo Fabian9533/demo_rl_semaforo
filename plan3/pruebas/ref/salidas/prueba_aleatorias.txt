@@ -1,25 +1,25 @@
 Referencias con llegadas aleatorias y perfil, por el lanzador (copia en C:\Users\GAMER\Documents\demo_rl_semaforo\w3_ref\plan3\tmp_ref\aleatorias)
   poi_corredor: 20 flows con period=exp(); per_corredor: perfil [1.0, 1.5, 2.0, 2.0, 1.5, 1.0] en bloques de 600 s
-OK    barrer_fino.py poi_corredor --etapa gruesa --procesos 3 --avenida 18,20,25 --transversal 10 --semillas 424301-424305: codigo 0; barrer_fino poi_corredor gruesa: listo en 188 s
+OK    barrer_fino.py poi_corredor --etapa gruesa --procesos 3 --avenida 18,20,25 --transversal 10 --semillas 424301-424305: codigo 0; barrer_fino poi_corredor gruesa: listo en 146 s
 OK    poi_corredor: llegadas detectadas como aleatorias
-OK    barrer_fino.py poi_corredor --etapa fina --procesos 3 --semillas 424301-424305 --semillas-desempate 424301-424315 --semillas-fragil 424301-424315 --permitir-prueba: codigo 0; barrer_fino poi_corredor fina: listo en 485 s
-OK    barrer_fino.py poi_corredor --etapa desfases --procesos 3 --semillas 424301-424305 --semillas-desempate 424301-424315 --semillas-fragil 424301-424315 --permitir-prueba: codigo 0; barrer_fino poi_corredor desfases: listo en 41 s
-OK    barrer_fino.py poi_corredor --etapa desempate --procesos 3 --semillas 424301-424305 --semillas-desempate 424301-424315 --semillas-fragil 424301-424315 --permitir-prueba: codigo 0; barrer_fino poi_corredor desempate: listo en 48 s
-OK    barrer_fino.py poi_corredor --etapa fragil --procesos 3 --semillas 424301-424305 --semillas-desempate 424301-424315 --semillas-fragil 424301-424315 --permitir-prueba: codigo 0; barrer_fino poi_corredor fragil: listo en 0 s
+OK    barrer_fino.py poi_corredor --etapa fina --procesos 3 --semillas 424301-424305 --semillas-desempate 424301-424315 --semillas-fragil 424301-424315 --permitir-prueba: codigo 0; barrer_fino poi_corredor fina: listo en 508 s
+OK    barrer_fino.py poi_corredor --etapa desfases --procesos 3 --semillas 424301-424305 --semillas-desempate 424301-424315 --semillas-fragil 424301-424315 --permitir-prueba: codigo 0; barrer_fino poi_corredor desfases: listo en 49 s
+OK    barrer_fino.py poi_corredor --etapa desempate --procesos 3 --semillas 424301-424305 --semillas-desempate 424301-424315 --semillas-fragil 424301-424315 --permitir-prueba: codigo 0; barrer_fino poi_corredor desempate: listo en 54 s
+OK    barrer_fino.py poi_corredor --etapa fragil --procesos 3 --semillas 424301-424305 --semillas-desempate 424301-424315 --semillas-fragil 424301-424315 --permitir-prueba: codigo 0; barrer_fino poi_corredor fragil: listo en 1 s
   regiones de la fina (umbral de 2 errores estandar): ['min1_v25_t10', 'min2_v30_t15']
 OK    desempate: 10 finalistas con 424301-424315; fijo fino v26_t11_o0_20 28.34 (424301-424315), traza {'dos_primeros_a_2pct': True, 'semillas_trabadas_ganador': 0, 'fragil': True, 'semillas_desempate': '424301-424315', 'desempate_fragil': ['v26_t11_o0_20', 'v25_t12_o0_20', 'v26_t11_o0_22'], 'semillas_fragil': '424301-424315'}
-OK    franja.py poi_corredor --procesos 3 --semillas 424301-424305 --semillas-final 424301-424315 --permitir-prueba: codigo 0; franja poi_corredor: listo en 66 s
+OK    franja.py poi_corredor --procesos 3 --semillas 424301-424305 --semillas-final 424301-424315 --permitir-prueba: codigo 0; franja poi_corredor: listo en 74 s
 OK    franja: 9 finalistas (todos los pares) con 424301-424315
-OK    barrer_fino.py per_corredor --etapa gruesa --bloque 600 --procesos 3 --avenida 20,25 --transversal 10 --semillas 424301-424303: codigo 0; barrer_fino per_corredor gruesa: listo en 199 s
-OK    barrer_fino.py per_corredor --etapa fina --bloque 600 --procesos 3 --semillas 424301-424303 --permitir-prueba: codigo 0; barrer_fino per_corredor fina: listo en 299 s
-OK    barrer_fino.py per_corredor --etapa desfases --bloque 600 --procesos 3 --semillas 424301-424303 --permitir-prueba: codigo 0; barrer_fino per_corredor desfases: listo en 30 s
+OK    barrer_fino.py per_corredor --etapa gruesa --bloque 600 --procesos 3 --avenida 20,25 --transversal 10 --semillas 424301-424303: codigo 0; barrer_fino per_corredor gruesa: listo en 192 s
+OK    barrer_fino.py per_corredor --etapa fina --bloque 600 --procesos 3 --semillas 424301-424303 --permitir-prueba: codigo 0; barrer_fino per_corredor fina: listo en 255 s
+OK    barrer_fino.py per_corredor --etapa desfases --bloque 600 --procesos 3 --semillas 424301-424303 --permitir-prueba: codigo 0; barrer_fino per_corredor desfases: listo en 26 s
 OK    per_corredor: seis puntajes por bloque en el barrido (total_p1..total_p6)
-OK    franja.py per_corredor --bloques --procesos 3 --semillas 424301-424303 --semillas-final 424301-424310 --permitir-prueba: codigo 0; franja per_corredor: listo en 14 s
+OK    franja.py per_corredor --bloques --procesos 3 --semillas 424301-424303 --semillas-final 424301-424310 --permitir-prueba: codigo 0; franja per_corredor: listo en 12 s
   bloques: [(0, 'v25_t10_o0_25'), (600, 'v24_t11_o0_30'), (1200, 'v24_t11_o0_5'), (1800, 'v23_t11_o0_0'), (2400, 'v23_t11_o0_38')], cambios {'semaforo_C1': [600, 1200, 1805, 2400], 'semaforo_C2': [605, 1209, 1824, 2401]} (reglas {'estricta': 8, 'relajada': 0, 'respaldo': 0, 'forzado': 0}, retraso maximo 24 s); 230.88 en 424301-424310; sin el fijo fino al lado (el perfil no corrio fragil): marca ['--semillas 424301-424303', '--semillas-final 424301-424310', 'entrada de prueba: barridos\\per_corredor\\fijo_grueso10.json', 'entrada de prueba: barridos\\per_corredor\\gruesa_semillas.csv', 'entrada de prueba: barridos\\per_corredor\\fina_semillas.csv', 'entrada de prueba: barridos\\per_corredor\\desfases_semillas.csv', 'entrada de prueba: barridos\\per_corredor\\fijo_fino.json']
 OK    bloques jugado por TraCI (evaluar --brazo bloques): media 230.88 = 230.88
-OK    actuado.py poi_corredor --paso todos --procesos 3 --semillas 424301-424302 --semillas-final 424301-424305 --permitir-prueba: codigo 0; actuado poi_corredor: listo en 42 s
+OK    actuado.py poi_corredor --paso todos --procesos 3 --semillas 424301-424302 --semillas-final 424301-424305 --permitir-prueba: codigo 0; actuado poi_corredor: listo en 37 s
 OK    actuado: 10 finalistas con 424301-424305
-OK    reglas.py poi_corredor --familia mp --semillas 424301-424302 --semillas-final 424301-424303: codigo 0; reglas poi_corredor: listo en 46 s
+OK    reglas.py poi_corredor --familia mp --semillas 424301-424302 --semillas-final 424301-424303: codigo 0; reglas poi_corredor: listo en 38 s
 OK    reglas mp: 4 finalistas (los 4, tope 10) con 424301-424303
 
 RESULTADO: PASA

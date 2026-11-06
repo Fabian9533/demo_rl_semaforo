@@ -1,0 +1,12 @@
+OK    corredor: 14 JSON del barrido, ninguno con la marca de prueba: {}
+OK    fino (--brazo fijo --programa corredor_r10f.add.xml --nombre fino): evaluar3 [20.64, 20.47, 20.6] = barrido [20.64, 20.47, 20.6] (['desempate_semillas.csv']); sha_ref 2a43d88d922a
+OK    fino5 (--brazo fijo --programa corredor_m5f.add.xml --nombre mult5): evaluar3 [21.48, 20.55, 21.11] = barrido [21.48, 20.55, 21.11] (['mult5_desempate_semillas.csv']); sha_ref ea1182d267b0
+OK    franja (--brazo franja): evaluar3 [20.26, 20.24, 20.29] = barrido [20.26, 20.24, 20.29] (['franja_semillas.csv']); sha_ref b67c922f69b6
+OK    actuadoaj (--brazo actuado_aj): evaluar3 [20.01, 20.11, 19.4] = barrido [20.01, 20.11, 19.4] (['actuado_final_semillas.csv']); sha_ref 9f7faf92da4a
+OK    regla (--regla-de barridos/corredor/regla.json): evaluar3 [35.98, 35.8, 36.78] = barrido [35.98, 35.8, 36.78] (['reglas_regla_semillas.csv']); sha_ref 36c69e37784e
+OK    reactiva (--regla-de barridos/corredor/reactiva.json): evaluar3 [23.56, 22.87, 22.87] = barrido [23.56, 22.87, 22.87] (['reglas_reactiva_semillas.csv']); sha_ref 61c326856166
+OK    mp (--regla-de barridos/corredor/mp.json): evaluar3 [25.19, 25.17, 26.28] = barrido [25.19, 25.17, 26.28] (['reglas_mp_semillas.csv']); sha_ref d8cbcde935b5
+OK    fijo10 (--brazo fijo --programa corredor_r10g.add.xml --nombre grueso10): evaluar3 [21.06, 20.64, 20.93] = barrido [21.06, 20.64, 20.93] (['desempate_semillas.csv']); sha_ref 4a38b917e65d
+OK    actuadoaj_programa (--brazo actuado_aj --programa corredor_actuado_aj.add.xml): evaluar3 [20.01, 20.11, 19.4] = barrido [20.01, 20.11, 19.4] (['actuado_final_semillas.csv']); sha_ref 9f7faf92da4a
+
+RESULTADO: PASA

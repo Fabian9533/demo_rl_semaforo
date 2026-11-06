@@ -32,5 +32,7 @@ OK    4 P6 coordinada fin fijo: sumo directo ('d38c08112ac098a0', 8700) = TraCI 
 OK    6 P2 plan v25_t15_o0_25 (ciclo 46), (b) con maxDur = verdes fijos: C1: 130/130 salidas, 0 fuera del fin fijo, transversal tarde 0; C2: 130/130 salidas, 2 fuera del fin fijo, transversal tarde 2
 OK    6 P3 plan v20_t15_o0_10_20 (ciclo 41), (b) con maxDur = verdes fijos: C1: 146/146 salidas, 2 fuera del fin fijo, transversal tarde 2; C2: 146/146 salidas, 1 fuera del fin fijo, transversal tarde 1; C3: 146/146 salidas, 0 fuera del fin fijo, transversal tarde 0
 OK    6 P6 plan v15_t15_o0_0_0_0_0_0_0_0_0 (ciclo 36), (b) con maxDur = verdes fijos: 11: 166/167 salidas, 1 fuera del fin fijo, transversal tarde 1; 12: 166/167 salidas, 1 fuera del fin fijo, transversal tarde 2; 13: 166/167 salidas, 1 fuera del fin fijo, transversal tarde 1; 21: 166/167 salidas, 1 fuera del fin fijo, transversal tarde 2; 22: 166/167 salidas, 1 fuera del fin fijo, transversal tarde 2; 23: 166/167 salidas, 1 fuera del fin fijo, transversal tarde 2; 31: 166/167 salidas, 1 fuera del fin fijo, transversal tarde 1; 32: 166/167 salidas, 1 fuera del fin fijo, transversal tarde 1; 33: 166/167 salidas, 1 fuera del fin fijo, transversal tarde 1
+OK    7 P1: detector-gap 2: 8 detectores a [27.78] m; detector-gap 4: 8 detectores a [43.22] m
+OK    7 P6: detector-gap 2: 72 detectores a [27.78] m; detector-gap 4: 72 detectores a [43.22] m
 
 RESULTADO: PASA

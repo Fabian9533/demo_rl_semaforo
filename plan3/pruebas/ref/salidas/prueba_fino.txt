@@ -10,9 +10,9 @@ OK    A fragil en el borde: 20.50 y 20.91 (2.00 %) -> fragil, 3 primeros con 3 s
 OK    B P1: subrejilla de 65 planes por la linea de comandos: 65/65 filas iguales a plan2/barrido_corredor.csv (14 columnas)
 OK    B P1: ganador 20/10 0/15 20.88 = ganador de plan2 20/10 0/15 20.88
   C barridos/corredor/gruesa.csv: f2e6e126f56f123e / f2e6e126f56f123e
-  C barridos/corredor/gruesa_semillas.csv: fcad7f5a8cb34907 / fcad7f5a8cb34907
+  C barridos/corredor/gruesa_semillas.csv: 7adfb006e78762da / 7adfb006e78762da
   C corredor_r10g.add.xml: e9d59a6289f279f1 / e9d59a6289f279f1
-  C barridos/corredor/fijo_grueso10.json: 1f657f189943ef47 / 1f657f189943ef47
+  C barridos/corredor/fijo_grueso10.json: 536fd8bd5dc36035 / 536fd8bd5dc36035
 OK    C dos corridas (una con 3 hilos; otra en 2 trozos y la union) dan los mismos archivos: [True, True, True, True]
 OK    B P2: 3 de 3 filas de plan2/barrido_corredor_alta.csv reproducidas (25/15 0/25, 25/15 0/20, 25/15 0/10)
 OK    B P3: 3 de 3 filas de plan2/barrido_red.csv reproducidas (10/10 0/25/24, 10/10 0/0/0, 10/10 0/25/0)
@@ -23,16 +23,17 @@ OK    B P2 25/15 0/25: barrer_fijo.evaluar_config 384.97 = barrer_fino 384.97 en
 OK    D malla3_alta 10/10 cero s424301: total sin write-undeparted 261.15 = suma por periodo 261.1544 (123.5796 y 398.7292); hora igual: True; no insertados 0 = 0 + 0; su salida programada (fin - departDelay) frente al flujo: error maximo 0.000 s en 0
 OK    D malla3_alta 10/25 cero s424301: total sin write-undeparted 912.12 = suma por periodo 912.1207 (672.9062 y 1151.3352); hora igual: True; no insertados 541 = 0 + 541; su salida programada (fin - departDelay) frente al flujo: error maximo 0.000 s en 541
 OK    D corredor_alta 10/25  s424301: total sin write-undeparted 1491.27 = suma por periodo 1491.2704 (1270.8909 y 1711.6499); hora igual: True; no insertados 792 = 69 + 723; su salida programada (fin - departDelay) frente al flujo: error maximo 0.000 s en 792
-OK    E copia del codigo: la gruesa chica corre 2 corridas (huella b602982d7a4e); repetirla corre 0 (huella b602982d7a4e), mismo gruesa.csv
-OK    E comun.py de la copia con los otros fines de linea (LF): misma huella b602982d7a4e, 0 corridas
-OK    E comun.py de la copia cambiado: huella b602982d7a4e -> dcd0976a8735, vuelve a correr 2 corridas, gruesa.csv igual byte a byte (los numeros no cambian)
-OK    E interruptores de comun: huella 85b37341c7f1; con ESCRIBIR_NO_INSERTADOS 1ffbd8204123; con QUITAR_BLOQUE fb2740060911
+OK    E copia del codigo: la gruesa chica corre 2 corridas (huella d290ac21a9c8); repetirla corre 0 (huella d290ac21a9c8), mismo gruesa.csv
+OK    E comun.py de la copia con los otros fines de linea (LF): misma huella d290ac21a9c8, 0 corridas
+OK    E comun.py de la copia cambiado: huella d290ac21a9c8 -> ce2c33bb4170, vuelve a correr 2 corridas, gruesa.csv igual byte a byte (los numeros no cambian)
+OK    E interruptores de comun: huella 8122465d3d53; con ESCRIBIR_NO_INSERTADOS 90315d7116f7; con QUITAR_BLOQUE e870ae352bf0
 OK    F la fina se niega a leer una gruesa con opciones de prueba: codigo 1; barridos\corredor\fijo_grueso10.json no es de la regla: semillas 424301 (la regla: 2001-2003); rejilla [[20], [10]] + [] (la regla: [[10, 12, 15, 18, 20, 25, 30], [10, 15, 20]] + [[20, 10]]); --limite 2; opciones de prue
 OK    F con --permitir-prueba la lee (2 planes) y su salida queda marcada: ['entrada de prueba: barridos\\corredor\\fijo_grueso10.json', 'entrada de prueba: barridos\\corredor\\gruesa_semillas.csv']
 OK    F una gruesa con el registro de la regla pero corrida con 424301 tambien se niega: barridos\corredor\gruesa_semillas.csv no es de la regla: 2 de 2 planes con otras semillas (p. ej. v20_t10_o0_0: 424301; la regla: 2001-2003). Repita esa etapa sin opciones de prueba (o, solo en una pr
 OK    F fragil lee el desempate sin reescribirlo: desempate.csv y desempate_semillas.csv con el mismo sha256 y la misma fecha; fijo fino v20_t10_o0_0 20.22 (2001-2030), registro sin marca de prueba
 OK    F desempate.csv en otro orden: fragil se niega: barridos\corredor\desempate.csv no es el desempate de las etapas de hoy (lee ['v21_t11_o0_5', 'v20_t10_o0_0', 'v21_t11_o0_3']..., sale ['v20_t10_o0_0', 'v21_t11
 OK    F desempate sin la semilla 2010: fragil se niega: barridos\corredor\desempate_semillas.csv no es de la regla: 10 de 10 planes con otras semillas (p. ej. v20_t10_o0_0: 2001-2009; la regla: 2001-2010). Repita esa etapa sin opciones de prueba (o, solo e
+OK    F el paso 6 del actuado lee fijo_fino.json con su huella (la de sus cortes; con otros cortes seria otra: True) y se niega si es de otra: barridos\corredor\fijo_fino.json es de otra huella (000000000000; con este codigo y este escenario: d290ac21a9c8): repit
 OK    F desde la raiz (donde tambien hay corredor.sumocfg) se niega: codigo 1
 OK    F una opcion abreviada (--sem) no se acepta: codigo 2
 OK    F semillas del examen y de la final: correr_periodos las niega antes de lanzar sumo (sumo reemplazado: nada se simula): [(7001, 'negada'), (8001, 'negada'), (13120, 'negada'), (424301, 'llega a sumo')]

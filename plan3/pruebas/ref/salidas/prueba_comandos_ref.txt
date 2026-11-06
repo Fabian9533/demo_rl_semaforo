@@ -1,0 +1,8 @@
+OK    1 894 comandos de preparar, referencias, evaluaciones_referencias, evaluaciones_perfil_mezcla pasan el parser de su script; rechazados: []
+OK    2 8 comandos errados, 8 rechazados con su motivo: -c: error: --trozo solo en gruesa, fina, desfases y mult5; -c: error: unrecognized arguments: --semilla 2001; -c: error: --instalar y --paso son excluyentes; -c: error: argument --familia: invalid choice: 'reactivas' (choose fro; -c: error: piezas desconocidas o ninguna: ['e2']; -c: error: argument --regla: not allowed with argument --brazo; -c: error: --programa solo va con --brazo fijo, franja, bloques, actua; -c: error: unrecognized arguments: --fam reactiva
+OK    3 51 trozos en 17 uniones: id, --trozo k/n, salida y dependencias de la union: bien
+OK    4 presupuestos (reglas {'regulares': {'regla': 0.607, 'reactiva': 0.429, 'mp': 0.393}, 'aleatorias': {'regla': 0.714, 'reactiva': 0.357, 'mp': 0.286}}; franja y reglas sin EMPAQUE; actuado por corridas {'1': 0.227, '2': 0.136, '3': 0.091, '4': 0.091, '5': 0.091, '6': 0.364}) y salidas con sus _semillas.csv: bien
+OK    5 324 evaluaciones de referencias ajustadas: a ciegas sin referencias_congeladas.json en requiere 0; otras evaluaciones que lo piden 0
+OK    6 huerfanos por pid: {'corredor_alta vivo, por su pid': True, 'corredor con el pid del de corredor_alta': True, 'corredor vivo, por su pid': True, 'corredor con su pid reusado por notepad': False, 'corredor_alta muerto (pid sin proceso)': False}
+
+RESULTADO: PASA
