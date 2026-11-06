@@ -37,7 +37,8 @@ regular: 8001, 8002 y 8003. Fue un error de la instrucción: no le dijo qué sem
 - Toda prueba o revisión usa solo semillas de humo (424301-424360) o la base 7.
 - La evidencia del conteo de cambios de fase se rehízo con semillas de humo (`pruebas/ver/salidas/prueba_k_humo.txt`).
 
-**Pendiente:** Fabian decide si los archivos en cuarentena se borran sin abrir (recomendado) o se guardan.
+**Decisión de Fabian (05.11, 19:57):** se borraron sin abrir. Su manifiesto (ruta, sha256, filas y semillas, sin
+ninguna métrica) queda en `plan3/doc/cuarentena_examen_20261105.json`.
 
 ## 2. Cambios de fase: corrección de un error de conteo (05.11.2026)
 
