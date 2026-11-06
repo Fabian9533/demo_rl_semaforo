@@ -8,9 +8,11 @@ Pasos, en orden; si el 1 encuentra problemas no corre nada:
   3. protecciones.py despues;
   4. borra los tripinfo_*.xml que queden en plan3/ (pesan y no se usan);
   5. respaldo incremental de plan3/checkpoints fuera del repositorio y cola/manifiesto_checkpoints.json;
-  6. cola/manifiesto_ciego.json: ruta, sha256, filas y semillas de cada CSV de ciego/ (sin metricas);
+  6. cola/manifiesto_ciego.json: ruta, sha256, filas y semillas de cada CSV de ciego/ (sin metricas), y copia
+     incremental de ciego/ a respaldo_plan3/ciego, fuera del repositorio (sin abrir los archivos);
   7. cola/resumen_<fecha>.txt: hechos, fallidos y bloqueados de la noche (sin metricas).
-Por la manana se commitean el estado, los logs, los manifiestos y los resultados no decisivos (nunca ciego/).
+Por la manana se commitean el estado, los logs, los manifiestos y los resultados no decisivos (nunca ciego/ ni el sello
+cola/manifiesto_cierre.json: va solo en el commit del cierre, PLAN3 5.1), y se empujan.
 """
 import os
 import sys
@@ -83,6 +85,26 @@ def respaldar_checkpoints():
     return len(man), copiados
 
 
+RESPALDO_CIEGO = os.path.join(os.path.dirname(RESPALDO), "ciego")
+
+
+def respaldar_ciego():
+    """Copia a respaldo_plan3/ciego (fuera del repositorio) lo nuevo o cambiado de plan3/ciego: ciego/ esta ignorada por
+    git y vive solo en este worktree, asi que un 'git clean -x' o un borrado la perderia. Se copia sin abrir ni leer
+    nada: solo se compara el sha256 (05.11)."""
+    copiados = 0
+    for raiz, _, archivos in os.walk(CIEGO):
+        for a in archivos:
+            origen = os.path.join(raiz, a)
+            destino = os.path.join(RESPALDO_CIEGO, os.path.relpath(origen, CIEGO))
+            if os.path.exists(destino) and protecciones.sha(destino) == protecciones.sha(origen):
+                continue
+            os.makedirs(os.path.dirname(destino), exist_ok=True)
+            shutil.copy2(origen, destino)
+            copiados += 1
+    return copiados
+
+
 def manifiesto_ciego():
     """Ruta, sha256, filas y semillas de cada CSV de ciego/. Solo cuenta filas y lee la columna de semillas."""
     salida = {}
@@ -131,12 +153,20 @@ def resumen(inicio):
                 if os.path.getmtime(p) >= inicio]
     if rehechos:
         lineas.append(f"  PROBLEMA (B22): episodios rehechos que no repiten el intento anterior: {', '.join(rehechos)}")
-    avisos = []
+    avisos, otro_codigo = [], []
     for t in de_hoy:
         ruta_log = os.path.join(COLA, "logs", t + ".log")
         if os.path.exists(ruta_log):
             with open(ruta_log, encoding="utf-8", errors="replace") as f:
-                avisos += [f"{t}: {l.strip()[:160]}" for l in f if l.startswith("AVISO")]
+                for l in f:
+                    if l.startswith("AVISO: el estado se escribio con otro codigo"):
+                        otro_codigo.append(t)
+                    elif l.startswith("AVISO"):
+                        avisos.append(f"{t}: {l.strip()[:160]}")
+    # Revision del 05.11 (R4-05): seguir un estado escrito por el codigo de antes de una fusion es lo esperado (la
+    # reanudacion entre versiones es exacta); se cuentan aparte para que no tapen los otros avisos.
+    if otro_codigo:
+        lineas.append(f"  tramos que siguieron un estado de otro codigo (esperado tras una fusion): {len(otro_codigo)}")
     if avisos:
         lineas.append(f"  avisos en los logs ({len(avisos)}):")
         lineas += [f"    {a}" for a in avisos[:30]]
@@ -176,6 +206,7 @@ def main():
     total, copiados = respaldar_checkpoints()
     print(f"checkpoints: {total} registrados, {copiados} copiados al respaldo", flush=True)
     print(f"manifiesto ciego: {manifiesto_ciego()} archivos", flush=True)
+    print(f"ciego: {respaldar_ciego()} archivos copiados al respaldo", flush=True)
     texto = resumen(inicio)
     with open(os.path.join(COLA, f"resumen_{time.strftime('%Y%m%d', time.localtime(inicio))}.txt"), "w",
               encoding="utf-8") as f:

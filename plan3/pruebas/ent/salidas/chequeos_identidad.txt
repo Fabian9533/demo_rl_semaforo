@@ -1,8 +1,8 @@
 chequeos_previos.identidad() (plan3/chequeos_previos.py, la identidad de cada tarde), desde plan3/
-05.11.2026 11:47; commit 24ebb66
+05.11.2026 15:36; commit 201ec69
 
 python -c "import chequeos_previos as c; print(c.identidad())"
 []
-(real 3m40.763s)
+(real 4m8.084s)
 
 Resultado: todo OK (lista vacia de problemas: IPPO entregado y V2 con --guardar-estado --registro-extendido = tag)

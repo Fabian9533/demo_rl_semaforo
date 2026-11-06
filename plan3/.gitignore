@@ -13,3 +13,6 @@ ciego/
 __pycache__/
 *.pyc
 lanzamiento.sha256
+
+# archivos E2 de la observacion cercana (rl_ippo.archivo_e2): se regeneran
+e2_*.add.xml

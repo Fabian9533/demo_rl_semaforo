@@ -1,3 +1,8 @@
+Codigo: commit 77145442389cb6081a91d97a0338f3e206fa30cd (rama plan3-ref); estos archivos sin cambios frente al commit
+  sha256 comun.py: 86efdfb0ed3737def7cf4a6c1309bb33549756476973bbeabad8e78afa5c5074
+  sha256 rl_ippo.py: 544cc6f9901dc9b4a84dee8ecebb94673197cf851dd4e67d7a7338cdf4f482b1
+  sha256 evaluar.py: 7423a9193a26ebad12b630883490ca6f99c3f804c167a23d856e20ea4ffdbb8b
+  sha256 rl_corredor.py: 7d6e38b9ef834a4022bd613fb5b3faec042743b16d79752701e9250523a1d059
 IPPO con mensajes (base 42) en P6, semillas 1001-1002
 OK    1 codigo entregado (223f908) corrido hoy = codigo de esta rama en las 34 columnas: True []
   frente al CSV entregado (insumos/puente): [('1001', 'cambios_fase', '1654', '1650'), ('1002', 'cambios_fase', '1596', '1592')]

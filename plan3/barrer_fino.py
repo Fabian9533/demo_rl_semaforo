@@ -4,8 +4,11 @@ prerregistro, seccion 5: "Fijo fino" y "Fijo con verdes de 5 en 5").
 
 Uso (cwd = plan3/). Con llegadas aleatorias, perfil o P6e, a traves del lanzador, que registra el escenario:
   python barrer_fino.py <esc> --etapa gruesa|fina|desfases|desempate|fragil|mult5|fino|todo
-         [--trozo k/n] [--procesos 1] [--llegadas auto|regulares|aleatorias] [--bloque 1800]
+         [--trozo k/n] [--procesos 1] [--bloque 1800]
   python ../con_escenarios.py barrer_fino.py poi_corredor --etapa gruesa ...
+  Solo para pruebas (fuera de la cola, en copias): --llegadas regulares|aleatorias, --semillas, --semillas-desempate,
+  --semillas-fragil, --avenida, --transversal, --limite y --permitir-prueba. Las opciones van completas (sin
+  abreviar).
 
 Importa Plantilla, configs_plantilla, desfases_malla3 y evaluar_config de barrer_fijo.py sin cambiarlos y nunca
 instala: escribe con nombres nuevos (barridos/<esc>/..., <esc>_r10f.add.xml, <esc>_r10g.add.xml, <esc>_m5f.add.xml).
@@ -47,14 +50,29 @@ Trozos y reanudacion: --trozo k/n corre solo los planes de indice = k (mod n) de
 barridos/<esc>/trozos/<etapa>_t<k>de<n>.csv.
 La etapa sin --trozo junta lo ya corrido (trozos, etapas anteriores y la cache tmp_fino/<esc>/*.jsonl, que se
 escribe corrida a corrida y sirve para reanudar), corre lo que falte y escribe la salida. Los resultados se guardan
-por (plan, semilla) con la huella del escenario (sha256 de cfg, red, rutas, adicionales, cortes y del codigo que corre
-y lee) y el sha256 del programa con que se corrieron: un resultado solo se reutiliza si los dos coinciden, asi un
-arreglo del codigo no hereda numeros viejos. El CSV no depende de --procesos ni de los trozos. Todo CSV, JSON y
-.add.xml se escribe en un temporal con el pid y se reemplaza.
+por (plan, semilla) con la huella del escenario y el sha256 del programa con que se corrieron: un resultado solo se
+reutiliza si los dos coinciden. La huella cubre los archivos del escenario (cfg, red, rutas, adicionales y plantilla,
+con los fines de linea normalizados),
+los cortes, el sha256 completo del codigo que arma, corre y lee cada corrida (barrer_fino.py, barrer_fijo.py, comun.py
+y escenarios_plan2.py, con los fines de linea normalizados: el mismo commit da la misma huella en cualquier worktree)
+y los interruptores de comun que cambian lo que se escribe o se lee (ESCRIBIR_NO_INSERTADOS, QUITAR_BLOQUE):
+cualquier cambio en esos archivos, aunque sea un comentario, deja sin uso todo lo guardado y obliga a repetir las
+etapas (B22). El CSV no depende de --procesos ni de los trozos. Todo CSV, JSON y .add.xml se escribe en
+un temporal con el pid y se reemplaza.
+
+Cadena de etapas: la gruesa deja en fijo_grueso10.json su registro (llegadas, semillas, rejilla inicial, --limite y
+las opciones de prueba usadas). Cada etapa siguiente compara lo que lee con la regla: el registro de la gruesa, las
+semillas de cada plan en <etapa>_semillas.csv y, donde se usa el fijo fino, la marca de prueba de fijo_fino.json; si
+algo no es de la regla (opciones de prueba, otra rejilla, otras semillas) se niega, salvo con --permitir-prueba (solo
+para pruebas en copias; la cola lo rechaza), y entonces su propia salida queda marcada como de prueba.
 
 Salidas en barridos/<esc>/: <etapa>.csv (una fila por plan, ordenada por retraso total), <etapa>_semillas.csv (una
-fila por plan y semilla), fijo_grueso10.json, fijo_fino.json y fijo_mult5.json (el ganador, la traza de la regla y
-el sha256 del .add.xml). Codigo 0 solo con las salidas de la etapa completas.
+fila por plan y semilla), fijo_grueso10.json, fijo_fino.json y fijo_mult5.json (el ganador, la traza de la regla, el
+registro y el sha256 del .add.xml). La etapa fragil lee el desempate (desempate.csv y desempate_semillas.csv) sin
+reescribirlo. Codigo 0 solo con las salidas de la etapa completas. Se corre con cwd = plan3/ (o una carpeta dentro de
+plan3/, como las copias de las pruebas en tmp_ref/): desde otro lugar se niega. Como todo sumo de plan3, antes de cada
+corrida pasa por comun.revisar_semilla_ciega: una semilla del examen o de la prueba final sale con error antes de
+simular si el proceso no es un trabajo ciego de la cola (franja.py y actuado.py corren por aqui).
 """
 import os
 import sys
@@ -88,7 +106,7 @@ SEMILLAS = {"regulares": {"barrido": "2001-2003", "desempate": "2001-2010", "fra
             "aleatorias": {"barrido": "2001-2010", "desempate": "2001-2030", "fragil": "2001-2030"}}
 FINALISTAS = 10          # desempate: las 10 mejores
 TOPE_MINIMOS = 3         # regiones de la etapa fina
-UMBRAL_REL = 0.02        # minimos a <= 2 % del mejor; fragil: dos primeros a <= 2 %
+UMBRAL_PCT = 2           # minimos a <= 2 % del mejor; fragil: dos primeros a <= 2 % (a_2pct)
 UMBRAL_EE = 2.0          # llegadas aleatorias: minimos a <= 2 errores estandar de la diferencia pareada
 TRABADA = 1.10           # semilla trabada: retraso total > 1.10 veces la mediana del plan
 TOP_FRAGIL = 3           # fragil: se desempata entre los 3 primeros
@@ -104,6 +122,36 @@ ETAPAS = ("gruesa", "fina", "desfases", "desempate", "fragil", "mult5")
 
 
 # ---------------------------------------------------------------- utilidades
+def exigir_cwd():
+    """Los scripts de las referencias escriben relativo a la carpeta actual (barridos/, tmp_fino/, <esc>_*.add.xml):
+    se corren con cwd = plan3/ o una carpeta dentro de plan3/ (las copias de las pruebas, tmp_ref/...). Desde la raiz
+    o desde plan2/, que tambien tienen los .sumocfg, escribirian ahi: se niega."""
+    cwd = os.path.normcase(os.path.realpath(os.getcwd()))
+    base = os.path.normcase(os.path.realpath(AQUI))
+    if cwd != base and not cwd.startswith(base.rstrip(os.sep) + os.sep):
+        raise SystemExit(f"Se corre con cwd = plan3/ ({AQUI}) o una carpeta dentro de ella, no desde {os.getcwd()}")
+
+
+def a_2pct(valor, mejor):
+    """True si valor queda a <= 2 % de mejor (valor <= 1.02 x mejor), en centesimas enteras: las medias llegan
+    redondeadas a 0.01, asi el borde exacto (20.50 y 20.91, o 30.00 y 30.60) cuenta como dentro, sin el error de la
+    coma flotante. La usan la etapa fina (llegadas regulares) y la regla de fragiles."""
+    v, m = round(100 * float(valor)), round(100 * float(mejor))
+    return 100 * (v - m) <= UMBRAL_PCT * m
+
+
+def con_reintentos(funcion, *args, intentos=10, espera=1.0):
+    """funcion(*args), reintentando si Windows niega el acceso un instante (PermissionError: otro proceso esta
+    reemplazando el archivo con os.replace)."""
+    for k in range(intentos):
+        try:
+            return funcion(*args)
+        except PermissionError:
+            if k == intentos - 1:
+                raise
+            time.sleep(espera)
+
+
 def texto_semillas(semillas):
     """[2001, 2002, 2003] -> '2001-2003' (como --semillas de barrer_fijo); si no son contiguas, con comas."""
     s = list(semillas)
@@ -128,6 +176,25 @@ def sha256_archivo(ruta):
     return h.hexdigest()
 
 
+def sha256_codigo(ruta):
+    """sha256 de un archivo de codigo con los fines de linea normalizados (CRLF -> LF): el mismo commit da la misma
+    huella en cualquier worktree, lo saque git con CRLF o con LF."""
+    with open(ruta, "rb") as f:
+        return hashlib.sha256(f.read().replace(b"\r\n", b"\n")).hexdigest()
+
+
+def reemplazar(tmp, ruta):
+    """barrer_fijo.reemplazar (con reintentos) y, si no llego a reemplazar, borra el temporal."""
+    try:
+        bf.reemplazar(tmp, ruta)
+    finally:
+        if os.path.exists(tmp):
+            try:
+                os.remove(tmp)
+            except OSError:
+                pass
+
+
 def escribir_atomico(ruta, texto, modo="w", **kw):
     """Escribe en <ruta>.<pid>.tmp y reemplaza con reintentos (barrer_fijo.reemplazar): un trabajo cortado no
     deja un archivo que parezca completo y dos procesos no se pisan el temporal."""
@@ -137,7 +204,7 @@ def escribir_atomico(ruta, texto, modo="w", **kw):
     tmp = f"{ruta}.{os.getpid()}.tmp"
     with open(tmp, modo, **kw) as f:
         f.write(texto)
-    bf.reemplazar(tmp, ruta)
+    reemplazar(tmp, ruta)
 
 
 def escribir_csv(ruta, campos, filas):
@@ -149,7 +216,22 @@ def escribir_csv(ruta, campos, filas):
         w = csv.DictWriter(f, fieldnames=campos, extrasaction="ignore")
         w.writeheader()
         w.writerows(filas)
-    bf.reemplazar(tmp, ruta)
+    reemplazar(tmp, ruta)
+
+
+def leer_csv(ruta):
+    """Filas de un CSV (con reintentos si otro proceso lo esta reemplazando)."""
+    def leer(r):
+        with open(r, newline="", encoding="utf-8") as f:
+            return list(csv.DictReader(f))
+    return con_reintentos(leer, ruta)
+
+
+def leer_json(ruta):
+    def leer(r):
+        with open(r, encoding="utf-8") as f:
+            return json.load(f)
+    return con_reintentos(leer, ruta)
 
 
 def escribir_json(ruta, datos):
@@ -177,19 +259,31 @@ def llegadas_aleatorias(cfg):
     return False
 
 
-def huella_escenario(cfg, extras=(), cortes=()):
-    """sha256 (12 hex) de los archivos que definen la simulacion de un barrido, de los cortes de periodo y del codigo
-    que corre y lee cada corrida (leer_periodos y correr_periodos). Una corrida guardada solo se reutiliza con la
-    misma huella (y con el mismo programa: Celda.asegurar)."""
+def archivos_codigo():
+    """Codigo del que dependen los numeros de una corrida guardada: este archivo (corre y lee: correr_periodos,
+    leer_periodos, Celda), barrer_fijo.py (plantilla y programas), comun.py (opciones de sumo y lector de la hora:
+    leer_tripinfo) y escenarios_plan2.py (escenarios y derivados)."""
+    import escenarios_plan2
+    return [os.path.abspath(m) for m in (__file__, bf.__file__, comun.__file__, escenarios_plan2.__file__)]
+
+
+def huella_escenario(cfg, extras=(), cortes=(), codigo=()):
+    """sha256 (12 hex) de los archivos que definen la simulacion de un barrido, de los cortes de periodo, del codigo
+    que arma, corre y lee cada corrida (archivos_codigo() y los de codigo, con su sha256 completo: un cambio
+    cualquiera, aunque sea un comentario, cambia la huella) y de los interruptores de comun que cambian lo que se
+    escribe o se lee. Una corrida guardada solo se reutiliza con la misma huella (y con el mismo programa:
+    Celda.asegurar)."""
     net, rutas, adic = rutas_cfg(cfg)
     h = hashlib.sha256()
     for ruta in [cfg, net] + rutas + adic + [e for e in extras if e not in adic]:
         h.update(ruta.encode())
-        with open(ruta, "rb") as f:
-            h.update(f.read())
+        with open(ruta, "rb") as f:                # fines de linea normalizados, como el codigo
+            h.update(f.read().replace(b"\r\n", b"\n"))
     h.update(f"fin={bf.FIN_SIM};cortes={list(cortes)}".encode())
-    import inspect
-    h.update((inspect.getsource(leer_periodos) + inspect.getsource(correr_periodos)).encode())
+    for ruta in archivos_codigo() + [os.path.abspath(r) for r in codigo]:
+        h.update(f"{os.path.basename(ruta)}={sha256_codigo(ruta)};".encode())
+    h.update(f"escribir_no_insertados={bool(getattr(comun, 'ESCRIBIR_NO_INSERTADOS', False))};"
+             f"quitar_bloque={bool(getattr(comun, 'QUITAR_BLOQUE', False))}".encode())
     return h.hexdigest()[:12]
 
 
@@ -244,6 +338,7 @@ def correr_periodos(cfg, extra, semilla, tripinfo, cortes, intentos=5):
            "--tripinfo-output.write-unfinished", "true"] + no_insertados + \
           ["--device.emissions.probability", "1",
            "--no-step-log", "true", "--no-warnings", "true", "--end", str(bf.FIN_SIM)] + estadisticas + extra
+    comun.revisar_semilla_ciega(cmd)            # plan3: semillas del examen y de la prueba final solo desde la cola
     for k in range(intentos):
         try:
             subprocess.run(cmd, check=True, **bf.SILENCIO)
@@ -260,9 +355,13 @@ def correr_periodos(cfg, extra, semilla, tripinfo, cortes, intentos=5):
 
 # ---------------------------------------------------------------- celda: escenario, semillas y resultados
 class Celda:
-    """Un escenario con su plantilla, sus semillas de ajuste y los resultados ya corridos."""
+    """Un escenario con su plantilla, sus semillas de ajuste y los resultados ya corridos.
+    prueba: opciones de prueba con que se corre (las anota el registro de las salidas); permitir: --permitir-prueba
+    (acepta entradas que no son de la regla y marca la salida como de prueba)."""
 
-    def __init__(self, esc, llegadas="auto", bloque=1800, procesos=1, semillas=None, prefijos=ETAPAS):
+    def __init__(self, esc, llegadas="auto", bloque=1800, procesos=1, semillas=None, prefijos=ETAPAS, prueba=(),
+                 permitir=False):
+        exigir_cwd()
         self.esc = esc
         self.cfg = f"{esc}.sumocfg"
         if not os.path.exists(self.cfg):
@@ -272,7 +371,8 @@ class Celda:
                              "registre el escenario con el caso cuya rejilla hereda")
         self.p = Plantilla(esc, self.cfg)
         self.malla = bf.es_malla(esc)
-        self.aleatorias = llegadas_aleatorias(self.cfg) if llegadas == "auto" else llegadas == "aleatorias"
+        self.llegadas_regla = "aleatorias" if llegadas_aleatorias(self.cfg) else "regulares"
+        self.aleatorias = self.llegadas_regla == "aleatorias" if llegadas == "auto" else llegadas == "aleatorias"
         self.llegadas = "aleatorias" if self.aleatorias else "regulares"
         self.cortes = list(range(bloque, FIN_HORA, bloque))
         self.k = len(self.cortes) + 1
@@ -282,6 +382,8 @@ class Celda:
         for k, v in (semillas or {}).items():
             if v:
                 self.semillas[k] = leer_semillas(v)
+        self.prueba = list(prueba) + ([f"--llegadas {self.llegadas}"] if self.llegadas != self.llegadas_regla else [])
+        self.permitir = bool(permitir)
         extras = [self.p.ruta] if self.p.ruta else []
         self.huella = huella_escenario(self.cfg, extras, self.cortes)
         self.procesos = max(1, procesos)
@@ -292,6 +394,70 @@ class Celda:
         self.programa = {}          # (clave, semilla) -> sha256 (12 hex) del programa con que se corrio
         self.cargar()
 
+    # ---------------- regla y registro (cadena de etapas)
+    def semillas_regla(self, cual):
+        """Semillas que la regla (prerregistro 5) da a esta celda: las de sus llegadas detectadas."""
+        return leer_semillas(SEMILLAS[self.llegadas_regla][cual])
+
+    def registro(self, **extra):
+        """Lo que se anota en el JSON de una salida: llegadas, semillas y opciones de prueba (vacio = la regla)."""
+        return {"llegadas": self.llegadas, "semillas": {k: texto_semillas(v) for k, v in self.semillas.items()},
+                **extra, "prueba": list(self.prueba)}
+
+    def fuera_de_regla(self, que, problemas):
+        """Una entrada que no es de la regla: se niega, salvo con --permitir-prueba (aviso y salida marcada)."""
+        if not problemas:
+            return
+        texto = f"{que} no es de la regla: " + "; ".join(problemas)
+        if not self.permitir:
+            raise SystemExit(f"{texto}. Repita esa etapa sin opciones de prueba (o, solo en una prueba, "
+                             f"--permitir-prueba)")
+        print(f"AVISO (--permitir-prueba): {texto}", flush=True)
+        marca = f"entrada de prueba: {que}"
+        if marca not in self.prueba:
+            self.prueba.append(marca)
+
+    def comprobar_semillas(self, ruta, cual):
+        """Cada plan de un <etapa>_semillas.csv tiene exactamente las semillas de la regla (cual: barrido o
+        desempate)."""
+        esperadas = self.semillas_regla(cual)
+        por_plan = {}
+        for fila in leer_csv(ruta):
+            por_plan.setdefault(fila["clave"], []).append(int(fila["semilla"]))
+        malos = sorted(k for k, s in por_plan.items() if sorted(s) != esperadas)
+        if malos:
+            ejemplo = sorted(por_plan[malos[0]])
+            self.fuera_de_regla(ruta, [f"{len(malos)} de {len(por_plan)} planes con otras semillas (p. ej. "
+                                       f"{malos[0]}: {texto_semillas(ejemplo)}; la regla: "
+                                       f"{texto_semillas(esperadas)})"])
+
+    def comprobar_marca(self, ruta):
+        """La marca de prueba del JSON de una salida (fijo_fino.json, actuado_paso<k>.json...)."""
+        datos = leer_json(ruta)
+        registro = datos.get("registro")
+        if registro is None:
+            self.fuera_de_regla(ruta, ["sin registro (salida de una version anterior del codigo)"])
+        elif registro.get("prueba"):
+            self.fuera_de_regla(ruta, [f"opciones de prueba {registro['prueba']}"])
+        return datos
+
+    def huella_con_cortes(self, cortes):
+        """La huella de este escenario con otros cortes de periodo (la del barrido que dejo un JSON)."""
+        extras = [self.p.ruta] if self.p.ruta else []
+        return huella_escenario(self.cfg, extras, list(cortes))
+
+    def comprobar_fino(self, ruta):
+        """fijo_fino.json para el paso 6 del actuado y para bloques: la marca de prueba y la huella de hoy, con los
+        cortes de su propio barrido (el del perfil usa --bloque 600 y el actuado siempre 1800). Una huella vieja (otro
+        codigo, otro escenario: un relanzamiento a medias) se niega siempre."""
+        datos = self.comprobar_marca(ruta)
+        if "cortes" not in datos:
+            self.fuera_de_regla(ruta, ["sin los cortes de su barrido (salida de una version anterior del codigo)"])
+        elif datos.get("huella") != self.huella_con_cortes(datos["cortes"]):
+            raise SystemExit(f"{ruta} es de otra huella ({datos.get('huella')}; con este codigo y este escenario: "
+                             f"{self.huella_con_cortes(datos['cortes'])}): repita la etapa fragil")
+        return datos
+
     # ---------------- resultados guardados
     def campos_corrida(self):
         return (["clave", "semilla", "huella", "programa"] + list(METRICAS) + list(EXTRA_CORRIDA)
@@ -300,7 +466,8 @@ class Celda:
 
     def cargar(self):
         """Resultados ya corridos con esta huella: <prefijo>*_semillas.csv y trozos/ de barridos/<esc>/ y la
-        cache tmp_fino/<esc>/<prefijo>*.jsonl (una linea por corrida; una linea cortada se ignora)."""
+        cache tmp_fino/<esc>/<prefijo>*.jsonl (una linea por corrida; una linea cortada se ignora). Si otro proceso
+        esta reemplazando un CSV (Windows niega el acceso un instante), se reintenta."""
         enteros = set(EXTRA_CORRIDA) | {f"n_p{k}" for k in range(1, self.k + 1)} | \
             {f"noins_p{k}" for k in range(1, self.k + 1)} | {"throughput"}
         rutas = []
@@ -308,27 +475,29 @@ class Celda:
             rutas += sorted(glob.glob(os.path.join(self.carpeta, f"{pre}*_semillas.csv")))
             rutas += sorted(glob.glob(os.path.join(self.carpeta, "trozos", f"{pre}_t*.csv")))
         for ruta in rutas:
-            with open(ruta, newline="", encoding="utf-8") as f:
-                for fila in csv.DictReader(f):
-                    if fila.get("huella") != self.huella or not fila.get("programa"):
-                        continue
-                    r = {}
-                    for c in self.campos_corrida()[4:]:
-                        v = fila[c]
-                        r[c] = int(v) if c in enteros else float(v)
-                    self.conocidas[(fila["clave"], int(fila["semilla"]))] = r
-                    self.programa[(fila["clave"], int(fila["semilla"]))] = fila["programa"]
+            for fila in leer_csv(ruta):
+                if fila.get("huella") != self.huella or not fila.get("programa"):
+                    continue
+                r = {}
+                for c in self.campos_corrida()[4:]:
+                    v = fila[c]
+                    r[c] = int(v) if c in enteros else float(v)
+                self.conocidas[(fila["clave"], int(fila["semilla"]))] = r
+                self.programa[(fila["clave"], int(fila["semilla"]))] = fila["programa"]
+
+        def lineas(r):
+            with open(r, encoding="utf-8") as f:
+                return f.readlines()
         for pre in self.prefijos:
             for ruta in sorted(glob.glob(os.path.join(self.tmp, f"{pre}*.jsonl"))):
-                with open(ruta, encoding="utf-8") as f:
-                    for linea in f:
-                        try:
-                            d = json.loads(linea)
-                        except ValueError:
-                            continue
-                        if d.get("h") == self.huella and "r" in d and d.get("p"):
-                            self.conocidas[(d["clave"], int(d["s"]))] = d["r"]
-                            self.programa[(d["clave"], int(d["s"]))] = d["p"]
+                for linea in con_reintentos(lineas, ruta):
+                    try:
+                        d = json.loads(linea)
+                    except ValueError:
+                        continue
+                    if d.get("h") == self.huella and "r" in d and d.get("p"):
+                        self.conocidas[(d["clave"], int(d["s"]))] = d["r"]
+                        self.programa[(d["clave"], int(d["s"]))] = d["p"]
 
     def fila_corrida(self, clave, semilla):
         return {"clave": clave, "semilla": semilla, "huella": self.huella,
@@ -514,6 +683,8 @@ def planes_de_pares(c, pares, limite=None):
 def etapa_gruesa(c, trozo=None, avenida=None, transversal=None, limite=None):
     """La rejilla de barrer_fijo con su extension. Devuelve (filas ordenadas, planes en el orden de barrer_fijo)."""
     ejes, extra = pares_gruesa(c, avenida, transversal)
+    registro = c.registro(ejes_iniciales=[list(e) for e in ejes], desplegado=sorted(list(p) for p in extra),
+                          limite=limite)
     semillas = c.semillas["barrido"]
     pares = sorted({(a, t) for a in ejes[0] for t in ejes[1]} | extra)
     if trozo:
@@ -544,34 +715,73 @@ def etapa_gruesa(c, trozo=None, avenida=None, transversal=None, limite=None):
              f"({c.llegadas}). Ganador: avenida {g['verde']} s, transversal {g['verde_transversal']} s, ciclo "
              f"{g['ciclo']} s, desfases {g['offsets']}{' (' + g['esquema'] + ')' if c.malla else ''}; retraso "
              f"total {g['retraso_total_prom']} s (sd {g['retraso_total_sd']}), timeLoss {g['timeloss_prom']} s.")
-    instalar(c, pl, g, "r10g", "fijo_grueso10", texto, {"ejes": ejes, "planes": len(planes)})
+    instalar(c, pl, g, "r10g", "fijo_grueso10", texto, {"ejes": ejes, "planes": len(planes)}, registro)
     return filas, planes
 
 
+def comprobar_gruesa(c):
+    """La gruesa que leen las etapas siguientes es la de la regla: su registro (fijo_grueso10.json) trae las
+    llegadas detectadas, las semillas del barrido de la regla, la rejilla inicial de barrer_fijo, sin --limite y sin
+    opciones de prueba. Si no, se niega (salvo --permitir-prueba)."""
+    ruta = os.path.join(c.carpeta, "fijo_grueso10.json")
+    if not os.path.exists(ruta):
+        raise SystemExit(f"Falta {ruta}: corra antes la etapa gruesa completa (sin --trozo)")
+    datos = leer_json(ruta)
+    if datos.get("huella") != c.huella:
+        raise SystemExit(f"{ruta} es de otra huella ({datos.get('huella')}, hoy {c.huella}): repita la gruesa")
+    reg = datos.get("registro")
+    if reg is None:
+        c.fuera_de_regla(ruta, ["sin registro (gruesa de una version anterior del codigo)"])
+        return
+    ejes, extra = pares_gruesa(c)
+    problemas = []
+    if reg.get("llegadas") != c.llegadas_regla:
+        problemas.append(f"llegadas {reg.get('llegadas')} (la regla: {c.llegadas_regla})")
+    semillas = (reg.get("semillas") or {}).get("barrido")
+    if semillas != texto_semillas(c.semillas_regla("barrido")):
+        problemas.append(f"semillas {semillas} (la regla: {texto_semillas(c.semillas_regla('barrido'))})")
+    if reg.get("ejes_iniciales") != ejes or reg.get("desplegado") != sorted(list(p) for p in extra):
+        problemas.append(f"rejilla {reg.get('ejes_iniciales')} + {reg.get('desplegado')} (la regla: {ejes} + "
+                         f"{sorted(list(p) for p in extra)})")
+    if reg.get("limite") is not None:
+        problemas.append(f"--limite {reg['limite']}")
+    if reg.get("prueba"):
+        problemas.append(f"opciones de prueba {reg['prueba']}")
+    c.fuera_de_regla(ruta, problemas)
+
+
 def planes_gruesa(c):
-    """Planes de la gruesa ya escrita (en su orden de barrer_fijo), para las etapas siguientes."""
+    """Planes de la gruesa ya escrita (en su orden de barrer_fijo), para las etapas siguientes; antes comprueba que
+    sea la de la regla (comprobar_gruesa)."""
     ruta = os.path.join(c.carpeta, "gruesa_semillas.csv")
     if not os.path.exists(ruta):
         raise SystemExit(f"Falta {ruta}: corra antes la etapa gruesa")
+    comprobar_gruesa(c)
     return planes_desde_semillas(c, ruta)
+
+
+def filas_de_esta_huella(c, ruta):
+    """Filas de un <etapa>_semillas.csv; error si alguna se corrio con otra huella."""
+    filas = leer_csv(ruta)
+    otras = sorted({f["huella"] for f in filas if f["huella"] != c.huella})
+    if otras:
+        raise SystemExit(f"{ruta} se corrio con otra huella del escenario ({', '.join(otras)}, hoy {c.huella}): "
+                         f"cambiaron los archivos del escenario, el codigo o --bloque; repita esa etapa")
+    return filas
 
 
 def planes_desde_semillas(c, ruta):
     """Planes en el orden de un <etapa>_semillas.csv (la clave dice verdes y desfases); el esquema sale del CSV
-    de la etapa."""
+    de la etapa. Cada plan debe traer las semillas del barrido de la regla (comprobar_semillas)."""
     claves = []
-    with open(ruta, newline="", encoding="utf-8") as f:
-        for fila in csv.DictReader(f):
-            if fila["huella"] != c.huella:
-                raise SystemExit(f"{ruta} se corrio con otra huella del escenario ({fila['huella']}, hoy "
-                                 f"{c.huella}): cambiaron los archivos del escenario o --bloque; repita la etapa")
-            if fila["clave"] not in claves:
-                claves.append(fila["clave"])
+    for fila in filas_de_esta_huella(c, ruta):
+        if fila["clave"] not in claves:
+            claves.append(fila["clave"])
+    c.comprobar_semillas(ruta, "barrido")
     esquemas = {}
     ruta_etapa = ruta.replace("_semillas.csv", ".csv")
     if os.path.exists(ruta_etapa):
-        with open(ruta_etapa, newline="", encoding="utf-8") as f:
-            esquemas = {fila["clave"]: fila.get("esquema", "") for fila in csv.DictReader(f)}
+        esquemas = {fila["clave"]: fila.get("esquema", "") for fila in leer_csv(ruta_etapa)}
     planes = []
     for clave in claves:
         v, t, o = clave.split("_", 2)
@@ -604,10 +814,10 @@ def minimos_locales(filas):
 
 
 def dentro_del_umbral(c, pl, pl_mejor, valor, valor_mejor):
-    """Llegadas regulares: a <= 2 % del mejor. Aleatorias: la media de la diferencia pareada por semilla con el
-    mejor plan no supera 2 errores estandar."""
+    """Llegadas regulares: a <= 2 % del mejor (a_2pct). Aleatorias: la media de la diferencia pareada por semilla con
+    el mejor plan no supera 2 errores estandar."""
     if not c.aleatorias:
-        return valor <= (1 + UMBRAL_REL) * valor_mejor
+        return a_2pct(valor, valor_mejor)
     d = [float(c.conocidas[(pl["clave"], s)]["retraso_total_prom"]) -
          float(c.conocidas[(pl_mejor["clave"], s)]["retraso_total_prom"]) for s in c.semillas["barrido"]]
     if len(d) < 2:
@@ -698,6 +908,8 @@ def contexto_desfases(c):
     ruta = os.path.join(c.carpeta, "fina_semillas.csv")
     if not os.path.exists(ruta):
         raise SystemExit(f"Falta {ruta}: corra antes la etapa fina")
+    filas_de_esta_huella(c, ruta)
+    c.comprobar_semillas(ruta, "barrido")
     c.asegurar(planes_f, c.semillas["barrido"], "fina")
     planes, region = [], {}
     for etiqueta, _, lista in regiones:
@@ -733,23 +945,28 @@ def planes_barrido(c):
     return unicos(planes)
 
 
-def desempatar(c, candidatos, nombre, etapa):
+def desempatar(c, candidatos, nombre, etapa, escribir=True, cache=None):
     """Las 10 mejores por la media en las semillas del barrido, con las del desempate: (filas, planes)
-    ordenados por la media del desempate."""
-    c.asegurar(candidatos, c.semillas["barrido"], nombre)
+    ordenados por la media del desempate. escribir=False: no escribe <nombre>.csv ni <nombre>_semillas.csv (la etapa
+    fragil lee el desempate sin reescribirlo); cache: nombre de la cache de las corridas que falten."""
+    cache = cache or nombre
+    c.asegurar(candidatos, c.semillas["barrido"], cache)
     filas = [c.fila(pl, c.semillas["barrido"], etapa) for pl in candidatos]
     orden = sorted(range(len(filas)), key=lambda i: filas[i]["retraso_total_prom"])
     finalistas = [candidatos[i] for i in orden[:FINALISTAS]]
-    c.asegurar(finalistas, c.semillas["desempate"], nombre)
-    return c.escribir_etapa(nombre, finalistas, c.semillas["desempate"], "desempate")
+    c.asegurar(finalistas, c.semillas["desempate"], cache)
+    if escribir:
+        return c.escribir_etapa(nombre, finalistas, c.semillas["desempate"], "desempate")
+    filas_f = [c.fila(pl, c.semillas["desempate"], "desempate") for pl in finalistas]
+    orden_f = sorted(range(len(filas_f)), key=lambda i: filas_f[i]["retraso_total_prom"])     # como escribir_etapa
+    return [filas_f[i] for i in orden_f], [finalistas[i] for i in orden_f]
 
 
 def regla_fragil(c, filas_d, planes_d, nombre):
     """Regla de ganadores fragiles sobre el desempate. Devuelve (fila ganadora, plan, traza)."""
     g = filas_d[0]
     segundo = filas_d[1] if len(filas_d) > 1 else None
-    cerca = segundo is not None and \
-        segundo["retraso_total_prom"] - g["retraso_total_prom"] <= UMBRAL_REL * g["retraso_total_prom"]
+    cerca = segundo is not None and a_2pct(segundo["retraso_total_prom"], g["retraso_total_prom"])
     traza = {"dos_primeros_a_2pct": bool(cerca), "semillas_trabadas_ganador": g["trabadas"],
              "fragil": bool(cerca or g["trabadas"] > 0), "semillas_desempate": g["semillas"]}
     if not traza["fragil"]:
@@ -761,20 +978,22 @@ def regla_fragil(c, filas_d, planes_d, nombre):
     return filas_f[0], planes_f[0], traza
 
 
-def instalar(c, pl, fila, sufijo, nombre_json, comentario, traza):
+def instalar(c, pl, fila, sufijo, nombre_json, comentario, traza, registro=None):
     """Escribe <esc>_<sufijo>.add.xml (programa "fijo", reemplaza a la plantilla <esc>.add.xml en
-    --additional-files, como lo haria barrer_fijo --instalar) y barridos/<esc>/<nombre_json>.json."""
+    --additional-files, como lo haria barrer_fijo --instalar) y barridos/<esc>/<nombre_json>.json (con el registro:
+    llegadas, semillas y opciones de prueba)."""
     destino = f"{c.esc}_{sufijo}.add.xml"
     tmp = f"{destino}.{os.getpid()}.tmp"
     c.escribir_plan(tmp, pl, comentario.replace("--", "- -"))     # un comentario XML no puede llevar "--"
-    bf.reemplazar(tmp, destino)
+    reemplazar(tmp, destino)
     datos = {"escenario": c.esc, "llegadas": c.llegadas, "archivo": destino, "sha256": sha256_archivo(destino),
-             "huella": c.huella, "verde": pl["verde"], "verde_transversal": pl["verde_transversal"],
+             "huella": c.huella, "cortes": c.cortes, "verde": pl["verde"], "verde_transversal": pl["verde_transversal"],
              "offsets": pl["offsets"], "esquema": pl["esquema"], "ciclo": pl["ciclo"], "clave": pl["clave"],
              "ids": c.p.ids, "fases_avenida": c.p.fases_av,
              **{k: fila[k] for k in ("retraso_total_prom", "retraso_total_sd", "timeloss_prom", "mediana", "peor",
                                       "trabadas", "semillas")},
-             "semillas_regla": {k: texto_semillas(v) for k, v in c.semillas.items()}, "traza": traza}
+             "semillas_regla": {k: texto_semillas(v) for k, v in c.semillas.items()}, "traza": traza,
+             "registro": registro or c.registro()}
     escribir_json(os.path.join(c.carpeta, f"{nombre_json}.json"), datos)
     print(f"Instalado {destino}: avenida {pl['verde']} s, transversal {pl['verde_transversal']} s, desfases "
           f"{'/'.join(map(str, pl['offsets']))} {pl['esquema']}, retraso total {fila['retraso_total_prom']} "
@@ -802,11 +1021,20 @@ def etapa_desempate(c):
 
 
 def etapa_fragil(c):
+    """Lee el desempate (sin reescribir desempate.csv ni desempate_semillas.csv, que son de r_desempate): rehace en
+    memoria las 10 finalistas con las corridas guardadas y comprueba que salgan las de desempate.csv, en su orden."""
     candidatos = planes_barrido(c)
     ruta = os.path.join(c.carpeta, "desempate_semillas.csv")
-    if not os.path.exists(ruta):
-        raise SystemExit(f"Falta {ruta}: corra antes la etapa desempate")
-    filas_d, planes_d = desempatar(c, candidatos, "desempate", "desempate")
+    ruta_csv = os.path.join(c.carpeta, "desempate.csv")
+    if not (os.path.exists(ruta) and os.path.exists(ruta_csv)):
+        raise SystemExit(f"Falta {ruta_csv} o {ruta}: corra antes la etapa desempate")
+    filas_de_esta_huella(c, ruta)
+    c.comprobar_semillas(ruta, "desempate")
+    filas_d, planes_d = desempatar(c, candidatos, "desempate", "desempate", escribir=False, cache="fragil")
+    leidas = [f["clave"] for f in leer_csv(ruta_csv)]
+    if leidas != [f["clave"] for f in filas_d]:
+        raise SystemExit(f"{ruta_csv} no es el desempate de las etapas de hoy (lee {leidas[:3]}..., sale "
+                         f"{[f['clave'] for f in filas_d][:3]}...): repita la etapa desempate")
     fila, pl, traza = regla_fragil(c, filas_d, planes_d, "fragil")
     if not traza["fragil"]:          # sin fragil: fragil.csv igual queda escrito (el ganador del desempate)
         c.escribir_etapa("fragil", planes_d[:1], c.semillas["desempate"], "fragil")
@@ -862,8 +1090,18 @@ def comprobar_lector(c, pl, semillas, tmp=None):
 
 
 # ---------------------------------------------------------------- main
-def main():
-    ap = argparse.ArgumentParser(description="Barrido fino del fijo con puntaje por periodo (plan3, 0.7)")
+OPCIONES_PRUEBA = ("semillas", "semillas_desempate", "semillas_fragil", "avenida", "transversal", "limite")
+
+
+def opciones_de_prueba(args, nombres):
+    """['--semillas 2001-2002', ...]: las opciones de prueba que trae la linea de comandos (anotadas en el
+    registro de las salidas)."""
+    return [f"--{n.replace('_', '-')} {getattr(args, n)}" for n in nombres if getattr(args, n, None) is not None]
+
+
+def construir_parser():
+    ap = argparse.ArgumentParser(description="Barrido fino del fijo con puntaje por periodo (plan3, 0.7)",
+                                 allow_abbrev=False)
     ap.add_argument("escenario")
     ap.add_argument("--etapa", choices=list(ETAPAS) + ["fino", "todo"], default="fino")
     ap.add_argument("--trozo", help="k/n: solo los planes de indice k (mod n) de la lista principal de la etapa")
@@ -878,20 +1116,45 @@ def main():
     ap.add_argument("--avenida", help="(pruebas) verdes de avenida de la gruesa, p. ej. 15,20")
     ap.add_argument("--transversal", help="(pruebas) verdes transversales de la gruesa")
     ap.add_argument("--limite", type=int, help="(pruebas) solo los primeros N planes de la gruesa, sin extension")
-    args = ap.parse_args()
+    ap.add_argument("--permitir-prueba", action="store_true",
+                    help="(pruebas) acepta entradas que no son de la regla y marca la salida como de prueba")
+    return ap
+
+
+def validar_args(argv):
+    """Lee y revisa los argumentos (argv sin el nombre del programa): parse_args y todos los ap.error, sin leer el
+    escenario ni tocar archivos. Devuelve args o sale como argparse (SystemExit(2), motivo en stderr).
+    chequeos_previos la llama para cada comando de este script en la lista de trabajos."""
+    ap = construir_parser()
+    args = ap.parse_args(argv)
     if args.etapa in ("desempate", "fragil", "fino", "todo") and args.trozo:
         ap.error("--trozo solo en gruesa, fina, desfases y mult5")
-    trozo = None
+    args.trozo_kn = None
     if args.trozo:
-        k, n = (int(x) for x in args.trozo.split("/"))
+        try:
+            k, n = (int(x) for x in args.trozo.split("/"))
+        except ValueError:
+            ap.error("--trozo k/n con k y n enteros")
         if not 0 <= k < n:
             ap.error("--trozo k/n con 0 <= k < n")
-        trozo = (k, n)
+        args.trozo_kn = (k, n)
+    if args.procesos < 1:
+        ap.error("--procesos va desde 1")
+    if args.bloque < 1 or FIN_HORA % args.bloque:
+        ap.error(f"--bloque debe dividir la hora ({FIN_HORA} s)")
+    return args
+
+
+def main():
+    args = validar_args(sys.argv[1:])
+    trozo = args.trozo_kn
     c = Celda(args.escenario, args.llegadas, args.bloque, args.procesos,
-              {"barrido": args.semillas, "desempate": args.semillas_desempate, "fragil": args.semillas_fragil})
+              {"barrido": args.semillas, "desempate": args.semillas_desempate, "fragil": args.semillas_fragil},
+              prueba=opciones_de_prueba(args, OPCIONES_PRUEBA), permitir=args.permitir_prueba)
     print(f"barrer_fino {c.esc}: etapa {args.etapa}, llegadas {c.llegadas}, semillas "
           f"{ {k: texto_semillas(v) for k, v in c.semillas.items()} }, periodos de {args.bloque} s, huella "
-          f"{c.huella}, {len(c.conocidas)} corridas ya guardadas", flush=True)
+          f"{c.huella}, {len(c.conocidas)} corridas ya guardadas"
+          + (f"; PRUEBA: {c.prueba}" if c.prueba else ""), flush=True)
     t0 = time.time()
     av = bf.lista_enteros(args.avenida) if args.avenida else None
     tr = bf.lista_enteros(args.transversal) if args.transversal else None

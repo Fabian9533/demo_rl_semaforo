@@ -1,5 +1,5 @@
 Pruebas 1 y 2 (tarea 1.1): identidad con el tag y opciones que no cambian numeros; ablacion de V2. P1, base 7, 10 episodios, validacion cada 5 en 424301,424302
-05.11.2026 11:38; python 3.14.6, torch 2.14.0+cpu
+05.11.2026 15:06; python 3.14.6, torch 2.14.0+cpu
 
 [OK] corrida tag_ippo (tag: --escenario corredor --seed 7 --episodios 10 --eval-cada 5 --val-seeds 424301,424302): codigo 0
 [OK] corrida tag_v2 (tag: --escenario corredor --seed 7 --episodios 10 --eval-cada 5 --val-seeds 424301,424302 --v2 --criterio-val total --etiqueta p3prbv2): codigo 0
@@ -10,6 +10,7 @@ Pruebas 1 y 2 (tarea 1.1): identidad con el tag y opciones que no cambian numero
 [OK] corrida nuevo_solos (nuevo: --escenario corredor --seed 7 --episodios 10 --eval-cada 5 --val-seeds 424301,424302 --solo-descuento --solo-exploracion --criterio-val total --etiqueta p3prbv2): codigo 0
 [OK] corrida nuevo_desc (nuevo: --escenario corredor --seed 7 --episodios 10 --eval-cada 5 --val-seeds 424301,424302 --solo-descuento --criterio-val total --etiqueta p3prbv2): codigo 0
 [OK] corrida nuevo_expl (nuevo: --escenario corredor --seed 7 --episodios 10 --eval-cada 5 --val-seeds 424301,424302 --solo-exploracion --criterio-val total --etiqueta p3prbv2): codigo 0
+[OK] corrida nuevo_v2_paso5 (nuevo: --escenario corredor --seed 7 --episodios 10 --eval-cada 5 --val-seeds 424301,424302 --v2 --criterio-val total --etiqueta p3prbv2 --paso-decision 5): codigo 0
 
 Prueba 1: todo apagado = tag
 -- nuevo_ippo frente a tag_ippo
@@ -30,6 +31,15 @@ Prueba 1: todo apagado = tag
 [OK] meta publicado: meta igual
 [OK] log de consola de nuevo_ippo = el de tag_ippo (salvo los segundos): 12 lineas
 [OK] log de consola de nuevo_v2 = el de tag_v2 (salvo los segundos): 12 lineas
+--paso-decision 5 (el reloj de siempre, puesto a mano) = tag
+-- nuevo_v2_paso5 frente a tag_v2
+[OK] CSV: iguales byte a byte salvo 'segundos' (10 filas)
+[OK] checkpoints: episodios con checkpoint: [5, 10] | [5, 10]
+  ep   5: 12/12 tensores iguales (torch.equal), claves iguales True; meta igual
+  ep  10: 12/12 tensores iguales (torch.equal), claves iguales True; meta igual
+[OK] politica publicada (tensores): 12/12 tensores iguales (torch.equal), claves iguales True
+[OK] politica publicada (bytes)
+[OK] meta publicado: meta igual
 
 Prueba 2: --guardar-estado y --registro-extendido no cambian ningun numero
 -- nuevo_ippo_ext frente a tag_ippo

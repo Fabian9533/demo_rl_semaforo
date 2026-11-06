@@ -7,12 +7,24 @@ prueba_franja.py - Pruebas de la tarea 0.8 (franja.py, modos franja y bloques de
   3. 0 cortes de verde sin ambar en toda la corrida (con dos pares que, cambiando todos a los 1800 s, si cortan:
      la prueba los ve);
   4. sumo directo = TraCI (evaluar.brazo_referencia(esc, "franja", archivo)) con dos planes distintos;
-  5. bloques: 6 programas con WAUT en P1 y P6: cambios en sus instantes, 0 cortes y sumo directo = TraCI (modo bloques).
+  5. bloques: 6 programas con WAUT en P1 y P6: cambios en sus instantes, 0 cortes y sumo directo = TraCI (modo bloques);
+  6. pares sin instante estricto (antes abortaban): la regla relajada (P1 25/10 0/0 -> 15/20 0/15, y uno de la red) y
+     el respaldo (P1 en contrafase: 10/10 0/0 -> 10/10 13/13, y uno de P6): el WAUT cambia en el instante anotado,
+     entra alineado, 0 verdes cortados, 0 ambares tras un verde mas cortos que 3 s; con la relajada ningun verde que
+     toca el cambio dura menos de 10 s; el registro dice regla y retraso por semaforo; y sumo directo (el barrido) =
+     TraCI (evaluar.brazo_referencia franja), tambien con estos programas no estrictos;
+  7. sin sumo: en 3000 pares al azar de P1, P3 y P6 (verdes de 10 a 60 s, desfases cualesquiera), el instante de la
+     regla estricta es el mismo que el del codigo de antes en todos los pares en que el de antes lo encontraba, y donde
+     no lo encontraba (abortaba) ahora hay relajada, respaldo o forzado; en ninguno el cambio corta un verde ni deja un
+     ambar corto tras un verde (problemas_del_cambio), ninguna relajada deja un verde de menos de 10 s, y forzado no
+     aparece.
 Semillas de humo (424301-424302). Uso (cwd = plan3/): python pruebas/ref/prueba_franja.py
 Salida: pruebas/ref/salidas/prueba_franja.txt
 """
 import os
 import sys
+import math
+import random
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import util_pruebas as up  # noqa: E402
@@ -80,6 +92,48 @@ def cortes(serie):
         for (_, a), (_, b) in zip(estados, estados[1:]):
             total += sum(1 for x, y in zip(a, b) if x in "Gg" and y in "rR")
     return total
+
+
+def verde_mas_corto_en(serie, instantes):
+    """El verde mas corto (s) de la serie que contiene algun segundo de cambio (instante + 1, cuando SUMO lo muestra),
+    por enlace y semaforo."""
+    corto = None
+    for tls, estados in serie.items():
+        e = [s for _, s in estados]
+        cambios = {t + 1 for t in instantes.get(tls, [])}
+        for i in range(len(e[0])):
+            t = 0
+            while t < len(e):
+                if e[t][i] in "Gg":
+                    fin = t
+                    while fin < len(e) and e[fin][i] in "Gg":
+                        fin += 1
+                    if any(t <= c <= fin for c in cambios) and 0 < t and fin < len(e):
+                        corto = fin - t if corto is None else min(corto, fin - t)
+                    t = fin
+                t += 1
+    return corto
+
+
+def ambares(serie, ambar=3):
+    """(ambares tras un verde mas cortos que ambar s, ambares tras un rojo, verdes tras un ambar) en la serie."""
+    cortos = tras_rojo = verde_tras = 0
+    for estados in serie.values():
+        e = [s for _, s in estados]
+        for i in range(len(e[0])):
+            t = 1
+            while t < len(e):
+                if e[t][i] == "y" and e[t - 1][i] != "y":
+                    fin = t
+                    while fin < len(e) and e[fin][i] == "y":
+                        fin += 1
+                    if e[t - 1][i] in "Gg" and fin < len(e) and fin - t < ambar:
+                        cortos += 1
+                    tras_rojo += e[t - 1][i] in "rR"
+                    verde_tras += fin < len(e) and e[fin][i] in "Gg"
+                    t = fin
+                t += 1
+    return cortos, tras_rojo, verde_tras
 
 
 def prueba_igual_al_fijo(esc):
@@ -160,6 +214,102 @@ def prueba_bloques(esc, planes, nombre, semilla):
                 f"5 {nombre}: sumo directo {ha} = TraCI modo bloques {hb}")
 
 
+def instante_viejo(a, b, desde):
+    """La regla de antes (solo la estricta): el t, o None donde abortaba."""
+    hasta = desde + math.lcm(a[1], b[1]) + max(a[1], b[1])
+    for t in range(desde, hasta + 1):
+        if all(franja.estado_en(*a, x) == franja.estado_en(*b, x) for x in (t - 1, t, t + 1)):
+            return t
+    return None
+
+
+def prueba_sin_estricto(esc, pl1, pl2, nombre, semilla, regla):
+    c = bfn.Celda(esc, prefijos=())
+    p1, p2 = c.plan(*pl1), c.plan(*pl2)
+    secuencia = [(0, p1), (franja.CORTE_FRANJA, p2)]
+    abortaba = [tls for i, tls in enumerate(c.p.ids)
+                if instante_viejo(franja.programa_tls(c.p, p1, i), franja.programa_tls(c.p, p2, i), 1800) is None]
+    r = franja.resumen_cambios(c.p, secuencia)
+    ruta, instantes = escribir(c, f"sin_estricto_{nombre}", secuencia)
+    solo, _ = escribir(c, f"solo_{nombre}", [(0, p2)])
+    serie = registrar(c, encima(c, ruta), semilla, nombre)
+    ref = registrar(c, encima(c, solo), semilla, nombre + "_solo")
+    ok_cambio = True
+    for tls in c.p.ids:
+        t_cambio = instantes[tls][0]
+        primero = next(t for t, (prog, _) in enumerate(serie[tls]) if prog == "franja2")
+        alineado = all(serie[tls][t][1] == ref[tls][t][1] for t in range(primero, min(len(serie[tls]), len(ref[tls]))))
+        ok_cambio &= primero == t_cambio + 1 and alineado
+    n = cortes(serie)
+    cortos, tras_rojo, verde_tras = ambares(serie)
+    detalle = {tls[-2:]: [(d["regla"], d["instante"], d["retraso"]) for d in lista]
+               for tls, lista in r["por_semaforo"].items()}
+    relajados = {tls: [d["instante"] for d in lista if d["regla"] == "relajada"]
+                 for tls, lista in r["por_semaforo"].items()}
+    corto_relajada = verde_mas_corto_en(serie, relajados)
+    corto = verde_mas_corto_en(serie, instantes)
+    inf.chequeo(abortaba and r["reglas"][regla] > 0 and r["reglas"]["forzado"] == 0 and ok_cambio and n == 0
+                and cortos == 0 and (corto_relajada is None or corto_relajada >= franja.VERDE_MINIMO),
+                f"6 {nombre}: antes abortaba en {len(abortaba)} semaforos; ahora reglas {r['reglas']}, por semaforo "
+                f"(regla, instante, retraso) {detalle}; cambia en su instante y entra alineado: {ok_cambio}; verdes "
+                f"cortados {n}, ambares cortos tras un verde {cortos} (ambares tras un rojo {tras_rojo}, verdes tras "
+                f"un ambar {verde_tras}); verde mas corto que toca un cambio {corto} s (en los relajados: "
+                f"{corto_relajada})")
+    ti_d, ti_t = os.path.join(TMP, f"ti_d_{nombre}.xml"), os.path.join(TMP, f"ti_t_{nombre}.xml")
+    a = up.sumo_directo(c.cfg, encima(c, ruta), semilla, ti_d)
+    _, _, _, correr = evaluar.brazo_referencia(esc, "franja", ruta)
+    b = correr(semilla, ti_t, None)
+    ha, hb = up.huella_tripinfo(ti_d), up.huella_tripinfo(ti_t)
+    inf.chequeo(ha == hb and all(a[k] == b[k] for k in a),
+                f"6 {nombre}: sumo directo (el barrido) {ha} = TraCI (brazo franja) {hb}; retraso total "
+                f"{a['retraso_total_prom']} = {b['retraso_total_prom']}")
+    return r
+
+
+def prueba_regla_de_antes(n_pares=3000):
+    """Sin sumo: el instante estricto no cambia donde el codigo de antes lo encontraba."""
+    rng = random.Random(424301)
+    celdas = [bfn.Celda(esc, prefijos=()) for esc in ("corredor", "red", "malla3_alta")]
+    verdes = list(range(10, 61))
+    cuenta = {r: 0 for r in franja.REGLAS_CAMBIO}
+    distintos, malos, retraso_max = [], [], {r: 0 for r in franja.REGLAS_CAMBIO}
+    tardes, sin_aviso = 0, []
+    for k in range(n_pares):
+        c = celdas[k % 3]
+        a1, t1, a2, t2 = (rng.choice(verdes) for _ in range(4))
+        ci1, ci2 = c.p.ciclo(a1, t1), c.p.ciclo(a2, t2)
+        if c.malla:
+            e1, e2 = rng.choice(franja.bfn.ESQUEMAS_FINA), rng.choice(franja.bfn.ESQUEMAS_FINA)
+            p1 = c.plan(a1, t1, c.desfases_esquema(ci1, e1), e1)
+            p2 = c.plan(a2, t2, c.desfases_esquema(ci2, e2), e2)
+        else:
+            p1 = c.plan(a1, t1, [rng.randrange(ci1) for _ in c.p.ids])
+            p2 = c.plan(a2, t2, [rng.randrange(ci2) for _ in c.p.ids])
+        for i in range(len(c.p.ids)):
+            a, b = franja.programa_tls(c.p, p1, i), franja.programa_tls(c.p, p2, i)
+            viejo = instante_viejo(a, b, 1800)
+            t, regla, problemas = franja.instante_limpio(a, b, 1800)
+            cuenta[regla] += 1
+            retraso_max[regla] = max(retraso_max[regla], t - 1800)
+            if (viejo is not None and (t, regla) != (viejo, "estricta")) or (viejo is None and regla == "estricta"):
+                distintos.append((c.esc, p1["clave"], p2["clave"], i, viejo, t, regla))
+            if any(p in ("verde_a_rojo", "ambar_corto") for _, p in franja.problemas_del_cambio(a, b, t)):
+                malos.append((c.esc, p1["clave"], p2["clave"], i, t, regla))
+            if regla == "relajada" and franja.verdes_cortos(a, b, t):
+                malos.append((c.esc, p1["clave"], p2["clave"], i, t, "relajada con un verde corto"))
+            if t - 1800 > franja.TARDE:
+                tardes += 1
+                r = franja.resumen_cambios(c.p, [(0, p1), (1800, p2)])
+                if c.p.ids[i] not in {x["semaforo"] for x in r["tardios"]} or "tardios" not in (r["aviso"] or ""):
+                    sin_aviso.append((c.esc, p1["clave"], p2["clave"], i, t))
+    inf.chequeo(not distintos and not malos and cuenta["forzado"] == 0 and not sin_aviso,
+                f"7 {n_pares} pares al azar en P1, P3 y P6 ({sum(cuenta.values())} cambios de semaforo): reglas "
+                f"{cuenta}, retraso maximo por regla {retraso_max}; instante estricto distinto del de antes: "
+                f"{len(distintos)} {distintos[:2]}; cambios que cortan un verde o dejan un ambar corto (o, la "
+                f"relajada, un verde de menos de {franja.VERDE_MINIMO} s): {len(malos)}; cambios de mas de "
+                f"{franja.TARDE} s tarde: {tardes}, sin su aviso en resumen_cambios: {len(sin_aviso)}")
+
+
 def main():
     inf("Pruebas de 0.8: fijo por franja y por bloques con WAUT (semillas de humo)")
     for esc in ("corredor", "red", "malla3_alta"):
@@ -178,6 +328,14 @@ def main():
                                    (14, 10, [0] * 9, "cero"), (14, 10, [0] * 9, "cero"),
                                    (20, 15, [0, 19, 0, 19, 0, 19, 0, 19, 0]), (15, 10, [0] * 9, "cero")],
                    "P6", s)
+    prueba_sin_estricto("corredor", (25, 10, [0, 0]), (15, 20, [0, 15]), "P1_relajada", s, "relajada")
+    prueba_sin_estricto("corredor", (10, 10, [0, 0]), (10, 10, [13, 13]), "P1_contrafase", s, "respaldo")
+    prueba_sin_estricto("red", (20, 15, [0, 22, 8]), (20, 15, [0, 26, 26]), "P3_relajada", s, "relajada")
+    c6 = bfn.Celda("malla3_alta", prefijos=())
+    prueba_sin_estricto("malla3_alta", (18, 25, c6.desfases_esquema(c6.p.ciclo(18, 25), "ajedrez"), "ajedrez"),
+                        (25, 18, c6.desfases_esquema(c6.p.ciclo(25, 18), "onda"), "onda"), "P6_respaldo", s,
+                        "respaldo")
+    prueba_regla_de_antes()
     sys.exit(1 if inf.cerrar() else 0)
 
 

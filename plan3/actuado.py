@@ -2,9 +2,11 @@
 actuado.py - Actuado ajustado (plan3, tarea 0.9; DECISIONES A1 y B9; prerregistro, seccion 5).
 
 Uso (cwd = plan3/; con llegadas aleatorias, a traves de ../con_escenarios.py):
-  python actuado.py <esc> --paso 1|2|3|4|5|6|final|todos [--procesos 1] [--llegadas auto|regulares|aleatorias]
+  python actuado.py <esc> --paso 1|2|3|4|5|6|final|todos [--procesos 1]
   python actuado.py <esc> --instalar     (reescribe <esc>_actuado_aj.add.xml desde barridos/<esc>/actuado_aj.json;
-                                          lo usa p3_preparar.py)
+                                          lo usa p3_preparar.py --piezas actuado_aj)
+  Solo para pruebas (fuera de la cola): --llegadas regulares|aleatorias, --semillas, --semillas-final y
+  --permitir-prueba. Las opciones van completas (sin abreviar).
 
 El actuado de SUMO 1.25 con <param>, la variante delay_based y dos variantes coordinadas con el ciclo y los desfases
 del fijo fino. Descenso por coordenadas en cadena (un paso por coordenada; cada paso parte del mejor de los
@@ -12,7 +14,10 @@ anteriores, por la media del retraso total en 2001-2003; en un empate se queda e
 directo con el programa cargado encima de los adicionales del .sumocfg (queda activo por ser el ultimo; la prueba
 sumo directo = TraCI esta en pruebas/ref). Rejillas fijas, con el defecto de SUMO (*) incluido:
   paso 1  max-gap                    1, 1.5, 2, 3*, 4 s
-  paso 2  detector-gap               1, 2*, 3, 4 s
+  paso 2  detector-gap               1, 2*, 3, 4 s (SUMO pone el detector a min(detector-gap x vmax, (minDur /
+                                     passing-time + 0.5) x 7.5 m): con minDur 10 s y passing-time 1.9 (su defecto)
+                                     el tope es 43.2 m, asi que en todas las celdas (13.89 m/s) el 4 queda en 43.2 m
+                                     (~3.1 s), a 1.55 m del 3 (41.7 m); se deja asi, declarado)
   paso 3  jam-threshold              -1*, 10, 30 s
   paso 4  maxDur del verde de avenida      30, 45, 60* s
   paso 5  maxDur del verde transversal     20, 30, 60* s
@@ -23,13 +28,23 @@ sumo directo = TraCI esta en pruebas/ref). Rejillas fijas, con el defecto de SUM
           avenida y latestEnd en la transversal, cada uno en su fin del plan fijo (la avenida termina siempre donde
           el plan fijo; la transversal puede cortar antes, nunca despues). Solo latestEnd en la transversal (sin el
           de la avenida) trababa P2 (835 s/veh); solo latestEnd = earliestEnd en la avenida (sin el de la
-          transversal) quedaba peor que el fijo en P1, P2, P3 y P6: ninguna de las dos se usa
+          transversal) quedaba peor que el fijo en P1, P2, P3 y P6: ninguna de las dos se usa.
+          En las dos, el ciclo de SUMO (timeInCycle) se cuenta desde el inicio del verde transversal del plan fijo
+          (offset = el del fijo fino + ese inicio; earliestEnd y latestEnd son los mismos instantes del plan fijo):
+          SUMO solo pasa un earliestEnd/latestEnd al ciclo siguiente si el verde ya empezo y termino en el ciclo
+          actual, asi que un verde de avenida que cruzaba el 0 del ciclo (plantillas con la avenida en la fase 0:
+          red, malla y sus derivados) dejaba sin efecto la coordinacion en la mitad de los ciclos (referencia_
+          coordinada). Y el maxDur de la avenida no baja de lo que necesita: el ciclo en (b), que su latestEnd corta
+          igual; en (a), el ciclo menos los ambares y los minDur de los otros verdes. Medido en
+          pruebas/ref/medir_coordinada.txt y tabla_coordinadas.txt
   final   las 3 mejores variantes de los 6 pasos con 2001-2010 (con llegadas aleatorias, las 10 mejores con
           2001-2030); gana la menor media
 minDur 10 s (5 en giros) y la fase y la duracion inicial del programa "0" de la red, como comun.archivo_actuado:
 la variante por defecto es el actuado entregado con programID "actuado_aj". Los <param> se escriben solo si difieren
 del defecto de SUMO (delay_based los escribe siempre). El paso 6 depende del fijo fino
-(barridos/<esc>/fijo_fino.json, barrer_fino.py --etapa fragil).
+(barridos/<esc>/fijo_fino.json, barrer_fino.py --etapa fragil). Cadena: cada paso parte del JSON del anterior (misma
+huella) y el paso 6 lee el fijo fino; si alguno trae la marca de prueba (o no trae registro), se niega, salvo con
+--permitir-prueba (solo pruebas; la salida queda marcada).
 
 Salidas en barridos/<esc>/: actuado_paso<k>.csv, actuado_paso<k>.json (punto de partida, variantes y elegida),
 actuado_paso<k>_semillas.csv, actuado_final.csv, actuado_final_semillas.csv y actuado_aj.json; y
@@ -126,7 +141,9 @@ def texto_actuado(c, v, comentario=None):
     for i, tls in enumerate(c.p.ids):
         if v["coordinado"]:                # fases de la plantilla con las duraciones del fijo fino
             fases = [(d, e) for d, e in fases_plantilla(c, i, v)]
-            fase_av, offset = c.p.fases_av[i], v["offsets"][i]
+            fase_av = c.p.fases_av[i]
+            ref, max_av = referencia_coordinada(fases, fase_av)
+            offset = (v["offsets"][i] + ref) % v["ciclo"]
         else:
             programas = net.getTLS(tls).getPrograms()
             programa = programas.get("0", next(iter(programas.values())))
@@ -142,8 +159,13 @@ def texto_actuado(c, v, comentario=None):
                 maximo = v["maxdur_av"] if k == fase_av else v["maxdur_tr"]
                 extra = ""
                 if v["coordinado"]:
+                    if k == fase_av:               # la avenida llega a su fin aunque la transversal corte antes
+                        # (b): el ciclo entero (su latestEnd la corta igual en su fin; asi se recupera en un ciclo si
+                        # un arranque la dejo corta); (a): lo que necesita en regimen (sin latestEnd puede alargar)
+                        maximo = max(maximo, v["ciclo"] if v.get("fin_fijo") else max_av)
                     dur = min(max(dur, minimo), maximo)
-                    fin = (inicio + fases[k][0]) % v["ciclo"]          # fin de ese verde en el plan fijo
+                    # fin de ese verde en el plan fijo, contado desde el inicio de la transversal (ref)
+                    fin = (inicio + fases[k][0] - ref) % v["ciclo"]
                     if k == fase_av:           # la avenida no termina antes de su fin en el plan fijo
                         extra = f' earliestEnd="{fin}"'
                         if v.get("fin_fijo"):  # ni despues: termina en su fin del plan fijo
@@ -158,6 +180,31 @@ def texto_actuado(c, v, comentario=None):
         lineas.append("    </tlLogic>")
     lineas.append("</additional>")
     return "\n".join(lineas) + "\n"
+
+
+def minimo_de(estado):
+    """minDur de un verde: 10 s (5 en giros), como el agente y el actuado entregado."""
+    return VERDE_MIN if sum(1 for x in estado if x in "Gg") > 2 else VERDE_MIN_GIRO
+
+
+def referencia_coordinada(fases, fase_av):
+    """(ref, max_av) de una variante coordinada sobre las fases [(duracion, estado)] del plan fijo.
+    ref: el instante del ciclo (desde el inicio de la fase 0) en que empieza el verde que sigue al de la avenida (la
+    transversal). SUMO cuenta timeInCycle = (t - offset) mod cycleTime y, para un verde con earliestEnd y latestEnd,
+    solo corre la cuenta al ciclo siguiente si el verde ya empezo Y termino en el ciclo actual: si el verde de avenida
+    cruza el 0 del ciclo (empieza antes y termina despues), el siguiente, que empieza antes del 0 porque la transversal
+    corto antes, ya no tiene su earliestEnd por delante y puede cortar antes de su fin (medido: en dem_red_t3620 solo la
+    mitad de las salidas en el fin fijo, con ciclos ~25 % mas cortos). Con el 0 en el inicio de la transversal, la
+    avenida empieza y termina siempre dentro del mismo ciclo: el offset del programa pasa a ser el del fijo fino mas ref
+    y los earliestEnd/latestEnd se cuentan desde ref (son los mismos instantes del plan fijo).
+    max_av: lo que la avenida necesita para llegar a su fin si la transversal corta en su minimo: el ciclo menos los
+    ambares y los minDur de los otros verdes (su verde fijo mas lo que los otros pueden cortar antes)."""
+    verdes = [k for k, (_, e) in enumerate(fases) if bf.es_verde(e)]
+    siguiente = next(k for k in verdes[verdes.index(fase_av) + 1:] + verdes if k != fase_av)
+    ref = sum(d for d, _ in fases[:siguiente])
+    max_av = fases[fase_av][0] + sum(max(0, d - minimo_de(e)) for k, (d, e) in enumerate(fases)
+                                     if k in verdes and k != fase_av)
+    return ref, max_av
 
 
 def fases_plantilla(c, i, v):
@@ -186,8 +233,7 @@ def coordinada(c, v, fin_fijo=False):
     ruta = os.path.join(c.carpeta, "fijo_fino.json")
     if not os.path.exists(ruta):
         raise SystemExit(f"Falta {ruta}: la variante coordinada usa el fijo fino (barrer_fino --etapa fragil)")
-    with open(ruta, encoding="utf-8") as f:
-        fino = json.load(f)
+    fino = c.comprobar_fino(ruta)
     if fino["ids"] != c.p.ids:
         raise SystemExit(f"{ruta}: semaforos en otro orden que la plantilla")
     salida = dict(v, coordinado=True, ciclo=fino["ciclo"], offsets=fino["offsets"], verde=fino["verde"],
@@ -214,8 +260,16 @@ def campos_variante(c):
 
 
 def leer_json(ruta):
-    with open(ruta, encoding="utf-8") as f:
-        return json.load(f)
+    return bfn.leer_json(ruta)
+
+
+def paso_anterior(c, ruta):
+    """El JSON de un paso ya corrido: de esta huella y de la regla (sin marca de prueba, salvo --permitir-prueba)."""
+    datos = leer_json(ruta)
+    if datos["huella"] != c.huella:
+        raise SystemExit(f"{ruta} es de otra huella del escenario ({datos['huella']}, hoy {c.huella}): repita los "
+                         f"pasos")
+    return c.comprobar_marca(ruta)
 
 
 def punto_de_partida(c, k):
@@ -224,10 +278,7 @@ def punto_de_partida(c, k):
     ruta = os.path.join(c.carpeta, f"actuado_paso{k - 1}.json")
     if not os.path.exists(ruta):
         raise SystemExit(f"Falta {ruta}: los pasos van en cadena (corra antes el paso {k - 1})")
-    datos = leer_json(ruta)
-    if datos["huella"] != c.huella:
-        raise SystemExit(f"{ruta} es de otra huella del escenario")
-    return datos["elegida"]
+    return paso_anterior(c, ruta)["elegida"]
 
 
 def paso(c, k):
@@ -255,7 +306,7 @@ def paso(c, k):
     bfn.escribir_json(os.path.join(c.carpeta, f"actuado_paso{k}.json"),
                       {"escenario": c.esc, "huella": c.huella, "paso": k, "coordenada": nombre,
                        "semillas": bfn.texto_semillas(semillas), "partida": actual,
-                       "variantes": [pl["var"] for pl in planes], "elegida": elegida})
+                       "variantes": [pl["var"] for pl in planes], "elegida": elegida, "registro": c.registro()})
     print(f"{c.esc} actuado paso {k} ({nombre}): {clave_actual} -> {clave(elegida)} "
           f"{filas[orden[0]]['retraso_total_prom']}", flush=True)
     return elegida
@@ -267,10 +318,7 @@ def final(c):
         ruta = os.path.join(c.carpeta, f"actuado_paso{k}.json")
         if not os.path.exists(ruta):
             raise SystemExit(f"Falta {ruta}: corra antes los 6 pasos")
-        datos = leer_json(ruta)
-        if datos["huella"] != c.huella:
-            raise SystemExit(f"{ruta} es de otra huella del escenario")
-        variantes += datos["variantes"]
+        variantes += paso_anterior(c, ruta)["variantes"]
     planes = bfn.unicos([plan_variante(c, v) for v in variantes])
     semillas = c.semillas["barrido"]
     c.asegurar(planes, semillas, "actuado_final", c.encima())
@@ -290,7 +338,7 @@ def final(c):
              "variante": g["var"], "variantes_probadas": len(planes),
              "semillas_pasos": bfn.texto_semillas(semillas), "finalistas": [pl["clave"] for pl in finalistas],
              **{k: fila[k] for k in ("retraso_total_prom", "retraso_total_sd", "timeloss_prom", "mediana", "peor",
-                                      "trabadas", "semillas")}}
+                                      "trabadas", "semillas")}, "registro": c.registro()}
     return instalar(c, datos)
 
 
@@ -314,39 +362,74 @@ def instalar(c, datos):
 
 
 def reinstalar(esc, carpeta=None):
-    """Reescribe <esc>_actuado_aj.add.xml desde barridos/<esc>/actuado_aj.json (p3_preparar.py). Devuelve la ruta;
-    error si falta el barrido o si el archivo no sale igual (sha256) al que se congelo."""
+    """Reescribe <esc>_actuado_aj.add.xml desde barridos/<esc>/actuado_aj.json (p3_preparar.py --piezas actuado_aj).
+    Si el instalado ya tiene el sha256 congelado, no lo toca. Si no, escribe el texto en un temporal, compara su
+    sha256 con el congelado y solo entonces reemplaza; si no coincide, error y el instalado queda como estaba (y el
+    temporal se borra). Devuelve la ruta."""
     ruta = os.path.join(carpeta or os.path.join("barridos", esc), "actuado_aj.json")
     if not os.path.exists(ruta):
         raise SystemExit(f"Falta {ruta}: corra antes actuado.py {esc} --paso final")
     datos = leer_json(ruta)
-    c = bfn.Celda(esc, datos["llegadas"], prefijos=())
     destino = f"{esc}_{PROGRAMA}.add.xml"
-    bfn.escribir_atomico(destino, texto_actuado(c, datos["variante"], comentario(datos)), encoding="utf-8")
-    if bfn.sha256_archivo(destino) != datos["sha256"]:
-        raise SystemExit(f"{destino} no coincide con el sha256 de {ruta}")
+    if os.path.exists(destino) and bfn.sha256_archivo(destino) == datos["sha256"]:
+        return destino
+    c = bfn.Celda(esc, datos["llegadas"], prefijos=())
+    tmp = f"{destino}.{os.getpid()}.tmp"
+    try:
+        with open(tmp, "w", encoding="utf-8") as f:          # como bfn.escribir_atomico: mismos bytes
+            f.write(texto_actuado(c, datos["variante"], comentario(datos)))
+        if bfn.sha256_archivo(tmp) != datos["sha256"]:
+            raise SystemExit(f"{destino}: el programa de hoy no coincide con el sha256 de {ruta} "
+                             f"({datos['sha256'][:16]}); el archivo instalado no se toca")
+        bfn.reemplazar(tmp, destino)
+    finally:
+        if os.path.exists(tmp):
+            os.remove(tmp)
     return destino
 
 
-def main():
-    ap = argparse.ArgumentParser(description="Actuado ajustado por descenso por coordenadas (plan3, 0.9)")
+def construir_parser():
+    ap = argparse.ArgumentParser(description="Actuado ajustado por descenso por coordenadas (plan3, 0.9)",
+                                 allow_abbrev=False)
     ap.add_argument("escenario")
     ap.add_argument("--paso", choices=[str(k) for k in range(1, len(PASOS) + 1)] + ["final", "todos"])
     ap.add_argument("--instalar", action="store_true", help="reescribe el .add.xml desde actuado_aj.json")
     ap.add_argument("--procesos", type=int, default=1)
-    ap.add_argument("--llegadas", choices=["auto", "regulares", "aleatorias"], default="auto")
+    ap.add_argument("--llegadas", choices=["auto", "regulares", "aleatorias"], default="auto",
+                    help="(pruebas) auto: aleatorias si las rutas tienen period=\"exp(...)\"")
     ap.add_argument("--semillas", help="(pruebas) en vez de 2001-2003")
     ap.add_argument("--semillas-final", help="(pruebas) en vez de 2001-2010 / 2001-2030")
-    args = ap.parse_args()
+    ap.add_argument("--permitir-prueba", action="store_true",
+                    help="(pruebas) acepta entradas que no son de la regla y marca la salida como de prueba")
+    return ap
+
+
+def validar_args(argv):
+    """Lee y revisa los argumentos (argv sin el nombre del programa): parse_args y todos los ap.error, sin leer el
+    escenario ni tocar archivos. Devuelve args o sale como argparse (SystemExit(2), motivo en stderr).
+    chequeos_previos la llama para cada comando de este script en la lista de trabajos."""
+    ap = construir_parser()
+    args = ap.parse_args(argv)
+    if args.instalar and args.paso:
+        ap.error("--instalar y --paso son excluyentes")
+    if not args.instalar and not args.paso:
+        ap.error("falta --paso (o --instalar)")
+    if args.procesos < 1:
+        ap.error("--procesos va desde 1")
+    return args
+
+
+def main():
+    args = validar_args(sys.argv[1:])
     if args.instalar:
+        bfn.exigir_cwd()
         print(f"Reescrito {reinstalar(args.escenario)}")
         return
-    if not args.paso:
-        ap.error("falta --paso (o --instalar)")
     t0 = time.time()
     c = bfn.Celda(args.escenario, args.llegadas, procesos=args.procesos,
                   semillas={"barrido": args.semillas or SEMILLAS_PASOS, "desempate": args.semillas_final},
-                  prefijos=("actuado",))
+                  prefijos=("actuado",), prueba=bfn.opciones_de_prueba(args, ("semillas", "semillas_final")),
+                  permitir=args.permitir_prueba)
     print(f"actuado {c.esc}: paso {args.paso}, llegadas {c.llegadas}, semillas "
           f"{bfn.texto_semillas(c.semillas['barrido'])} y {bfn.texto_semillas(c.semillas['desempate'])}, huella "
           f"{c.huella}", flush=True)

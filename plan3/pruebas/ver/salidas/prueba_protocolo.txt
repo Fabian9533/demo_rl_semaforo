@@ -1,0 +1,61 @@
+--- 0. Parte A y lanzamiento (repositorio de prueba con su origin)
+PASA  generar_trabajos3.py escribe la lista y el manifiesto (con las dos bases caídas declaradas): corre (escritos cola\trabajos.jsonl y cola\manifiesto_esperado.json (1710 CSV esperados))
+      3109 trabajos, 1710 CSV esperados; semillas de la tabla del prerregistro (rótulos)
+--- 1. Noches y mañanas (cada mañana: p3_noche.manifiesto_ciego, commit sin ciego/ y push)
+PASA  un sello temprano (manifiesto.py cierre antes de tiempo; después se barre a la mañana 3): corre (escrito cola\manifiesto_cierre.json: 1710 CSV, 1296 metas, 19 otros; ultimo manifiesto de la manana <manana 2>)
+PASA  la enmienda §14 como código: generar_trabajos3.py da el trabajo y el CSV nuevos (_r2): corre (escritos cola\trabajos.jsonl y cola\manifiesto_esperado.json (1710 CSV esperados))
+PASA  después de la enmienda §14: ev_t1r_corredor__fino_r2 y ciego/t1r/eval_corredor__fino_r2.csv en las listas; ciego/t1r/eval_corredor__fino.csv queda en disco y en las mañanas 1 y 2
+PASA  la mañana 3 se lleva por error el sello temprano (lo que PLAN3 5.1 prohíbe; V1-M4)
+--- 2. Cierre (PLAN3 5.1)
+PASA  manifiesto.py cierre con la salida vieja conservada y sin declarar: se niega (manifiesto: 1 CSV de ciego/ no cuadran con los manifiestos de cada manana [MAL ciego/t1r/eval_corredor__fino.csv: esta en el manifiesto de la manana <manana 1> y no en el manifiesto esperado ni en cola/reemplazos.json])
+PASA  con cola/reemplazos.json commiteado (mañana 4), manifiesto.py cierre escribe el sello: corre (escrito cola\manifiesto_cierre.json: 1710 CSV, 1296 metas, 20 otros; ultimo manifiesto de la manana <manana 3>)
+PASA  el commit del cierre sin el sello (PLAN3 5.1 de antes; el de su árbol es el temprano de la mañana 3): se niega (veredicto3: los CSV de ciego/ no son los de cada mañana (§14); no se corre: el sello del cierre es de la mañana <manana 2> y antes del cierre hubo otra (<manana 3>): es un sello viejo (el commit del cierre no trae el sello: el de su árbol es de un commit anterior); manifiesto.py cierre va después de la última mañana y el sello se commitea con cierre.ok)
+PASA  --final con cierre.ok sin commitear: se niega (veredicto3: listo/cierre.ok no está commiteado: el cierre es el commit que lo agrega junto con el sello (§14); no se corre)
+PASA  --final con el commit del cierre sin push: se niega (veredicto3: el commit del cierre (<cierre>) no está en origin/plan3 (sin empujar o con la historia reescrita); no se corre)
+PASA  --final con el commit del cierre (sello, cierre.ok, cola/ y ciego/) empujado: corre (escrito salidas\veredicto3_celdas.csv)
+      numero unico regulares T1 modelo citado frente al fijo fino: -3.93 [-3.96, -3.89]
+      numero unico regulares T2 modelo citado frente al fijo fino: -2.10 [-2.19, -2.00]
+      numero unico regulares T1 modelo citado frente al fijo entregado: -5.80 [-5.83, -5.77]
+      numero unico regulares T2 modelo citado frente al fijo entregado: -4.01 [-4.10, -3.92]
+      numero unico regulares T1 IPPO con mensajes corregido frente al fijo fino: -3.57 [-3.60, -3.54]
+      numero unico regulares T2 IPPO con mensajes corregido frente al fijo fino: -1.74 [-1.84, -1.65]
+      numero unico aleatorias T1 modelo citado frente al fijo fino: -5.99 [-6.01, -5.97]
+      numero unico aleatorias T2 modelo citado frente al fijo fino: -6.01 [-6.03, -5.99]
+      numero unico aleatorias T1 modelo citado frente al fijo entregado: -7.83 [-7.85, -7.81]
+      numero unico aleatorias T2 modelo citado frente al fijo entregado: -7.85 [-7.87, -7.83]
+--- 3. Ataques al cierre (cada uno en su copia, con su origin)
+PASA  merge (empujado) que trae otro sello desde una rama lateral: se niega (veredicto3: los commits del sello, de las mañanas y de holdout.ok no forman una sola cadena (<cierre> y <cierre (lado)> están en ramas distintas); no se corre)
+PASA  amend del commit del cierre, sin push: se niega (veredicto3: el commit del cierre (<cierre rehecho>) no está en origin/plan3 (sin empujar o con la historia reescrita); no se corre)
+PASA  amend del commit del cierre con push forzado: se niega (veredicto3: origin/plan3 se reescribió (push forzado): <cierre>, que este repositorio ya vio en la rama empujada, no está en ella; no se corre)
+PASA  otra rama con su propio cierre (empujada como otra rama): se niega (veredicto3: el commit del cierre (<cierre (otra rama)>) no está en origin/plan3 (sin empujar o con la historia reescrita); no se corre)
+PASA  clon superficial (shallow) de la rama empujada: se niega (veredicto3: el repositorio es superficial (shallow): su historia no está completa; no se corre)
+PASA  una mañana en una rama lateral (un CSV cambiado después de su mañana, mezclada y empujada): se niega (veredicto3: los commits del sello, de las mañanas y de holdout.ok no forman una sola cadena (<cierre> y <manana 2 (lado)> están en ramas distintas); no se corre)
+PASA  cola/manifiesto_esperado.json editado después del cierre, sin sellar: se niega (veredicto3: lo sellado al cierre no coincide; no se corre: cola/manifiesto_esperado.json cambió después del cierre (sha256 distinto))
+PASA  git replace del commit del cierre por uno con otro sello (git sin GIT_NO_REPLACE_OBJECTS lo ve: True): se niega (veredicto3: el sello no es el del cierre (<cierre>) ni solo le agrega la prueba final; no se corre: promocion.json no es el del primer sello; promocion/corredor.json no es el del primer sello)
+      OBSERVACIÓN: --final en un clon nuevo con core.autocrlf=true: rc 1 (veredicto3: lo sellado al cierre no coincide; no se corre: ciego/h1t1/eval_corredor__c0med.csv cambió después del cierre (sha256 distinto); ciego/h1t1/eval_corredor__entmed.csv cambió después del cierre (sha256 distinto); ciego/h1t1/eval_corredor__v2reg3med.csv cambió después del cierre (sha256 dist)
+--- 4. Enmienda de la prueba final (PLAN3 5.3): código, lista, resello y holdout.ok
+PASA  generar_trabajos3.py --partes <las del cierre>,prueba_final: corre (escritos cola\trabajos.jsonl y cola\manifiesto_esperado.json (1714 CSV esperados))
+PASA  lo que no es de la prueba final queda igual en la lista y en el manifiesto; se agregan 4 CSV (uso 'final', 11001-11030 y 12001-12100)
+PASA  resello (manifiesto.py cierre): los CSV de la prueba final todavía no existen y no se sellan: corre (siguiente (PLAN3 5.3, resello de la prueba final): commit de cola/manifiesto_cierre.json y push; despues listo/holdout.ok (commit y push) y recien la noche final)
+PASA  --final con el resello (solo le agrega la prueba final al sello del cierre): corre (escrito salidas\veredicto3_celdas.csv)
+PASA  protecciones.revisar_comando de un trabajo 'final': holdout.ok sin commitear, sin push y empujado [['la prueba final exige listo/holdout.ok commiteado (y empujado) antes de la noche final'], ['listo/holdout.ok no esta empujado a origin/plan3: push antes de la noche final'], []]
+--- 5. Noche final y su mañana
+PASA  holdout.ok commiteado después de la noche final (su mañana lista los CSV): se niega (veredicto3: prueba final: los CSV no son los de la enmienda (§13); no corre: ciego/f1a/eval_poi_corredor__fino.csv está en el manifiesto de la mañana <manana de la noche final (antes de holdout.ok)>, que no es posterior a listo/holdout.ok; ciego/f1a/eval_poi_corredor__fino.csv no aparece en ningún manifiesto de la mañana posterior a listo/holdout.ok; ciego/f1a/eval_poi_corredor__v2poi_s42.csv está en el manifiesto de la mañana <manana de la noche final (antes de holdout.ok)>)
+PASA  los CSV de la noche final tienen los bloques de §13 [(11001, 11030, 30), (12001, 12100, 100)]
+--- 6. Ataques a la prueba final (cada uno en su copia)
+PASA  los dos brazos de f1r intercambiados en cola/manifiesto_esperado.json, sin sellar: se niega (veredicto3: lo sellado al cierre no coincide; no se corre: cola/manifiesto_esperado.json cambió después del cierre (sha256 distinto))
+PASA  una mañana con los CSV finales en una rama lateral desde el resello (V1-H4), mezclada y empujada: se niega (veredicto3: los commits del sello, de las mañanas y de holdout.ok no forman una sola cadena (<manana 5> y <manana final (lado, antes de holdout.ok)> están en ramas distintas); no se corre)
+PASA  otra lista (la de la enmienda al revés): se niega (veredicto3: listo/holdout.ok no tiene el sha256 de la lista: no es la lista de la enmienda)
+--- 7. La prueba final (una vez) y el candado
+PASA  --prueba-final con la lista de la enmienda (exigir_semillas: los bloques de §13): corre (prueba final: 2 comparaciones en salidas/veredicto3_prueba_final.csv)
+PASA  salidas/veredicto3_prueba_final.csv: una fila por comparación, con n = 30 y 100 y la nota de §13
+      corredor f1r: {"tipo": "v2reg", "base": 42} frente a {"tipo": "ref_fino"}: -8.04 % [-8.11, -7.96]
+      poi_corredor f1a: {"tipo": "v2poi", "base": 42} frente a {"tipo": "ref_fino"}: -5.96 % [-6.01, -5.91]
+PASA  otra vez, con el candado en disco: se niega (veredicto3: la prueba final ya corrió (listo/holdout.candado): no corre una segunda vez)
+PASA  el candado borrado del disco (commiteado antes), la misma lista: se niega (veredicto3: la prueba final ya corrió (listo/holdout.candado está en disco o en la historia): no corre una segunda vez)
+PASA  rev_ver2/critic/candado.py: sin el candado, otra lista y su sha256 agregado a holdout.ok: se niega (veredicto3: listo/holdout.ok de hoy no es el que se commiteó)
+PASA  el candado borrado con git rm (commit y push): se niega (veredicto3: la prueba final ya corrió (listo/holdout.candado está en disco o en la historia): no corre una segunda vez)
+PASA  un push forzado desde otro clon saca el candado de la rama empujada (en el repositorio que la vio): se niega (veredicto3: origin/plan3 se reescribió (push forzado): <candado>, que este repositorio ya vio en la rama empujada, no está en ella; no se corre)
+PASA  reset y push forzado desde el propio repositorio, el candado borrado del disco: se niega (veredicto3: la prueba final ya corrió (listo/holdout.candado está en disco o en la historia): no corre una segunda vez)
+      LÍMITE: lo mismo, después de borrar el reflog y refs/veredicto3/visto (o desde un clon nuevo, que nunca vio la rama de antes): rc 0 (prueba final: 2 comparaciones en salidas/veredicto3_prueba_final.csv). Lo cierra la protección de la rama plan3 en GitHub (sin push forzado ni borrado) y el hash del commit del candado enviado al asesor
+=== 37 pasan, 0 fallan

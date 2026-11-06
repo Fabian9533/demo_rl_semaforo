@@ -31,6 +31,8 @@ Lee (rutas relativas a plan3/):
   politica_*.json, insumos/entregado/politica_*.json   metas: val_elegido, ep_elegido, val_total_serie...
   promocion.json, promocion/*.json                     regla de promocion (§12, p3_promocion.py), con sha256
   insumos/puente/eval_<esc>_*.csv                      fijo e IPPO entregados en 1001-1030 (puente, descriptivo)
+  <esc>.sumocfg y su net y sus .add.xml de plan3/      la plantilla versionada de cada escenario: k para corregir los
+                                                       cambios de fase de los brazos de rl_ippo (k_plantilla)
   listo/cierre.ok, cola/manifiesto_cierre.json y la historia git de cola/manifiesto_ciego.json: solo en --final
 Escribe solo dentro de plan3/ (y nunca la carpeta plan3 misma): escribir() resuelve la ruta real y se niega si cae
 fuera; carpeta_limpia() solo borra carpetas plan3/tmp_*. Importar veredicto, consolidar y sintesis_plan solo define
@@ -55,6 +57,8 @@ import hashlib
 import argparse
 import tempfile
 import statistics
+import subprocess
+import time
 import xml.etree.ElementTree as ET
 
 sys.dont_write_bytecode = True          # importar los modulos de la raiz no deja __pycache__ fuera de plan3/
@@ -112,8 +116,8 @@ REDES = {"corredor": ["P1", "P2", "c905", "c1358", "c2715"],
          "red": ["P3", "P4", "r905", "r1358", "r1810", "r2715", "r3620"],
          "malla": ["P5", "P6", "m1810", "m2715", "m3620", "m6525"]}
 MINIMO_RED = {"corredor": 4, "red": 6, "malla": 5}          # H10: al menos el 80 % de los niveles
-# Perfil, mezcla y arranque lento (§8, A7; descriptivas): (celda, escenario, que), las del generador. La celda se busca
-# por escenario: el arranque lento (mixa_) lleva la misma celda que la mezcla (gt.MEZCLA_A: mix1 y mix3).
+# Perfil, mezcla y arranque lento (§8, A7; descriptivas): (celda, escenario, que), las del generador (per1, per3, mix1,
+# mix3, mixa1, mixa3). La celda se busca por escenario.
 ESTOCASTICAS = ([(c, e, "perfil de 10 min") for c, e in gt.PERFIL.items()]
                 + [(c, e, "mezcla de Lima") for c, e in gt.MEZCLA.items()]
                 + [(c, e, "mezcla con arranque lento") for c, e in gt.MEZCLA_A.items()])
@@ -153,7 +157,8 @@ NOMBRE = {
     "p3red": "una política por red",
     "ref_fino": "fijo fino", "ref_fino5": "fijo de verdes de 5 en 5", "ref_franja": "fijo por franja",
     "ref_bloques": "fijo por bloques", "ref_actuadoaj": "actuado ajustado", "ref_actuado": "actuado por defecto",
-    "ref_regla": "regla simple", "ref_mp": "Max-Pressure", "ref_fijo10": "fijo ajustado desde 10 s",
+    "ref_regla": "regla simple", "ref_reactiva": "regla reactiva", "ref_mp": "Max-Pressure",
+    "ref_fijo10": "fijo ajustado desde 10 s",
     "ref_trivial": "ciclo mínimo", "ref_fijo": "fijo entregado"}
 
 
@@ -183,7 +188,14 @@ def escribir(ruta, texto):
     tmp = f"{real}.{os.getpid()}.tmp"
     with open(tmp, "w", encoding="utf-8", newline="") as f:
         f.write(texto)
-    os.replace(tmp, real)
+    for intento in range(6):                    # Windows: un antivirus o un indexador puede tener el archivo un rato
+        try:
+            os.replace(tmp, real)
+            break
+        except PermissionError:
+            if intento == 5:
+                raise
+            time.sleep(0.2 * (intento + 1))
     return real
 
 
@@ -215,8 +227,22 @@ def carpeta_limpia(ruta):
 # ---------------- Lectura ----------------
 
 def leer_json(ruta):
-    with open(ruta, encoding="utf-8") as f:
-        return json.load(f)
+    """JSON de un archivo (utf-8, con o sin BOM); ERROR con el nombre del archivo si no se puede leer."""
+    try:
+        with open(ruta, "rb") as f:
+            contenido = f.read()
+    except OSError as ex:
+        raise ErrorVeredicto(f"{ruta}: no se pudo leer ({ex})")
+    return json_de(contenido, ruta)
+
+
+def json_de(contenido, donde):
+    """JSON de un contenido (bytes o texto; utf-8 con o sin BOM), o ERROR que nombra de donde salio."""
+    try:
+        texto = contenido.decode("utf-8-sig") if isinstance(contenido, bytes) else contenido.lstrip("\ufeff")
+        return json.loads(texto)
+    except (UnicodeDecodeError, ValueError) as ex:
+        raise ErrorVeredicto(f"{donde}: no es un JSON válido ({ex})")
 
 
 def sha256(ruta):
@@ -249,9 +275,10 @@ def politica_de(trabajo):
 
 def corrida_de(pol):
     """(escenario, variante, etiqueta) de la corrida de entrenamiento de una politica por base
-    (politica_<esc>_<variante>_<etiqueta>_s<base>.pt; gt.nombre_corrida), o None (lo entregado, lo publicado)."""
-    m = re.fullmatch(r"politica_(.+)_(vecinos|local)_(p3[a-z0-9]+)_s\d+\.pt", os.path.basename(pol or ""))
-    return m.groups() if m else None
+    (politica_<esc>_<variante>_<etiqueta>_s<base>.pt; gt.corrida_de_politica, la misma lectura que el generador), o
+    None (lo entregado, lo publicado)."""
+    origen = gt.corrida_de_politica(pol)
+    return origen[:3] if origen else None
 
 
 def base_de(e):
@@ -260,28 +287,22 @@ def base_de(e):
 
 
 def caidas_de_texto(texto):
-    """cola/caidas.json (§14, B22), el que lee tambien generar_trabajos3.leer_caidas: lista de {corrida, celda,
-    escenario, tipo, base, intentos: [{id, error, fecha}, ...], fecha}, con los dos intentos fallidos. [AMB-7] La fecha
-    va en cada intento o una vez en la declaracion; la corrida (gt.nombre_corrida) es opcional y, si esta, tiene que
-    ser de esa base. Devuelve ({(celda, escenario, tipo, base): declaracion}, {corrida: declaracion})."""
-    datos = json.loads(texto)
+    """cola/caidas.json (§14, B22), con las mismas reglas que generar_trabajos3.leer_caidas (gt.validar_caida): lista
+    de {corrida, celda, escenario, tipo, base, intentos: [{id, error, fecha}, ...], fecha}, con los dos intentos
+    fallidos. [AMB-7] La fecha va en cada intento o una vez en la declaracion; el escenario es el de la politica (mix_,
+    no mixa_); el tipo es un entrenamiento (no una re-eleccion ni C0); la corrida es opcional y, si esta, es la de
+    gt.corrida_de_tipo(escenario, tipo, base). Devuelve ({(celda, escenario, tipo, base): declaracion},
+    {corrida: declaracion})."""
+    datos = json_de(texto, "cola/caidas.json")
     lista = datos.get("caidas", []) if isinstance(datos, dict) else datos
     caidas, corridas = {}, {}
     for c in lista:
-        faltan = [k for k in ("celda", "escenario", "tipo", "base", "intentos") if k not in c]
-        intentos = c.get("intentos") or []
-        incompletos = any(not (isinstance(i, dict) and i.get("id") and i.get("error")
-                               and (i.get("fecha") or c.get("fecha"))) for i in intentos)
-        if faltan or len(intentos) < 2 or incompletos:
-            raise ErrorVeredicto(f"cola/caidas.json: cada base caída lleva celda, escenario, tipo, base y los dos "
-                                 f"intentos fallidos con id, error y fecha (§14): {c}")
-        corrida = c.get("corrida")
-        if corrida and not (str(corrida).endswith(f"_s{int(c['base'])}") and "_ippo_" in str(corrida)):
-            raise ErrorVeredicto(f"cola/caidas.json: la corrida {corrida} no es una corrida de la base {c['base']} "
-                                 f"({c['escenario']}, {c['tipo']})")
+        try:
+            corrida = gt.validar_caida(c)
+        except ValueError as ex:
+            raise ErrorVeredicto(f"cola/caidas.json: {ex}")
         caidas[(c["celda"], c["escenario"], c["tipo"], int(c["base"]))] = c
-        if corrida:
-            corridas[corrida] = c
+        corridas[corrida] = c
     return caidas, corridas
 
 
@@ -301,7 +322,7 @@ def declaracion_caida(caidas, corridas, ck, fam, b, pol):
         decl = corridas.get(gt.nombre_corrida(esc, variante, et, b))
         if decl is not None:
             return decl
-        et = gt.DERIVA.get(et)
+        et = gt.origen_de(et)
     return None
 
 
@@ -321,9 +342,12 @@ def opcion_de(trabajo, opcion):
     return None
 
 
-# --regla-de barridos/<esc>/regla.json o mp.json (evaluar.brazo_regla): el nombre exacto de la regla ganadora esta en
-# ese archivo, que no se sella; se comprueba su forma (PATRON de plan3/reglas.py), con un texto para los mensajes
+# --regla-de barridos/<esc>/regla.json, reactiva.json o mp.json (evaluar.brazo_regla): el nombre exacto de la regla
+# ganadora esta en ese archivo, que no se sella; se comprueba su forma (PATRON de plan3/reglas.py: regla_u<U>g<G>,
+# reactiva_d<D> con D de REACTIVAS y mp...; la familia reactiva entro en plan3-ref 4faffb7), con un texto para los
+# mensajes.
 FORMA_REGLA = {"regla.json": (r"regla_u(\d+|inf)g\d+", "regla_u<U>g<G>"),
+               "reactiva.json": (r"reactiva_d(15|25|35|50|70)", "reactiva_d<D> (D en 15, 25, 35, 50 o 70)"),
                "mp.json": (r"mp(_det)?(_c\d+)?", "mp, mp_det, mp_c<C> o mp_det_c<C>")}
 
 
@@ -354,6 +378,128 @@ def brazo_de_trabajo(trabajo, meta):
     else:
         return None
     return brazo + sufijo
+
+
+def corre_por_rl_ippo(trabajo):
+    """Por donde corre el brazo de un trabajo, en el orden de evaluar3.armar_brazo: --politica -> rl_ippo
+    (evaluar.brazo_profundo); --brazo (tambien fijo con --programa) -> rl_corredor; --regla-de o --regla -> rl_ippo
+    (evaluar.brazo_regla con reglas.correr). True si rl_ippo, False si rl_corredor, None si no se sabe."""
+    partes = partes_de(trabajo)
+    if "--politica" in partes:
+        return True
+    if "--brazo" in partes:
+        return False
+    if "--regla-de" in partes or "--regla" in partes:
+        return True
+    return None
+
+
+_K_PLANTILLA, _TL_ARCHIVO = {}, {}
+TAG_PRERREGISTRO = "plan3-prerregistro-A"     # los .sumocfg derivados no estan en insumos/manifiesto.json
+
+
+def plantilla(esc, carpeta=PLAN3):
+    """(k, archivos) de la plantilla de un escenario (hallazgo 10 de la revision de referencias, 05.11). archivos: las
+    rutas relativas que se leen (<esc>.sumocfg, su red y sus .add.xml). k: cuantos semaforos arranca (t = 0) fuera de
+    su primera fase verde. rl_ippo pone cada semaforo en su primer verde y su contador de cambios de fase compara con la
+    fase de la plantilla (la suscripcion se lee antes del setPhase): suma 1 por cada uno; rl_corredor lee la fase
+    despues y no los cuenta. Se calcula a mano, como k_plantillas.a_mano de la revision: el programa activo de cada
+    semaforo es el ultimo tlLogic que cargan el net-file y los additional-files del .sumocfg (la plantilla versionada,
+    no los datos); su fase a t = 0 es la que contiene (-offset) mod ciclo; verde = una fase con G o g y sin y
+    (rl_corredor.fases_verdes). k es None si falta el .sumocfg o alguno de los archivos que nombra."""
+    clave = (carpeta, esc)
+    if clave in _K_PLANTILLA:
+        return _K_PLANTILLA[clave]
+    cfg = os.path.join(carpeta, f"{esc}.sumocfg")
+    archivos, k = [f"{esc}.sumocfg"], None
+    if os.path.exists(cfg):
+        entrada = ET.parse(cfg).getroot().find("input")
+        for etiqueta_xml in ("net-file", "additional-files"):
+            nodo = entrada.find(etiqueta_xml) if entrada is not None else None
+            if nodo is not None:
+                archivos += [a for a in re.split(r"[,\s]+", nodo.get("value", "")) if a]
+        if all(os.path.exists(os.path.join(carpeta, a)) for a in archivos):
+            logicas = {}
+            for a in archivos[1:]:
+                ruta = os.path.join(carpeta, a)
+                if ruta not in _TL_ARCHIVO:
+                    _TL_ARCHIVO[ruta] = list(ET.parse(ruta).getroot().iter("tlLogic"))
+                for tl in _TL_ARCHIVO[ruta]:
+                    logicas[tl.get("id")] = tl
+            k = 0
+            for tl in logicas.values():
+                fases = [(float(p.get("duration")), p.get("state")) for p in tl.iter("phase")]
+                verdes = [i for i, (_, s) in enumerate(fases) if ("G" in s or "g" in s) and "y" not in s]
+                ciclo = sum(d for d, _ in fases)
+                pos = (-float(tl.get("offset", "0"))) % ciclo if ciclo else 0.0
+                acum, fase0 = 0.0, 0
+                for i, (d, _) in enumerate(fases):
+                    if pos < acum + d:
+                        fase0 = i
+                        break
+                    acum += d
+                k += bool(verdes) and fase0 != verdes[0]
+    _K_PLANTILLA[clave] = (k, archivos)
+    return _K_PLANTILLA[clave]
+
+
+def k_plantilla(esc, carpeta=PLAN3):
+    """k de la plantilla de un escenario (plantilla), o None si falta algun archivo."""
+    return plantilla(esc, carpeta)[0]
+
+
+def cambio_desde_tag(rel, cwd=PLAN3, tag=TAG_PRERREGISTRO):
+    """True si un archivo (rel, relativo a cwd) cambio en git desde el tag; False si es el mismo; None si no se pudo
+    comprobar (no esta en el tag, no esta en git o no existe). Compara el blob del tag con el del archivo de hoy
+    (git rev-parse <tag>:<ruta> frente a git hash-object), que no depende de los fines de linea; no basta git diff,
+    que tambien da 0 cuando la ruta no coincide con nada (segunda revision del 05.11, V3-2)."""
+    if not os.path.exists(os.path.join(cwd, rel)):
+        return None
+    rc, prefijo, _ = git_bytes("rev-parse", "--show-prefix", cwd=cwd)
+    if rc != 0 or git_bytes("ls-files", "--error-unmatch", "--", rel, cwd=cwd)[0] != 0:
+        return None
+    rc, en_tag, _ = git_bytes("rev-parse", "--verify", "--quiet", f"{tag}:{prefijo.decode().strip()}{rel}", cwd=cwd)
+    rc2, hoy, _ = git_bytes("hash-object", "--", rel, cwd=cwd)
+    if rc != 0 or rc2 != 0:
+        return None
+    return en_tag.strip() != hoy.strip()
+
+
+def insumos_del_tag(cwd=PLAN3, tag=TAG_PRERREGISTRO):
+    """insumos/manifiesto.json["."] tal como esta en el tag (no el de hoy, que se podria re-hacer): {archivo: [bytes,
+    sha256]}; {} si no se puede leer."""
+    rc, prefijo, _ = git_bytes("rev-parse", "--show-prefix", cwd=cwd)
+    rc2, texto, _ = git_bytes("cat-file", "-p", f"{tag}:{prefijo.decode().strip()}insumos/manifiesto.json", cwd=cwd)
+    if rc != 0 or rc2 != 0:
+        return {}
+    try:
+        return json.loads(texto.decode("utf-8-sig")).get(".", {})
+    except (UnicodeDecodeError, ValueError):
+        return {}
+
+
+def verificar_plantilla(esc, punto, cambiado=cambio_desde_tag):
+    """En --final, lo que se sabe de los archivos que lee k (el .sumocfg, su red y sus .add.xml): ninguno cambio en
+    git desde TAG_PRERREGISTRO (cambiado) y los que estan en insumos/manifiesto.json["."] del tag (punto: {archivo:
+    [bytes, sha256]}) tienen ese sha256, con o sin los CR de Windows. Devuelve los problemas (lista vacia si todo
+    cuadra); con problemas, la fila de cambios de fase se marca (k sin verificar), no se corta el veredicto."""
+    k, archivos = plantilla(esc)
+    problemas = []
+    for a in archivos:
+        ruta = os.path.join(PLAN3, a)
+        if not os.path.exists(ruta):
+            problemas.append(f"falta {a}")
+            continue
+        c = cambiado(a)
+        if c is None:
+            problemas.append(f"no se pudo comprobar {a} contra {TAG_PRERREGISTRO}")
+        elif c:
+            problemas.append(f"{a} cambió desde {TAG_PRERREGISTRO}")
+        if a in punto:
+            with open(ruta, "rb") as f:
+                if not es_version(f.read(), punto[a][1]):
+                    problemas.append(f"{a} no es el de insumos/manifiesto.json")
+    return problemas
 
 
 def nombre(tipo):
@@ -711,18 +857,19 @@ class Datos:
     estricto (--final): falta de trabajos, metas o bases sin declarar = ERROR. sello: el de cola/manifiesto_cierre.json;
     con el, todo meta y todo archivo de control que se lee debe estar sellado con el mismo sha256."""
 
-    def __init__(self, raiz, estricto=False, sello=None):
-        self.raiz, self.estricto, self.sello = raiz, estricto, sello
+    def __init__(self, raiz, estricto=False, sello=None, mananas=()):
+        self.raiz, self.estricto, self.sello, self.mananas = raiz, estricto, sello, set(mananas)
         self.avisos, self.celdas, self.todas = [], {}, {}
         self._csv, self._meta, self._comp, self._pub, self._insumos = {}, {}, {}, {}, None
+        self._plantillas, self._punto = {}, None
         if not os.path.exists(os.path.join(raiz, "cola", "manifiesto_esperado.json")):
             raise ErrorVeredicto("falta cola/manifiesto_esperado.json (python generar_trabajos3.py)")
-        self.manifiesto = json.loads(self.leer_otro("cola/manifiesto_esperado.json"))
+        self.manifiesto = json_de(self.leer_otro("cola/manifiesto_esperado.json"), "cola/manifiesto_esperado.json")
         self.trabajos = {}
         if os.path.exists(os.path.join(raiz, "cola", "trabajos.jsonl")):
             for linea in self.leer_otro("cola/trabajos.jsonl").splitlines():
                 if linea.strip():
-                    t = json.loads(linea)
+                    t = json_de(linea, "cola/trabajos.jsonl")
                     self.trabajos[t["id"]] = t
         elif estricto:
             raise ErrorVeredicto("falta cola/trabajos.jsonl: sin el comando de cada CSV no se sabe qué política juega")
@@ -745,7 +892,13 @@ class Datos:
                 fuera[e["tanda"]] = fuera.get(e["tanda"], 0) + 1
                 continue
             if base is not None and self.es_caida((e["celda"], e["escenario"]), e["tipo"], base, ent["politica"]):
-                continue                        # base caida declarada: sus CSV no existen (§14)
+                donde = [x for x, si in (("en disco", os.path.exists(os.path.join(raiz, e["csv"]))),
+                                         ("sellado", e["csv"] in ((sello or {}).get("csv") or {})),
+                                         ("en un manifiesto de la mañana", e["csv"] in self.mananas)) if si]
+                if donde:                       # una base caida no se evalua (§14)
+                    raise ErrorVeredicto(f"{e['csv']}: la base {base} está declarada caída en cola/caidas.json y "
+                                         f"tiene CSV ({', '.join(donde)}); una base caída no se evalúa (§14)")
+                continue                        # base caida declarada: sus CSV no existen
             ck = (e["celda"], e["escenario"])
             c = self.celdas.setdefault(ck, {"llegadas": lleg, "tipos": {}})
             if c["llegadas"] != lleg:
@@ -1030,7 +1183,7 @@ class Datos:
         fisicas = FISICAS[c["llegadas"]].get(tl)
         if not fisicas:
             return None, None, None, f"no hay tanda {tl} con llegadas {c['llegadas']}"
-        filas, esperadas = {}, set()
+        filas, esperadas, k_de = {}, set(), {}
         for tf in fisicas:
             e, motivo = self.entrada(ck, brazo, tf)
             if motivo:
@@ -1046,9 +1199,49 @@ class Datos:
             repetidas = set(por) & set(filas)
             if repetidas:
                 raise ErrorVeredicto(f"{e['csv']}: semillas repetidas entre tandas {sorted(repetidas)[:5]}")
+            if metrica == "cambios_fase":               # los de rl_ippo cuentan k de mas (k_plantilla)
+                k, motivo = self.k_cambios(e)
+                if motivo:
+                    return None, None, None, motivo
+                k_de.update({s: k for s in por})
             filas.update(por)
             esperadas |= set(rango(e["semillas"]))
-        return self._valores(filas, metrica, ck, brazo) + (esperadas, None)
+        valores, filas = self._valores(filas, metrica, ck, brazo)
+        if k_de:
+            valores = {s: v - k_de[s] for s, v in valores.items()}
+        return valores, filas, esperadas, None
+
+    def k_cambios(self, e):
+        """(k, motivo): cambios de fase que el conteo de un CSV tiene de mas (hallazgo 10 de la revision de
+        referencias): k de la plantilla del escenario si su brazo corre por rl_ippo (politicas, regla simple, reactiva
+        y Max-Pressure); 0 si corre por rl_corredor (fijo, fijo fino, franja, bloques, actuado, actuado ajustado, ciclo
+        minimo). Sin k, el motivo: no se sabe por donde corre el brazo, o falta la plantilla."""
+        por_ippo = corre_por_rl_ippo(self.trabajos.get(e.get("trabajo")))
+        if por_ippo is None:
+            return None, (f"no se sabe por qué código corre el brazo de {e['csv']} (rl_ippo o rl_corredor): falta su "
+                          f"trabajo o no se reconoce su comando; no se corrigen sus cambios de fase")
+        if not por_ippo:
+            return 0, None
+        k = k_plantilla(e["escenario"])
+        if k is None:
+            return None, (f"falta la plantilla de {e['escenario']} (su .sumocfg o un archivo que nombra) para "
+                          f"corregir los cambios de fase")
+        return k, None
+
+    def plantilla_sin_verificar(self, esc):
+        """En --final (estricto), los problemas de los archivos de la plantilla de un escenario (verificar_plantilla,
+        contra insumos/manifiesto.json["."] de plan3/ y contra git desde TAG_PRERREGISTRO); fuera de --final, nada.
+        Con problemas, una linea de aviso por escenario."""
+        if not self.estricto:
+            return []
+        if esc not in self._plantillas:
+            if self._punto is None:
+                self._punto = insumos_del_tag()
+            self._plantillas[esc] = verificar_plantilla(esc, self._punto)
+            if self._plantillas[esc]:
+                self.avisos.append(f"{esc}: k de su plantilla sin verificar ({'; '.join(self._plantillas[esc])}): "
+                                   f"la fila de cambios de fase va marcada")
+        return self._plantillas[esc]
 
     def serie_insumo(self, ck, cual, tl, metrica):
         """Puente (§8, descriptivo): fijo entregado o IPPO entregado de insumos/puente, en las semillas del puente."""
@@ -1350,9 +1543,11 @@ def fila_celda(d, ck):
                                                                                           "CONTRADICTORIO"):
             lecturas.append(f"Mejora frente al fijo, pero no frente al {nombre(ref)}: la ventaja la logra también "
                             f"un plan por horario.")
-    if "ref_regla" in al_lado and palabra(al_lado["ref_regla"]["citable"]) in ("EMPATA", "FALLA", "CONTRADICTORIO"):
-        lecturas.append("No le gana a la regla simple: no se dice que el modelo aprendió algo que la regla no hace ni "
-                        "\"coordinación aprendida\" (§5).")
+    reglas_ganan = [nombre(r) for r in ("ref_regla", "ref_reactiva")      # §5 y §11: la regla simple o la reactiva
+                    if r in al_lado and palabra(al_lado[r]["citable"]) in ("EMPATA", "FALLA", "CONTRADICTORIO")]
+    if reglas_ganan:
+        lecturas.append(f"No le gana a la {' ni a la '.join(reglas_ganan)}: no se dice que el modelo aprendió algo que "
+                        f"la regla no hace ni \"coordinación aprendida\" (§5).")
     if cit is not None and cit_p in POSITIVAS:
         no_rep = [t for t in T if not fila[f"_sentido_{t}"]["cumple"]]
         if no_rep:
@@ -1413,9 +1608,11 @@ def tabla_bases(d):
             if caida:
                 origen = corrida_de(pol)
                 propia = gt.nombre_corrida(*origen, b) if origen else None
+                declarada = caida.get("corrida") or gt.corrida_de_tipo(caida["escenario"], caida["tipo"],
+                                                                         int(caida["base"]))
                 fila["estado"] = ("caída declarada en cola/caidas.json (" + ", ".join(
                     f"{i['id']}: {i['error']} ({i.get('fecha') or caida.get('fecha')})" for i in caida["intentos"])
-                    + ")" + (f"; sale de {caida['corrida']}" if caida.get("corrida") not in (None, propia) else ""))
+                    + ")" + (f"; sale de {declarada}" if propia and declarada != propia else ""))
             else:
                 fila["estado"] = "sin meta: falta entrenarla o declararla caída (§14)"
             filas.append(fila)
@@ -1862,8 +2059,8 @@ def hipotesis(d, filas_celdas):
                              f"{k} de {len(bases)} bases a ±1 % del ciclo mínimo en T1 y T2", "; ".join(det)))
     # H0 (descriptiva): controles que reaccionan frente al fijo fino re-ajustado con llegadas aleatorias
     # (Max-Pressure: la mejor de la familia, con y sin ciclo maximo; el generador la evalua como ref_mp)
-    controles = [("ref", "ref_actuado"), ("ref", "ref_actuadoaj"), ("ref", "ref_regla"), ("ref", "ref_mp"),
-                 ("pub", "entmed"), ("pub", "v2regmed")]
+    controles = [("ref", "ref_actuado"), ("ref", "ref_actuadoaj"), ("ref", "ref_regla"), ("ref", "ref_reactiva"),
+                 ("ref", "ref_mp"), ("pub", "entmed"), ("pub", "v2regmed")]
     por_caso = {}
     for brazo in controles:
         k = 0
@@ -2020,6 +2217,14 @@ def comparaciones(d, filas_celdas):
         for m in metricas:
             for t in T:
                 filas.append(fila_comparacion(ck, lleg, t, cit, REF_FINO, m, d.comp(ck, cit, ("ref", REF_FINO), t, m)))
+                if m == "cambios_fase":                 # hallazgo 10: se declara la correccion en la fila
+                    sin_verificar = d.plantilla_sin_verificar(ck[1])
+                    k_esc = k_plantilla(ck[1])
+                    filas[-1]["nota"] = "; ".join(x for x in (filas[-1]["nota"], (
+                        f"a los brazos de rl_ippo se les resta k = {k_esc} por semilla (semáforos que la plantilla "
+                        f"arranca fuera de su primer verde)" if k_esc is not None else
+                        "k desconocido: falta la plantilla del escenario"), (
+                        f"k SIN VERIFICAR: {', '.join(sin_verificar)}" if sin_verificar else "")) if x)
         if "corredor" in ck[1]:                 # no insertados por periodo, aparte (§4)
             for t in T:
                 for brazo in (cit, ("ref", REF_FINO)):
@@ -2188,7 +2393,7 @@ def texto_md(res, titulo_extra=""):
     for f in res["celdas"]:
         cuenta[(f["celda"], f["llegadas"])] = cuenta.get((f["celda"], f["llegadas"]), 0) + 1
 
-    def caso(f):            # la celda; con su escenario si otra de las mismas llegadas se llama igual (mixa_: mix1)
+    def caso(f):            # la celda; con su escenario si otra de las mismas llegadas se llama igual
         return f["celda"] + (f" ({f['escenario']})" if cuenta.get((f["celda"], f["llegadas"]), 0) > 1 else "")
     num = {(f["llegadas"], f["modelo"], f["referencia"], f["tanda"]): f for f in res["numero"]}
     for lleg in ("regulares", "aleatorias"):            # la frase de §17: siempre las dos tandas, por separado
@@ -2314,12 +2519,19 @@ def otros_que_se_sellan(raiz):
     return rels
 
 
+def tanda_de_ruta(rel):
+    """Tanda de un CSV de evaluacion por su ruta (ciego/<tanda>/... o parciales/<tanda>/...), o ''."""
+    partes = rel.replace("\\", "/").split("/")
+    return partes[1] if len(partes) > 2 and partes[0] in ("ciego", "parciales") else ""
+
+
 def comprobar_cierre(raiz):
     """--final se niega sin listo/cierre.ok o si algo de lo sellado en cola/manifiesto_cierre.json cambio. El sello es
     el de manifiesto.py cierre (mf.sello): {"csv": {ruta: sha256}, "metas": {...}, "otros": {...},
-    "manifiesto_ciego_commit": ...}. Cada CSV del manifiesto esta sellado, salvo los de la prueba final (uso 'final':
-    sellados o no, no se miran aqui) y los que no existen por una base caida declarada (§14); no hay CSV sellados
-    fuera del manifiesto; y lo sellado (CSV, politica_*.pt y .json, otros) tiene el mismo sha256. Devuelve el sello."""
+    "manifiesto_ciego_commit": ...}. Cada CSV del manifiesto esta sellado, salvo los de la prueba final (uso 'final': no
+    se sellan al cierre; si alguno esta sellado, ERROR) y los que no existen por una base caida declarada (§14); no hay
+    CSV sellados fuera del manifiesto; y lo sellado (CSV, politica_*.pt y .json, otros) tiene el mismo sha256. Devuelve
+    el sello."""
     if not os.path.exists(os.path.join(raiz, "listo", "cierre.ok")):
         raise ErrorVeredicto("falta listo/cierre.ok: los resultados decisivos siguen a ciegas (§14); no se corre")
     ruta = os.path.join(raiz, "cola", "manifiesto_cierre.json")
@@ -2347,8 +2559,11 @@ def comprobar_cierre(raiz):
     csvs = set(esperado) - finales
     sellados = set(sello["csv"])
     faltan = sorted(c for c in csvs - sellados if not caida(esperado[c]))
-    sobran = sorted(sellados - csvs - finales)
+    sellados_finales = sorted(c for c in sellados if c in finales or es_final(tanda_de_ruta(c)))
+    sobran = sorted(sellados - csvs - set(sellados_finales))
     problemas = []
+    if sellados_finales:
+        problemas.append(f"los CSV de la prueba final no se sellan al cierre (§13): {sellados_finales[:3]}")
     if faltan or sobran:
         problemas.append(f"el sello y el manifiesto no listan los mismos CSV (sin sellar: {faltan[:3]}; de más: "
                          f"{sobran[:3]})")
@@ -2367,38 +2582,203 @@ def comprobar_cierre(raiz):
     return sello
 
 
-def historia_ciego(raiz):
-    """Las versiones commiteadas de cola/manifiesto_ciego.json (p3_noche, cada manana: {csv: {sha256, bytes, filas,
-    semillas}}), de la mas vieja a la mas nueva: [(commit, manifiesto)]. Solo lee git (log y show)."""
-    rc, top = protecciones.git("--no-optional-locks", "rev-parse", "--show-toplevel", cwd=raiz)
-    if rc != 0:
-        raise ErrorVeredicto("no se pudo leer la historia de git de cola/manifiesto_ciego.json")
-    top = top.strip()
-    rel = os.path.relpath(os.path.join(raiz, "cola", "manifiesto_ciego.json"), top).replace(os.sep, "/")
-    rc, log = protecciones.git("--no-optional-locks", "log", "--reverse", "--format=%H", "--", rel, cwd=top)
-    if rc != 0:
-        raise ErrorVeredicto("no se pudo leer la historia de git de cola/manifiesto_ciego.json")
-    versiones = []
-    for h in log.split():
-        rc, texto = protecciones.git("--no-optional-locks", "show", f"{h}:{rel}", cwd=top)
-        if rc == 0:                             # un commit que borro el archivo no trae manifiesto
-            versiones.append((h, json.loads(texto)))
-    return versiones
+# ------- Historia de git anclada a la rama empujada (segunda revision del 05.11: V1-H1 a V1-H4, V1-M3, V1-M4) -------
+# Nadie, por error o a proposito, puede hacer aceptar otro resultado sellado reescribiendo la historia de git, editando
+# archivos sin sellar o repitiendo la prueba final. Todo se ancla a la historia EMPUJADA: despues de git fetch, el
+# commit del sello fijo, cada manana y el primer commit de listo/holdout.ok tienen que ser ancestros de origin/plan3.
+REMOTO, RAMA = "origin", "plan3"
+VISTO = "refs/veredicto3/visto"         # la ultima ancla aceptada (contra un push forzado; git push no la sube)
+ENTORNO_GIT = dict(os.environ, GIT_NO_REPLACE_OBJECTS="1", GIT_TERMINAL_PROMPT="0")
+SELLO, MANANA, CIERRE_OK, HOLDOUT_OK = ("cola/manifiesto_cierre.json", "cola/manifiesto_ciego.json",
+                                        "listo/cierre.ok", "listo/holdout.ok")
+CANDADO, SALIDA_FINAL = "listo/holdout.candado", "salidas/veredicto3_prueba_final.csv"
 
 
-def comprobar_ciego(raiz, sello):
-    """Segunda barrera del a ciegas (§14, A5 #8): cada CSV sellado de ciego/ aparece en algun manifiesto de manana
-    versionado, su sha256 no cambio de una manana a otra y el del cierre es el de la primera manana en que aparecio; y
-    el commit de la ultima manana que guarda el sello (manifiesto_ciego_commit, de manifiesto.py cierre) esta en la
-    historia."""
-    versiones = historia_ciego(raiz)
+def git_bytes(*args, cwd):
+    """(rc, stdout en bytes, stderr) de git: sin objetos de reemplazo (GIT_NO_REPLACE_OBJECTS=1), sin locks opcionales y
+    con rutas largas."""
+    r = subprocess.run(["git", "-c", "core.longpaths=true", "--no-optional-locks", *args], cwd=cwd,
+                       capture_output=True, env=ENTORNO_GIT)
+    return r.returncode, r.stdout, r.stderr.decode("utf-8", "replace")
+
+
+class Historia:
+    """La historia de git de una carpeta plan3 anclada a la rama empujada: el ancla es REMOTO/RAMA tal como esta en el
+    remoto (git fetch a FETCH_HEAD, sin mover ninguna rama). Se niega con un repositorio superficial y si la rama
+    empujada se reescribio (push forzado): lo que este repositorio ya vio de ella (refs/remotes/REMOTO/RAMA, que mueven
+    los push, y VISTO, la ultima ancla aceptada) tiene que ser ancestro del ancla. El fetch no mueve
+    refs/remotes/REMOTO/RAMA, asi que la negativa se repite en cada corrida. Lee toda la historia de cada archivo
+    (rev-list --full-history --topo-order --reverse HEAD: un merge no esconde nada) y cada version con cat-file; una
+    lectura que falla es un ERROR, no un borrado. Limite: un push forzado hecho desde un repositorio que no vio la rama
+    de antes no se ve aqui; eso lo cierra la proteccion de la rama en el remoto (sin push forzado ni borrado)."""
+
+    def __init__(self, raiz, remoto=REMOTO, rama=RAMA, traer=True):
+        self.raiz = raiz
+        rc, top, err = git_bytes("rev-parse", "--show-toplevel", cwd=raiz)
+        if rc != 0:
+            raise ErrorVeredicto(f"{raiz} no está en un repositorio git ({err.strip()[:120]}); no se corre")
+        self.top = top.decode().strip()
+        rc, prefijo, err = git_bytes("rev-parse", "--show-prefix", cwd=raiz)
+        self.prefijo = prefijo.decode().strip()
+        rc, sup, err = git_bytes("rev-parse", "--is-shallow-repository", cwd=raiz)
+        if rc != 0 or sup.decode().strip() != "false":
+            raise ErrorVeredicto("el repositorio es superficial (shallow): su historia no está completa; no se corre")
+        ref = f"refs/remotes/{remoto}/{rama}"
+        vistos = [v for v in (self.rev(ref), self.rev(VISTO)) if v]
+        if traer:
+            rc, _, err = git_bytes("fetch", "--quiet", "--no-tags", "--refmap=", remoto, rama, cwd=raiz)
+            if rc != 0:
+                raise ErrorVeredicto(f"no se pudo traer {remoto}/{rama} (git fetch: {err.strip()[:160]}); no se corre")
+        ancla = self.rev("FETCH_HEAD" if traer else ref)
+        if ancla is None:
+            raise ErrorVeredicto(f"no hay {remoto}/{rama}: la historia tiene que estar empujada; no se corre")
+        self.ancla, self.nombre_ancla = ancla, f"{remoto}/{rama}"
+        self._ancestro = {}
+        for v in vistos:
+            if not self.es_ancestro(v, self.ancla):
+                raise ErrorVeredicto(f"{remoto}/{rama} se reescribió (push forzado): {v[:10]}, que este repositorio ya "
+                                     f"vio en la rama empujada, no está en ella; no se corre")
+        if traer and git_bytes("update-ref", VISTO, self.ancla, cwd=raiz)[0] != 0:
+            raise ErrorVeredicto(f"no se pudo guardar {VISTO}; no se corre")
+
+    def rev(self, nombre):
+        """El commit de nombre (una referencia), o None si no existe."""
+        rc, out, _ = git_bytes("rev-parse", "--verify", "--quiet", f"{nombre}^{{commit}}", cwd=self.raiz)
+        return out.decode().strip() if rc == 0 else None
+
+    def commits(self, *rels, desde="HEAD"):
+        """Los commits que cambian alguno de rels, del mas viejo al mas nuevo (toda la historia de desde)."""
+        rc, out, err = git_bytes("rev-list", "--full-history", "--topo-order", "--reverse", desde, "--",
+                                 *[self.prefijo + r for r in rels], cwd=self.top)
+        if rc != 0:
+            raise ErrorVeredicto(f"no se pudo leer la historia de git de {', '.join(rels)}: {err.strip()[:160]}")
+        return out.decode().split()
+
+    def en_algun_lado(self, rel):
+        """Algun commit de cualquier rama, tag o reflog de este repositorio cambia rel."""
+        rc, out, err = git_bytes("rev-list", "--all", "--reflog", "--full-history", "--", self.prefijo + rel,
+                                 cwd=self.top)
+        if rc != 0:
+            raise ErrorVeredicto(f"no se pudo leer la historia de git de {rel}: {err.strip()[:160]}")
+        return bool(out.strip())
+
+    def leer(self, c, rel):
+        """El contenido (bytes) de rel en el commit c, o None si no esta en ese commit. Cualquier otra falla: ERROR."""
+        ruta = self.prefijo + rel
+        rc, out, err = git_bytes("cat-file", "-p", f"{c}:{ruta}", cwd=self.raiz)
+        if rc == 0:
+            return out
+        rc2, ls, err2 = git_bytes("ls-tree", c, "--", ruta, cwd=self.top)
+        if rc2 == 0 and not ls.strip():
+            return None
+        raise ErrorVeredicto(f"no se pudo leer {rel} en el commit {c[:10]}: {(err or err2).strip()[:160]}")
+
+    def es_ancestro(self, a, b):
+        """a es ancestro de b o el mismo commit."""
+        if (a, b) not in self._ancestro:
+            rc, _, err = git_bytes("merge-base", "--is-ancestor", a, b, cwd=self.raiz)
+            if rc not in (0, 1):
+                raise ErrorVeredicto(f"git merge-base falló con {a[:10]} y {b[:10]}: {err.strip()[:160]}")
+            self._ancestro[(a, b)] = rc == 0
+        return self._ancestro[(a, b)]
+
+    def anclado(self, c):
+        return self.es_ancestro(c, self.ancla)
+
+    def versiones(self, rel):
+        """[(commit, bytes)] de cada version commiteada de rel; ERROR si un commit lo borra."""
+        salida = []
+        for c in self.commits(rel):
+            contenido = self.leer(c, rel)
+            if contenido is None:
+                raise ErrorVeredicto(f"{rel} se borró en el commit {c[:10]}; no se corre")
+            salida.append((c, contenido))
+        return salida
+
+    def cadena(self):
+        """Los commits que tocan el sello, cierre.ok, las mananas y holdout.ok forman una sola cadena de ascendencia
+        (cada uno es ancestro del siguiente): una manana o un sello en una rama lateral no entra. Si no, ERROR."""
+        cs = self.commits(SELLO, CIERRE_OK, MANANA, HOLDOUT_OK)
+        for a, b in zip(cs, cs[1:]):
+            if not self.es_ancestro(a, b):
+                raise ErrorVeredicto(f"los commits del sello, de las mañanas y de holdout.ok no forman una sola cadena "
+                                     f"({a[:10]} y {b[:10]} están en ramas distintas); no se corre")
+        return cs
+
+
+def sin_cr(b):
+    return b.replace(b"\r\n", b"\n")
+
+
+def sha_texto(b):
+    """sha256 de un archivo de texto sin los CR de Windows (el mismo con autocrlf o sin el)."""
+    return hashlib.sha256(sin_cr(b)).hexdigest()
+
+
+def es_version(b, h):
+    """El contenido b es el que tenia sha256 h, con los fines de linea de git o los de Windows."""
+    lf = sin_cr(b)
+    return h in (hashlib.sha256(b).hexdigest(), hashlib.sha256(lf).hexdigest(),
+                 hashlib.sha256(lf.replace(b"\n", b"\r\n")).hexdigest())
+
+
+def sello_fijado(hist):
+    """V1-M4: (commit, sello) del cierre. Vale la version de cola/manifiesto_cierre.json del primer commit que contiene
+    listo/cierre.ok (un sello commiteado antes no fija nada); ese commit tiene que estar empujado y el sello tiene que
+    decir el commit de su ultima manana (manifiesto_ciego_commit). Antes, la cadena (Historia.cadena): con un sello o
+    una manana en una rama lateral no hay 'primer commit' que valga."""
+    hist.cadena()
+    c = next((x for x in hist.commits(CIERRE_OK) if hist.leer(x, CIERRE_OK) is not None), None)
+    if c is None:
+        raise ErrorVeredicto("listo/cierre.ok no está commiteado: el cierre es el commit que lo agrega junto con el "
+                             "sello (§14); no se corre")
+    contenido = hist.leer(c, SELLO)
+    if contenido is None:
+        raise ErrorVeredicto(f"el commit que agrega listo/cierre.ok ({c[:10]}) no tiene cola/manifiesto_cierre.json: "
+                             f"el sello y cierre.ok se commitean juntos; no se corre")
+    if not hist.anclado(c):
+        raise ErrorVeredicto(f"el commit del cierre ({c[:10]}) no está en {hist.nombre_ancla} (sin empujar o con la "
+                             f"historia reescrita); no se corre")
+    sello0 = json_de(contenido, f"{SELLO} en el commit del cierre")
+    if not sello0.get("manifiesto_ciego_commit"):
+        raise ErrorVeredicto("el sello del cierre no dice su última mañana (manifiesto_ciego_commit); no se corre")
+    return c, sello0
+
+
+def comprobar_ciego(raiz, sello, hist=None, fijado=None):
+    """Segunda barrera del a ciegas (§14, A5 #8), sobre la historia empujada: el sello, cierre.ok, las mananas y
+    holdout.ok forman una sola cadena; cada manana esta empujada; la ultima manana que dice el sello fijo es una de
+    ellas y es anterior al cierre; ningun CSV cambio su sha256 de una manana a otra; cada CSV sellado de ciego/ aparece
+    en alguna con su primer sha256; y todo CSV de ciego/ de una tanda que no es de la prueba final que aparece en una
+    manana esta sellado o declarado en cola/reemplazos.json (con su nuevo sellado o su trabajo en la lista). Devuelve
+    {csv: (commit, sha256)} de la primera manana de cada CSV."""
+    hist = hist or Historia(raiz)
+    c_sello, sello0 = fijado or sello_fijado(hist)
+    hist.cadena()
+    versiones = [(h, json_de(t, f"{MANANA} en {h[:10]}")) for h, t in hist.versiones(MANANA)]
     if not versiones:
         raise ErrorVeredicto("no hay ninguna versión commiteada de cola/manifiesto_ciego.json (§14); no se corre")
-    primero, problemas = {}, []
-    commit = sello.get("manifiesto_ciego_commit")       # el ultimo manifiesto de la manana que vio el cierre
-    if commit and commit not in {h for h, _ in versiones}:
-        problemas.append(f"el cierre se hizo con el manifiesto de la mañana {commit[:10]}, que no está en la "
-                         f"historia de git")
+    problemas = [f"la mañana {h[:10]} no está en {hist.nombre_ancla}" for h, _ in versiones if not hist.anclado(h)]
+    mananas = {h for h, _ in versiones}
+    for s, quien in ((sello0, "el sello del cierre"), (sello, "el sello de hoy")):
+        commit = s.get("manifiesto_ciego_commit")
+        if not commit or commit not in mananas:
+            problemas.append(f"{quien} dice que su última mañana es {str(commit)[:10]}, que no es una mañana de la "
+                             f"historia de git")
+    if sello0.get("manifiesto_ciego_commit") in mananas and not hist.es_ancestro(sello0["manifiesto_ciego_commit"],
+                                                                                c_sello):
+        problemas.append("la última mañana del sello no es anterior al commit del cierre")
+    antes = [h for h, _ in versiones if hist.es_ancestro(h, c_sello)]
+    if antes and sello0.get("manifiesto_ciego_commit") in mananas and sello0["manifiesto_ciego_commit"] != antes[-1]:
+        # un sello viejo: se hizo antes de la ultima manana anterior al cierre (p. ej. uno temprano, barrido a una
+        # manana, y un commit del cierre que no trae el nuevo)
+        trae = c_sello in set(hist.commits(SELLO))
+        problemas.append(f"el sello del cierre es de la mañana {sello0['manifiesto_ciego_commit'][:10]} y antes del "
+                         f"cierre hubo otra ({antes[-1][:10]}): es un sello viejo"
+                         + ("" if trae else " (el commit del cierre no trae el sello: el de su árbol es de un commit "
+                                            "anterior)")
+                         + "; manifiesto.py cierre va después de la última mañana y el sello se commitea con cierre.ok")
+    primero = {}
     for h, man in versiones:
         for rel, info in man.items():
             if rel in primero and info.get("sha256") != primero[rel][1]:
@@ -2411,8 +2791,172 @@ def comprobar_ciego(raiz, sello):
             problemas.append(f"{rel} no aparece en ningún manifiesto de la mañana")
         elif primero[rel][1] != h_sello:
             problemas.append(f"{rel}: el sha256 del cierre no es el de la primera mañana ({primero[rel][0][:10]})")
+    try:
+        reemplazos = mf.leer_reemplazos(raiz)
+    except ValueError as ex:
+        raise ErrorVeredicto(str(ex))
+    trabajos = set()
+    if os.path.exists(os.path.join(raiz, "cola", "trabajos.jsonl")):
+        with open(os.path.join(raiz, "cola", "trabajos.jsonl"), encoding="utf-8-sig") as f:
+            trabajos = {json.loads(x)["id"] for x in f if x.strip()}
+    for rel in mf.huerfanos(set(primero), set(sello["csv"]), reemplazos, trabajos):
+        problemas.append(f"{rel} está en el manifiesto de la mañana {primero[rel][0][:10]} y no en el sello ni en "
+                         f"cola/reemplazos.json")
     if problemas:
         raise ErrorVeredicto("los CSV de ciego/ no son los de cada mañana (§14); no se corre: "
+                             + "; ".join(problemas[:5])
+                             + (f" (y {len(problemas) - 5} más)" if len(problemas) > 5 else ""))
+    return primero
+
+
+AGREGAN_FINAL = ("cola/manifiesto_esperado.json", "cola/trabajos.jsonl", "cola/partes.txt")
+
+
+def solo_agrega_final(raiz, hist, c0, rel, h0):
+    """None si el archivo de control rel de hoy es la version que sello el cierre (la del commit c0, cotejada con el
+    sha256 h0 que guardo el sello) mas entradas de la prueba final: manifiesto, entradas de una tanda de uso 'final';
+    trabajos, trabajos de uso 'final'; partes (una linea con las partes separadas por comas), las de antes y despues
+    otras. Si no, el motivo."""
+    viejo = hist.leer(c0, rel)
+    if viejo is None or not es_version(viejo, h0):
+        return f"el commit del cierre ({c0[:10]}) no tiene la versión sellada de {rel}"
+    with open(os.path.join(raiz, rel), "rb") as f:
+        nuevo = f.read()
+    if rel.endswith(".json"):
+        v, n = json_de(viejo, f"{rel} del cierre"), json_de(nuevo, rel)
+        es_extra_bien = lambda e: es_final(e.get("tanda", ""))           # noqa: E731
+    elif rel.endswith(".jsonl"):
+        v, n = ([json.loads(x) for x in t.decode("utf-8-sig").splitlines() if x.strip()] for t in (viejo, nuevo))
+        es_extra_bien = lambda t: t.get("uso") == "final"                # noqa: E731
+    else:
+        v, n = ([x.strip() for x in t.decode("utf-8-sig").strip().split(",") if x.strip()] for t in (viejo, nuevo))
+        if n[:len(v)] != v:
+            return f"{rel} no es el del cierre con partes nuevas al final"
+        return None
+    canon = lambda x: json.dumps(x, sort_keys=True)                      # noqa: E731
+    cv, cn = {canon(x) for x in v}, {canon(x) for x in n}
+    if not cv <= cn or not all(es_extra_bien(x) for x in n if canon(x) not in cv):
+        return f"{rel} no es el del primer sello más entradas de la prueba final"
+    return None
+
+
+def comprobar_sello_fijo(raiz, sello, hist=None, fijado=None):
+    """C1 (revision del 05.11): vale el sello del cierre (sello_fijado). Uno posterior solo puede agregar la prueba
+    final (§13): los mismos CSV y metas, y los mismos archivos de control, salvo el manifiesto esperado, los trabajos y
+    sus partes, que solo pueden sumar entradas de la prueba final (solo_agrega_final, contra la version que sello el
+    cierre). Devuelve (commit, sello) del cierre."""
+    hist = hist or Historia(raiz)
+    c0, s0 = fijado or sello_fijado(hist)
+    if s0 == sello:
+        return c0, s0
+    problemas = []
+    if s0.get("metas") != sello.get("metas"):
+        problemas.append("las políticas o sus metas no son las del primer sello")
+    if s0.get("csv") != sello.get("csv"):
+        problemas.append("los CSV sellados no son los del primer sello")
+    otros0, otros = s0.get("otros", {}), sello.get("otros", {})
+    for rel in sorted(set(otros0) | set(otros)):
+        if otros0.get(rel) == otros.get(rel):
+            continue
+        motivo = (solo_agrega_final(raiz, hist, c0, rel, otros0[rel])
+                  if rel in AGREGAN_FINAL and rel in otros0 and rel in otros else f"{rel} no es el del primer sello")
+        if motivo:
+            problemas.append(motivo)
+    if problemas:
+        raise ErrorVeredicto(f"el sello no es el del cierre ({c0[:10]}) ni solo le agrega la prueba final; "
+                             f"no se corre: " + "; ".join(problemas[:5]))
+    return c0, s0
+
+
+def sha_lista(ruta):
+    """sha256 de la lista de la prueba final, sin los CR de Windows: el que va en listo/holdout.ok
+    (python veredicto3.py --sha-lista LISTA.json)."""
+    with open(ruta, "rb") as f:
+        return sha_texto(f.read())
+
+
+def comprobar_holdout(raiz, lista, hist):
+    """V1-H2: listo/holdout.ok se fija en su primer commit, empujado y sin cambios despues: tiene exactamente un
+    sha256, el de la lista (sha_lista), y el archivo de hoy es esa version. La lista esta commiteada en ese commit (o
+    antes) con ese sha256. La prueba final no corrio nunca: ni listo/holdout.candado ni su salida estan en disco ni en
+    la historia (de HEAD, de la rama empujada ni de ninguna rama o reflog de este repositorio: un reset o un amend
+    dejan el commit del candado en el reflog). Devuelve el commit de holdout.ok."""
+    rel_lista = os.path.relpath(os.path.abspath(lista), os.path.abspath(raiz)).replace(os.sep, "/")
+    if rel_lista.startswith(".."):
+        raise ErrorVeredicto("prueba final: la lista tiene que estar dentro de plan3/ (commiteada)")
+    versiones = hist.versiones(HOLDOUT_OK)
+    if not versiones:
+        raise ErrorVeredicto("listo/holdout.ok no está commiteado: se commitea y se empuja antes de la noche final "
+                             "(§13)")
+    c_ok, contenido = versiones[0]
+    if not hist.anclado(c_ok):
+        raise ErrorVeredicto(f"el primer commit de listo/holdout.ok ({c_ok[:10]}) no está en {hist.nombre_ancla}")
+    if len(versiones) > 1:
+        raise ErrorVeredicto("listo/holdout.ok cambió después de su primer commit: vale una sola lista (§13)")
+    lineas = [x.strip() for x in contenido.decode("utf-8-sig").splitlines() if x.strip()]
+    if len(lineas) != 1 or not re.fullmatch(r"[0-9a-f]{64}", lineas[0]):
+        raise ErrorVeredicto("listo/holdout.ok tiene que tener exactamente un sha256: el de la lista (§13)")
+    with open(os.path.join(raiz, HOLDOUT_OK), "rb") as f:
+        if sin_cr(f.read()).strip() != sin_cr(contenido).strip():
+            raise ErrorVeredicto("listo/holdout.ok de hoy no es el que se commiteó")
+    if sha_lista(lista) != lineas[0]:
+        raise ErrorVeredicto("listo/holdout.ok no tiene el sha256 de la lista: no es la lista de la enmienda")
+    commiteada = hist.leer(c_ok, rel_lista)
+    if commiteada is None or sha_texto(commiteada) != lineas[0]:
+        raise ErrorVeredicto(f"la lista {rel_lista} no está commiteada (con ese sha256) en el commit de "
+                             f"listo/holdout.ok o antes")
+    for rel in (CANDADO, SALIDA_FINAL):
+        if (os.path.exists(os.path.join(raiz, rel)) or hist.commits(rel)
+                or hist.commits(rel, desde=hist.ancla) or hist.en_algun_lado(rel)):
+            raise ErrorVeredicto(f"la prueba final ya corrió ({rel} está en disco o en la historia): no corre una "
+                                 f"segunda vez")
+    return c_ok
+
+
+def comprobar_sellos_final(raiz, sello, hist, c_ok):
+    """V1-H3: ninguna version commiteada del sello tiene CSV de la prueba final; el sello de hoy es el ultimo
+    commiteado, y ese commit (el que suma la prueba final) es anterior a listo/holdout.ok."""
+    versiones = [(c, json_de(t, f"{SELLO} en {c[:10]}")) for c, t in hist.versiones(SELLO)]
+    for c, s in versiones:
+        finales = sorted(k for k in s.get("csv", {}) if es_final(tanda_de_ruta(k)))
+        if finales:
+            raise ErrorVeredicto(f"el sello del commit {c[:10]} tiene CSV de la prueba final ({finales[0]}): no se "
+                                 f"sellan")
+    c_ult, s_ult = versiones[-1]
+    if s_ult != sello:
+        raise ErrorVeredicto("el sello de hoy no es el último commiteado: se commitea (y se empuja) antes de "
+                             "listo/holdout.ok")
+    if not hist.es_ancestro(c_ult, c_ok):
+        raise ErrorVeredicto(f"el sello que suma la prueba final ({c_ult[:10]}) no es anterior a listo/holdout.ok")
+
+
+def comprobar_ciego_final(raiz, csvs, hist, c_ok):
+    """V1-H3 y V1-H4, antes del candado de la prueba final: ningun CSV de la lista esta en una version del sello ni en
+    una manana que no sea descendiente estricta del primer commit de listo/holdout.ok (despues = en la misma cadena,
+    mas tarde); cada uno aparece en alguna manana posterior y conserva el sha256 de la primera vez, que es el del
+    archivo de hoy."""
+    sellos = [json_de(t, f"{SELLO} en {c[:10]}") for c, t in hist.versiones(SELLO)]
+    mananas = [(h, json_de(t, f"{MANANA} en {h[:10]}")) for h, t in hist.versiones(MANANA)]
+    despues_de = {h: h != c_ok and hist.es_ancestro(c_ok, h) for h, _ in mananas}
+    problemas = []
+    for rel in csvs:
+        if any(rel in (s.get("csv") or {}) for s in sellos):
+            problemas.append(f"{rel} está en el sello del cierre")
+        previas = [h for h, man in mananas if rel in man and not despues_de[h]]
+        despues = [(h, man[rel].get("sha256")) for h, man in mananas if rel in man and despues_de[h]]
+        if previas:
+            problemas.append(f"{rel} está en el manifiesto de la mañana {previas[0][:10]}, que no es posterior a "
+                             f"listo/holdout.ok")
+        if not despues:
+            problemas.append(f"{rel} no aparece en ningún manifiesto de la mañana posterior a listo/holdout.ok")
+            continue
+        cambia = [h for h, s in despues if s != despues[0][1]]
+        if cambia:
+            problemas.append(f"{rel}: su sha256 cambió en el manifiesto de la mañana {cambia[0][:10]}")
+        if sha256(os.path.join(raiz, rel)) != despues[0][1]:
+            problemas.append(f"{rel}: hoy no es el de su primera mañana ({despues[0][0][:10]})")
+    if problemas:
+        raise ErrorVeredicto("prueba final: los CSV no son los de la enmienda (§13); no corre: "
                              + "; ".join(problemas[:5])
                              + (f" (y {len(problemas) - 5} más)" if len(problemas) > 5 else ""))
 
@@ -2436,12 +2980,16 @@ def comprobar_semillas(manifiesto, texto_prerregistro=None):
         raise ErrorVeredicto("semillas del manifiesto distintas de las del prerregistro: " + "; ".join(problemas[:5]))
 
 
-def correr_final(raiz=PLAN3, exigir_semillas=True, carpeta=None):
-    """--final: sello del cierre, historia de los manifiestos de la manana, datos en modo estricto (con el sello),
-    semillas del prerregistro; recien entonces el analisis y las salidas."""
+def correr_final(raiz=PLAN3, exigir_semillas=True, carpeta=None, hist=None):
+    """--final: sello del cierre, historia empujada (sello fijo, cadena, mananas), un sello que solo le agrega la prueba
+    final, datos en modo estricto (con el sello y las mananas), semillas del prerregistro; recien entonces el
+    analisis y las salidas."""
+    hist = hist or Historia(raiz)               # primero la historia: un clon superficial se niega por eso
     sello = comprobar_cierre(raiz)
-    comprobar_ciego(raiz, sello)
-    d = Datos(raiz, estricto=True, sello=sello)
+    fijado = sello_fijado(hist)
+    primero = comprobar_ciego(raiz, sello, hist, fijado)
+    comprobar_sello_fijo(raiz, sello, hist, fijado)
+    d = Datos(raiz, estricto=True, sello=sello, mananas=primero)
     if exigir_semillas:
         comprobar_semillas(d.manifiesto)
     res = analizar(d)
@@ -2449,32 +2997,41 @@ def correr_final(raiz=PLAN3, exigir_semillas=True, carpeta=None):
     return res, rutas
 
 
-def correr_prueba_final(lista, raiz=PLAN3, exigir_semillas=True):
-    """Prueba final reservada (§13): una sola vez, con la lista exacta de la enmienda. listo/holdout.ok debe contener
-    el sha256 de la lista. Antes de cerrar el candado se valida TODO: cada CSV en una tanda de uso 'final' con el bloque
-    completo de su tipo de llegadas (11001-11030 regulares, 12001-12100 aleatorias; tabla JSON de §3), la metrica en
-    cada semilla, las mismas semillas y los mismos vehiculos en los dos brazos (§7), y la comparacion misma. El
-    candado listo/holdout.candado se crea en exclusiva (si ya existe, no corre) con el sha256 de la lista, de
-    holdout.ok, de cada CSV leido y de la salida. Lista: {"comparaciones": [{"celda", "escenario", "tanda",
-    "a": {"tipo", "base"?}, "b": {"tipo", "base"?}}]}. Lo que se cite de aqui dice 'elegido despues de ver T1 y T2;
-    una tanda'."""
+def correr_prueba_final(lista, raiz=PLAN3, exigir_semillas=True, hist=None):
+    """Prueba final reservada (§13): una sola vez, con la lista exacta de la enmienda. Antes de cerrar el candado se
+    valida TODO: el sello (comprobar_cierre) y la historia empujada como en --final; el sello de hoy es el del cierre
+    mas la prueba final, commiteado antes de listo/holdout.ok; holdout.ok fijo en su primer commit con el sha256 de la
+    lista commiteada (comprobar_holdout) y la prueba final nunca corrida; cada brazo de la lista, su CSV y su trabajo
+    (clave, ruta y base de la politica); cada CSV en una tanda de uso 'final' con el bloque completo de su tipo de
+    llegadas (11001-11030 regulares, 12001-12100 aleatorias; tabla JSON de §3), la metrica en cada semilla, las mismas
+    semillas y los mismos vehiculos en los dos brazos (§7), la comparacion misma, y los CSV frente a las mananas
+    (comprobar_ciego_final). El candado listo/holdout.candado se crea en exclusiva con el sha256 de la lista, de
+    holdout.ok, de cada CSV leido y de la salida; despues se commitea. Lista: {"comparaciones": [{"celda",
+    "escenario", "tanda", "a": {"tipo", "base"?}, "b": {"tipo", "base"?}}]}. Lo que se cite de aqui dice 'elegido
+    despues de ver T1 y T2; una tanda'."""
     if not os.path.exists(os.path.join(raiz, "listo", "cierre.ok")):
         raise ErrorVeredicto("la prueba final va después del cierre: falta listo/cierre.ok")
-    ok = os.path.join(raiz, "listo", "holdout.ok")
+    ok = os.path.join(raiz, HOLDOUT_OK)
     if not os.path.exists(ok):
         raise ErrorVeredicto("falta listo/holdout.ok (lo crea Fabian con la enmienda, §13)")
-    h_lista = sha256(lista)
-    with open(ok, encoding="utf-8") as f:
-        if h_lista not in f.read():
+    with open(ok, encoding="utf-8-sig") as f:
+        if sha_lista(lista) not in f.read():
             raise ErrorVeredicto("listo/holdout.ok no tiene el sha256 de la lista: no es la lista de la enmienda")
-    candado = os.path.join(raiz, "listo", "holdout.candado")
+    candado = os.path.join(raiz, CANDADO)
     if os.path.exists(candado):
         raise ErrorVeredicto("la prueba final ya corrió (listo/holdout.candado): no corre una segunda vez")
-    d = Datos(raiz)
+    hist = hist or Historia(raiz)               # primero la historia: un clon superficial se niega por eso
+    sello = comprobar_cierre(raiz)
+    fijado = sello_fijado(hist)
+    primero = comprobar_ciego(raiz, sello, hist, fijado)
+    comprobar_sello_fijo(raiz, sello, hist, fijado)
+    c_ok = comprobar_holdout(raiz, lista, hist)
+    comprobar_sellos_final(raiz, sello, hist, c_ok)
+    d = Datos(raiz, estricto=True, sello=sello, mananas=primero)
     bloques = protecciones.tabla_prerregistro()["semillas"]["final"]      # [regulares, aleatorias] (§3)
     bloque = {"regulares": list(range(bloques[0][0], bloques[0][1] + 1)),
               "aleatorias": list(range(bloques[1][0], bloques[1][1] + 1))}
-    filas, leidos = [], {}
+    filas, leidos, finales = [], {}, set()
     for item in leer_json(lista)["comparaciones"]:
         ck = (item["celda"], item["escenario"])
         lleg = (d.celdas[ck]["llegadas"] if ck in d.celdas
@@ -2484,6 +3041,7 @@ def correr_prueba_final(lista, raiz=PLAN3, exigir_semillas=True):
             e = d.todas.get((ck[0], ck[1], x["tipo"], x.get("base"), item["tanda"]))
             if e is None:
                 raise ErrorVeredicto(f"prueba final: no hay CSV de {x} en {ck} ({item['tanda']})")
+            comprobar_brazo_final(d, e, x)
             if exigir_semillas and not es_final(e["tanda"]):
                 raise ErrorVeredicto(f"prueba final: la tanda {e['tanda']} no es de uso 'final' (generar_trabajos3)")
             if exigir_semillas and rango(e["semillas"]) != bloque[lleg]:
@@ -2504,15 +3062,16 @@ def correr_prueba_final(lista, raiz=PLAN3, exigir_semillas=True):
         comp = comparar(va, vb, set(rango(ea["semillas"])))
         if comp is None:
             raise ErrorVeredicto(f"prueba final: sin cambio en {ck} (la media de la referencia es 0)")
+        finales.update({ea["csv"], eb["csv"]})
         filas.append({"celda": ck[0], "escenario": ck[1], "tanda": item["tanda"], "brazo": json.dumps(item["a"]),
                       "referencia": json.dumps(item["b"]), "metrica": METRICA, "n": comp["n"],
                       "cambio": txt(comp["cambio"]), "ic": txt_ic(comp["ic"]), "p": txt_p(comp["p"]),
                       "nota": "elegido después de ver T1 y T2; una tanda (§13)"})
+    comprobar_ciego_final(raiz, sorted(finales), hist, c_ok)
     texto = texto_csv(filas, ["celda", "escenario", "tanda", "brazo", "referencia", "metrica", "n", "cambio", "ic",
                               "p", "nota"])
-    salida = "salidas/veredicto3_prueba_final.csv"
-    registro = {"lista": os.path.basename(lista), "sha256_lista": h_lista, "sha256_holdout_ok": sha256(ok),
-                "csv": leidos, "salida": {salida: hashlib.sha256(texto.encode("utf-8")).hexdigest()}}
+    registro = {"lista": os.path.basename(lista), "sha256_lista": sha_lista(lista), "sha256_holdout_ok": sha256(ok),
+                "csv": leidos, "salida": {SALIDA_FINAL: hashlib.sha256(texto.encode("utf-8")).hexdigest()}}
     real = dentro_de_plan3(candado)
     os.makedirs(os.path.dirname(real), exist_ok=True)
     try:
@@ -2520,8 +3079,24 @@ def correr_prueba_final(lista, raiz=PLAN3, exigir_semillas=True):
             f.write(json.dumps(registro, indent=1) + "\n")
     except FileExistsError:
         raise ErrorVeredicto("la prueba final ya corrió (listo/holdout.candado): no corre una segunda vez")
-    escribir(os.path.join(raiz, salida), texto)
+    escribir(os.path.join(raiz, SALIDA_FINAL), texto)
     return filas
+
+
+def comprobar_brazo_final(d, e, x):
+    """V1-H3: un brazo de la lista de la prueba final y su CSV son los del generador: la ruta y el trabajo de su clave
+    (generar_trabajos3.evaluacion), y con base, la clave <tipo>_s<base> y la politica de esa base."""
+    uso = gt.TANDAS.get(e["tanda"], ("",))[0]
+    clave = e.get("clave", "")
+    ruta = f"{'ciego' if uso in gt.CIEGAS else 'parciales'}/{e['tanda']}/eval_{e['escenario']}__{clave}.csv"
+    if e["csv"] != ruta or e.get("trabajo") != f"ev_{e['tanda']}_{e['escenario']}__{clave}" \
+            or e.get("trabajo") not in d.trabajos:
+        raise ErrorVeredicto(f"prueba final: {e['csv']} no es el CSV ni el trabajo de la clave {clave} en "
+                             f"{e['escenario']} ({e['tanda']})")
+    if x.get("base") is not None:
+        corrida = gt.corrida_de_politica(politica_de(d.trabajos[e["trabajo"]]))
+        if clave != f"{x['tipo']}_s{x['base']}" or corrida is None or corrida[3] != x["base"]:
+            raise ErrorVeredicto(f"prueba final: {e['csv']} no juega la base {x['base']} de {x['tipo']}")
 
 
 # ---------------- Pruebas (--probar) ----------------
@@ -2563,7 +3138,8 @@ DELTA = {"v2loc": 2, "c0": 1, "c0med": 1, "entmed": 1.5, "v2viejamed": 0.5, "v2p
          "v2poiloc": 2, "p3obspoi": 1, "p3reloj2poi": -2, "p3completopoi": "alt", "p3e400poi": -1,
          "p3piso200poi": 0, "p3e400c20poi": -0.5, TIPO_RED: 0.5}
 REF_EFECTO = {"ref_fino": 0, "ref_actuadoaj": 3, "ref_actuado": 5, "ref_fijo": 2, "ref_trivial": 10, "ref_fino5": 1,
-              "ref_franja": -1, "ref_bloques": -1.5, "ref_regla": 20, "ref_mp": 15, "ref_fijo10": 1}
+              "ref_franja": -1, "ref_bloques": -1.5, "ref_regla": 20, "ref_reactiva": -4, "ref_mp": 15,
+              "ref_fijo10": 1}
 NO_CONVERGE = {("dem_corredor_t2715", "p3v2reg", 42), ("poi_red", "p3v2poi", 42)}
 # bases caidas declaradas en el mundo, con su corrida (formato de generar_trabajos3.leer_caidas): las dos nuevas de V2
 # aleatoria en P4 (n sigue siendo 5: 3 de 5 no alcanza). El generador no las evalua (gt.CAIDAS)
@@ -2574,8 +3150,9 @@ CAIDAS_MUNDO = [("P4", "poi_red_alta", "v2poi", b, gt.nombre_corrida("poi_red_al
 QUITAR_MUNDO = {("r905", "ref_fino"), ("r1358", "ref_actuadoaj")}
 # (celda, tipo, tanda) del CSV con un vehiculo de mas en una semilla: numeros aleatorios comunes rotos
 ROTO_MUNDO = ("m2715", "ref_fijo10", "t1r")
-# la regla ganadora de cada familia en el mundo (en la noche, la dice barridos/<esc>/regla.json o mp.json)
-REGLA_MUNDO = {"regla.json": "regla_u3g60", "mp.json": "mp_c60"}
+# la regla ganadora de cada familia en el mundo (en la noche, la dice barridos/<esc>/regla.json, reactiva.json o
+# mp.json)
+REGLA_MUNDO = {"regla.json": "regla_u3g60", "reactiva.json": "reactiva_d35", "mp.json": "mp_c60"}
 NO_INSERTADOS_MUNDO = {("P2", "poi_corredor_alta", "ref_fino", "t1a"): {1: 40, 4: 40, 7: 40}}
 
 
@@ -2759,7 +3336,35 @@ def mundo_sintetico(raiz):
          "intentos": [{"id": f"e2_v2poi_{esc}_s{b}", "error": "pérdida NaN", "fecha": "2026-11-15 03:10"},
                       {"id": f"e2_v2poi_{esc}_s{b}_r2", "error": "pérdida NaN", "fecha": "2026-11-16 02:55"}]}
         for c, esc, tipo, b, corrida in CAIDAS_MUNDO], indent=1) + "\n")
-    # metas y .pt de cada politica que juega o que entra a una mediana (las caidas no estan: el generador no las usa)
+    politicas_mundo(raiz, trabajos)
+    csv_mundo(raiz, manifiesto, trabajos)
+    puente_mundo(raiz, SEMILLAS_PRUEBA["puente"])
+    promocion_mundo(raiz, manifiesto, rango(SEMILLAS_PRUEBA["promo"]))
+    escribir(os.path.join(raiz, "listo", "cierre.ok"), "cierre sintetico\n")
+    # repositorio git anidado y temporal en la rama plan3, con su origin (un repositorio desnudo al lado): dos mananas
+    # de cola/manifiesto_ciego.json, commiteadas y empujadas; despues, el sello y el commit del cierre (con cierre.ok)
+    origen = repo + "_origen.git"
+    carpeta_limpia(origen)
+    git_mundo(origen, "init", "-q", "--bare")
+    git_mundo(repo, "init", "-q")
+    git_mundo(repo, "checkout", "-q", "-b", "plan3")
+    git_mundo(repo, "remote", "add", "origin", origen)
+    for n, filtro in ((1, lambda e: e["tanda"] in ("t1r", "t2r")), (2, lambda e: True)):
+        escribir(os.path.join(raiz, "cola", "manifiesto_ciego.json"),
+                 json.dumps(manifiesto_ciego_de(raiz, manifiesto, filtro), indent=1, sort_keys=True))
+        commit_mundo(raiz, f"manana {n}", "cola/manifiesto_ciego.json")
+    malos = sellar_mundo(raiz, manifiesto)
+    if malos:
+        raise ErrorVeredicto(f"mundo sintetico: manifiesto.revisar_historia encontró problemas: {malos[:3]}")
+    # el commit del cierre: el sello, cierre.ok y los archivos de control (el sello de ese commit es el que vale)
+    commit_mundo(raiz, "cierre", "cola/manifiesto_esperado.json", "cola/trabajos.jsonl", "cola/caidas.json",
+                 "cola/manifiesto_cierre.json", "listo/cierre.ok")
+    return manifiesto, info
+
+
+def politicas_mundo(raiz, trabajos):
+    """Metas y .pt sinteticos de cada politica que juega o que entra a una mediana de los trabajos (las caidas no
+    estan: el generador no las usa), y la version evaluada de cada mediana (base_mediana_n de sus candidatas)."""
     rutas, medianas_pub = set(), []
     for t in trabajos:
         partes_t = partes_de(t)
@@ -2792,9 +3397,16 @@ def mundo_sintetico(raiz):
                                 for r, m in metas.items()])
         escribir(os.path.join(raiz, salida[:-3] + ".json"), json.dumps(meta) + "\n")
         escribir(os.path.join(raiz, salida), f"politica sintetica {salida} (copia de la base {b})\n")
-    # CSV de cada entrada del manifiesto, con el brazo que escribiria evaluar3 para su trabajo
+
+
+def csv_mundo(raiz, manifiesto, trabajos, filtro=None, anomalias=True):
+    """El CSV de cada entrada del manifiesto (las que pasan filtro), con el brazo que escribiria evaluar3 para su
+    trabajo y las semillas de la entrada. anomalias: el vehiculo de mas de ROTO_MUNDO y los no insertados de
+    NO_INSERTADOS_MUNDO."""
     trab = {t["id"]: t for t in trabajos}
     for e in manifiesto:
+        if filtro is not None and not filtro(e):
+            continue
         lleg = LLEGADAS.get(e["tanda"]) or ("aleatorias" if e["escenario"].startswith("poi_") else "regulares")
         t = trab[e["trabajo"]]
         pol = politica_de(t)
@@ -2803,23 +3415,30 @@ def mundo_sintetico(raiz):
             brazo = REGLA_MUNDO[os.path.basename(opcion_de(t, "--regla-de"))]
         if not brazo:
             raise ErrorVeredicto(f"mundo sintetico: no se sabe qué brazo escribe {e['trabajo']}")
-        roto = 3 if (e["celda"], e["tipo"], e["tanda"]) == ROTO_MUNDO else None
-        no_ins = NO_INSERTADOS_MUNDO.get((e["celda"], e["escenario"], e["tipo"], e["tanda"]))
+        roto = 3 if anomalias and (e["celda"], e["tipo"], e["tanda"]) == ROTO_MUNDO else None
+        no_ins = NO_INSERTADOS_MUNDO.get((e["celda"], e["escenario"], e["tipo"], e["tanda"])) if anomalias else None
         csv_sintetico(os.path.join(raiz, e["csv"]), e, lleg, brazo, roto=roto, no_ins=no_ins)
-    # puente: CSV entregados del fijo y de IPPO entregado (version evaluada: base 42) e insumos/manifiesto.json
+
+
+def puente_mundo(raiz, semillas):
+    """Puente: CSV entregados del fijo y de IPPO entregado (version evaluada: base 42), en las semillas dadas (las de
+    la tanda puente del manifiesto), e insumos/manifiesto.json."""
     for c, esc in gt.CASOS.items():
-        e = {"celda": c, "escenario": esc, "tanda": "puente", "semillas": SEMILLAS_PRUEBA["puente"], "base": 42}
+        e = {"celda": c, "escenario": esc, "tanda": "puente", "semillas": semillas, "base": 42}
         for nombre_csv, tipo in (("fijo", "ref_fijo"), ("ippo_vecinos_s42", "entmed")):
             csv_sintetico(os.path.join(raiz, "insumos", "puente", f"eval_{esc}_{nombre_csv}.csv"),
                           dict(e, tipo=tipo), "regulares", nombre_csv)
     escribir(os.path.join(raiz, "insumos", "manifiesto.json"), json.dumps({
         g: {os.path.basename(p): [os.path.getsize(p), sha256(p)] for p in glob.glob(os.path.join(raiz, g, "*"))}
         for g in ("insumos/entregado", "insumos/puente")}, indent=0) + "\n")
-    # promocion con p3_promocion (decidir y juntar), con las semillas de humo del mundo; D queda sin decision
+
+
+def promocion_mundo(raiz, manifiesto, semillas):
+    """Promocion con p3_promocion (decidir y juntar), con las semillas dadas; D queda sin decision."""
     import contextlib
     import p3_promocion
     viejas = p3_promocion.SEMILLAS
-    p3_promocion.SEMILLAS = rango(SEMILLAS_PRUEBA["promo"])
+    p3_promocion.SEMILLAS = semillas
     try:
         por_esc, salidas = {}, []
         for e in manifiesto:
@@ -2839,22 +3458,21 @@ def mundo_sintetico(raiz):
                                                    salida=os.path.join(raiz, "promocion.json")))
     finally:
         p3_promocion.SEMILLAS = viejas
-    escribir(os.path.join(raiz, "listo", "cierre.ok"), "cierre sintetico\n")
-    # dos mananas de cola/manifiesto_ciego.json, commiteadas en un repositorio git anidado y temporal; despues, el sello
-    rc, out = protecciones.git("init", "-q", cwd=repo)
+
+
+def git_mundo(cwd, *args):
+    """git en el repositorio del mundo sintetico; ERROR si falla."""
+    rc, out, err = git_bytes(*args, cwd=cwd)
     if rc != 0:
-        raise ErrorVeredicto(f"mundo sintetico: git init: {out}")
-    for n, filtro in ((1, lambda e: e["tanda"] in ("t1r", "t2r")), (2, lambda e: True)):
-        escribir(os.path.join(raiz, "cola", "manifiesto_ciego.json"),
-                 json.dumps(manifiesto_ciego_de(raiz, manifiesto, filtro), indent=1, sort_keys=True))
-        for args in (("add", "cola/manifiesto_ciego.json"), ("commit", "-q", "-m", f"manana {n}")):
-            rc, out = protecciones.git(*args, cwd=raiz)
-            if rc != 0:
-                raise ErrorVeredicto(f"mundo sintetico: git {args}: {out}")
-    malos = sellar_mundo(raiz, manifiesto)
-    if malos:
-        raise ErrorVeredicto(f"mundo sintetico: manifiesto.revisar_historia encontró problemas: {malos[:3]}")
-    return manifiesto, info
+        raise ErrorVeredicto(f"mundo sintetico: git {' '.join(args[:2])}: {err.strip()[:200]}")
+    return out.decode("utf-8", "replace")
+
+
+def commit_mundo(raiz, mensaje, *rels):
+    """Commit de rels (relativos a raiz) en el repositorio del mundo y push de la rama plan3 a su origin."""
+    git_mundo(raiz, "add", "-f", "--", *rels)
+    git_mundo(raiz, "commit", "-q", "-m", mensaje)
+    git_mundo(raiz, "push", "-q", "origin", "plan3")
 
 
 def probar():
@@ -3194,6 +3812,148 @@ def probar():
                      "politica_x_vecinos_p3v2vieja_s42.json")
         ok(rechazos == 2, "N17 una base de plan3 elegida con timeLoss o con 8 semillas es ERROR (§6); lo entregado y "
                           "p3_elegir regla no")
+        ok(k_plantilla("corredor") == 1 and k_plantilla("poi_corredor") == 1 and k_plantilla("red") == 0
+           and k_plantilla("malla3_alta") == 0 and k_plantilla("dem_red_t905") == 1 and k_plantilla("no_existe") is None
+           and corre_por_rl_ippo({"cmd": "python evaluar3.py --politica politica_x_vecinos_p3v2reg_s42.pt"}) is True
+           and corre_por_rl_ippo({"cmd": "python evaluar3.py --regla-de barridos/x/reactiva.json"}) is True
+           and corre_por_rl_ippo({"cmd": "python evaluar3.py --brazo fijo --programa x_r10f.add.xml --nombre fino"})
+           is False and corre_por_rl_ippo({"cmd": "python evaluar3.py --brazo fijo --regla regla_u3g60"}) is False
+           and corre_por_rl_ippo({"cmd": "python evaluar3.py --escenario x"}) is None,
+           "N18 k por plantilla (semáforos que arrancan fuera de su primer verde, de las plantillas de plan3: corredor "
+           "1, red 0, malla3_alta 0, dem_red_t905 1) y por dónde corre cada brazo, en el orden de evaluar3.armar_brazo "
+           "(política y regla por rl_ippo; --brazo por rl_corredor, aunque traiga --regla)")
+        # una plantilla a la que le falta un archivo: k None; y lo que se verifica de sus archivos en --final
+        tmp_k = carpeta_limpia(os.path.join(TMP_VER, "plantilla"))
+        for f in ("corredor.sumocfg", "corredor.add.xml"):          # sin corredor.net.xml
+            escribir(os.path.join(tmp_k, f), open(os.path.join(PLAN3, f), encoding="utf-8").read())
+        punto = leer_json(os.path.join(PLAN3, "insumos", "manifiesto.json")).get(".", {})
+        otro_sha = {**punto, "corredor.add.xml": [0, "0" * 64]}
+        quieto = lambda rel: False                                                  # noqa: E731
+        ok(k_plantilla("corredor", tmp_k) is None and plantilla("corredor", tmp_k)[1][1] == "corredor.net.xml"
+           and verificar_plantilla("poi_corredor", punto, quieto) == []
+           and verificar_plantilla("poi_corredor", otro_sha, quieto) == [
+               "corredor.add.xml no es el de insumos/manifiesto.json"]
+           and verificar_plantilla("poi_corredor", punto, lambda rel: rel == "poi_corredor.sumocfg") == [
+               f"poi_corredor.sumocfg cambió desde {TAG_PRERREGISTRO}"]
+           and verificar_plantilla("poi_corredor", punto, lambda rel: None) == [
+               f"no se pudo comprobar {a} contra {TAG_PRERREGISTRO}"
+               for a in ("poi_corredor.sumocfg", "corredor.net.xml", "corredor.add.xml")],
+           "N19 una plantilla a la que le falta un archivo que nombra su .sumocfg da k None; en --final cada archivo "
+           "que lee k se coteja con git desde el tag de la parte A y, si está ahí, con insumos/manifiesto.json[\".\"] "
+           "del tag")
+        # cola/caidas.json: las mismas reglas en generar_trabajos3.leer_caidas y en veredicto3.caidas_de_texto
+        base_c = {"celda": "P1", "escenario": "corredor", "tipo": "v2reg", "base": 42, "fecha": "2026-11-16",
+                  "intentos": [{"id": "a", "error": "NaN"}, {"id": "b", "error": "NaN"}]}
+        malas = {"mixa_": dict(base_c, celda="mixa1", escenario="mixa_corredor", tipo="v2mix"),
+                 "re-elección": dict(base_c, tipo="p3piso200reg"), "C0": dict(base_c, tipo="c0"),
+                 "corrida": dict(base_c, corrida="corredor_ippo_vecinos_p3v2reg_s2042"),
+                 "un intento": dict(base_c, intentos=base_c["intentos"][:1]),
+                 "p3c0": dict(base_c, tipo="p3c0"), "escenario": dict(base_c, escenario="corredr"),
+                 "celda": dict(base_c, celda="P2")}
+        iguales, motivos = 0, {}
+        for clave_m, c in malas.items():
+            ruta_c = escribir(os.path.join(tmp_k, f"caidas_{len(motivos)}.json"), json.dumps([c]))
+            try:
+                gt.leer_caidas(ruta_c)
+                m_gt = None
+            except ValueError as ex:
+                m_gt = str(ex)
+            try:
+                caidas_de_texto(json.dumps([c]))
+                m_v3 = None
+            except ErrorVeredicto as ex:
+                m_v3 = str(ex)
+            motivos[clave_m] = m_gt
+            iguales += (m_gt is not None and m_v3 is not None
+                        and m_v3.split(": ", 1)[1] == m_gt.split(": ", 1)[1])
+        bien_c = (gt.validar_caida(dict(base_c, tipo="p3e400")) == "corredor_ippo_vecinos_p3e400_s42"
+                  and gt.validar_caida(dict(base_c, corrida="corredor_ippo_vecinos_p3v2reg_s42"))
+                  == "corredor_ippo_vecinos_p3v2reg_s42")
+        ok(iguales == len(malas) and bien_c and "mix_corredor / mix_red" in motivos["mixa_"]
+           and "no es un entrenamiento" in motivos["re-elección"] and "no es un entrenamiento" in motivos["C0"]
+           and "no es la de" in motivos["corrida"] and "no es un entrenamiento" in motivos["p3c0"]
+           and "no es un entrenamiento" in motivos["escenario"] and "la celda de corredor es P1" in motivos["celda"],
+           "N20 cola/caidas.json con las mismas reglas en el generador y en veredicto3: ERROR con mixa_ (se declara "
+           "con el escenario de la política), con una re-elección, C0 (c0 o p3c0) o un escenario que no existe (no son "
+           "entrenamientos del plan: sale del código del generador), con otra celda, con una corrida que no es la de "
+           "su escenario, tipo y base, o con un solo intento; p3e400 sí se declara (es un entrenamiento)")
+        # el camino de una corrida rehecha por un error de codigo (§14, sufijo r2): con el entrenamiento rehecho en el
+        # plan (como lo pondria la enmienda), la declaracion sin corrida va a la rehecha y lo que sale de ella cae
+        r2 = "corredor_ippo_vecinos_p3v2regr2_s42"
+        ok_r2 = False
+        try:
+            gt.validar_caida(dict(base_c, corrida=r2))
+        except ValueError as ex:
+            ok_r2 = "no es un entrenamiento del plan" in str(ex)
+        entrenos = gt.entrenamientos_del_plan()
+        entrenos.add(r2)
+        try:
+            caidas_r2, corridas_r2 = caidas_de_texto(json.dumps([base_c]))
+            ok_r2 = (ok_r2 and gt.validar_caida(dict(base_c, corrida=r2)) == r2 and set(corridas_r2) == {r2}
+                     and gt.caida("corredor", "vecinos", "p3e400r2", 42, caidas={r2})
+                     and not gt.caida("corredor", "vecinos", "p3e400", 42, caidas={r2})
+                     and declaracion_caida({}, corridas_r2, ("P1", "corredor"), "p3piso200reg", 42,
+                                           "politica_corredor_vecinos_p3piso200regr2_s42.pt") is not None
+                     and declaracion_caida({}, corridas_r2, ("P1", "corredor"), "v2reg", 42,
+                                           "politica_corredor_vecinos_p3v2reg_s42.pt") is None)
+        finally:
+            entrenos.discard(r2)
+        ok(ok_r2, "N21 una corrida rehecha (§14, r2): sin el entrenamiento rehecho en el plan, ERROR; con él, la "
+                  "declaración (con o sin corrida) va a la rehecha, y caen ella y lo que sale de ella (p3e400r2, "
+                  "p3piso200regr2), no la original")
+        # cambio_desde_tag frente a un repositorio de prueba: el mismo, cambiado, sin seguimiento, fuera del tag
+        repo_t = carpeta_limpia(os.path.join(TMP_VER, "tag"))
+        os.makedirs(os.path.join(repo_t, "plan3"))
+        for f, texto_f in (("a.sumocfg", "<a/>\n"), ("b.sumocfg", "<b/>\n")):
+            escribir(os.path.join(repo_t, "plan3", f), texto_f)
+        for args in (("init", "-q"), ("add", "plan3/a.sumocfg", "plan3/b.sumocfg"), ("commit", "-q", "-m", "t"),
+                     ("tag", "t")):
+            git_mundo(repo_t, *args)
+        escribir(os.path.join(repo_t, "plan3", "b.sumocfg"), "<b x='1'/>\n")
+        escribir(os.path.join(repo_t, "plan3", "c.sumocfg"), "<c/>\n")
+        p3_t = os.path.join(repo_t, "plan3")
+        res_t = [cambio_desde_tag(f, cwd=p3_t, tag="t") for f in ("a.sumocfg", "b.sumocfg", "c.sumocfg", "d.sumocfg")]
+        git_mundo(repo_t, "add", "plan3/c.sumocfg")
+        res_t.append(cambio_desde_tag("c.sumocfg", cwd=p3_t, tag="t"))
+        ok(res_t == [False, True, None, None, None],
+           f"N22 cambio_desde_tag: el mismo archivo, False; cambiado, True; sin seguimiento, que no existe o que no "
+           f"está en el tag, None (no se pudo comprobar) {res_t}")
+        # un JSON con BOM se lee; uno invalido es ERROR con su nombre (tambien en el generador)
+        con_bom = "\ufeff" + json.dumps([base_c])
+        ruta_bom = escribir(os.path.join(tmp_k, "caidas_bom.json"), con_bom)
+        ruta_mal = escribir(os.path.join(tmp_k, "caidas_mal.json"), "[{")
+        mensajes = []
+        for f in (lambda: caidas_de_texto("[{"), lambda: leer_json(ruta_mal)):
+            try:
+                f()
+            except ErrorVeredicto as ex:
+                mensajes.append(str(ex))
+        try:
+            gt.leer_caidas(ruta_mal)
+        except ValueError as ex:
+            mensajes.append(str(ex))
+        ok(len(caidas_de_texto(con_bom)[1]) == 1 and len(gt.leer_caidas(ruta_bom)) == 1 and len(mensajes) == 3
+           and mensajes[0].startswith("cola/caidas.json: no es un JSON válido") and "caidas_mal.json" in mensajes[1]
+           and "caidas_mal.json" in mensajes[2],
+           "N23 un JSON con BOM se lee (caidas.json en veredicto3 y en el generador); uno inválido es ERROR que nombra "
+           "el archivo, no un traceback")
+        lf = escribir(os.path.join(tmp_k, "lista_lf.json"), '{"comparaciones": []}\n')
+        crlf = escribir(os.path.join(tmp_k, "lista_crlf.json"), '{"comparaciones": []}\r\n')
+        ok(sha_lista(lf) == sha_lista(crlf) == hashlib.sha256(b'{"comparaciones": []}\n').hexdigest(),
+           "N24 el sha256 de la lista de la prueba final no depende de los fines de línea (--sha-lista)")
+        # una familia a la que se le cayeron todas las bases: el generador no publica su version ni la evalua
+        viejas = gt.CAIDAS
+        try:
+            gt.CAIDAS = {gt.nombre_corrida("poi_red", "vecinos", "p3v2poi", b) for b in BASES5}
+            trabajos_t, man_t = gt.generar_con_manifiesto(gt.PARTES_PLAN)
+        finally:
+            gt.CAIDAS = viejas
+        ids_t = {x["id"] for x in trabajos_t}
+        ok("el_p3v2poimed_poi_red" not in ids_t and "promo_decidir_poi_red" not in ids_t
+           and not any(x["escenario"] == "poi_red" and x["tipo"] in ("v2poi", "v2poi3med") for x in man_t)
+           and not any("politica_poi_red_vecinos_p3v2poimed.pt" in x["cmd"] for x in trabajos_t),
+           "N25 si caen todas las bases de una familia, el generador no publica su versión evaluada ni la evalúa (y "
+           "esa celda queda sin decisión de promoción)")
 
     # ===== 3. Mundo sintetico de punta a punta =====
     raiz = os.path.join(TMP_VER, "mundo", "plan3")          # su repositorio git: tmp_ver/mundo (como el worktree)
@@ -3246,8 +4006,8 @@ def probar():
                    for e in manifiesto)
            and set(sello["csv"]) == {e["csv"] for e in manifiesto} and sello["manifiesto_ciego_commit"]
            and all(pt in sello["metas"] for pt in mf.politicas_evaluadas(manifiesto, raiz))
-           and {"cola/manifiesto_esperado.json", "cola/trabajos.jsonl", "cola/caidas.json", "promocion.json"}
-           <= set(sello["otros"]),
+           and {"cola/manifiesto_esperado.json", "cola/trabajos.jsonl", "cola/caidas.json", "promocion.json",
+                "insumos/manifiesto.json"} <= set(sello["otros"]),
            "M00b el generador no evalúa las bases caídas (gt.CAIDAS) y el sello es el de manifiesto.py (CSV, cada "
            ".pt y .json, otros y el commit de la última mañana)")
         # --- negativas de --final (antes de analizar) ---
@@ -3311,7 +4071,7 @@ def probar():
                                    else c for c in json.loads(caidas)])
         con_cambio("cola/caidas.json", otra_corrida, lambda: negarse(
             "M04j2 cola/caidas.json con una corrida que no es la de su base: ERROR", lambda: Datos(raiz),
-            "no es una corrida"))
+            "no es la de"))
         fecha_arriba = json.dumps([dict(c, intentos=[{k: v for k, v in i.items() if k != "fecha"}
                                                      for i in c["intentos"]]) for c in json.loads(caidas)])
         con_cambio("cola/caidas.json", fecha_arriba, lambda: ok(
@@ -3347,6 +4107,14 @@ def probar():
             "M04p la regla simple con el nombre de un Max-Pressure: ERROR (la forma de la regla de su trabajo)",
             lambda: Datos(raiz).serie(("P1", "corredor"), ("ref", "ref_regla"), "T1"),
             "su trabajo escribe un nombre de la forma regla_u<U>g<G>"))
+        rel_r = "ciego/t1r/eval_corredor__reactiva.csv"
+        texto_r = open(os.path.join(raiz, rel_r), encoding="utf-8").read()
+        for otra_r, que_r in (("regla_u3g60", "una regla simple"), ("reactiva_d99", "una D que no está en REACTIVAS"),
+                              ("reactiva_x", "otra forma")):
+            con_cambio(rel_r, texto_r.replace(REGLA_MUNDO["reactiva.json"], otra_r), lambda: negarse(
+                f"M04p2 la regla reactiva con el nombre de {que_r} ({otra_r}): ERROR (reactiva_d<D> de su trabajo)",
+                lambda: Datos(raiz).serie(("P1", "corredor"), ("ref", "ref_reactiva"), "T1"),
+                "su trabajo escribe un nombre de la forma reactiva_d<D>"))
         con_cambio("cola/trabajos.jsonl", None, lambda: negarse(
             "M04n en --final, sin cola/trabajos.jsonl: ERROR", lambda: Datos(raiz, estricto=True), "trabajos.jsonl"))
         # el manifiesto todavia lista el CSV de una base (generado antes de declararla caida): sin CSV y sin sellar
@@ -3373,6 +4141,33 @@ def probar():
         con_entrada(99, lambda: negarse(
             "M04r ... y sí el de una base que no está declarada caída: se niega", lambda: comprobar_cierre(raiz),
             "sin sellar"))
+        rel_14 = "ciego/t1a/eval_poi_red_alta__v2poi_s14042.csv"
+        texto_42 = open(os.path.join(raiz, "ciego", "t1a", "eval_poi_red_alta__v2poi_s42.csv"), encoding="utf-8").read()
+        con_entrada(14042, lambda: con_cambio(rel_14, texto_42, lambda: negarse(
+            "M04v una base declarada caída que tiene CSV en disco: ERROR", lambda: Datos(raiz),
+            "tiene CSV (en disco)")))
+        con_entrada(14042, lambda: negarse(
+            "M04w ... o que está en un manifiesto de la mañana: ERROR", lambda: Datos(raiz, mananas={rel_14}),
+            "en un manifiesto de la mañana"))
+        # vale el primer sello commiteado (C1): otro sello con un meta distinto, o con un manifiesto que suma algo que
+        # no es la prueba final, se niega
+        texto_sello = open(os.path.join(raiz, "cola", "manifiesto_cierre.json"), encoding="utf-8").read()
+
+        def resellado_con(man_r, prueba_r, contiene):
+            def dentro():
+                sellar_mundo(raiz, man_r)
+                negarse(prueba_r, lambda: comprobar_sello_fijo(raiz, leer_json(os.path.join(raiz, "cola",
+                                                                                            "manifiesto_cierre.json"))),
+                        contiene)
+            con_cambio("cola/manifiesto_cierre.json", texto_sello, dentro)
+        con_cambio(rel_meta, texto_meta.replace('"val_elegido": 28.0', '"val_elegido": 35.0'), lambda: resellado_con(
+            manifiesto, "M04s un sello nuevo con un meta distinto del primer sello commiteado: se niega",
+            "las políticas o sus metas no son las del primer sello"))
+        extra_u = dict(man[0], csv="parciales/puente/eval_corredor__extra.csv", tanda="puente", clave="extra")
+        con_cambio("cola/manifiesto_esperado.json", json.dumps(man + [extra_u]), lambda: con_cambio(
+            extra_u["csv"], open(os.path.join(raiz, man[0]["csv"]), encoding="utf-8").read(), lambda: resellado_con(
+                man + [extra_u], "M04u un sello nuevo cuyo manifiesto suma algo que no es la prueba final: se niega",
+                "más entradas de la prueba final")))
         # --- la corrida final ---
         res, rutas = correr_final(raiz, exigir_semillas=False)
         ok(all(os.path.exists(r) for r in rutas) and len(rutas) == 6,
@@ -3395,9 +4190,9 @@ def probar():
         por_esc = {f["escenario"]: f for f in res["celdas"]}
         estoc = {esc: por_esc[esc]["etiqueta_v2_citable"] for _, esc, _ in ESTOCASTICAS}
         ok(all(v == "FUNCIONA" for v in estoc.values()) and len(estoc) == 6
-           and por_esc["mixa_corredor"]["celda"] == "mix1",
-           f"M06b perfil, mezcla y arranque lento (las celdas del generador, por escenario; mixa_ con la celda de la "
-           f"mezcla): {estoc}")
+           and por_esc["mixa_corredor"]["celda"] == "mixa1" and por_esc["mixa_red"]["celda"] == "mixa3",
+           f"M06b perfil, mezcla y arranque lento (las celdas del generador: per1, per3, mix1, mix3, mixa1 y mixa3): "
+           f"{estoc}")
         f = cel[("D", "regulares")]
         ok(f["etiqueta_v2_citable"] == "MEJORA" and palabra(f["etiqueta_citable"]) == "PENDIENTE"
            and "promoción" in f["etiqueta_citable"],
@@ -3540,6 +4335,80 @@ def probar():
         d.estricto = True
         negarse("M28i en --final, una celda sin modelo principal: ERROR", lambda: fila_celda(d, ("zz", "poi_zz")),
                 "no tiene modelo principal")
+        h0_reac = [r for r in res["hipotesis"] if r["id"] == "H0" and r["a"] == nombre("ref_reactiva")]
+        h0_resumen = [r["lectura"] for r in h0_reac if r["prueba"] == "resumen (descriptiva)"]
+        h0_alguno = [r for r in res["hipotesis"] if r["id"] == "H0" and r["a"] == "algún control"]
+        ok("No le gana a la regla reactiva" in cel[("P3", "regulares")]["lecturas"]
+           and "regla reactiva" not in cel[("P1", "regulares")]["lecturas"] and len(h0_reac) == 7
+           and h0_resumen == ["MEJORA o FUNCIONA en 6 de 6 casos"] and len(h0_alguno) == 1
+           and h0_alguno[0]["nota"].count("regla reactiva") == 6,
+           f"M28j regla reactiva al lado (§5, §11): en P3 regular V2 no le gana y la celda lleva la lectura de la "
+           f"regla; en P1 el citado le gana; H0 la cuenta entre los controles que reaccionan (6 casos y su resumen: "
+           f"{h0_resumen[0] if h0_resumen else '-'}; y en el detalle de 'algún control')")
+        # hallazgo 10: los cambios de fase de los brazos de rl_ippo, menos k de su plantilla
+        d = Datos(raiz)
+
+        def crudo(rel):
+            with open(os.path.join(raiz, rel), newline="", encoding="utf-8") as f:
+                return {int(r["semilla"]): float(r["cambios_fase"]) for r in csv.DictReader(f)}
+        casos_k = [(("P1", "corredor"), ("base", "v2reg", 42), "ciego/t1r/eval_corredor__v2reg_s42.csv", 1),
+                   (("P1", "corredor"), ("ref", "ref_regla"), "ciego/t1r/eval_corredor__regla.csv", 1),
+                   (("P1", "corredor"), ("ref", REF_FINO), "ciego/t1r/eval_corredor__fino.csv", 0),
+                   (("P3", "red"), ("base", "v2reg", 42), "ciego/t1r/eval_red__v2reg_s42.csv", 0)]
+        bien = all(d.serie(ck, brazo, "T1", "cambios_fase")[0] == {s: v - k for s, v in crudo(rel).items()}
+                   for ck, brazo, rel, k in casos_k)
+        filas_c = [f for f in res["comparaciones"] if (f["celda"], f["escenario"], f["metrica"])
+                   == ("P1", "corredor", "cambios_fase")]
+        ok(bien and len(filas_c) == 2 and all("k = 1" in f["nota"] for f in filas_c),
+           "M37 cambios de fase (hallazgo 10): a los brazos de rl_ippo (V2, regla) se les resta k de su plantilla "
+           "(P1: 1; P3: 0) y a los de rl_corredor (fijo fino) no; la fila de comparaciones lo dice")
+        por_ck_f = {(f["celda"], f["escenario"]): f for f in res["celdas"]}
+        filas_k = [f for f in res["comparaciones"] if f["metrica"] == "cambios_fase"]
+        fallos_k = []
+        for fila_c in filas_k:
+            ck_f = (fila_c["celda"], fila_c["escenario"])
+            cit_f = por_ck_f[ck_f]["_brazo_citado"]
+            m_k = re.search(r"k = (\d+)", fila_c["nota"])
+            restado = d.serie(ck_f, cit_f, fila_c["tanda"], "cambios_fase")[0]
+            crudo_k = {}
+            for tf in FISICAS[d.celdas[ck_f]["llegadas"]][fila_c["tanda"]]:
+                crudo_k.update(crudo(d.entrada(ck_f, cit_f, tf)[0]["csv"]))
+            if (not m_k or "SIN VERIFICAR" in fila_c["nota"]
+                    or restado != {s: v - int(m_k.group(1)) for s, v in crudo_k.items()}):
+                fallos_k.append((ck_f, fila_c["tanda"], m_k and m_k.group(1)))
+        ok(len(filas_k) > 40 and not fallos_k,
+           f"M37b en cada fila de cambios de fase ({len(filas_k)}) lo que se le resta al modelo citado, semilla por "
+           f"semilla frente a su CSV, es el k de la nota, y ninguna va marcada sin verificar {fallos_k[:2]}")
+        d_m = Datos(raiz, estricto=True, sello=leer_json(os.path.join(raiz, "cola", "manifiesto_cierre.json")))
+        d_m._plantillas["corredor"] = ["corredor.add.xml no es el de insumos/manifiesto.json"]   # como si cambiara
+        filas_m = [f for f in comparaciones(d_m, res["celdas"])
+                   if (f["celda"], f["escenario"], f["metrica"]) == ("P1", "corredor", "cambios_fase")]
+        ok(len(filas_m) == 2 and all("k SIN VERIFICAR: corredor.add.xml" in f["nota"] for f in filas_m)
+           and not any("sin verificar" in a for a in res["avisos"]),
+           "M38 en --final, si un archivo de la plantilla no es el de insumos/manifiesto.json (o un .sumocfg derivado "
+           "cambió desde el tag), la fila de cambios de fase va marcada 'k SIN VERIFICAR'; en el mundo, ninguna")
+        # el aviso se agrega una vez por escenario y llega al .md (con la verificacion real, no la cache)
+        global verificar_plantilla
+        verdadera = verificar_plantilla
+        try:
+            verificar_plantilla = (lambda esc, punto, cambiado=None: ["corredor.add.xml cambió desde el tag"]
+                                   if esc == "corredor" else [])
+            d_a = Datos(raiz, estricto=True, sello=leer_json(os.path.join(raiz, "cola", "manifiesto_cierre.json")))
+            d_a.plantilla_sin_verificar("corredor")
+            d_a.plantilla_sin_verificar("corredor")
+            d_a.plantilla_sin_verificar("red")
+        finally:
+            verificar_plantilla = verdadera
+        avisos_k = [a for a in d_a.avisos if "sin verificar" in a]
+        md_k = texto_md(dict(res, avisos=list(d_a.avisos)))
+        # los dos motivos de k_cambios: sin trabajo (no se sabe por donde corre) y sin plantilla
+        e_sin = dict(d.entrada(("P1", "corredor"), ("ref", REF_FINO), "t1r")[0], trabajo="no_existe")
+        e_poi = dict(d.entrada(("P1", "corredor"), ("base", "v2reg", 42), "t1r")[0], escenario="sin_plantilla")
+        ok(len(avisos_k) == 1 and avisos_k[0].startswith("corredor: k de su plantilla sin verificar")
+           and avisos_k[0] in md_k and "no se sabe por qué código corre" in d.k_cambios(e_sin)[1]
+           and "falta la plantilla de sin_plantilla" in d.k_cambios(e_poi)[1],
+           "M38b el aviso 'k sin verificar' sale una vez por escenario y llega al .md; k_cambios dice aparte que no se "
+           "sabe por dónde corre el brazo y que falta la plantilla")
         escribir(os.path.join(SALIDA_PRUEBAS, "ejemplo_veredicto3.md"),
                  texto_md(res, " — EJEMPLO CON DATOS SINTÉTICOS (veredicto3.py --probar), no son resultados"))
         # version publicada inconsistente con la mediana -> ERROR
@@ -3561,36 +4430,61 @@ def probar():
             lambda: Datos(raiz).citado(("P2", "corredor_alta"), "v2reg"), "sha256"))
         # --- prueba final: tanda de uso 'final' (simulada con humo), todo validado antes del candado exclusivo ---
         gt.TANDAS["f1r"] = ("final", SEMILLAS_PRUEBA["t1r"])
+
+        def manana(nombre_m, filtro, man):
+            escribir(os.path.join(raiz, "cola", "manifiesto_ciego.json"),
+                     json.dumps(manifiesto_ciego_de(raiz, man, filtro), indent=1, sort_keys=True))
+            commit_mundo(raiz, nombre_m, "cola/manifiesto_ciego.json")
         try:
-            extra = []
+            # la enmienda como la escribiria el generador: los mismos brazos de t1r en la tanda final, con sus
+            # trabajos (uso 'final') y sus CSV (gt.evaluacion)
+            texto_trab = open(os.path.join(raiz, "cola", "trabajos.jsonl"), encoding="utf-8").read()
+            por_id = {json.loads(x)["id"]: json.loads(x) for x in texto_trab.splitlines() if x.strip()}
+            lista_f = gt.Lista()
             for e in manifiesto:
                 if e["celda"] == "P1" and e["escenario"] == "corredor" and e["tanda"] == "t1r" and (
-                        (e["tipo"], e["base"]) in (("v2reg", 42), ("ref_fino", ""))):
-                    f_ = dict(e, tanda="f1r", csv=e["csv"].replace("/t1r/", "/f1r/"))
-                    escribir(os.path.join(raiz, f_["csv"]), open(os.path.join(raiz, e["csv"]),
-                                                                 encoding="utf-8").read())
-                    extra.append(f_)
+                        (e["tipo"], e["base"]) in (("v2reg", 42), ("ref_fino", ""), ("ref_fijo", ""))):
+                    brazo_f = por_id[e["trabajo"]]["cmd"].split(f"--salida {e['csv']} ", 1)[1]
+                    gt.evaluacion(lista_f, e["celda"], e["escenario"], "f1r", e["clave"], brazo_f, tipo=e["tipo"],
+                                  base=e["base"])
+                    escribir(os.path.join(raiz, lista_f.manifiesto[-1]["csv"]),
+                             open(os.path.join(raiz, e["csv"]), encoding="utf-8").read())
+            extra = lista_f.manifiesto
+            escribir(os.path.join(raiz, "cola", "trabajos.jsonl"),
+                     texto_trab + "".join(json.dumps(x) + "\n" for x in lista_f.trabajos))
             escribir(os.path.join(raiz, "cola", "manifiesto_esperado.json"), json.dumps(manifiesto + extra, indent=0))
-            sellar_mundo(raiz, manifiesto + extra)          # mf.sello sella tambien los CSV de la prueba final
+            malos_f = sellar_mundo(raiz, manifiesto + extra)    # mf.sello y revisar_historia saltan la prueba final
             d = Datos(raiz)
-            ok(any("tanda f1r" in a and "prueba final" in a for a in d.avisos),
-               "M32 los CSV de una tanda de uso 'final' no entran al veredicto (una línea de aviso)")
-            comprobar_cierre(raiz)
             sello_f = leer_json(os.path.join(raiz, "cola", "manifiesto_cierre.json"))
-            sin_finales = dict(sello_f, csv={k: v for k, v in sello_f["csv"].items() if "/f1r/" not in k})
-            con_cambio("cola/manifiesto_cierre.json", json.dumps(sin_finales), lambda: comprobar_cierre(raiz))
-            ok(sum("/f1r/" in k for k in sello_f["csv"]) == 2,
-               "M32b comprobar_cierre acepta el sello con y sin los CSV de la prueba final (uso 'final'; mf.sello los "
-               "sella si ya están al cierre)")
+            ok(any("tanda f1r" in a and "prueba final" in a for a in d.avisos) and not malos_f
+               and not any("/f1r/" in k for k in sello_f["csv"]),
+               "M32 la enmienda de la prueba final: sus CSV no entran al veredicto (una línea de aviso), el sello "
+               "nuevo sale sin problemas y no los sella")
+            comprobar_cierre(raiz)
+            comprobar_sello_fijo(raiz, sello_f)
+            ok(True, "M32c el sello nuevo solo le agrega la prueba final al del cierre (el manifiesto suma entradas "
+                     "de uso 'final'): se acepta")
+            con_finales = dict(sello_f, csv=dict(sello_f["csv"], **{x["csv"]: sha256(os.path.join(raiz, x["csv"]))
+                                                                    for x in extra}))
+            con_cambio("cola/manifiesto_cierre.json", json.dumps(con_finales), lambda: negarse(
+                "M32b un sello con los CSV de la prueba final: se niega", lambda: comprobar_cierre(raiz),
+                "no se sellan al cierre"))
+            comparacion = {"celda": "P1", "escenario": "corredor", "tanda": "f1r", "b": {"tipo": "ref_fino"}}
             lista = escribir(os.path.join(raiz, "listo", "lista_final.json"), json.dumps(
-                {"comparaciones": [{"celda": "P1", "escenario": "corredor", "tanda": "f1r",
-                                    "a": {"tipo": "v2reg", "base": 42}, "b": {"tipo": "ref_fino"}}]}))
+                {"comparaciones": [dict(comparacion, a={"tipo": "v2reg", "base": 42})]}))
+            lista_2 = os.path.join(raiz, "listo", "lista_2.json")
             negarse("M33 prueba final sin listo/holdout.ok: se niega",
                     lambda: correr_prueba_final(lista, raiz, exigir_semillas=False), "holdout.ok")
             escribir(os.path.join(raiz, "listo", "holdout.ok"), "0" * 64 + "\n")
             negarse("M33b holdout.ok sin el sha256 de la lista: se niega",
                     lambda: correr_prueba_final(lista, raiz, exigir_semillas=False), "sha256")
-            escribir(os.path.join(raiz, "listo", "holdout.ok"), sha256(lista) + "\n")
+            # el protocolo: la enmienda resellada, commiteada y empujada; despues holdout.ok con la lista commiteada y
+            # empujada, antes de la noche final; la noche final y su manana
+            commit_mundo(raiz, "enmienda: prueba final", "cola/manifiesto_esperado.json", "cola/trabajos.jsonl",
+                         "cola/manifiesto_cierre.json")
+            escribir(os.path.join(raiz, "listo", "holdout.ok"), f"{sha_lista(lista)}\n")
+            commit_mundo(raiz, "holdout", "listo/holdout.ok", "listo/lista_final.json")
+            manana("manana 3", lambda e: True, manifiesto + extra)
             candado = os.path.join(raiz, "listo", "holdout.candado")
             negarse("M33c con exigir_semillas, una tanda 'final' sin el bloque completo de su tipo de llegadas: se "
                     "niega", lambda: correr_prueba_final(lista, raiz, exigir_semillas=True), "bloque completo")
@@ -3608,32 +4502,86 @@ def probar():
             con_cambio(rel_f, "\n".join([lineas_f[0], ",".join(otro)] + lineas_f[2:]) + "\n", lambda: negarse(
                 "M33e otros vehículos en una semilla: ERROR antes de cerrar el candado",
                 lambda: correr_prueba_final(lista, raiz, exigir_semillas=False), "mismos vehículos"))
+            otro_r = lineas_f[1].split(",")
+            otro_r[campos_f.index(METRICA)] = str(float(otro_r[campos_f.index(METRICA)]) + 0.5)
+            con_cambio(rel_f, "\n".join([lineas_f[0], ",".join(otro_r)] + lineas_f[2:]) + "\n", lambda: negarse(
+                "M33h un CSV de la prueba final que cambió después de su mañana: se niega",
+                lambda: correr_prueba_final(lista, raiz, exigir_semillas=False), "hoy no es el de su primera mañana"))
+            con_cambio("cola/manifiesto_cierre.json", json.dumps(con_finales), lambda: negarse(
+                "M33i un sello con un CSV de la prueba final: --prueba-final también se niega",
+                lambda: correr_prueba_final(lista, raiz, exigir_semillas=False), "no se sellan al cierre"))
+            man_txt_f = open(os.path.join(raiz, "cola", "manifiesto_esperado.json"), encoding="utf-8").read()
+            man_f = json.loads(man_txt_f)
+            cruzado = [dict(e, csv=rel_f) if e["csv"] in [x["csv"] for x in extra if x["tipo"] == "v2reg"] else e
+                       for e in man_f]
+            con_cambio("cola/manifiesto_esperado.json", json.dumps(cruzado), lambda: negarse(
+                "M33j el manifiesto editado sin sellar (un brazo de la lista apunta a otro CSV): se niega",
+                lambda: correr_prueba_final(lista, raiz, exigir_semillas=False), "cambió después del cierre"))
+            texto_ok = open(os.path.join(raiz, "listo", "holdout.ok"), encoding="utf-8").read()
+            con_cambio("listo/holdout.ok", texto_ok + "0" * 64 + "\n", lambda: negarse(
+                "M33k holdout.ok con otra línea, sin commitear: se niega (vale el primer commit)",
+                lambda: correr_prueba_final(lista, raiz, exigir_semillas=False), "no es el que se commiteó"))
             ok(not os.path.exists(candado), "M33f ninguna de esas negativas cerró el candado")
             filas = correr_prueba_final(lista, raiz, exigir_semillas=False)
             reg = leer_json(candado)
             ok(len(filas) == 1 and "una tanda" in filas[0]["nota"] and len(reg["csv"]) == 2 and
                list(reg["salida"].values())[0] == sha256(os.path.join(raiz, "salidas", "veredicto3_prueba_final.csv")),
                "M34 la prueba final corre una vez; el candado guarda el sha256 de la lista, de cada CSV y de la salida")
+            commit_mundo(raiz, "candado", "listo/holdout.candado", "salidas/veredicto3_prueba_final.csv")
             negarse("M34b no corre una segunda vez", lambda: correr_prueba_final(lista, raiz, exigir_semillas=False),
                     "ya corrió")
+            # la segunda corrida de la revision (critic/candado.py): sin el candado en disco, con otra lista y su
+            # sha256 agregado a holdout.ok sin commitear
+            escribir(lista_2, json.dumps({"comparaciones": [dict(comparacion, a={"tipo": "ref_fijo"})]}))
+            texto_cand = open(candado, encoding="utf-8").read()
+            os.remove(candado)
+            try:
+                con_cambio("listo/holdout.ok", texto_ok + sha_lista(lista_2) + "\n", lambda: negarse(
+                    "M34c otra lista, sin el candado en disco y con su sha256 en holdout.ok sin commitear: se niega",
+                    lambda: correr_prueba_final(lista_2, raiz, exigir_semillas=False), "holdout.ok"))
+                negarse("M34d la misma lista sin el candado en disco: se niega (el candado está en la historia)",
+                        lambda: correr_prueba_final(lista, raiz, exigir_semillas=False), "ya corrió")
+            finally:
+                escribir(candado, texto_cand)
+                os.remove(lista_2)
+            escribir(os.path.join(raiz, "cola", "manifiesto_esperado.json"), json.dumps(manifiesto, indent=0) + "\n")
+            escribir(os.path.join(raiz, "cola", "trabajos.jsonl"), texto_trab)
+            sellar_mundo(raiz, manifiesto)
+            commit_mundo(raiz, "sello sin la prueba final", "cola/manifiesto_esperado.json", "cola/trabajos.jsonl",
+                         "cola/manifiesto_cierre.json")
+            sello_v = leer_json(os.path.join(raiz, "cola", "manifiesto_cierre.json"))
+            negarse("M35b un sello cuyo último manifiesto de la mañana no está en la historia de git: se niega",
+                    lambda: comprobar_ciego(raiz, dict(sello_v, manifiesto_ciego_commit="0" * 40)),
+                    "no es una mañana de la historia")
+            # una manana que trae un CSV de ciego/ (de T1) que el cierre no sello: se niega, salvo que
+            # cola/reemplazos.json lo declare reemplazado por uno sellado (§14, una corrida rehecha)
+            man_c = leer_json(os.path.join(raiz, "cola", "manifiesto_ciego.json"))
+            clave_c = sorted(k for k in man_c if not es_final(tanda_de_ruta(k)))[0]
+            otro_csv = "ciego/t1r/eval_corredor__v2reg_s42_viejo.csv"
+            man_c[otro_csv] = dict(man_c[clave_c], sha256="e" * 64)
+            escribir(os.path.join(raiz, "cola", "manifiesto_ciego.json"), json.dumps(man_c, indent=1, sort_keys=True))
+            commit_mundo(raiz, "manana 4", "cola/manifiesto_ciego.json")
+            negarse("M35c un CSV de ciego/ de una tanda que no es de la prueba final, en una mañana y fuera del "
+                    "sello: se niega", lambda: comprobar_ciego(raiz, sello_v),
+                    "eval_corredor__v2reg_s42_viejo.csv está")
+            malos_h, _ = mf.revisar_historia(manifiesto, raiz)
+            reemplazo = [{"viejo": otro_csv, "nuevo": "ciego/t1r/eval_corredor__v2reg_s42.csv", "fecha": "2026-11-20",
+                          "motivo": "error de código: rehecho con _r2 (§14)"}]
+            escribir(os.path.join(raiz, "cola", "reemplazos.json"), json.dumps(reemplazo, indent=1))
+            comprobar_ciego(raiz, sello_v)
+            malos_r, _ = mf.revisar_historia(manifiesto, raiz)
+            ok(any(otro_csv in m for m in malos_h) and not malos_r,
+               "M35d el mismo CSV declarado en cola/reemplazos.json (con su nuevo sellado): --final y manifiesto.py "
+               "cierre lo aceptan; sin declarar, manifiesto.py cierre también lo rechaza")
+            os.remove(os.path.join(raiz, "cola", "reemplazos.json"))
+            # una manana mas con un sha256 distinto para un CSV ya registrado: --final se niega
+            man_c[clave_c] = dict(man_c[clave_c], sha256="f" * 64)
+            escribir(os.path.join(raiz, "cola", "manifiesto_ciego.json"), json.dumps(man_c, indent=1, sort_keys=True))
+            commit_mundo(raiz, "manana 5", "cola/manifiesto_ciego.json")
+            negarse("M35 un CSV cuyo sha256 cambia de una mañana a otra: se niega",
+                    lambda: comprobar_ciego(raiz, sello_v), "cambió en el manifiesto de la mañana")
         finally:
             del gt.TANDAS["f1r"]
-            escribir(os.path.join(raiz, "cola", "manifiesto_esperado.json"), json.dumps(manifiesto, indent=0) + "\n")
-            sellar_mundo(raiz, manifiesto)
-        sello_v = leer_json(os.path.join(raiz, "cola", "manifiesto_cierre.json"))
-        negarse("M35b un sello cuyo último manifiesto de la mañana no está en la historia de git: se niega",
-                lambda: comprobar_ciego(raiz, dict(sello_v, manifiesto_ciego_commit="0" * 40)),
-                "no está en la historia")
-        # tercera manana con un sha256 distinto para un CSV ya registrado: --final se niega
-        man_c = leer_json(os.path.join(raiz, "cola", "manifiesto_ciego.json"))
-        clave_c = sorted(man_c)[0]
-        man_c[clave_c] = dict(man_c[clave_c], sha256="f" * 64)
-        escribir(os.path.join(raiz, "cola", "manifiesto_ciego.json"), json.dumps(man_c, indent=1, sort_keys=True))
-        for args in (("add", "cola/manifiesto_ciego.json"), ("commit", "-q", "-m", "manana 3")):
-            protecciones.git(*args, cwd=raiz)
-        sello_v = leer_json(os.path.join(raiz, "cola", "manifiesto_cierre.json"))
-        negarse("M35 un CSV cuyo sha256 cambia de una mañana a otra: se niega",
-                lambda: comprobar_ciego(raiz, sello_v), "cambió en el manifiesto de la mañana")
         # caidas por corrida (con lo que sale de ellas, gt.DERIVA, y la V2 de la mezcla en el arranque lento):
         # veredicto3 da por caidas exactamente las bases que el generador deja de evaluar
         corridas = [("P1", "corredor", "v2reg", 42, "corredor", "p3v2reg"),
@@ -3667,6 +4615,63 @@ def probar():
            f"M36 caídas por corrida: veredicto3 da por caídas las mismas {len(segun_v3)} bases que el generador deja "
            f"de evaluar (la V2 con sus 400 episodios y sus dos derivadas, la V2 de la mezcla también en el arranque "
            f"lento, los 400 episodios aleatorios con sus derivadas)")
+        sin_corrida = [{k: v for k, v in c.items() if k != "corrida"}
+                       for c in leer_json(os.path.join(raiz_c, "cola", "caidas.json"))]
+        escribir(os.path.join(raiz_c, "cola", "caidas.json"), json.dumps(sin_corrida))
+        d = Datos(raiz_c)
+        ok({(ck[0], ck[1], fam, b) for ck, fam, b in ((k[:2], k[2], k[3]) for k in evaluadas)
+            if d.es_caida(ck, fam, b)} == caen,
+           "M36b las mismas declaraciones sin corrida: veredicto3 la arma como el generador (gt.corrida_de_tipo) y da "
+           "las mismas 9 bases")
+        intentos_c = [{"id": "a", "error": "NaN"}, {"id": "b", "error": "NaN"}]
+        todas = [{"celda": "P3", "escenario": "poi_red", "tipo": "v2poi", "base": b, "fecha": "2026-11-16",
+                  "intentos": intentos_c} for b in BASES5]
+        escribir(os.path.join(raiz_c, "cola", "caidas.json"), json.dumps(todas))
+        b_todas, motivo_todas = Datos(raiz_c).base_version(("P3", "poi_red"), "v2poi")
+        ok(b_todas is None and motivo_todas.startswith("cayeron todas las bases"),
+           f"M36c si caen las 5 bases de una familia, veredicto3 la da por caída: {motivo_todas}")
+        # manifiesto.py revisar nombra la base caida declarada despues de generar el manifiesto (con la corrida del
+        # trabajo del CSV); sin la declaracion, no
+        rel_39 = "ciego/t1r/eval_red__v2reg_s2042.csv"
+        caidas_39 = leer_json(os.path.join(raiz, "cola", "caidas.json")) + [
+            {"corrida": gt.nombre_corrida("red", "vecinos", "p3v2reg", 2042), "celda": "P3", "escenario": "red",
+             "tipo": "v2reg", "base": 2042, "fecha": "2026-11-20", "intentos": intentos_c}]
+        faltan_39 = []
+
+        def revisar_39():
+            faltan_39.append(mf.revisar([e for e in manifiesto if e["csv"] == rel_39], raiz)["faltan"])
+        con_cambio("cola/caidas.json", json.dumps(caidas_39), lambda: con_cambio(rel_39, None, revisar_39))
+        con_cambio(rel_39, None, revisar_39)
+        ok(faltan_39 == [[rel_39 + " (base caida declarada despues: regenerar el manifiesto)"], [rel_39]],
+           f"M39 manifiesto.py revisar dice qué CSV que falta es de una base caída declarada después (con la corrida "
+           f"de su trabajo y el caidas.json de la carpeta que revisa); sin la declaración, no {faltan_39}")
+        # un clon superficial (shallow) no tiene la historia completa: se niega
+        sup = carpeta_limpia(os.path.join(TMP_VER, "superficial"))
+        url = "file:///" + os.path.join(TMP_VER, "mundo_origen.git").replace(os.sep, "/")
+        git_mundo(sup, "clone", "-q", "--depth", "1", "-b", "plan3", url, "r")
+        negarse("M40 un clon superficial (shallow) de la rama empujada: se niega", lambda: Historia(
+            os.path.join(sup, "r", "plan3")), "superficial")
+        # un push forzado desde otro clon reescribe la rama empujada: el repositorio que ya la vio se niega, en cada
+        # corrida (el fetch no mueve origin/plan3), hasta que la rama vuelve a ser la que vio
+        otro = carpeta_limpia(os.path.join(TMP_VER, "forzado"))
+        git_mundo(otro, "clone", "-q", "-b", "plan3", url, "r")
+        r_otro = os.path.join(otro, "r")
+        viejo = git_mundo(r_otro, "rev-parse", "HEAD").strip()
+        git_mundo(r_otro, "reset", "-q", "--soft", "HEAD~1")
+        git_mundo(r_otro, "commit", "-q", "-m", "reescrito")
+        git_mundo(r_otro, "push", "-q", "-f", "origin", "plan3")
+        forzado = []
+        for _ in range(2):
+            try:
+                Historia(raiz)
+                forzado.append("corre")
+            except ErrorVeredicto as ex:
+                forzado.append(str(ex).split(":", 1)[0])
+        git_mundo(r_otro, "push", "-q", "-f", "origin", f"{viejo}:plan3")
+        Historia(raiz)
+        ok(forzado == ["origin/plan3 se reescribió (push forzado)"] * 2,
+           f"M41 un push forzado desde otro clon (la rama empujada reescrita): el repositorio que la vio se niega en "
+           f"cada corrida, no solo en la primera; con la rama de vuelta, corre {forzado}")
 
     grupo("1. Pruebas del prototipo (lo entregado de plan2/, solo lectura)", prototipo)
     grupo("2. Reglas nuevas con datos por semilla fabricados", reglas)
@@ -3689,6 +4694,7 @@ def main():
     modo.add_argument("--probar", action="store_true", help="pruebas con datos sinteticos y con lo entregado")
     modo.add_argument("--final", action="store_true", help="el veredicto (exige listo/cierre.ok y el sello)")
     modo.add_argument("--prueba-final", metavar="LISTA", help="prueba final reservada (exige listo/holdout.ok)")
+    modo.add_argument("--sha-lista", metavar="LISTA", help="el sha256 de la lista que va en listo/holdout.ok")
     a = ap.parse_args()
     try:
         if a.probar:
@@ -3700,6 +4706,9 @@ def main():
             for f in res["numero"]:
                 print(f"numero unico {f['llegadas']} {f['tanda']} {f['modelo']} frente al {f['referencia']}: "
                       f"{f['cambio'] or f['nota']} {f['ic']}")
+            return
+        if a.sha_lista:
+            print(sha_lista(a.sha_lista))
             return
         filas = correr_prueba_final(os.path.abspath(a.prueba_final))
         print(f"prueba final: {len(filas)} comparaciones en salidas/veredicto3_prueba_final.csv")

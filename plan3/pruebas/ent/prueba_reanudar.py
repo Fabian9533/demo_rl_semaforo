@@ -14,7 +14,9 @@ prueba_reanudar.py - Pruebas 3 y 4 de la tarea 1.2 del plan 3 (informe: plan3/do
 
 Uso:  python plan3/pruebas/ent/prueba_reanudar.py corredor      (P1: IPPO y V2, prueba 4 y rechazos)
       python plan3/pruebas/ent/prueba_reanudar.py malla3_alta   (P6: V2; ~2 procesos durante 20-45 min)
-Salida: plan3/pruebas/ent/salidas/prueba_reanudar_<escenario>.txt; corridas en plan3/tmp_ent/rean_<esc>_*.
+      python plan3/pruebas/ent/prueba_reanudar.py corredor e3 e4   (solo la prueba 3 con las opciones de las
+                                                                    Etapas 3 y 4 juntas; informe_ent2.md)
+Salida: plan3/pruebas/ent/salidas/prueba_reanudar_<escenario>[_<modos>].txt; corridas en plan3/tmp_ent/rean_<esc>_*.
 """
 import sys
 import json
@@ -26,6 +28,57 @@ MODOS = {   # modo: (opciones, tag, politica)
     "ippo": (["--guardar-estado"], "ippo_vecinos_s7", "vecinos_s7"),
     "v2": (["--v2", "--criterio-val", "total", "--etiqueta", "p3prbv2", "--guardar-estado", "--registro-extendido"],
            "ippo_vecinos_p3prbv2_s7", "vecinos_p3prbv2_s7"),
+    # Etapa 3 (informe_ent2): observacion cercana, normalizacion del valor, reloj de 2 s, sin forzadas, mensajes
+    # cada paso y calendario de entropia, juntos
+    "e3": (["--v2", "--criterio-val", "total", "--etiqueta", "p3prbe3", "--guardar-estado", "--registro-extendido",
+            "--obs-cercana", "75", "--norm-valor", "--paso-decision", "2", "--sin-forzadas", "--msg-cada-paso",
+            "--hiper", "ent=0.03", "--ent-final", "0.003"], "ippo_vecinos_p3prbe3_s7", "vecinos_p3prbe3_s7"),
+    # Etapa 4: escala de demanda por episodio con curriculo, validacion por niveles y beta rapido
+    "e4": (["--v2", "--criterio-val", "total", "--etiqueta", "p3prbe4", "--guardar-estado", "--registro-extendido",
+            "--escala-demanda", "0.5,2.0", "--curriculo", "10", "--val-escalas", "0.5,1,1.5", "--norm-valor",
+            "--norm-beta", "0.99"], "ippo_vecinos_p3prbe4_s7", "vecinos_p3prbe4_s7"),
+    # Modelo completo en su forma real (revision del 05.11, a): las opciones de e3 sin --hiper ent ni --ent-final,
+    # con la tasa del modelo completo a escala (horizonte 10 y piso 0.1 en 20 episodios)
+    "e3c": (["--v2", "--criterio-val", "total", "--etiqueta", "p3prbe3c", "--guardar-estado", "--registro-extendido",
+             "--obs-cercana", "75", "--norm-valor", "--sin-forzadas", "--msg-cada-paso", "--lr-horizonte", "10",
+             "--lr-piso", "0.1", "--paso-decision", "2"], "ippo_vecinos_p3prbe3c_s7", "vecinos_p3prbe3c_s7"),
+}
+
+
+def quitar(opciones, opcion, valores=1):
+    """Las opciones sin opcion (y sus valores)."""
+    i = opciones.index(opcion)
+    return opciones[:i] + opciones[i + 1 + valores:]
+
+
+def cambiar(opciones, opcion, valor):
+    """Las opciones con otro valor para opcion (o con ella agregada al final)."""
+    if opcion not in opciones:
+        return opciones + [opcion, valor]
+    i = opciones.index(opcion)
+    return opciones[:i + 1] + [valor] + opciones[i + 2:]
+
+
+# Revision del 05.11 (b): cada opcion de las Etapas 3 y 4 quitada o cambiada al reanudar debe rechazarse
+CAMBIOS_E34 = {
+    "e3": [("sin --obs-cercana", lambda o: quitar(o, "--obs-cercana")),
+           ("--obs-cercana 50", lambda o: cambiar(o, "--obs-cercana", "50")),
+           ("sin --norm-valor", lambda o: quitar(o, "--norm-valor", 0)),
+           ("con --norm-beta 0.99", lambda o: cambiar(o, "--norm-beta", "0.99")),
+           ("--paso-decision 5", lambda o: cambiar(o, "--paso-decision", "5")),
+           ("sin --sin-forzadas", lambda o: quitar(o, "--sin-forzadas", 0)),
+           ("sin --msg-cada-paso", lambda o: quitar(o, "--msg-cada-paso", 0)),
+           ("sin --hiper ent=0.03", lambda o: quitar(o, "--hiper")),
+           ("sin --ent-final", lambda o: quitar(o, "--ent-final")),
+           ("--ent-final 0.001", lambda o: cambiar(o, "--ent-final", "0.001"))],
+    "e4": [("sin --escala-demanda ni --curriculo", lambda o: quitar(quitar(o, "--escala-demanda"), "--curriculo")),
+           ("--escala-demanda 0.5,1.5", lambda o: cambiar(o, "--escala-demanda", "0.5,1.5")),
+           ("sin --curriculo", lambda o: quitar(o, "--curriculo")),
+           ("--curriculo 5", lambda o: cambiar(o, "--curriculo", "5")),
+           ("sin --val-escalas", lambda o: quitar(o, "--val-escalas")),
+           ("--val-escalas 0.5,1", lambda o: cambiar(o, "--val-escalas", "0.5,1")),
+           ("sin --norm-beta", lambda o: quitar(o, "--norm-beta")),
+           ("sin --norm-valor ni --norm-beta", lambda o: quitar(quitar(o, "--norm-valor", 0), "--norm-beta"))],
 }
 
 
@@ -188,14 +241,47 @@ def prueba_rechazos(inf, seguida_v2):
                 f"codigo {cod}; {len(despues)} archivos sin cambios: {antes == despues}")
 
 
+def prueba_rechazos_etapas(inf, esc, seguidas):
+    """(b) Desde el estado del ep 10 de cada corrida seguida con opciones de las Etapas 3 y 4, la misma etiqueta con
+    una opcion quitada o cambiada: sale con error (configuracion o argparse) y no cambia ningun archivo de la corrida.
+    La unica escritura posible es la de entrada e2_<esc>_<L>.add.xml con otro L, que no es de la corrida."""
+    for modo, cambios in CAMBIOS_E34.items():
+        if modo not in seguidas:
+            continue
+        opciones, tag = MODOS[modo][0], f"{esc}_{MODOS[modo][1]}"
+        c = u.carpeta(f"rean_{esc}_{modo}_rechazos", [esc])
+        shutil.copytree(seguidas[modo] / "checkpoints", c / "checkpoints")
+        shutil.copyfile(seguidas[modo] / f"resultados_{tag}.csv", c / f"resultados_{tag}.csv")
+        inf(f"-- {modo}: desde checkpoints/{tag}_ep010.estado.pt con una opcion quitada o cambiada")
+        for k, (nombre, cambio) in enumerate(cambios):
+            antes = {str(p.relative_to(c)): u.sha256(p) for p in c.rglob("*") if p.is_file()
+                     and not p.name.startswith(("log", "e2_"))}
+            log = c / f"log_rechazo_{k}.txt"
+            cod = u.correr(u.RL_NUEVO, base(esc) + cambio(list(opciones))
+                           + ["--reanudar", f"checkpoints/{tag}_ep010.estado.pt"], c, log)
+            texto = log.read_text(encoding="utf-8", errors="replace")
+            despues = {str(p.relative_to(c)): u.sha256(p) for p in c.rglob("*") if p.is_file()
+                       and not p.name.startswith(("log", "e2_"))}
+            motivo = next((l.strip() for l in reversed(texto.splitlines()) if "reanudar" in l or "error" in l), "")
+            inf.chequeo(f"rechaza {nombre}", cod != 0 and antes == despues
+                        and ("otra configuracion" in texto or "calendario de entropia" in texto or "error:" in texto),
+                        f"codigo {cod}; archivos sin cambios {antes == despues}; {motivo[:110]}")
+
+
 def main():
     esc = sys.argv[1] if len(sys.argv) > 1 else "corredor"
-    p1 = esc == "corredor"
-    inf = u.Informe(f"prueba_reanudar_{esc}", f"Pruebas 3{' y 4' if p1 else ''} (tarea 1.2): reanudacion exacta en "
-                    f"{esc}, base 7, validacion cada 5 en {u.VAL_HUMO}")
+    pedidos = sys.argv[2:]                  # modos a mano (p. ej. e3 e4): solo la prueba 3 con ellos
+    p1 = esc == "corredor" and not pedidos
+    nombre = f"prueba_reanudar_{esc}" + (f"_{'_'.join(pedidos)}" if pedidos else "")
+    inf = u.Informe(nombre, f"Pruebas 3{' y 4' if p1 else ''} (tarea 1.2): reanudacion exacta en {esc}, base 7, "
+                    f"validacion cada 5 en {u.VAL_HUMO}" + (f"; modos {', '.join(pedidos)}" if pedidos else ""))
     inf("")
     inf("Prueba 3: 20 seguidos = 10 + 10 reanudados")
-    seguidas = prueba_tramos(inf, esc, ["ippo", "v2"] if p1 else ["v2"])
+    seguidas = prueba_tramos(inf, esc, pedidos or (["ippo", "v2"] if esc == "corredor" else ["v2"]))
+    if any(m in CAMBIOS_E34 for m in seguidas):
+        inf("")
+        inf("Rechazos con las opciones de las Etapas 3 y 4 (revision del 05.11, b)")
+        prueba_rechazos_etapas(inf, esc, seguidas)
     if p1:
         inf("")
         inf("Prueba 4: etiqueta nueva")

@@ -182,27 +182,36 @@ def escribir_atomico(ruta, texto, intentos=10, espera=2.0):
     """plan3 (0.11): escribe ruta en un temporal con el pid y lo reemplaza con reintentos (como
     barrer_fijo.reemplazar). Varias evaluaciones del mismo escenario regeneran el mismo .add.xml: asi ninguna
     lee un archivo a medio escribir y dos procesos no se pisan el temporal. En Windows os.replace falla si en
-    ese instante un sumo tiene abierto el destino. El contenido es el mismo de antes, byte a byte."""
+    ese instante un sumo tiene abierto el destino. El contenido es el mismo de antes, byte a byte. Si no llega
+    a reemplazar (se agotan los reintentos u otro error), borra su temporal; el destino queda como estaba."""
     import time
     tmp = f"{ruta}.{os.getpid()}.tmp"
-    with open(tmp, "w") as f:
-        f.write(texto)
-    for k in range(intentos):
-        try:
-            os.replace(tmp, ruta)
-            return
-        except PermissionError:
-            if k == intentos - 1:
-                raise
-            time.sleep(espera)
+    try:
+        with open(tmp, "w") as f:
+            f.write(texto)
+        for k in range(intentos):
+            try:
+                os.replace(tmp, ruta)
+                return
+            except PermissionError:
+                if k == intentos - 1:
+                    raise
+                time.sleep(espera)
+    finally:
+        if os.path.exists(tmp):
+            try:
+                os.remove(tmp)
+            except OSError:
+                pass
 
 
 def leer_cfg(cfg):
-    """Devuelve (net-file, lista de additional-files) del .sumocfg."""
+    """Devuelve (net-file, lista de additional-files) del .sumocfg. plan3: sin espacios alrededor de cada ruta
+    ('a.add.xml, b.add.xml' es valido en SUMO); con los .sumocfg de siempre la lista es la misma."""
     raiz = ET.parse(cfg).getroot()
     net = raiz.find("input/net-file").get("value")
     add = raiz.find("input/additional-files")
-    adicionales = add.get("value").split(",") if add is not None else []
+    adicionales = [a.strip() for a in add.get("value").split(",") if a.strip()] if add is not None else []
     return net, adicionales
 
 
@@ -423,6 +432,31 @@ def brazo_ippo(variante, politicas, brazos_csv):
     return f"ippo_{variante}" if f"ippo_{variante}" in brazos_csv else None
 
 
+# ---------------- Semillas a ciegas del plan 3 (05.11.2026) ----------------
+# Las semillas del examen y de la prueba final (plan3/PRERREGISTRO.md, tabla de §3: examen_regular, examen_h1,
+# examen_aleatorio y final) solo se simulan desde la cola de plan3, en un trabajo de uso ciego: cola.py pone P3_USO.
+# Cualquier otra corrida con ellas (una prueba, una revision) se niega antes de abrir SUMO. Lo entregado nunca uso
+# estas semillas, y las de entrenamiento son base + episodio, asi que no cambia ningun numero.
+BLOQUES_CIEGOS = ((7001, 7100), (8001, 8120), (10001, 10100), (11001, 11030), (12001, 12100), (13001, 13120))
+USOS_CIEGOS = ("examen_regular", "examen_h1", "examen_aleatorio", "final")
+
+
+def revisar_semilla_ciega(cmd):
+    """Sale con error si cmd (lista de argumentos de sumo) lleva --seed de un bloque ciego fuera de un trabajo ciego."""
+    cmd = list(cmd)
+    if "--seed" not in cmd:
+        return
+    try:
+        semilla = int(cmd[cmd.index("--seed") + 1])
+    except (IndexError, ValueError):
+        return
+    uso = os.environ.get("P3_USO")
+    if any(a <= semilla <= b for a, b in BLOQUES_CIEGOS) and uso not in USOS_CIEGOS:
+        raise SystemExit(f"semilla {semilla}: es del examen o de la prueba final del plan 3 y solo se simula desde la "
+                         f"cola, en un trabajo de uso ciego (P3_USO={uso!r}). Para probar, use las de humo "
+                         f"424301-424360 o la base 7.")
+
+
 # ---------------- Arranque robusto de SUMO (plan v2) ----------------
 def iniciar_sumo(cmd, intentos=5, espera=3.0):
     """traci.start con reintentos. En Windows otro proceso (el antivirus) puede tener tomado un
@@ -432,6 +466,7 @@ def iniciar_sumo(cmd, intentos=5, espera=3.0):
     import time
     import traci
     from traci import connection as conexiones
+    revisar_semilla_ciega(cmd)
     for k in range(intentos):
         try:
             return traci.start(cmd)

@@ -68,10 +68,15 @@ def _validar_checkpoints(a, rl_ippo, res, hechos, eps, semillas, tripinfo):
             continue
         ruta = os.path.join(a.origen, f"{a.corrida}_ep{ep:03d}.pt")
         politica, meta = rl_ippo.Politica.cargar(ruta)
-        assert meta["dim_obs"] == rl_ippo.C["dim_obs"], (meta["dim_obs"], rl_ippo.C["dim_obs"])
-        rl_ippo.configurar_obs_insercion(meta.get("opciones", {}).get("obs_insercion", False))
+        # la observacion, el reloj y los mensajes con que se entreno (como evaluar.brazo_profundo); con las opciones
+        # de siempre, nada cambia. La dimension se compara despues de configurar.
+        rl_ippo.configurar_desde_meta(meta)
         t0 = time.time()
-        fila = rl_ippo.validar(politica, semillas, meta["variante"], tripinfo)
+        try:
+            assert meta["dim_obs"] == rl_ippo.C["dim_obs"], (meta["dim_obs"], rl_ippo.C["dim_obs"])
+            fila = rl_ippo.validar(politica, semillas, meta["variante"], tripinfo)
+        finally:
+            rl_ippo.configurar_desde_meta({})
         # Control de reproduccion: solo si se valida en el escenario de entrenamiento.
         control = {}
         if meta.get("escenario", a.escenario) == a.escenario:

@@ -232,7 +232,7 @@ cuatro piezas para decidir.
 | | Sin (iv) | V2 sigue siendo el único modelo citable, aunque otra variante sea mejor | 0 |
 
 **Lo que no se agrega, y por qué.**
-- Brazos aparte de limpiezas y de entropía con llegadas aleatorias: van dentro del modelo completo.
+- Brazos aparte de limpiezas con llegadas aleatorias: van dentro del modelo completo. La entropía no entra en el modelo completo (B25 y prerregistro §12); su brazo corre solo en D y P1 con llegadas regulares (nota del 05.11).
 - Lote de varios episodios por actualización de PPO: sin medición propia, solo literatura [L Yu et al. 2022]. Se
   declara como trabajo futuro.
 - Quitar P3 y P5 del 400 regular para ahorrar: no hace falta (el cuello es el código) y reabriría la crítica de

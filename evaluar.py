@@ -47,9 +47,13 @@ plan3 (05.11.2026; apagado por defecto, lo de antes no cambia):
   --brazo franja | bloques | actuado_aj [--programa ARCHIVO]   fijo por franja o por bloques (WAUT) y actuado
       ajustado, con el archivo de franja.py o actuado.py (por defecto <esc>_<brazo>.add.xml)
   --brazo fijo --programa ARCHIVO --nombre X   fijo con otro programa (p. ej. <esc>_r10f.add.xml): brazo fijo_X
-  --regla NOMBRE   regla simple o Max-Pressure de plan3/reglas.py (regla_u3g60, mp, mp_c60...): brazo NOMBRE
+  --regla NOMBRE   regla simple, reactiva o Max-Pressure de plan3/reglas.py (regla_u3g60, reactiva_d25, mp,
+      mp_c60...): brazo NOMBRE
+  Con estos brazos --semillas es obligatorio (sin el, 1001-1030 no vale para lo nuevo: prerregistro 3) y el
+  escenario no puede ser cruce ni cruce2 (rl_semaforo no conoce estos modos).
   Funciones para evaluar3: brazo_referencia(esc, brazo, adicional=None), brazo_programa(esc, ruta, nombre) y
-  brazo_regla(esc, regla), cada una -> (brazo, modelo, base, correr), sin impresiones dentro de correr.
+  brazo_regla(esc, regla), cada una -> (brazo, modelo, base, correr), sin impresiones dentro de correr. adicional
+  solo con franja, bloques y actuado_aj (con fijo, actuado o trivial es un error).
 
 Cambios del plan v2: modo --brazo/--politica/--salida con CSV parcial por brazo
 (la estadistica pasa a consolidar.py), carga por tipo de politica y meta, nombres de brazo
@@ -90,6 +94,7 @@ METRICAS_V2 = METRICAS + ["ret_retraso", "ret_colas", "ret_spill", "vehiculos", 
 MODO_REFERENCIA = {"fijo": "baseline", "actuado": "actuado", "trivial": "trivial",
                    # plan3 (0.8 y 0.9): fijo por franja y por bloques (WAUT) y actuado ajustado, desde su archivo
                    "franja": "franja", "bloques": "bloques", "actuado_aj": "actuado_aj"}
+BRAZOS_PLAN3 = ("franja", "bloques", "actuado_aj")      # los unicos que cargan un archivo (adicional)
 # meta["algoritmo"] de rl_corredor -> etiqueta del modelo (ESPEC seccion 2)
 ALG_TABULAR = {"qlearning": "ql", "q-learning": "ql", "ql": "ql", "sarsa": "sarsa"}
 
@@ -182,10 +187,22 @@ def leer_json(ruta):
         return json.load(f)
 
 
+def solo_plan3(esc, que):
+    """plan3: sus brazos corren con rl_corredor o rl_ippo; en cruce y cruce2 (rl_semaforo) correrian otra cosa."""
+    if esc in ("cruce", "cruce2"):
+        raise SystemExit(f"{que} no corre en {esc} (rl_semaforo no lo conoce)")
+
+
 def brazo_referencia(esc, brazo, adicional=None):
     """fijo, actuado o trivial (verdes minimos y desfases 0, control de cordura del
     plan v2): (brazo, modelo, base, correr). plan3: franja, bloques y actuado_aj con su archivo
-    (adicional; por defecto <esc>_<brazo>.add.xml en la carpeta actual)."""
+    (adicional; por defecto <esc>_<brazo>.add.xml en la carpeta actual). adicional solo con esos tres: con fijo
+    se usa brazo_programa (brazo fijo_<nombre>); con actuado o trivial se ignoraria."""
+    if adicional and brazo not in BRAZOS_PLAN3:
+        raise SystemExit(f"adicional ({adicional}) solo vale con {', '.join(BRAZOS_PLAN3)}, no con {brazo} (el fijo "
+                         f"de otro archivo es brazo_programa)")
+    if brazo in BRAZOS_PLAN3 + ("trivial",):      # trivial: rl_semaforo no lo conoce (correria el fijo con su nombre)
+        solo_plan3(esc, f"el brazo {brazo}")
     mod = configurar(esc)
     opcion = {"adicional": adicional} if adicional else {}
 
@@ -198,6 +215,7 @@ def brazo_referencia(esc, brazo, adicional=None):
 def brazo_programa(esc, ruta, nombre):
     """plan3: fijo con el programa de un archivo (p. ej. plan3/<esc>_r10f.add.xml, el fijo fino), que reemplaza a
     los adicionales del .sumocfg con programas. Brazo y modelo fijo_<nombre>."""
+    solo_plan3(esc, "el fijo de un archivo (--programa)")
     mod = configurar(esc)
 
     def correr(semilla, tripinfo, serie):
@@ -210,6 +228,7 @@ def brazo_regla(esc, regla):
     """plan3: regla simple o Max-Pressure de plan3/reglas.py (regla_u3g60, mp, mp_c60...) por el gancho decidir
     de rl_ippo, sin mensajes. Brazo y modelo = el nombre de la regla."""
     import sys
+    solo_plan3(esc, f"la regla {regla}")
     import rl_ippo
     carpeta = os.path.join(os.path.dirname(os.path.abspath(__file__)), "plan3")
     if carpeta not in sys.path:
@@ -261,17 +280,17 @@ def brazo_profundo(esc, ruta, latencia, perdida):
         modelo = "ippo_" + meta["variante"]
         if meta.get("etiqueta"):        # 25.10.2026: correcciones del diagnostico (rl_ippo.py --etiqueta)
             modelo += "_" + meta["etiqueta"]
-        # Enmienda 2 del diagnostico (rl_ippo.py --obs-insercion): la observacion con la que se entreno
-        obs_ins = meta.get("opciones", {}).get("obs_insercion", False)
+        # La observacion, el reloj y los mensajes con que se entreno, de las opciones del meta: --obs-insercion
+        # (Enmienda 2 del diagnostico) y, del plan 3, --obs-cercana, --paso-decision y --msg-cada-paso
 
         def correr(semilla, tripinfo, serie):
-            rl_ippo.configurar_obs_insercion(obs_ins)
+            rl_ippo.configurar_desde_meta(meta)
             try:
                 return rl_ippo.correr_episodio("demo", politica, False, 0, semilla, tripinfo=tripinfo,
                                                serie=serie, latencia=latencia, perdida=perdida,
                                                variante=meta["variante"])
             finally:
-                rl_ippo.configurar_obs_insercion(False)
+                rl_ippo.configurar_desde_meta({})
     elif alg in ("dqn", "mappo"):
         import importlib
         mod = importlib.import_module("rl_" + alg)
@@ -280,19 +299,26 @@ def brazo_profundo(esc, ruta, latencia, perdida):
         modelo = alg
         if hasattr(mod, "cargar"):
             politica, meta = mod.cargar(ruta)
+            if rl_ippo.opciones_que_actuan(meta):       # rl_<alg> juega con su propia observacion: no las aplica
+                raise SystemExit(f"{ruta}: {alg} no juega con las opciones de su meta "
+                                 f"{rl_ippo.opciones_que_actuan(meta)}")
 
             def correr(semilla, tripinfo, serie):
                 return mod.correr_episodio("demo", politica, False, 0, semilla, tripinfo=tripinfo,
                                            serie=serie, **canal)
         else:
-            # MAPPO guardado como Politica de rl_ippo: se juega su actor con la variante del meta
+            # MAPPO guardado como Politica de rl_ippo: se juega su actor con la variante y las opciones del meta
             politica, meta = rl_ippo.Politica.cargar(ruta)
             variante = meta.get("variante", "vecinos")
 
             def correr(semilla, tripinfo, serie):
-                return rl_ippo.correr_episodio("demo", politica, False, 0, semilla, tripinfo=tripinfo,
-                                               serie=serie, latencia=latencia, perdida=perdida,
-                                               variante=variante)
+                rl_ippo.configurar_desde_meta(meta)
+                try:
+                    return rl_ippo.correr_episodio("demo", politica, False, 0, semilla, tripinfo=tripinfo,
+                                                   serie=serie, latencia=latencia, perdida=perdida,
+                                                   variante=variante)
+                finally:
+                    rl_ippo.configurar_desde_meta({})
     else:
         raise SystemExit(f"{ruta}: algoritmo desconocido en el meta: {alg}")
     if meta.get("escenario", esc) != esc:
@@ -387,6 +413,9 @@ def main():
         ap.error("--programa va con --brazo fijo, franja, bloques o actuado_aj")
     if bool(args.brazo == "fijo" and args.programa) != bool(args.nombre):
         ap.error("--brazo fijo --programa ARCHIVO necesita --nombre (y --nombre solo va con ellos)")
+    if (args.brazo in BRAZOS_PLAN3 or args.programa or args.regla) and not args.semillas:     # plan3
+        ap.error("con los brazos de plan3 (franja, bloques, actuado_aj, --programa, --regla) --semillas es "
+                 "obligatorio")
     if args.brazo or args.politica or args.regla:
         if args.ippo:
             ap.error("--ippo es del modo antiguo; en el plan v2 use --politica")
@@ -432,18 +461,24 @@ def main():
                   f"espera={res['espera_prom']:6.2f}  paradas={res['paradas_prom']:.2f}", flush=True)
     for nombre, politica, meta in ippo:
         import rl_ippo
-        for i, semilla in enumerate(semillas):
-            random.seed(semilla)
-            tripinfo = f"tripinfo_{esc}_eval_ippo.xml"
-            serie = f"serie_{esc}_{nombre}_s{semilla}.csv" if i == 0 else None
-            res = rl_ippo.correr_episodio("demo", politica, False, 0, semilla, tripinfo=tripinfo,
-                                          serie=serie, latencia=args.latencia, perdida=args.perdida,
-                                          variante=meta["variante"])
-            if i == 0:
-                guardar_vehiculos(esc, nombre, tripinfo)
-            filas.append({"brazo": nombre, "semilla": semilla, **{m: res.get(m, "") for m in METRICAS}})
-            print(f"{nombre:16s} semilla {semilla}: timeLoss={res['timeloss_prom']:6.2f}  "
-                  f"espera={res['espera_prom']:6.2f}  paradas={res['paradas_prom']:.2f}", flush=True)
+        # plan3: cada politica juega con la observacion, el reloj y los mensajes con que se entreno (como
+        # brazo_profundo); con las opciones de siempre, nada cambia
+        rl_ippo.configurar_desde_meta(meta)
+        try:
+            for i, semilla in enumerate(semillas):
+                random.seed(semilla)
+                tripinfo = f"tripinfo_{esc}_eval_ippo.xml"
+                serie = f"serie_{esc}_{nombre}_s{semilla}.csv" if i == 0 else None
+                res = rl_ippo.correr_episodio("demo", politica, False, 0, semilla, tripinfo=tripinfo,
+                                              serie=serie, latencia=args.latencia, perdida=args.perdida,
+                                              variante=meta["variante"])
+                if i == 0:
+                    guardar_vehiculos(esc, nombre, tripinfo)
+                filas.append({"brazo": nombre, "semilla": semilla, **{m: res.get(m, "") for m in METRICAS}})
+                print(f"{nombre:16s} semilla {semilla}: timeLoss={res['timeloss_prom']:6.2f}  "
+                      f"espera={res['espera_prom']:6.2f}  paradas={res['paradas_prom']:.2f}", flush=True)
+        finally:
+            rl_ippo.configurar_desde_meta({})
 
     # Conservar del archivo anterior los brazos que no se corrieron ahora
     ruta = f"evaluacion_{esc}.csv"

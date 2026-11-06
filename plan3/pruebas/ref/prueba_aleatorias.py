@@ -12,6 +12,8 @@ real lo escribe otro agente). Corre por el lanzador, con semillas de humo en lug
   barrer_fino per_corredor --bloque 600 y franja per_corredor --bloques: 6 puntajes por bloque, secuencia de bloques
       verificada y jugada por TraCI con la misma media;
   actuado poi_corredor --paso todos: 10 finalistas;  reglas poi_corredor --familia mp: 4 finalistas.
+Las gruesas son subrejillas con semillas de humo (opciones de prueba): las etapas siguientes corren con
+--permitir-prueba (sin el se niegan; eso lo prueba prueba_fino.py F).
 Uso (cwd = plan3/): python pruebas/ref/prueba_aleatorias.py    Salida: pruebas/ref/salidas/prueba_aleatorias.txt
 """
 import os
@@ -84,7 +86,8 @@ def main():
                  "--transversal", "10", *bar)
     inf.chequeo("llegadas aleatorias" in out, "poi_corredor: llegadas detectadas como aleatorias")
     for etapa in ("fina", "desfases", "desempate", "fragil"):
-        out = lanzar("barrer_fino.py", "poi_corredor", "--etapa", etapa, "--procesos", "3", *bar, *des)
+        out = lanzar("barrer_fino.py", "poi_corredor", "--etapa", etapa, "--procesos", "3", *bar, *des,
+                     "--permitir-prueba")
     regiones = sorted({f["region"] for f in leer_csv("barridos/poi_corredor/fina.csv")})
     inf(f"  regiones de la fina (umbral de 2 errores estandar): {regiones}")
     d = leer_csv("barridos/poi_corredor/desempate.csv")
@@ -93,7 +96,7 @@ def main():
                 f"desempate: {len(d)} finalistas con {d[0]['semillas']}; fijo fino {fino['clave']} "
                 f"{fino['retraso_total_prom']} ({fino['semillas']}), traza {fino['traza']}")
     lanzar("franja.py", "poi_corredor", "--procesos", "3", "--semillas", "424301-424305", "--semillas-final",
-           "424301-424315")
+           "424301-424315", "--permitir-prueba")
     ff = leer_csv("barridos/poi_corredor/franja_final.csv")
     inf.chequeo(len(ff) == 9 and ff[0]["semillas"] == "424301-424315", f"franja: {len(ff)} finalistas (todos los "
                                                                          f"pares) con {ff[0]['semillas']}")
@@ -102,15 +105,17 @@ def main():
            "20,25", "--transversal", "10", "--semillas", "424301-424303")
     for etapa in ("fina", "desfases"):
         lanzar("barrer_fino.py", "per_corredor", "--etapa", etapa, "--bloque", "600", "--procesos", "3",
-               "--semillas", "424301-424303")
+               "--semillas", "424301-424303", "--permitir-prueba")
     g = leer_csv("barridos/per_corredor/gruesa.csv")
     inf.chequeo(all(f"total_p{k}" in g[0] for k in range(1, 7)) and "total_p7" not in g[0],
                 "per_corredor: seis puntajes por bloque en el barrido (total_p1..total_p6)")
     lanzar("franja.py", "per_corredor", "--bloques", "--procesos", "3", "--semillas", "424301-424303",
-           "--semillas-final", "424301-424310")
+           "--semillas-final", "424301-424310", "--permitir-prueba")
     bl = leer_json("barridos/per_corredor/bloques.json")
-    inf(f"  bloques: {[(p['desde'], p['clave']) for p in bl['programas']]}, cambios {bl['instantes']}; "
-        f"{bl['retraso_total_prom']} en {bl['semillas']}")
+    inf(f"  bloques: {[(p['desde'], p['clave']) for p in bl['programas']]}, cambios {bl['instantes']} (reglas "
+        f"{bl['cambios']['reglas']}, retraso maximo {bl['cambios']['retraso_maximo']} s); "
+        f"{bl['retraso_total_prom']} en "
+        f"{bl['semillas']}; sin el fijo fino al lado (el perfil no corrio fragil): marca {bl['registro']['prueba']}")
     os.chdir(CARPETA)
     sys.path.insert(0, CARPETA)
     import escenarios_plan2 as ep
@@ -123,7 +128,7 @@ def main():
     inf.chequeo(m == bl["retraso_total_prom"], f"bloques jugado por TraCI (evaluar --brazo bloques): media {m} = "
                                                f"{bl['retraso_total_prom']}")
     lanzar("actuado.py", "poi_corredor", "--paso", "todos", "--procesos", "3", "--semillas", "424301-424302",
-           "--semillas-final", "424301-424305")
+           "--semillas-final", "424301-424305", "--permitir-prueba")
     af = [f for f in leer_csv("barridos/poi_corredor/actuado_final.csv") if f["etapa"] == "final"]
     inf.chequeo(len(af) == 10 and af[0]["semillas"] == "424301-424305", f"actuado: {len(af)} finalistas con "
                                                                          f"{af[0]['semillas']}")

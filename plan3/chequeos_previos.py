@@ -9,7 +9,10 @@ Pasos (si alguno falla, no escribe lanzamiento.sha256 y la cola no arranca):
   2. lista de trabajos: capas 1 y 2 de protecciones.py (comandos, nombres y salidas unicos, dependencias), y que
      cola/trabajos.jsonl y cola/manifiesto_esperado.json son los que escribe el generador con cola/partes.txt;
   3. semillas: ningun CSV fuera de ciego/ e insumos/ tiene semillas de las tandas decisivas o de la prueba final;
-  4. el codigo y el prerregistro no tienen cambios sin commit.
+  4. el codigo y el prerregistro no tienen cambios sin commit;
+  5. cada comando de la lista pasa el parser de su script (validar_args de rl_ippo, barrer_fino, franja, actuado,
+     reglas, p3_preparar y evaluar3): un desajuste entre el generador y un script se ve aqui y no a la noche;
+  6. desde la parte B (dia 14): cada archivo de referencias_congeladas.json existe con su sha256.
 Si todo pasa, escribe lanzamiento.sha256: "<commit> <sha256 de PRERREGISTRO.md> <sha256 de cola/trabajos.jsonl>".
 """
 import os
@@ -34,22 +37,23 @@ CMD = ["train", "--escenario", "corredor", "--seed", "7", "--episodios", "10", "
 CSV_ID = "resultados_corredor_ippo_vecinos_s7.csv"
 
 
-def correr(codigo, carpeta, extra=()):
-    """Entrena con el rl_ippo.py de `codigo` en `carpeta` (con los archivos del escenario)."""
+def correr(codigo, carpeta, extra=(), programa="rl_ippo.py", cmd=None, archivos=None):
+    """Corre el `programa` de `codigo` en `carpeta` (con los archivos del escenario). Por omision, el entrenamiento CMD
+    de rl_ippo en P1."""
     os.makedirs(carpeta, exist_ok=True)
-    for a in ESCENARIO:
+    for a in (ESCENARIO if archivos is None else archivos):
         shutil.copy(os.path.join(PLAN3, a), carpeta)
     entorno = dict(os.environ, OMP_NUM_THREADS="1", MKL_NUM_THREADS="1", PYTHONIOENCODING="utf-8")
-    r = subprocess.run([sys.executable, os.path.join(codigo, "rl_ippo.py")] + CMD + list(extra), cwd=carpeta,
-                       capture_output=True, text=True, env=entorno)
+    r = subprocess.run([sys.executable, os.path.join(codigo, programa)] + list(CMD if cmd is None else cmd)
+                       + list(extra), cwd=carpeta, capture_output=True, text=True, env=entorno)
     if r.returncode != 0:
-        raise RuntimeError(f"rl_ippo fallo en {carpeta}:\n{r.stdout[-2000:]}\n{r.stderr[-2000:]}")
+        raise RuntimeError(f"{programa} fallo en {carpeta}:\n{r.stdout[-2000:]}\n{r.stderr[-2000:]}")
 
 
-def filas(ruta, columnas=None):
+def filas(ruta, columnas=None, sin=("segundos",)):
     """Filas del CSV sin 'segundos' (y, si se da, solo esas columnas)."""
     with open(ruta, encoding="utf-8", newline="") as f:
-        return [{k: v for k, v in r.items() if k != "segundos" and (columnas is None or k in columnas)}
+        return [{k: v for k, v in r.items() if k not in sin and (columnas is None or k in columnas)}
                 for r in csv.DictReader(f)]
 
 
@@ -111,7 +115,99 @@ def identidad():
     if not tensores_iguales(os.path.join(a, pol), os.path.join(b, pol)):
         malos.append("identidad: la politica publicada difiere")
     malos += identidad_v2(tag)
+    malos += identidad_tramos()
+    malos += identidad_evaluar(tag)
+    malos += identidad_malla(tag)
     return malos
+
+
+def iguales_corridas(a, b, etiqueta_a, etiqueta_b, que, esc="corredor", base=7, columnas_csv=None, subconjunto=False):
+    """Compara dos corridas de entrenamiento: CSV (sin 'segundos' ni 'etiqueta'), tensores de los checkpoints y de la
+    politica publicada, y la eleccion del checkpoint. Con subconjunto, los checkpoints de b pueden ser parte de los de a
+    (una etiqueta nueva no repite los anteriores a su origen), pero el ultimo tiene que estar."""
+    malos = []
+    csv_a = f"resultados_{esc}_ippo_vecinos_{etiqueta_a}_s{base}.csv"
+    csv_b = f"resultados_{esc}_ippo_vecinos_{etiqueta_b}_s{base}.csv"
+    sin = ("segundos", "etiqueta")
+    if filas(os.path.join(a, csv_a), columnas_csv, sin) != filas(os.path.join(b, csv_b), columnas_csv, sin):
+        malos.append(f"{que}: el CSV difiere")
+    pts = lambda d, et: {x.replace(f"_{et}_", "_"): x for x in os.listdir(os.path.join(d, "checkpoints"))
+                         if x.endswith(".pt") and not x.endswith(".estado.pt") and f"_{et}_" in x}
+    pa, pb = pts(a, etiqueta_a), pts(b, etiqueta_b)
+    if (not set(pb) <= set(pa) or max(pa, default="") not in pb) if subconjunto else sorted(pa) != sorted(pb):
+        malos.append(f"{que}: checkpoints distintos: {sorted(pa)} frente a {sorted(pb)}")
+    for k in pa:
+        if k in pb and not tensores_iguales(os.path.join(a, "checkpoints", pa[k]), os.path.join(b, "checkpoints", pb[k])):
+            malos.append(f"{que}: tensores distintos en {pa[k]}")
+    pol_a = os.path.join(a, f"politica_{esc}_vecinos_{etiqueta_a}_s{base}.pt")
+    pol_b = os.path.join(b, f"politica_{esc}_vecinos_{etiqueta_b}_s{base}.pt")
+    if not tensores_iguales(pol_a, pol_b):
+        malos.append(f"{que}: la politica publicada difiere")
+    ma, mb = (json.load(open(p[:-3] + ".json", encoding="utf-8")) for p in (pol_a, pol_b))
+    if (ma["ep_elegido"], ma["val_elegido"]) != (mb["ep_elegido"], mb["val_elegido"]):
+        malos.append(f"{que}: la eleccion del checkpoint difiere")
+    return malos
+
+
+def identidad_tramos():
+    """El camino de los trabajos en tramos (revision de las Etapas 3-4, 05.11): V2 de hoy cortada en 5 + 5 con
+    --reanudar auto, y la continuacion con una etiqueta nueva desde el estado del ep 5 (como la Etapa 3b, con las
+    mismas opciones), dan lo mismo que la corrida seguida de identidad_v2 (TMP/v2_actual)."""
+    base = ["--v2", "--criterio-val", "total", "--guardar-estado", "--registro-extendido"]
+    seguida, tramos, nueva = (os.path.join(TMP, x) for x in ("v2_actual", "v2_tramos", "v2_nueva"))
+    correr(RAIZ, tramos, base + ["--etiqueta", "p3id", "--reanudar", "auto", "--hasta-ep", "5"])
+    correr(RAIZ, tramos, base + ["--etiqueta", "p3id", "--reanudar", "auto"])
+    malos = iguales_corridas(seguida, tramos, "p3id", "p3id", "identidad en tramos (5 + 5)")
+    os.makedirs(os.path.join(nueva, "checkpoints"), exist_ok=True)
+    for x in os.listdir(os.path.join(tramos, "checkpoints")):
+        if "_ep005" in x:
+            shutil.copy(os.path.join(tramos, "checkpoints", x), os.path.join(nueva, "checkpoints"))
+    correr(RAIZ, nueva, base + ["--etiqueta", "p3idn", "--reanudar",
+                                "checkpoints/corredor_ippo_vecinos_p3id_s7_ep005.estado.pt"])
+    malos += iguales_corridas(seguida, nueva, "p3id", "p3idn", "identidad con etiqueta nueva desde el ep 5",
+                              subconjunto=True)
+    return malos
+
+
+def identidad_evaluar(tag):
+    """evaluar.py del tag y de hoy juegan igual la politica V2 publicada por el tag (una semilla de humo)."""
+    for a in ("evaluar.py",):
+        rc, texto = protecciones.git("show", f"{TAG}:{a}")
+        if rc != 0:
+            return [f"no se pudo leer {a} del tag"]
+        with open(os.path.join(tag, a), "w", encoding="utf-8", newline="") as f:
+            f.write(texto)
+    pol = os.path.join(TMP, "v2_tag", "politica_corredor_vecinos_p3id_s7.pt")
+    salidas = {}
+    for nombre, codigo in (("tag", tag), ("actual", RAIZ)):
+        carpeta = os.path.join(TMP, f"evaluar_{nombre}")
+        os.makedirs(carpeta, exist_ok=True)
+        for x in (pol, pol[:-3] + ".json"):
+            shutil.copy(x, carpeta)
+        correr(codigo, carpeta, programa="evaluar.py",
+               cmd=["--escenario", "corredor", "--politica", os.path.basename(pol), "--semillas", "424303",
+                    "--salida", "eval_id.csv"])
+        salidas[nombre] = filas(os.path.join(carpeta, "eval_id.csv"))
+    return [] if salidas["tag"] == salidas["actual"] else ["identidad de evaluar.py: el CSV difiere del del tag"]
+
+
+def identidad_malla(tag):
+    """V2 en la malla de P6 (malla3_alta, 3 episodios, validacion al final en 2 semillas de humo): la red donde las
+    cadenas de la Etapa 1 cruzan las fusiones. El tag y el codigo de hoy, a la vez (dos procesos)."""
+    from concurrent.futures import ThreadPoolExecutor
+    archivos = ["malla3_alta.sumocfg", "malla3.net.xml", "malla3_alta.rou.xml", "malla3_alta.add.xml"]
+    cmd = ["train", "--escenario", "malla3_alta", "--seed", "7", "--episodios", "3", "--eval-cada", "3",
+           "--val-seeds", "424301,424302", "--v2", "--criterio-val", "total", "--etiqueta", "p3id"]
+    a, b = os.path.join(TMP, "malla_tag"), os.path.join(TMP, "malla_actual")
+    with ThreadPoolExecutor(2) as ex:
+        trabajos = [ex.submit(correr, tag, a, (), "rl_ippo.py", cmd, archivos),
+                    ex.submit(correr, RAIZ, b, ["--guardar-estado", "--registro-extendido"], "rl_ippo.py", cmd,
+                              archivos)]
+        for t in trabajos:
+            t.result()
+    cab_a = encabezado(os.path.join(a, "resultados_malla3_alta_ippo_vecinos_p3id_s7.csv"))
+    return iguales_corridas(a, b, "p3id", "p3id", "identidad V2 en la malla (P6)", esc="malla3_alta",
+                            columnas_csv=set(cab_a))
 
 
 def identidad_v2(tag):
@@ -149,47 +245,79 @@ def identidad_v2(tag):
     return malos
 
 
-# Valida cada comando de rl_ippo de la lista con su propio parser (rl_ippo.validar_args), en otro proceso para que el
-# registro de los escenarios nuevos llegue antes de importar rl_ippo (revision del 05.11).
-VALIDAR_RL_IPPO = r'''
-import io, sys, json, shlex, contextlib
+# Valida cada comando de la lista con el parser de su propio script (validar_args), en otro proceso para que el
+# registro de los escenarios nuevos llegue antes de importar los modulos que lo copian (revision del 05.11; G1-F4).
+SCRIPTS_VALIDADOS = {"rl_ippo.py": "rl_ippo", "barrer_fino.py": "barrer_fino", "franja.py": "franja",
+                     "actuado.py": "actuado", "reglas.py": "reglas", "p3_preparar.py": "p3_preparar",
+                     "evaluar3.py": "evaluar3"}
+VALIDAR_COMANDOS = r'''
+import io, os, sys, json, shlex, importlib, contextlib
 sys.path.insert(0, sys.argv[1])
+sys.path.insert(0, os.getcwd())
 import con_escenarios
 con_escenarios.registrar()
-import rl_ippo
-malos, n = [], 0
+SCRIPTS = json.loads(sys.argv[3])
+modulos, malos, n = {}, [], {}
 for linea in open(sys.argv[2], encoding="utf-8"):
     if not linea.strip():
         continue
     t = json.loads(linea)
     partes = shlex.split(t["cmd"])
-    argv = next((partes[i + 1:] for i, p in enumerate(partes) if p.replace("\\", "/").endswith("rl_ippo.py")), None)
-    if argv is None:
+    k = next((i for i, p in enumerate(partes) if os.path.basename(p.replace("\\", "/")) in SCRIPTS), None)
+    if k is None:
         continue
-    n += 1
+    script = os.path.basename(partes[k].replace("\\", "/"))
+    if script not in modulos:
+        modulos[script] = importlib.import_module(SCRIPTS[script])
+    n[script] = n.get(script, 0) + 1
     err = io.StringIO()
     try:
         with contextlib.redirect_stderr(err):
-            rl_ippo.validar_args(argv)
+            modulos[script].validar_args(partes[k + 1:])
     except SystemExit:
-        malos.append(t["id"] + ": " + (err.getvalue().strip().splitlines() or ["?"])[-1])
+        malos.append(t["id"] + ": " + script + ": " + (err.getvalue().strip().splitlines() or ["?"])[-1])
 print(json.dumps({"n": n, "malos": malos}))
 '''
 
 
-def comandos_rl_ippo():
-    """Problemas de los comandos de rl_ippo de cola/trabajos.jsonl (opciones que rl_ippo no acepta)."""
-    ruta = os.path.join(PLAN3, "cola", "trabajos.jsonl")
+def comandos(ruta=None):
+    """Problemas de los comandos de cola/trabajos.jsonl (o de ruta): opciones que su script no acepta, segun el
+    validar_args de rl_ippo, barrer_fino, franja, actuado, reglas, p3_preparar y evaluar3."""
+    ruta = ruta or os.path.join(PLAN3, "cola", "trabajos.jsonl")
     if not os.path.exists(ruta):
         return []
-    r = subprocess.run([sys.executable, "-c", VALIDAR_RL_IPPO, RAIZ, ruta], cwd=PLAN3, capture_output=True,
-                       text=True)
+    r = subprocess.run([sys.executable, "-c", VALIDAR_COMANDOS, RAIZ, ruta, json.dumps(SCRIPTS_VALIDADOS)],
+                       cwd=PLAN3, capture_output=True, text=True)
     if r.returncode != 0 or not r.stdout.strip():
-        return [f"no se pudieron validar los comandos de rl_ippo:\n{r.stderr[-800:]}"]
+        return [f"no se pudieron validar los comandos:\n{r.stderr[-800:]}"]
     datos = json.loads(r.stdout.strip().splitlines()[-1])
-    print(f"comandos de rl_ippo validados: {datos['n']}, rechazados: {len(datos['malos'])}", flush=True)
-    malos = [f"rl_ippo rechaza {m}" for m in datos["malos"][:10]]
+    print(f"comandos validados con el parser de su script: {datos['n']}, rechazados: {len(datos['malos'])}",
+          flush=True)
+    malos = [f"rechazado {m}" for m in datos["malos"][:10]]
     return malos + ([f"... y {len(datos['malos']) - 10} comandos rechazados mas"] if len(datos["malos"]) > 10 else [])
+
+
+def comandos_rl_ippo():
+    """Nombre de antes (lo usan pruebas): ahora valida todos los scripts."""
+    return comandos()
+
+
+def referencias_congeladas():
+    """Desde la parte B: cada archivo de referencias_congeladas.json existe en el disco con su sha256."""
+    ruta = os.path.join(PLAN3, "referencias_congeladas.json")
+    if not os.path.exists(ruta):
+        return []
+    with open(ruta, encoding="utf-8") as f:
+        congeladas = json.load(f)["referencias"]
+    malos = []
+    for rel, dato in sorted(congeladas.items()):
+        archivo = os.path.join(PLAN3, rel)
+        if not os.path.exists(archivo):
+            malos.append(f"referencia congelada que falta: {rel}")
+        elif protecciones.sha(archivo) != dato["sha256"]:
+            malos.append(f"referencia congelada cambiada (sha256 distinto): {rel}")
+    print(f"referencias congeladas: {len(congeladas)}, cambiadas o faltantes: {len(malos)}", flush=True)
+    return malos
 
 
 def semillas_filtradas():
@@ -237,7 +365,8 @@ def main():
             problemas.append(str(e))
         print(f"identidad: {'bien' if not problemas else 'MAL'} ({time.time() - t0:.0f} s)", flush=True)
     problemas += protecciones.revisar_trabajos(protecciones.leer_trabajos())
-    problemas += comandos_rl_ippo()
+    problemas += comandos()
+    problemas += referencias_congeladas()
     r = subprocess.run([sys.executable, "generar_trabajos3.py", "--comprobar"], cwd=PLAN3, capture_output=True,
                        text=True)
     if r.returncode != 0:

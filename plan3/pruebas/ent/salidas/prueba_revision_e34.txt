@@ -1,0 +1,93 @@
+Revision del 05.11 sobre las Etapas 3 y 4: politicas de la Etapa 3 en evaluar, revalidar_c0 y demo; lote vacio; validar_args; reglas antes y despues; variantes entregadas; observacion cercana recalculada; poi_corredor; creacion concurrente de los E2
+05.11.2026 14:41; python 3.14.6, torch 2.14.0+cpu
+
+
+C. Reglas nuevas de validar_args
+[OK] rechaza train --v2 --paso-decision 2: sale 2:  --paso-decision distinto de 5 va con --sin-forzadas (H14: antes del verde minimo las decisiones son f
+[OK] acepta train --v2 --paso-decision 2 --sin-forzadas: acepta
+[OK] acepta demo --paso-decision 2: acepta
+[OK] rechaza train --v2 --obs-cercana 75 --obs-insercion: sale 2:  --obs-cercana no va con --obs-insercion (ningun trabajo del plan las junta)
+[OK] rechaza train --v2 --obs-cercana 75 --variante local: sale 2:  --obs-cercana: no van con --variante local (los trabajos de la Etapa 3 son de vecinos)
+[OK] rechaza train --v2 --norm-valor --variante local: sale 2:  --norm-valor: no van con --variante local (los trabajos de la Etapa 3 son de vecinos)
+[OK] rechaza train --v2 --msg-cada-paso --escala-demanda 0.5,2: sale 2:  --msg-cada-paso: no van con --escala-demanda ni --val-escalas (la politica por red, B16, solo suma --
+[OK] rechaza train --v2 --obs-cercana 75 --val-escalas 0.5,1: sale 2:  --obs-cercana: no van con --escala-demanda ni --val-escalas (la politica por red, B16, solo suma --no
+[OK] acepta train --v2 --norm-valor --escala-demanda 0.5,2 --val-escalas 0.5,1,1.5: acepta
+[OK] rechaza train --v2 --val-escalas 1,1.0: sale 2:  --val-escalas: niveles repetidos (1, 1)
+[OK] rechaza train --v2 --val-escalas 0.5,1 --eval-cada 0: sale 2:  --val-escalas necesita validacion: --eval-cada > 0 y --val-seeds
+[OK] rechaza train --v2 --val-escalas 0.5,1 --val-seeds : sale 2:  --val-escalas necesita validacion: --eval-cada > 0 y --val-seeds
+[OK] rechaza train --v2 --escala-demanda 0.05,2: sale 2:  --escala-demanda: factores de demanda entre 0.1 y 4
+[OK] rechaza train --v2 --val-escalas 0.5,4.5: sale 2:  --val-escalas: factores de demanda entre 0.1 y 4
+[OK] acepta train --v2 --escala-demanda 0.1,4: acepta
+[OK] HIPER y C quedan iguales
+
+H. Ocho procesos crean a la vez e2_corredor_75.add.xml
+[OK] los ocho salen con 0, el archivo queda igual al de un proceso solo y no quedan temporales: codigos [0, 0, 0, 0, 0, 0, 0, 0]; 1073 bytes; temporales []
+
+B. Episodio sin transiciones en el lote
+[OK] la corrida sigue: el episodio 2 deja vacias las columnas de la actualizacion y el 1 y el 3 no: codigo 0; episodio 2: ['', '', '', '', '']
+[OK] sin validacion, la politica publicada lleva la escala del critico (vn_media, vn_desv, vn_estado): {'vn_media': -5.0809, 'vn_desv': 2.7392}
+[OK] NormValor.actualizar se niega con un lote vacio
+
+A. Politica de la Etapa 3 en evaluar.py (modo antiguo), revalidar_c0.py y demo
+[OK] entrena la politica de la Etapa 3: codigo 0
+   validacion del checkpoint publicado (ep 1): {424301: 71.99, 424302: 75.16}
+[OK] evaluar.py --ippo (modo antiguo) la juega con su reloj, sus mensajes y su observacion: da su validacion: codigo 0; {424301: 71.99, 424302: 75.16} | {424301: 71.99, 424302: 75.16}
+[OK] revalidar_c0.py validar reproduce la validacion guardada de los dos checkpoints: codigo 0; reproducidas [[424301, 424302], [424301, 424302]]
+[OK] demo avisa que la linea de comandos pedia otras opciones (obs_cercana, paso_decision, msg_cada_paso) y juega con las del meta: da su validacion: codigo 0; timeLoss 71.99 | 71.99; ['AVISO: demo juega politica_corredor_vecinos_p3rv3_s7.pt con las opciones de su meta; la linea de comandos pedia obs_cercana=0.0 (meta: 75.0); paso_decision=5 (meta: 2); msg_cada_paso=False (meta: True)']
+
+F. Observacion cercana recalculada aparte (verif_e3.py del revisor R2) en red_alta
+[OK] K = 5: sin problemas y la observacion cercana coincide con la recalculada: codigo 0; dim 49; lecturas 1887; distintas {}; marca de giro en 0; decisiones a los t_verde [0, 5, 10, 15, 20, 25, 30, 35]
+[OK] K = 2: sin problemas y la observacion cercana coincide con la recalculada: codigo 0; dim 49; lecturas 4551; distintas {}; marca de giro en 0; decisiones a los t_verde [0, 2, 4, 6, 8, 10, 12, 14]
+
+G. Politica de forma p3obspoi en poi_corredor, jugada con ../con_escenarios.py evaluar3.py
+[OK] entrena (2 episodios, --v2 --obs-cercana 75): codigo 0
+[OK] las tres salen con 0: {'sola': 0, 'colas0': 0, 'perdida1': 0}
+[OK] sola da su validacion, semilla por semilla: {424301: 69.14, 424302: 102.07} | {424301: 69.14, 424302: 102.07}
+   con --colas-cero {424301: 74.29, 424302: 54.51}; con --perdida 1 {424301: 104.97, 424302: 112.66}
+
+D. Reglas y Max-Pressure: el arbol de a9ba36b frente al de hoy (evaluar3.py, 424301-424302)
+[OK] regla_u2g60 en corredor: mismo CSV byte a byte: codigos [0, 0]; timeLoss ['40.86', '38.98']
+[OK] mp_c90 en malla3_alta: mismo CSV byte a byte: codigos [0, 0]; timeLoss ['54.71', '48.65']
+
+E. Variantes entregadas frente al tag (P1, base 7, 4 episodios, validacion cada 2)
+-- obs_insercion
+[OK] las dos corridas salen con 0: codigos 0, 0
+[OK] CSV: iguales byte a byte salvo 'segundos' (4 filas)
+[OK] checkpoints: episodios con checkpoint: [2, 4] | [2, 4]
+  ep   2: 12/12 tensores iguales (torch.equal), claves iguales True; meta igual
+  ep   4: 12/12 tensores iguales (torch.equal), claves iguales True; meta igual
+[OK] politica publicada (bytes)
+[OK] meta publicado: meta igual
+-- recompensa_insercion
+[OK] las dos corridas salen con 0: codigos 0, 0
+[OK] CSV: iguales byte a byte salvo 'segundos' (4 filas)
+[OK] checkpoints: episodios con checkpoint: [2, 4] | [2, 4]
+  ep   2: 12/12 tensores iguales (torch.equal), claves iguales True; meta igual
+  ep   4: 12/12 tensores iguales (torch.equal), claves iguales True; meta igual
+[OK] politica publicada (bytes)
+[OK] meta publicado: meta igual
+-- spill
+[OK] las dos corridas salen con 0: codigos 0, 0
+[OK] CSV: iguales byte a byte salvo 'segundos' (4 filas)
+[OK] checkpoints: episodios con checkpoint: [2, 4] | [2, 4]
+  ep   2: 12/12 tensores iguales (torch.equal), claves iguales True; meta igual
+  ep   4: 12/12 tensores iguales (torch.equal), claves iguales True; meta igual
+[OK] politica publicada (bytes)
+[OK] meta publicado: meta igual
+-- cambio
+[OK] las dos corridas salen con 0: codigos 0, 0
+[OK] CSV: iguales byte a byte salvo 'segundos' (4 filas)
+[OK] checkpoints: episodios con checkpoint: [2, 4] | [2, 4]
+  ep   2: 12/12 tensores iguales (torch.equal), claves iguales True; meta igual
+  ep   4: 12/12 tensores iguales (torch.equal), claves iguales True; meta igual
+[OK] politica publicada (bytes)
+[OK] meta publicado: meta igual
+-- rl_mappo, un episodio
+[OK] las dos corridas salen con 0: codigos 0, 0
+[OK] CSV: iguales byte a byte salvo 'segundos' (1 filas)
+[OK] checkpoints de actor y critico (tensores): ['corredor_mappo_s7_critico_ep001.pt', 'corredor_mappo_s7_ep001.pt']
+[OK] politica publicada (bytes)
+-- evaluar.py --latencia 5 con la politica de --obs-insercion (semillas 424303-424304)
+[OK] mismo CSV de evaluar.py byte a byte (tag y hoy): codigos [0, 0]
+
+Resultado: todo OK

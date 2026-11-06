@@ -75,8 +75,25 @@ def sumo_directo(cfg, adicionales, semilla, tripinfo, extra=(), log=None):
     cmd += ["--log", log, "--no-warnings", "false"] if log else ["--no-warnings", "true"]
     if adicionales:
         cmd += ["--additional-files", adicionales]
+    comun.revisar_semilla_ciega(cmd)            # las pruebas nunca simulan semillas del examen ni de la final
     subprocess.run(cmd + list(extra), check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     return comun.leer_tripinfo(tripinfo)
+
+
+def cabecera_codigo(archivos=("comun.py", "rl_ippo.py", "evaluar.py", "rl_corredor.py")):
+    """Lineas que dicen con que codigo se corre: el commit (HEAD), si esos archivos tienen cambios sin commitear y
+    el sha256 de cada uno con los fines de linea de git (LF): es el de 'git show <commit>:<archivo>', el mismo en
+    cualquier worktree."""
+    def git(*args):
+        return subprocess.run(["git", *args], cwd=RAIZ, capture_output=True, text=True).stdout.strip()
+    sucios = git("status", "--porcelain", "--", *archivos)
+    lineas = [f"Codigo: commit {git('rev-parse', 'HEAD')} (rama {git('rev-parse', '--abbrev-ref', 'HEAD')}); "
+              + ("estos archivos sin cambios frente al commit" if not sucios else f"CON CAMBIOS: {sucios}")]
+    for a in archivos:
+        with open(os.path.join(RAIZ, a), "rb") as f:
+            crudo = f.read().replace(b"\r\n", b"\n")
+        lineas.append(f"  sha256 {a}: {hashlib.sha256(crudo).hexdigest()}")
+    return lineas
 
 
 class Informe:

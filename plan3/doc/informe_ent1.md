@@ -124,6 +124,11 @@ entero y todo lo ≤ NNN está completo. Se lee con `torch.load(weights_only=Tru
 `codigo`, `tramos` y `reanudaciones` llegaron con la revisión del 05.11 y se leen con `.get`: un estado sin ellas sigue
 valiendo (la versión sigue siendo 1).
 
+*Segunda parte (`informe_ent2.md` §2.6):* con las opciones de las Etapas 3 y 4, el estado guarda además `ent` (el
+coeficiente de entropía de cada episodio, que se compara al reanudar), `norm_valor` (las medias de `--norm-valor`) y
+`generadores.escala` (el generador de `--escala-demanda`). También son claves nuevas: la versión sigue en 1 y un
+estado de antes se lee igual.
+
 Pesa ~185 KB (P1) más ~0.4 KB por fila del CSV [M]: unos 4.5 MB por corrida de 200 episodios con validación cada 10 y
 ~11 MB por una de 400 [I]. La política `.pt` no cambia.
 
@@ -156,9 +161,11 @@ Detalles:
   respaldo), copia de ahí los checkpoints y estados ≤ k.
 - **Etiqueta nueva**: el meta de los checkpoints > k y el de la política publicada llevan
   `"reanudado_de": [{"corrida": "<tag de origen>", "episodio": k}]`. Los `.json` de los checkpoints copiados se
-  reescriben como los habría escrito una corrida seguida con la etiqueta nueva (meta nuevo más la validación de ese
-  checkpoint, sacada de las series). Las filas ≤ k del CSV pasan con la columna `etiqueta` nueva; las demás columnas,
-  tal cual. Los estados copiados guardan dentro el `tag` de origen.
+  reescriben como los habría escrito una corrida seguida con la etiqueta nueva: meta nuevo más la validación de ese
+  checkpoint. Desde la segunda parte, esa validación se toma del `.json` de origen, todo lo que va desde
+  `ep_checkpoint` (sin sus `tramos`, que son los de esta corrida); antes se rearmaba desde las series, lo que no
+  alcanza con los niveles de `--val-escalas`. El resultado es el mismo. Las filas ≤ k del CSV pasan con la columna
+  `etiqueta` nueva; las demás columnas, tal cual. Los estados copiados guardan dentro el `tag` de origen.
 - **Comprobación de B22**: al reanudar, las filas > k que haya en el CSV de esta corrida (las de un intento caído) se
   comparan con las que se rehacen, salvo `segundos`, en cuanto sale cada una. El log dice "Reanudacion: los episodios
   a-b repiten el intento anterior" o "AVISO: el episodio n no repite...". Si alguno no repite, además queda en
@@ -303,13 +310,13 @@ mismos caminos de la reanudación.
 | — | `--reanudar auto` con `taskkill /F /T` a mitad de cada tramo; y la ruta de una etiqueta nueva relanzada | OK. Misma etiqueta (dos tramos, 10 y 20): cada intento muerto (en el ep 8 y en el 18; python y su sumo) sale distinto de 0 y deja los estados hasta el 5 y el 15; relanzado con el mismo comando, sigue desde ahí, los episodios rehechos repiten los del intento muerto, y el resultado es la corrida seguida (CSV, checkpoints, política byte a byte, meta y estados). Relanzar un tramo ya hecho, o la corrida publicada, sale con 0 sin tocar ningún archivo. Etiqueta nueva (desde el ep 10, 30 episodios, horizonte 20, piso 0.1, la ruta de origen en los dos tramos): muerto en el ep 18 y relanzado, sigue desde su estado del 15 sin volver a copiar, y termina igual que la corrida seguida de 30 con esa etiqueta. Desde la revisión de robustez, el meta publicado anota cada relanzamiento (partidas 5 y 15; 15 en la etiqueta nueva), todos repetidos, y no hay `rehechos.json` | `prueba_caida.txt` |
 | 5 | V2 del corredor, base 42, ep 10, frente a la V2 del diagnóstico | OK: 12/12 tensores iguales (`torch.equal`; el sha256 difiere por el nombre); filas 1-10 iguales en las 48 columnas comparables. Validar en otras semillas, y una vez más (en el 5), no cambió el entrenamiento | `prueba_diag.txt` |
 | r | Robustez (sección 7): estados dañados, etiqueta nueva con estados propios dañados, CSV tomado, B22, procedencia, `validar_args` y escrituras atómicas | OK, R1-R7 (detalle en la sección 7) | `prueba_robustez.txt` |
-| c | Los 403 comandos de `rl_ippo` del generador frente a `validar_args` | OK: pasan todos menos los 175 de la Etapa 3, que esperan sus opciones | `prueba_comandos.txt` |
+| c | Los 403 comandos de `rl_ippo` del generador frente a `validar_args` | OK: con la robustez sola (97ea592) pasan todos menos los 175 de la Etapa 3, que esperaban sus opciones; con la Etapa 3 (5824084) pasan los 403 | `prueba_comandos.txt` |
 | d | 400 con horizonte 200 y piso 0.1 repite los episodios 1-181 de una de 200 | OK: la tasa es la misma bit a bit en 1-180 (en el 181 difiere en el último bit: 0.1 frente a 0.0999...98); CSV 1-181 igual; checkpoints 10-180 iguales; estados 10-180 iguales. En el 181 hasta los pesos y los momentos de Adam coinciden: la diferencia se pierde al pasar a float32. Desde el 182 la tasa cambia de verdad (9.5e-05 frente a 1e-04) | `prueba_piso.txt` |
 
 ## 5. Para la Etapa 3 y la política por red (dónde enganchar)
 
-No se implementó nada de la Etapa 3 ni de la Etapa 4. Lo que cada opción nueva tendrá que sumar, para que la
-reanudación siga exacta:
+*Hecho en la segunda parte: ver `informe_ent2.md`.* En esta primera parte no se implementó nada de la Etapa 3 ni de
+la Etapa 4. Lo que cada opción nueva tendría que sumar, para que la reanudación siguiera exacta:
 
 | Pieza | Dónde | Qué |
 |---|---|---|
@@ -416,7 +423,8 @@ except SystemExit as e:                       # mal: e.code == 2; el motivo es l
 `generar_trabajos3` (3037 trabajos) y pasa por `validar_args` los 403 que corren `rl_ippo`, como hará
 `chequeos_previos`. En este commit pasan los de las etapas 1, 2 y 3b, y fallan los 175 de la Etapa 3
 ("unrecognized arguments: --obs-cercana 75"), como se esperaba: sus opciones llegan con la Etapa 3. Con
-`--esperar-rechazo etapa3`, la prueba da todo OK [M].
+`--esperar-rechazo etapa3`, la prueba da todo OK [M]. Con la segunda parte (commit 5824084, `informe_ent2.md`) pasan
+los 403, sin `--esperar-rechazo` [M].
 
 **Límites:**
 

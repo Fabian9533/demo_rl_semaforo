@@ -1,0 +1,817 @@
+{
+ "creado": "2026-11-05 13:49:06",
+ "origen": "C:/Users/GAMER/AppData/Local/Temp/claude/c--Users-GAMER-Documents-demo-rl-semaforo/de7717ed-cbad-4afb-8e8f-03cbdcefb7fa/scratchpad/rev_ver/A-k-empirico",
+ "motivo": "revision de veredicto3 (13fd132), revisor A-k-empirico: corridas con semillas de examen T1 regular. Movidos sin abrir; solo se leyo la columna de semillas.",
+ "archivos": [
+  {
+   "ruta": "out/ent_eval_corredor.csv",
+   "sha256": "08f173529d245d9819b4c8367e5737d07428d72e903f2423287ccd0ecc8efbc6",
+   "bytes": 810,
+   "filas": 1,
+   "semillas": [
+    8001
+   ]
+  },
+  {
+   "ruta": "out/ent_eval_dem_red_t1810.csv",
+   "sha256": "25b2fb6bdfcc53b3761ab5b3d15a066b86f7a8773a8d95f0d664cac6ddcaa85d",
+   "bytes": 809,
+   "filas": 1,
+   "semillas": [
+    8001
+   ]
+  },
+  {
+   "ruta": "out/ent_eval_red.csv",
+   "sha256": "209ba338573090f28475c5c2fd6b91e617dbed50a0793af6f97471aa738543e4",
+   "bytes": 811,
+   "filas": 1,
+   "semillas": [
+    8001
+   ]
+  },
+  {
+   "ruta": "out/eval_corredor_actuado.csv",
+   "sha256": "60243cfdbd60e77712d7caffe4200cb607b21b5d0e3a0573bccf8301fe0a01ba",
+   "bytes": 1221,
+   "filas": 3,
+   "semillas": [
+    8001,
+    8002,
+    8003
+   ]
+  },
+  {
+   "ruta": "out/eval_corredor_fijo.csv",
+   "sha256": "6c3a05ca6e5c940d5e536b6f478b9741fc51b0cd35a2b90c791339af49ab1bbe",
+   "bytes": 1204,
+   "filas": 3,
+   "semillas": [
+    8001,
+    8002,
+    8003
+   ]
+  },
+  {
+   "ruta": "out/eval_corredor_fijo_prog_plantilla.csv",
+   "sha256": "29959c57a35fb1fa6b57d8008e0fb0efc4df3660ac60cc6d52b624263b3087a4",
+   "bytes": 1264,
+   "filas": 3,
+   "semillas": [
+    8001,
+    8002,
+    8003
+   ]
+  },
+  {
+   "ruta": "out/eval_corredor_mp_c60.csv",
+   "sha256": "5a12fc04e0f338487863ec58ed80c353c17f92b65cfb85d40237b3d577bdc8c1",
+   "bytes": 1228,
+   "filas": 3,
+   "semillas": [
+    8001,
+    8002,
+    8003
+   ]
+  },
+  {
+   "ruta": "out/eval_corredor_pol_vecinos_s42.csv",
+   "sha256": "fb49610dcf22113e4af561e1e26a3ff03c908992e90c5d004d4e64ee3c5c8df3",
+   "bytes": 1277,
+   "filas": 3,
+   "semillas": [
+    8001,
+    8002,
+    8003
+   ]
+  },
+  {
+   "ruta": "out/eval_corredor_regla_u3g60.csv",
+   "sha256": "08f173529d245d9819b4c8367e5737d07428d72e903f2423287ccd0ecc8efbc6",
+   "bytes": 810,
+   "filas": 1,
+   "semillas": [
+    8001
+   ]
+  },
+  {
+   "ruta": "out/eval_corredor_regla_u3g60b.csv",
+   "sha256": "31aceace6c7985082c25570bcfe6996b3d471b9708e40b4aed55a2290ee4aaec",
+   "bytes": 1255,
+   "filas": 3,
+   "semillas": [
+    8001,
+    8002,
+    8003
+   ]
+  },
+  {
+   "ruta": "out/eval_corredor_trivial.csv",
+   "sha256": "2359611b15cb3454569230f13b3d61d39b683a7d7532e20178eef28d40ca325e",
+   "bytes": 1258,
+   "filas": 3,
+   "semillas": [
+    8001,
+    8002,
+    8003
+   ]
+  },
+  {
+   "ruta": "out/eval_dem_corredor_t1358_regla_u3g60.csv",
+   "sha256": "adb5382f03ec8cc448690e3e2d9214275f3b0f32e9842e5ae5b9fa850938a716",
+   "bytes": 1246,
+   "filas": 3,
+   "semillas": [
+    8001,
+    8002,
+    8003
+   ]
+  },
+  {
+   "ruta": "out/eval_dem_red_t905_fijo.csv",
+   "sha256": "da33b2c17c0a2cce9e383f99605085a585195d6b98d3a2d833127c74ed6be90e",
+   "bytes": 1186,
+   "filas": 3,
+   "semillas": [
+    8001,
+    8002,
+    8003
+   ]
+  },
+  {
+   "ruta": "out/eval_dem_red_t905_regla_u3g60.csv",
+   "sha256": "37df330a9a7448ccc0e5e2152b5f605c1ede39575b031a5519ef8585563cc95c",
+   "bytes": 1236,
+   "filas": 3,
+   "semillas": [
+    8001,
+    8002,
+    8003
+   ]
+  },
+  {
+   "ruta": "out/eval_malla3_regla_u3g60.csv",
+   "sha256": "14ceed96c848ddf2b58c3e8953271a7064a18daf3479c562d3d73f9131e79bd9",
+   "bytes": 1260,
+   "filas": 3,
+   "semillas": [
+    8001,
+    8002,
+    8003
+   ]
+  },
+  {
+   "ruta": "out/eval_poi_corredor_regla_u3g60.csv",
+   "sha256": "e728aa9bf3b8f4cc9464e9dfd71915604dde35979af96f8ed94dcc9bee9393aa",
+   "bytes": 1256,
+   "filas": 3,
+   "semillas": [
+    8001,
+    8002,
+    8003
+   ]
+  },
+  {
+   "ruta": "out/eval_red_fijo.csv",
+   "sha256": "5490276586ae221f1e732fce0c9d02bfa1aabc05a4c8757953b4585045f466fb",
+   "bytes": 1205,
+   "filas": 3,
+   "semillas": [
+    8001,
+    8002,
+    8003
+   ]
+  },
+  {
+   "ruta": "out/eval_red_mp_c60.csv",
+   "sha256": "7cc42c5b335ae869bc16eb501744ef2c4a0bfed76f19caf2477f5170c9798830",
+   "bytes": 1230,
+   "filas": 3,
+   "semillas": [
+    8001,
+    8002,
+    8003
+   ]
+  },
+  {
+   "ruta": "out/eval_red_pol_vecinos_s42.csv",
+   "sha256": "ec493c1aa13aa5def673a3309c55f8e3cad6bbf413345d682c405e13f8d93854",
+   "bytes": 1278,
+   "filas": 3,
+   "semillas": [
+    8001,
+    8002,
+    8003
+   ]
+  },
+  {
+   "ruta": "out/eval_red_regla_u3g60.csv",
+   "sha256": "db38f896ac0b6593a625579705ca5dea207d0a2798ecedb64879fa2a3b435e2d",
+   "bytes": 1256,
+   "filas": 3,
+   "semillas": [
+    8001,
+    8002,
+    8003
+   ]
+  },
+  {
+   "ruta": "out/plain_corredor_fijo.csv",
+   "sha256": "6c3a05ca6e5c940d5e536b6f478b9741fc51b0cd35a2b90c791339af49ab1bbe",
+   "bytes": 1204,
+   "filas": 3,
+   "semillas": [
+    8001,
+    8002,
+    8003
+   ]
+  },
+  {
+   "ruta": "out/plain_corredor_regla.csv",
+   "sha256": "31aceace6c7985082c25570bcfe6996b3d471b9708e40b4aed55a2290ee4aaec",
+   "bytes": 1255,
+   "filas": 3,
+   "semillas": [
+    8001,
+    8002,
+    8003
+   ]
+  },
+  {
+   "ruta": "out/todas/eval_corredor.csv",
+   "sha256": "08f173529d245d9819b4c8367e5737d07428d72e903f2423287ccd0ecc8efbc6",
+   "bytes": 810,
+   "filas": 1,
+   "semillas": [
+    8001
+   ]
+  },
+  {
+   "ruta": "out/todas/eval_corredor_alta.csv",
+   "sha256": "04203babac7b4bc4af676d4ef93185f82c05fc1efbf61e213844fcda45558816",
+   "bytes": 840,
+   "filas": 1,
+   "semillas": [
+    8001
+   ]
+  },
+  {
+   "ruta": "out/todas/eval_dem_corredor_t1358.csv",
+   "sha256": "8365bffc9b7c5bf97c1031e191a45171336fc2cdae2fdb4b6e4d4785c0a39557",
+   "bytes": 809,
+   "filas": 1,
+   "semillas": [
+    8001
+   ]
+  },
+  {
+   "ruta": "out/todas/eval_dem_corredor_t2715.csv",
+   "sha256": "91aecc28003ca8abed00623ca10448471dc306c8c477e5a6d269b0ab620b90ef",
+   "bytes": 829,
+   "filas": 1,
+   "semillas": [
+    8001
+   ]
+  },
+  {
+   "ruta": "out/todas/eval_dem_corredor_t2715_der.csv",
+   "sha256": "d703ccf798ea01c49b3e94c9f4cd3cdfd275ab9536128b9417ca95bff9b750d1",
+   "bytes": 821,
+   "filas": 1,
+   "semillas": [
+    8001
+   ]
+  },
+  {
+   "ruta": "out/todas/eval_dem_corredor_t905.csv",
+   "sha256": "1e5117a3dce4b8c96ee715e59f6d74c872f048ae290453e5665307472043a435",
+   "bytes": 802,
+   "filas": 1,
+   "semillas": [
+    8001
+   ]
+  },
+  {
+   "ruta": "out/todas/eval_dem_malla3_t1810.csv",
+   "sha256": "7b9af59349c954d0e51a705ed7d92b72bcfa95b610e2750f1f97b456c624e846",
+   "bytes": 812,
+   "filas": 1,
+   "semillas": [
+    8001
+   ]
+  },
+  {
+   "ruta": "out/todas/eval_dem_malla3_t2715.csv",
+   "sha256": "053a03beef1b9f82fb7ba8dada8a75ddcf9a98c3472dcdaf3add64461f36f961",
+   "bytes": 814,
+   "filas": 1,
+   "semillas": [
+    8001
+   ]
+  },
+  {
+   "ruta": "out/todas/eval_dem_malla3_t3620.csv",
+   "sha256": "d5a4e8ceaf99f1cb6d2969241c7ec11e8a8d02de8bd4015885d241230d1b8858",
+   "bytes": 813,
+   "filas": 1,
+   "semillas": [
+    8001
+   ]
+  },
+  {
+   "ruta": "out/todas/eval_dem_malla3_t6525.csv",
+   "sha256": "2bfa038d433f3492cf636202656cfbe8a0781b5bb4c5123a66a78c4e88ec3976",
+   "bytes": 816,
+   "filas": 1,
+   "semillas": [
+    8001
+   ]
+  },
+  {
+   "ruta": "out/todas/eval_dem_red_t1358.csv",
+   "sha256": "362fb0f48422fb2efe5b2f99f1fd2f6abfbf0e1ab51c7d90a8641a71b615b5c2",
+   "bytes": 806,
+   "filas": 1,
+   "semillas": [
+    8001
+   ]
+  },
+  {
+   "ruta": "out/todas/eval_dem_red_t1810.csv",
+   "sha256": "25b2fb6bdfcc53b3761ab5b3d15a066b86f7a8773a8d95f0d664cac6ddcaa85d",
+   "bytes": 809,
+   "filas": 1,
+   "semillas": [
+    8001
+   ]
+  },
+  {
+   "ruta": "out/todas/eval_dem_red_t2715.csv",
+   "sha256": "7ccb730e80eed27897c80e3730914f9caeea5306d87295c935d5e0dbc19a2c1b",
+   "bytes": 812,
+   "filas": 1,
+   "semillas": [
+    8001
+   ]
+  },
+  {
+   "ruta": "out/todas/eval_dem_red_t3620.csv",
+   "sha256": "e872292338eaa809a060813cd71f12521445444dc86ad5246636a4f1e9539485",
+   "bytes": 819,
+   "filas": 1,
+   "semillas": [
+    8001
+   ]
+  },
+  {
+   "ruta": "out/todas/eval_dem_red_t905.csv",
+   "sha256": "dea8cb95ad34edca3faf638a4d6cb40db06fde40c661b57478ec646d05937e50",
+   "bytes": 805,
+   "filas": 1,
+   "semillas": [
+    8001
+   ]
+  },
+  {
+   "ruta": "out/todas/eval_malla3.csv",
+   "sha256": "b10322b70f8cdbd6c6370753427592ca65af41f15dc34e4a0733a68618f9e265",
+   "bytes": 812,
+   "filas": 1,
+   "semillas": [
+    8001
+   ]
+  },
+  {
+   "ruta": "out/todas/eval_malla3_alta.csv",
+   "sha256": "b065a3d2f3d51159d5e79de40a2663416ef9cce84991016fc7791baf1d2d07f0",
+   "bytes": 823,
+   "filas": 1,
+   "semillas": [
+    8001
+   ]
+  },
+  {
+   "ruta": "out/todas/eval_malla3_alta_e.csv",
+   "sha256": "58fe7451a30e465ae04e4380d584933909377837929d3bc5f3f0fbcba08d484c",
+   "bytes": 828,
+   "filas": 1,
+   "semillas": [
+    8001
+   ]
+  },
+  {
+   "ruta": "out/todas/eval_mix_corredor.csv",
+   "sha256": "d4c2570b9e0dd09e273b50935967352dbd69ba871aeee9f6cdc663d7dd34281f",
+   "bytes": 811,
+   "filas": 1,
+   "semillas": [
+    8001
+   ]
+  },
+  {
+   "ruta": "out/todas/eval_mix_red.csv",
+   "sha256": "999bd6b59530afd49c9805c3ceab6949903c78295dba31a9fa7c67545e4a4743",
+   "bytes": 810,
+   "filas": 1,
+   "semillas": [
+    8001
+   ]
+  },
+  {
+   "ruta": "out/todas/eval_mixa_corredor.csv",
+   "sha256": "7ea598f41467dc33ae090c87e2a852376b7a197ec1cb318aa9a3901783fa6bb1",
+   "bytes": 813,
+   "filas": 1,
+   "semillas": [
+    8001
+   ]
+  },
+  {
+   "ruta": "out/todas/eval_mixa_red.csv",
+   "sha256": "db386da5f484b46170d61b728699de9a096aa5d0b6c2d12a03309f575f377611",
+   "bytes": 811,
+   "filas": 1,
+   "semillas": [
+    8001
+   ]
+  },
+  {
+   "ruta": "out/todas/eval_per_corredor.csv",
+   "sha256": "934b5e9db092fc563b186a989d6153c1803d7c3e9e6b05de08600725b530c9d5",
+   "bytes": 815,
+   "filas": 1,
+   "semillas": [
+    8001
+   ]
+  },
+  {
+   "ruta": "out/todas/eval_per_red.csv",
+   "sha256": "4950f3ea12a664a05b2ab29aec0e0efacbb90f6e2ffb1880237dc77635a2aaff",
+   "bytes": 814,
+   "filas": 1,
+   "semillas": [
+    8001
+   ]
+  },
+  {
+   "ruta": "out/todas/eval_poi_corredor.csv",
+   "sha256": "9eca5fd9e899870450b64a4d0638c83cde82d61f385e4f7f7692f4c95c52fb3c",
+   "bytes": 810,
+   "filas": 1,
+   "semillas": [
+    8001
+   ]
+  },
+  {
+   "ruta": "out/todas/eval_poi_corredor_alta.csv",
+   "sha256": "c3d52703d18aa9743af3368c28084acdfb5ae6d73ad3df9f1de63a9dfe040de3",
+   "bytes": 841,
+   "filas": 1,
+   "semillas": [
+    8001
+   ]
+  },
+  {
+   "ruta": "out/todas/eval_poi_malla3.csv",
+   "sha256": "8e428aef7121fdd1dc81618fd627eac867fcc46ac91d91bfb3518f5df5a5bb30",
+   "bytes": 815,
+   "filas": 1,
+   "semillas": [
+    8001
+   ]
+  },
+  {
+   "ruta": "out/todas/eval_poi_malla3_alta.csv",
+   "sha256": "18652e6e810f75111456f1b6bb0243cd965c8456b5d6d602f8e80e77bba15faa",
+   "bytes": 823,
+   "filas": 1,
+   "semillas": [
+    8001
+   ]
+  },
+  {
+   "ruta": "out/todas/eval_poi_red.csv",
+   "sha256": "4157cfd3ab75c48d7b689137056d720a694debe3e2b52bae463b9aa868b30f53",
+   "bytes": 807,
+   "filas": 1,
+   "semillas": [
+    8001
+   ]
+  },
+  {
+   "ruta": "out/todas/eval_poi_red_alta.csv",
+   "sha256": "978d5f0a5189c76b9808611d45e9ccf18635749d449dcaefc3a7e83df09f9687",
+   "bytes": 811,
+   "filas": 1,
+   "semillas": [
+    8001
+   ]
+  },
+  {
+   "ruta": "out/todas/eval_red.csv",
+   "sha256": "209ba338573090f28475c5c2fd6b91e617dbed50a0793af6f97471aa738543e4",
+   "bytes": 811,
+   "filas": 1,
+   "semillas": [
+    8001
+   ]
+  },
+  {
+   "ruta": "out/todas/eval_red_alta.csv",
+   "sha256": "c3a3c35cce4294824ed6b13fd0040550c4f876510a4168840975871cfcd69af3",
+   "bytes": 812,
+   "filas": 1,
+   "semillas": [
+    8001
+   ]
+  },
+  {
+   "ruta": "out/todas/log_corredor.txt",
+   "sha256": "81ea08e435c3c3575c423b27c84e19c888be8cd14082a77f500cfaa874c62a5a",
+   "bytes": 891,
+   "filas": null,
+   "semillas": [
+    8001
+   ]
+  },
+  {
+   "ruta": "out/todas/log_corredor_alta.txt",
+   "sha256": "6041a60d568c5af3ea51538a0d2a362f1913370e4295ee1c640b5d6ae04d7481",
+   "bytes": 907,
+   "filas": null,
+   "semillas": [
+    8001
+   ]
+  },
+  {
+   "ruta": "out/todas/log_dem_corredor_t1358.txt",
+   "sha256": "f6a84b09edb76f043a90e1acfe5766f3d0d55540dc782bb138bcaeec1a8045bb",
+   "bytes": 913,
+   "filas": null,
+   "semillas": [
+    8001
+   ]
+  },
+  {
+   "ruta": "out/todas/log_dem_corredor_t2715.txt",
+   "sha256": "e41a041649ee22ced6555227e645e753a8cd6283778311b350ad13c50ab0e5f2",
+   "bytes": 916,
+   "filas": null,
+   "semillas": [
+    8001
+   ]
+  },
+  {
+   "ruta": "out/todas/log_dem_corredor_t2715_der.txt",
+   "sha256": "bc92013cab07efa97d1b69526f2167307a111e6e64eb1477f2c27c1c9fb8719e",
+   "bytes": 921,
+   "filas": null,
+   "semillas": [
+    8001
+   ]
+  },
+  {
+   "ruta": "out/todas/log_dem_corredor_t905.txt",
+   "sha256": "56ad415992353e6f68740f92fff820edc12e8151dfa2dbc3cdf6f7ecaaed2cb5",
+   "bytes": 911,
+   "filas": null,
+   "semillas": [
+    8001
+   ]
+  },
+  {
+   "ruta": "out/todas/log_dem_malla3_t1810.txt",
+   "sha256": "780f69824155c57d4f431121111b9fbb939aba436aaa159f137a03bda95a4467",
+   "bytes": 1524,
+   "filas": null,
+   "semillas": [
+    8001
+   ]
+  },
+  {
+   "ruta": "out/todas/log_dem_malla3_t2715.txt",
+   "sha256": "edad538d93a2556d34f53283804af976d57ca5bb52e2d71aba56f3d42d17758c",
+   "bytes": 1524,
+   "filas": null,
+   "semillas": [
+    8001
+   ]
+  },
+  {
+   "ruta": "out/todas/log_dem_malla3_t3620.txt",
+   "sha256": "cd702f31795a0586f864101ce1285eccd20709869569385e86976bd179bae5fd",
+   "bytes": 1524,
+   "filas": null,
+   "semillas": [
+    8001
+   ]
+  },
+  {
+   "ruta": "out/todas/log_dem_malla3_t6525.txt",
+   "sha256": "b5893b860529603fc1f48b112e6af3ccd0d0d07878e5f6fc85174a0a7d420fe3",
+   "bytes": 1524,
+   "filas": null,
+   "semillas": [
+    8001
+   ]
+  },
+  {
+   "ruta": "out/todas/log_dem_red_t1358.txt",
+   "sha256": "5a448a880850a230a61f542905a3df731c2d990100c0e53b58d24194585f13a7",
+   "bytes": 985,
+   "filas": null,
+   "semillas": [
+    8001
+   ]
+  },
+  {
+   "ruta": "out/todas/log_dem_red_t1810.txt",
+   "sha256": "7b537a9c0762c820e1e110c25a50b3aa58a247d62e36c5a1b08f0f21d3929546",
+   "bytes": 983,
+   "filas": null,
+   "semillas": [
+    8001
+   ]
+  },
+  {
+   "ruta": "out/todas/log_dem_red_t2715.txt",
+   "sha256": "d081f57a3774d636ffb1da4aaf0179ff945c9208f7c4f4417d4349d8a7f61d05",
+   "bytes": 985,
+   "filas": null,
+   "semillas": [
+    8001
+   ]
+  },
+  {
+   "ruta": "out/todas/log_dem_red_t3620.txt",
+   "sha256": "a61e20047c362c717358e06e753ec829062357c33395698e0c27cd3edf3b93ed",
+   "bytes": 988,
+   "filas": null,
+   "semillas": [
+    8001
+   ]
+  },
+  {
+   "ruta": "out/todas/log_dem_red_t905.txt",
+   "sha256": "0d34aaa612f6b1e9f067b7e1a0ea93e17a83657ef45c878efca982a6a031c3a7",
+   "bytes": 983,
+   "filas": null,
+   "semillas": [
+    8001
+   ]
+  },
+  {
+   "ruta": "out/todas/log_malla3.txt",
+   "sha256": "9174e0865e6ded1c9fa3dbebd369589e3951262a6344e2cc51cc68a48a0a2f70",
+   "bytes": 1504,
+   "filas": null,
+   "semillas": [
+    8001
+   ]
+  },
+  {
+   "ruta": "out/todas/log_malla3_alta.txt",
+   "sha256": "2111875f7a5a389d149e623f996f91cb742616744c829767c663803988bbc19c",
+   "bytes": 1516,
+   "filas": null,
+   "semillas": [
+    8001
+   ]
+  },
+  {
+   "ruta": "out/todas/log_malla3_alta_e.txt",
+   "sha256": "8b23269de3c6ebcb244a5415736fd3857222f5fcb63389c729b39beca2c01b58",
+   "bytes": 1518,
+   "filas": null,
+   "semillas": [
+    8001
+   ]
+  },
+  {
+   "ruta": "out/todas/log_mix_corredor.txt",
+   "sha256": "66a9071ea6e90ad5d5bbfe48cf4361e4c46d142e849a521af305c004c33986d0",
+   "bytes": 899,
+   "filas": null,
+   "semillas": [
+    8001
+   ]
+  },
+  {
+   "ruta": "out/todas/log_mix_red.txt",
+   "sha256": "99a7c0a26a94d7e7826370a601966cd32ef56f1c0a458d7f4a28ee872423e8dc",
+   "bytes": 973,
+   "filas": null,
+   "semillas": [
+    8001
+   ]
+  },
+  {
+   "ruta": "out/todas/log_mixa_corredor.txt",
+   "sha256": "e0e5510bf2fff3559a30a79199481702dc2443f66c1e69706a614c1b9144854e",
+   "bytes": 903,
+   "filas": null,
+   "semillas": [
+    8001
+   ]
+  },
+  {
+   "ruta": "out/todas/log_mixa_red.txt",
+   "sha256": "4ec57800488d81ff21a74b7e62bfa4f5fa968025e6969a9345db9b21766f756e",
+   "bytes": 975,
+   "filas": null,
+   "semillas": [
+    8001
+   ]
+  },
+  {
+   "ruta": "out/todas/log_per_corredor.txt",
+   "sha256": "4012fff44352007b51aa318377e8b2218c5460afd6dbc57ec9c8056539a5a860",
+   "bytes": 901,
+   "filas": null,
+   "semillas": [
+    8001
+   ]
+  },
+  {
+   "ruta": "out/todas/log_per_red.txt",
+   "sha256": "6d16f0a28dec2ec84dbb8e27017551beee30682f6ae49ca31bc65bc9c7693aeb",
+   "bytes": 973,
+   "filas": null,
+   "semillas": [
+    8001
+   ]
+  },
+  {
+   "ruta": "out/todas/log_poi_corredor.txt",
+   "sha256": "8045f76f61b542b9661b3cf1522b42339190075b814242fc0bae4e71e447f3ad",
+   "bytes": 901,
+   "filas": null,
+   "semillas": [
+    8001
+   ]
+  },
+  {
+   "ruta": "out/todas/log_poi_corredor_alta.txt",
+   "sha256": "22d44a06145b15d9139fbd8b14d116fe34fc46aab672ad9042f86ef4b7a89616",
+   "bytes": 915,
+   "filas": null,
+   "semillas": [
+    8001
+   ]
+  },
+  {
+   "ruta": "out/todas/log_poi_malla3.txt",
+   "sha256": "5d0f69973f52c5b12f3ee417431b2922125f0871036d86b3b094c119040eeec2",
+   "bytes": 1512,
+   "filas": null,
+   "semillas": [
+    8001
+   ]
+  },
+  {
+   "ruta": "out/todas/log_poi_malla3_alta.txt",
+   "sha256": "ea6b5bf487a6ac4045d828593c7a78c7adcd56f5d19349128d3bae9254e7342f",
+   "bytes": 1522,
+   "filas": null,
+   "semillas": [
+    8001
+   ]
+  },
+  {
+   "ruta": "out/todas/log_poi_red.txt",
+   "sha256": "203964374eb657b28305e589b810a5e297e7e26f48edd58341fc6a5b27e0d203",
+   "bytes": 970,
+   "filas": null,
+   "semillas": [
+    8001
+   ]
+  },
+  {
+   "ruta": "out/todas/log_poi_red_alta.txt",
+   "sha256": "3f85423a3bf251621b3baa4a04e4de51e7cad9228a83fadf936459f7e9747acf",
+   "bytes": 983,
+   "filas": null,
+   "semillas": [
+    8001
+   ]
+  },
+  {
+   "ruta": "out/todas/log_red.txt",
+   "sha256": "f18045e12fd6493d01837f2d756db531f86d6fd4c9ad853bf2f62bc4d11a3796",
+   "bytes": 963,
+   "filas": null,
+   "semillas": [
+    8001
+   ]
+  },
+  {
+   "ruta": "out/todas/log_red_alta.txt",
+   "sha256": "9dd0fae47cd38e7ff0a2aba29dc424f7b5a89fe6b1dba06c131a34804a80564e",
+   "bytes": 975,
+   "filas": null,
+   "semillas": [
+    8001
+   ]
+  }
+ ]
+}

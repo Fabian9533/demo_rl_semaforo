@@ -17,6 +17,7 @@ caido se relanza con el mismo comando y sigue desde su ultimo estado (DECISIONES
 Regenerar el archivo deja los mismos ids: la cola no repite lo hecho.
 """
 import os
+import re
 import sys
 import json
 import argparse
@@ -79,12 +80,20 @@ def duracion_entreno(celda, episodios=EPISODIOS, desde=0, hasta=None, factor=1.0
 
 
 def cortes_tramos(celda, episodios=EPISODIOS, desde=0, factor=1.0):
-    """Episodios donde termina cada tramo de <= 5 h (multiplos de EVAL_CADA, para cortar en un checkpoint)."""
+    """Episodios donde termina cada tramo de <= 5 h (multiplos de EVAL_CADA, para cortar en un checkpoint). Si al
+    redondear a EVAL_CADA un tramo pasa de 5 h, se agrega un tramo (revision del 05.11, R4-04); los que ya cumplian
+    quedan igual."""
     total = duracion_entreno(celda, episodios, desde=desde, factor=factor)
     n_tramos = max(1, -(-int(total) // TRAMO_MAX_S))
-    paso = -(-(episodios - desde) // n_tramos)
-    paso = -(-paso // EVAL_CADA) * EVAL_CADA
-    return list(range(desde + paso, episodios, paso)) + [episodios]
+    while True:
+        paso = -(-(episodios - desde) // n_tramos)
+        paso = -(-paso // EVAL_CADA) * EVAL_CADA
+        cortes = list(range(desde + paso, episodios, paso)) + [episodios]
+        inicios = [desde] + cortes[:-1]
+        if paso == EVAL_CADA or all(duracion_entreno(celda, episodios, a, b, factor) <= TRAMO_MAX_S
+                                    for a, b in zip(inicios, cortes)):
+            return cortes
+        n_tramos += 1
 
 
 class Lista:
@@ -115,8 +124,10 @@ class Lista:
         previo, inicio = list(requiere), desde
         for k, fin in enumerate(cortes):
             ultimo = fin == episodios
-            # el primer tramo de una etiqueta nueva parte del estado de origen; los demas, de su propio ultimo estado
-            cmd = base_cmd + (f" --reanudar {ruta_origen}" if ruta_origen and k == 0 else " --reanudar auto")
+            # una etiqueta nueva pasa su estado de origen en todos los tramos: rl_ippo sigue desde el ultimo estado
+            # propio que salga de ese origen y, si no queda ninguno, copia otra vez el origen (con auto empezaria de
+            # cero; revision del 05.11); las demas, --reanudar auto
+            cmd = base_cmd + (f" --reanudar {ruta_origen}" if ruta_origen else " --reanudar auto")
             if not ultimo:
                 cmd += f" --hasta-ep {fin}"
             salidas = ([f"politica_{esc}_{variante}_{etiqueta}_s{base}.pt",
@@ -273,9 +284,40 @@ def v2vieja(lista):
 
 
 # ---------------- Etapa 3: observacion nueva, limpiezas, entropia, reloj de 2 s y modelo completo (PLAN3 3.6) ----------
-# Factores de duracion [S, analisis_mejora_2026-11-04/plan3/final/costos_plan3.py]: observacion x1.35; reloj de 2 s
-# x1.4 al entrenar y x1.15 al validar.
+# Factores de duracion (entrenamiento, validacion) frente a V2 en la misma celda.
+# [S] diseno (analisis_mejora_2026-11-04/plan3/final/costos_plan3.py): observacion x1.35; reloj de 2 s x1.4 al
+#     entrenar y x1.15 al validar.
+# [M] revision del 05.11 (ABBA con el mismo trafico): la observacion cercana entrena a x1.23-1.35 fuera de la malla y a
+#     x1.45 en poi_malla3, y valida a x1.57 en P6; el modelo completo valida a x1.41-1.86 y entrena a x1.17-1.64 (con
+#     politicas nuevas). Se toman cotas por encima de lo medido: sobreestimar solo hace tramos mas cortos.
 OBS, RELOJ_TR, RELOJ_VAL = 1.35, 1.40, 1.15
+OBS_MALLA, OBS_VAL, OBS_VAL_MALLA = 1.5, 1.45, 1.6
+COMPLETO_TR, COMPLETO_VAL = OBS * RELOJ_TR, 1.9
+MALLA_E3 = ("P5", "P6", "P6e")
+
+
+def factor_e3(et, celda):
+    """(entrenamiento, validacion) de un brazo de la Etapa 3 o 3b en una celda; 1.0 si su costo es el de V2. Es el
+    unico lugar de estos factores: los cortes en tramos (y los ids de los tramos) dependen de ellos, asi que el
+    entrenamiento y quien lo requiere tienen que usar el mismo."""
+    poi = POI_F if et.endswith("poi") else 1.0
+    brazo = et[:-3] if et.endswith("poi") else et
+    if brazo == "p3obs":
+        f = (OBS_MALLA, OBS_VAL_MALLA) if celda in MALLA_E3 else (OBS, OBS_VAL)
+    elif brazo == "p3reloj2":
+        f = (RELOJ_TR, RELOJ_VAL)
+    elif brazo == "p3completo":
+        f = (COMPLETO_TR, COMPLETO_VAL)
+    else:
+        return 1.0
+    return (f[0] * poi, f[1] * poi)
+
+
+def factor_ev(et, celda):
+    """Factor de una evaluacion de la politica de un brazo (el de su validacion, sin el de las llegadas, que ya esta
+    en la tanda)."""
+    f = factor_e3(et, celda)
+    return 1.0 if f == 1.0 else f[1] / (POI_F if et.endswith("poi") else 1.0)
 OP_OBS = "--obs-cercana 75"
 OP_M7 = "--norm-valor --sin-forzadas --msg-cada-paso"
 OP_ENT = "--hiper ent=0.03 --ent-final 0.003"
@@ -285,30 +327,28 @@ OP_COMPLETO = ("--obs-cercana 75 --norm-valor --sin-forzadas --msg-cada-paso --l
 
 
 def etapa3(lista):
-    """Cada brazo = (etiqueta, opciones ademas de --v2, celdas, bases, factor, episodios). D entra primero."""
+    """Cada brazo = (etiqueta, opciones ademas de --v2, celdas, bases, episodios); su factor de duracion sale de
+    factor_e3 por celda. D entra primero."""
     reg = {**CASOS, **NIVELES, **D}
     brazos = [
-        ("p3obs", OP_OBS, {"D": D["D"], "c2715": NIVELES["c2715"]}, BASES5, OBS, EPISODIOS),
-        ("p3obs", OP_OBS, {c: CASOS[c] for c in ("P1", "P2", "P3", "P6")}, BASES3, OBS, EPISODIOS),
-        ("p3obspoi", OP_OBS, POI, BASES3, (OBS * POI_F, OBS * POI_F), EPISODIOS),
-        ("p3m7norm", "--norm-valor", D, BASES3, 1.0, EPISODIOS),
-        ("p3m7forz", "--sin-forzadas", D, BASES3, 1.0, EPISODIOS),
-        ("p3m7msg", "--msg-cada-paso", D, BASES3, 1.0, EPISODIOS),
-        ("p3m7", OP_M7, {"D": D["D"], "P2": CASOS["P2"], "P6": CASOS["P6"]}, BASES3, 1.0, EPISODIOS),
-        ("p3ent", OP_ENT, {"D": D["D"], "P1": CASOS["P1"]}, BASES3, 1.0, EPISODIOS),
-        ("p3reloj2", OP_RELOJ, {c: reg[c] for c in ("D", "P1", "P2", "P6")}, BASES3, (RELOJ_TR, RELOJ_VAL),
-         EPISODIOS),
-        ("p3reloj2poi", OP_RELOJ, {c: POI[c] for c in ("P1", "P2", "P6")}, BASES3,
-         (RELOJ_TR * POI_F, RELOJ_VAL * POI_F), EPISODIOS),
-        ("p3completo", OP_COMPLETO, {c: CASOS[c] for c in ("P1", "P2", "P4", "P6")}, BASES3,
-         (OBS * RELOJ_TR, OBS * RELOJ_VAL), 400),
-        ("p3completopoi", OP_COMPLETO, POI, BASES3, (OBS * RELOJ_TR * POI_F, OBS * RELOJ_VAL * POI_F), 400),
+        ("p3obs", OP_OBS, {"D": D["D"], "c2715": NIVELES["c2715"]}, BASES5, EPISODIOS),
+        ("p3obs", OP_OBS, {c: CASOS[c] for c in ("P1", "P2", "P3", "P6")}, BASES3, EPISODIOS),
+        ("p3obspoi", OP_OBS, POI, BASES3, EPISODIOS),
+        ("p3m7norm", "--norm-valor", D, BASES3, EPISODIOS),
+        ("p3m7forz", "--sin-forzadas", D, BASES3, EPISODIOS),
+        ("p3m7msg", "--msg-cada-paso", D, BASES3, EPISODIOS),
+        ("p3m7", OP_M7, {"D": D["D"], "P2": CASOS["P2"], "P6": CASOS["P6"]}, BASES3, EPISODIOS),
+        ("p3ent", OP_ENT, {"D": D["D"], "P1": CASOS["P1"]}, BASES3, EPISODIOS),
+        ("p3reloj2", OP_RELOJ, {c: reg[c] for c in ("D", "P1", "P2", "P6")}, BASES3, EPISODIOS),
+        ("p3reloj2poi", OP_RELOJ, {c: POI[c] for c in ("P1", "P2", "P6")}, BASES3, EPISODIOS),
+        ("p3completo", OP_COMPLETO, {c: CASOS[c] for c in ("P1", "P2", "P4", "P6")}, BASES3, 400),
+        ("p3completopoi", OP_COMPLETO, POI, BASES3, 400),
     ]
     trabajos = []
-    for et, op, celdas, bases, f, eps in brazos:
+    for et, op, celdas, bases, eps in brazos:
         for c, e in celdas.items():
             for b in bases:
-                trabajos.append((et, op, c, e, b, f, eps))
+                trabajos.append((et, op, c, e, b, factor_e3(et, c), eps))
     # D primero (prioridad 2); el resto, lo mas largo primero (prioridad 3)
     trabajos.sort(key=lambda x: (x[2] != "D", -duracion_entreno(x[2], x[6], factor=x[5])))
     for et, op, c, e, b, f, eps in trabajos:
@@ -328,8 +368,6 @@ REGULARES, ALEATORIAS = ("t1r", "t2r"), ("t1a", "t2a")
 EV = {"P1": 5.4, "P2": 13.2, "P3": 9.0, "P4": 10.0, "P5": 23.6, "P6": 42.2, "P6e": 42.2,
       "c905": 3.6, "c1358": 4.2, "c2715": 6.6, "r905": 5.6, "r1358": 6.2, "r1810": 6.6, "r2715": 8.8,
       "r3620": 12.0, "m1810": 13.6, "m2715": 15.6, "m3620": 17.6, "m6525": 24.8, "D": 5.4}
-FACTOR_EV = {"p3obs": OBS, "p3obspoi": OBS, "p3reloj2": RELOJ_VAL, "p3reloj2poi": RELOJ_VAL,
-             "p3completo": OBS * RELOJ_VAL, "p3completopoi": OBS * RELOJ_VAL}
 
 
 def n_semillas(texto):
@@ -337,41 +375,149 @@ def n_semillas(texto):
 
 
 CAIDAS_JSON = os.path.join(PLAN3, "cola", "caidas.json")
+# Corridas que salen de otra: si la de origen cayo, tampoco existen (V2 vieja y 3b re-eligen o siguen la de V2).
+DERIVA = {"p3v2vieja": "p3v2reg", "p3e400": "p3v2reg", "p3e400poi": "p3v2poi",
+          "p3piso200reg": "p3e400", "p3e400c20reg": "p3e400", "p3piso200poi": "p3e400poi", "p3e400c20poi": "p3e400poi"}
+# celda de cada escenario de entrenamiento (la que va en una declaracion de cola/caidas.json)
+CELDA_DE_ESCENARIO = {e: c for d in (CASOS, NIVELES, D, P6E, POI, PERFIL, MEZCLA) for c, e in d.items()}
 
 
-def leer_caidas():
-    """Corridas declaradas caidas (falla del metodo en dos intentos; prerregistro §7 y §14): sus evaluaciones no se
-    generan y las versiones evaluadas salen de las bases que quedan. cola/caidas.json = lista de
-    {"corrida", "celda", "escenario", "tipo", "base", "intentos", "fecha"}."""
-    if not os.path.exists(CAIDAS_JSON):
-        return set()
-    with open(CAIDAS_JSON, encoding="utf-8") as f:
-        datos = json.load(f)
-    lista = datos.get("caidas", []) if isinstance(datos, dict) else datos
-    return {c.get("corrida") or corrida_de_tipo(c["escenario"], c["tipo"], int(c["base"])) for c in lista}
+def origen_de(et):
+    """Etiqueta de la corrida de la que sale otra (DERIVA), tambien para las rehechas por un error de codigo (§14,
+    sufijo r<N>): la rehecha de una derivada sale de la rehecha de su origen (p3e400r2 de p3v2regr2). None si no sale
+    de otra."""
+    if et in DERIVA:
+        return DERIVA[et]
+    m = re.fullmatch(r"(.+?)(r\d+)", et or "")
+    return DERIVA[m.group(1)] + m.group(2) if m and m.group(1) in DERIVA else None
 
 
 def corrida_de_tipo(esc, tipo, base):
-    """Nombre de la corrida de una base declarada por su tipo del manifiesto (v2reg, v2poi, v2loc, p3obs...)."""
+    """Nombre de la corrida de una base declarada por su tipo del manifiesto (v2reg, v2poi, v2loc, p3obs...), sin
+    sufijo de rehecha."""
     variante = "local" if tipo in ("v2loc", "v2poiloc") else "vecinos"
     etiqueta = {"v2reg": "p3v2reg", "v2loc": "p3v2reg", "v2poi": "p3v2poi", "v2poiloc": "p3v2poi",
                 "v2per": "p3v2per", "v2mix": "p3v2mix", "c0": "p3c0"}.get(tipo, tipo)
     return nombre_corrida(esc, variante, etiqueta, base)
 
 
-CAIDAS = leer_caidas()
-# Corridas que salen de otra: si la de origen cayo, tampoco existen (V2 vieja y 3b re-eligen o siguen la de V2).
-DERIVA = {"p3v2vieja": "p3v2reg", "p3e400": "p3v2reg", "p3e400poi": "p3v2poi",
-          "p3piso200reg": "p3e400", "p3e400c20reg": "p3e400", "p3piso200poi": "p3e400poi", "p3e400c20poi": "p3e400poi"}
+def corrida_de_politica(ruta):
+    """(escenario, variante, etiqueta, base) de la corrida de entrenamiento de una politica por base
+    (politica_<esc>_<variante>_<etiqueta>_s<base>.pt), o None (lo entregado, las versiones publicadas)."""
+    m = re.fullmatch(r"politica_(.+)_(vecinos|local)_(p3[a-z0-9]+)_s(\d+)\.pt", os.path.basename(ruta or ""))
+    return (m.group(1), m.group(2), m.group(3), int(m.group(4))) if m else None
 
 
-def caida(esc, variante, et, base):
-    """¿Esta corrida, o aquella de la que sale, esta declarada caida?"""
+_ENTRENAMIENTOS = None
+
+
+def entrenamientos_del_plan():
+    """Las corridas (cadena) de todos los entrenamientos del plan completo (PARTES_PLAN), sacadas del codigo de este
+    generador: lo unico que se puede declarar caido. C0 (re-validacion), las re-elecciones de p3_elegir y lo que no
+    existe no estan. Se calcula una vez; los entrenamientos no dependen de las caidas."""
+    global _ENTRENAMIENTOS, CAIDAS
+    if _ENTRENAMIENTOS is None:
+        viejas = CAIDAS
+        CAIDAS = set()
+        try:
+            _ENTRENAMIENTOS = {t["cadena"] for t in generar(PARTES_PLAN) if t.get("uso") == "entrenamiento"}
+        finally:
+            CAIDAS = viejas
+    return _ENTRENAMIENTOS
+
+
+def validar_caida(c):
+    """La corrida de una declaracion de cola/caidas.json (prerregistro §14; B22), o ValueError con el motivo. Las
+    mismas reglas para el generador (leer_caidas), manifiesto.py y veredicto3 (caidas_de_texto). Cada declaracion
+    lleva celda, escenario, tipo, base y los dos intentos fallidos con id, error y fecha (la fecha en cada intento o
+    una vez en la declaracion); el escenario es el de la politica (mix_, no mixa_: el arranque lento juega la de la
+    mezcla; la politica por red, el suyo) y la celda, la de ese escenario; la corrida tiene que ser un entrenamiento
+    del plan (entrenamientos_del_plan; C0 y las re-elecciones no lo son). Sin corrida, la de su tipo (la rehecha mas
+    nueva si un error de codigo la rehizo, §14); con corrida, la de su tipo o una rehecha de ella (sufijo r<N>)."""
+    faltan = [k for k in ("celda", "escenario", "tipo", "base", "intentos") if k not in c]
+    intentos = c.get("intentos") or []
+    incompletos = any(not (isinstance(i, dict) and i.get("id") and i.get("error")
+                           and (i.get("fecha") or c.get("fecha"))) for i in intentos)
+    if faltan or len(intentos) < 2 or incompletos:
+        raise ValueError(f"cada base caída lleva celda, escenario, tipo, base y los dos intentos fallidos con id, "
+                         f"error y fecha (§14): {c}")
+    esc, tipo = c["escenario"], c["tipo"]
+    try:
+        base = int(c["base"])
+    except (TypeError, ValueError):
+        raise ValueError(f"la base no es un número: {c}")
+    if esc in MEZCLA_A.values():
+        raise ValueError(f"{esc} juega la política de la mezcla: declárela con el escenario de la "
+                         f"política (mix_corredor / mix_red): {c}")
+    if esc in CELDA_DE_ESCENARIO and c["celda"] != CELDA_DE_ESCENARIO[esc]:
+        raise ValueError(f"la celda de {esc} es {CELDA_DE_ESCENARIO[esc]}, no {c['celda']}: {c}")
+    raiz = corrida_de_tipo(esc, tipo, base)
+    pre, suf = raiz[:-len(f"_s{base}")], f"_s{base}"
+    rehecha = re.compile(re.escape(pre) + r"r(\d+)" + re.escape(suf))
+    entrenos = entrenamientos_del_plan()
+    corrida = c.get("corrida")
+    if corrida and corrida != raiz and not rehecha.fullmatch(corrida):
+        raise ValueError(f"la corrida {corrida} no es la de {esc}, {tipo}, base {base} ({raiz}, o una rehecha "
+                         f"{pre}r<N>{suf})")
+    if not corrida:                         # la vigente: la rehecha mas nueva que este en el plan, o la original
+        rehechas = sorted((int(m.group(1)), x) for x in entrenos if (m := rehecha.fullmatch(x)))
+        corrida = rehechas[-1][1] if rehechas else raiz
+    if corrida not in entrenos:
+        origen = origen_de(tipo)
+        raise ValueError(f"{corrida} no es un entrenamiento del plan (C0 es una re-validación y las re-elecciones de "
+                         f"p3_elegir salen de otra corrida{f', aquí de {origen}' if origen else ''}): declare la "
+                         f"corrida que entrenó y falló: {c}")
+    return corrida
+
+
+def leer_caidas(ruta=None):
+    """Corridas declaradas caidas (falla del metodo en dos intentos; prerregistro §7 y §14): sus evaluaciones no se
+    generan y las versiones evaluadas salen de las bases que quedan. cola/caidas.json = lista de
+    {"corrida", "celda", "escenario", "tipo", "base", "intentos", "fecha"} (validar_caida; la corrida es opcional).
+    ruta: otro caidas.json (por defecto el de plan3/cola). ValueError con el nombre del archivo si no se puede leer
+    o una declaracion no vale."""
+    ruta = ruta or CAIDAS_JSON
+    nombre = "cola/caidas.json" if ruta == CAIDAS_JSON else ruta
+    if not os.path.exists(ruta):
+        return set()
+    try:
+        with open(ruta, encoding="utf-8-sig") as f:
+            datos = json.load(f)
+    except (OSError, UnicodeDecodeError, ValueError) as ex:
+        raise ValueError(f"{nombre}: no es un JSON válido ({ex})")
+    lista = datos.get("caidas", []) if isinstance(datos, dict) else datos
+    corridas = set()
+    for c in lista:
+        try:
+            corridas.add(validar_caida(c))
+        except ValueError as ex:
+            raise ValueError(f"{nombre}: {ex}")
+    return corridas
+
+
+CAIDAS = None                       # se leen al usarse (cargar_caidas): un caidas.json invalido no rompe el import
+
+
+def cargar_caidas():
+    global CAIDAS
+    if CAIDAS is None:
+        CAIDAS = leer_caidas()
+    return CAIDAS
+
+
+def caida(esc, variante, et, base, caidas=None):
+    """¿Esta corrida, o aquella de la que sale (origen_de), esta declarada caida? caidas: otro conjunto (por defecto
+    el de cola/caidas.json)."""
+    caidas = cargar_caidas() if caidas is None else caidas
     while et:
-        if nombre_corrida(esc, variante, et, base) in CAIDAS:
+        if nombre_corrida(esc, variante, et, base) in caidas:
             return True
-        et = DERIVA.get(et)
+        et = origen_de(et)
     return False
+
+
+# versiones publicadas sin ninguna base viva (cayeron todas): no hay paso de eleccion ni evaluaciones que las jueguen
+MEDIANAS_SIN_BASES = set()
 
 
 def evaluacion(lista, celda, esc, tanda, clave, brazo, requiere=(), etapa="ev", factor=1.0, tipo="",
@@ -381,6 +527,9 @@ def evaluacion(lista, celda, esc, tanda, clave, brazo, requiere=(), etapa="ev", 
     caido (o cayo aquel del que sale) no se evalua."""
     if corrida is not None and caida(*corrida):
         return None
+    partes_b = brazo.split()
+    if "--politica" in partes_b[:-1] and partes_b[partes_b.index("--politica") + 1] in MEDIANAS_SIN_BASES:
+        return None                                 # una version publicada de la que cayeron todas las bases
     uso, semillas = TANDAS[tanda]
     carpeta = "ciego" if uso in CIEGAS else "parciales"
     salida = f"{carpeta}/{tanda}/eval_{esc}__{clave}.csv"
@@ -398,7 +547,9 @@ def evaluacion(lista, celda, esc, tanda, clave, brazo, requiere=(), etapa="ev", 
 def mediana(lista, esc, variante, et, bases, requiere, et_med, origen="", fuente=None):
     """Paso de eleccion: la version evaluada (base mediana por val_elegido) publicada como <...>_<et_med>.pt.
     requiere va alineada con bases (o vacia); las bases caidas no entran (prerregistro §6). fuente(b) da la corrida de
-    origen (escenario, variante, etiqueta) cuando no es la misma (C0 aleatorio sale de la V2 regular)."""
+    origen (escenario, variante, etiqueta) cuando no es la misma (C0 aleatorio sale de la V2 regular). Si cayeron
+    todas, no hay paso de eleccion: devuelve (ruta, None) y las evaluaciones que la juegan no se generan
+    (MEDIANAS_SIN_BASES)."""
     var_et = f"{variante}_{et}" if et else variante          # lo entregado no lleva etiqueta: politica_<esc>_vecinos_s42
     origen_de = fuente or (lambda b: (esc, variante, et))
     vivas = [k for k, b in enumerate(bases) if not et or not caida(*origen_de(b), b)]
@@ -406,6 +557,9 @@ def mediana(lista, esc, variante, et, bases, requiere, et_med, origen="", fuente
     bases = [bases[k] for k in vivas]
     rutas = ",".join(f"{origen}politica_{esc}_{var_et}_s{b}.pt" for b in bases)
     salida = f"politica_{esc}_{variante}_{et_med}.pt"
+    if not bases:                       # cayeron todas: no hay version evaluada (veredicto3: 'cayeron todas')
+        MEDIANAS_SIN_BASES.add(salida)
+        return salida, None
     tid = f"el_{et_med}_{esc}"
     if tid not in lista.ids:
         lista.agregar({"id": tid, "etapa": "ev", "prioridad": 2, "uso": "sin_semillas", "requiere": list(requiere),
@@ -527,16 +681,13 @@ def evaluaciones_variantes(lista):
                  ("p3completopoi", list(POI), BASES3, 400)]
     for et, celdas, bases, eps in variantes:
         poi = et.endswith("poi")
-        f_tr = {"p3obspoi": (OBS * POI_F, OBS * POI_F), "p3reloj2poi": (RELOJ_TR * POI_F, RELOJ_VAL * POI_F),
-                "p3completopoi": (OBS * RELOJ_TR * POI_F, OBS * RELOJ_VAL * POI_F), "p3obs": OBS,
-                "p3reloj2": (RELOJ_TR, RELOJ_VAL), "p3completo": (OBS * RELOJ_TR, OBS * RELOJ_VAL)}.get(et, 1.0)
         for c in celdas:
             e = POI[c] if poi else reg[c]
             for b in bases:
-                req = req_entreno(f"e3_{et}", e, b, c, eps, factor=f_tr)
+                req = req_entreno(f"e3_{et}", e, b, c, eps, factor=factor_e3(et, c))
                 for t in (ALEATORIAS if poi else REGULARES):
                     evaluacion(lista, c, e, t, f"{et}_s{b}", f"--politica politica_{e}_vecinos_{et}_s{b}.pt",
-                               [req], factor=FACTOR_EV.get(et, 1.0), tipo=et, base=b,
+                               [req], factor=factor_ev(et, c), tipo=et, base=b,
                                corrida=(e, "vecinos", et, b))
     for tipo, celdas, pref in (("reg", CASOS, "p3e400"), ("poi", POI, "p3e400poi")):
         tandas = ALEATORIAS if tipo == "poi" else REGULARES
@@ -588,16 +739,15 @@ def promocion(lista):
                     et_med = f"{et}med"
                 else:
                     eps = 400 if et.startswith("p3completo") else EPISODIOS
-                    f_tr = {"p3obs": OBS, "p3obspoi": (OBS * POI_F, OBS * POI_F),
-                            "p3reloj2": (RELOJ_TR, RELOJ_VAL), "p3reloj2poi": (RELOJ_TR * POI_F, RELOJ_VAL * POI_F),
-                            "p3completo": (OBS * RELOJ_TR, OBS * RELOJ_VAL),
-                            "p3completopoi": (OBS * RELOJ_TR * POI_F, OBS * RELOJ_VAL * POI_F)}.get(et, 1.0)
-                    reqs = [req_entreno(f"e3_{et}", e, b, c, eps, factor=f_tr) for b in BASES3]
+                    reqs = [req_entreno(f"e3_{et}", e, b, c, eps, factor=factor_e3(et, c)) for b in BASES3]
                     et_med = f"{et}med"
                 ruta, tid = mediana(lista, e, "vecinos", et, BASES3, reqs, et_med)
                 ev = evaluacion(lista, c, e, "promo", et_med, f"--politica {ruta}", [f"trabajo:{tid}"],
-                                factor=FACTOR_EV.get(et, 1.0), tipo=f"promo_{et}")
-                csvs[et] = (f"parciales/promo/eval_{e}__{et_med}.csv", ev)
+                                factor=factor_ev(et, c), tipo=f"promo_{et}")
+                if ev is not None:              # un candidato sin bases vivas no compite
+                    csvs[et] = (f"parciales/promo/eval_{e}__{et_med}.csv", ev)
+            if et_v2 not in csvs:               # sin V2 no hay decision: la celda queda sin promocion
+                continue
             salida = f"promocion/{e}.json"
             lista.agregar({"id": f"promo_decidir_{e}", "etapa": "ev", "prioridad": 4, "uso": "sin_semillas",
                            "requiere": [f"trabajo:{ev}" for _, ev in csvs.values()],
@@ -662,19 +812,34 @@ CON_TROZOS = ("gruesa", "fina", "desfases", "mult5")
 
 
 def ref_salidas(esc, trabajo):
-    """Salidas que deja cada trabajo de referencias (informe_ref §2.5)."""
+    """Salidas que deja siempre cada trabajo de referencias (informe_ref §2.6, columna "siempre"; los *_semillas.csv
+    tambien, que las etapas siguientes leen)."""
     b = f"barridos/{esc}"
     if trabajo in ("fina", "desfases", "desempate"):
         return [f"{b}/{trabajo}.csv", f"{b}/{trabajo}_semillas.csv"]
+    if trabajo.startswith("actuado_paso"):
+        return [f"{b}/{trabajo}.csv", f"{b}/{trabajo}_semillas.csv", f"{b}/{trabajo}.json"]
+    if trabajo in ("regla", "mp", "reactiva"):
+        return [f"{b}/reglas_{trabajo}.csv", f"{b}/reglas_{trabajo}_final.csv", f"{b}/reglas_{trabajo}_semillas.csv",
+                f"{b}/{trabajo}.json"]
     return {"gruesa": [f"{b}/gruesa.csv", f"{b}/gruesa_semillas.csv", f"{b}/fijo_grueso10.json", f"{esc}_r10g.add.xml"],
-            "fragil": [f"{b}/fragil.csv", f"{b}/fijo_fino.json", f"{esc}_r10f.add.xml"],
-            "mult5": [f"{b}/mult5.csv", f"{b}/mult5_desempate.csv", f"{b}/fijo_mult5.json", f"{esc}_m5f.add.xml"],
-            "franja": [f"{b}/franja.csv", f"{b}/franja_final.csv", f"{b}/franja.json", f"{esc}_franja.add.xml"],
-            "bloques": [f"{b}/bloques.csv", f"{b}/bloques.json", f"{esc}_bloques.add.xml"],
-            "actuado_final": [f"{b}/actuado_final.csv", f"{b}/actuado_aj.json", f"{esc}_actuado_aj.add.xml"],
-            "regla": [f"{b}/reglas_regla.csv", f"{b}/reglas_regla_final.csv", f"{b}/regla.json"],
-            "mp": [f"{b}/reglas_mp.csv", f"{b}/reglas_mp_final.csv", f"{b}/mp.json"],
-            "reactiva": [f"{b}/reglas_reactiva.csv", f"{b}/reglas_reactiva_final.csv", f"{b}/reactiva.json"]}[trabajo]
+            "fragil": [f"{b}/fragil.csv", f"{b}/fragil_semillas.csv", f"{b}/fijo_fino.json", f"{esc}_r10f.add.xml"],
+            "mult5": [f"{b}/mult5.csv", f"{b}/mult5_semillas.csv", f"{b}/mult5_desempate.csv",
+                      f"{b}/mult5_desempate_semillas.csv", f"{b}/fijo_mult5.json", f"{esc}_m5f.add.xml"],
+            "franja": [f"{b}/franja.csv", f"{b}/franja_final.csv", f"{b}/franja_semillas.csv", f"{b}/franja.json",
+                       f"{esc}_franja.add.xml"],
+            "bloques": [f"{b}/bloques.csv", f"{b}/bloques_semillas.csv", f"{b}/bloques.json", f"{esc}_bloques.add.xml"],
+            "actuado_final": [f"{b}/actuado_final.csv", f"{b}/actuado_final_semillas.csv", f"{b}/actuado_aj.json",
+                              f"{esc}_actuado_aj.add.xml"]}[trabajo]
+
+
+# Reparto de la columna "reglas" de REF_H (que cuesta regla + MP) por familia, por las corridas de cada una: con
+# llegadas regulares, 2001-2003 y 3 finalistas con 2001-2010 (regla 30 + 21, reactiva 15 + 21, MP 12 + 21, de 84); con
+# aleatorias, 2001-2003 y hasta 10 finalistas con 2001-2030 (regla 30 + 270, reactiva 15 + 135, MP 12 + 108, de 420).
+PARTE_REGLAS = {"regulares": {"regla": 51 / 84, "reactiva": 36 / 84, "mp": 33 / 84},
+                "aleatorias": {"regla": 300 / 420, "reactiva": 150 / 420, "mp": 120 / 420}}
+# Pasos del actuado por sus corridas nuevas en 2001-2003: 5, 3, 2, 2, 2 y 8 (el 6: 6 delay_based y 2 coordinadas)
+PESO_PASO = {"1": 5 / 22, "2": 3 / 22, "3": 2 / 22, "4": 2 / 22, "5": 2 / 22, "6": 8 / 22}
 
 
 def ref_celda(lista, esc, completa=True, perfil=False, franja=True, mp=True, mult5=True):
@@ -716,7 +881,7 @@ def ref_celda(lista, esc, completa=True, perfil=False, franja=True, mp=True, mul
         lista.agregar({"id": tid, "etapa": "0", "prioridad": 1, "uso": "ajuste",
                        "requiere": [d, f] if perfil else [d],
                        "cmd": f"{pre} franja.py {esc}{' --bloques' if perfil else ''}",
-                       "duracion": round(3600 * max(h["franja"], 0.05) * EMPAQUE), "salidas": ref_salidas(esc, nombre)})
+                       "duracion": round(3600 * max(h["franja"], 0.05)), "salidas": ref_salidas(esc, nombre)})
         ids[nombre] = tid
     previo = []
     for paso in ("1", "2", "3", "4", "5", "6", "final"):
@@ -727,19 +892,20 @@ def ref_celda(lista, esc, completa=True, perfil=False, franja=True, mp=True, mul
                        "cmd": f"{pre} actuado.py {esc} --paso {paso}",
                        "duracion": round(3600 * max(h["actuado"], 0.07) * (
                            (0.81 if esc.startswith(("poi_", "per_", "mix")) else 0.25) if paso == "final" else
-                           (0.19 if esc.startswith(("poi_", "per_", "mix")) else 0.75) / 6)),
+                           (0.19 if esc.startswith(("poi_", "per_", "mix")) else 0.75) * PESO_PASO[paso])),
                        "salidas": (ref_salidas(esc, "actuado_final") if paso == "final"
-                                   else [f"{b}/actuado_paso{paso}.csv", f"{b}/actuado_paso{paso}.json"])})
+                                   else ref_salidas(esc, f"actuado_paso{paso}"))})
         previo = [f"trabajo:{tid}"]
     ids["actuado"] = f"r_actuadofinal_{esc}"
     if completa:
         familias = ("regla", "reactiva", "mp") if mp else ("regla", "reactiva")
+        llegadas = "aleatorias" if esc.startswith(("poi_", "per_", "mix")) else "regulares"
         for fam in familias:
             tid = f"r_{fam}_{esc}"
-            parte = {"regla": 0.5, "reactiva": 0.3, "mp": 0.3}[fam]
+            parte = PARTE_REGLAS[llegadas][fam]
             lista.agregar({"id": tid, "etapa": "0", "prioridad": 1, "uso": "ajuste", "requiere": [],
                            "cmd": f"{pre} reglas.py {esc} --familia {fam}",
-                           "duracion": round(3600 * max(h["reglas"] * parte, 0.05) * EMPAQUE),
+                           "duracion": round(3600 * max(h["reglas"] * parte, 0.05)),
                            "salidas": ref_salidas(esc, fam)})
             ids[fam] = tid
     return ids
@@ -793,6 +959,12 @@ EV.update({"per1": EV["P1"], "per3": EV["P3"], "mix1": EV["P1"] * 1.10, "mix3": 
 TR.update({"mixa1": TR["P1"], "mixa3": TR["P3"]})
 
 
+def congeladas(tanda):
+    """Una evaluacion decisiva (a ciegas) de una referencia ajustada espera a la parte B: referencias_congeladas.json
+    (evaluar3 ademas se niega si la referencia no es la congelada)."""
+    return ["referencias_congeladas.json"] if TANDAS[tanda][0] in CIEGAS else []
+
+
 def evaluaciones_referencias(lista):
     """Las referencias ajustadas en las tandas de su tipo de llegadas (PLAN3 1.6 y 2.3)."""
     if not REFS:
@@ -801,7 +973,7 @@ def evaluaciones_referencias(lista):
         for c, e in celdas.items():
             for clave, brazo, req, tipo in brazos_ref(e):
                 for t in tandas:
-                    evaluacion(lista, c, e, t, clave, brazo, [f"trabajo:{req}"], tipo=tipo)
+                    evaluacion(lista, c, e, t, clave, brazo, [f"trabajo:{req}"] + congeladas(t), tipo=tipo)
 
 
 def evaluaciones_perfil_mezcla(lista):
@@ -819,7 +991,7 @@ def evaluaciones_perfil_mezcla(lista):
                                [req], tipo=tipo, base=b, corrida=(e_pol, "vecinos", et, b))
             for clave, brazo, req, tipo_r in brazos_ref(e, de=e_pol):
                 for t in ALEATORIAS:
-                    evaluacion(lista, c, e, t, clave, brazo, [f"trabajo:{req}"], tipo=tipo_r)
+                    evaluacion(lista, c, e, t, clave, brazo, [f"trabajo:{req}"] + congeladas(t), tipo=tipo_r)
             for clave, brazo in (("fijo", "--brazo fijo"), ("actuado", "--brazo actuado"),
                                  ("trivial", "--brazo trivial")):
                 for t in ALEATORIAS:
@@ -836,19 +1008,21 @@ def evaluaciones_a3(lista):
     """a3 (descriptiva): la version evaluada de V2 y de la observacion nueva con colas en cero y con los mensajes
     cortados, frente a la misma politica sin perturbar (prerregistro §8, Etapa 3)."""
     reg = {"D": D["D"], "c2715": NIVELES["c2715"], **{c: CASOS[c] for c in ("P1", "P2", "P3", "P6")}}
+    # factor de V2 (None = el de la Etapa 3, factor_e3 por celda, igual que en su entrenamiento)
     for celdas, tandas, pares in ((reg, REGULARES, (("p3v2reg", "v2reg3med", "p3v2reg3med", "e1_v2reg", 200, 1.0),
-                                                      ("p3obs", "p3obsmed", "p3obsmed", "e3_p3obs", 200, OBS))),
+                                                      ("p3obs", "p3obsmed", "p3obsmed", "e3_p3obs", 200, None))),
                                   (POI, ALEATORIAS, (("p3v2poi", "v2poi3med", "p3v2poi3med", "e2_v2poi", 200, POI_F),
                                                      ("p3obspoi", "p3obspoimed", "p3obspoimed", "e3_p3obspoi", 200,
-                                                      (OBS * POI_F, OBS * POI_F))))):
+                                                      None)))):
         for c, e in celdas.items():
             for et, tipo, et_med, pref, eps, f in pares:
+                f = factor_e3(et, c) if f is None else f
                 reqs = [req_entreno(pref, e, b, c, eps, factor=f) for b in BASES3]
                 ruta, tid = mediana(lista, e, "vecinos", et, BASES3, reqs, et_med)
                 for t in tandas:
                     for pert, op in (("colas0", "--colas-cero"), ("msg0", "--perdida 1")):
                         evaluacion(lista, c, e, t, f"a3{pert}_{tipo}", f"--politica {ruta} {op}", [f"trabajo:{tid}"],
-                                   factor=FACTOR_EV.get(et, 1.0), tipo=f"a3{pert}_{tipo}")
+                                   factor=factor_ev(et, c), tipo=f"a3{pert}_{tipo}")
 
 
 PARTES = {"etapa1": etapa1, "c0": c0, "v2vieja": v2vieja, "etapa2": etapa2, "etapa2pm": etapa2pm,
@@ -863,6 +1037,8 @@ PARTES_PLAN = [p for p in PARTES if p not in ("etapa3b_reg", "etapa3b_poi")]
 
 
 def generar(partes):
+    cargar_caidas()                     # antes que nada: leerlas puede generar el plan (entrenamientos_del_plan)
+    MEDIANAS_SIN_BASES.clear()
     lista = Lista()
     for p in partes:
         PARTES[p](lista)
@@ -870,6 +1046,8 @@ def generar(partes):
 
 
 def generar_con_manifiesto(partes):
+    cargar_caidas()                     # antes que nada: leerlas puede generar el plan (entrenamientos_del_plan)
+    MEDIANAS_SIN_BASES.clear()
     lista = Lista()
     for p in partes:
         PARTES[p](lista)
@@ -893,7 +1071,10 @@ def main():
     desconocidas = [p for p in partes if p not in PARTES]
     if desconocidas:
         sys.exit(f"partes desconocidas: {desconocidas}; hay {sorted(PARTES)}")
-    trabajos, manifiesto = generar_con_manifiesto(partes)
+    try:
+        trabajos, manifiesto = generar_con_manifiesto(partes)
+    except ValueError as ex:                # cola/caidas.json invalido: una linea con la causa, sin traceback
+        sys.exit(f"generar_trabajos3: {ex}")
     texto = "".join(json.dumps(t, ensure_ascii=False) + "\n" for t in trabajos)
     texto_m = json.dumps(manifiesto, ensure_ascii=False, indent=0) + "\n"
     if args.comprobar:

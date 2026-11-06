@@ -64,6 +64,8 @@ CASOS = [
      "python ../evaluar.py --escenario corredor --brazo fijo --semillas 5001-5030 --salida parciales/x.csv", False),
     ("barrido con semillas de examen", "ajuste",
      "python barrer_fino.py corredor --semillas 8001-8010 --salida barridos/x.csv", False),
+    ("barrido que acepta salidas de prueba (--permitir-prueba)", "ajuste",
+     "python barrer_fino.py corredor --permitir-prueba", False),
     ("nombra plan2", "puente",
      "python ../evaluar.py --escenario corredor --brazo fijo --semillas 1001-1030 --salida ../plan2/parciales/x.csv",
      False),

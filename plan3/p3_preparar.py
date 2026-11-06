@@ -3,17 +3,19 @@ p3_preparar.py - Trabajo "preparar" del inicio de cada noche (plan3, tarea 0.11;
 las evaluaciones que dependen de el, los archivos de programa que los brazos regeneran o cargan al arrancar sumo.
 
 Uso (cwd = plan3/; para escenarios de escenarios_plan3, a traves de ../con_escenarios.py):
-  python p3_preparar.py <esc> [<esc> ...] [--piezas actuado,trivial,actuado_aj]
-Piezas (por defecto las tres):
+  python p3_preparar.py <esc> [<esc> ...] [--piezas actuado,trivial]
+Piezas (por defecto actuado y trivial; actuado_aj solo si se pide):
   actuado     <esc>_actuado.add.xml   comun.archivo_actuado (el actuado entregado)
   trivial     <esc>_trivial.add.xml   comun.archivo_trivial (el ciclo minimo)
-  actuado_aj  <esc>_actuado_aj.add.xml, reescrito desde barridos/<esc>/actuado_aj.json (actuado.py); su sha256 debe
-              coincidir con el que se congelo
+  actuado_aj  <esc>_actuado_aj.add.xml desde barridos/<esc>/actuado_aj.json (actuado.reinstalar): si el instalado ya
+              tiene el sha256 congelado no se toca; si no, el texto de hoy va a un temporal y reemplaza solo si su
+              sha256 es el congelado (si no, error y el instalado queda como estaba)
 Las dos primeras usan las funciones entregadas, que desde 0.11 escriben en un temporal con el pid y reemplazan con
 reintentos: si un sumo de otra evaluacion tiene el archivo abierto, se espera; el contenido es el de siempre.
 Punto de extension: PIEZAS es un diccionario {nombre: funcion(esc) -> ruta escrita}; los detectores E2 de la
 observacion nueva (tarea 3.1) se agregan ahi con su propia pieza, sin tocar lo demas.
 Imprime el sha256 de cada archivo; codigo 0 solo si todas las piezas pedidas quedaron escritas y se leen como XML.
+Se corre con cwd = plan3/ (o una carpeta dentro de plan3/): desde otro lugar se niega.
 """
 import os
 import sys
@@ -60,17 +62,29 @@ def pieza_actuado_aj(esc):
 
 # Punto de extension: los E2 de la observacion nueva (3.1) se registran aqui como otra pieza.
 PIEZAS = {"actuado": pieza_actuado, "trivial": pieza_trivial, "actuado_aj": pieza_actuado_aj}
+POR_DEFECTO = ("actuado", "trivial")          # actuado_aj solo si se pide (--piezas actuado_aj)
+
+
+def validar_args(argv):
+    """Lee y revisa los argumentos (argv sin el nombre del programa): parse_args y todos los ap.error, sin leer el
+    escenario ni tocar archivos. Devuelve args o sale como argparse (SystemExit(2), motivo en stderr).
+    chequeos_previos la llama para cada comando de este script en la lista de trabajos."""
+    ap = argparse.ArgumentParser(description="Trabajo preparar de cada noche (plan3, 0.11)", allow_abbrev=False)
+    ap.add_argument("escenarios", nargs="+")
+    ap.add_argument("--piezas", default=",".join(POR_DEFECTO), help=f"de {', '.join(PIEZAS)} (por defecto "
+                                                                   f"{', '.join(POR_DEFECTO)})")
+    args = ap.parse_args(argv)
+    args.lista_piezas = [p for p in args.piezas.split(",") if p]
+    desconocidas = [p for p in args.lista_piezas if p not in PIEZAS]
+    if desconocidas or not args.lista_piezas:
+        ap.error(f"piezas desconocidas o ninguna: {desconocidas}")
+    return args
 
 
 def main():
-    ap = argparse.ArgumentParser(description="Trabajo preparar de cada noche (plan3, 0.11)")
-    ap.add_argument("escenarios", nargs="+")
-    ap.add_argument("--piezas", default=",".join(PIEZAS), help=f"de {', '.join(PIEZAS)}")
-    args = ap.parse_args()
-    piezas = [p for p in args.piezas.split(",") if p]
-    desconocidas = [p for p in piezas if p not in PIEZAS]
-    if desconocidas:
-        ap.error(f"piezas desconocidas: {desconocidas}")
+    args = validar_args(sys.argv[1:])
+    bfn.exigir_cwd()
+    piezas = args.lista_piezas
     escritas = []
     for esc in args.escenarios:
         for pieza in piezas:
