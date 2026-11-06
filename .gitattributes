@@ -1,3 +1,13 @@
 # Salidas de las pruebas de veredicto3 (las escribe --probar con LF): sin conversion CRLF en Windows
 plan3/pruebas/ver/* text eol=lf
 plan3/pruebas/ver/salidas/* text eol=lf
+# Archivos sellados que se escriben con LF (el generador, a mano o veredicto3): sin conversion de fines de linea, para
+# que un clon nuevo en Windows (core.autocrlf=true) tenga los mismos bytes que el sello (tercera revision del 05.11,
+# P2-M2). Los que se escriben con CRLF (evaluar3, p3_promocion, los metas) no van aqui: ya vuelven iguales.
+plan3/cola/trabajos.jsonl -text
+plan3/cola/manifiesto_esperado.json -text
+plan3/cola/partes.txt -text
+plan3/cola/caidas.json -text
+plan3/cola/reemplazos.json -text
+plan3/referencias_congeladas.json -text
+plan3/listo/** -text

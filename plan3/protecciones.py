@@ -58,8 +58,15 @@ def sha(ruta):
     return h.hexdigest()
 
 
-def git(*args, cwd=RAIZ):
-    r = subprocess.run(["git", *args], cwd=cwd, capture_output=True, text=True, encoding="utf-8")
+def git(*args, cwd=RAIZ, espera=120):
+    """(rc, stdout) de git con el entorno limpio de anclaje (sin GIT_DIR ni GIT_CONFIG_*, sin preguntar credenciales:
+    GIT_TERMINAL_PROMPT=0) y un tiempo maximo (rc 124 si no responde: sin red, un fetch no se queda colgado)."""
+    import anclaje
+    try:
+        r = subprocess.run(["git", *args], cwd=cwd, capture_output=True, text=True, encoding="utf-8",
+                           errors="replace", env=anclaje.entorno(), timeout=espera)
+    except subprocess.TimeoutExpired:
+        return 124, ""
     return r.returncode, r.stdout
 
 
@@ -122,13 +129,15 @@ def desenvolver(partes):
 
 
 _HOLDOUT = {}
+_MANANAS = {}
 
 
 def holdout_listo():
-    """Problemas de listo/holdout.ok para lanzar la prueba final (segunda revision del 05.11, V1-L3): tiene que
-    existir, estar commiteado, ser igual al de HEAD y estar empujado (su primer commit esta en origin/plan3, despues de
-    git fetch). Asi la noche final no corre antes de que la lista quede fija: veredicto3 --prueba-final rechaza para
-    siempre una manana anterior al primer commit de holdout.ok que ya tenga sus CSV. Se calcula una vez por proceso."""
+    """Problemas de listo/holdout.ok para lanzar la prueba final (segunda y tercera revision del 05.11, V1-L3, P2-H4):
+    tiene que existir, estar commiteado, ser igual al de HEAD y estar empujado (su primer commit esta en origin/plan3,
+    despues de git fetch, que no se queda colgado), y el commiteado tiene que estar en UTF-8 sin BOM con una sola
+    linea: el sha256 (sin CR) de listo/lista_final.json commiteada (lo escribe veredicto3.py --holdout). Asi la noche
+    final no corre con un holdout.ok que --prueba-final no aceptaria. Se calcula una vez por proceso."""
     if "malos" not in _HOLDOUT:
         rel = "plan3/listo/holdout.ok"
         malos = []
@@ -138,14 +147,59 @@ def holdout_listo():
             malos.append("la prueba final exige listo/holdout.ok commiteado (y empujado) antes de la noche final")
         elif git("diff", "--quiet", "HEAD", "--", rel)[0] != 0:
             malos.append("listo/holdout.ok cambio desde su commit")
+        elif contenido_holdout():
+            malos.append(contenido_holdout())
         else:
-            git("fetch", "-q", "origin", "plan3")
+            git("fetch", "-q", "origin", "plan3", espera=90)
             rc, commits = git("rev-list", "--full-history", "--topo-order", "--reverse", "HEAD", "--", rel)
             primero = commits.split()[0] if rc == 0 and commits.split() else None
             if primero is None or git("merge-base", "--is-ancestor", primero, "origin/plan3")[0] != 0:
                 malos.append("listo/holdout.ok no esta empujado a origin/plan3: push antes de la noche final")
         _HOLDOUT["malos"] = malos
     return _HOLDOUT["malos"]
+
+
+def contenido_holdout():
+    """Motivo si el listo/holdout.ok de HEAD no es UTF-8 sin BOM con una sola linea, el sha256 (sin CR) de
+    listo/lista_final.json de HEAD; '' si esta bien."""
+    rc1 = subprocess.run(["git", "show", "HEAD:plan3/listo/holdout.ok"], cwd=RAIZ, capture_output=True)
+    rc2 = subprocess.run(["git", "show", "HEAD:plan3/listo/lista_final.json"], cwd=RAIZ, capture_output=True)
+    if rc1.returncode != 0:
+        return "listo/holdout.ok no esta en HEAD"
+    b = rc1.stdout
+    if b.startswith((b"\xff\xfe", b"\xfe\xff", b"\xef\xbb\xbf")):
+        return "listo/holdout.ok esta en UTF-16 o con BOM: escribalo con python veredicto3.py --holdout LISTA"
+    try:
+        lineas = [x.strip() for x in b.decode("utf-8").splitlines() if x.strip()]
+    except UnicodeDecodeError:
+        return "listo/holdout.ok no es UTF-8: escribalo con python veredicto3.py --holdout LISTA"
+    if len(lineas) != 1 or not re.fullmatch(r"[0-9a-f]{64}", lineas[0]):
+        return "listo/holdout.ok tiene que tener una sola linea con el sha256 de la lista"
+    if rc2.returncode != 0:
+        return "listo/lista_final.json no esta commiteada"
+    if hashlib.sha256(rc2.stdout.replace(b"\r\n", b"\n")).hexdigest() != lineas[0]:
+        return "listo/holdout.ok no tiene el sha256 de listo/lista_final.json commiteada"
+    return ""
+
+
+def mananas_registradas():
+    """Los CSV que ya estan en un manifiesto de la manana: el del disco y el de HEAD (cache por proceso)."""
+    if "csv" not in _MANANAS:
+        csvs = set()
+        textos = []
+        ruta = os.path.join(COLA, "manifiesto_ciego.json")
+        if os.path.exists(ruta):
+            textos.append(open(ruta, "rb").read())
+        r = subprocess.run(["git", "show", "HEAD:plan3/cola/manifiesto_ciego.json"], cwd=RAIZ, capture_output=True)
+        if r.returncode == 0:
+            textos.append(r.stdout)
+        for b in textos:
+            try:
+                csvs |= set(json.loads(b.decode("utf-8-sig")))
+            except (UnicodeDecodeError, ValueError):
+                pass
+        _MANANAS["csv"] = csvs
+    return _MANANAS["csv"]
 
 
 def revisar_comando(t, existe=os.path.exists):
@@ -244,6 +298,12 @@ def revisar_comando(t, existe=os.path.exists):
     salida = opcion(args, "--salida")
     if uso in USOS_CIEGOS and (salida is None or not salida.startswith("ciego/")):
         malos.append(f"uso '{uso}' debe escribir en ciego/: --salida {salida}")
+    if existe is os.path.exists and uso in USOS_CIEGOS:      # al lanzar (tercera revision del 05.11)
+        if uso != "final" and os.path.exists(os.path.join(PLAN3, "listo", "cierre.ok")):
+            malos.append("despues de listo/cierre.ok no se lanzan trabajos ciegos (solo los de la prueba final)")
+        if salida and salida.replace("\\", "/") in mananas_registradas():
+            malos.append(f"{salida} ya esta en un manifiesto de la manana: no se vuelve a escribir (un trabajo rehecho "
+                         f"va con id y CSV nuevos, _r2, y cola/reemplazos.json, §14)")
     if uso == "final":
         if existe is os.path.exists:            # al lanzar: commiteado, igual al de HEAD y empujado
             malos += holdout_listo()
@@ -403,7 +463,30 @@ def revisar_prerregistro():
             local = f.read()
         if local.replace("\r\n", "\n") != remoto.replace("\r\n", "\n"):
             malos.append("el prerregistro local difiere del de origin/plan3")
+    rc, texto_tag = git("show", "plan3-prerregistro-A:plan3/PRERREGISTRO.md")
+    if rc != 0:
+        malos.append("no se pudo leer PRERREGISTRO.md del tag plan3-prerregistro-A")
+    else:
+        try:
+            if tabla_prerregistro(texto_tag)["semillas"] != tabla_prerregistro()["semillas"]:
+                malos.append("la tabla de semillas de PRERREGISTRO.md no es la del tag plan3-prerregistro-A (§3)")
+        except (ValueError, json.JSONDecodeError) as e:
+            malos.append(f"tabla del prerregistro del tag ilegible: {e}")
     return malos
+
+
+def revisar_ancla():
+    """(problemas, avisos): la rama empujada no se reescribio despues de tener datos decisivos y
+    refs/veredicto3/visto queda guardado desde la primera noche (anclaje.Ancla nocturna; tercera revision del 05.11,
+    P1-H3). Sin red, un aviso: la noche corre igual."""
+    import anclaje
+    try:
+        anclaje.Ancla(PLAN3, nocturna=True)
+    except anclaje.SinRed as ex:
+        return [], [f"sin red: {ex}"]
+    except anclaje.ErrorAncla as ex:
+        return [str(ex)], []
+    return [], []
 
 
 def versiones():
@@ -434,6 +517,9 @@ def main():
     informe = {"momento": momento, "hora": time.strftime("%Y-%m-%d %H:%M:%S"),
                "commit": git("rev-parse", "HEAD")[1].strip()}
     problemas = estado_git() + revisar_insumos() + revisar_checkpoints() + revisar_versiones()
+    malos_a, avisos = revisar_ancla()
+    problemas += malos_a
+    informe["avisos"] = avisos
     if momento == "antes":
         problemas += revisar_prerregistro()
         problemas += revisar_trabajos(leer_trabajos())
@@ -453,6 +539,8 @@ def main():
     salida = os.path.join(COLA, f"control_{time.strftime('%Y%m%d_%H%M%S')}_{momento}.json")
     with open(salida, "w", encoding="utf-8") as f:
         json.dump(informe, f, indent=1, ensure_ascii=False)
+    for a in avisos:
+        print("AVISO:", a)
     for p in problemas:
         print("PROBLEMA:", p)
     print(f"{momento}: {len(problemas)} problemas ({os.path.relpath(salida, PLAN3)})")

@@ -117,6 +117,8 @@ def identidad():
     malos += identidad_v2(tag)
     malos += identidad_tramos()
     malos += identidad_evaluar(tag)
+    malos += identidad_evaluar_viejo(tag)
+    malos += identidad_c0()
     malos += identidad_malla(tag)
     return malos
 
@@ -189,6 +191,47 @@ def identidad_evaluar(tag):
                     "--salida", "eval_id.csv"])
         salidas[nombre] = filas(os.path.join(carpeta, "eval_id.csv"))
     return [] if salidas["tag"] == salidas["actual"] else ["identidad de evaluar.py: el CSV difiere del del tag"]
+
+
+def identidad_evaluar_viejo(tag):
+    """evaluar.py en su modo antiguo (--brazos "" --ippo P): el del tag y el de hoy juegan igual la politica V2 del tag
+    en una semilla de humo. Es uno de los dos caminos que cambio el arreglo de las opciones del meta (revision del
+    06.11, E2-L1). Usa el evaluar.py del tag que copio identidad_evaluar."""
+    pol = os.path.join(TMP, "v2_tag", "politica_corredor_vecinos_p3id_s7.pt")
+    salidas = {}
+    for nombre, codigo in (("tag", tag), ("actual", RAIZ)):
+        carpeta = os.path.join(TMP, f"evaluar_viejo_{nombre}")
+        os.makedirs(carpeta, exist_ok=True)
+        for x in (pol, pol[:-3] + ".json"):
+            shutil.copy(x, carpeta)
+        correr(codigo, carpeta, programa="evaluar.py",
+               cmd=["--escenario", "corredor", "--brazos", "", "--ippo", os.path.basename(pol), "--semillas", "424303"])
+        salidas[nombre] = filas(os.path.join(carpeta, "evaluacion_corredor.csv"))
+    if not salidas["tag"]:
+        return ["identidad de evaluar.py en modo antiguo: el del tag no escribio filas"]
+    return [] if salidas["tag"] == salidas["actual"] else \
+        ["identidad de evaluar.py en modo antiguo: el CSV difiere del del tag"]
+
+
+def identidad_c0():
+    """Los trabajos C0 (revalidar_c0.py validar) reproducen la validacion guardada de un checkpoint entregado: corredor,
+    base 42, ep 10, semillas 999 y 1999. revalidar_c0 compara cada semilla con el meta y sale con error si no
+    coincide; aqui se exige ademas que el control haya cubierto las dos (revision del 06.11, E2-L1)."""
+    origen = os.path.join(PLAN3, "insumos", "c0_checkpoints", "corredor_ippo_vecinos_s42_ep010.pt")
+    if not os.path.exists(origen):
+        return ["identidad de C0: falta insumos/c0_checkpoints/corredor_ippo_vecinos_s42_ep010.pt (p3_insumos.py)"]
+    salida = os.path.join("tmp_identidad", "c0_identidad.json")
+    entorno = dict(os.environ, OMP_NUM_THREADS="1", MKL_NUM_THREADS="1", PYTHONIOENCODING="utf-8")
+    r = subprocess.run([sys.executable, "revalidar_c0.py", "validar", "--escenario", "corredor",
+                        "--origen", "insumos/c0_checkpoints", "--corrida", "corredor_ippo_vecinos_s42", "--eps", "10",
+                        "--val-seeds", "999,1999", "--salida", salida], cwd=PLAN3, capture_output=True, text=True,
+                       env=entorno)
+    if r.returncode != 0:
+        return [f"identidad de C0: revalidar_c0 fallo:\n{r.stdout[-600:]}\n{r.stderr[-600:]}"]
+    with open(os.path.join(PLAN3, salida), encoding="utf-8") as f:
+        res = json.load(f)
+    control = res["checkpoints"][0].get("control_reproducido") if res.get("checkpoints") else None
+    return [] if control == [999, 1999] else [f"identidad de C0: el control reprodujo {control}, no [999, 1999]"]
 
 
 def identidad_malla(tag):

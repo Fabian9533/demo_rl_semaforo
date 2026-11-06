@@ -20,6 +20,7 @@ import csv
 import sys
 import json
 import glob
+import re
 import shlex
 import hashlib
 import subprocess
@@ -28,19 +29,9 @@ from collections import defaultdict
 PLAN3 = os.path.dirname(os.path.abspath(__file__))
 ESPERADO = os.path.join(PLAN3, "cola", "manifiesto_esperado.json")
 CIERRE = os.path.join(PLAN3, "cola", "manifiesto_cierre.json")
-CIEGO_MANANA = "plan3/cola/manifiesto_ciego.json"           # ruta en git, desde la raiz del worktree
 OTROS = ["cola/manifiesto_esperado.json", "cola/trabajos.jsonl", "cola/partes.txt", "cola/caidas.json",
          "cola/reemplazos.json", "promocion.json", "referencias_congeladas.json", "insumos/manifiesto.json"]
 # git sin objetos de reemplazo (git replace) y con rutas largas: la historia es la que esta en los commits
-ENTORNO_GIT = dict(os.environ, GIT_NO_REPLACE_OBJECTS="1", GIT_TERMINAL_PROMPT="0")
-
-
-def git(*args, cwd):
-    """(rc, stdout en bytes, stderr) de git con ENTORNO_GIT y core.longpaths."""
-    r = subprocess.run(["git", "-c", "core.longpaths=true", *args], cwd=cwd, capture_output=True, env=ENTORNO_GIT)
-    return r.returncode, r.stdout, r.stderr.decode("utf-8", "replace")
-
-
 def es_final(tanda):
     """Tandas de la prueba final (uso 'final'): no se sellan al cierre; la enmienda que la active las agrega."""
     try:
@@ -138,31 +129,49 @@ def caida_declarada(e, caidas, trabajos):
     return bool(caidas) and corrida is not None and gt.caida(*corrida, caidas=caidas)
 
 
-def historia_ciego(raiz_git):
-    """[(commit, {ruta: sha256})] de cada version commiteada de cola/manifiesto_ciego.json, de la mas vieja a la nueva:
-    toda la historia (rev-list --full-history --topo-order: un merge no esconde una manana) y cada version con
-    cat-file. Una version que no se puede leer es un error (RuntimeError), no un borrado."""
-    rc, out, err = git("rev-list", "--full-history", "--topo-order", "--reverse", "HEAD", "--", CIEGO_MANANA,
-                       cwd=raiz_git)
-    if rc != 0:
-        raise RuntimeError(f"git rev-list fallo: {err.strip()}")
+MANANA = "cola/manifiesto_ciego.json"
+# los commits que cambian estos archivos forman una sola cadena (veredicto3.CADENA; los merges que no los cambian no
+# cuentan)
+CADENA = ("cola/manifiesto_cierre.json", "listo/cierre.ok", MANANA, "listo/holdout.ok", "cola/reemplazos.json",
+          "cola/enmiendas.json")
+RUTA_CIEGO = re.compile(r"ciego/([^/\\]+)/eval_([^/\\]+?)__([^/\\]+)\.csv")
+
+
+def historial(raiz=PLAN3):
+    """La historia de git de HEAD (anclaje.Historial, sin red); RuntimeError si no se puede leer."""
+    import anclaje
+    try:
+        return anclaje.Historial(raiz)
+    except anclaje.ErrorAncla as ex:
+        raise RuntimeError(str(ex))
+
+
+def historia_ciego(raiz=PLAN3, hist=None):
+    """[(commit, {ruta: sha256})] de cada version commiteada de cola/manifiesto_ciego.json en la historia de HEAD, de
+    la mas vieja a la nueva: rev-list --full-history (un merge no esconde una manana) y un merge que no trae una
+    version nueva no cuenta (un merge de codigo no es una manana); cada version con cat-file. Una version que no se
+    puede leer o se borra es un error (RuntimeError), no un borrado."""
+    import anclaje
+    hist = hist or historial(raiz)
     salida = []
-    for c in out.decode().split():
-        rc, texto, err = git("cat-file", "-p", f"{c}:{CIEGO_MANANA}", cwd=raiz_git)
-        if rc != 0:
-            raise RuntimeError(f"no se pudo leer {CIEGO_MANANA} en {c[:10]} (borrado o ilegible): {err.strip()}")
+    try:
+        versiones = hist.versiones(MANANA)
+    except anclaje.ErrorAncla as ex:
+        raise RuntimeError(str(ex))
+    for c, texto in versiones:
         try:
             datos = json.loads(texto.decode("utf-8-sig"))
         except (UnicodeDecodeError, ValueError) as ex:
-            raise RuntimeError(f"{CIEGO_MANANA} en {c[:10]} no es un JSON valido: {ex}")
+            raise RuntimeError(f"{MANANA} en {c[:10]} no es un JSON valido: {ex}")
         salida.append((c, {k: v["sha256"] for k, v in datos.items()}))
     return salida
 
 
 def leer_reemplazos(raiz=PLAN3):
-    """cola/reemplazos.json (§14): las salidas viejas que se conservan y que otra reemplaza (una corrida rehecha por un
-    error de codigo, un trabajo _r2): lista de {viejo, nuevo (CSV) o trabajo (id), motivo, fecha}. Versionado y sellado
-    (OTROS). Devuelve {viejo: entrada}; ValueError si una entrada esta incompleta o el archivo no se puede leer."""
+    """cola/reemplazos.json (§14): las salidas viejas que se conservan y la corrida rehecha que las reemplaza (un error
+    de codigo; el trabajo _r2 escribe un CSV nuevo): lista de {viejo, nuevo, motivo, fecha}, las dos rutas de ciego/.
+    Versionado y sellado (OTROS); las reglas de tiempo, en validar_reemplazos. Devuelve {viejo: entrada}; ValueError si
+    una entrada esta incompleta o el archivo no se puede leer."""
     ruta = os.path.join(raiz, "cola", "reemplazos.json")
     if not os.path.exists(ruta):
         return {}
@@ -173,17 +182,71 @@ def leer_reemplazos(raiz=PLAN3):
         raise ValueError(f"cola/reemplazos.json: no es un JSON valido ({ex})")
     salida = {}
     for r in (datos.get("reemplazos", []) if isinstance(datos, dict) else datos):
-        if not (isinstance(r, dict) and r.get("viejo") and (r.get("nuevo") or r.get("trabajo")) and r.get("motivo")
-                and r.get("fecha")):
-            raise ValueError(f"cola/reemplazos.json: cada entrada lleva viejo, nuevo o trabajo, motivo y fecha: {r}")
+        if not (isinstance(r, dict) and r.get("viejo") and r.get("nuevo") and r.get("motivo") and r.get("fecha")):
+            raise ValueError(f"cola/reemplazos.json: cada entrada lleva viejo, nuevo, motivo y fecha: {r}")
         salida[r["viejo"]] = r
     return salida
 
 
-def huerfanos(en_mananas, vigentes, reemplazos, trabajos):
+def base_rehecha(clave):
+    """(clave sin el sufijo de rehecha, N) de una clave '<x>_r<N>'; (clave, 0) si no lo tiene."""
+    m = re.fullmatch(r"(.+?)_r(\d+)", clave)
+    return (m.group(1), int(m.group(2))) if m else (clave, 0)
+
+
+def validar_reemplazos(actuales, versiones, primero, vigentes, es_ancestro):
+    """P1-H4 (tercera revision del 05.11): cada entrada de cola/reemplazos.json es una corrida rehecha por un error de
+    codigo, declarada antes de correrla. actuales: {viejo: entrada}; versiones: [(commit, lista)] de cada version
+    commiteada del archivo; primero: {csv: (commit de su primera manana, sha256)}; vigentes: los CSV del manifiesto;
+    es_ancestro(a, b). Reglas: viejo y nuevo son rutas canonicas de ciego/ de la misma tanda y el mismo escenario y la
+    clave de nuevo es la de viejo con un sufijo _r<N> mayor (una sola direccion); nuevo esta en el manifiesto y viejo
+    no; el commit que agrego la entrada es posterior a la primera manana de viejo y anterior a la primera de nuevo; una
+    entrada no se borra ni cambia despues. Devuelve (problemas, [entrada con commit, manana_viejo y manana_nuevo])."""
+    clave = lambda r: (r.get("viejo"), r.get("nuevo"))                  # noqa: E731
+    lista_de = lambda v: v.get("reemplazos", []) if isinstance(v, dict) else (v or [])   # noqa: E731
+    problemas, salida = [], []
+    for (c1, v1), (c2, v2) in zip(versiones, versiones[1:]):
+        despues = {clave(r): r for r in lista_de(v2)}
+        quitadas = [k for k, r in ((clave(r), r) for r in lista_de(v1)) if despues.get(k) != r]
+        if quitadas:
+            problemas.append(f"una entrada de cola/reemplazos.json se borro o cambio en el commit {c2[:10]}: "
+                             f"{quitadas[0][0]}")
+    for viejo, r in sorted(actuales.items()):
+        nuevo = r.get("nuevo")
+        pv, pn = RUTA_CIEGO.fullmatch(viejo or ""), RUTA_CIEGO.fullmatch(nuevo or "")
+        if pv is None or pn is None or nuevo == viejo:
+            problemas.append(f"{viejo} -> {nuevo}: las dos rutas son de ciego/, canonicas y distintas")
+            continue
+        (tv, ev, kv), (tn, en, kn) = pv.groups(), pn.groups()
+        (bv, nv), (bn, nn) = base_rehecha(kv), base_rehecha(kn)
+        if (tv, ev, bv) != (tn, en, bn) or nn <= nv:
+            problemas.append(f"{nuevo} no es una corrida rehecha de {viejo} (misma tanda y escenario, la clave "
+                             f"{bv}_r<N> con un N mayor: una sola direccion)")
+            continue
+        if viejo in vigentes or nuevo not in vigentes:
+            problemas.append(f"{viejo} sigue en el manifiesto o {nuevo} no esta: el manifiesto trae la rehecha en "
+                             f"lugar de la vieja")
+            continue
+        e_c = next((c for c, v in versiones if any(clave(x) == (viejo, nuevo) for x in lista_de(v))), None)
+        if e_c is None:
+            problemas.append(f"{viejo} -> {nuevo} no esta commiteado")
+            continue
+        mv, mn = primero.get(viejo, (None,))[0], primero.get(nuevo, (None,))[0]
+        if mv is None or mv == e_c or not es_ancestro(mv, e_c):
+            problemas.append(f"{viejo}: tiene que estar en una manana anterior al commit que declara el reemplazo "
+                             f"({e_c[:10]})")
+        if mn is None or mn == e_c or not es_ancestro(e_c, mn):
+            problemas.append(f"{nuevo}: su primera manana tiene que ser posterior al commit que declara el reemplazo "
+                             f"({e_c[:10]}): la enmienda va antes de la corrida rehecha")
+        salida.append(dict(r, commit=e_c, manana_viejo=mv or "", manana_nuevo=mn or ""))
+    return problemas, salida
+
+
+def huerfanos(en_mananas, vigentes, reemplazos, trabajos=()):
     """CSV de ciego/ de una tanda que no es de la prueba final que estan en un manifiesto de la manana y no entre los
     vigentes (los del manifiesto esperado, o los sellados) ni declarados en cola/reemplazos.json con su nuevo vigente
-    o su trabajo en la lista. Un CSV ciego fuera del cierre seria una evaluacion que no se sabe por que se descarto."""
+    (validar_reemplazos decide si la declaracion vale). Un CSV ciego fuera del cierre seria una evaluacion que no se
+    sabe por que se descarto."""
     malos = []
     for rel in sorted(en_mananas):
         partes = rel.split("/")
@@ -192,31 +255,117 @@ def huerfanos(en_mananas, vigentes, reemplazos, trabajos):
         if len(partes) > 2 and es_final(partes[1]):
             continue
         r = reemplazos.get(rel)
-        if r and ((r.get("nuevo") and r["nuevo"] in vigentes) or (r.get("trabajo") and r["trabajo"] in trabajos)):
+        if r and r.get("nuevo") and r["nuevo"] in vigentes:
             continue
         malos.append(rel)
     return malos
 
 
-def revisar_historia(esperado, raiz=PLAN3, raiz_git=None):
-    """Problemas de los CSV de ciego/ frente a los manifiestos de cada manana (vacio si todo cuadra)."""
-    historia = historia_ciego(raiz_git or os.path.dirname(raiz))
-    primera = {}
+def ruta_canonica(e):
+    """La ruta del CSV de una entrada del manifiesto como la escribe generar_trabajos3.evaluacion."""
+    import generar_trabajos3 as gt
+    uso = gt.TANDAS.get(e.get("tanda"), ("",))[0]
+    return f"{'ciego' if uso in gt.CIEGAS else 'parciales'}/{e.get('tanda')}/eval_{e.get('escenario')}__" \
+           f"{e.get('clave', '')}.csv"
+
+
+def rutas_canonicas(esperado, trabajos):
+    """P1-H2: problemas de rutas: cada CSV del manifiesto esta en su ruta canonica (sin './', sin '\\', sin cambios de
+    mayusculas), es la --salida de su trabajo y no se repite."""
+    import generar_trabajos3 as gt
+    problemas, vistas = [], set()
+    for e in esperado:
+        if e.get("tanda") not in gt.TANDAS:
+            problemas.append(f"{e.get('csv')}: tanda desconocida {e.get('tanda')}")
+            continue
+        canon = ruta_canonica(e)
+        if e.get("csv") != canon:
+            problemas.append(f"{e.get('csv')} no es la ruta canonica de su entrada ({canon})")
+        t = trabajos.get(e.get("trabajo"))
+        if t is None:
+            problemas.append(f"{e.get('csv')}: su trabajo {e.get('trabajo')} no esta en cola/trabajos.jsonl")
+        else:
+            partes = shlex.split(t.get("cmd", ""))
+            salida = partes[partes.index("--salida") + 1] if "--salida" in partes[:-1] else None
+            if salida != e.get("csv"):
+                problemas.append(f"{e.get('csv')}: su trabajo {t['id']} escribe {salida}")
+        if canon in vistas:
+            problemas.append(f"{canon} esta dos veces en el manifiesto")
+        vistas.add(canon)
+    return problemas
+
+
+def listas_del_generador(raiz=PLAN3):
+    """P1-H2: [archivos] de cola/trabajos.jsonl y cola/manifiesto_esperado.json que no son los que escribe
+    generar_trabajos3 (su codigo de hoy) con cola/partes.txt y cola/caidas.json de raiz (como 'generar_trabajos3.py
+    --comprobar'). ValueError si no se puede generar."""
+    import generar_trabajos3 as gt
+    ruta_p = os.path.join(raiz, "cola", "partes.txt")
+    if not os.path.exists(ruta_p):
+        raise ValueError("falta cola/partes.txt (lo escribe generar_trabajos3.py)")
+    with open(ruta_p, encoding="utf-8-sig") as f:
+        partes = [x.strip() for x in f.read().strip().split(",") if x.strip()]
+    desconocidas = [x for x in partes if x not in gt.PARTES]
+    if desconocidas:
+        raise ValueError(f"cola/partes.txt nombra partes que el generador no tiene: {desconocidas}")
+    viejas = gt.CAIDAS
+    try:
+        gt.CAIDAS = gt.leer_caidas(os.path.join(raiz, "cola", "caidas.json"))
+        trabajos, man = gt.generar_con_manifiesto(partes)
+    finally:
+        gt.CAIDAS = viejas
+    esperados = {"cola/trabajos.jsonl": "".join(json.dumps(x, ensure_ascii=False) + "\n" for x in trabajos),
+                 "cola/manifiesto_esperado.json": json.dumps(man, ensure_ascii=False, indent=0) + "\n"}
     malos = []
+    for rel, texto in esperados.items():
+        ruta = os.path.join(raiz, rel)
+        hoy = open(ruta, "rb").read() if os.path.exists(ruta) else b""
+        if hoy.replace(b"\r\n", b"\n") != texto.encode("utf-8"):
+            malos.append(rel)
+    return malos
+
+
+def revisar_historia(esperado, raiz=PLAN3, raiz_git=None, hist=None):
+    """Problemas de los CSV de ciego/ frente a los manifiestos de cada manana (vacio si todo cuadra), en la historia de
+    HEAD: los commits de las mananas, el sello, cierre.ok, holdout.ok, los reemplazos y las enmiendas forman una sola
+    cadena; los CSV que se cotejan son los de las tandas ciegas del manifiesto (por el uso de su tanda, no por el
+    prefijo de la ruta), cada uno en su ruta canonica; ningun CSV cambia su sha256 de una manana a otra;
+    cola/reemplazos.json sigue validar_reemplazos; y ningun CSV de ciego/ de una manana queda fuera del manifiesto sin
+    un reemplazo.
+    Devuelve (problemas, el commit de la ultima manana). raiz_git: no se usa (la historia sale de raiz)."""
+    import anclaje
+    import generar_trabajos3 as gt
+    hist = hist or historial(raiz)
+    malos = []
+    try:
+        hist.cadena(*CADENA)
+    except anclaje.ErrorAncla as ex:
+        malos.append(str(ex))
+    historia = historia_ciego(raiz, hist)
+    primera = {}
     for commit, manifiesto in historia:
         for ruta, h in manifiesto.items():
             if ruta in primera and primera[ruta][1] != h:
                 malos.append(f"{ruta}: su sha256 cambio entre la manana del {primera[ruta][0][:10]} y la del {commit[:10]}")
             primera.setdefault(ruta, (commit, h))
     for e in esperado:
-        if not e["csv"].startswith("ciego/") or es_final(e["tanda"]):
+        if gt.TANDAS.get(e["tanda"], ("",))[0] not in gt.CIEGAS or es_final(e["tanda"]):
             continue                                # la prueba final se coteja en veredicto3 --prueba-final
-        if e["csv"] not in primera:
+        if "clave" in e and e["csv"] != ruta_canonica(e):
+            malos.append(f"{e['csv']}: no es la ruta canonica de su entrada ({ruta_canonica(e)})")
+        elif e["csv"] not in primera:
             malos.append(f"{e['csv']}: nunca aparecio en un manifiesto de la manana commiteado")
         elif sha(os.path.join(raiz, e["csv"])) != primera[e["csv"]][1]:
             malos.append(f"{e['csv']}: hoy no es el que se registro la primera manana")
-    _, trabajos = leer_caidas_y_trabajos(raiz)
-    for rel in huerfanos(set(primera), {e["csv"] for e in esperado}, leer_reemplazos(raiz), set(trabajos)):
+    actuales = leer_reemplazos(raiz)
+    try:
+        versiones = [(c, json.loads(x.decode("utf-8-sig"))) for c, x in hist.versiones("cola/reemplazos.json")]
+    except (anclaje.ErrorAncla, UnicodeDecodeError, ValueError) as ex:
+        raise RuntimeError(f"cola/reemplazos.json en la historia de git: {ex}")
+    vigentes = {e["csv"] for e in esperado}
+    problemas_r, validos = validar_reemplazos(actuales, versiones, primera, vigentes, hist.es_ancestro)
+    malos += [f"cola/reemplazos.json: {m}" for m in problemas_r]
+    for rel in huerfanos(set(primera), vigentes, {r["viejo"]: r for r in validos}):
         malos.append(f"{rel}: esta en el manifiesto de la manana {primera[rel][0][:10]} y no en el manifiesto "
                      f"esperado ni en cola/reemplazos.json")
     return malos, (historia[-1][0] if historia else None)
@@ -334,6 +483,16 @@ def principal(modo):
     if modo == "cierre":
         if r["faltan"] or r["mal"]:
             sys.exit("manifiesto: no se puede cerrar con CSV que faltan o estan mal")
+        _, trabajos = leer_caidas_y_trabajos()
+        rutas = rutas_canonicas(esperado, trabajos)
+        for m in rutas[:30]:
+            print("  MAL", m)
+        if rutas:
+            sys.exit(f"manifiesto: {len(rutas)} rutas del manifiesto no son las del generador")
+        listas = listas_del_generador()
+        if listas:
+            sys.exit(f"manifiesto: {', '.join(listas)} no son los que escribe el generador con cola/partes.txt "
+                     f"(python generar_trabajos3.py --comprobar)")
         malos, ultimo = revisar_historia(esperado)
         for m in malos[:30]:
             print("  MAL", m)
@@ -350,8 +509,8 @@ def principal(modo):
                   "despues listo/holdout.ok (commit y push) y recien la noche final")
         else:
             print("siguiente (PLAN3 5.1): Fabian crea listo/cierre.ok; UN commit con el sello, cierre.ok, cola/ y los "
-                  "CSV de ciego/ (git add -f plan3/ciego); push; despues veredicto3.py --final. El sello nunca va en "
-                  "un commit de la manana")
+                  "CSV de ciego/ (git add -f plan3/ciego); python veredicto3.py --preflight cierre; push; despues "
+                  "veredicto3.py --final. El sello nunca va en un commit de la manana")
 
 
 if __name__ == "__main__":
