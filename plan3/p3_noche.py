@@ -11,8 +11,8 @@ Pasos, en orden; si el 1 encuentra problemas no corre nada:
   6. cola/manifiesto_ciego.json: ruta, sha256, filas y semillas de cada CSV de ciego/ (sin metricas), y copia
      incremental de ciego/ a respaldo_plan3/ciego, fuera del repositorio (sin abrir los archivos);
   7. cola/resumen_<fecha>.txt: hechos, fallidos y bloqueados de la noche (sin metricas).
-Por la manana se commitean el estado, los logs, los manifiestos y los resultados no decisivos (nunca ciego/ ni el sello
-cola/manifiesto_cierre.json: va solo en el commit del cierre, PLAN3 5.1), y se empujan.
+Por la manana se commitean el estado, los logs, los manifiestos y los resultados no decisivos (nunca ciego/, listo/ ni
+el sello cola/manifiesto_cierre.json: van solo en el commit del cierre, PLAN3 5.1), y se empujan.
 """
 import os
 import sys

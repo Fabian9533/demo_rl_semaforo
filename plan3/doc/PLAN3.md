@@ -539,24 +539,71 @@ puerta.
 - **Prueba:** las 20 del prototipo; la V2 de P6 da meseta 3.19 % y estabilidad 0.00 %; reproduce las etiquetas de la
   robustez en P1-P6 y en los 12 niveles; rechaza un CSV con una semilla de más; se niega a escribir fuera de `plan3/`.
 
+### Amenaza y defensas del cierre y de la prueba final
+**Repositorio.** El `origin` de la rama `plan3` es `https://github.com/Fabian9533/demo_rl_semaforo.git` (veredicto3
+lo compara con `git remote get-url origin`; https o ssh, con o sin `.git`).
+
+Lo que se cuida, en este orden:
+- **(a) Que se pueda recuperar.** Ningún error honesto deja el cierre o la prueba final imposibles para siempre. Los
+  dos pasos que no se deshacen son el push del commit del cierre y el push de `listo/holdout.ok`: cada uno tiene un
+  preflight (`python veredicto3.py --preflight cierre|holdout`) que corre, con HEAD como si ya estuviera empujado, las
+  mismas comprobaciones que después, y nombra el error antes del push. Un merge de código en `plan3` en cualquier
+  momento (`plan3-dev` → `plan3`, o `plan3` → otra rama y de vuelta) no rompe nada: solo cuentan los commits que
+  cambian lo protegido (el sello, `cierre.ok`, las mañanas, `holdout.ok`, los reemplazos y las enmiendas), y un merge
+  que trae lo mismo que uno de sus padres no cuenta. Si `cierre.ok` se barre por error a un commit de la mañana sin
+  el sello, el cierre es el commit siguiente que traiga el sello con `cierre.ok`.
+- **(b) Que una manipulación se vea desde afuera.** El testigo de afuera es el correo al asesor con los hashes que
+  imprimen las herramientas en cada paso clave: el commit del cierre y el sha256 del sello (`--preflight cierre` antes
+  del push y `--final` después), el commit de `holdout.ok` y el sha256 de la lista (`--preflight holdout`), y el
+  commit del candado con el sha256 del candado y de la salida (`--verificar-prueba-final`, después del push). Quien
+  tenga esos correos y el repositorio de GitHub ve si la historia empujada es la de los hashes.
+- **Límite declarado.** Fabian es el único que trabaja en el repositorio y no protege la rama ni los tags en GitHub.
+  Sin esa protección, un push forzado (o borrar y volver a crear `plan3`) que se mire desde un repositorio que nunca
+  vio la rama de antes (un clon nuevo, o el de ejecución después de borrar su reflog y `refs/veredicto3/visto`) no se
+  distingue de la historia honesta: entre dos correos (por ejemplo, las mañanas antes del cierre) solo el reflog del
+  repositorio de ejecución lo delata, y quien lo borra lo borra. También quedan fuera del código: correr un CSV a mano
+  con `P3_USO` puesto a mano y regenerar un CSV antes de su primera mañana (§14: "nada demuestra que nadie miró").
+- **Opcional (no se hace).** Proteger `plan3` en GitHub (sin push forzado ni borrado) y prohibir un tag `plan3`
+  agregaría que esa reescritura no se pueda hacer en el remoto: el testigo dejaría de depender del reflog local entre
+  dos correos. veredicto3 ya se niega, sin protección, si el remoto tiene `refs/tags/plan3`, `refs/plan3` o
+  `refs/remotes/plan3`.
+
+Lo que el código hace de verdad (con la prueba que lo muestra: `--probar`, `pruebas/ver/prueba_protocolo.py`):
+- `--final` y `--prueba-final` leen todo desde `origin/plan3` traída con un fetch explícito de `refs/heads/plan3` (no
+  desde HEAD): el commit del cierre, las mañanas, `holdout.ok` y el candado. Lo protegido del disco tiene que ser lo
+  de `origin/plan3` (commiteado y empujado), y HEAD tiene que estar en su línea.
+- Se niegan con: un `origin` que no es el de arriba; un remoto con una referencia ambigua `plan3`; un tag del
+  prerregistro distinto del remoto; un repositorio superficial; una rama empujada reescrita después de tener datos
+  decisivos, si este repositorio la vio antes (el reflog de `origin/plan3` y `refs/veredicto3/visto`, que
+  `protecciones.py antes` y `despues` guardan cada noche); un sello, una mañana, un reemplazo o `holdout.ok` en una
+  rama lateral; un CSV del manifiesto fuera de su ruta canónica o listas que no son las del generador; un CSV que
+  cambió después de su mañana; un reemplazo que no es una corrida rehecha declarada antes de correrla; una decisión de
+  promoción que no es la que da `p3_promocion` con sus CSV, o que cambió sin una enmienda; la tabla de semillas
+  distinta de la del tag; código del análisis sin commitear; y, en la prueba final, CSV que no escribió la cola
+  después de `holdout.ok`, otra lista, un `holdout.ok` cambiado o un candado que ya existió (en disco, en la historia,
+  en otra rama o en el reflog).
+- Sin red (o sin credenciales), `--final` y `--prueba-final` se niegan con un mensaje claro y no se quedan colgados
+  (tiempo máximo); `protecciones.py antes` solo avisa: la noche corre igual.
+
 ### 5.1 Cierre (día 20 en el central, 21 en el conservador)
-En el worktree de ejecución (`demo_rl_plan3`, rama `plan3`, desde `plan3/`), en este orden. Cada paso que falta hace
-que el siguiente se niegue con un mensaje que lo nombra; el commit del paso 4 queda fijo para siempre (no se rehace):
-1. Después del commit y el push de la última mañana: `protecciones.py despues` sobre la última noche y
-   `promocion.json` registrado. Si una salida vieja de `ciego/` quedó fuera del manifiesto (un trabajo rehecho por un
-   error de código, `_r2`, §14), se declara en `cola/reemplazos.json` (`viejo`, `nuevo` o `trabajo`, `motivo`,
-   `fecha`) y se commitea en una mañana.
-2. `python manifiesto.py cierre`: revisa los CSV contra el manifiesto y contra la historia de las mañanas y escribe el
-   sello `cola/manifiesto_cierre.json`. Si se niega, se corrige la causa y se corre otra vez; nada se sella a mano.
+En el worktree de ejecución (`demo_rl_plan3`, rama `plan3`, desde `plan3/`), en este orden:
+1. Después del commit y el push de la última mañana: `protecciones.py despues` sobre la última noche. Una corrida
+   rehecha por un error de código (§14) ya tiene su enmienda: el generador le da id y CSV nuevos (`_r2`) y
+   `cola/reemplazos.json` la declara (`viejo`, `nuevo`, `motivo`, `fecha`) en un commit empujado **antes** de la noche
+   que la corre; la salida vieja ya estaba en una mañana anterior y se conserva.
+2. `python manifiesto.py cierre`: revisa los CSV, las rutas, que la lista y el manifiesto sean los del generador, la
+   historia de las mañanas y los reemplazos, y escribe el sello `cola/manifiesto_cierre.json`. Si se niega, se corrige
+   la causa y se corre otra vez; nada se sella a mano.
 3. Fabian crea `plan3/listo/cierre.ok`.
-4. **Un solo commit** con el sello, `listo/cierre.ok`, `cola/` y los CSV de `ciego/` (`git add -f plan3/ciego`), y
-   `git push`. Vale el sello de ese commit (el primero con `cierre.ok`), y tiene que cubrir la última mañana.
-5. Recién entonces `python veredicto3.py --final`. Se niega si el commit del cierre no está en `origin/plan3`, si la
-   rama empujada se reescribió (push forzado), si el repositorio es superficial, si un sello o una mañana quedó en una
-   rama lateral o si algo sellado cambió.
-- **Nunca** se commitea el sello en un commit de la mañana: un `manifiesto.py cierre` corrido antes de tiempo deja
-  `cola/manifiesto_cierre.json` en disco, y queda fuera del commit. Desde la parte A, nada de `--amend`, `rebase`,
-  `reset` ni push forzado sobre `plan3`; conviene proteger la rama en GitHub (sin push forzado ni borrado).
+4. **Un solo commit** con el sello, `listo/cierre.ok`, `cola/` y los CSV de `ciego/` (`git add -f plan3/ciego`).
+5. `python veredicto3.py --preflight cierre` (antes del push): las comprobaciones de `--final` con HEAD como ancla.
+   Si dice algo, se corrige con otro commit (sin `--amend`) y se repite.
+6. `git push origin plan3` (sin forzar). Enseguida, `python veredicto3.py --final` y el correo al asesor con el texto
+   que imprime (el commit del cierre, `origin/plan3` y el sha256 del sello): es el testigo de afuera del cierre.
+- **Nunca** se commitea el sello en un commit de la mañana (un `manifiesto.py cierre` corrido antes de tiempo deja
+  `cola/manifiesto_cierre.json` en disco: queda fuera del commit). Desde la parte A, nada de `--amend`, `rebase`,
+  `reset` ni push forzado sobre `plan3` después de un push. Después de `cierre.ok`, `protecciones` no lanza trabajos
+  ciegos (salvo los de la prueba final), y nunca relanza uno cuyo CSV ya está en una mañana.
 - Ensayo de punta a punta, con estos programas y un `origin` de prueba: `plan3/pruebas/ver/prueba_protocolo.py`.
 
 ### 5.2 Veredicto y tablas
@@ -564,21 +611,31 @@ que el siguiente se niegue con un mensaje que lo nombra; el commit del paso 4 qu
   `veredicto3_bases.csv`, `veredicto3_hipotesis.csv` (con Holm y lecturas) y `veredicto3.md` (la tabla simple).
 
 ### 5.3 Prueba final reservada (solo si hace falta) [A3]
-Una sola vez (~22 h-p, ~2 h), en este orden; la noche final no corre antes del paso 3:
+Una sola vez (~22 h-p, ~2 h), en este orden; la noche final no corre antes del paso 4:
 1. **Enmienda como código y lista**, en un commit con push: las tandas de uso `final` en `generar_trabajos3.TANDAS`
    (11001-11030 regulares, 12001-12100 aleatorias), una parte nueva en `PARTES` (fuera de `PARTES_PLAN`) con los
    brazos exactos, y la lista `plan3/listo/lista_final.json` (`{"comparaciones": [{celda, escenario, tanda, a, b}]}`;
-   `a` y `b` = `{tipo, base}`, `base` solo si es una base); antes,
+   `a` y `b` = `{"tipo": ..., "base": 42}`, `base` como número y solo si es una base); antes,
    `python generar_trabajos3.py --partes <las de cola/partes.txt>,<la parte nueva>` (lo de antes queda igual: solo se
    agregan los trabajos y los CSV de la prueba final).
 2. **Resello:** `python manifiesto.py cierre` (los CSV de la prueba final no se sellan), commit del sello y push.
-3. `python veredicto3.py --sha-lista listo/lista_final.json`; Fabian escribe ese sha256, una sola línea, en
-   `plan3/listo/holdout.ok`; commit y push **antes de la noche final** (la cola no lanza un trabajo `final` sin eso).
-4. La noche final; a la mañana, su commit (el manifiesto de la mañana, sin el sello) y push.
-5. `python veredicto3.py --prueba-final listo/lista_final.json`: crea `listo/holdout.candado` y
-   `salidas/veredicto3_prueba_final.csv`.
-6. Enseguida, un commit del candado, de esa salida y de los CSV de la prueba final (`git add -f`), y push. Nunca se
-   borran ni se editan `holdout.ok`, la lista ni el candado.
+3. `python veredicto3.py --holdout listo/lista_final.json`: valida la lista (cada brazo en el manifiesto, en su tanda
+   final, con el bloque completo de semillas) y escribe `listo/holdout.ok` en UTF-8 con una sola línea. **Nunca** con
+   `>` de PowerShell (escribe UTF-16). Commit de `holdout.ok`.
+4. `python veredicto3.py --preflight holdout` (antes del push) y, si no dice nada, `git push origin plan3` **antes de
+   la noche final**, y el correo al asesor con el texto que imprime. La cola no lanza un trabajo `final` si
+   `holdout.ok` no está commiteado, igual al de HEAD, empujado y con el hash de la lista; si ya los rechazó, sus ids
+   van en `cola/reintentar.txt`.
+5. La noche final (por la cola: veredicto3 exige que cada CSV final lo haya escrito un trabajo lanzado después de
+   `holdout.ok`, según `cola/estado.json`); a la mañana, su commit (el manifiesto de la mañana y `cola/estado.json`,
+   sin el sello) y push.
+6. `python veredicto3.py --prueba-final listo/lista_final.json`: escribe primero `salidas/veredicto3_prueba_final.csv`
+   y después `listo/holdout.candado` (con las filas, los sha256 y el código). Un corte antes del candado deja volver a
+   correrla; después, no.
+7. Enseguida, un commit del candado, de esa salida y de los CSV de la prueba final (`git add -f`) y push; después
+   `python veredicto3.py --verificar-prueba-final` (vuelve a calcular la prueba final commiteada, se niega si no da lo
+   mismo) y el correo al asesor con el texto que imprime (el commit del candado y sus sha256). `--final` hace la misma
+   verificación. Nunca se borran ni se editan `holdout.ok`, la lista ni el candado.
 - Lo que se cite de ella dice "elegido después de ver T1 y T2; una tanda". Nunca juzga lo prerregistrado.
 
 ### 5.4 Escritura [A8]

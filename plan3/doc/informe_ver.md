@@ -1,8 +1,9 @@
 # veredicto3.py: informe de implementación (PLAN3 5.0; DECISIONES B11, B21 y B22)
 
 05.11.2026, con la revisión de la tarde, el ajuste de la noche al generador nuevo, el seguimiento de la revisión de
-referencias, la revisión adversarial de 13fd132 y la segunda revisión (la historia de git anclada a la rama empujada).
-Rama `plan3-ver` (nació de `plan3-dev` en cff0d61 y trae `plan3-dev` fusionada hasta d742f71). No se simuló nada
+referencias, la revisión adversarial de 13fd132, la segunda revisión (la historia de git anclada a la rama empujada) y
+la tercera (recuperar los errores honestos y ver las manipulaciones). Rama `plan3-ver` (nació de `plan3-dev` en
+cff0d61 y trae `plan3-dev` fusionada hasta 0aa6ff0). No se simuló nada
 con semillas del examen ni se abrió ningún resultado decisivo (todavía no existen): todo se probó con lo entregado de
 `plan2/` (solo lectura), con datos sintéticos que usan las semillas de humo (424301-424360) en `plan3/tmp_ver/`
 (ignorada por git) y, para la evidencia de k, con evaluar3 en semillas de humo (424301-424303). El ensayo del protocolo
@@ -15,13 +16,14 @@ nada.
   las reglas del prerregistro (parte A), las etiquetas de cada celda (T1, T2 y citable), el modelo citado, el sentido
   entre entrenamientos, todas las hipótesis de §8 con sus familias y Holm, el número único, las lecturas obligadas y el
   informe de vehículos sin entrar al cierre (§4).
-- **Modos.** `--probar` (190 pruebas, ~2 min), `--final` (se niega si algo sellado cambió, si un CSV de `ciego/`
+- **Modos.** `--probar` (196 pruebas, ~2 min), `--final` (se niega si algo sellado cambió, si un CSV de `ciego/`
   no es el de su primera mañana, si falta un trabajo, un meta o una base sin declararla caída, o si la historia de git
   no es la empujada), `--prueba-final LISTA.json` (§13: valida todo, luego crea el candado en exclusiva y corre una
-  sola vez) y `--sha-lista LISTA.json` (el sha256 que va en `listo/holdout.ok`).
-- **Pruebas: 190 de 190 pasan** en `plan3-dev` fusionada (`plan3/pruebas/ver/prueba_veredicto3.txt`; el registro
+  sola vez), `--sha-lista LISTA.json`, `--holdout LISTA.json` (valida la lista y escribe `listo/holdout.ok`),
+  `--preflight cierre|holdout` (antes de cada push que no se deshace) y `--verificar-prueba-final`.
+- **Pruebas: 196 de 196 pasan** en `plan3-dev` fusionada (`plan3/pruebas/ver/prueba_veredicto3.txt`; el registro
   sale igual byte a byte en dos corridas). **El protocolo de punta a punta, con los programas de verdad y un `origin` de
-  prueba: 37 de 37** (`plan3/pruebas/ver/salidas/prueba_protocolo.txt`).
+  prueba: 73 de 73** (`plan3/pruebas/ver/salidas/prueba_protocolo.txt`).
 - **Ajuste de la noche (05.11).** El mundo sintético ahora es el manifiesto del generador tal cual: no agrega lo que el
   generador ya produce (eso daba los duplicados), y se sella con `manifiesto.sello` real. veredicto3 lee las bases
   caídas por su corrida, como el generador, y coteja el brazo de las referencias nuevas.
@@ -35,9 +37,12 @@ nada.
 - **Segunda revisión (05.11, tarde).** Todo se ancla a la historia empujada: el sello que vale (el del primer commit con
   `cierre.ok`), cada mañana y el primer commit de `holdout.ok` tienen que estar en `origin/plan3`, en una sola cadena.
   Un merge, un amend, otra rama, un clon superficial, un `git replace`, una mañana en una rama lateral, una edición sin
-  sellar, borrar el candado o una segunda lista: se niega (en `--probar` y con los programas de verdad). Lo único que
-  el código no cierra es un push forzado visto desde un repositorio que nunca vio la rama de antes: lo cierra proteger
-  la rama `plan3` en GitHub.
+  sellar, borrar el candado o una segunda lista: se niega (en `--probar` y con los programas de verdad).
+- **Tercera revisión (05.11, noche).** Primero, que se pueda recuperar: los dos push que no se deshacen (el del cierre y
+  el de `holdout.ok`) tienen su preflight, y un merge de código en cualquier momento no rompe nada. Después, que una
+  manipulación se vea desde afuera: todo se lee desde `origin/plan3`, y el testigo de afuera es el correo al asesor
+  con los hashes que imprimen las herramientas. Fabian no protege la rama en GitHub: lo que eso deja sin ver está
+  declarado abajo.
 
 ## Ajuste al generador nuevo y al sello real (05.11, noche)
 
@@ -155,6 +160,55 @@ la tabla del prerregistro, también 11001-11030 y 12001-12100 en la prueba final
   marcar los datos de `plan3/` como `-text` en `.gitattributes`, y eso conviene hacerlo con la cola parada (los archivos
   ya commiteados saldrían modificados): no lo hice.
 
+## Tercera revisión (05.11, noche): recuperar los errores honestos y ver las manipulaciones
+
+**Amenaza** (PLAN3 §5, "Amenaza y defensas"). (a) Ningún error honesto deja el cierre o la prueba final imposibles
+para siempre: el preflight lo ve antes del push o se corrige después. (b) Una manipulación la puede ver alguien de
+afuera con el repositorio de GitHub y los correos al asesor. Un operador decidido con todo el control de su máquina es
+un límite declarado (§14).
+
+| # | Punto | Qué se hizo | Prueba |
+|---|---|---|---|
+| 1 | Leer desde el ancla, no desde HEAD (P1-H1) | Módulo nuevo `anclaje.py`, que usan veredicto3, `manifiesto.py` y `protecciones.py`. git corre con un entorno limpio (sin `GIT_DIR`, `GIT_CONFIG_*`, `GIT_*_PATHSPECS`; sin objetos de reemplazo; sin preguntar credenciales; con tiempo máximo). El ancla es `refs/heads/plan3` del origin, traída con un fetch explícito a `refs/veredicto3/traida`. Se niega si el origin no es el de PLAN3.md §5, si el remoto tiene una referencia que git confunde con la rama (`refs/tags/plan3`, `refs/plan3`, `refs/remotes/plan3`) o si el tag del prerregistro local no es el del remoto. Todo (el cierre, las mañanas, `holdout.ok`, el candado) se lee de la historia del ancla; lo protegido del disco tiene que ser lo del ancla y HEAD tiene que estar en su línea | N29; protocolo |
+| 2 | Rutas canónicas (P1-H2) | Cada CSV del manifiesto está en su ruta canónica y es la `--salida` de su trabajo (`mf.rutas_canonicas`, en `manifiesto.py cierre` y en veredicto3); los CSV que se cotejan con las mañanas se eligen por el uso de su tanda; la lista y el manifiesto son los del generador (`mf.listas_del_generador`, como `--comprobar`) | N28; protocolo |
+| 3 | Push forzado antes del primer `--final` y sin `visto` (P1-H3, P1-M2) | Cada valor del reflog de `refs/remotes/origin/plan3` (y `refs/veredicto3/visto`) que ya tenía datos decisivos tiene que ser ancestro del ancla (un clon nuevo no tiene reflog: no vio nada antes). `protecciones.py antes` y `despues` hacen lo mismo cada noche y guardan `visto` (sin red, solo avisan) | M41; protocolo |
+| 4 | Reemplazos (P1-H4) | `mf.validar_reemplazos`, en `manifiesto.py cierre` y en veredicto3: una corrida rehecha (clave con `_r<N>` mayor: una sola dirección), declarada en un commit empujado posterior a la mañana de la vieja y anterior a la de la nueva; una entrada no se borra ni cambia; sin la variante solo con `trabajo`. veredicto3.md las lista | N26, M35d, M35e; protocolo |
+| 5 | CSV finales a mano (P1-H5) | Cada CSV de la prueba final lo escribió un trabajo de la cola lanzado después de `holdout.ok`: en `cola/estado.json` de la rama empujada, el commit de lanzamiento desciende del de `holdout.ok`, la hora es posterior y el código es 0. El candado guarda esos commits y el código | protocolo |
+| 6 | Promoción dada vuelta (P1-H6) | La promoción se vuelve a calcular con `p3_promocion` y los argumentos de su trabajo; `promocion.json` y cada `promocion/<esc>.json` se commitean antes del cierre y no cambian después; los metas commiteados tampoco; `cola/caidas.json` solo suma. Un cambio vale solo si `cola/enmiendas.json` lo declaró antes (empujado) | protocolo |
+| 7 | Merges de código (P2-H1, P2-H2, P2-H3) | Un merge cuyo contenido de lo que se mira es el de uno de sus padres no cuenta (`anclaje.Historial.commits`); el "sello viejo" se mira por contenido; el cierre es el primer commit con `cierre.ok` y un sello que cubre su última mañana | protocolo (merges en el flujo principal) |
+| 8 | holdout.ok en UTF-16 y la lista (P2-H4, P2-M1) | `--holdout LISTA` valida la lista (cada brazo en el manifiesto, la base como número, el bloque completo de la tanda final) y escribe `holdout.ok` en UTF-8 con una línea. `--preflight holdout` y `protecciones.holdout_listo` rechazan UTF-16, BOM o dos líneas antes de la noche; ya empujado, se lee por contenido y no se pierde | N27; protocolo |
+| 9 | Tabla de semillas (P1-M1) | veredicto3 usa la tabla del tag de la parte A y se niega si la del disco es otra; `protecciones.py antes` también | protocolo |
+| 10 | Código sin commitear (P1-M3) | `--final` y `--prueba-final` se niegan con cambios sin commitear en el código del análisis, y guardan el commit y los blobs en `salidas/veredicto3_procedencia.json` (con el sha256 de cada salida), en veredicto3.md y en el candado | protocolo |
+| 11 | La salida y el candado (P1-M4, P1-M5) | Primero la salida, después el candado (con las filas); un corte antes del candado deja volver a correr. `--verificar-prueba-final` y `--final` vuelven a calcular la prueba final commiteada y se niegan si no da lo mismo | protocolo |
+| 12 | PLAN3 §5 (P1-M6 y el crítico) | La amenaza, las listas de 5.1 y 5.3 con los preflight y los correos, y solo las negativas que el código hace. Por decisión de Fabian, la protección de GitHub es opcional (y se dice qué agregaría) | — |
+| 13 | Después del cierre (crítico) | `protecciones` no lanza trabajos ciegos después de `cierre.ok` (salvo los finales) ni relanza uno cuyo CSV ya está en una mañana | protocolo |
+| 14 | Ensayo de la noche final (crítico) | El protocolo corre `protecciones.py antes` y `chequeos_previos.py --sin-identidad` en el HEAD de `holdout.ok` (cada comando, los finales incluidos, pasa el parser de su script) | protocolo |
+| 15 | Sin red (P2-L3) | fetch y ls-remote con tiempo máximo y sin preguntar credenciales; `protecciones.git` también | protocolo |
+| 16 | `.gitattributes` (P2-M2) | Las 7 líneas `-text` del revisor. En el protocolo llegan a un worktree con datos commiteados sin cambios fantasma, y un clon nuevo en Windows corre `--final` | protocolo |
+| 17 | Menores (P2-L1, P2-L2, P1-L1) | P2-L1 lo arregla 7; el mundo escribe como los programas de verdad (CSV y metas con CRLF, la promoción con los comandos de la cola); P1-L1 queda declarado | M07, M07b |
+
+**Lo que hice distinto de lo pedido.**
+- El reflog de `refs/heads/plan3` no se usa: un amend o un rebase local que nunca se empujó es un error honesto que se
+  tiene que poder corregir; lo empujado ya está en el reflog de `refs/remotes/origin/plan3`.
+- Los tags: se niega solo lo que git puede confundir con la rama (`refs/tags/plan3`, `refs/plan3`,
+  `refs/remotes/plan3`). "Cualquier tag plan3*" negaría el tag del prerregistro (`plan3-prerregistro-A`) y los de
+  las enmiendas.
+- La promoción se fija antes del commit del cierre (§12), no antes de la primera mañana con CSV de examen: la promoción
+  se decide después de que existen los CSV de examen de V2. Lo que cierra el ataque es volver a calcularla.
+- El cierre que vale es el primer commit con `cierre.ok` y un sello que cubre su última mañana (antes, el primero con
+  `cierre.ok`): así barrer `cierre.ok` a una mañana se corrige con el commit del cierre.
+- La URL del origin está en PLAN3.md §5, no en el prerregistro (cambiarlo pediría una enmienda).
+
+**Lo que queda sin ver (Fabian no protege la rama en GitHub).**
+- Un push forzado, o borrar y volver a crear `plan3`, mirado desde un repositorio que nunca vio la rama de antes (un
+  clon nuevo, o el de ejecución después de borrar su reflog y `refs/veredicto3/visto` y hacer un fetch). Lo ve el
+  asesor: los commits de sus correos (cierre, `holdout.ok`, candado) ya no están en la rama.
+- Entre dos correos (las mañanas antes del cierre), solo el reflog del repositorio de ejecución y `visto` delatan una
+  reescritura; quien los borra los borra.
+- Un CSV corrido a mano con `P3_USO` puesto a mano, o regenerado antes de su primera mañana (P1-L1: las mañanas no
+  guardan el trabajo ni la hora).
+- Una base declarada caída no se coteja con los fallos de `cola/estado.json`.
+
 ## Cómo se corre
 
 Desde `plan3/`:
@@ -165,6 +219,10 @@ Desde `plan3/`:
 | `python veredicto3.py --final` | El veredicto, después del cierre | `salidas/veredicto3_celdas.csv`, `_bases.csv`, `_hipotesis.csv`, `_comparaciones.csv`, `_no_insertados.csv` y `veredicto3.md` |
 | `python veredicto3.py --prueba-final LISTA.json` | Prueba final reservada (§13) | `listo/holdout.candado` y `salidas/veredicto3_prueba_final.csv` |
 | `python veredicto3.py --sha-lista LISTA.json` | El sha256 de la lista (sin CR) que va en `listo/holdout.ok` | Nada |
+| `python veredicto3.py --holdout LISTA.json` | Valida la lista (sin leer CSV) y escribe `listo/holdout.ok` (UTF-8, una línea) | `listo/holdout.ok` |
+| `python veredicto3.py --preflight cierre` | Antes del push del cierre: lo de `--final`, con HEAD como ancla, sin escribir; imprime el correo | Nada |
+| `python veredicto3.py --preflight holdout` | Antes del push de `holdout.ok`: lo de `--prueba-final` que no lee CSV finales; imprime el correo | Nada |
+| `python veredicto3.py --verificar-prueba-final` | Vuelve a calcular la prueba final commiteada; imprime el correo del candado | Nada |
 | `python -B pruebas/ver/prueba_protocolo.py` | El protocolo de punta a punta con estos programas y un `origin` de prueba (sin SUMO) | `pruebas/ver/salidas/prueba_protocolo.txt` y temporales en `tmp_ver/proto/` |
 
 `--final` revisa, en este orden, y se niega (sale con 1 sin escribir nada) en cuanto algo falla:
@@ -301,7 +359,7 @@ A5), margen +2 %, demanda con `exp()`, mismos vehículos en P1, H6 y no inferior
 | N07 Holm con 6; N08 tres lecturas de la no inferioridad; N09 H1 por intersección-unión; N10 H6; N11 vehículos y ciclo mínimo; N12 número único | pasan |
 | N13-N13d no escribe fuera de `plan3/` ni la carpeta `plan3`; `carpeta_limpia` solo `tmp_*` | pasan |
 | N14 semillas del prerregistro; N15 lectura conjunta de la no inferioridad (8 casos); N16 `acuerdo` sin StopIteration; N17 criterio y semillas de las bases; N18 k de las plantillas de plan3 y por dónde corre cada brazo; N19 plantilla con un archivo que falta (k None) y lo que se verifica en `--final`; N20 las reglas de `cola/caidas.json`, iguales en el generador y en veredicto3 (también `p3c0`, un escenario mal escrito y otra celda) | pasan |
-| N21 una corrida rehecha (`r2`); N22 `cambio_desde_tag` frente a un repositorio de prueba; N23 JSON con BOM e inválido; N24 sha256 de la lista sin CR; N25 una familia sin bases en el generador | pasan |
+| N21 una corrida rehecha (`r2`); N22 `cambio_desde_tag` frente a un repositorio de prueba; N23 JSON con BOM e inválido; N24 sha256 de la lista sin CR; N25 una familia sin bases en el generador; N26 las reglas de `cola/reemplazos.json`; N27 `holdout.ok` en UTF-16, con BOM o con dos líneas; N28 rutas con './', '\' u otra mayúscula; N29 el origin de PLAN3.md §5 | pasan |
 
 **3. Mundo sintético de punta a punta** (`tmp_ver/mundo/plan3`: 32 celdas, 1736 CSV = 1710 del generador + 30 de la
 política por red − 4 referencias quitadas).
@@ -316,7 +374,7 @@ política por red − 4 referencias quitadas).
 | M25-M28j: vehículos distintos en una referencia (m2715, fijo ajustado desde 10 s), tabla de bases (convergencia, candidatas, caídas con sus intentos), `.md` (tabla, lecturas, no insertados, promoción, frase de §17), avisos (una línea para promo), a3 (48 filas, todas "mayor"), perfil y mezcla (6 celdas, bloques al lado en el perfil), C0 aleatorio con `v2reg3poi`, celda sin modelo principal, regla reactiva (lectura en P3 regular, no en P1; en H0) | pasan |
 | M29-M31: versión publicada que no es la mediana, CSV con una semilla de más y promoción alterada: ERROR | pasan |
 | M32-M38: prueba final (tanda de uso 'final' simulada con humo): no entra al veredicto; el sello nuevo sale sin problemas, no sella sus CSV y solo agrega la prueba final (se acepta); un sello con sus CSV se niega; sin `holdout.ok` o con otro sha256 se niega; sin el bloque completo, con una métrica vacía, con otros vehículos, con un CSV que ya estaba en una mañana anterior a `holdout.ok`, que cambió después de su mañana o que está en el sello, se niega sin cerrar el candado; corre una vez y no dos. Un sello cuya última mañana no está en la historia, una mañana posterior con otro sha256 y una mañana con un CSV de T1 que el cierre no selló: se niega. Caídas por corrida, con o sin la corrida en la declaración: las mismas 9 bases que deja de evaluar el generador. Cambios de fase: a V2 y a la regla de P1 se les resta 1 y al fijo fino nada; en P3, 0; el k de la nota de cada fila es el que se le resta al citado; una plantilla sin verificar marca la fila | pasan |
-| M39 `manifiesto.py revisar` nombra la base caída declarada después; M40 un clon superficial; M41 un push forzado desde otro clon: se niega en cada corrida (no solo la primera) y con la rama de vuelta corre | pasan |
+| M39 `manifiesto.py revisar` nombra la base caída declarada después; M40 un clon superficial; M41 un push forzado desde otro clon: se niega en cada corrida (no solo la primera) y con la rama de vuelta corre; M07b sin la decisión de promoción, el citado queda PENDIENTE; M35d-M35e un reemplazo que no es una corrida rehecha | pasan |
 | G01 `git status --porcelain --ignored -- plan2 TESIS` vacío, rc 0 | pasa |
 
 ## Ambigüedades del prerregistro y lectura implementada
@@ -382,8 +440,23 @@ Cada una lleva `[AMB-n]` en el código. **Fijada (05.11)** = el coordinador la d
    (`entrenamientos_del_plan`), la celda de su escenario y acepta las corridas `r<N>`; `origen_de` y
    `corrida_de_politica`; `CAIDAS` se carga al generar (un `caidas.json` inválido no rompe el import); una familia sin
    bases no publica mediana ni evaluaciones (`MEDIANAS_SIN_BASES`).
-9. **GitHub.** Proteger la rama `plan3` (sin push forzado ni borrado): es lo único que cierra un push forzado visto
-   desde un repositorio que nunca vio la rama de antes.
+9. **GitHub.** Por decisión de Fabian, la rama `plan3` no se protege; el testigo de afuera es el correo al asesor con
+   los hashes que imprimen `--final`, `--preflight holdout` y `--verificar-prueba-final`. Protegerla agregaría que un
+   push forzado no se pueda hacer en el remoto (PLAN3 §5).
+10. **`anclaje.py`** (nuevo): la historia de git anclada a `origin/plan3`, para veredicto3, `manifiesto.py` y
+   `protecciones.py`. Escribe dos referencias locales que `git push` no sube: `refs/veredicto3/traida` (lo último que
+   trajo el fetch) y `refs/veredicto3/visto` (lo último aceptado). El origin esperado está en PLAN3.md §5 ("El `origin`
+   de la rama `plan3` es ...").
+11. **`protecciones.py`** (en la noche): `antes` y `despues` traen `origin/plan3`, se niegan si la rama empujada se
+   reescribió después de tener datos decisivos y guardan `visto` (sin red, solo avisan); `antes` coteja la tabla de
+   semillas con el tag; `revisar_comando` no lanza trabajos ciegos después de `cierre.ok` ni relanza uno cuyo CSV ya
+   está en una mañana, y un trabajo `final` exige `holdout.ok` en UTF-8 con el hash de `listo/lista_final.json`;
+   `git` con tiempo máximo y sin preguntar credenciales.
+12. **`manifiesto.py cierre`** exige además las rutas canónicas, la lista y el manifiesto del generador, la cadena de
+   commits y los reemplazos con sus reglas; `cola/reemplazos.json` ya no acepta entradas solo con `trabajo`.
+13. **`cola/enmiendas.json`** (nuevo, opcional): `[{"archivo", "motivo", "fecha"}]`; declara, antes del cambio y
+   empujado, una decisión que cambia después de su primer commit (promoción, un meta, una caída).
+14. **`.gitattributes`**: las 7 líneas `-text`; conviene fusionarlo de día, con `git status` limpio.
 
 ## Límites
 

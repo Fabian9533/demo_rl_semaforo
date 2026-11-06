@@ -6,7 +6,7 @@ Generado por `veredicto3.py` con las reglas de `PRERREGISTRO.md` (§7-§12). No 
 
 - Número único, llegadas regulares (P1-P6, con P6): frente al plan fijo ajustado al segundo, -4.0 % [-4.0, -3.9] en la tanda 1 y -2.1 % [-2.3, -2.0] en la tanda 2 (frente al plan fijo entregado: -5.8 % [-5.9, -5.8] y -4.0 % [-4.2, -3.9]). IPPO con mensajes corregido: -3.6 % [-3.7, -3.6] y -1.7 % [-1.9, -1.6].
 - Número único, llegadas aleatorias (P1-P6, con P6): frente al plan fijo ajustado al segundo, -6.0 % [-6.1, -6.0] en la tanda 1 y -6.0 % [-6.1, -6.0] en la tanda 2 (frente al plan fijo entregado: -7.8 % [-7.9, -7.8] y -7.9 % [-7.9, -7.8]). Cifra provisional en P3.
-- Casos con etiqueta citable MEJORA o FUNCIONA: 22 de 32 (P1 (regulares), P2 (regulares), P6 (regulares), P6e (regulares), r1810 (regulares), r2715 (regulares), r3620 (regulares), m1810 (regulares), m2715 (regulares), m3620 (regulares), m6525 (regulares), P1 (aleatorias), P2 (aleatorias), P4 (aleatorias), P5 (aleatorias), P6 (aleatorias), mix1 (aleatorias), mix3 (aleatorias), mixa1 (aleatorias), mixa3 (aleatorias), per1 (aleatorias), per3 (aleatorias))
+- Casos con etiqueta citable MEJORA o FUNCIONA: 23 de 32 (P1 (regulares), P2 (regulares), P6 (regulares), P6e (regulares), D (regulares), r1810 (regulares), r2715 (regulares), r3620 (regulares), m1810 (regulares), m2715 (regulares), m3620 (regulares), m6525 (regulares), P1 (aleatorias), P2 (aleatorias), P4 (aleatorias), P5 (aleatorias), P6 (aleatorias), mix1 (aleatorias), mix3 (aleatorias), mixa1 (aleatorias), mixa3 (aleatorias), per1 (aleatorias), per3 (aleatorias))
 - Hipótesis que pasan (con su regla global o, si se juzgan caso por caso, en al menos un caso): H2, H7r, H7, H8a, H8c, H12, H14 regulares, H14 aleatorias, H15 regulares, H9 regulares, H9 aleatorias, H10 corredor, H3, H5, H6.
 
 ## Cómo leer
@@ -26,7 +26,7 @@ Generado por `veredicto3.py` con las reglas de `PRERREGISTRO.md` (§7-§12). No 
 | P5 | regulares | IPPO con mensajes corregido | MEJORA | FALLA | CONTRADICTORIO (no se concluye) | -3.0 % [-3.1, -2.9] | +4.0 % [3.8, 4.2] | 5 de 5; 5 de 5 | CONTRADICTORIO (no se concluye) |
 | P6 | regulares | IPPO con mensajes corregido | MEJORA | MEJORA | MEJORA | -3.1 % [-3.2, -3.0] | -3.0 % [-3.1, -2.9] | 4 de 5; 4 de 5 | MEJORA |
 | P6e | regulares | IPPO con mensajes corregido | MEJORA | MEJORA | MEJORA | -3.0 % [-3.2, -2.9] | -3.2 % [-3.3, -3.1] | 3 de 5; 3 de 5 | MEJORA |
-| D | regulares | PENDIENTE | PENDIENTE | PENDIENTE | PENDIENTE | — | — | —; — | MEJORA |
+| D | regulares | IPPO con mensajes corregido | MEJORA | MEJORA | MEJORA | -8.0 % [-8.2, -7.9] | -8.0 % [-8.2, -7.9] | 5 de 5; 5 de 5 | MEJORA |
 | c905 | regulares | IPPO con mensajes corregido | EMPATA | EMPATA | EMPATA | -0.0 % [-0.7, 0.6] | -0.0 % [-0.6, 0.5] | 2 de 3; 1 de 3 | EMPATA |
 | c1358 | regulares | IPPO con mensajes corregido | FALLA | FALLA | FALLA | +3.9 % [3.8, 4.1] | +4.0 % [3.9, 4.1] | 3 de 3; 3 de 3 | FALLA |
 | c2715 | regulares | IPPO con mensajes corregido | PENDIENTE (MEJORA) | PENDIENTE (MEJORA) | PENDIENTE (MEJORA) | -3.0 % [-3.2, -2.8] | -3.0 % [-3.1, -2.9] | 5 de 5; 5 de 5 | MEJORA |
@@ -114,7 +114,7 @@ Generado por `veredicto3.py` con las reglas de `PRERREGISTRO.md` (§7-§12). No 
 | P5 | regulares | MEJORA | CONTRADICTORIO (no se concluye) | — | CONTRADICTORIO (no se concluye) | — | CONTRADICTORIO (no se concluye) | CONTRADICTORIO (no se concluye) | FUNCIONA | FALLA | FUNCIONA | FUNCIONA |
 | P6 | regulares | FUNCIONA | FUNCIONA | — | MEJORA | — | MEJORA | MEJORA | FUNCIONA | FALLA | FUNCIONA | FUNCIONA |
 | P6e | regulares | FUNCIONA | FUNCIONA | — | MEJORA | — | MEJORA | MEJORA | FUNCIONA | FALLA | FUNCIONA | FUNCIONA |
-| D | regulares | — | — | — | — | — | — | — | — | — | — | — |
+| D | regulares | FUNCIONA | FALLA | — | FUNCIONA | — | FUNCIONA | FUNCIONA | FUNCIONA | MEJORA | FUNCIONA | FUNCIONA |
 | c905 | regulares | MEJORA | MEJORA | — | MEJORA | EMPATA (mejora no confirmada) | — | — | — | — | — | FUNCIONA |
 | c1358 | regulares | MEJORA | FALLA | — | FALLA | FALLA | — | — | — | — | — | FUNCIONA |
 | c2715 | regulares | FUNCIONA | FUNCIONA | — | MEJORA | MEJORA | — | — | — | — | — | FUNCIONA |
@@ -142,7 +142,6 @@ Generado por `veredicto3.py` con las reglas de `PRERREGISTRO.md` (§7-§12). No 
 
 ## PENDIENTE
 
-- D (regulares): PENDIENTE (falta la decisión de promoción de dem_corredor_t2715_der).
 - c2715 (regulares): PENDIENTE (no convergió; provisional: MEJORA); probabilidad de que una política estable no converja por ruido (§6): no medido.
 - r905 (regulares): PENDIENTE (falta fijo fino en t1r).
 - r1358 (regulares): PENDIENTE (falta actuado ajustado en t1r).
@@ -156,6 +155,7 @@ Generado por `veredicto3.py` con las reglas de `PRERREGISTRO.md` (§7-§12). No 
 - P4 (regulares): modelo completo +0.21 %, 400 episodios +0.37 %; se cita IPPO con mensajes corregido.
 - P5 (regulares): 400 episodios +0.34 %; se cita IPPO con mensajes corregido.
 - P6 (regulares): reloj de 2 s +0.30 %, modelo completo +0.30 %, limpiezas de PPO juntas +0.32 %, observación nueva +0.32 %, 400 episodios +0.34 %; se cita IPPO con mensajes corregido.
+- D (regulares): reloj de 2 s +0.35 %, observación nueva +0.36 %, limpiezas de PPO juntas +0.42 %; se cita IPPO con mensajes corregido.
 - c2715 (regulares): observación nueva +0.21 %; se cita IPPO con mensajes corregido.
 - P1 (aleatorias): modelo completo +0.23 %, reloj de 2 s +0.26 %, observación nueva +0.26 %, 400 episodios +0.26 %; se cita IPPO con mensajes corregido (entrenado con llegadas aleatorias).
 - P2 (aleatorias): 400 episodios +0.22 %, modelo completo +0.26 %, reloj de 2 s +0.34 %, observación nueva +0.38 %; se cita IPPO con mensajes corregido (entrenado con llegadas aleatorias).
