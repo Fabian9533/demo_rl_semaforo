@@ -1,0 +1,513 @@
+{
+ "escenario": "malla3_alta",
+ "variante": "vecinos",
+ "algoritmo": "ippo",
+ "recompensa": "retraso",
+ "etiqueta": "p3v2vieja",
+ "opciones": {
+  "v2": true,
+  "recompensa_insercion": false,
+  "etiqueta": "p3v2reg",
+  "criterio_val": "total"
+ },
+ "descuento": "por segundo: gamma^(dt/5)",
+ "exploracion": "comun: un u por segundo, default_rng(semilla + 104729)",
+ "recompensa_insercion": "no",
+ "criterio_validacion": "timeLoss medio en 999 y 1999 (regla del 25.09)",
+ "base": 42,
+ "episodios": 200,
+ "dim_obs": 53,
+ "n_id": 9,
+ "lados": [
+  "oeste",
+  "este",
+  "norte",
+  "sur"
+ ],
+ "ocultas": 64,
+ "hiper": {
+  "gamma": 0.95,
+  "lam": 0.95,
+  "clip": 0.2,
+  "epocas": 10,
+  "minibatch": 64,
+  "lr": 0.001,
+  "ent": 0.01,
+  "valor": 0.5,
+  "grad": 0.5
+ },
+ "w1": 1.0,
+ "w2": 0.01,
+ "w3": 2.0,
+ "w4": 2.0,
+ "escala_r": 0.02,
+ "fase_av": {
+  "semaforo_C11": 0,
+  "semaforo_C12": 0,
+  "semaforo_C13": 0,
+  "semaforo_C21": 0,
+  "semaforo_C22": 0,
+  "semaforo_C23": 0,
+  "semaforo_C31": 0,
+  "semaforo_C32": 0,
+  "semaforo_C33": 0
+ },
+ "vecinos": {
+  "semaforo_C11": {
+   "oeste": null,
+   "este": [
+    "semaforo_C12",
+    "C12_C11",
+    "C11_C12"
+   ],
+   "norte": null,
+   "sur": [
+    "semaforo_C21",
+    "C21_C11",
+    "C11_C21"
+   ]
+  },
+  "semaforo_C12": {
+   "oeste": [
+    "semaforo_C11",
+    "C11_C12",
+    "C12_C11"
+   ],
+   "este": [
+    "semaforo_C13",
+    "C13_C12",
+    "C12_C13"
+   ],
+   "norte": null,
+   "sur": [
+    "semaforo_C22",
+    "C22_C12",
+    "C12_C22"
+   ]
+  },
+  "semaforo_C13": {
+   "oeste": [
+    "semaforo_C12",
+    "C12_C13",
+    "C13_C12"
+   ],
+   "este": null,
+   "norte": null,
+   "sur": [
+    "semaforo_C23",
+    "C23_C13",
+    "C13_C23"
+   ]
+  },
+  "semaforo_C21": {
+   "oeste": null,
+   "este": [
+    "semaforo_C22",
+    "C22_C21",
+    "C21_C22"
+   ],
+   "norte": [
+    "semaforo_C11",
+    "C11_C21",
+    "C21_C11"
+   ],
+   "sur": [
+    "semaforo_C31",
+    "C31_C21",
+    "C21_C31"
+   ]
+  },
+  "semaforo_C22": {
+   "oeste": [
+    "semaforo_C21",
+    "C21_C22",
+    "C22_C21"
+   ],
+   "este": [
+    "semaforo_C23",
+    "C23_C22",
+    "C22_C23"
+   ],
+   "norte": [
+    "semaforo_C12",
+    "C12_C22",
+    "C22_C12"
+   ],
+   "sur": [
+    "semaforo_C32",
+    "C32_C22",
+    "C22_C32"
+   ]
+  },
+  "semaforo_C23": {
+   "oeste": [
+    "semaforo_C22",
+    "C22_C23",
+    "C23_C22"
+   ],
+   "este": null,
+   "norte": [
+    "semaforo_C13",
+    "C13_C23",
+    "C23_C13"
+   ],
+   "sur": [
+    "semaforo_C33",
+    "C33_C23",
+    "C23_C33"
+   ]
+  },
+  "semaforo_C31": {
+   "oeste": null,
+   "este": [
+    "semaforo_C32",
+    "C32_C31",
+    "C31_C32"
+   ],
+   "norte": [
+    "semaforo_C21",
+    "C21_C31",
+    "C31_C21"
+   ],
+   "sur": null
+  },
+  "semaforo_C32": {
+   "oeste": [
+    "semaforo_C31",
+    "C31_C32",
+    "C32_C31"
+   ],
+   "este": [
+    "semaforo_C33",
+    "C33_C32",
+    "C32_C33"
+   ],
+   "norte": [
+    "semaforo_C22",
+    "C22_C32",
+    "C32_C22"
+   ],
+   "sur": null
+  },
+  "semaforo_C33": {
+   "oeste": [
+    "semaforo_C32",
+    "C32_C33",
+    "C33_C32"
+   ],
+   "este": null,
+   "norte": [
+    "semaforo_C23",
+    "C23_C33",
+    "C33_C23"
+   ],
+   "sur": null
+  }
+ },
+ "cap": {
+  "W1_C11": 102,
+  "C12_C11": 74,
+  "N1_C11": 102,
+  "C21_C11": 74,
+  "C11_C12": 74,
+  "C13_C12": 74,
+  "N2_C12": 102,
+  "C22_C12": 74,
+  "C12_C13": 74,
+  "E1_C13": 102,
+  "N3_C13": 102,
+  "C23_C13": 74,
+  "W2_C21": 102,
+  "C22_C21": 74,
+  "C11_C21": 74,
+  "C31_C21": 74,
+  "C21_C22": 74,
+  "C23_C22": 74,
+  "C12_C22": 74,
+  "C32_C22": 74,
+  "C22_C23": 74,
+  "E2_C23": 102,
+  "C13_C23": 74,
+  "C33_C23": 74,
+  "W3_C31": 102,
+  "C32_C31": 74,
+  "C21_C31": 74,
+  "S1_C31": 102,
+  "C31_C32": 74,
+  "C33_C32": 74,
+  "C22_C32": 74,
+  "S2_C32": 102,
+  "C32_C33": 74,
+  "E3_C33": 102,
+  "C23_C33": 74,
+  "S3_C33": 102
+ },
+ "plazas": {
+  "C11_C12": 37,
+  "C11_C21": 37,
+  "C12_C11": 37,
+  "C12_C13": 37,
+  "C12_C22": 37,
+  "C13_C12": 37,
+  "C13_C23": 37,
+  "C21_C11": 37,
+  "C21_C22": 37,
+  "C21_C31": 37,
+  "C22_C12": 37,
+  "C22_C21": 37,
+  "C22_C23": 37,
+  "C22_C32": 37,
+  "C23_C13": 37,
+  "C23_C22": 37,
+  "C23_C33": 37,
+  "C31_C21": 37,
+  "C31_C32": 37,
+  "C32_C22": 37,
+  "C32_C31": 37,
+  "C32_C33": 37,
+  "C33_C23": 37,
+  "C33_C32": 37
+ },
+ "umbral_spillback": 0.9,
+ "latencia_entrenamiento": 0,
+ "perdida_entrenamiento": 0.0,
+ "val_seeds": [
+  999,
+  1999,
+  2999,
+  3999,
+  4999,
+  7999,
+  8999,
+  9999,
+  15001,
+  15002,
+  15003,
+  15004,
+  15005,
+  15006,
+  15007,
+  15008
+ ],
+ "eval_seed": 999,
+ "torch": "2.14.0+cpu",
+ "python": "3.14.6",
+ "sumo": "1.25.0",
+ "git": "981aaa3",
+ "features": [
+  "cola_o",
+  "cola_e",
+  "cola_n",
+  "cola_s",
+  "movil_o",
+  "movil_e",
+  "movil_n",
+  "movil_s",
+  "fase_0",
+  "fase_1",
+  "t_verde",
+  "puede_cambiar",
+  "id_C11",
+  "id_C12",
+  "id_C13",
+  "id_C21",
+  "id_C22",
+  "id_C23",
+  "id_C31",
+  "id_C32",
+  "id_C33",
+  "oeste_presente",
+  "oeste_verde_hacia_mi",
+  "oeste_ambar",
+  "oeste_t_fase",
+  "oeste_outflow",
+  "oeste_cola_alimentadora",
+  "oeste_cola_mi_salida",
+  "oeste_edad",
+  "este_presente",
+  "este_verde_hacia_mi",
+  "este_ambar",
+  "este_t_fase",
+  "este_outflow",
+  "este_cola_alimentadora",
+  "este_cola_mi_salida",
+  "este_edad",
+  "norte_presente",
+  "norte_verde_hacia_mi",
+  "norte_ambar",
+  "norte_t_fase",
+  "norte_outflow",
+  "norte_cola_alimentadora",
+  "norte_cola_mi_salida",
+  "norte_edad",
+  "sur_presente",
+  "sur_verde_hacia_mi",
+  "sur_ambar",
+  "sur_t_fase",
+  "sur_outflow",
+  "sur_cola_alimentadora",
+  "sur_cola_mi_salida",
+  "sur_edad"
+ ],
+ "ep_checkpoint": 160,
+ "val_checkpoint": 35.808,
+ "val_999": 34.81,
+ "val_1999": 33.57,
+ "val_2999": 33.98,
+ "val_3999": 45.63,
+ "val_4999": 34.63,
+ "val_7999": 35.4,
+ "val_8999": 33.41,
+ "val_9999": 41.79,
+ "val_15001": 34.47,
+ "val_15002": 35.52,
+ "val_15003": 34.36,
+ "val_15004": 34.23,
+ "val_15005": 36.02,
+ "val_15006": 34.0,
+ "val_15007": 35.69,
+ "val_15008": 35.42,
+ "val_total_checkpoint": 81.425,
+ "val_total_999": 80.61,
+ "val_total_1999": 79.03,
+ "val_total_2999": 79.43,
+ "val_total_3999": 91.49,
+ "val_total_4999": 80.58,
+ "val_total_7999": 80.37,
+ "val_total_8999": 79.05,
+ "val_total_9999": 87.95,
+ "val_total_15001": 80.43,
+ "val_total_15002": 81.28,
+ "val_total_15003": 79.88,
+ "val_total_15004": 79.72,
+ "val_total_15005": 81.37,
+ "val_total_15006": 79.77,
+ "val_total_15007": 80.84,
+ "val_total_15008": 81.0,
+ "ep_elegido": 160,
+ "val_elegido": 34.19,
+ "regla_eleccion": "vieja",
+ "corrida_origen": "malla3_alta_ippo_vecinos_p3v2reg_s42",
+ "serie_eleccion": [
+  [
+   10,
+   41.45,
+   42.36,
+   41.905
+  ],
+  [
+   20,
+   40.22,
+   42.34,
+   41.28
+  ],
+  [
+   30,
+   37.21,
+   39.65,
+   38.43
+  ],
+  [
+   40,
+   38.23,
+   38.78,
+   38.505
+  ],
+  [
+   50,
+   37.74,
+   43.62,
+   40.68
+  ],
+  [
+   60,
+   37.97,
+   41.76,
+   39.865
+  ],
+  [
+   70,
+   37.02,
+   36.6,
+   36.81
+  ],
+  [
+   80,
+   36.17,
+   36.53,
+   36.35
+  ],
+  [
+   90,
+   35.82,
+   36.39,
+   36.105
+  ],
+  [
+   100,
+   35.78,
+   36.78,
+   36.28
+  ],
+  [
+   110,
+   35.88,
+   34.63,
+   35.255
+  ],
+  [
+   120,
+   33.9,
+   35.21,
+   34.555
+  ],
+  [
+   130,
+   38.65,
+   34.8,
+   36.725
+  ],
+  [
+   140,
+   35.37,
+   41.11,
+   38.24
+  ],
+  [
+   150,
+   35.04,
+   49.98,
+   42.51
+  ],
+  [
+   160,
+   34.81,
+   33.57,
+   34.19
+  ],
+  [
+   170,
+   37.93,
+   36.15,
+   37.04
+  ],
+  [
+   180,
+   40.07,
+   34.26,
+   37.165
+  ],
+  [
+   190,
+   34.22,
+   34.56,
+   34.39
+  ],
+  [
+   200,
+   34.51,
+   35.57,
+   35.04
+  ]
+ ]
+}

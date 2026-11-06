@@ -1,0 +1,298 @@
+{
+ "escenario": "dem_corredor_t905",
+ "variante": "vecinos",
+ "algoritmo": "ippo",
+ "recompensa": "retraso",
+ "etiqueta": "p3v2vieja",
+ "opciones": {
+  "v2": true,
+  "recompensa_insercion": false,
+  "etiqueta": "p3v2reg",
+  "criterio_val": "total"
+ },
+ "descuento": "por segundo: gamma^(dt/5)",
+ "exploracion": "comun: un u por segundo, default_rng(semilla + 104729)",
+ "recompensa_insercion": "no",
+ "criterio_validacion": "timeLoss medio en 999 y 1999 (regla del 25.09)",
+ "base": 42,
+ "episodios": 200,
+ "dim_obs": 31,
+ "n_id": 3,
+ "lados": [
+  "oeste",
+  "este"
+ ],
+ "ocultas": 64,
+ "hiper": {
+  "gamma": 0.95,
+  "lam": 0.95,
+  "clip": 0.2,
+  "epocas": 10,
+  "minibatch": 64,
+  "lr": 0.001,
+  "ent": 0.01,
+  "valor": 0.5,
+  "grad": 0.5
+ },
+ "w1": 1.0,
+ "w2": 0.01,
+ "w3": 2.0,
+ "w4": 2.0,
+ "escala_r": 0.02,
+ "fase_av": {
+  "semaforo_C1": 1,
+  "semaforo_C2": 1
+ },
+ "vecinos": {
+  "semaforo_C1": {
+   "oeste": null,
+   "este": [
+    "semaforo_C2",
+    "C2_C1",
+    "C1_C2"
+   ]
+  },
+  "semaforo_C2": {
+   "oeste": [
+    "semaforo_C1",
+    "C1_C2",
+    "C2_C1"
+   ],
+   "este": null
+  }
+ },
+ "cap": {
+  "W_C1": 52,
+  "C2_C1": 38,
+  "N1_C1": 52,
+  "S1_C1": 52,
+  "C1_C2": 38,
+  "E_C2": 52,
+  "N2_C2": 52,
+  "S2_C2": 52
+ },
+ "plazas": {
+  "C1_C2": 38,
+  "C2_C1": 38
+ },
+ "umbral_spillback": 0.9,
+ "latencia_entrenamiento": 0,
+ "perdida_entrenamiento": 0.0,
+ "val_seeds": [
+  999,
+  1999,
+  2999,
+  3999,
+  4999,
+  7999,
+  8999,
+  9999,
+  15001,
+  15002,
+  15003,
+  15004,
+  15005,
+  15006,
+  15007,
+  15008
+ ],
+ "eval_seed": 999,
+ "torch": "2.14.0+cpu",
+ "python": "3.14.6",
+ "sumo": "1.25.0",
+ "git": "981aaa3",
+ "features": [
+  "cola_o",
+  "cola_e",
+  "cola_n",
+  "cola_s",
+  "movil_o",
+  "movil_e",
+  "movil_n",
+  "movil_s",
+  "fase_0",
+  "fase_1",
+  "t_verde",
+  "puede_cambiar",
+  "id_C1",
+  "id_C2",
+  "id_libre2",
+  "oeste_presente",
+  "oeste_verde_hacia_mi",
+  "oeste_ambar",
+  "oeste_t_fase",
+  "oeste_outflow",
+  "oeste_cola_alimentadora",
+  "oeste_cola_mi_salida",
+  "oeste_edad",
+  "este_presente",
+  "este_verde_hacia_mi",
+  "este_ambar",
+  "este_t_fase",
+  "este_outflow",
+  "este_cola_alimentadora",
+  "este_cola_mi_salida",
+  "este_edad"
+ ],
+ "ep_checkpoint": 190,
+ "val_checkpoint": 15.155,
+ "val_999": 14.89,
+ "val_1999": 14.7,
+ "val_2999": 15.54,
+ "val_3999": 14.92,
+ "val_4999": 15.33,
+ "val_7999": 14.95,
+ "val_8999": 15.72,
+ "val_9999": 15.76,
+ "val_15001": 15.59,
+ "val_15002": 15.06,
+ "val_15003": 15.05,
+ "val_15004": 15.11,
+ "val_15005": 14.74,
+ "val_15006": 14.78,
+ "val_15007": 14.92,
+ "val_15008": 15.42,
+ "val_total_checkpoint": 15.525,
+ "val_total_999": 15.26,
+ "val_total_1999": 15.07,
+ "val_total_2999": 15.91,
+ "val_total_3999": 15.29,
+ "val_total_4999": 15.7,
+ "val_total_7999": 15.32,
+ "val_total_8999": 16.09,
+ "val_total_9999": 16.14,
+ "val_total_15001": 15.96,
+ "val_total_15002": 15.43,
+ "val_total_15003": 15.42,
+ "val_total_15004": 15.47,
+ "val_total_15005": 15.11,
+ "val_total_15006": 15.14,
+ "val_total_15007": 15.3,
+ "val_total_15008": 15.79,
+ "ep_elegido": 190,
+ "val_elegido": 14.795,
+ "regla_eleccion": "vieja",
+ "corrida_origen": "dem_corredor_t905_ippo_vecinos_p3v2reg_s42",
+ "serie_eleccion": [
+  [
+   10,
+   15.63,
+   15.28,
+   15.455
+  ],
+  [
+   20,
+   15.63,
+   15.28,
+   15.455
+  ],
+  [
+   30,
+   15.83,
+   15.94,
+   15.885
+  ],
+  [
+   40,
+   16.29,
+   15.55,
+   15.92
+  ],
+  [
+   50,
+   15.99,
+   15.83,
+   15.91
+  ],
+  [
+   60,
+   15.92,
+   16.01,
+   15.965
+  ],
+  [
+   70,
+   15.92,
+   15.85,
+   15.885
+  ],
+  [
+   80,
+   15.53,
+   15.86,
+   15.695
+  ],
+  [
+   90,
+   16.1,
+   15.68,
+   15.89
+  ],
+  [
+   100,
+   16.2,
+   15.65,
+   15.925
+  ],
+  [
+   110,
+   15.79,
+   15.89,
+   15.84
+  ],
+  [
+   120,
+   15.48,
+   15.15,
+   15.315
+  ],
+  [
+   130,
+   15.09,
+   15.06,
+   15.075
+  ],
+  [
+   140,
+   15.69,
+   15.11,
+   15.4
+  ],
+  [
+   150,
+   15.14,
+   14.85,
+   14.995
+  ],
+  [
+   160,
+   15.4,
+   15.4,
+   15.4
+  ],
+  [
+   170,
+   15.55,
+   15.23,
+   15.39
+  ],
+  [
+   180,
+   15.51,
+   15.68,
+   15.595
+  ],
+  [
+   190,
+   14.89,
+   14.7,
+   14.795
+  ],
+  [
+   200,
+   15.08,
+   15.04,
+   15.06
+  ]
+ ]
+}

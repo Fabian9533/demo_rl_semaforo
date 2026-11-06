@@ -1,0 +1,13 @@
+{
+ "momento": "despues",
+ "hora": "2026-11-06 07:25:26",
+ "commit": "981aaa35dbd05cf489bd7855dcc3bfebeacbab52",
+ "fallidos": {},
+ "hechos": 132,
+ "versiones": {
+  "python": "3.14.6",
+  "torch": "2.14.0+cpu",
+  "sumo": "1.25.0"
+ },
+ "problemas": []
+}

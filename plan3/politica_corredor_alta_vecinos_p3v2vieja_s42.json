@@ -1,0 +1,298 @@
+{
+ "escenario": "corredor_alta",
+ "variante": "vecinos",
+ "algoritmo": "ippo",
+ "recompensa": "retraso",
+ "etiqueta": "p3v2vieja",
+ "opciones": {
+  "v2": true,
+  "recompensa_insercion": false,
+  "etiqueta": "p3v2reg",
+  "criterio_val": "total"
+ },
+ "descuento": "por segundo: gamma^(dt/5)",
+ "exploracion": "comun: un u por segundo, default_rng(semilla + 104729)",
+ "recompensa_insercion": "no",
+ "criterio_validacion": "timeLoss medio en 999 y 1999 (regla del 25.09)",
+ "base": 42,
+ "episodios": 200,
+ "dim_obs": 31,
+ "n_id": 3,
+ "lados": [
+  "oeste",
+  "este"
+ ],
+ "ocultas": 64,
+ "hiper": {
+  "gamma": 0.95,
+  "lam": 0.95,
+  "clip": 0.2,
+  "epocas": 10,
+  "minibatch": 64,
+  "lr": 0.001,
+  "ent": 0.01,
+  "valor": 0.5,
+  "grad": 0.5
+ },
+ "w1": 1.0,
+ "w2": 0.01,
+ "w3": 2.0,
+ "w4": 2.0,
+ "escala_r": 0.02,
+ "fase_av": {
+  "semaforo_C1": 1,
+  "semaforo_C2": 1
+ },
+ "vecinos": {
+  "semaforo_C1": {
+   "oeste": null,
+   "este": [
+    "semaforo_C2",
+    "C2_C1",
+    "C1_C2"
+   ]
+  },
+  "semaforo_C2": {
+   "oeste": [
+    "semaforo_C1",
+    "C1_C2",
+    "C2_C1"
+   ],
+   "este": null
+  }
+ },
+ "cap": {
+  "W_C1": 52,
+  "C2_C1": 38,
+  "N1_C1": 52,
+  "S1_C1": 52,
+  "C1_C2": 38,
+  "E_C2": 52,
+  "N2_C2": 52,
+  "S2_C2": 52
+ },
+ "plazas": {
+  "C1_C2": 38,
+  "C2_C1": 38
+ },
+ "umbral_spillback": 0.9,
+ "latencia_entrenamiento": 0,
+ "perdida_entrenamiento": 0.0,
+ "val_seeds": [
+  999,
+  1999,
+  2999,
+  3999,
+  4999,
+  7999,
+  8999,
+  9999,
+  15001,
+  15002,
+  15003,
+  15004,
+  15005,
+  15006,
+  15007,
+  15008
+ ],
+ "eval_seed": 999,
+ "torch": "2.14.0+cpu",
+ "python": "3.14.6",
+ "sumo": "1.25.0",
+ "git": "981aaa3",
+ "features": [
+  "cola_o",
+  "cola_e",
+  "cola_n",
+  "cola_s",
+  "movil_o",
+  "movil_e",
+  "movil_n",
+  "movil_s",
+  "fase_0",
+  "fase_1",
+  "t_verde",
+  "puede_cambiar",
+  "id_C1",
+  "id_C2",
+  "id_libre2",
+  "oeste_presente",
+  "oeste_verde_hacia_mi",
+  "oeste_ambar",
+  "oeste_t_fase",
+  "oeste_outflow",
+  "oeste_cola_alimentadora",
+  "oeste_cola_mi_salida",
+  "oeste_edad",
+  "este_presente",
+  "este_verde_hacia_mi",
+  "este_ambar",
+  "este_t_fase",
+  "este_outflow",
+  "este_cola_alimentadora",
+  "este_cola_mi_salida",
+  "este_edad"
+ ],
+ "ep_checkpoint": 160,
+ "val_checkpoint": 126.189,
+ "val_999": 126.63,
+ "val_1999": 125.97,
+ "val_2999": 127.11,
+ "val_3999": 129.85,
+ "val_4999": 127.15,
+ "val_7999": 121.99,
+ "val_8999": 121.98,
+ "val_9999": 128.23,
+ "val_15001": 129.83,
+ "val_15002": 125.28,
+ "val_15003": 123.27,
+ "val_15004": 131.17,
+ "val_15005": 129.56,
+ "val_15006": 123.58,
+ "val_15007": 120.93,
+ "val_15008": 126.49,
+ "val_total_checkpoint": 351.673,
+ "val_total_999": 355.78,
+ "val_total_1999": 346.76,
+ "val_total_2999": 354.31,
+ "val_total_3999": 367.27,
+ "val_total_4999": 354.31,
+ "val_total_7999": 344.3,
+ "val_total_8999": 333.78,
+ "val_total_9999": 362.47,
+ "val_total_15001": 358.01,
+ "val_total_15002": 357.89,
+ "val_total_15003": 340.6,
+ "val_total_15004": 361.76,
+ "val_total_15005": 363.35,
+ "val_total_15006": 342.85,
+ "val_total_15007": 336.5,
+ "val_total_15008": 346.83,
+ "ep_elegido": 160,
+ "val_elegido": 126.3,
+ "regla_eleccion": "vieja",
+ "corrida_origen": "corredor_alta_ippo_vecinos_p3v2reg_s42",
+ "serie_eleccion": [
+  [
+   10,
+   184.62,
+   171.2,
+   177.91
+  ],
+  [
+   20,
+   153.4,
+   155.35,
+   154.375
+  ],
+  [
+   30,
+   149.6,
+   140.71,
+   145.155
+  ],
+  [
+   40,
+   136.39,
+   133.16,
+   134.775
+  ],
+  [
+   50,
+   142.21,
+   141.93,
+   142.07
+  ],
+  [
+   60,
+   144.77,
+   146.15,
+   145.46
+  ],
+  [
+   70,
+   135.69,
+   140.62,
+   138.155
+  ],
+  [
+   80,
+   132.4,
+   139.1,
+   135.75
+  ],
+  [
+   90,
+   132.67,
+   129.09,
+   130.88
+  ],
+  [
+   100,
+   132.97,
+   131.15,
+   132.06
+  ],
+  [
+   110,
+   135.24,
+   139.1,
+   137.17
+  ],
+  [
+   120,
+   131.37,
+   125.42,
+   128.395
+  ],
+  [
+   130,
+   137.49,
+   127.75,
+   132.62
+  ],
+  [
+   140,
+   127.9,
+   132.28,
+   130.09
+  ],
+  [
+   150,
+   127.93,
+   128.92,
+   128.425
+  ],
+  [
+   160,
+   126.63,
+   125.97,
+   126.3
+  ],
+  [
+   170,
+   130.99,
+   130.89,
+   130.94
+  ],
+  [
+   180,
+   131.95,
+   134.39,
+   133.17
+  ],
+  [
+   190,
+   133.58,
+   128.41,
+   130.995
+  ],
+  [
+   200,
+   130.21,
+   128.76,
+   129.485
+  ]
+ ]
+}

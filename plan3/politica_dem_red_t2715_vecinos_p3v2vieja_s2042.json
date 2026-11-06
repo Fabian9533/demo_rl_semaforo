@@ -1,0 +1,317 @@
+{
+ "escenario": "dem_red_t2715",
+ "variante": "vecinos",
+ "algoritmo": "ippo",
+ "recompensa": "retraso",
+ "etiqueta": "p3v2vieja",
+ "opciones": {
+  "v2": true,
+  "recompensa_insercion": false,
+  "etiqueta": "p3v2reg",
+  "criterio_val": "total"
+ },
+ "descuento": "por segundo: gamma^(dt/5)",
+ "exploracion": "comun: un u por segundo, default_rng(semilla + 104729)",
+ "recompensa_insercion": "no",
+ "criterio_validacion": "timeLoss medio en 999 y 1999 (regla del 25.09)",
+ "base": 2042,
+ "episodios": 200,
+ "dim_obs": 31,
+ "n_id": 3,
+ "lados": [
+  "oeste",
+  "este"
+ ],
+ "ocultas": 64,
+ "hiper": {
+  "gamma": 0.95,
+  "lam": 0.95,
+  "clip": 0.2,
+  "epocas": 10,
+  "minibatch": 64,
+  "lr": 0.001,
+  "ent": 0.01,
+  "valor": 0.5,
+  "grad": 0.5
+ },
+ "w1": 1.0,
+ "w2": 0.01,
+ "w3": 2.0,
+ "w4": 2.0,
+ "escala_r": 0.02,
+ "fase_av": {
+  "semaforo_C1": 0,
+  "semaforo_C2": 0,
+  "semaforo_C3": 0
+ },
+ "vecinos": {
+  "semaforo_C1": {
+   "oeste": null,
+   "este": [
+    "semaforo_C2",
+    "C2_C1",
+    "C1_C2"
+   ]
+  },
+  "semaforo_C2": {
+   "oeste": [
+    "semaforo_C1",
+    "C1_C2",
+    "C2_C1"
+   ],
+   "este": [
+    "semaforo_C3",
+    "C3_C2",
+    "C2_C3"
+   ]
+  },
+  "semaforo_C3": {
+   "oeste": [
+    "semaforo_C2",
+    "C2_C3",
+    "C3_C2"
+   ],
+   "este": null
+  }
+ },
+ "cap": {
+  "RE_C1": 72,
+  "C2_C1": 76,
+  "N1_C1": 38,
+  "S1_C1": 38,
+  "C1_C2": 76,
+  "C3_C2": 76,
+  "N2_C2": 38,
+  "S2_C2": 38,
+  "C2_C3": 76,
+  "E_C3": 104,
+  "N3_C3": 38,
+  "S3_C3": 38
+ },
+ "plazas": {
+  "C1_C2": 38,
+  "C2_C1": 38,
+  "C2_C3": 38,
+  "C3_C2": 38
+ },
+ "umbral_spillback": 0.9,
+ "latencia_entrenamiento": 0,
+ "perdida_entrenamiento": 0.0,
+ "val_seeds": [
+  999,
+  1999,
+  2999,
+  3999,
+  4999,
+  7999,
+  8999,
+  9999,
+  15001,
+  15002,
+  15003,
+  15004,
+  15005,
+  15006,
+  15007,
+  15008
+ ],
+ "eval_seed": 999,
+ "torch": "2.14.0+cpu",
+ "python": "3.14.6",
+ "sumo": "1.25.0",
+ "git": "981aaa3",
+ "features": [
+  "cola_o",
+  "cola_e",
+  "cola_n",
+  "cola_s",
+  "movil_o",
+  "movil_e",
+  "movil_n",
+  "movil_s",
+  "fase_0",
+  "fase_1",
+  "t_verde",
+  "puede_cambiar",
+  "id_C1",
+  "id_C2",
+  "id_C3",
+  "oeste_presente",
+  "oeste_verde_hacia_mi",
+  "oeste_ambar",
+  "oeste_t_fase",
+  "oeste_outflow",
+  "oeste_cola_alimentadora",
+  "oeste_cola_mi_salida",
+  "oeste_edad",
+  "este_presente",
+  "este_verde_hacia_mi",
+  "este_ambar",
+  "este_t_fase",
+  "este_outflow",
+  "este_cola_alimentadora",
+  "este_cola_mi_salida",
+  "este_edad"
+ ],
+ "ep_checkpoint": 150,
+ "val_checkpoint": 36.496,
+ "val_999": 35.08,
+ "val_1999": 37.31,
+ "val_2999": 33.97,
+ "val_3999": 38.41,
+ "val_4999": 39.12,
+ "val_7999": 34.2,
+ "val_8999": 35.65,
+ "val_9999": 42.03,
+ "val_15001": 36.31,
+ "val_15002": 40.25,
+ "val_15003": 35.32,
+ "val_15004": 32.22,
+ "val_15005": 37.19,
+ "val_15006": 34.07,
+ "val_15007": 37.51,
+ "val_15008": 35.3,
+ "val_total_checkpoint": 37.303,
+ "val_total_999": 35.78,
+ "val_total_1999": 38.31,
+ "val_total_2999": 34.67,
+ "val_total_3999": 39.11,
+ "val_total_4999": 39.83,
+ "val_total_7999": 34.9,
+ "val_total_8999": 36.36,
+ "val_total_9999": 43.89,
+ "val_total_15001": 37.01,
+ "val_total_15002": 40.95,
+ "val_total_15003": 36.03,
+ "val_total_15004": 32.92,
+ "val_total_15005": 38.1,
+ "val_total_15006": 34.77,
+ "val_total_15007": 38.21,
+ "val_total_15008": 36.01,
+ "ep_elegido": 150,
+ "val_elegido": 36.195,
+ "regla_eleccion": "vieja",
+ "corrida_origen": "dem_red_t2715_ippo_vecinos_p3v2reg_s2042",
+ "serie_eleccion": [
+  [
+   10,
+   38.45,
+   40.1,
+   39.275
+  ],
+  [
+   20,
+   35.57,
+   41.49,
+   38.53
+  ],
+  [
+   30,
+   38.45,
+   40.1,
+   39.275
+  ],
+  [
+   40,
+   38.45,
+   40.1,
+   39.275
+  ],
+  [
+   50,
+   38.56,
+   38.23,
+   38.395
+  ],
+  [
+   60,
+   38.45,
+   40.1,
+   39.275
+  ],
+  [
+   70,
+   36.45,
+   37.72,
+   37.085
+  ],
+  [
+   80,
+   37.31,
+   39.28,
+   38.295
+  ],
+  [
+   90,
+   37.05,
+   36.84,
+   36.945
+  ],
+  [
+   100,
+   40.52,
+   37.41,
+   38.965
+  ],
+  [
+   110,
+   38.43,
+   40.1,
+   39.265
+  ],
+  [
+   120,
+   35.91,
+   40.52,
+   38.215
+  ],
+  [
+   130,
+   35.61,
+   36.79,
+   36.2
+  ],
+  [
+   140,
+   35.62,
+   38.22,
+   36.92
+  ],
+  [
+   150,
+   35.08,
+   37.31,
+   36.195
+  ],
+  [
+   160,
+   38.45,
+   40.1,
+   39.275
+  ],
+  [
+   170,
+   38.45,
+   40.99,
+   39.72
+  ],
+  [
+   180,
+   38.45,
+   41.34,
+   39.895
+  ],
+  [
+   190,
+   38.45,
+   41.48,
+   39.965
+  ],
+  [
+   200,
+   38.45,
+   41.86,
+   40.155
+  ]
+ ]
+}
