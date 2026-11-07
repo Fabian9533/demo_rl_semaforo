@@ -40,6 +40,12 @@ regular: 8001, 8002 y 8003. Fue un error de la instrucción: no le dijo qué sem
 **Decisión de Fabian (05.11, 19:57):** se borraron sin abrir. Su manifiesto (ruta, sha256, filas y semillas, sin
 ninguna métrica) queda en `plan3/doc/cuarentena_examen_20261105.json`.
 
+## 4. Enmienda 1: el plan se centra en el tráfico aleatorio (06.11.2026)
+
+Con llegadas regulares, la Etapa 3 corre solo en 2715, D y P2, y la 3b no corre. Se decidió antes de cualquier
+evaluación del examen. Va más allá de lo que permite la §14, así que se declara como desviación. El detalle está en
+`plan3/doc/enmienda_1.md`.
+
 ## 2. Cambios de fase: corrección de un error de conteo (05.11.2026)
 
 **Qué pasó.** `rl_ippo.py` cuenta un cambio de más por cada semáforo que la plantilla arranca fuera de su primer verde.
