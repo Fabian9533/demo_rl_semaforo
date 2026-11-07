@@ -1,0 +1,258 @@
+{
+ "escenario": "per_red",
+ "llegadas": "aleatorias",
+ "archivo": "per_red_bloques.add.xml",
+ "sha256": "45b53d287a8e3057cd9657d07fc5fde8d8c876e2d94db21a87ed4a02a8241218",
+ "huella": "b8a867ab6b8a",
+ "clave": "bl_d54bf3d900a6",
+ "programas": [
+  {
+   "desde": 0,
+   "programID": "bloque1",
+   "verde": 10,
+   "verde_transversal": 10,
+   "offsets": [
+    0,
+    25,
+    23
+   ],
+   "esquema": "",
+   "ciclo": 26,
+   "clave": "v10_t10_o0_25_23"
+  },
+  {
+   "desde": 600,
+   "programID": "bloque2",
+   "verde": 10,
+   "verde_transversal": 10,
+   "offsets": [
+    0,
+    0,
+    24
+   ],
+   "esquema": "",
+   "ciclo": 26,
+   "clave": "v10_t10_o0_0_24"
+  },
+  {
+   "desde": 1200,
+   "programID": "bloque3",
+   "verde": 10,
+   "verde_transversal": 10,
+   "offsets": [
+    0,
+    2,
+    1
+   ],
+   "esquema": "",
+   "ciclo": 26,
+   "clave": "v10_t10_o0_2_1"
+  },
+  {
+   "desde": 1800,
+   "programID": "bloque4",
+   "verde": 23,
+   "verde_transversal": 16,
+   "offsets": [
+    0,
+    25,
+    0
+   ],
+   "esquema": "",
+   "ciclo": 45,
+   "clave": "v23_t16_o0_25_0"
+  },
+  {
+   "desde": 2400,
+   "programID": "bloque5",
+   "verde": 10,
+   "verde_transversal": 10,
+   "offsets": [
+    0,
+    2,
+    2
+   ],
+   "esquema": "",
+   "ciclo": 26,
+   "clave": "v10_t10_o0_2_2"
+  },
+  {
+   "desde": 3000,
+   "programID": "bloque6",
+   "verde": 10,
+   "verde_transversal": 10,
+   "offsets": [
+    0,
+    1,
+    0
+   ],
+   "esquema": "",
+   "ciclo": 26,
+   "clave": "v10_t10_o0_1_0"
+  }
+ ],
+ "instantes": {
+  "semaforo_C1": [
+   600,
+   1200,
+   1801,
+   2400,
+   3000
+  ],
+  "semaforo_C2": [
+   600,
+   1200,
+   1800,
+   2421,
+   3006
+  ],
+  "semaforo_C3": [
+   600,
+   1200,
+   1801,
+   2400,
+   3006
+  ]
+ },
+ "cambios": {
+  "por_semaforo": {
+   "semaforo_C1": [
+    {
+     "nominal": 600,
+     "instante": 600,
+     "retraso": 0,
+     "regla": "estricta",
+     "problemas": []
+    },
+    {
+     "nominal": 1200,
+     "instante": 1200,
+     "retraso": 0,
+     "regla": "estricta",
+     "problemas": []
+    },
+    {
+     "nominal": 1800,
+     "instante": 1801,
+     "retraso": 1,
+     "regla": "estricta",
+     "problemas": []
+    },
+    {
+     "nominal": 2400,
+     "instante": 2400,
+     "retraso": 0,
+     "regla": "estricta",
+     "problemas": []
+    },
+    {
+     "nominal": 3000,
+     "instante": 3000,
+     "retraso": 0,
+     "regla": "estricta",
+     "problemas": []
+    }
+   ],
+   "semaforo_C2": [
+    {
+     "nominal": 600,
+     "instante": 600,
+     "retraso": 0,
+     "regla": "estricta",
+     "problemas": []
+    },
+    {
+     "nominal": 1200,
+     "instante": 1200,
+     "retraso": 0,
+     "regla": "estricta",
+     "problemas": []
+    },
+    {
+     "nominal": 1800,
+     "instante": 1800,
+     "retraso": 0,
+     "regla": "estricta",
+     "problemas": []
+    },
+    {
+     "nominal": 2400,
+     "instante": 2421,
+     "retraso": 21,
+     "regla": "estricta",
+     "problemas": []
+    },
+    {
+     "nominal": 3000,
+     "instante": 3006,
+     "retraso": 6,
+     "regla": "estricta",
+     "problemas": []
+    }
+   ],
+   "semaforo_C3": [
+    {
+     "nominal": 600,
+     "instante": 600,
+     "retraso": 0,
+     "regla": "estricta",
+     "problemas": []
+    },
+    {
+     "nominal": 1200,
+     "instante": 1200,
+     "retraso": 0,
+     "regla": "estricta",
+     "problemas": []
+    },
+    {
+     "nominal": 1800,
+     "instante": 1801,
+     "retraso": 1,
+     "regla": "estricta",
+     "problemas": []
+    },
+    {
+     "nominal": 2400,
+     "instante": 2400,
+     "retraso": 0,
+     "regla": "estricta",
+     "problemas": []
+    },
+    {
+     "nominal": 3000,
+     "instante": 3006,
+     "retraso": 6,
+     "regla": "estricta",
+     "problemas": []
+    }
+   ]
+  },
+  "reglas": {
+   "estricta": 15,
+   "relajada": 0,
+   "respaldo": 0,
+   "forzado": 0
+  },
+  "retraso_maximo": 21,
+  "tardios": [],
+  "aviso": null
+ },
+ "retraso_total_prom": 27.65,
+ "retraso_total_sd": 1.87,
+ "timeloss_prom": 25.6,
+ "mediana": 27.27,
+ "peor": 31.44,
+ "trabadas": 3,
+ "semillas": "2001-2030",
+ "fijo_fino_mismas_semillas": 27.76,
+ "registro": {
+  "llegadas": "aleatorias",
+  "semillas": {
+   "barrido": "2001-2010",
+   "desempate": "2001-2030",
+   "fragil": "2001-2030"
+  },
+  "prueba": []
+ }
+}

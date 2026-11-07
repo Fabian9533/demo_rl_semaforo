@@ -1,0 +1,57 @@
+{
+ "escenario": "per_red",
+ "llegadas": "aleatorias",
+ "huella": "9da23dfb5b84",
+ "clave": "act_mg1.5_dg2_jt-1_av60_tr60_coord62549973_finfijo",
+ "variante": {
+  "tipo": "actuated",
+  "max-gap": 1.5,
+  "detector-gap": 2.0,
+  "jam-threshold": -1,
+  "maxdur_av": 60,
+  "maxdur_tr": 60,
+  "coordinado": true,
+  "ciclo": 26,
+  "offsets": [
+   0,
+   1,
+   25
+  ],
+  "verde": 10,
+  "verde_transversal": 10,
+  "fino_sha256": "6ac54cec42fe2fdc01169ec03ac49461d7d0f5fecd00a6c512c096d3d0c5bb77",
+  "fin_fijo": true
+ },
+ "variantes_probadas": 22,
+ "semillas_pasos": "2001-2003",
+ "finalistas": [
+  "act_mg1.5_dg2_jt-1_av60_tr60_coord62549973_finfijo",
+  "act_mg1.5_dg2_jt-1_av60_tr60",
+  "act_mg1.5_dg2_jt10_av60_tr60",
+  "act_mg1.5_dg2_jt30_av60_tr60",
+  "act_mg1.5_dg2_jt-1_av45_tr60",
+  "act_mg1.5_dg2_jt-1_av60_tr20",
+  "act_mg1.5_dg2_jt-1_av60_tr30",
+  "act_mg1.5_dg2_jt-1_av30_tr60",
+  "act_mg1.5_dg2_jt-1_av60_tr60_coord62549973",
+  "act_mg1_dg2_jt-1_av60_tr60"
+ ],
+ "retraso_total_prom": 27.76,
+ "retraso_total_sd": 2.24,
+ "timeloss_prom": 25.71,
+ "mediana": 27.73,
+ "peor": 31.81,
+ "trabadas": 4,
+ "semillas": "2001-2030",
+ "registro": {
+  "llegadas": "aleatorias",
+  "semillas": {
+   "barrido": "2001-2003",
+   "desempate": "2001-2030",
+   "fragil": "2001-2030"
+  },
+  "prueba": []
+ },
+ "archivo": "per_red_actuado_aj.add.xml",
+ "sha256": "45415c52022eaad3b00b10e240d59393063c90db84658f12e272be716642bced"
+}

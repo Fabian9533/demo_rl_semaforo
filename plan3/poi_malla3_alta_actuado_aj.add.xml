@@ -1,0 +1,78 @@
+<additional>
+    <!-- Actuado ajustado (actuado.py, plan3; prerregistro, seccion 5) para poi_malla3_alta, llegadas
+         aleatorias: descenso por coordenadas en cadena con 2001-2003 (22 variantes) y las finalistas con
+         2001-2030. Ganadora act_mg1.5_dg2_jt30_av60_tr60: retraso total 44.35 s (sd 4.64), timeLoss
+         43.39 s. -->
+    <tlLogic id="semaforo_C11" type="actuated" programID="actuado_aj" offset="0">
+        <param key="max-gap" value="1.5"/>
+        <param key="jam-threshold" value="30"/>
+        <phase duration="20" minDur="10" maxDur="60" state="GGGgrrrrGGGgrrrr"/>
+        <phase duration="3" state="yyyyrrrryyyyrrrr"/>
+        <phase duration="20" minDur="10" maxDur="60" state="rrrrGGGgrrrrGGGg"/>
+        <phase duration="3" state="rrrryyyyrrrryyyy"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C12" type="actuated" programID="actuado_aj" offset="0">
+        <param key="max-gap" value="1.5"/>
+        <param key="jam-threshold" value="30"/>
+        <phase duration="20" minDur="10" maxDur="60" state="GGGgrrrrGGGgrrrr"/>
+        <phase duration="3" state="yyyyrrrryyyyrrrr"/>
+        <phase duration="20" minDur="10" maxDur="60" state="rrrrGGGgrrrrGGGg"/>
+        <phase duration="3" state="rrrryyyyrrrryyyy"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C13" type="actuated" programID="actuado_aj" offset="0">
+        <param key="max-gap" value="1.5"/>
+        <param key="jam-threshold" value="30"/>
+        <phase duration="20" minDur="10" maxDur="60" state="GGGgrrrrGGGgrrrr"/>
+        <phase duration="3" state="yyyyrrrryyyyrrrr"/>
+        <phase duration="20" minDur="10" maxDur="60" state="rrrrGGGgrrrrGGGg"/>
+        <phase duration="3" state="rrrryyyyrrrryyyy"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C21" type="actuated" programID="actuado_aj" offset="0">
+        <param key="max-gap" value="1.5"/>
+        <param key="jam-threshold" value="30"/>
+        <phase duration="20" minDur="10" maxDur="60" state="GGGgrrrrGGGgrrrr"/>
+        <phase duration="3" state="yyyyrrrryyyyrrrr"/>
+        <phase duration="20" minDur="10" maxDur="60" state="rrrrGGGgrrrrGGGg"/>
+        <phase duration="3" state="rrrryyyyrrrryyyy"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C22" type="actuated" programID="actuado_aj" offset="0">
+        <param key="max-gap" value="1.5"/>
+        <param key="jam-threshold" value="30"/>
+        <phase duration="20" minDur="10" maxDur="60" state="GGGgrrrrGGGgrrrr"/>
+        <phase duration="3" state="yyyyrrrryyyyrrrr"/>
+        <phase duration="20" minDur="10" maxDur="60" state="rrrrGGGgrrrrGGGg"/>
+        <phase duration="3" state="rrrryyyyrrrryyyy"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C23" type="actuated" programID="actuado_aj" offset="0">
+        <param key="max-gap" value="1.5"/>
+        <param key="jam-threshold" value="30"/>
+        <phase duration="20" minDur="10" maxDur="60" state="GGGgrrrrGGGgrrrr"/>
+        <phase duration="3" state="yyyyrrrryyyyrrrr"/>
+        <phase duration="20" minDur="10" maxDur="60" state="rrrrGGGgrrrrGGGg"/>
+        <phase duration="3" state="rrrryyyyrrrryyyy"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C31" type="actuated" programID="actuado_aj" offset="0">
+        <param key="max-gap" value="1.5"/>
+        <param key="jam-threshold" value="30"/>
+        <phase duration="20" minDur="10" maxDur="60" state="GGGgrrrrGGGgrrrr"/>
+        <phase duration="3" state="yyyyrrrryyyyrrrr"/>
+        <phase duration="20" minDur="10" maxDur="60" state="rrrrGGGgrrrrGGGg"/>
+        <phase duration="3" state="rrrryyyyrrrryyyy"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C32" type="actuated" programID="actuado_aj" offset="0">
+        <param key="max-gap" value="1.5"/>
+        <param key="jam-threshold" value="30"/>
+        <phase duration="20" minDur="10" maxDur="60" state="GGGgrrrrGGGgrrrr"/>
+        <phase duration="3" state="yyyyrrrryyyyrrrr"/>
+        <phase duration="20" minDur="10" maxDur="60" state="rrrrGGGgrrrrGGGg"/>
+        <phase duration="3" state="rrrryyyyrrrryyyy"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C33" type="actuated" programID="actuado_aj" offset="0">
+        <param key="max-gap" value="1.5"/>
+        <param key="jam-threshold" value="30"/>
+        <phase duration="20" minDur="10" maxDur="60" state="GGGgrrrrGGGgrrrr"/>
+        <phase duration="3" state="yyyyrrrryyyyrrrr"/>
+        <phase duration="20" minDur="10" maxDur="60" state="rrrrGGGgrrrrGGGg"/>
+        <phase duration="3" state="rrrryyyyrrrryyyy"/>
+    </tlLogic>
+</additional>

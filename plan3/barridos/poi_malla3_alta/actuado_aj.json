@@ -1,0 +1,47 @@
+{
+ "escenario": "poi_malla3_alta",
+ "llegadas": "aleatorias",
+ "huella": "ee2fdbc6fcbc",
+ "clave": "act_mg1.5_dg2_jt30_av60_tr60",
+ "variante": {
+  "tipo": "actuated",
+  "max-gap": 1.5,
+  "detector-gap": 2.0,
+  "jam-threshold": 30,
+  "maxdur_av": 60,
+  "maxdur_tr": 60,
+  "coordinado": false
+ },
+ "variantes_probadas": 22,
+ "semillas_pasos": "2001-2003",
+ "finalistas": [
+  "act_mg1.5_dg2_jt-1_av60_tr60",
+  "act_mg1.5_dg2_jt-1_av45_tr60",
+  "del_dr100_mt1_av60_tr60",
+  "act_mg1.5_dg2_jt-1_av60_tr30",
+  "act_mg1.5_dg2_jt30_av60_tr60",
+  "act_mg1.5_dg2_jt-1_av30_tr60",
+  "act_mg2_dg2_jt-1_av60_tr60",
+  "act_mg1.5_dg4_jt-1_av60_tr60",
+  "act_mg1.5_dg2_jt10_av60_tr60",
+  "del_dr100_mt3_av60_tr60"
+ ],
+ "retraso_total_prom": 44.35,
+ "retraso_total_sd": 4.64,
+ "timeloss_prom": 43.39,
+ "mediana": 43.59,
+ "peor": 56.84,
+ "trabadas": 5,
+ "semillas": "2001-2030",
+ "registro": {
+  "llegadas": "aleatorias",
+  "semillas": {
+   "barrido": "2001-2003",
+   "desempate": "2001-2030",
+   "fragil": "2001-2030"
+  },
+  "prueba": []
+ },
+ "archivo": "poi_malla3_alta_actuado_aj.add.xml",
+ "sha256": "db1be13f301e81a5f72aa39ae712b1c87f05f94a02cdd5a96fbd9c42ae3abc42"
+}
