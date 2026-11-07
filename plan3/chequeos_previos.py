@@ -395,13 +395,29 @@ def semillas_filtradas():
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--sin-identidad", action="store_true", help="omite la prueba de identidad (solo pruebas)")
+    ap.add_argument("--solo-datos", action="store_true",
+                    help="commit que solo trae datos (la manana sin detener la cola): sin la prueba de identidad, si "
+                         "el codigo, el prerregistro y los escenarios no cambiaron desde el ultimo commit aprobado")
     args = ap.parse_args()
     ruta = os.path.join(PLAN3, "lanzamiento.sha256")
+    previo = None
     if os.path.exists(ruta):
+        with open(ruta, encoding="utf-8") as f:
+            previo = (f.read().split() or [None])[0]
         os.remove(ruta)
     problemas = []
     t0 = time.time()
-    if not args.sin_identidad:
+    if args.solo_datos:
+        if not previo:
+            sys.exit("--solo-datos: no hay un commit aprobado antes (falta lanzamiento.sha256); corre los completos")
+        rc, _ = protecciones.git("merge-base", "--is-ancestor", previo, "HEAD")
+        if rc != 0:
+            sys.exit(f"--solo-datos: {previo[:10]} no es antecesor de HEAD; corre los chequeos completos")
+        _, cambiados = protecciones.git("diff", "--name-only", previo, "HEAD", "--", *protecciones.SIN_CAMBIOS)
+        if cambiados.strip():
+            sys.exit(f"--solo-datos: desde {previo[:10]} cambiaron:\n{cambiados}corre los chequeos completos")
+        print(f"solo datos desde {previo[:10]}: el codigo no cambio, sin la prueba de identidad", flush=True)
+    elif not args.sin_identidad:
         try:
             problemas += identidad()
         except RuntimeError as e:
