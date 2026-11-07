@@ -247,10 +247,13 @@ def binario(ruta):
         return f.read()
 
 
+ESC_PROMO = "corredor_alta"         # P2 regular: con la enmienda 1, corredor (P1) ya no tiene candidatas ni promocion
+
+
 def cambiar_promocion(p3):
-    """Lo que querria cambiar quien resella despues de ver los datos: la promocion de corredor al reves, con
-    promocion/corredor.json y promocion.json de acuerdo entre si (como los escribe p3_promocion)."""
-    ruta = os.path.join(p3, "promocion", "corredor.json")
+    """Lo que querria cambiar quien resella despues de ver los datos: la promocion de corredor_alta al reves, con
+    promocion/corredor_alta.json y promocion.json de acuerdo entre si (como los escribe p3_promocion)."""
+    ruta = os.path.join(p3, "promocion", f"{ESC_PROMO}.json")
     d = leer(ruta)
     d["promovido"] = not d["promovido"]
     citado = d["candidatos"][0] if d["promovido"] else d["v2"]
@@ -259,11 +262,11 @@ def cambiar_promocion(p3):
         json.dump(d, f, indent=1, ensure_ascii=False)
     ruta_p = os.path.join(p3, "promocion.json")
     todo = leer(ruta_p)
-    todo["celdas"]["corredor"].update(sha256=hashlib.sha256(binario(ruta)).hexdigest(),
-                                      modelo_citado=d["modelo_citado"], promovido=d["promovido"])
+    todo["celdas"][ESC_PROMO].update(sha256=hashlib.sha256(binario(ruta)).hexdigest(),
+                                     modelo_citado=d["modelo_citado"], promovido=d["promovido"])
     with open(ruta_p, "w", encoding="utf-8") as f:
         json.dump(todo, f, indent=1, ensure_ascii=False)
-    return ["plan3/promocion/corredor.json", "plan3/promocion.json"]
+    return [f"plan3/promocion/{ESC_PROMO}.json", "plan3/promocion.json"]
 
 
 def resellar(r):
