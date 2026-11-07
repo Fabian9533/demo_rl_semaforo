@@ -2,12 +2,14 @@
 
 Generado por `veredicto3.py` con las reglas de `PRERREGISTRO.md` (§7-§12). No editar a mano.
 
+**Enmienda 1 (06.11.2026)**, `plan3/doc/enmienda_1.md`: con llegadas regulares no se corren H8c, H12, H15 regulares ni H9 regulares; H14 regulares queda solo con D. Tampoco se corren, con llegadas regulares, la entropía en P1, la 3b ni la a3 de la observación nueva en P1, P3 y P6. Holm va sobre lo que queda. En P1, P3, P4, P5 y P6 regulares no queda variante candidata: el modelo citado es V2, sin promoción. Con llegadas aleatorias no cambia nada. La enmienda reduce el alcance (desviación declarada, §14) y se decidió antes de cualquier dato del examen.
+
 ## Respuesta corta
 
-- Número único, llegadas regulares (P1-P6, con P6): frente al plan fijo ajustado al segundo, -4.0 % [-4.0, -3.9] en la tanda 1 y -2.1 % [-2.3, -2.0] en la tanda 2 (frente al plan fijo entregado: -5.8 % [-5.9, -5.8] y -4.0 % [-4.2, -3.9]). IPPO con mensajes corregido: -3.6 % [-3.7, -3.6] y -1.7 % [-1.9, -1.6].
+- Número único, llegadas regulares (P1-P6, con P6): frente al plan fijo ajustado al segundo, -4.0 % [-4.0, -3.9] en la tanda 1 y -2.1 % [-2.2, -1.9] en la tanda 2 (frente al plan fijo entregado: -5.8 % [-5.9, -5.8] y -4.0 % [-4.2, -3.9]). IPPO con mensajes corregido: -3.6 % [-3.7, -3.6] y -1.7 % [-1.9, -1.6].
 - Número único, llegadas aleatorias (P1-P6, con P6): frente al plan fijo ajustado al segundo, -6.0 % [-6.1, -6.0] en la tanda 1 y -6.0 % [-6.1, -6.0] en la tanda 2 (frente al plan fijo entregado: -7.8 % [-7.9, -7.8] y -7.9 % [-7.9, -7.8]). Cifra provisional en P3.
 - Casos con etiqueta citable MEJORA o FUNCIONA: 23 de 32 (P1 (regulares), P2 (regulares), P6 (regulares), P6e (regulares), D (regulares), r1810 (regulares), r2715 (regulares), r3620 (regulares), m1810 (regulares), m2715 (regulares), m3620 (regulares), m6525 (regulares), P1 (aleatorias), P2 (aleatorias), P4 (aleatorias), P5 (aleatorias), P6 (aleatorias), mix1 (aleatorias), mix3 (aleatorias), mixa1 (aleatorias), mixa3 (aleatorias), per1 (aleatorias), per3 (aleatorias))
-- Hipótesis que pasan (con su regla global o, si se juzgan caso por caso, en al menos un caso): H2, H7r, H7, H8a, H8c, H12, H14 regulares, H14 aleatorias, H15 regulares, H9 regulares, H9 aleatorias, H10 corredor, H3, H5, H6.
+- Hipótesis que pasan (con su regla global o, si se juzgan caso por caso, en al menos un caso): H2, H7r, H7, H8a, H14 regulares, H14 aleatorias, H9 aleatorias, H10 corredor, H3, H5, H6.
 
 ## Cómo leer
 
@@ -19,8 +21,8 @@ Generado por `veredicto3.py` con las reglas de `PRERREGISTRO.md` (§7-§12). No 
 
 | Caso | Llegadas | Modelo citado | Tanda 1 | Tanda 2 | Citable | Cambio T1 [IC95] | Cambio T2 [IC95] | Se repite (T1; T2) | Con la mejor base |
 |---|---|---|---|---|---|---|---|---|---|
-| P1 | regulares | observación nueva | FUNCIONA | FUNCIONA | FUNCIONA | -9.9 % [-10.1, -9.8] | -10.2 % [-10.3, -10.0] | 3 de 3; 3 de 3 | FUNCIONA |
-| P2 | regulares | IPPO con mensajes corregido | FUNCIONA | MEJORA | MEJORA | -8.2 % [-8.3, -8.1] | -2.9 % [-3.0, -2.8] | 5 de 5; 5 de 5 | MEJORA |
+| P1 | regulares | IPPO con mensajes corregido | FUNCIONA | FUNCIONA | FUNCIONA | -7.9 % [-8.1, -7.8] | -8.1 % [-8.2, -7.9] | 5 de 5; 5 de 5 | FUNCIONA |
+| P2 | regulares | observación nueva | FUNCIONA | MEJORA | MEJORA | -10.1 % [-10.2, -9.9] | -4.9 % [-5.1, -4.8] | 3 de 3; 3 de 3 | MEJORA |
 | P3 | regulares | IPPO con mensajes corregido | MEJORA | EMPATA | EMPATA (mejora no confirmada) | -3.0 % [-3.1, -2.9] | -0.0 % [-0.6, 0.5] | 5 de 5; 3 de 5 | EMPATA (mejora no confirmada) |
 | P4 | regulares | IPPO con mensajes corregido | FALLA | EMPATA | EMPATA (falla no confirmada) | +3.9 % [3.7, 4.0] | -0.0 % [-0.7, 0.7] | 5 de 5; 2 de 5 | EMPATA (falla no confirmada) |
 | P5 | regulares | IPPO con mensajes corregido | MEJORA | FALLA | CONTRADICTORIO (no se concluye) | -3.0 % [-3.1, -2.9] | +4.0 % [3.8, 4.2] | 5 de 5; 5 de 5 | CONTRADICTORIO (no se concluye) |
@@ -62,13 +64,13 @@ Generado por `veredicto3.py` con las reglas de `PRERREGISTRO.md` (§7-§12). No 
 | H7 | con mensajes < sin mensajes, llegadas aleatorias | pasa en 6 de 6 casos: P1, P2, P3, P4, P5, P6 |
 | H8a | V2 + observación < V2, llegadas regulares | pasa en 3 de 3 casos: c2715, P2, D |
 | H8b | V2 + observación < V2, llegadas aleatorias | no pasa: 0 de 6 casos (ninguno); hace falta 1 |
-| H8c | V2 + observación no es peor que V2 | pasa en 3 de 3 casos: P1, P3, P6 |
-| H12 | V2 + las tres limpiezas no es peor que V2 | pasa en 1 de 2 casos: P6 |
-| H14 regulares | reloj de 2 s < reloj de 5 s | pasa en 4 de 4 casos: D, P1, P2, P6 |
+| H8c | V2 + observación no es peor que V2 | no se corre (enmienda 1) |
+| H12 | V2 + las tres limpiezas no es peor que V2 | no se corre (enmienda 1) |
+| H14 regulares | reloj de 2 s < reloj de 5 s | pasa en 1 de 1 casos: D (con la enmienda 1 queda D; P1, P2 y P6 no se corren) |
 | H14 aleatorias | reloj de 2 s < reloj de 5 s | pasa en 3 de 3 casos: P1, P2, P6 |
-| H15 regulares | modelo completo < V2 | pasa en 4 de 4 casos: P1, P2, P4, P6 |
+| H15 regulares | modelo completo < V2 | no se corre (enmienda 1) |
 | H15 aleatorias | modelo completo < V2 | pasa en 0 de 6 casos: ninguno |
-| H9 regulares | 400 episodios con piso < 200 sin piso | pasa en 5 de 6 casos: P1, P2, P3, P5, P6 |
+| H9 regulares | 400 episodios con piso < 200 sin piso | no se corre (enmienda 1) |
 | H9 aleatorias | 400 episodios con piso < 200 sin piso | pasa en 6 de 6 casos: P1, P2, P3, P4, P5, P6 |
 | H10 corredor | una política por red (corredor) no es peor que la V2 de cada nivel | pasa: 'no es peor' en 4 de 5 niveles; hacen falta 4 ('no concluyente' no cuenta) |
 | H10 red | una política por red (red) no es peor que la V2 de cada nivel | no pasa: 'no es peor' en 0 de 7 niveles; hacen falta 6 ('no concluyente' no cuenta); no se pudo correr en 7 |
@@ -81,8 +83,8 @@ Generado por `veredicto3.py` con las reglas de `PRERREGISTRO.md` (§7-§12). No 
 
 ## Lecturas obligadas (§5 y §11)
 
-- P1 (regulares): El modelo citado no es IPPO con mensajes corregido: es observación nueva; la etiqueta de IPPO con mensajes corregido es FUNCIONA. | V2 mejora a C0 y C0 mejora a IPPO entregado: parte de la ganancia viene de cómo se elige la versión.
-- P2 (regulares): No le gana a la regla reactiva: no se dice que el modelo aprendió algo que la regla no hace ni "coordinación aprendida" (§5). | V2 mejora a C0 y C0 mejora a IPPO entregado: parte de la ganancia viene de cómo se elige la versión.
+- P1 (regulares): V2 mejora a C0 y C0 mejora a IPPO entregado: parte de la ganancia viene de cómo se elige la versión.
+- P2 (regulares): El modelo citado no es IPPO con mensajes corregido: es observación nueva; la etiqueta de IPPO con mensajes corregido es MEJORA. | V2 mejora a C0 y C0 mejora a IPPO entregado: parte de la ganancia viene de cómo se elige la versión.
 - P3 (regulares): No le gana a la regla reactiva: no se dice que el modelo aprendió algo que la regla no hace ni "coordinación aprendida" (§5). | V2 mejora a C0 y C0 mejora a IPPO entregado: parte de la ganancia viene de cómo se elige la versión.
 - P4 (regulares): No le gana a la regla reactiva: no se dice que el modelo aprendió algo que la regla no hace ni "coordinación aprendida" (§5).
 - P5 (regulares): No le gana a la regla reactiva: no se dice que el modelo aprendió algo que la regla no hace ni "coordinación aprendida" (§5).
@@ -107,8 +109,8 @@ Generado por `veredicto3.py` con las reglas de `PRERREGISTRO.md` (§7-§12). No 
 
 | Caso | Llegadas | actuado por defecto | actuado ajustado | fijo por bloques | fijo entregado | fijo ajustado desde 10 s | fijo de verdes de 5 en 5 | fijo por franja | Max-Pressure | regla reactiva | regla simple | ciclo mínimo |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
-| P1 | regulares | FUNCIONA | FUNCIONA | — | FUNCIONA | — | FUNCIONA | FUNCIONA | FUNCIONA | FUNCIONA | FUNCIONA | FUNCIONA |
-| P2 | regulares | FUNCIONA | FUNCIONA | — | MEJORA | — | MEJORA | MEJORA | FUNCIONA | CONTRADICTORIO (no se concluye) | FUNCIONA | FUNCIONA |
+| P1 | regulares | FUNCIONA | FUNCIONA | — | FUNCIONA | — | FUNCIONA | FUNCIONA | FUNCIONA | MEJORA | FUNCIONA | FUNCIONA |
+| P2 | regulares | FUNCIONA | FUNCIONA | — | FUNCIONA | — | FUNCIONA | MEJORA | FUNCIONA | MEJORA | FUNCIONA | FUNCIONA |
 | P3 | regulares | MEJORA | MEJORA | — | MEJORA | — | MEJORA | CONTRADICTORIO (no se concluye) | FUNCIONA | FALLA | FUNCIONA | FUNCIONA |
 | P4 | regulares | MEJORA | CONTRADICTORIO (no se concluye) | — | CONTRADICTORIO (no se concluye) | — | CONTRADICTORIO (no se concluye) | EMPATA (falla no confirmada) | FUNCIONA | FALLA | FUNCIONA | FUNCIONA |
 | P5 | regulares | MEJORA | CONTRADICTORIO (no se concluye) | — | CONTRADICTORIO (no se concluye) | — | CONTRADICTORIO (no se concluye) | CONTRADICTORIO (no se concluye) | FUNCIONA | FALLA | FUNCIONA | FUNCIONA |
@@ -149,12 +151,7 @@ Generado por `veredicto3.py` con las reglas de `PRERREGISTRO.md` (§7-§12). No 
 
 ## Regla de promoción (§12): validación en 15009-15024 frente a V2
 
-- P1 (regulares): observación nueva -3.21 %, reloj de 2 s +0.34 %, modelo completo +0.38 %, 400 episodios +0.39 %; se cita observación nueva (promovido: le gana a V2 por al menos 1 %).
-- P2 (regulares): reloj de 2 s +0.21 %, 400 episodios +0.29 %, limpiezas de PPO juntas +0.30 %, modelo completo +0.31 %, observación nueva +0.32 %; se cita IPPO con mensajes corregido.
-- P3 (regulares): observación nueva +0.24 %, 400 episodios +0.25 %; se cita IPPO con mensajes corregido.
-- P4 (regulares): modelo completo +0.21 %, 400 episodios +0.37 %; se cita IPPO con mensajes corregido.
-- P5 (regulares): 400 episodios +0.34 %; se cita IPPO con mensajes corregido.
-- P6 (regulares): reloj de 2 s +0.30 %, modelo completo +0.30 %, limpiezas de PPO juntas +0.32 %, observación nueva +0.32 %, 400 episodios +0.34 %; se cita IPPO con mensajes corregido.
+- P2 (regulares): observación nueva -3.27 %; se cita observación nueva (promovido: le gana a V2 por al menos 1 %).
 - D (regulares): reloj de 2 s +0.35 %, observación nueva +0.36 %, limpiezas de PPO juntas +0.42 %; se cita IPPO con mensajes corregido.
 - c2715 (regulares): observación nueva +0.21 %; se cita IPPO con mensajes corregido.
 - P1 (aleatorias): modelo completo +0.23 %, reloj de 2 s +0.26 %, observación nueva +0.26 %, 400 episodios +0.26 %; se cita IPPO con mensajes corregido (entrenado con llegadas aleatorias).
@@ -181,7 +178,7 @@ Generado por `veredicto3.py` con las reglas de `PRERREGISTRO.md` (§7-§12). No 
 
 ## Avisos
 
-- 58 CSV de la tanda promo no entran al veredicto (regla de promoción: se leen en promocion.json)
+- 35 CSV de la tanda promo no entran al veredicto (regla de promoción: se leen en promocion.json)
 - m2715 (dem_malla3_t2715, t1r): los brazos no generan los mismos vehículos en 1 semilla (la primera, 424304; distinto: ciego/t1r/eval_dem_malla3_t2715__fijo10.csv)
 
 La predicción de §15 del prerregistro va al lado de estos resultados para medir la sorpresa. El detalle está en veredicto3_celdas.csv, veredicto3_bases.csv, veredicto3_hipotesis.csv, veredicto3_comparaciones.csv y veredicto3_no_insertados.csv.

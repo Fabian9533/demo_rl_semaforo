@@ -107,6 +107,36 @@ PUBLICADA = {("v2reg", 3): "v2reg3med"}
 FAMILIAS_PRINCIPALES = ("v2reg", "v2poi", "v2per", "v2mix")
 CANDIDATOS_PROMOCION = ({t for ts in gt.CANDIDATOS_REG.values() for t in ts}
                         | {t for ts in gt.CANDIDATOS_POI.values() for t in ts})
+# Enmienda 1 (06.11.2026, plan3/doc/enmienda_1.md; decidida antes de cualquier evaluacion del examen): con llegadas
+# regulares no se corren H8c, H12, las partes regulares de H15 y de H9, el reloj de 2 s fuera de D, la entropia en P1,
+# la 3b ni la a3 de la observacion nueva en P1, P3 y P6. Que brazo se quito sale del generador (gt.queda y
+# gt.TIPOS_3B), la misma lista con la que deja de generar sus trabajos. Lo quitado no es una falta ni una caida: "no se
+# corre (enmienda 1)". [AMB-29] Una fila de resumen por familia quitada, sin "si" ni "no" (no es un "no pasa"), con los
+# casos en la nota; lo descriptivo quitado no tiene fila (lo nombra la linea del .md). Holm va sobre lo que queda:
+# estas familias quedan con estos tamanios (0 = no se corre).
+ENMIENDA1 = "enmienda 1"
+NO_SE_CORRE = "no se corre (enmienda 1)"
+N_FAMILIA_ENMIENDA1 = {"H8c": 0, "H12": 0, "H14 regulares": 1, "H15 regulares": 0, "H9 regulares": 0}
+# la tabla de la enmienda: familia (o descriptiva) -> casos con llegadas regulares que dejan de correr. veredicto3 la
+# compara con lo que quita el generador (aplicar_enmienda1)
+QUITADAS_ENMIENDA1 = {"H8c": {"P1", "P3", "P6"}, "H12": {"P2", "P6"}, "H14 regulares": {"P1", "P2", "P6"},
+                      "H15 regulares": {"P1", "P2", "P4", "P6"}, "H9 regulares": set(CASOS6),
+                      "Entropía": {"P1"}, "3b": set(CASOS6), "a3": {"P1", "P3", "P6"}}
+TIPOS_3B_REG = ("p3e400", "p3piso200reg", "p3e400c20reg")      # la 3b con llegadas regulares (tipos del manifiesto)
+
+
+def y_lista(xs, y="y"):
+    """'P1, P2 y P6' (sin repetidos, en el orden dado; con y="ni", 'P1, P2 ni P6')."""
+    xs = list(dict.fromkeys(xs))
+    return f" {y} ".join([", ".join(xs[:-1]), xs[-1]]) if len(xs) > 1 else "".join(xs)
+
+
+def quitado_enmienda1(tipo, celda):
+    """True si la enmienda 1 quito el brazo regular tipo (tipo del manifiesto: p3obs, p3e400, ...) en la celda (P1-P6,
+    D, c2715). Los aleatorios (*poi) y lo demas quedan."""
+    if tipo in TIPOS_3B_REG:
+        return "reg" not in gt.TIPOS_3B
+    return not gt.queda(tipo, celda)
 # Bases del DISENIO (§2, §6, A3, B23): 5 en el modelo principal y en H8a, 3 en lo demas. No sale del manifiesto: una
 # base caida sigue contando en n (fuera del lado, §14) [AMB-7].
 DISENIO5 = ({("v2reg", c) for c in CASOS6 + ["P6e", "c2715", "D"]} | {("v2poi", c) for c in CASOS6}
@@ -1341,13 +1371,18 @@ class Datos:
             raise ErrorVeredicto(f"promocion: {rel} dice otra cosa que promocion.json")
         return dec, None
 
+    def candidatas(self, ck):
+        """Variantes candidatas a la promocion en la celda (§12): las de la celda en el manifiesto, menos las que quito
+        la enmienda 1 (aunque un CSV suyo apareciera, la celda no tiene decision de promocion y cita a V2)."""
+        return {t for t in self.celdas[ck]["tipos"] if t in CANDIDATOS_PROMOCION and not quitado_enmienda1(t, ck[0])}
+
     def citado(self, ck, fam):
         """(brazo, nombre, promovido, motivo) del modelo citado (§12, A4). Sin variantes candidatas en la celda, V2 (con
         su version de las bases del diseno). Promovida, la variante con su version entre 42, 2042 y 4042, que debe ser
         la base que nombra p3_promocion (modelo_citado = ippo_<variante>_<etiqueta>med_s<base>)."""
         v2 = ("ver", fam, None)
         tipos = self.celdas[ck]["tipos"]
-        if not set(tipos) & CANDIDATOS_PROMOCION:
+        if not self.candidatas(ck):             # tambien las celdas que la enmienda 1 dejo sin candidatas
             return v2, nombre(fam), False, None
         dec, motivo = self.promocion(ck)
         if motivo:
@@ -1494,7 +1529,7 @@ def fila_celda(d, ck):
     fila = {"celda": ck[0], "escenario": ck[1], "llegadas": c["llegadas"], "modelo_citado": nom_cit or "PENDIENTE",
             "clave_citado": clave_brazo(cit) if cit else "", "promovido": "sí" if promovido else "no",
             "_brazo_citado": cit, "_brazo_v2": v2, "_e_cit": e_cit, "_e_v2": e_v2,
-            "_promocion": d.promocion(ck)[0] if set(c["tipos"]) & CANDIDATOS_PROMOCION else None}
+            "_promocion": d.promocion(ck)[0] if d.candidatas(ck) else None}
     lecturas = []
     for t in T:
         r = e_cit[t]
@@ -1660,8 +1695,9 @@ def h(id_, prueba, ck, a, b, n_fam=None, familia=None, tandas=T, sentido_=None, 
             "tandas": tandas, "sentido": sentido_, "que": que}
 
 
-def pruebas_definidas():
-    """Las pruebas de §8 con sus familias exactas (superioridad, no inferioridad) y los contrastes descriptivos."""
+def pruebas_definidas(con_quitadas=False):
+    """Las pruebas de §8 con sus familias exactas (superioridad, no inferioridad) y los contrastes descriptivos, menos
+    lo que quito la enmienda 1 (aplicar_enmienda1; con con_quitadas, tambien la lista de lo quitado)."""
     R = lambda c: (c, ESC_REG[c])                                   # noqa: E731
     A = lambda c: (c, gt.POI[c])                                    # noqa: E731
     V = lambda fam, n=3: ("ver", fam, n)                            # noqa: E731
@@ -1763,7 +1799,46 @@ def pruebas_definidas():
                     L.append(h("a3", "desc", R(c) if lleg == "regulares" else A(c), ("pub", f"a3{pert}_{t}"),
                                ("ver",) + A3_VERSION[t],
                                que=f"{nombre(f'a3{pert}_{t}')} frente a la misma versión sin perturbar"))
-    return L
+    quedan, quitadas = aplicar_enmienda1(L)
+    return (quedan, quitadas) if con_quitadas else quedan
+
+
+def tipo_quitado(brazo, celda):
+    """True si el brazo de una prueba (ver, pub o base; la a3, por la version que perturba) es de un tipo regular que
+    la enmienda 1 quito en la celda."""
+    if brazo[0] not in ("ver", "pub", "base"):
+        return False
+    m = re.fullmatch(r"a3(?:colas0|msg0)_(.+)", str(brazo[1]))
+    tipo = A3_VERSION[m.group(1)][0] if m and m.group(1) in A3_VERSION else brazo[1]
+    return quitado_enmienda1(tipo, celda)
+
+
+def aplicar_enmienda1(L):
+    """(las que quedan, las quitadas) de la lista prerregistrada: se quita toda prueba con llegadas regulares que
+    compara un brazo que la enmienda 1 quito en su celda. Las familias de Holm que cambian quedan con el tamanio que
+    fija la enmienda (N_FAMILIA_ENMIENDA1); si el generador quitara otra cosa, ERROR (no se elige en silencio)."""
+    quedan, quitadas = [], []
+    for s in L:
+        regular = s["celda"][1] not in gt.POI.values()
+        if regular and (tipo_quitado(s["a"], s["celda"][0]) or tipo_quitado(s["b"], s["celda"][0])):
+            quitadas.append(s)
+        else:
+            quedan.append(s)
+    por_fam = {}
+    for s in quitadas:
+        por_fam.setdefault(s["familia"], set()).add(s["celda"][0])
+    if por_fam != QUITADAS_ENMIENDA1:
+        def txt_q(q):
+            return "; ".join(f"{f}: {y_lista(sorted(c))}" for f, c in sorted(q.items()))
+        raise ErrorVeredicto(f"{ENMIENDA1}: el generador quita {txt_q(por_fam)} y la tabla de la enmienda dice "
+                             f"{txt_q(QUITADAS_ENMIENDA1)}")
+    for fam, n in N_FAMILIA_ENMIENDA1.items():
+        rs = [s for s in quedan if s["familia"] == fam]
+        if len(rs) != n:
+            raise ErrorVeredicto(f"{ENMIENDA1}: la familia {fam} queda con {len(rs)} pruebas y la enmienda fija {n}")
+        for s in rs:
+            s["n_familia"] = n
+    return quedan, quitadas
 
 
 def evaluar_pruebas(d, specs):
@@ -1924,7 +1999,8 @@ def hipotesis(d, filas_celdas):
         if ck in d.celdas:
             return d.celdas[ck]["llegadas"]
         return "aleatorias" if ck[1].startswith("poi_") else "regulares"
-    res = evaluar_pruebas(d, pruebas_definidas())
+    specs, quitadas = pruebas_definidas(con_quitadas=True)
+    res = evaluar_pruebas(d, specs)
     for r in res:
         s = r["spec"]
         tandas = []
@@ -1963,6 +2039,13 @@ def hipotesis(d, filas_celdas):
                             ("H15", "H15 regulares", None), ("H15", "H15 aleatorias", None),
                             ("H9", "H9 regulares", None), ("H9", "H9 aleatorias", None)):
         rs = [r for r in res if r["spec"]["familia"] == fam]
+        fuera = [s for s in quitadas if s["familia"] == fam]
+        que = (rs[0]["spec"] if rs else fuera[0])["que"] if rs or fuera else fam
+        nota = f"{ENMIENDA1} (06.11.2026): no se corre en {y_lista([s['celda'][0] for s in fuera])}" if fuera else ""
+        if not rs and fuera:                    # la enmienda 1 la quito entera: ni falta ni "no pasa"
+            salida.append(fila_h(id_, fam, 0, "resumen", "global", "", "", "", [], None, NO_SE_CORRE, nota, que))
+            resumen.append((fam, que, None, NO_SE_CORRE))
+            continue
         k = sum(1 for r in rs if r["pasa"])
         casos = ", ".join(r["spec"]["celda"][0] for r in rs if r["pasa"]) or "ninguno"
         if regla is None:                       # [AMB-18] caso por caso; en la plantilla de §17, "pasa" = 1 caso o mas
@@ -1970,9 +2053,11 @@ def hipotesis(d, filas_celdas):
         else:
             pasa = k >= regla
             lect = f"{'pasa' if pasa else 'no pasa'}: {k} de {len(rs)} casos ({casos}); hace falta {regla}"
-        salida.append(fila_h(id_, fam, len(rs), "resumen", "global", "", "", "", [], pasa, lect, "",
-                             rs[0]["spec"]["que"] if rs else ""))
-        resumen.append((fam, rs[0]["spec"]["que"] if rs else fam, pasa, lect))
+        if fuera:                               # la enmienda 1 dejo una parte: Holm sobre lo que queda
+            lect += (f" (con la {ENMIENDA1} queda {y_lista([r['spec']['celda'][0] for r in rs])}; "
+                     f"{y_lista([s['celda'][0] for s in fuera])} no se corren)")
+        salida.append(fila_h(id_, fam, len(rs), "resumen", "global", "", "", "", [], pasa, lect, nota, que))
+        resumen.append((fam, que, pasa, lect))
     for red in REDES:
         rs = [r for r in res if r["spec"]["familia"] == f"H10 {red}"]
         k = sum(1 for r in rs if r["pasa"])
@@ -2384,10 +2469,27 @@ def valor_numero(f):
     return f"{float(f['cambio']):+.1f} % [{lo:.1f}, {hi:.1f}]"
 
 
+def texto_enmienda1():
+    """La linea del informe sobre la enmienda 1 (§11: el informe final la repite). Las familias y las celdas salen del
+    codigo (pruebas_definidas, gt.CANDIDATOS_REG); lo descriptivo, de la tabla de la enmienda (QUITADAS_ENMIENDA1)."""
+    quedan = pruebas_definidas()
+    enteras = [f for f, n in N_FAMILIA_ENMIENDA1.items() if n == 0]
+    partes = [f"{f} queda solo con {y_lista([s['celda'][0] for s in quedan if s['familia'] == f])}"
+              for f, n in N_FAMILIA_ENMIENDA1.items() if n]
+    sin_cand = [c for c, ets in gt.CANDIDATOS_REG.items() if all(quitado_enmienda1(et, c) for et in ets)]
+    return (f"**Enmienda 1 (06.11.2026)**, `plan3/doc/enmienda_1.md`: con llegadas regulares no se corren "
+            f"{y_lista(enteras, 'ni')}; {'; '.join(partes)}. Tampoco se corren, con llegadas regulares, la entropía "
+            f"en P1, la 3b ni la a3 de la observación nueva en P1, P3 y P6. Holm va sobre lo que queda. En "
+            f"{y_lista(sin_cand)} regulares no queda variante candidata: el modelo citado es V2, sin promoción. Con "
+            f"llegadas aleatorias no cambia nada. La enmienda reduce el alcance (desviación declarada, §14) y se "
+            f"decidió antes de cualquier dato del examen.")
+
+
 def texto_md(res, titulo_extra=""):
     """veredicto3.md: respuesta corta, la tabla simple del anexo, hipotesis, lecturas obligadas y avisos."""
     L = [f"# Veredicto del bloque nuevo (plan 3){titulo_extra}", "",
-         "Generado por `veredicto3.py` con las reglas de `PRERREGISTRO.md` (§7-§12). No editar a mano.", ""]
+         "Generado por `veredicto3.py` con las reglas de `PRERREGISTRO.md` (§7-§12). No editar a mano.", "",
+         texto_enmienda1(), ""]
     L += ["## Respuesta corta", ""]
     cuenta = {}
     for f in res["celdas"]:
@@ -3554,10 +3656,10 @@ def efecto_mundo(celda, esc, lleg, tl, tipo, base):
     alt = 0.0
     if v2 == "alt":
         v2, alt = 0.0, 1.0
-    if tipo.startswith("promo_"):               # promocion: en P1 regular la observacion nueva le gana a V2 por 3 %
-        et = tipo[len("promo_"):]
-        ef = v2 if et in ("p3v2reg", "p3v2poi") else (v2 - 3 if (celda, esc, et) == ("P1", "corredor", "p3obs")
-                                                       else v2 + 0.3)
+    if tipo.startswith("promo_"):               # promocion: en P2 regular la observacion nueva le gana a V2 por 3 %
+        et = tipo[len("promo_"):]               # (con la enmienda 1, P1 regular ya no tiene candidatas)
+        gana = (celda, esc, et) == ("P2", "corredor_alta", "p3obs")
+        ef = v2 if et in ("p3v2reg", "p3v2poi") else (v2 - 3 if gana else v2 + 0.3)
         return ef, 0.0, (esc, "promo", et)
     m = re.fullmatch(r"a3(colas0|msg0)_(.+)", tipo)
     if m:                                       # a3: la politica perturbada pierde frente a la misma sin perturbar
@@ -3578,8 +3680,6 @@ def efecto_mundo(celda, esc, lleg, tl, tipo, base):
         return -2.0, 0.0, (esc, "c0", b)         # H1 en P5: V2 (+4 %) es peor que C0 (-2 %) en T2
     if tipo == "v2loc" and celda == "P6" and b == 4042:
         return 0.0, 0.0, (esc, tipo, b)          # H7r en P6: el sentido falla (2 de 3)
-    if tipo == "p3m7" and celda == "P2":
-        delta = 5                               # H12 en P2: es peor
     if tipo == TIPO_RED and celda == "c1358":
         delta = 4                               # H10 en el corredor: la politica por red es peor solo en c1358
     if delta == "alt":
@@ -4230,7 +4330,9 @@ def probar():
                  "corrida": dict(base_c, corrida="corredor_ippo_vecinos_p3v2reg_s2042"),
                  "un intento": dict(base_c, intentos=base_c["intentos"][:1]),
                  "p3c0": dict(base_c, tipo="p3c0"), "escenario": dict(base_c, escenario="corredr"),
-                 "celda": dict(base_c, celda="P2")}
+                 "celda": dict(base_c, celda="P2"),
+                 # enmienda 1: los 400 episodios regulares y la observacion nueva en P1 ya no son entrenamientos
+                 "3b regular": dict(base_c, tipo="p3e400"), "obs P1": dict(base_c, tipo="p3obs")}
         iguales, motivos = 0, {}
         for clave_m, c in malas.items():
             ruta_c = escribir(os.path.join(tmp_k, f"caidas_{len(motivos)}.json"), json.dumps([c]))
@@ -4247,41 +4349,49 @@ def probar():
             motivos[clave_m] = m_gt
             iguales += (m_gt is not None and m_v3 is not None
                         and m_v3.split(": ", 1)[1] == m_gt.split(": ", 1)[1])
-        bien_c = (gt.validar_caida(dict(base_c, tipo="p3e400")) == "corredor_ippo_vecinos_p3e400_s42"
+        bien_c = (gt.validar_caida(dict(base_c, escenario="poi_corredor", tipo="p3e400poi"))
+                  == "poi_corredor_ippo_vecinos_p3e400poi_s42"
+                  and gt.validar_caida(dict(base_c, tipo="p3obs", celda="P2", escenario="corredor_alta"))
+                  == "corredor_alta_ippo_vecinos_p3obs_s42"
                   and gt.validar_caida(dict(base_c, corrida="corredor_ippo_vecinos_p3v2reg_s42"))
                   == "corredor_ippo_vecinos_p3v2reg_s42")
         ok(iguales == len(malas) and bien_c and "mix_corredor / mix_red" in motivos["mixa_"]
            and "no es un entrenamiento" in motivos["re-elección"] and "no es un entrenamiento" in motivos["C0"]
            and "no es la de" in motivos["corrida"] and "no es un entrenamiento" in motivos["p3c0"]
-           and "no es un entrenamiento" in motivos["escenario"] and "la celda de corredor es P1" in motivos["celda"],
+           and "no es un entrenamiento" in motivos["escenario"] and "la celda de corredor es P1" in motivos["celda"]
+           and "no es un entrenamiento" in motivos["3b regular"] and "no es un entrenamiento" in motivos["obs P1"],
            "N20 cola/caidas.json con las mismas reglas en el generador y en veredicto3: ERROR con mixa_ (se declara "
            "con el escenario de la política), con una re-elección, C0 (c0 o p3c0) o un escenario que no existe (no son "
            "entrenamientos del plan: sale del código del generador), con otra celda, con una corrida que no es la de "
-           "su escenario, tipo y base, o con un solo intento; p3e400 sí se declara (es un entrenamiento)")
+           "su escenario, tipo y base, o con un solo intento; con la enmienda 1, tampoco los 400 episodios regulares "
+           "ni la observación nueva en P1 (no se corren); los 400 episodios aleatorios y la observación nueva en P2 sí "
+           "se declaran")
         # el camino de una corrida rehecha por un error de codigo (§14, sufijo r2): con el entrenamiento rehecho en el
         # plan (como lo pondria la enmienda), la declaracion sin corrida va a la rehecha y lo que sale de ella cae
-        r2 = "corredor_ippo_vecinos_p3v2regr2_s42"
+        # (con llegadas aleatorias: la enmienda 1 quito la 3b regular, la que sale de la V2 regular)
+        base_p = dict(base_c, escenario="poi_corredor", tipo="v2poi")
+        r2 = "poi_corredor_ippo_vecinos_p3v2poir2_s42"
         ok_r2 = False
         try:
-            gt.validar_caida(dict(base_c, corrida=r2))
+            gt.validar_caida(dict(base_p, corrida=r2))
         except ValueError as ex:
             ok_r2 = "no es un entrenamiento del plan" in str(ex)
         entrenos = gt.entrenamientos_del_plan()
         entrenos.add(r2)
         try:
-            caidas_r2, corridas_r2 = caidas_de_texto(json.dumps([base_c]))
-            ok_r2 = (ok_r2 and gt.validar_caida(dict(base_c, corrida=r2)) == r2 and set(corridas_r2) == {r2}
-                     and gt.caida("corredor", "vecinos", "p3e400r2", 42, caidas={r2})
-                     and not gt.caida("corredor", "vecinos", "p3e400", 42, caidas={r2})
-                     and declaracion_caida({}, corridas_r2, ("P1", "corredor"), "p3piso200reg", 42,
-                                           "politica_corredor_vecinos_p3piso200regr2_s42.pt") is not None
-                     and declaracion_caida({}, corridas_r2, ("P1", "corredor"), "v2reg", 42,
-                                           "politica_corredor_vecinos_p3v2reg_s42.pt") is None)
+            caidas_r2, corridas_r2 = caidas_de_texto(json.dumps([base_p]))
+            ok_r2 = (ok_r2 and gt.validar_caida(dict(base_p, corrida=r2)) == r2 and set(corridas_r2) == {r2}
+                     and gt.caida("poi_corredor", "vecinos", "p3e400poir2", 42, caidas={r2})
+                     and not gt.caida("poi_corredor", "vecinos", "p3e400poi", 42, caidas={r2})
+                     and declaracion_caida({}, corridas_r2, ("P1", "poi_corredor"), "p3piso200poi", 42,
+                                           "politica_poi_corredor_vecinos_p3piso200poir2_s42.pt") is not None
+                     and declaracion_caida({}, corridas_r2, ("P1", "poi_corredor"), "v2poi", 42,
+                                           "politica_poi_corredor_vecinos_p3v2poi_s42.pt") is None)
         finally:
             entrenos.discard(r2)
         ok(ok_r2, "N21 una corrida rehecha (§14, r2): sin el entrenamiento rehecho en el plan, ERROR; con él, la "
-                  "declaración (con o sin corrida) va a la rehecha, y caen ella y lo que sale de ella (p3e400r2, "
-                  "p3piso200regr2), no la original")
+                  "declaración (con o sin corrida) va a la rehecha, y caen ella y lo que sale de ella (p3e400poir2, "
+                  "p3piso200poir2), no la original")
         # cambio_desde_tag frente a un repositorio de prueba: el mismo, cambiado, sin seguimiento, fuera del tag
         repo_t = carpeta_limpia(os.path.join(TMP_VER, "tag"))
         os.makedirs(os.path.join(repo_t, "plan3"))
@@ -4640,11 +4750,13 @@ def probar():
             Datos(raiz).citado(("D", gt.D["D"]), "v2reg")))
         ok(citado_d and citado_d[0][0] is None and "falta la decisión de promoción" in citado_d[0][3],
            f"M07b sin la decisión de promoción de la celda, el modelo citado queda PENDIENTE: {citado_d[0][3]}")
-        f = cel[("P1", "regulares")]
-        ok(f["modelo_citado"] == "observación nueva" and f["promovido"] == "sí" and f["etiqueta_citable"] == "FUNCIONA"
-           and "El modelo citado no es IPPO" in f["lecturas"],
-           f"M08 P1: la promoción (p3_promocion, -3 % en la validación) cita la observación nueva "
-           f"({f['etiqueta_citable']}) con la etiqueta de V2 al lado")
+        f = cel[("P2", "regulares")]
+        ok(f["modelo_citado"] == "observación nueva" and f["promovido"] == "sí" and f["etiqueta_citable"] == "MEJORA"
+           and float(f["cambio_T1"]) < -9.5 and f["etiqueta_v2_citable"] == "MEJORA"
+           and "la etiqueta de IPPO con mensajes corregido es MEJORA" in f["lecturas"],
+           f"M08 P2: la promoción (p3_promocion, -3 % en la validación) cita la observación nueva "
+           f"({f['etiqueta_citable']}, {f['cambio_T1']} % en T1; V2 da -8 %) con la etiqueta de V2 al lado (con la "
+           f"enmienda 1, P1 regular ya no tiene candidatas)")
         f = cel[("P6", "regulares")]
         ok(f["repite_T1"] == "4 de 5" and "diluido" in f["lecturas"], f"M09 P6: se repite en {f['repite_T1']} y lleva "
                                                                        f"la lectura de la espera de inserción")
@@ -4691,8 +4803,10 @@ def probar():
            "M19 H7r: pasa en P1; en P6 la versión evaluada mejora pero el sentido es 2 de 3 (lectura de §11)")
         ok(hip[("H8b", "H8b", "global")]["pasa"] == "no" and hip[("H8a", "H8a", "global")]["lectura"].startswith(
             "pasa en 3 de 3 casos: "), "M20 H8a pasa en 3 de 3; H8b (al menos 1 de 6) no pasa")
-        ok(hip[("H12", "H12", "P2")]["lectura"].startswith("es peor (T1: es peor; T2: es peor)")
-           and hip[("H12", "H12", "P6")]["lectura"] == "no es peor", "M21 H12: P2 es peor, P6 no es peor")
+        h12 = [r for r in res["hipotesis"] if r["familia"] == "H12"]
+        ok(len(h12) == 1 and h12[0]["caso"] == "global" and h12[0]["lectura"] == NO_SE_CORRE and h12[0]["pasa"] == ""
+           and h12[0]["nota"] == "enmienda 1 (06.11.2026): no se corre en P2 y P6",
+           f"M21 H12 (enmienda 1): una sola fila, '{NO_SE_CORRE}', sin 'sí' ni 'no' ({h12[0]['nota'] if h12 else '-'})")
         ok(hip[("H10", "H10 red", "global")]["pasa"] == "no" and hip[("H10", "H10 red", "global")]["n_familia"] == 7
            and hip[("H10", "H10 red", "global")]["lectura"].endswith("no se pudo correr en 7")
            and hip[("H10", "H10 red", "P3")]["lectura"].startswith("no se pudo correr"),
@@ -4703,11 +4817,15 @@ def probar():
            and h10["c1358"].startswith("es peor") and all(v == "no es peor" for c, v in h10.items() if c != "c1358"),
            f"M22b H10 en el corredor (la política por red que agrega el mundo): no es peor en 4 de 5 niveles (c1358 es "
            f"peor) y pasa, porque hacen falta 4 ({hip[('H10', 'H10 corredor', 'global')]['lectura']})")
-        ok(hip[("H15", "H15 regulares", "global")]["lectura"].startswith("pasa en 4 de 4") and
+        g14 = hip[("H14", "H14 regulares", "global")]
+        ok(hip[("H15", "H15 regulares", "global")]["lectura"] == NO_SE_CORRE and
+           hip[("H15", "H15 regulares", "global")]["pasa"] == "" and
            hip[("H15", "H15 aleatorias", "global")]["lectura"] == "pasa en 0 de 6 casos: ninguno" and
-           hip[("H15", "H15 regulares", "global")]["pasa"] == "sí" and
-           hip[("H15", "H15 aleatorias", "global")]["pasa"] == "no",
-           "M23 H15: 'pasa en k de n casos' (AMB-18; pasa = al menos un caso)")
+           hip[("H15", "H15 aleatorias", "global")]["pasa"] == "no" and
+           g14["lectura"] == "pasa en 1 de 1 casos: D (con la enmienda 1 queda D; P1, P2 y P6 no se corren)" and
+           g14["pasa"] == "sí" and g14["n_familia"] == 1 and hip[("H14", "H14 regulares", "D")]["n_familia"] == 1,
+           f"M23 'pasa en k de n casos' (AMB-18; pasa = al menos un caso): H15 aleatorias no pasa; H14 regulares pasa "
+           f"en D, la única que dejó la enmienda 1 (Holm con 1: {g14['lectura']}); H15 regulares no se corre")
         num = [f for f in res["numero"] if f["modelo"] == "modelo citado" and f["referencia"] == "fijo fino"
                and f["llegadas"] == "regulares" and f["tanda"] == "T1"][0]
         d = Datos(raiz)
@@ -4752,9 +4870,112 @@ def probar():
         filas_h = {(r["id"], r["caso"], r["llegadas"], r["a"]): r for r in res["hipotesis"]}
         a3 = [r for r in res["hipotesis"] if r["id"] == "a3"]
         a3_mayor = [r for r in a3 if r["lectura"] == "mayor"]
-        ok(len(a3) == 2 * 2 * (6 + 6) and len(a3_mayor) == len(a3),
-           f"M28d a3 (las celdas del generador): {len(a3)} filas; en todas, la versión perturbada (colas en cero o "
-           f"mensajes cortados) pierde frente a la misma versión sin perturbar ({len(a3_mayor)} 'mayor')")
+        ok(len(a3) == 2 * (6 + 3) + 2 * 2 * 6 and len(a3_mayor) == len(a3),
+           f"M28d a3 (las celdas del generador; con la enmienda 1, la observación nueva regular solo en D, 2715 y P2): "
+           f"{len(a3)} filas; en todas, la versión perturbada (colas en cero o mensajes cortados) pierde frente a la "
+           f"misma versión sin perturbar ({len(a3_mayor)} 'mayor')")
+        # --- enmienda 1 (06.11.2026): lo quitado "no se corre"; no es una falta, una caida ni un "no pasa" ---
+        quedan_e, quitadas_e = pruebas_definidas(con_quitadas=True)
+
+        def usa_quitado(s_):                    # sin pasar por tipo_quitado: la tabla del generador, a mano
+            c_, q_ = s_["celda"][0], gt.QUITADOS_ENMIENDA1
+            return s_["celda"][1] not in gt.POI.values() and any(
+                b_[0] in ("ver", "pub", "base") and (b_[1] in TIPOS_3B_REG or (b_[1], c_) in q_
+                                                     or ("p3obsmed" in b_[1] and ("p3obs", c_) in q_))
+                for b_ in (s_["a"], s_["b"]))
+        fam_e = {}
+        for s_ in quedan_e:
+            fam_e.setdefault(s_["familia"], []).append(s_)
+        a3_e = {t: {s_["celda"][0] for s_ in fam_e["a3"] if t in s_["a"][1] and s_["celda"][1] not in gt.POI.values()}
+                for t in ("p3obsmed", "v2reg3med")}
+        ok(not any(usa_quitado(s_) for s_ in quedan_e) and all(usa_quitado(s_) for s_ in quitadas_e)
+           and [(s_["celda"][0], s_["n_familia"]) for s_ in fam_e["H14 regulares"]] == [("D", 1)]
+           and [len(fam_e[f]) for f in ("H14 aleatorias", "H15 aleatorias", "H9 aleatorias")] == [3, 6, 6]
+           and [s_["celda"][0] for s_ in fam_e["H8a"]] == ["c2715", "P2", "D"]
+           and not any(f in fam_e for f in ("H8c", "H12", "H15 regulares", "H9 regulares"))
+           and a3_e == {"p3obsmed": {"D", "c2715", "P2"}, "v2reg3med": {"D", "c2715", "P1", "P2", "P3", "P6"}}
+           and [s_["celda"][0] for s_ in fam_e["Entropía"]] == ["D"] and len(fam_e["3b"]) == 18
+           and all(s_["celda"][1] in gt.POI.values() for s_ in fam_e["3b"]) and len(quitadas_e) == 43,
+           "E01 enmienda 1, la lista de pruebas: ninguna prueba regular que queda usa un brazo quitado "
+           "(gt.QUITADOS_ENMIENDA1 y la 3b regular) y las 43 quitadas sí; H14 regulares queda con D (Holm con 1); H14, "
+           "H15 y H9 aleatorias completas; H8a con 2715, P2 y D; sin H8c, H12, H15 ni H9 regulares; la a3 de la "
+           "observación nueva regular en D, 2715 y P2 y la de V2 en sus 6 celdas; la entropía solo en D; la 3b solo "
+           "aleatoria")
+        mensajes_e = []
+        viejo_q = gt.QUITADOS_ENMIENDA1
+        try:
+            for otro in (viejo_q | {("p3obs", "P2")}, viejo_q - {("p3reloj2", "P6")}):
+                gt.QUITADOS_ENMIENDA1 = otro
+                try:
+                    pruebas_definidas()
+                    mensajes_e.append("")
+                except ErrorVeredicto as ex:
+                    mensajes_e.append(str(ex))
+        finally:
+            gt.QUITADOS_ENMIENDA1 = viejo_q
+        ok(len(mensajes_e) == 2 and all("y la tabla de la enmienda dice" in m for m in mensajes_e)
+           and "H8a: P2" in mensajes_e[0] and "H14 regulares: P1 y P2;" in mensajes_e[1],
+           "E01b si el generador quitara algo que la tabla de la enmienda no nombra (la observación nueva en P2) o "
+           "dejara algo que nombra (el reloj de 2 s en P6), ERROR: veredicto3 no elige en silencio")
+        filas_e = {}
+        for r in res["hipotesis"]:
+            filas_e.setdefault(r["familia"], []).append(r)
+        enteras_e = [f for f, n in N_FAMILIA_ENMIENDA1.items() if n == 0]
+        claves_q = {(s_["familia"], s_["celda"][0], "regulares", nombre_brazo(s_["a"]), nombre_brazo(s_["b"]))
+                    for s_ in quitadas_e}
+        ok(all(len(filas_e[f]) == 1 and filas_e[f][0]["caso"] == "global" and filas_e[f][0]["lectura"] == NO_SE_CORRE
+               and filas_e[f][0]["pasa"] == "" and filas_e[f][0]["n_familia"] == "" for f in enteras_e)
+           and filas_e["H8c"][0]["nota"] == "enmienda 1 (06.11.2026): no se corre en P1, P3 y P6"
+           and filas_e["H9 regulares"][0]["nota"] == "enmienda 1 (06.11.2026): no se corre en P1, P2, P3, P4, P5 y P6"
+           and [r["caso"] for r in filas_e["H14 regulares"]] == ["D", "global"]
+           and not any((r["familia"], r["caso"], r["llegadas"], r["a"], r["b"]) in claves_q for r in res["hipotesis"])
+           and not any(r["lectura"] == NO_SE_CORRE for f, rs in filas_e.items() if f not in enteras_e for r in rs),
+           "E02 enmienda 1 en veredicto3_hipotesis.csv: H8c, H12, H15 regulares y H9 regulares tienen una fila, la "
+           f"del resumen, que dice '{NO_SE_CORRE}' con los casos que no se corren (ni 'sí' ni 'no', ni 'no se pudo "
+           "correr'); ninguna prueba quitada aparece por caso; H14 regulares tiene D y su resumen")
+        lineas_md = md.splitlines()
+        pasan_md = next(x for x in lineas_md if x.startswith("- Hipótesis que pasan"))
+        ok("**Enmienda 1 (06.11.2026)**, `plan3/doc/enmienda_1.md`: con llegadas regulares no se corren H8c, H12, "
+           "H15 regulares ni H9 regulares; H14 regulares queda solo con D." in md
+           and ("En P1, P3, P4, P5 y P6 regulares no queda variante candidata: el modelo citado es V2, sin "
+                "promoción.") in md
+           and all(any(x.startswith(f"| {f} | ") and x.endswith(f"| {NO_SE_CORRE} |") for x in lineas_md)
+                   for f in enteras_e)
+           and not any(f in pasan_md for f in ("H8c", "H12", "H15 regulares", "H9 regulares"))
+           and lineas_md.index(next(x for x in lineas_md if x.startswith("**Enmienda 1")))
+           < lineas_md.index("## Respuesta corta"),
+           "E03 veredicto3.md: la línea de la enmienda 1 con su fecha antes de la respuesta corta (§11: el informe la "
+           "repite), y en la tabla de hipótesis las quitadas dicen 'no se corre (enmienda 1)' sin contar como que "
+           "pasan")
+        with open(os.path.join(raiz, "cola", "trabajos.jsonl"), encoding="utf-8") as f_t:
+            trabajos_e = [json.loads(x) for x in f_t if x.strip()]
+        decidir_e = {opcion_de(t, "--celda") for t in trabajos_e
+                     if "p3_promocion.py" in t.get("cmd", "") and "decidir" in partes_de(t)}
+        promo_e = set(json.loads(open(os.path.join(raiz, "promocion.json"), encoding="utf-8").read())["celdas"])
+        archivos_e = {os.path.basename(x)[:-len(".json")] for x in glob.glob(os.path.join(raiz, "promocion", "*.json"))}
+        d_e = Datos(raiz)
+        con_cand = {ck[1] for ck in d_e.celdas if d_e.candidatas(ck)}
+        esperadas_e = {gt.CASOS["P2"], gt.D["D"], gt.NIVELES["c2715"]} | set(gt.POI.values())
+        sello_e = leer_json(os.path.join(raiz, "cola", "manifiesto_cierre.json"))
+        v2_e = [cel[(c, "regulares")] for c in ("P1", "P3", "P4", "P5", "P6")]
+        ok(all(f_["modelo_citado"] == nombre("v2reg") and f_["promovido"] == "no" and not f_["_promocion"]
+               and "promoción" not in f_["lecturas"] for f_ in v2_e)
+           and decidir_e == promo_e == archivos_e == con_cand == esperadas_e
+           and ({k for k in sello_e["otros"] if k.startswith("promocion/")}
+                == {f"promocion/{e}.json" for e in esperadas_e})
+           and not any("decisión de promoción" in a or "falta promocion" in a for a in res["avisos"]),
+           "E04 promoción con la enmienda 1: P1, P3, P4, P5 y P6 regulares citan V2 sin promocion/<esc>.json y sin "
+           "aviso; las decisiones (trabajos de p3_promocion, promocion.json, promocion/*.json, las celdas con "
+           "candidatas para veredicto3 y lo que sella manifiesto.py) son las mismas 9: P2, D y 2715 regulares y los 6 "
+           "casos aleatorios")
+        ck_p1 = ("P1", gt.CASOS["P1"])
+        d_e.celdas[ck_p1]["tipos"]["p3obs"] = {}
+        cit_e = d_e.citado(ck_p1, "v2reg")
+        d_e.estricto = True
+        cit_f = d_e.citado(ck_p1, "v2reg")
+        ok(cit_e == cit_f == (("ver", "v2reg", None), nombre("v2reg"), False, None) and not d_e.candidatas(ck_p1),
+           "E05 un tipo quitado que apareciera en una celda (la observación nueva en P1 regular) no la vuelve "
+           "candidata: cita a V2 sin pedir promocion/corredor.json, también en --final")
         pm = [r for r in res["hipotesis"] if r["id"] == "Perfil y mezcla"]
         con_bloques = {r["caso"] for r in pm if "fijo por bloques" in r["nota"]}
         ok(sum(1 for r in pm if r["a"] == nombre_brazo(("ver", "v2per", None)) and r["lectura"] == "citable FUNCIONA")
@@ -5035,6 +5256,7 @@ def probar():
         # caidas por corrida (con lo que sale de ellas, gt.DERIVA, y la V2 de la mezcla en el arranque lento):
         # veredicto3 da por caidas exactamente las bases que el generador deja de evaluar
         corridas = [("P1", "corredor", "v2reg", 42, "corredor", "p3v2reg"),
+                    ("P2", "poi_corredor_alta", "v2poi", 42, "poi_corredor_alta", "p3v2poi"),
                     ("mix1", "mix_corredor", "v2mix", 2042, "mix_corredor", "p3v2mix"),
                     ("P3", "poi_red", "p3e400poi", 4042, "poi_red", "p3e400poi")]
         viejas = gt.CAIDAS
@@ -5061,18 +5283,19 @@ def probar():
         d = Datos(raiz_c)
         segun_v3 = {(ck[0], ck[1], fam, b) for ck, fam, b in ((k[:2], k[2], k[3]) for k in evaluadas)
                     if d.es_caida(ck, fam, b)}
-        ok(segun_v3 == caen and len(caen) == 9,
+        ok(segun_v3 == caen and len(caen) == 10,
            f"M36 caídas por corrida: veredicto3 da por caídas las mismas {len(segun_v3)} bases que el generador deja "
-           f"de evaluar (la V2 con sus 400 episodios y sus dos derivadas, la V2 de la mezcla también en el arranque "
-           f"lento, los 400 episodios aleatorios con sus derivadas)")
+           f"de evaluar (la V2 regular sola, porque la enmienda 1 quitó sus 400 episodios; la V2 aleatoria con sus 400 "
+           f"episodios y sus dos derivadas; la V2 de la mezcla también en el arranque lento; los 400 episodios "
+           f"aleatorios con sus derivadas)")
         sin_corrida = [{k: v for k, v in c.items() if k != "corrida"}
                        for c in leer_json(os.path.join(raiz_c, "cola", "caidas.json"))]
         escribir(os.path.join(raiz_c, "cola", "caidas.json"), json.dumps(sin_corrida))
         d = Datos(raiz_c)
         ok({(ck[0], ck[1], fam, b) for ck, fam, b in ((k[:2], k[2], k[3]) for k in evaluadas)
             if d.es_caida(ck, fam, b)} == caen,
-           "M36b las mismas declaraciones sin corrida: veredicto3 la arma como el generador (gt.corrida_de_tipo) y da "
-           "las mismas 9 bases")
+           f"M36b las mismas declaraciones sin corrida: veredicto3 la arma como el generador (gt.corrida_de_tipo) y "
+           f"da las mismas {len(caen)} bases")
         intentos_c = [{"id": "a", "error": "NaN"}, {"id": "b", "error": "NaN"}]
         todas = [{"celda": "P3", "escenario": "poi_red", "tipo": "v2poi", "base": b, "fecha": "2026-11-16",
                   "intentos": intentos_c} for b in BASES5]
