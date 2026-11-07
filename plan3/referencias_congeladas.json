@@ -1,0 +1,1495 @@
+{
+ "version": 1,
+ "commit": "62c774619ce4c12c0ba6752fa08a2956dfd3a197",
+ "escrito": "2026-11-07T12:44:43",
+ "referencias": {
+  "barridos/corredor/mp.json": {
+   "sha256": "d8cbcde935b509306a6294eb36b05156c0d261c84188f47e20acc366690a0fa3",
+   "escenario": "corredor",
+   "regla": "mp_c60",
+   "huella": "24e7eff388e4",
+   "celda": "corredor",
+   "referencia": "mp",
+   "tipo": "ref_mp"
+  },
+  "barridos/corredor/reactiva.json": {
+   "sha256": "61c326856166ed0815b21d7b0c435ca1501bd6294860f6888f2cb58b8c55a710",
+   "escenario": "corredor",
+   "regla": "reactiva_d25",
+   "huella": "24e7eff388e4",
+   "celda": "corredor",
+   "referencia": "reactiva",
+   "tipo": "ref_reactiva"
+  },
+  "barridos/corredor/regla.json": {
+   "sha256": "36c69e37784e1f791e7322681edb7b23ce463c71effc185f238418059db74c02",
+   "escenario": "corredor",
+   "regla": "regla_u1g60",
+   "huella": "24e7eff388e4",
+   "celda": "corredor",
+   "referencia": "regla",
+   "tipo": "ref_regla"
+  },
+  "barridos/corredor_alta/mp.json": {
+   "sha256": "cbe3a2279d30e2f7e674526e622c70921913ee766a09fe018d481369473d204f",
+   "escenario": "corredor_alta",
+   "regla": "mp_det",
+   "huella": "b535e9da6946",
+   "celda": "corredor_alta",
+   "referencia": "mp",
+   "tipo": "ref_mp"
+  },
+  "barridos/corredor_alta/reactiva.json": {
+   "sha256": "c2726290ce0aea918a7cbd0985f6af0d6ab83104ca581edd9a2212d133f63df0",
+   "escenario": "corredor_alta",
+   "regla": "reactiva_d35",
+   "huella": "b535e9da6946",
+   "celda": "corredor_alta",
+   "referencia": "reactiva",
+   "tipo": "ref_reactiva"
+  },
+  "barridos/corredor_alta/regla.json": {
+   "sha256": "81b98420e7d20264f7ae48a394bc621e0bbe2d20aec789e5f943442e0158e333",
+   "escenario": "corredor_alta",
+   "regla": "regla_u1g30",
+   "huella": "b535e9da6946",
+   "celda": "corredor_alta",
+   "referencia": "regla",
+   "tipo": "ref_regla"
+  },
+  "barridos/dem_corredor_t2715_der/mp.json": {
+   "sha256": "699c791aa88d7342d4ae01601da1f165d465c86d7b8d33ed0fa8b0e520425b5a",
+   "escenario": "dem_corredor_t2715_der",
+   "regla": "mp_c60",
+   "huella": "962dcf7b33e3",
+   "celda": "dem_corredor_t2715_der",
+   "referencia": "mp",
+   "tipo": "ref_mp"
+  },
+  "barridos/dem_corredor_t2715_der/reactiva.json": {
+   "sha256": "4127e52b50828be29fcf7b4f5b00b81db87d1042d979897f8b568424490365fd",
+   "escenario": "dem_corredor_t2715_der",
+   "regla": "reactiva_d25",
+   "huella": "962dcf7b33e3",
+   "celda": "dem_corredor_t2715_der",
+   "referencia": "reactiva",
+   "tipo": "ref_reactiva"
+  },
+  "barridos/dem_corredor_t2715_der/regla.json": {
+   "sha256": "d2d2b44812f93cb2fade47f2018817db2ae3674f7fbeab4acab58b554027d74e",
+   "escenario": "dem_corredor_t2715_der",
+   "regla": "regla_u1g60",
+   "huella": "962dcf7b33e3",
+   "celda": "dem_corredor_t2715_der",
+   "referencia": "regla",
+   "tipo": "ref_regla"
+  },
+  "barridos/malla3/mp.json": {
+   "sha256": "928d141506e271f33396a7e623c26f506e577b18ba0636a71d20c6108ec2332d",
+   "escenario": "malla3",
+   "regla": "mp_det",
+   "huella": "85733a69732d",
+   "celda": "malla3",
+   "referencia": "mp",
+   "tipo": "ref_mp"
+  },
+  "barridos/malla3/reactiva.json": {
+   "sha256": "3beb451227b78246db30deecb55c92bed0098ebbbfc5a8881020605fcdb8b0a9",
+   "escenario": "malla3",
+   "regla": "reactiva_d15",
+   "huella": "85733a69732d",
+   "celda": "malla3",
+   "referencia": "reactiva",
+   "tipo": "ref_reactiva"
+  },
+  "barridos/malla3/regla.json": {
+   "sha256": "93aa140adf54e82b48d676e157c215b97bdbf66d9bdab3c78191af88beb2f736",
+   "escenario": "malla3",
+   "regla": "regla_u3g30",
+   "huella": "85733a69732d",
+   "celda": "malla3",
+   "referencia": "regla",
+   "tipo": "ref_regla"
+  },
+  "barridos/malla3_alta/mp.json": {
+   "sha256": "5a89fa9b1f49153079d7db5c7958d41aacdd08c7e2888be6d4c0e1fe9518fd82",
+   "escenario": "malla3_alta",
+   "regla": "mp_c60",
+   "huella": "9e5f7bc61aed",
+   "celda": "malla3_alta",
+   "referencia": "mp",
+   "tipo": "ref_mp"
+  },
+  "barridos/malla3_alta/reactiva.json": {
+   "sha256": "5626e6cf6c524b4c247bcbdd69ade493cad4d2d0ca60400e81452f36282f803d",
+   "escenario": "malla3_alta",
+   "regla": "reactiva_d15",
+   "huella": "9e5f7bc61aed",
+   "celda": "malla3_alta",
+   "referencia": "reactiva",
+   "tipo": "ref_reactiva"
+  },
+  "barridos/malla3_alta/regla.json": {
+   "sha256": "78d5f8afa4764ee5a58a50c98fe1e28f44f156ce7ff5de1de644cc2d3dfefbb2",
+   "escenario": "malla3_alta",
+   "regla": "regla_u2g30",
+   "huella": "9e5f7bc61aed",
+   "celda": "malla3_alta",
+   "referencia": "regla",
+   "tipo": "ref_regla"
+  },
+  "barridos/malla3_alta_e/mp.json": {
+   "sha256": "71127bffd92af408258bf8a8991049037424ad1209e7deb7f3d38d7162ce4e04",
+   "escenario": "malla3_alta_e",
+   "regla": "mp_c60",
+   "huella": "e5ae1d3dbd92",
+   "celda": "malla3_alta_e",
+   "referencia": "mp",
+   "tipo": "ref_mp"
+  },
+  "barridos/malla3_alta_e/reactiva.json": {
+   "sha256": "f7e877cc67dbd0507307f42719db55ac495d004583ca52481ffbd8024f749ce9",
+   "escenario": "malla3_alta_e",
+   "regla": "reactiva_d15",
+   "huella": "e5ae1d3dbd92",
+   "celda": "malla3_alta_e",
+   "referencia": "reactiva",
+   "tipo": "ref_reactiva"
+  },
+  "barridos/malla3_alta_e/regla.json": {
+   "sha256": "7f93842027df539c351403827b8b84b44f7da8506fdcbaea826ffbb7f376495f",
+   "escenario": "malla3_alta_e",
+   "regla": "regla_u1g30",
+   "huella": "e5ae1d3dbd92",
+   "celda": "malla3_alta_e",
+   "referencia": "regla",
+   "tipo": "ref_regla"
+  },
+  "barridos/mix_corredor/reactiva.json": {
+   "sha256": "93355fac72eb30b287fba28122476579e958b139305d70adeb23b340c24c9426",
+   "escenario": "mix_corredor",
+   "regla": "reactiva_d50",
+   "huella": "20f2af6f5c08",
+   "celda": "mix_corredor",
+   "referencia": "reactiva",
+   "tipo": "ref_reactiva"
+  },
+  "barridos/mix_corredor/regla.json": {
+   "sha256": "40bac49eeb80947c703cde26c44b9b095c2cc3dc7e30cf45a0d5f59756900aaa",
+   "escenario": "mix_corredor",
+   "regla": "regla_u1g60",
+   "huella": "20f2af6f5c08",
+   "celda": "mix_corredor",
+   "referencia": "regla",
+   "tipo": "ref_regla"
+  },
+  "barridos/mix_red/reactiva.json": {
+   "sha256": "83e2e3dc182397559297c0ee8dc36fd1fd0cd71a1e4c1116babb7dbfd9979f82",
+   "escenario": "mix_red",
+   "regla": "reactiva_d50",
+   "huella": "47c9a1b98ff1",
+   "celda": "mix_red",
+   "referencia": "reactiva",
+   "tipo": "ref_reactiva"
+  },
+  "barridos/mix_red/regla.json": {
+   "sha256": "a00a6cca7f3040a98dc20690fabdcd8ef1c7bb222fd3d1ea7e7b90f98fc678df",
+   "escenario": "mix_red",
+   "regla": "regla_u2g30",
+   "huella": "47c9a1b98ff1",
+   "celda": "mix_red",
+   "referencia": "regla",
+   "tipo": "ref_regla"
+  },
+  "barridos/per_corredor/mp.json": {
+   "sha256": "3f21c144fb0099e7ce4ff73b966df2d954cbe51af83950c0034a4c60a287e2b4",
+   "escenario": "per_corredor",
+   "regla": "mp_c60",
+   "huella": "03064ce27e81",
+   "celda": "per_corredor",
+   "referencia": "mp",
+   "tipo": "ref_mp"
+  },
+  "barridos/per_corredor/reactiva.json": {
+   "sha256": "89926ea61c47783097f602e1ae889a69e2e19edc24b1f0ee05d020f3fa95c483",
+   "escenario": "per_corredor",
+   "regla": "reactiva_d25",
+   "huella": "03064ce27e81",
+   "celda": "per_corredor",
+   "referencia": "reactiva",
+   "tipo": "ref_reactiva"
+  },
+  "barridos/per_corredor/regla.json": {
+   "sha256": "b3ec72591d9da7531c6ff8e2c4394b88900f293b4ce75f7c4c0e9213b52ea9bf",
+   "escenario": "per_corredor",
+   "regla": "regla_u1g30",
+   "huella": "03064ce27e81",
+   "celda": "per_corredor",
+   "referencia": "regla",
+   "tipo": "ref_regla"
+  },
+  "barridos/per_red/mp.json": {
+   "sha256": "8b109cebf46cd2d054560955c43046d3c8f01aa75583e06272c1afe4efa8043c",
+   "escenario": "per_red",
+   "regla": "mp_c60",
+   "huella": "7df2b651bca4",
+   "celda": "per_red",
+   "referencia": "mp",
+   "tipo": "ref_mp"
+  },
+  "barridos/per_red/reactiva.json": {
+   "sha256": "8e34736d538bc24641bc0c641ff7b99c0da369fc01edde8fdff9a801ef420f78",
+   "escenario": "per_red",
+   "regla": "reactiva_d25",
+   "huella": "7df2b651bca4",
+   "celda": "per_red",
+   "referencia": "reactiva",
+   "tipo": "ref_reactiva"
+  },
+  "barridos/per_red/regla.json": {
+   "sha256": "b28ad248cc7163bd14c1786b87a3ca103100e3cd4c1b0f2ecfaa90b7046442b8",
+   "escenario": "per_red",
+   "regla": "regla_u3g30",
+   "huella": "7df2b651bca4",
+   "celda": "per_red",
+   "referencia": "regla",
+   "tipo": "ref_regla"
+  },
+  "barridos/poi_corredor/mp.json": {
+   "sha256": "b18dae12fa5e11c804f1f4c07970051d6d9c0880214d1cc9d8e739c4ac0e14ac",
+   "escenario": "poi_corredor",
+   "regla": "mp_c60",
+   "huella": "f617ff8b7350",
+   "celda": "poi_corredor",
+   "referencia": "mp",
+   "tipo": "ref_mp"
+  },
+  "barridos/poi_corredor/reactiva.json": {
+   "sha256": "b3986699c492e84860e3f4d9691a0519bc3d2098cb70716a564270298bb033a7",
+   "escenario": "poi_corredor",
+   "regla": "reactiva_d25",
+   "huella": "f617ff8b7350",
+   "celda": "poi_corredor",
+   "referencia": "reactiva",
+   "tipo": "ref_reactiva"
+  },
+  "barridos/poi_corredor/regla.json": {
+   "sha256": "2a48a7c2d35a3d405898df44e5cb6c89774db5d2a6c2e1ed4d4bf94d0071eb98",
+   "escenario": "poi_corredor",
+   "regla": "regla_u1g60",
+   "huella": "f617ff8b7350",
+   "celda": "poi_corredor",
+   "referencia": "regla",
+   "tipo": "ref_regla"
+  },
+  "barridos/poi_corredor_alta/mp.json": {
+   "sha256": "2b8d8ca135bc6e8df6fa12b6da8492faa9bf486a67a1fff96ecc387f717ba0ed",
+   "escenario": "poi_corredor_alta",
+   "regla": "mp_c60",
+   "huella": "7534540965ef",
+   "celda": "poi_corredor_alta",
+   "referencia": "mp",
+   "tipo": "ref_mp"
+  },
+  "barridos/poi_corredor_alta/reactiva.json": {
+   "sha256": "37b98aa41ac57c3fb46f82a60aff352c721dfa856e7d82e79483f0776010b9dd",
+   "escenario": "poi_corredor_alta",
+   "regla": "reactiva_d25",
+   "huella": "7534540965ef",
+   "celda": "poi_corredor_alta",
+   "referencia": "reactiva",
+   "tipo": "ref_reactiva"
+  },
+  "barridos/poi_corredor_alta/regla.json": {
+   "sha256": "dbf52663d8151c3d11354842b2f07389dc9de86e4ad5156ae8307bf2d97d6381",
+   "escenario": "poi_corredor_alta",
+   "regla": "regla_u2g30",
+   "huella": "7534540965ef",
+   "celda": "poi_corredor_alta",
+   "referencia": "regla",
+   "tipo": "ref_regla"
+  },
+  "barridos/poi_malla3/mp.json": {
+   "sha256": "d307e5cbc2176f05c3b775f5535912b22366e4c850b3a5a526374e1ff3cdd81e",
+   "escenario": "poi_malla3",
+   "regla": "mp_det",
+   "huella": "45cab20ae125",
+   "celda": "poi_malla3",
+   "referencia": "mp",
+   "tipo": "ref_mp"
+  },
+  "barridos/poi_malla3/reactiva.json": {
+   "sha256": "934adff4d4bab7c55879b2014e5bfc97c023b58aeb876a06b798caa88cdab32e",
+   "escenario": "poi_malla3",
+   "regla": "reactiva_d25",
+   "huella": "45cab20ae125",
+   "celda": "poi_malla3",
+   "referencia": "reactiva",
+   "tipo": "ref_reactiva"
+  },
+  "barridos/poi_malla3/regla.json": {
+   "sha256": "857fb64b44db51c99bc461f7b977041afed32e1acfbd68629e5fb6f8a302ec42",
+   "escenario": "poi_malla3",
+   "regla": "regla_u6g30",
+   "huella": "45cab20ae125",
+   "celda": "poi_malla3",
+   "referencia": "regla",
+   "tipo": "ref_regla"
+  },
+  "barridos/poi_malla3_alta/mp.json": {
+   "sha256": "f64dd6af796ea17c355cc3b18c7497b92fd5c9f3c5ae4322664d260ca4408db8",
+   "escenario": "poi_malla3_alta",
+   "regla": "mp_c60",
+   "huella": "49284c6706f3",
+   "celda": "poi_malla3_alta",
+   "referencia": "mp",
+   "tipo": "ref_mp"
+  },
+  "barridos/poi_malla3_alta/reactiva.json": {
+   "sha256": "0cd2e8f1935852d464caa7a1b4796031474abe24a5600df71ad5f872592d0e69",
+   "escenario": "poi_malla3_alta",
+   "regla": "reactiva_d15",
+   "huella": "49284c6706f3",
+   "celda": "poi_malla3_alta",
+   "referencia": "reactiva",
+   "tipo": "ref_reactiva"
+  },
+  "barridos/poi_malla3_alta/regla.json": {
+   "sha256": "5bc8e290c8f43d4c6157782bf56ecc7005961a16317c497a91688801ed1cec93",
+   "escenario": "poi_malla3_alta",
+   "regla": "regla_u1g30",
+   "huella": "49284c6706f3",
+   "celda": "poi_malla3_alta",
+   "referencia": "regla",
+   "tipo": "ref_regla"
+  },
+  "barridos/poi_red/mp.json": {
+   "sha256": "55686c3aa4f4efa676d519da377caa24a98bf13d7f4df7b9e618e4fc0c7424ce",
+   "escenario": "poi_red",
+   "regla": "mp_c60",
+   "huella": "112f5475f956",
+   "celda": "poi_red",
+   "referencia": "mp",
+   "tipo": "ref_mp"
+  },
+  "barridos/poi_red/reactiva.json": {
+   "sha256": "f5a3b583012cb4c8e2c6d246ab563fcca875663ed7ef8c249fda154043c66aec",
+   "escenario": "poi_red",
+   "regla": "reactiva_d35",
+   "huella": "112f5475f956",
+   "celda": "poi_red",
+   "referencia": "reactiva",
+   "tipo": "ref_reactiva"
+  },
+  "barridos/poi_red/regla.json": {
+   "sha256": "1f752d73fea5950c7a851b4d4a3fc3bb09b5689bfd978fbe4074677dd55c7473",
+   "escenario": "poi_red",
+   "regla": "regla_u2g30",
+   "huella": "112f5475f956",
+   "celda": "poi_red",
+   "referencia": "regla",
+   "tipo": "ref_regla"
+  },
+  "barridos/poi_red_alta/mp.json": {
+   "sha256": "194f619029168d1016c21f726336038f4eaf5b363357d433086da380ea34f98f",
+   "escenario": "poi_red_alta",
+   "regla": "mp_c60",
+   "huella": "456dc1983dd8",
+   "celda": "poi_red_alta",
+   "referencia": "mp",
+   "tipo": "ref_mp"
+  },
+  "barridos/poi_red_alta/reactiva.json": {
+   "sha256": "c2863e30316ce2831b0a8c03bc77edac1d8366c10647356ee1d91698b477bf8b",
+   "escenario": "poi_red_alta",
+   "regla": "reactiva_d25",
+   "huella": "456dc1983dd8",
+   "celda": "poi_red_alta",
+   "referencia": "reactiva",
+   "tipo": "ref_reactiva"
+  },
+  "barridos/poi_red_alta/regla.json": {
+   "sha256": "533af80381020ab3255608535ba7d8a8c6c5e562dc96ce3d4c6b0ec8757a9cfa",
+   "escenario": "poi_red_alta",
+   "regla": "regla_u4g30",
+   "huella": "456dc1983dd8",
+   "celda": "poi_red_alta",
+   "referencia": "regla",
+   "tipo": "ref_regla"
+  },
+  "barridos/red/mp.json": {
+   "sha256": "003c0406d5cf38cec9fe3f0c39b0b3cad32eda41f3cf3f81376cb8f5bcd3db0e",
+   "escenario": "red",
+   "regla": "mp_c60",
+   "huella": "decc45712f99",
+   "celda": "red",
+   "referencia": "mp",
+   "tipo": "ref_mp"
+  },
+  "barridos/red/reactiva.json": {
+   "sha256": "a4db94b11dd4084230d5cb626af05f570751fb0d277f2101bfde13b2dffc9211",
+   "escenario": "red",
+   "regla": "reactiva_d35",
+   "huella": "decc45712f99",
+   "celda": "red",
+   "referencia": "reactiva",
+   "tipo": "ref_reactiva"
+  },
+  "barridos/red/regla.json": {
+   "sha256": "c17dd2c37f8b9f0366c7a74556bc1e39a993840250da7f5d118cdd7b82da2cdf",
+   "escenario": "red",
+   "regla": "regla_u2g30",
+   "huella": "decc45712f99",
+   "celda": "red",
+   "referencia": "regla",
+   "tipo": "ref_regla"
+  },
+  "barridos/red_alta/mp.json": {
+   "sha256": "980a5e70ed7af383585282a02377974a0ad1403d897a90671bcb9b041c09f178",
+   "escenario": "red_alta",
+   "regla": "mp_c60",
+   "huella": "65b387407bc1",
+   "celda": "red_alta",
+   "referencia": "mp",
+   "tipo": "ref_mp"
+  },
+  "barridos/red_alta/reactiva.json": {
+   "sha256": "291c8a26f7bacdc37b90b2025f6d937f934c2eb25b93d469585dc3a6118047f8",
+   "escenario": "red_alta",
+   "regla": "reactiva_d25",
+   "huella": "65b387407bc1",
+   "celda": "red_alta",
+   "referencia": "reactiva",
+   "tipo": "ref_reactiva"
+  },
+  "barridos/red_alta/regla.json": {
+   "sha256": "eb363f46040c21cfb1ca170060e13567a4fc0c8d253147e4b780241d74debc15",
+   "escenario": "red_alta",
+   "regla": "regla_u2g30",
+   "huella": "65b387407bc1",
+   "celda": "red_alta",
+   "referencia": "regla",
+   "tipo": "ref_regla"
+  },
+  "corredor_actuado_aj.add.xml": {
+   "sha256": "9f7faf92da4acbc857b1fc17f4074218d24b0dc2a7937328f2dc00391e723ecd",
+   "escenario": "corredor",
+   "fuente": "barridos/corredor/actuado_aj.json",
+   "huella": "d290ac21a9c8",
+   "clave": "act_mg3_dg3_jt-1_av60_tr60_coordd92b8a11",
+   "celda": "corredor",
+   "referencia": "actuadoaj",
+   "tipo": "ref_actuadoaj"
+  },
+  "corredor_alta_actuado_aj.add.xml": {
+   "sha256": "96345be656747ed45d906d0b68c3f12c1a8a402fbb7be23d8420195e6f983610",
+   "escenario": "corredor_alta",
+   "fuente": "barridos/corredor_alta/actuado_aj.json",
+   "huella": "9b355d54750e",
+   "clave": "act_mg3_dg4_jt30_av60_tr60_coord409b57cd_finfijo",
+   "celda": "corredor_alta",
+   "referencia": "actuadoaj",
+   "tipo": "ref_actuadoaj"
+  },
+  "corredor_alta_franja.add.xml": {
+   "sha256": "2670c8bc66c3e5f8a7d3abab590f81e100a2a9a0bbe9300a2ab1978eb74781c4",
+   "escenario": "corredor_alta",
+   "fuente": "barridos/corredor_alta/franja.json",
+   "huella": "9b355d54750e",
+   "clave": "fr_v35_t15_o0_30__v25_t13_o0_20",
+   "celda": "corredor_alta",
+   "referencia": "franja",
+   "tipo": "ref_franja"
+  },
+  "corredor_alta_m5f.add.xml": {
+   "sha256": "f039ab4a88344b8016087c2508df99dfc002e5022797565e3ec4d7bf5383374d",
+   "escenario": "corredor_alta",
+   "fuente": "barridos/corredor_alta/fijo_mult5.json",
+   "huella": "9b355d54750e",
+   "clave": "v25_t15_o0_19",
+   "celda": "corredor_alta",
+   "referencia": "fino5",
+   "tipo": "ref_fino5"
+  },
+  "corredor_alta_r10f.add.xml": {
+   "sha256": "874c91011ab834d975e62f7402bb4594d94334e9d5b565ce07c370f1bbbf0399",
+   "escenario": "corredor_alta",
+   "fuente": "barridos/corredor_alta/fijo_fino.json",
+   "huella": "9b355d54750e",
+   "clave": "v25_t13_o0_21",
+   "celda": "corredor_alta",
+   "referencia": "fino",
+   "tipo": "ref_fino"
+  },
+  "corredor_franja.add.xml": {
+   "sha256": "b67c922f69b69420cbca62dc4dc28bd1df1c02716bd872ad6e9ce562a9dae1c2",
+   "escenario": "corredor",
+   "fuente": "barridos/corredor/franja.json",
+   "huella": "d290ac21a9c8",
+   "clave": "fr_v20_t10_o0_25__v22_t10_o0_13",
+   "celda": "corredor",
+   "referencia": "franja",
+   "tipo": "ref_franja"
+  },
+  "corredor_m5f.add.xml": {
+   "sha256": "ea1182d267b03c9ba5ce7ac5e3ad3ef3a94b883762f17705a1fb9c97a8e404e3",
+   "escenario": "corredor",
+   "fuente": "barridos/corredor/fijo_mult5.json",
+   "huella": "d290ac21a9c8",
+   "clave": "v25_t10_o0_24",
+   "celda": "corredor",
+   "referencia": "fino5",
+   "tipo": "ref_fino5"
+  },
+  "corredor_r10f.add.xml": {
+   "sha256": "2a43d88d922a1b8b5e5ec45f11271154eb513a996de250a98d049e988f1fa56f",
+   "escenario": "corredor",
+   "fuente": "barridos/corredor/fijo_fino.json",
+   "huella": "d290ac21a9c8",
+   "clave": "v22_t10_o0_17",
+   "celda": "corredor",
+   "referencia": "fino",
+   "tipo": "ref_fino"
+  },
+  "dem_corredor_t1358_actuado_aj.add.xml": {
+   "sha256": "23858159611159eaf8611fd7fa513616952d91e28c0ed5c3411ee3539f449200",
+   "escenario": "dem_corredor_t1358",
+   "fuente": "barridos/dem_corredor_t1358/actuado_aj.json",
+   "huella": "b724d3b0de5e",
+   "clave": "act_mg1.5_dg2_jt-1_av60_tr60",
+   "celda": "dem_corredor_t1358",
+   "referencia": "actuadoaj",
+   "tipo": "ref_actuadoaj"
+  },
+  "dem_corredor_t1358_r10f.add.xml": {
+   "sha256": "86b13ee574aa8878b00579a6066008cdf89e8a7b6598eb8ffa64799d45065df4",
+   "escenario": "dem_corredor_t1358",
+   "fuente": "barridos/dem_corredor_t1358/fijo_fino.json",
+   "huella": "b724d3b0de5e",
+   "clave": "v12_t10_o0_0",
+   "celda": "dem_corredor_t1358",
+   "referencia": "fino",
+   "tipo": "ref_fino"
+  },
+  "dem_corredor_t1358_r10g.add.xml": {
+   "sha256": "0f4500effe2760c79cbcbf413d555b52b933e2d206e92a0ca716bee98b413731",
+   "escenario": "dem_corredor_t1358",
+   "fuente": "barridos/dem_corredor_t1358/fijo_grueso10.json",
+   "huella": "b724d3b0de5e",
+   "clave": "v12_t10_o0_0",
+   "celda": "dem_corredor_t1358",
+   "referencia": "fijo10",
+   "tipo": "ref_fijo10"
+  },
+  "dem_corredor_t2715_actuado_aj.add.xml": {
+   "sha256": "03cf727fa241da3698ddfa428a7616d50833be44a46236b93c3504ea50f1d4b0",
+   "escenario": "dem_corredor_t2715",
+   "fuente": "barridos/dem_corredor_t2715/actuado_aj.json",
+   "huella": "c497d9969467",
+   "clave": "act_mg1_dg2_jt10_av45_tr60_coord1c393e3f_finfijo",
+   "celda": "dem_corredor_t2715",
+   "referencia": "actuadoaj",
+   "tipo": "ref_actuadoaj"
+  },
+  "dem_corredor_t2715_der_actuado_aj.add.xml": {
+   "sha256": "b252ac34b554070e85b379e6da54a27080d1731eb815417abf0b1f20a0e70546",
+   "escenario": "dem_corredor_t2715_der",
+   "fuente": "barridos/dem_corredor_t2715_der/actuado_aj.json",
+   "huella": "9ae443ffbb50",
+   "clave": "act_mg2_dg2_jt-1_av45_tr20",
+   "celda": "dem_corredor_t2715_der",
+   "referencia": "actuadoaj",
+   "tipo": "ref_actuadoaj"
+  },
+  "dem_corredor_t2715_der_franja.add.xml": {
+   "sha256": "c87091dd4260b9a3900df80bb498f744464ad858d67894eb8c0f4b6de3a8eb77",
+   "escenario": "dem_corredor_t2715_der",
+   "fuente": "barridos/dem_corredor_t2715_der/franja.json",
+   "huella": "9ae443ffbb50",
+   "clave": "fr_v33_t13_o0_27__v33_t13_o0_24",
+   "celda": "dem_corredor_t2715_der",
+   "referencia": "franja",
+   "tipo": "ref_franja"
+  },
+  "dem_corredor_t2715_der_m5f.add.xml": {
+   "sha256": "12b7462c826c653245c9ef44b7fe72f86792cb0933c134717619b17943a1b04b",
+   "escenario": "dem_corredor_t2715_der",
+   "fuente": "barridos/dem_corredor_t2715_der/fijo_mult5.json",
+   "huella": "9ae443ffbb50",
+   "clave": "v35_t15_o0_27",
+   "celda": "dem_corredor_t2715_der",
+   "referencia": "fino5",
+   "tipo": "ref_fino5"
+  },
+  "dem_corredor_t2715_der_r10f.add.xml": {
+   "sha256": "27798720ee7c837c675824b37693f28043d40f9e891c5d547ad55f185b931103",
+   "escenario": "dem_corredor_t2715_der",
+   "fuente": "barridos/dem_corredor_t2715_der/fijo_fino.json",
+   "huella": "9ae443ffbb50",
+   "clave": "v33_t13_o0_27",
+   "celda": "dem_corredor_t2715_der",
+   "referencia": "fino",
+   "tipo": "ref_fino"
+  },
+  "dem_corredor_t2715_r10f.add.xml": {
+   "sha256": "8843a006b09d3aaeea74db6d67684075dc0c0e40594030d9cdd4230bb0174510",
+   "escenario": "dem_corredor_t2715",
+   "fuente": "barridos/dem_corredor_t2715/fijo_fino.json",
+   "huella": "c497d9969467",
+   "clave": "v25_t10_o0_2",
+   "celda": "dem_corredor_t2715",
+   "referencia": "fino",
+   "tipo": "ref_fino"
+  },
+  "dem_corredor_t2715_r10g.add.xml": {
+   "sha256": "d9a324294f88e6c41fee4aece252f45f86832cc797beb07f4b9aba4b47da285f",
+   "escenario": "dem_corredor_t2715",
+   "fuente": "barridos/dem_corredor_t2715/fijo_grueso10.json",
+   "huella": "c497d9969467",
+   "clave": "v25_t10_o0_0",
+   "celda": "dem_corredor_t2715",
+   "referencia": "fijo10",
+   "tipo": "ref_fijo10"
+  },
+  "dem_corredor_t905_actuado_aj.add.xml": {
+   "sha256": "41e0a885ac8cad632e6bd51154c49d47cf1bee9218b467c8db7667d1b434222a",
+   "escenario": "dem_corredor_t905",
+   "fuente": "barridos/dem_corredor_t905/actuado_aj.json",
+   "huella": "1e0f6764f6eb",
+   "clave": "act_mg1.5_dg2_jt-1_av60_tr60",
+   "celda": "dem_corredor_t905",
+   "referencia": "actuadoaj",
+   "tipo": "ref_actuadoaj"
+  },
+  "dem_corredor_t905_r10f.add.xml": {
+   "sha256": "825767a8d5be6ba638805d2da6025b6105ae8f64c508e9f42941baec8febe013",
+   "escenario": "dem_corredor_t905",
+   "fuente": "barridos/dem_corredor_t905/fijo_fino.json",
+   "huella": "1e0f6764f6eb",
+   "clave": "v10_t10_o0_0",
+   "celda": "dem_corredor_t905",
+   "referencia": "fino",
+   "tipo": "ref_fino"
+  },
+  "dem_corredor_t905_r10g.add.xml": {
+   "sha256": "3b97616b38d97f98d7783234b9ec9188a77c427c4fb71d7743f5f5f90de894f0",
+   "escenario": "dem_corredor_t905",
+   "fuente": "barridos/dem_corredor_t905/fijo_grueso10.json",
+   "huella": "1e0f6764f6eb",
+   "clave": "v10_t10_o0_0",
+   "celda": "dem_corredor_t905",
+   "referencia": "fijo10",
+   "tipo": "ref_fijo10"
+  },
+  "dem_malla3_t1810_actuado_aj.add.xml": {
+   "sha256": "c767a189a01395a712543340655bef743081e8e76ba7025c01576614d86be3b0",
+   "escenario": "dem_malla3_t1810",
+   "fuente": "barridos/dem_malla3_t1810/actuado_aj.json",
+   "huella": "3f37484afcf3",
+   "clave": "act_mg1_dg2_jt-1_av60_tr60_coordca2252de",
+   "celda": "dem_malla3_t1810",
+   "referencia": "actuadoaj",
+   "tipo": "ref_actuadoaj"
+  },
+  "dem_malla3_t1810_r10f.add.xml": {
+   "sha256": "1b03c426fd6fc852d9fbcc552d8064b63d1606171b0b9e3206c606cbf0aa741f",
+   "escenario": "dem_malla3_t1810",
+   "fuente": "barridos/dem_malla3_t1810/fijo_fino.json",
+   "huella": "3f37484afcf3",
+   "clave": "v32_t10_o0_24_0_24_0_24_0_24_0",
+   "celda": "dem_malla3_t1810",
+   "referencia": "fino",
+   "tipo": "ref_fino"
+  },
+  "dem_malla3_t1810_r10g.add.xml": {
+   "sha256": "652c5b5c651674733f7f40845b0abf3c360a50653206f32e3d3e0de28befa4a2",
+   "escenario": "dem_malla3_t1810",
+   "fuente": "barridos/dem_malla3_t1810/fijo_grueso10.json",
+   "huella": "3f37484afcf3",
+   "clave": "v25_t15_o0_23_0_23_0_23_0_23_0",
+   "celda": "dem_malla3_t1810",
+   "referencia": "fijo10",
+   "tipo": "ref_fijo10"
+  },
+  "dem_malla3_t2715_actuado_aj.add.xml": {
+   "sha256": "c361a1a373a6303fc58ac7bee02b4cd6f6a0f7c7613e559da91f01376f5e19ca",
+   "escenario": "dem_malla3_t2715",
+   "fuente": "barridos/dem_malla3_t2715/actuado_aj.json",
+   "huella": "10d7ecf5c418",
+   "clave": "act_mg1_dg2_jt-1_av60_tr60_coord420bac59",
+   "celda": "dem_malla3_t2715",
+   "referencia": "actuadoaj",
+   "tipo": "ref_actuadoaj"
+  },
+  "dem_malla3_t2715_r10f.add.xml": {
+   "sha256": "9833619865b2de7916beb7750225a0f4cee9a09e00884fdca5df47490d2e55b3",
+   "escenario": "dem_malla3_t2715",
+   "fuente": "barridos/dem_malla3_t2715/fijo_fino.json",
+   "huella": "10d7ecf5c418",
+   "clave": "v27_t13_o0_23_0_23_0_23_0_23_0",
+   "celda": "dem_malla3_t2715",
+   "referencia": "fino",
+   "tipo": "ref_fino"
+  },
+  "dem_malla3_t2715_r10g.add.xml": {
+   "sha256": "47ecc3ffc5713ab4a4993bd6065af49b60d2f376f743c5544a86053a4180ec0d",
+   "escenario": "dem_malla3_t2715",
+   "fuente": "barridos/dem_malla3_t2715/fijo_grueso10.json",
+   "huella": "10d7ecf5c418",
+   "clave": "v25_t15_o0_23_0_23_0_23_0_23_0",
+   "celda": "dem_malla3_t2715",
+   "referencia": "fijo10",
+   "tipo": "ref_fijo10"
+  },
+  "dem_malla3_t3620_actuado_aj.add.xml": {
+   "sha256": "5656a3212ab8b70d5720c4bc7af0af5a82623a8360f57ebe57a41c3e139f718c",
+   "escenario": "dem_malla3_t3620",
+   "fuente": "barridos/dem_malla3_t3620/actuado_aj.json",
+   "huella": "189ac982ff8a",
+   "clave": "act_mg1.5_dg2_jt-1_av60_tr60_coordad6abef4",
+   "celda": "dem_malla3_t3620",
+   "referencia": "actuadoaj",
+   "tipo": "ref_actuadoaj"
+  },
+  "dem_malla3_t3620_r10f.add.xml": {
+   "sha256": "a74e1b6c37e1b75eac975b62dfcd2c68124c2f4b5d4028f99688f9684071d14a",
+   "escenario": "dem_malla3_t3620",
+   "fuente": "barridos/dem_malla3_t3620/fijo_fino.json",
+   "huella": "189ac982ff8a",
+   "clave": "v28_t12_o0_23_0_23_0_23_0_23_0",
+   "celda": "dem_malla3_t3620",
+   "referencia": "fino",
+   "tipo": "ref_fino"
+  },
+  "dem_malla3_t3620_r10g.add.xml": {
+   "sha256": "e2716cd7d778e4914fa23cfb9085023dc85281d43cd9c88a95425a74bc7a31ee",
+   "escenario": "dem_malla3_t3620",
+   "fuente": "barridos/dem_malla3_t3620/fijo_grueso10.json",
+   "huella": "189ac982ff8a",
+   "clave": "v25_t15_o0_23_0_23_0_23_0_23_0",
+   "celda": "dem_malla3_t3620",
+   "referencia": "fijo10",
+   "tipo": "ref_fijo10"
+  },
+  "dem_malla3_t6525_actuado_aj.add.xml": {
+   "sha256": "a24e839ce749d853d2326b46f10486beffe24236f8694be004099c20419b76cd",
+   "escenario": "dem_malla3_t6525",
+   "fuente": "barridos/dem_malla3_t6525/actuado_aj.json",
+   "huella": "ead8d48da185",
+   "clave": "act_mg1.5_dg2_jt-1_av60_tr60_coord44b14435",
+   "celda": "dem_malla3_t6525",
+   "referencia": "actuadoaj",
+   "tipo": "ref_actuadoaj"
+  },
+  "dem_malla3_t6525_r10f.add.xml": {
+   "sha256": "d97d40b6b827990259dbb00b3ac2328094129993ef2a5b67b8626b1a4b232b4d",
+   "escenario": "dem_malla3_t6525",
+   "fuente": "barridos/dem_malla3_t6525/fijo_fino.json",
+   "huella": "ead8d48da185",
+   "clave": "v27_t14_o0_23_0_23_0_23_0_23_0",
+   "celda": "dem_malla3_t6525",
+   "referencia": "fino",
+   "tipo": "ref_fino"
+  },
+  "dem_malla3_t6525_r10g.add.xml": {
+   "sha256": "06f185eadab585647b1ae51c05df337319d12e471937d1c23aeba8098c0e71ac",
+   "escenario": "dem_malla3_t6525",
+   "fuente": "barridos/dem_malla3_t6525/fijo_grueso10.json",
+   "huella": "ead8d48da185",
+   "clave": "v10_t10_o0_0_0_0_0_0_0_0_0",
+   "celda": "dem_malla3_t6525",
+   "referencia": "fijo10",
+   "tipo": "ref_fijo10"
+  },
+  "dem_red_t1358_actuado_aj.add.xml": {
+   "sha256": "cf4d11cce73dd9ec64e243aebaaf11ebed1a428ce6b37d15b8daad08ac302ca9",
+   "escenario": "dem_red_t1358",
+   "fuente": "barridos/dem_red_t1358/actuado_aj.json",
+   "huella": "02a7b67359ef",
+   "clave": "act_mg1.5_dg2_jt-1_av60_tr60_coord62549973_finfijo",
+   "celda": "dem_red_t1358",
+   "referencia": "actuadoaj",
+   "tipo": "ref_actuadoaj"
+  },
+  "dem_red_t1358_r10f.add.xml": {
+   "sha256": "8567b6bdd6c0db77f81774262b7e75176d8e672c6f50671fb59fc7b8393514ec",
+   "escenario": "dem_red_t1358",
+   "fuente": "barridos/dem_red_t1358/fijo_fino.json",
+   "huella": "02a7b67359ef",
+   "clave": "v10_t10_o0_1_25",
+   "celda": "dem_red_t1358",
+   "referencia": "fino",
+   "tipo": "ref_fino"
+  },
+  "dem_red_t1358_r10g.add.xml": {
+   "sha256": "5108bd4fcde342a656c8ff4d6939480083d4565c9755b1227cbc1f893a27b9df",
+   "escenario": "dem_red_t1358",
+   "fuente": "barridos/dem_red_t1358/fijo_grueso10.json",
+   "huella": "02a7b67359ef",
+   "clave": "v10_t10_o0_0_0",
+   "celda": "dem_red_t1358",
+   "referencia": "fijo10",
+   "tipo": "ref_fijo10"
+  },
+  "dem_red_t1810_actuado_aj.add.xml": {
+   "sha256": "bde6e1a517280e450bbf86cfd77f0a3f3e24aa7d200cb19c305efff9a1f34623",
+   "escenario": "dem_red_t1810",
+   "fuente": "barridos/dem_red_t1810/actuado_aj.json",
+   "huella": "e4bdef29d057",
+   "clave": "del_dr50_mt1_av30_tr60",
+   "celda": "dem_red_t1810",
+   "referencia": "actuadoaj",
+   "tipo": "ref_actuadoaj"
+  },
+  "dem_red_t1810_r10f.add.xml": {
+   "sha256": "dd1bca88d36946656b3496131c0b67bb43aa6fd110e2b93c44de3d50a77cad30",
+   "escenario": "dem_red_t1810",
+   "fuente": "barridos/dem_red_t1810/fijo_fino.json",
+   "huella": "e4bdef29d057",
+   "clave": "v10_t10_o0_1_25",
+   "celda": "dem_red_t1810",
+   "referencia": "fino",
+   "tipo": "ref_fino"
+  },
+  "dem_red_t1810_r10g.add.xml": {
+   "sha256": "56245197435c430d2872b090a63c4bc198876df7be1a423997248a58372a6db3",
+   "escenario": "dem_red_t1810",
+   "fuente": "barridos/dem_red_t1810/fijo_grueso10.json",
+   "huella": "e4bdef29d057",
+   "clave": "v10_t10_o0_25_24",
+   "celda": "dem_red_t1810",
+   "referencia": "fijo10",
+   "tipo": "ref_fijo10"
+  },
+  "dem_red_t2715_actuado_aj.add.xml": {
+   "sha256": "88390b257ddbb73dd5adfcfbd1a4b4053cdd155db51c13f322b424d96ff8197c",
+   "escenario": "dem_red_t2715",
+   "fuente": "barridos/dem_red_t2715/actuado_aj.json",
+   "huella": "4cc6161bcf53",
+   "clave": "act_mg1.5_dg4_jt-1_av30_tr60",
+   "celda": "dem_red_t2715",
+   "referencia": "actuadoaj",
+   "tipo": "ref_actuadoaj"
+  },
+  "dem_red_t2715_r10f.add.xml": {
+   "sha256": "460adf82e5102cf03347ebc277e5c16fa15d6e031f2cc65a7c19da2579170bf0",
+   "escenario": "dem_red_t2715",
+   "fuente": "barridos/dem_red_t2715/fijo_fino.json",
+   "huella": "4cc6161bcf53",
+   "clave": "v24_t13_o0_20_0",
+   "celda": "dem_red_t2715",
+   "referencia": "fino",
+   "tipo": "ref_fino"
+  },
+  "dem_red_t2715_r10g.add.xml": {
+   "sha256": "5b3352c3ac9f4c39e1cf75fb19b0eaa8d755f74bcb3d8c697ac756046e312562",
+   "escenario": "dem_red_t2715",
+   "fuente": "barridos/dem_red_t2715/fijo_grueso10.json",
+   "huella": "4cc6161bcf53",
+   "clave": "v25_t15_o0_25_0",
+   "celda": "dem_red_t2715",
+   "referencia": "fijo10",
+   "tipo": "ref_fijo10"
+  },
+  "dem_red_t3620_actuado_aj.add.xml": {
+   "sha256": "daca4894fec06c76a0b063552fac58f214434087640cd3b515d3fbc3595f5d19",
+   "escenario": "dem_red_t3620",
+   "fuente": "barridos/dem_red_t3620/actuado_aj.json",
+   "huella": "93ed440bd778",
+   "clave": "act_mg1_dg2_jt-1_av30_tr60",
+   "celda": "dem_red_t3620",
+   "referencia": "actuadoaj",
+   "tipo": "ref_actuadoaj"
+  },
+  "dem_red_t3620_r10f.add.xml": {
+   "sha256": "12c9aa24ea1f4866217e9b0b76f23846f0bddb8bb59a26ccf95c8e1aa06b2ef5",
+   "escenario": "dem_red_t3620",
+   "fuente": "barridos/dem_red_t3620/fijo_fino.json",
+   "huella": "93ed440bd778",
+   "clave": "v25_t15_o0_23_0",
+   "celda": "dem_red_t3620",
+   "referencia": "fino",
+   "tipo": "ref_fino"
+  },
+  "dem_red_t3620_r10g.add.xml": {
+   "sha256": "0c81404157c22e44d397398d8b3bba2a0795bdee803add54caae67202e7d8ab2",
+   "escenario": "dem_red_t3620",
+   "fuente": "barridos/dem_red_t3620/fijo_grueso10.json",
+   "huella": "93ed440bd778",
+   "clave": "v25_t15_o0_23_0",
+   "celda": "dem_red_t3620",
+   "referencia": "fijo10",
+   "tipo": "ref_fijo10"
+  },
+  "dem_red_t905_actuado_aj.add.xml": {
+   "sha256": "2adc7f86db5c0215d2bfcf7643679dc826b34c3fa7815eacc6ae7d39ce8c541f",
+   "escenario": "dem_red_t905",
+   "fuente": "barridos/dem_red_t905/actuado_aj.json",
+   "huella": "b5bd24307c05",
+   "clave": "del_dr50_mt1_av60_tr60",
+   "celda": "dem_red_t905",
+   "referencia": "actuadoaj",
+   "tipo": "ref_actuadoaj"
+  },
+  "dem_red_t905_r10f.add.xml": {
+   "sha256": "98b97c4b7a23c12955fab17f36d88e82a6909cebf3ceb827cf901ad1a4574322",
+   "escenario": "dem_red_t905",
+   "fuente": "barridos/dem_red_t905/fijo_fino.json",
+   "huella": "b5bd24307c05",
+   "clave": "v10_t10_o0_0_24",
+   "celda": "dem_red_t905",
+   "referencia": "fino",
+   "tipo": "ref_fino"
+  },
+  "dem_red_t905_r10g.add.xml": {
+   "sha256": "78d4c8be45c45fef1e353737e1c6c0272b48ed64abdc21fcc69421878ef9f15d",
+   "escenario": "dem_red_t905",
+   "fuente": "barridos/dem_red_t905/fijo_grueso10.json",
+   "huella": "b5bd24307c05",
+   "clave": "v10_t10_o0_25_24",
+   "celda": "dem_red_t905",
+   "referencia": "fijo10",
+   "tipo": "ref_fijo10"
+  },
+  "malla3_actuado_aj.add.xml": {
+   "sha256": "c3fc06e4460dd01d95a03a34df39d10592ce84131aa700728f03230499d3aaa7",
+   "escenario": "malla3",
+   "fuente": "barridos/malla3/actuado_aj.json",
+   "huella": "bd7693ed4f2b",
+   "clave": "act_mg1_dg2_jt-1_av60_tr60_coord4002a053",
+   "celda": "malla3",
+   "referencia": "actuadoaj",
+   "tipo": "ref_actuadoaj"
+  },
+  "malla3_alta_actuado_aj.add.xml": {
+   "sha256": "8e6a9a6c5e73083ccb8a13470f92aabde9c50ccebaf009818b9c365f63f5f278",
+   "escenario": "malla3_alta",
+   "fuente": "barridos/malla3_alta/actuado_aj.json",
+   "huella": "9508ba745dc1",
+   "clave": "act_mg1_dg1_jt10_av60_tr60_coordd987aca6_finfijo",
+   "celda": "malla3_alta",
+   "referencia": "actuadoaj",
+   "tipo": "ref_actuadoaj"
+  },
+  "malla3_alta_e_actuado_aj.add.xml": {
+   "sha256": "ac8ada32f8e7d1d34e81e4da20863c82d19db9ba71346dd95f97bee2c80670c1",
+   "escenario": "malla3_alta_e",
+   "fuente": "barridos/malla3_alta_e/actuado_aj.json",
+   "huella": "7cbef1b485e2",
+   "clave": "act_mg1.5_dg2_jt10_av30_tr60_coordd987aca6_finfijo",
+   "celda": "malla3_alta_e",
+   "referencia": "actuadoaj",
+   "tipo": "ref_actuadoaj"
+  },
+  "malla3_alta_e_franja.add.xml": {
+   "sha256": "1fac85f490f9eac883359dbc3d17d9f2d0a2352f324ef75a4e9559ad7f226d84",
+   "escenario": "malla3_alta_e",
+   "fuente": "barridos/malla3_alta_e/franja.json",
+   "huella": "7cbef1b485e2",
+   "clave": "fr_v25_t15_o0_23_0_23_0_23_0_23_0__v14_t10_o0_0_0_0_0_0_0_0_0",
+   "celda": "malla3_alta_e",
+   "referencia": "franja",
+   "tipo": "ref_franja"
+  },
+  "malla3_alta_e_m5f.add.xml": {
+   "sha256": "0b4b078715cf9d6b805e6a7a91c395063fb0cd3db690951cb4f1bf4548a56b91",
+   "escenario": "malla3_alta_e",
+   "fuente": "barridos/malla3_alta_e/fijo_mult5.json",
+   "huella": "7cbef1b485e2",
+   "clave": "v15_t10_o0_0_0_0_0_0_0_0_0",
+   "celda": "malla3_alta_e",
+   "referencia": "fino5",
+   "tipo": "ref_fino5"
+  },
+  "malla3_alta_e_r10f.add.xml": {
+   "sha256": "badd93716b5a28b4257dfc5ea149654065f310e625de94ced2710ad487687420",
+   "escenario": "malla3_alta_e",
+   "fuente": "barridos/malla3_alta_e/fijo_fino.json",
+   "huella": "7cbef1b485e2",
+   "clave": "v14_t10_o0_0_0_0_0_0_0_0_0",
+   "celda": "malla3_alta_e",
+   "referencia": "fino",
+   "tipo": "ref_fino"
+  },
+  "malla3_alta_franja.add.xml": {
+   "sha256": "12a181ebea973c4422e25e9eb337d2f639aa8999a58e27f9fa6c30f511b60bb5",
+   "escenario": "malla3_alta",
+   "fuente": "barridos/malla3_alta/franja.json",
+   "huella": "9508ba745dc1",
+   "clave": "fr_v25_t15_o0_23_0_23_0_23_0_23_0__v14_t10_o0_0_0_0_0_0_0_0_0",
+   "celda": "malla3_alta",
+   "referencia": "franja",
+   "tipo": "ref_franja"
+  },
+  "malla3_alta_m5f.add.xml": {
+   "sha256": "3aa2f6382ea6afc1555dce4806d257dc2e4bcb1211fa7a461e4a7de9665b1cad",
+   "escenario": "malla3_alta",
+   "fuente": "barridos/malla3_alta/fijo_mult5.json",
+   "huella": "9508ba745dc1",
+   "clave": "v15_t10_o0_0_0_0_0_0_0_0_0",
+   "celda": "malla3_alta",
+   "referencia": "fino5",
+   "tipo": "ref_fino5"
+  },
+  "malla3_alta_r10f.add.xml": {
+   "sha256": "919edeffc997106e200fc4fc81414a1d3b35781db6c592f682e9d440231cf6db",
+   "escenario": "malla3_alta",
+   "fuente": "barridos/malla3_alta/fijo_fino.json",
+   "huella": "9508ba745dc1",
+   "clave": "v14_t10_o0_0_0_0_0_0_0_0_0",
+   "celda": "malla3_alta",
+   "referencia": "fino",
+   "tipo": "ref_fino"
+  },
+  "malla3_franja.add.xml": {
+   "sha256": "0bf264d81f1b526096af4bff5f3f8309e9717aae60fb033377c55ef0030909cf",
+   "escenario": "malla3",
+   "fuente": "barridos/malla3/franja.json",
+   "huella": "bd7693ed4f2b",
+   "clave": "fr_v28_t13_o0_23_0_23_0_23_0_23_0__v28_t13_o0_23_0_23_0_23_0_23_0",
+   "celda": "malla3",
+   "referencia": "franja",
+   "tipo": "ref_franja"
+  },
+  "malla3_m5f.add.xml": {
+   "sha256": "b8db019d6106f7f70e2d2eccf735610f8524cea57caf47098d61f894aa070792",
+   "escenario": "malla3",
+   "fuente": "barridos/malla3/fijo_mult5.json",
+   "huella": "bd7693ed4f2b",
+   "clave": "v10_t10_o0_0_0_0_0_0_0_0_0",
+   "celda": "malla3",
+   "referencia": "fino5",
+   "tipo": "ref_fino5"
+  },
+  "malla3_r10f.add.xml": {
+   "sha256": "c914d2802782c62f1442386635fc66c5f2dff81273a1d74fa581ae6db20cbb5f",
+   "escenario": "malla3",
+   "fuente": "barridos/malla3/fijo_fino.json",
+   "huella": "bd7693ed4f2b",
+   "clave": "v28_t13_o0_23_0_23_0_23_0_23_0",
+   "celda": "malla3",
+   "referencia": "fino",
+   "tipo": "ref_fino"
+  },
+  "mix_corredor_actuado_aj.add.xml": {
+   "sha256": "91d633278e1d9500d85f0832c75be85012ac2722e394c8cba606bed625ebe116",
+   "escenario": "mix_corredor",
+   "fuente": "barridos/mix_corredor/actuado_aj.json",
+   "huella": "4bc7a0ccb129",
+   "clave": "act_mg3_dg3_jt-1_av60_tr60_coord03a23dd1",
+   "celda": "mix_corredor",
+   "referencia": "actuadoaj",
+   "tipo": "ref_actuadoaj"
+  },
+  "mix_corredor_r10f.add.xml": {
+   "sha256": "dd32d72e6b0077acf1d1b2c61fa8cf20853b165149395a2c58062a182c946411",
+   "escenario": "mix_corredor",
+   "fuente": "barridos/mix_corredor/fijo_fino.json",
+   "huella": "4bc7a0ccb129",
+   "clave": "v24_t12_o0_20",
+   "celda": "mix_corredor",
+   "referencia": "fino",
+   "tipo": "ref_fino"
+  },
+  "mix_red_actuado_aj.add.xml": {
+   "sha256": "09dda865045ff8a823387429b95c1838f567ea236c8a8ce5eca8f9b83672687c",
+   "escenario": "mix_red",
+   "fuente": "barridos/mix_red/actuado_aj.json",
+   "huella": "86d685f0134d",
+   "clave": "act_mg1.5_dg2_jt-1_av60_tr60_coord8910306f_finfijo",
+   "celda": "mix_red",
+   "referencia": "actuadoaj",
+   "tipo": "ref_actuadoaj"
+  },
+  "mix_red_r10f.add.xml": {
+   "sha256": "2e630ac94778c174ab3a9bac48af1a78521ce1ea76fa8956a5de3b62e6deb5e5",
+   "escenario": "mix_red",
+   "fuente": "barridos/mix_red/fijo_fino.json",
+   "huella": "86d685f0134d",
+   "clave": "v10_t10_o0_1_0",
+   "celda": "mix_red",
+   "referencia": "fino",
+   "tipo": "ref_fino"
+  },
+  "per_corredor_actuado_aj.add.xml": {
+   "sha256": "e55947a9e534f6054065bf22b5a5728ab27fb4132576814633de73dad51f8565",
+   "escenario": "per_corredor",
+   "fuente": "barridos/per_corredor/actuado_aj.json",
+   "huella": "f0ffd305e34d",
+   "clave": "del_dr100_mt1_av60_tr60",
+   "celda": "per_corredor",
+   "referencia": "actuadoaj",
+   "tipo": "ref_actuadoaj"
+  },
+  "per_corredor_bloques.add.xml": {
+   "sha256": "902d4fb92a8d70889f2b909507fc53c118fcda6ace42d1e17901c3fd756e4645",
+   "escenario": "per_corredor",
+   "fuente": "barridos/per_corredor/bloques.json",
+   "huella": "a1e5313ade6b",
+   "clave": "bl_00f0fdecd4a7",
+   "celda": "per_corredor",
+   "referencia": "bloques",
+   "tipo": "ref_bloques"
+  },
+  "per_corredor_r10f.add.xml": {
+   "sha256": "5d97a8592450fa5e9f666721056310b31290bd44d951561715bb2bd69efbb615",
+   "escenario": "per_corredor",
+   "fuente": "barridos/per_corredor/fijo_fino.json",
+   "huella": "a1e5313ade6b",
+   "clave": "v27_t11_o0_25",
+   "celda": "per_corredor",
+   "referencia": "fino",
+   "tipo": "ref_fino"
+  },
+  "per_red_actuado_aj.add.xml": {
+   "sha256": "45415c52022eaad3b00b10e240d59393063c90db84658f12e272be716642bced",
+   "escenario": "per_red",
+   "fuente": "barridos/per_red/actuado_aj.json",
+   "huella": "9da23dfb5b84",
+   "clave": "act_mg1.5_dg2_jt-1_av60_tr60_coord62549973_finfijo",
+   "celda": "per_red",
+   "referencia": "actuadoaj",
+   "tipo": "ref_actuadoaj"
+  },
+  "per_red_bloques.add.xml": {
+   "sha256": "45b53d287a8e3057cd9657d07fc5fde8d8c876e2d94db21a87ed4a02a8241218",
+   "escenario": "per_red",
+   "fuente": "barridos/per_red/bloques.json",
+   "huella": "b8a867ab6b8a",
+   "clave": "bl_d54bf3d900a6",
+   "celda": "per_red",
+   "referencia": "bloques",
+   "tipo": "ref_bloques"
+  },
+  "per_red_r10f.add.xml": {
+   "sha256": "6ac54cec42fe2fdc01169ec03ac49461d7d0f5fecd00a6c512c096d3d0c5bb77",
+   "escenario": "per_red",
+   "fuente": "barridos/per_red/fijo_fino.json",
+   "huella": "b8a867ab6b8a",
+   "clave": "v10_t10_o0_1_25",
+   "celda": "per_red",
+   "referencia": "fino",
+   "tipo": "ref_fino"
+  },
+  "poi_corredor_actuado_aj.add.xml": {
+   "sha256": "a70251e1124b79a736456fbe870f3e6737e98e1aef75271b77533b218e6da92a",
+   "escenario": "poi_corredor",
+   "fuente": "barridos/poi_corredor/actuado_aj.json",
+   "huella": "9fb6c33155b8",
+   "clave": "del_dr200_mt1_av60_tr20",
+   "celda": "poi_corredor",
+   "referencia": "actuadoaj",
+   "tipo": "ref_actuadoaj"
+  },
+  "poi_corredor_alta_actuado_aj.add.xml": {
+   "sha256": "16893f5757781cfcc89aa8b4aecf92e1d05295f1064689d50f069f53c4f47b39",
+   "escenario": "poi_corredor_alta",
+   "fuente": "barridos/poi_corredor_alta/actuado_aj.json",
+   "huella": "ee0cdb444039",
+   "clave": "act_mg1.5_dg2_jt-1_av60_tr60_coord46e1660e_finfijo",
+   "celda": "poi_corredor_alta",
+   "referencia": "actuadoaj",
+   "tipo": "ref_actuadoaj"
+  },
+  "poi_corredor_alta_franja.add.xml": {
+   "sha256": "de7949b52830e27d82d87404d91d0ac9c55da7d20f45c65ad2bad230d98bbc23",
+   "escenario": "poi_corredor_alta",
+   "fuente": "barridos/poi_corredor_alta/franja.json",
+   "huella": "ee0cdb444039",
+   "clave": "fr_v34_t16_o0_30__v34_t16_o0_32",
+   "celda": "poi_corredor_alta",
+   "referencia": "franja",
+   "tipo": "ref_franja"
+  },
+  "poi_corredor_alta_m5f.add.xml": {
+   "sha256": "05b8c68f5af9a0b106c2efe6636270ec0fd60e9e8d70d7fcb6337975b48497dc",
+   "escenario": "poi_corredor_alta",
+   "fuente": "barridos/poi_corredor_alta/fijo_mult5.json",
+   "huella": "ee0cdb444039",
+   "clave": "v35_t15_o0_32",
+   "celda": "poi_corredor_alta",
+   "referencia": "fino5",
+   "tipo": "ref_fino5"
+  },
+  "poi_corredor_alta_r10f.add.xml": {
+   "sha256": "57addf31173cf5e5aa410a199749779d5fa66da5f8fb23a3a93fa22dda652c56",
+   "escenario": "poi_corredor_alta",
+   "fuente": "barridos/poi_corredor_alta/fijo_fino.json",
+   "huella": "ee0cdb444039",
+   "clave": "v34_t16_o0_32",
+   "celda": "poi_corredor_alta",
+   "referencia": "fino",
+   "tipo": "ref_fino"
+  },
+  "poi_corredor_franja.add.xml": {
+   "sha256": "3136077af41f5eff3b19088cab5deaa22203431cbe14775b65e188c8c59bdf10",
+   "escenario": "poi_corredor",
+   "fuente": "barridos/poi_corredor/franja.json",
+   "huella": "9fb6c33155b8",
+   "clave": "fr_v22_t11_o0_25__v22_t10_o0_19",
+   "celda": "poi_corredor",
+   "referencia": "franja",
+   "tipo": "ref_franja"
+  },
+  "poi_corredor_m5f.add.xml": {
+   "sha256": "80ae9150104fb70ff7221e93ba0dca1c99fb24e96c42fa4ec7563a7f77899a4b",
+   "escenario": "poi_corredor",
+   "fuente": "barridos/poi_corredor/fijo_mult5.json",
+   "huella": "9fb6c33155b8",
+   "clave": "v20_t10_o0_22",
+   "celda": "poi_corredor",
+   "referencia": "fino5",
+   "tipo": "ref_fino5"
+  },
+  "poi_corredor_r10f.add.xml": {
+   "sha256": "b9f6e092c07a64f3640752f4c2e4c3f42abaf4ab40f7b2ee3aa4c89c40e05b4e",
+   "escenario": "poi_corredor",
+   "fuente": "barridos/poi_corredor/fijo_fino.json",
+   "huella": "9fb6c33155b8",
+   "clave": "v22_t10_o0_19",
+   "celda": "poi_corredor",
+   "referencia": "fino",
+   "tipo": "ref_fino"
+  },
+  "poi_malla3_actuado_aj.add.xml": {
+   "sha256": "887fdf13e058cf8a45a8a68b6afbdc81ecc7110e00461629248d2ff467207da1",
+   "escenario": "poi_malla3",
+   "fuente": "barridos/poi_malla3/actuado_aj.json",
+   "huella": "38b0f9bd24f3",
+   "clave": "act_mg1.5_dg2_jt-1_av60_tr60_coordaf9fc31e",
+   "celda": "poi_malla3",
+   "referencia": "actuadoaj",
+   "tipo": "ref_actuadoaj"
+  },
+  "poi_malla3_alta_actuado_aj.add.xml": {
+   "sha256": "db1be13f301e81a5f72aa39ae712b1c87f05f94a02cdd5a96fbd9c42ae3abc42",
+   "escenario": "poi_malla3_alta",
+   "fuente": "barridos/poi_malla3_alta/actuado_aj.json",
+   "huella": "ee2fdbc6fcbc",
+   "clave": "act_mg1.5_dg2_jt30_av60_tr60",
+   "celda": "poi_malla3_alta",
+   "referencia": "actuadoaj",
+   "tipo": "ref_actuadoaj"
+  },
+  "poi_malla3_alta_franja.add.xml": {
+   "sha256": "173edacef6280eb37fe3c6bc1e13f295bf8d5f0c78783d01b944a3542f728513",
+   "escenario": "poi_malla3_alta",
+   "fuente": "barridos/poi_malla3_alta/franja.json",
+   "huella": "ee2fdbc6fcbc",
+   "clave": "fr_v26_t15_o0_23_0_23_0_23_0_23_0__v18_t11_o8_22_0_8_22_0_8_22_0",
+   "celda": "poi_malla3_alta",
+   "referencia": "franja",
+   "tipo": "ref_franja"
+  },
+  "poi_malla3_alta_m5f.add.xml": {
+   "sha256": "622756dd278a432c7013747a0bb011528b203748c661f11f23340bb6ac8212c3",
+   "escenario": "poi_malla3_alta",
+   "fuente": "barridos/poi_malla3_alta/fijo_mult5.json",
+   "huella": "ee2fdbc6fcbc",
+   "clave": "v20_t10_o7_22_0_7_22_0_7_22_0",
+   "celda": "poi_malla3_alta",
+   "referencia": "fino5",
+   "tipo": "ref_fino5"
+  },
+  "poi_malla3_alta_r10f.add.xml": {
+   "sha256": "d8edcd37ecfce3cef84ac59bb62c89e4275f4c4595318da561b441e03434f772",
+   "escenario": "poi_malla3_alta",
+   "fuente": "barridos/poi_malla3_alta/fijo_fino.json",
+   "huella": "ee2fdbc6fcbc",
+   "clave": "v19_t10_o8_22_0_8_22_0_8_22_0",
+   "celda": "poi_malla3_alta",
+   "referencia": "fino",
+   "tipo": "ref_fino"
+  },
+  "poi_malla3_franja.add.xml": {
+   "sha256": "2d849ce968b61a70122eb1f7027ac4530d2e20972685da140aace1367e2ced42",
+   "escenario": "poi_malla3",
+   "fuente": "barridos/poi_malla3/franja.json",
+   "huella": "38b0f9bd24f3",
+   "clave": "fr_v26_t14_o0_23_0_23_0_23_0_23_0__v26_t14_o0_23_0_23_0_23_0_23_0",
+   "celda": "poi_malla3",
+   "referencia": "franja",
+   "tipo": "ref_franja"
+  },
+  "poi_malla3_m5f.add.xml": {
+   "sha256": "4c4bda228ff9319366abd1b901614b52e1439692e7829decaef1f1fcbdd6eb87",
+   "escenario": "poi_malla3",
+   "fuente": "barridos/poi_malla3/fijo_mult5.json",
+   "huella": "38b0f9bd24f3",
+   "clave": "v10_t10_o0_0_0_0_0_0_0_0_0",
+   "celda": "poi_malla3",
+   "referencia": "fino5",
+   "tipo": "ref_fino5"
+  },
+  "poi_malla3_r10f.add.xml": {
+   "sha256": "ba428ebea86b1fb872bdc3a9df63654bacbf6cb0a0c327e2fc4fb15f2fac516d",
+   "escenario": "poi_malla3",
+   "fuente": "barridos/poi_malla3/fijo_fino.json",
+   "huella": "38b0f9bd24f3",
+   "clave": "v26_t14_o0_23_0_23_0_23_0_23_0",
+   "celda": "poi_malla3",
+   "referencia": "fino",
+   "tipo": "ref_fino"
+  },
+  "poi_red_actuado_aj.add.xml": {
+   "sha256": "934f0b5e0a5e8a4ffb45ed58127876df228ee85544c200928696e4dee2266f1f",
+   "escenario": "poi_red",
+   "fuente": "barridos/poi_red/actuado_aj.json",
+   "huella": "1eedf3aed55c",
+   "clave": "act_mg1.5_dg2_jt-1_av60_tr60_coord8910306f_finfijo",
+   "celda": "poi_red",
+   "referencia": "actuadoaj",
+   "tipo": "ref_actuadoaj"
+  },
+  "poi_red_alta_actuado_aj.add.xml": {
+   "sha256": "2d3c1ffd728adc8091f4aa1ac91f165fa8b4b051e985c2ffd81965364337b43a",
+   "escenario": "poi_red_alta",
+   "fuente": "barridos/poi_red_alta/actuado_aj.json",
+   "huella": "b4b6973631a2",
+   "clave": "act_mg1.5_dg2_jt-1_av60_tr60_coord62549973_finfijo",
+   "celda": "poi_red_alta",
+   "referencia": "actuadoaj",
+   "tipo": "ref_actuadoaj"
+  },
+  "poi_red_alta_franja.add.xml": {
+   "sha256": "d78ac5de3d905ceff9259bef3f938048762b0dbed72e270899c406d6444153ec",
+   "escenario": "poi_red_alta",
+   "fuente": "barridos/poi_red_alta/franja.json",
+   "huella": "b4b6973631a2",
+   "clave": "fr_v10_t10_o0_25_25__v10_t10_o0_1_25",
+   "celda": "poi_red_alta",
+   "referencia": "franja",
+   "tipo": "ref_franja"
+  },
+  "poi_red_alta_m5f.add.xml": {
+   "sha256": "91396d44b71d5c3fda89fc1ea5500c8698b0f3964b34e98cdb1ee0b59774d7f7",
+   "escenario": "poi_red_alta",
+   "fuente": "barridos/poi_red_alta/fijo_mult5.json",
+   "huella": "b4b6973631a2",
+   "clave": "v10_t10_o0_1_25",
+   "celda": "poi_red_alta",
+   "referencia": "fino5",
+   "tipo": "ref_fino5"
+  },
+  "poi_red_alta_r10f.add.xml": {
+   "sha256": "1c519283d188ab3af32e0fabfbd99277f02982b817af5ccdc86704979285c5ad",
+   "escenario": "poi_red_alta",
+   "fuente": "barridos/poi_red_alta/fijo_fino.json",
+   "huella": "b4b6973631a2",
+   "clave": "v10_t10_o0_1_25",
+   "celda": "poi_red_alta",
+   "referencia": "fino",
+   "tipo": "ref_fino"
+  },
+  "poi_red_franja.add.xml": {
+   "sha256": "beca4aecd0dfc28e6f60c3b76a42f2f7df75416c272dddf2646f8f026eda259f",
+   "escenario": "poi_red",
+   "fuente": "barridos/poi_red/franja.json",
+   "huella": "1eedf3aed55c",
+   "clave": "fr_v10_t10_o0_1_0__v10_t10_o0_1_0",
+   "celda": "poi_red",
+   "referencia": "franja",
+   "tipo": "ref_franja"
+  },
+  "poi_red_m5f.add.xml": {
+   "sha256": "88a8f3bc4f5dc3925e8ba2b98e4a716a27f0747a9d64bf3721377a96c2038d61",
+   "escenario": "poi_red",
+   "fuente": "barridos/poi_red/fijo_mult5.json",
+   "huella": "1eedf3aed55c",
+   "clave": "v10_t10_o0_1_0",
+   "celda": "poi_red",
+   "referencia": "fino5",
+   "tipo": "ref_fino5"
+  },
+  "poi_red_r10f.add.xml": {
+   "sha256": "a97c60af4a88a8b760ac8874ac116766ea67011d42f9d2e871e7853ec2267ebc",
+   "escenario": "poi_red",
+   "fuente": "barridos/poi_red/fijo_fino.json",
+   "huella": "1eedf3aed55c",
+   "clave": "v10_t10_o0_1_0",
+   "celda": "poi_red",
+   "referencia": "fino",
+   "tipo": "ref_fino"
+  },
+  "red_actuado_aj.add.xml": {
+   "sha256": "7c962f13ac3a76db2605aaf19db59843284114e5a829b2ba462235fe1587678b",
+   "escenario": "red",
+   "fuente": "barridos/red/actuado_aj.json",
+   "huella": "81df8a6cf21f",
+   "clave": "act_mg2_dg2_jt-1_av60_tr60_coord8910306f_finfijo",
+   "celda": "red",
+   "referencia": "actuadoaj",
+   "tipo": "ref_actuadoaj"
+  },
+  "red_alta_actuado_aj.add.xml": {
+   "sha256": "813447eeb5a3db85654d0504c05b81c7b2a7994319087507b2a82c53fb5cb82c",
+   "escenario": "red_alta",
+   "fuente": "barridos/red_alta/actuado_aj.json",
+   "huella": "53f9f1dd8cf1",
+   "clave": "act_mg1_dg2_jt-1_av60_tr60_coord62549973_finfijo",
+   "celda": "red_alta",
+   "referencia": "actuadoaj",
+   "tipo": "ref_actuadoaj"
+  },
+  "red_alta_franja.add.xml": {
+   "sha256": "7e95fe44966a0139a670667abe9efacabbec208bffaeafa55de0228b35c62752",
+   "escenario": "red_alta",
+   "fuente": "barridos/red_alta/franja.json",
+   "huella": "53f9f1dd8cf1",
+   "clave": "fr_v10_t10_o0_25_24__v10_t10_o0_0_25",
+   "celda": "red_alta",
+   "referencia": "franja",
+   "tipo": "ref_franja"
+  },
+  "red_alta_m5f.add.xml": {
+   "sha256": "99cf868cc21949d0532b7f01adf6dd724ef845290842cb88ebb67b4f25f059bb",
+   "escenario": "red_alta",
+   "fuente": "barridos/red_alta/fijo_mult5.json",
+   "huella": "53f9f1dd8cf1",
+   "clave": "v10_t10_o0_1_25",
+   "celda": "red_alta",
+   "referencia": "fino5",
+   "tipo": "ref_fino5"
+  },
+  "red_alta_r10f.add.xml": {
+   "sha256": "7f7589b3483a91c6ef34a3349c2c76178faad1bc5b30154920546f64646424fb",
+   "escenario": "red_alta",
+   "fuente": "barridos/red_alta/fijo_fino.json",
+   "huella": "53f9f1dd8cf1",
+   "clave": "v10_t10_o0_1_25",
+   "celda": "red_alta",
+   "referencia": "fino",
+   "tipo": "ref_fino"
+  },
+  "red_franja.add.xml": {
+   "sha256": "395caf308771a2953d55fa7d6da91c94ba859866bf6dde0f2a362edce6eab55f",
+   "escenario": "red",
+   "fuente": "barridos/red/franja.json",
+   "huella": "81df8a6cf21f",
+   "clave": "fr_v10_t10_o0_0_24__v10_t10_o0_2_1",
+   "celda": "red",
+   "referencia": "franja",
+   "tipo": "ref_franja"
+  },
+  "red_m5f.add.xml": {
+   "sha256": "241d937910d230ad014c81e1fac7d4279403ebd8119e29da707da7e6df3cf997",
+   "escenario": "red",
+   "fuente": "barridos/red/fijo_mult5.json",
+   "huella": "81df8a6cf21f",
+   "clave": "v10_t10_o0_1_0",
+   "celda": "red",
+   "referencia": "fino5",
+   "tipo": "ref_fino5"
+  },
+  "red_r10f.add.xml": {
+   "sha256": "64817113264d10949111ed2b352cf7c19c9b8ab7ada8dad5829d921b2be63afd",
+   "escenario": "red",
+   "fuente": "barridos/red/fijo_fino.json",
+   "huella": "81df8a6cf21f",
+   "clave": "v10_t10_o0_1_0",
+   "celda": "red",
+   "referencia": "fino",
+   "tipo": "ref_fino"
+  }
+ }
+}
