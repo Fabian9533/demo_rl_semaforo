@@ -246,7 +246,22 @@ def etapa2pm(lista):
                 lista.entrenamiento(f"e2_{et}_{e}_s{b}", "2", 3, c, e, et, b, "--v2", lanzador=True, factor=f)
 
 
-def etapa3b(lista, tipos=("reg", "poi")):
+# ---------------- Enmienda 1 (06.11.2026): el plan se centra en el trafico aleatorio (plan3/doc/enmienda_1.md) -------
+# Con llegadas regulares, la Etapa 3 corre solo donde hay una pregunta abierta: la observacion nueva en 2715, D y P2
+# (H8a) y las piezas sueltas en D (limpiezas, entropia y reloj de 2 s). La 3b corre solo con llegadas aleatorias.
+# Se decidio antes de cualquier evaluacion del examen. Con llegadas aleatorias no cambia nada.
+QUITADOS_ENMIENDA1 = {("p3obs", "P1"), ("p3obs", "P3"), ("p3obs", "P6"), ("p3m7", "P2"), ("p3m7", "P6"),
+                      ("p3ent", "P1"), ("p3reloj2", "P1"), ("p3reloj2", "P2"), ("p3reloj2", "P6"),
+                      ("p3completo", "P1"), ("p3completo", "P2"), ("p3completo", "P4"), ("p3completo", "P6")}
+TIPOS_3B = ("poi",)
+
+
+def queda(et, celda):
+    """False si el brazo regular et en la celda lo quito la enmienda 1 (los aleatorios, *poi, siempre quedan)."""
+    return et.endswith("poi") or (et, celda) not in QUITADOS_ENMIENDA1
+
+
+def etapa3b(lista, tipos=TIPOS_3B):
     op = "--v2 --lr-horizonte 200 --lr-piso 0.1"
     for tipo, celdas, et_v2, et, pref_v2 in (("reg", CASOS, "p3v2reg", "p3e400", "e1_v2reg"),
                                             ("poi", POI, "p3v2poi", "p3e400poi", "e2_v2poi")):
@@ -347,6 +362,8 @@ def etapa3(lista):
     trabajos = []
     for et, op, celdas, bases, eps in brazos:
         for c, e in celdas.items():
+            if not queda(et, c):                # enmienda 1
+                continue
             for b in bases:
                 trabajos.append((et, op, c, e, b, factor_e3(et, c), eps))
     # D primero (prioridad 2); el resto, lo mas largo primero (prioridad 3)
@@ -682,6 +699,8 @@ def evaluaciones_variantes(lista):
     for et, celdas, bases, eps in variantes:
         poi = et.endswith("poi")
         for c in celdas:
+            if not queda(et, c):                # enmienda 1
+                continue
             e = POI[c] if poi else reg[c]
             for b in bases:
                 req = req_entreno(f"e3_{et}", e, b, c, eps, factor=factor_e3(et, c))
@@ -690,6 +709,8 @@ def evaluaciones_variantes(lista):
                                [req], factor=factor_ev(et, c), tipo=et, base=b,
                                corrida=(e, "vecinos", et, b))
     for tipo, celdas, pref in (("reg", CASOS, "p3e400"), ("poi", POI, "p3e400poi")):
+        if tipo not in TIPOS_3B:                # enmienda 1: la 3b solo con llegadas aleatorias
+            continue
         tandas = ALEATORIAS if tipo == "poi" else REGULARES
         for c, e in celdas.items():
             for b in BASES3:
@@ -725,6 +746,10 @@ def promocion(lista):
     decisiones = []
     for tipo, candidatos in (("reg", CANDIDATOS_REG), ("poi", CANDIDATOS_POI)):
         for c, ets in candidatos.items():
+            # enmienda 1: solo los candidatos que quedan; una celda sin candidatos cita a V2 sin promocion
+            ets = [et for et in ets if queda(et, c) and (tipo == "poi" or et != "p3e400")]
+            if not ets:
+                continue
             e = POI[c] if tipo == "poi" else reg[c]
             et_v2 = "p3v2poi" if tipo == "poi" else "p3v2reg"
             pref_v2 = "e2_v2poi" if tipo == "poi" else "e1_v2reg"
@@ -1016,6 +1041,8 @@ def evaluaciones_a3(lista):
                                                       None)))):
         for c, e in celdas.items():
             for et, tipo, et_med, pref, eps, f in pares:
+                if not queda(et, c):            # enmienda 1: sin observacion nueva regular en esa celda
+                    continue
                 f = factor_e3(et, c) if f is None else f
                 reqs = [req_entreno(pref, e, b, c, eps, factor=f) for b in BASES3]
                 ruta, tid = mediana(lista, e, "vecinos", et, BASES3, reqs, et_med)
@@ -1026,7 +1053,7 @@ def evaluaciones_a3(lista):
 
 
 PARTES = {"etapa1": etapa1, "c0": c0, "v2vieja": v2vieja, "etapa2": etapa2, "etapa2pm": etapa2pm,
-          "etapa3b": etapa3b, "etapa3b_reg": lambda l: etapa3b(l, ("reg",)),
+          "etapa3b": etapa3b, "etapa3b_reg": lambda l: None,   # la quito la enmienda 1
           "etapa3b_poi": lambda l: etapa3b(l, ("poi",)), "etapa3": etapa3,
           "preparar": preparar, "referencias": referencias, "evaluaciones": evaluaciones,
           "evaluaciones_variantes": evaluaciones_variantes, "promocion": promocion,
