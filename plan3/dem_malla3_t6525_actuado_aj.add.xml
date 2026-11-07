@@ -1,0 +1,87 @@
+<additional>
+    <!-- Actuado ajustado (actuado.py, plan3; prerregistro, seccion 5) para dem_malla3_t6525, llegadas
+         regulares: descenso por coordenadas en cadena con 2001-2003 (22 variantes) y las finalistas con
+         2001-2010. Ganadora act_mg1.5_dg2_jt-1_av60_tr60_coord44b14435: retraso total 25.65 s (sd 0.35),
+         timeLoss 24.95 s. -->
+    <tlLogic id="semaforo_C11" type="actuated" programID="actuado_aj" offset="30">
+        <param key="max-gap" value="1.5"/>
+        <param key="coordinated" value="true"/>
+        <param key="cycleTime" value="47"/>
+        <phase duration="27" minDur="10" maxDur="60" state="rrrrGGGgrrrrGGGg" earliestEnd="44"/>
+        <phase duration="3" state="rrrryyyyrrrryyyy"/>
+        <phase duration="14" minDur="10" maxDur="60" state="GGGgrrrrGGGgrrrr"/>
+        <phase duration="3" state="yyyyrrrryyyyrrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C12" type="actuated" programID="actuado_aj" offset="6">
+        <param key="max-gap" value="1.5"/>
+        <param key="coordinated" value="true"/>
+        <param key="cycleTime" value="47"/>
+        <phase duration="27" minDur="10" maxDur="60" state="rrrrGGGgrrrrGGGg" earliestEnd="44"/>
+        <phase duration="3" state="rrrryyyyrrrryyyy"/>
+        <phase duration="14" minDur="10" maxDur="60" state="GGGgrrrrGGGgrrrr"/>
+        <phase duration="3" state="yyyyrrrryyyyrrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C13" type="actuated" programID="actuado_aj" offset="30">
+        <param key="max-gap" value="1.5"/>
+        <param key="coordinated" value="true"/>
+        <param key="cycleTime" value="47"/>
+        <phase duration="27" minDur="10" maxDur="60" state="rrrrGGGgrrrrGGGg" earliestEnd="44"/>
+        <phase duration="3" state="rrrryyyyrrrryyyy"/>
+        <phase duration="14" minDur="10" maxDur="60" state="GGGgrrrrGGGgrrrr"/>
+        <phase duration="3" state="yyyyrrrryyyyrrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C21" type="actuated" programID="actuado_aj" offset="6">
+        <param key="max-gap" value="1.5"/>
+        <param key="coordinated" value="true"/>
+        <param key="cycleTime" value="47"/>
+        <phase duration="27" minDur="10" maxDur="60" state="rrrrGGGgrrrrGGGg" earliestEnd="44"/>
+        <phase duration="3" state="rrrryyyyrrrryyyy"/>
+        <phase duration="14" minDur="10" maxDur="60" state="GGGgrrrrGGGgrrrr"/>
+        <phase duration="3" state="yyyyrrrryyyyrrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C22" type="actuated" programID="actuado_aj" offset="30">
+        <param key="max-gap" value="1.5"/>
+        <param key="coordinated" value="true"/>
+        <param key="cycleTime" value="47"/>
+        <phase duration="27" minDur="10" maxDur="60" state="rrrrGGGgrrrrGGGg" earliestEnd="44"/>
+        <phase duration="3" state="rrrryyyyrrrryyyy"/>
+        <phase duration="14" minDur="10" maxDur="60" state="GGGgrrrrGGGgrrrr"/>
+        <phase duration="3" state="yyyyrrrryyyyrrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C23" type="actuated" programID="actuado_aj" offset="6">
+        <param key="max-gap" value="1.5"/>
+        <param key="coordinated" value="true"/>
+        <param key="cycleTime" value="47"/>
+        <phase duration="27" minDur="10" maxDur="60" state="rrrrGGGgrrrrGGGg" earliestEnd="44"/>
+        <phase duration="3" state="rrrryyyyrrrryyyy"/>
+        <phase duration="14" minDur="10" maxDur="60" state="GGGgrrrrGGGgrrrr"/>
+        <phase duration="3" state="yyyyrrrryyyyrrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C31" type="actuated" programID="actuado_aj" offset="30">
+        <param key="max-gap" value="1.5"/>
+        <param key="coordinated" value="true"/>
+        <param key="cycleTime" value="47"/>
+        <phase duration="27" minDur="10" maxDur="60" state="rrrrGGGgrrrrGGGg" earliestEnd="44"/>
+        <phase duration="3" state="rrrryyyyrrrryyyy"/>
+        <phase duration="14" minDur="10" maxDur="60" state="GGGgrrrrGGGgrrrr"/>
+        <phase duration="3" state="yyyyrrrryyyyrrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C32" type="actuated" programID="actuado_aj" offset="6">
+        <param key="max-gap" value="1.5"/>
+        <param key="coordinated" value="true"/>
+        <param key="cycleTime" value="47"/>
+        <phase duration="27" minDur="10" maxDur="60" state="rrrrGGGgrrrrGGGg" earliestEnd="44"/>
+        <phase duration="3" state="rrrryyyyrrrryyyy"/>
+        <phase duration="14" minDur="10" maxDur="60" state="GGGgrrrrGGGgrrrr"/>
+        <phase duration="3" state="yyyyrrrryyyyrrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C33" type="actuated" programID="actuado_aj" offset="30">
+        <param key="max-gap" value="1.5"/>
+        <param key="coordinated" value="true"/>
+        <param key="cycleTime" value="47"/>
+        <phase duration="27" minDur="10" maxDur="60" state="rrrrGGGgrrrrGGGg" earliestEnd="44"/>
+        <phase duration="3" state="rrrryyyyrrrryyyy"/>
+        <phase duration="14" minDur="10" maxDur="60" state="GGGgrrrrGGGgrrrr"/>
+        <phase duration="3" state="yyyyrrrryyyyrrrr"/>
+    </tlLogic>
+</additional>

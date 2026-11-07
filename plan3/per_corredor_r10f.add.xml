@@ -1,0 +1,18 @@
+<additional>
+    <!-- Fijo fino (barrer_fino.py, plan3; regla del prerregistro, seccion 5) para per_corredor, llegadas
+         aleatorias: 256 planes con las semillas 2001-2010; las 10 mejores con 2001-2030; ganador fragil,
+         desempate de los 3 primeros con 2001-2030. Ganador: avenida 27 s, transversal 11 s, ciclo 44 s,
+         desfases 0/25; retraso total 43.69 s (sd 9.21, peor 63.92), timeLoss 41.95 s sobre 2001-2030. -->
+    <tlLogic id="semaforo_C1" type="static" programID="fijo" offset="0">
+        <phase duration="11" state="GGgrrrGGgrrr"/>
+        <phase duration="3" state="yyyrrryyyrrr"/>
+        <phase duration="27" state="rrrGGgrrrGGg"/>
+        <phase duration="3" state="rrryyyrrryyy"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C2" type="static" programID="fijo" offset="25">
+        <phase duration="11" state="GGgrrrGGgrrr"/>
+        <phase duration="3" state="yyyrrryyyrrr"/>
+        <phase duration="27" state="rrrGGgrrrGGg"/>
+        <phase duration="3" state="rrryyyrrryyy"/>
+    </tlLogic>
+</additional>

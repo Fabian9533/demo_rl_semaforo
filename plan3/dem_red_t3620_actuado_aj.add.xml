@@ -1,0 +1,27 @@
+<additional>
+    <!-- Actuado ajustado (actuado.py, plan3; prerregistro, seccion 5) para dem_red_t3620, llegadas
+         regulares: descenso por coordenadas en cadena con 2001-2003 (22 variantes) y las finalistas con
+         2001-2010. Ganadora act_mg1_dg2_jt-1_av30_tr60: retraso total 103.7 s (sd 1.52), timeLoss 60.41
+         s. -->
+    <tlLogic id="semaforo_C1" type="actuated" programID="actuado_aj" offset="0">
+        <param key="max-gap" value="1"/>
+        <phase duration="20" minDur="10" maxDur="30" state="rrrGGGgrrrGGGg"/>
+        <phase duration="3" state="rrryyyyrrryyyy"/>
+        <phase duration="20" minDur="10" maxDur="60" state="GGgrrrrGGgrrrr"/>
+        <phase duration="3" state="yyyrrrryyyrrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C2" type="actuated" programID="actuado_aj" offset="0">
+        <param key="max-gap" value="1"/>
+        <phase duration="20" minDur="10" maxDur="30" state="rrrGGGgrrrGGGg"/>
+        <phase duration="3" state="rrryyyyrrryyyy"/>
+        <phase duration="20" minDur="10" maxDur="60" state="GGgrrrrGGgrrrr"/>
+        <phase duration="3" state="yyyrrrryyyrrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C3" type="actuated" programID="actuado_aj" offset="0">
+        <param key="max-gap" value="1"/>
+        <phase duration="20" minDur="10" maxDur="30" state="rrrGGGgrrrGGGg"/>
+        <phase duration="3" state="rrryyyyrrryyyy"/>
+        <phase duration="20" minDur="10" maxDur="60" state="GGgrrrrGGgrrrr"/>
+        <phase duration="3" state="yyyrrrryyyrrrr"/>
+    </tlLogic>
+</additional>

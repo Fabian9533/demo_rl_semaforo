@@ -1,0 +1,61 @@
+<additional>
+    <!-- Fijo fino (barrer_fino.py, plan3; regla del prerregistro, seccion 5) para dem_malla3_t6525,
+         llegadas regulares: 302 planes con las semillas 2001-2003; las 10 mejores con 2001-2010; ganador
+         fragil, desempate de los 3 primeros con 2001-2030. Ganador: avenida 27 s, transversal 14 s,
+         ciclo 47 s, desfases 0/23/0/23/0/23/0/23/0 (ajedrez); retraso total 24.06 s (sd 0.24, peor
+         24.64), timeLoss 23.36 s sobre 2001-2030. -->
+    <tlLogic id="semaforo_C11" type="static" programID="fijo" offset="0">
+        <phase duration="27" state="rrrrGGGgrrrrGGGg"/>
+        <phase duration="3" state="rrrryyyyrrrryyyy"/>
+        <phase duration="14" state="GGGgrrrrGGGgrrrr"/>
+        <phase duration="3" state="yyyyrrrryyyyrrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C12" type="static" programID="fijo" offset="23">
+        <phase duration="27" state="rrrrGGGgrrrrGGGg"/>
+        <phase duration="3" state="rrrryyyyrrrryyyy"/>
+        <phase duration="14" state="GGGgrrrrGGGgrrrr"/>
+        <phase duration="3" state="yyyyrrrryyyyrrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C13" type="static" programID="fijo" offset="0">
+        <phase duration="27" state="rrrrGGGgrrrrGGGg"/>
+        <phase duration="3" state="rrrryyyyrrrryyyy"/>
+        <phase duration="14" state="GGGgrrrrGGGgrrrr"/>
+        <phase duration="3" state="yyyyrrrryyyyrrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C21" type="static" programID="fijo" offset="23">
+        <phase duration="27" state="rrrrGGGgrrrrGGGg"/>
+        <phase duration="3" state="rrrryyyyrrrryyyy"/>
+        <phase duration="14" state="GGGgrrrrGGGgrrrr"/>
+        <phase duration="3" state="yyyyrrrryyyyrrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C22" type="static" programID="fijo" offset="0">
+        <phase duration="27" state="rrrrGGGgrrrrGGGg"/>
+        <phase duration="3" state="rrrryyyyrrrryyyy"/>
+        <phase duration="14" state="GGGgrrrrGGGgrrrr"/>
+        <phase duration="3" state="yyyyrrrryyyyrrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C23" type="static" programID="fijo" offset="23">
+        <phase duration="27" state="rrrrGGGgrrrrGGGg"/>
+        <phase duration="3" state="rrrryyyyrrrryyyy"/>
+        <phase duration="14" state="GGGgrrrrGGGgrrrr"/>
+        <phase duration="3" state="yyyyrrrryyyyrrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C31" type="static" programID="fijo" offset="0">
+        <phase duration="27" state="rrrrGGGgrrrrGGGg"/>
+        <phase duration="3" state="rrrryyyyrrrryyyy"/>
+        <phase duration="14" state="GGGgrrrrGGGgrrrr"/>
+        <phase duration="3" state="yyyyrrrryyyyrrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C32" type="static" programID="fijo" offset="23">
+        <phase duration="27" state="rrrrGGGgrrrrGGGg"/>
+        <phase duration="3" state="rrrryyyyrrrryyyy"/>
+        <phase duration="14" state="GGGgrrrrGGGgrrrr"/>
+        <phase duration="3" state="yyyyrrrryyyyrrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C33" type="static" programID="fijo" offset="0">
+        <phase duration="27" state="rrrrGGGgrrrrGGGg"/>
+        <phase duration="3" state="rrrryyyyrrrryyyy"/>
+        <phase duration="14" state="GGGgrrrrGGGgrrrr"/>
+        <phase duration="3" state="yyyyrrrryyyyrrrr"/>
+    </tlLogic>
+</additional>

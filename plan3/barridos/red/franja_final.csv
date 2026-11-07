@@ -1,0 +1,4 @@
+etapa,clave,programas,retraso_total_prom,timeloss_prom,retraso_insercion_prom,espera_prom,paradas_prom,throughput,co2_prom,retraso_total_sd,timeloss_sd,semillas,mediana,peor,trabadas,total_p1,noins_p1,total_p2,noins_p2
+final,fr_v10_t10_o0_0_24__v10_t10_o0_2_1,0:v10_t10_o0_0_24 | 1800:v10_t10_o0_2_1,19.78,19.43,0.35,4.5,0.6,2095.0,252.74,0.36,0.36,2001-2010,19.71,20.54,0,20.69,0.0,18.88,0.0
+final,fr_v10_t10_o0_0_24__v10_t10_o0_2_2,0:v10_t10_o0_0_24 | 1800:v10_t10_o0_2_2,19.81,19.45,0.35,4.53,0.6,2094.8,252.78,0.37,0.37,2001-2010,19.69,20.58,0,20.7,0.0,18.92,0.0
+final,fr_v10_t10_o0_1_25__v10_t10_o0_2_1,0:v10_t10_o0_1_25 | 1800:v10_t10_o0_2_1,19.85,19.5,0.35,4.51,0.6,2095.4,252.89,0.37,0.37,2001-2010,19.75,20.53,0,20.82,0.0,18.88,0.0

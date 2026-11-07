@@ -1,0 +1,81 @@
+{
+ "escenario": "poi_malla3",
+ "llegadas": "aleatorias",
+ "archivo": "poi_malla3_m5f.add.xml",
+ "sha256": "4c4bda228ff9319366abd1b901614b52e1439692e7829decaef1f1fcbdd6eb87",
+ "huella": "38b0f9bd24f3",
+ "cortes": [
+  1800
+ ],
+ "verde": 10,
+ "verde_transversal": 10,
+ "offsets": [
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0
+ ],
+ "esquema": "cero",
+ "ciclo": 26,
+ "clave": "v10_t10_o0_0_0_0_0_0_0_0_0",
+ "ids": [
+  "semaforo_C11",
+  "semaforo_C12",
+  "semaforo_C13",
+  "semaforo_C21",
+  "semaforo_C22",
+  "semaforo_C23",
+  "semaforo_C31",
+  "semaforo_C32",
+  "semaforo_C33"
+ ],
+ "fases_avenida": [
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0
+ ],
+ "retraso_total_prom": 22.56,
+ "retraso_total_sd": 0.28,
+ "timeloss_prom": 21.95,
+ "mediana": 22.62,
+ "peor": 22.98,
+ "trabadas": 0,
+ "semillas": "2001-2030",
+ "semillas_regla": {
+  "barrido": "2001-2010",
+  "desempate": "2001-2030",
+  "fragil": "2001-2030"
+ },
+ "traza": {
+  "dos_primeros_a_2pct": true,
+  "semillas_trabadas_ganador": 0,
+  "fragil": true,
+  "semillas_desempate": "2001-2030",
+  "desempate_fragil": [
+   "v10_t10_o0_0_0_0_0_0_0_0_0",
+   "v25_t15_o0_23_0_23_0_23_0_23_0",
+   "v30_t10_o0_23_0_23_0_23_0_23_0"
+  ],
+  "semillas_fragil": "2001-2030"
+ },
+ "registro": {
+  "llegadas": "aleatorias",
+  "semillas": {
+   "barrido": "2001-2010",
+   "desempate": "2001-2030",
+   "fragil": "2001-2030"
+  },
+  "prueba": []
+ }
+}

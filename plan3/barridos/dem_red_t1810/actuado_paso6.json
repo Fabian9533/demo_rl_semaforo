@@ -1,0 +1,129 @@
+{
+ "escenario": "dem_red_t1810",
+ "huella": "e4bdef29d057",
+ "paso": 6,
+ "coordenada": "familia",
+ "semillas": "2001-2003",
+ "partida": {
+  "tipo": "actuated",
+  "max-gap": 3.0,
+  "detector-gap": 4.0,
+  "jam-threshold": -1,
+  "maxdur_av": 30,
+  "maxdur_tr": 60,
+  "coordinado": false
+ },
+ "variantes": [
+  {
+   "tipo": "actuated",
+   "max-gap": 3.0,
+   "detector-gap": 4.0,
+   "jam-threshold": -1,
+   "maxdur_av": 30,
+   "maxdur_tr": 60,
+   "coordinado": false
+  },
+  {
+   "maxdur_av": 30,
+   "maxdur_tr": 60,
+   "tipo": "delay_based",
+   "detectorRange": 50,
+   "minTimeLoss": 1,
+   "coordinado": false
+  },
+  {
+   "maxdur_av": 30,
+   "maxdur_tr": 60,
+   "tipo": "delay_based",
+   "detectorRange": 50,
+   "minTimeLoss": 3,
+   "coordinado": false
+  },
+  {
+   "maxdur_av": 30,
+   "maxdur_tr": 60,
+   "tipo": "delay_based",
+   "detectorRange": 100,
+   "minTimeLoss": 1,
+   "coordinado": false
+  },
+  {
+   "maxdur_av": 30,
+   "maxdur_tr": 60,
+   "tipo": "delay_based",
+   "detectorRange": 100,
+   "minTimeLoss": 3,
+   "coordinado": false
+  },
+  {
+   "maxdur_av": 30,
+   "maxdur_tr": 60,
+   "tipo": "delay_based",
+   "detectorRange": 200,
+   "minTimeLoss": 1,
+   "coordinado": false
+  },
+  {
+   "maxdur_av": 30,
+   "maxdur_tr": 60,
+   "tipo": "delay_based",
+   "detectorRange": 200,
+   "minTimeLoss": 3,
+   "coordinado": false
+  },
+  {
+   "tipo": "actuated",
+   "max-gap": 3.0,
+   "detector-gap": 4.0,
+   "jam-threshold": -1,
+   "maxdur_av": 30,
+   "maxdur_tr": 60,
+   "coordinado": true,
+   "ciclo": 26,
+   "offsets": [
+    0,
+    1,
+    25
+   ],
+   "verde": 10,
+   "verde_transversal": 10,
+   "fino_sha256": "dd1bca88d36946656b3496131c0b67bb43aa6fd110e2b93c44de3d50a77cad30"
+  },
+  {
+   "tipo": "actuated",
+   "max-gap": 3.0,
+   "detector-gap": 4.0,
+   "jam-threshold": -1,
+   "maxdur_av": 30,
+   "maxdur_tr": 60,
+   "coordinado": true,
+   "ciclo": 26,
+   "offsets": [
+    0,
+    1,
+    25
+   ],
+   "verde": 10,
+   "verde_transversal": 10,
+   "fino_sha256": "dd1bca88d36946656b3496131c0b67bb43aa6fd110e2b93c44de3d50a77cad30",
+   "fin_fijo": true
+  }
+ ],
+ "elegida": {
+  "maxdur_av": 30,
+  "maxdur_tr": 60,
+  "tipo": "delay_based",
+  "detectorRange": 50,
+  "minTimeLoss": 1,
+  "coordinado": false
+ },
+ "registro": {
+  "llegadas": "regulares",
+  "semillas": {
+   "barrido": "2001-2003",
+   "desempate": "2001-2010",
+   "fragil": "2001-2030"
+  },
+  "prueba": []
+ }
+}

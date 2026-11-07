@@ -1,0 +1,106 @@
+{
+ "escenario": "dem_malla3_t6525",
+ "llegadas": "regulares",
+ "archivo": "dem_malla3_t6525_r10g.add.xml",
+ "sha256": "06f185eadab585647b1ae51c05df337319d12e471937d1c23aeba8098c0e71ac",
+ "huella": "ead8d48da185",
+ "cortes": [
+  1800
+ ],
+ "verde": 10,
+ "verde_transversal": 10,
+ "offsets": [
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0
+ ],
+ "esquema": "cero",
+ "ciclo": 26,
+ "clave": "v10_t10_o0_0_0_0_0_0_0_0_0",
+ "ids": [
+  "semaforo_C11",
+  "semaforo_C12",
+  "semaforo_C13",
+  "semaforo_C21",
+  "semaforo_C22",
+  "semaforo_C23",
+  "semaforo_C31",
+  "semaforo_C32",
+  "semaforo_C33"
+ ],
+ "fases_avenida": [
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0
+ ],
+ "retraso_total_prom": 23.93,
+ "retraso_total_sd": 0.07,
+ "timeloss_prom": 23.24,
+ "mediana": 23.92,
+ "peor": 24.01,
+ "trabadas": 0,
+ "semillas": "2001-2003",
+ "semillas_regla": {
+  "barrido": "2001-2003",
+  "desempate": "2001-2010",
+  "fragil": "2001-2030"
+ },
+ "traza": {
+  "ejes": [
+   [
+    10,
+    15,
+    20,
+    25,
+    30,
+    35
+   ],
+   [
+    10,
+    15,
+    20,
+    25
+   ]
+  ],
+  "planes": 72
+ },
+ "registro": {
+  "llegadas": "regulares",
+  "semillas": {
+   "barrido": "2001-2003",
+   "desempate": "2001-2010",
+   "fragil": "2001-2030"
+  },
+  "ejes_iniciales": [
+   [
+    10,
+    15,
+    20,
+    25,
+    30,
+    35
+   ],
+   [
+    10,
+    15,
+    20,
+    25
+   ]
+  ],
+  "desplegado": [],
+  "limite": null,
+  "prueba": []
+ }
+}

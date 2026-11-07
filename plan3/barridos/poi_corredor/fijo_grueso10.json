@@ -1,0 +1,90 @@
+{
+ "escenario": "poi_corredor",
+ "llegadas": "aleatorias",
+ "archivo": "poi_corredor_r10g.add.xml",
+ "sha256": "47674dcb84d924792ebd340176c995e82f8f967f071df591e1bcda7b24b16d90",
+ "huella": "9fb6c33155b8",
+ "cortes": [
+  1800
+ ],
+ "verde": 20,
+ "verde_transversal": 10,
+ "offsets": [
+  0,
+  20
+ ],
+ "esquema": "",
+ "ciclo": 36,
+ "clave": "v20_t10_o0_20",
+ "ids": [
+  "semaforo_C1",
+  "semaforo_C2"
+ ],
+ "fases_avenida": [
+  2,
+  2
+ ],
+ "retraso_total_prom": 30.79,
+ "retraso_total_sd": 3.36,
+ "timeloss_prom": 29.32,
+ "mediana": 30.01,
+ "peor": 39.16,
+ "trabadas": 1,
+ "semillas": "2001-2010",
+ "semillas_regla": {
+  "barrido": "2001-2010",
+  "desempate": "2001-2030",
+  "fragil": "2001-2030"
+ },
+ "traza": {
+  "ejes": [
+   [
+    10,
+    12,
+    15,
+    18,
+    20,
+    25,
+    30
+   ],
+   [
+    10,
+    15,
+    20
+   ]
+  ],
+  "planes": 170
+ },
+ "registro": {
+  "llegadas": "aleatorias",
+  "semillas": {
+   "barrido": "2001-2010",
+   "desempate": "2001-2030",
+   "fragil": "2001-2030"
+  },
+  "ejes_iniciales": [
+   [
+    10,
+    12,
+    15,
+    18,
+    20,
+    25,
+    30
+   ],
+   [
+    10,
+    15,
+    20
+   ]
+  ],
+  "desplegado": [
+   [
+    20,
+    10
+   ]
+  ],
+  "limite": null,
+  "prueba": []
+ }
+}

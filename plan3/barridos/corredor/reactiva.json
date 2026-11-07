@@ -1,0 +1,27 @@
+{
+ "escenario": "corredor",
+ "llegadas": "regulares",
+ "huella": "24e7eff388e4",
+ "familia": "reactiva",
+ "regla": "reactiva_d25",
+ "finalistas": [
+  "reactiva_d25",
+  "reactiva_d35",
+  "reactiva_d15"
+ ],
+ "semillas_barrido": "2001-2003",
+ "retraso_total_prom": 22.87,
+ "retraso_total_sd": 0.47,
+ "timeloss_prom": 22.5,
+ "mediana": 22.87,
+ "peor": 23.56,
+ "semillas": "2001-2010",
+ "registro": {
+  "llegadas": "regulares",
+  "semillas": {
+   "barrido": "2001-2003",
+   "final": "2001-2010"
+  },
+  "prueba": []
+ }
+}

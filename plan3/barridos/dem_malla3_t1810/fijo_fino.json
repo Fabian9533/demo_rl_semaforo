@@ -1,0 +1,81 @@
+{
+ "escenario": "dem_malla3_t1810",
+ "llegadas": "regulares",
+ "archivo": "dem_malla3_t1810_r10f.add.xml",
+ "sha256": "1b03c426fd6fc852d9fbcc552d8064b63d1606171b0b9e3206c606cbf0aa741f",
+ "huella": "3f37484afcf3",
+ "cortes": [
+  1800
+ ],
+ "verde": 32,
+ "verde_transversal": 10,
+ "offsets": [
+  0,
+  24,
+  0,
+  24,
+  0,
+  24,
+  0,
+  24,
+  0
+ ],
+ "esquema": "ajedrez",
+ "ciclo": 48,
+ "clave": "v32_t10_o0_24_0_24_0_24_0_24_0",
+ "ids": [
+  "semaforo_C11",
+  "semaforo_C12",
+  "semaforo_C13",
+  "semaforo_C21",
+  "semaforo_C22",
+  "semaforo_C23",
+  "semaforo_C31",
+  "semaforo_C32",
+  "semaforo_C33"
+ ],
+ "fases_avenida": [
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0
+ ],
+ "retraso_total_prom": 19.96,
+ "retraso_total_sd": 0.2,
+ "timeloss_prom": 19.36,
+ "mediana": 19.91,
+ "peor": 20.43,
+ "trabadas": 0,
+ "semillas": "2001-2030",
+ "semillas_regla": {
+  "barrido": "2001-2003",
+  "desempate": "2001-2010",
+  "fragil": "2001-2030"
+ },
+ "traza": {
+  "dos_primeros_a_2pct": true,
+  "semillas_trabadas_ganador": 0,
+  "fragil": true,
+  "semillas_desempate": "2001-2010",
+  "desempate_fragil": [
+   "v32_t10_o0_24_0_24_0_24_0_24_0",
+   "v29_t13_o0_24_0_24_0_24_0_24_0",
+   "v29_t12_o0_23_0_23_0_23_0_23_0"
+  ],
+  "semillas_fragil": "2001-2030"
+ },
+ "registro": {
+  "llegadas": "regulares",
+  "semillas": {
+   "barrido": "2001-2003",
+   "desempate": "2001-2010",
+   "fragil": "2001-2030"
+  },
+  "prueba": []
+ }
+}

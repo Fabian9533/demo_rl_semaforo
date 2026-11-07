@@ -1,0 +1,6 @@
+etapa,regla,semillas,retraso_total_prom,timeloss_prom,retraso_insercion_prom,espera_prom,paradas_prom,throughput,co2_prom,no_insertados,no_terminados,vehiculos,cambios_fase,decisiones,decisiones_libres,retraso_total_sd,mediana,peor
+final_reactiva,reactiva_d50,2001-2030,24.79,23.5,1.29,6.55,0.76,1761.93,462.03,0.0,0.0,1816.53,635.07,1879.63,1237.23,0.69,24.67,27.03
+final_reactiva,reactiva_d35,2001-2030,25.04,23.75,1.29,6.34,0.82,1761.77,466.15,0.0,0.0,1816.53,707.53,1838.03,1125.23,0.74,25.02,26.48
+final_reactiva,reactiva_d25,2001-2030,25.32,24.04,1.29,6.31,0.86,1761.97,469.5,0.0,0.0,1816.53,751.47,1812.27,1056.07,0.79,25.22,27.58
+final_reactiva,reactiva_d70,2001-2030,25.43,24.14,1.29,7.59,0.69,1761.3,458.5,0.0,0.0,1816.53,534.93,1937.93,1385.97,0.71,25.35,27.04
+final_reactiva,reactiva_d15,2001-2030,25.97,24.68,1.29,6.59,0.93,1761.6,473.21,0.0,0.0,1816.53,796.4,1785.9,984.5,0.9,25.96,28.19

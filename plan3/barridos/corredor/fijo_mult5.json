@@ -1,0 +1,60 @@
+{
+ "escenario": "corredor",
+ "llegadas": "regulares",
+ "archivo": "corredor_m5f.add.xml",
+ "sha256": "ea1182d267b03c9ba5ce7ac5e3ad3ef3a94b883762f17705a1fb9c97a8e404e3",
+ "huella": "d290ac21a9c8",
+ "cortes": [
+  1800
+ ],
+ "verde": 25,
+ "verde_transversal": 10,
+ "offsets": [
+  0,
+  24
+ ],
+ "esquema": "",
+ "ciclo": 41,
+ "clave": "v25_t10_o0_24",
+ "ids": [
+  "semaforo_C1",
+  "semaforo_C2"
+ ],
+ "fases_avenida": [
+  2,
+  2
+ ],
+ "retraso_total_prom": 21.13,
+ "retraso_total_sd": 0.38,
+ "timeloss_prom": 20.76,
+ "mediana": 21.15,
+ "peor": 21.84,
+ "trabadas": 0,
+ "semillas": "2001-2030",
+ "semillas_regla": {
+  "barrido": "2001-2003",
+  "desempate": "2001-2010",
+  "fragil": "2001-2030"
+ },
+ "traza": {
+  "dos_primeros_a_2pct": true,
+  "semillas_trabadas_ganador": 0,
+  "fragil": true,
+  "semillas_desempate": "2001-2010",
+  "desempate_fragil": [
+   "v25_t10_o0_24",
+   "v25_t10_o0_22",
+   "v20_t10_o0_15"
+  ],
+  "semillas_fragil": "2001-2030"
+ },
+ "registro": {
+  "llegadas": "regulares",
+  "semillas": {
+   "barrido": "2001-2003",
+   "desempate": "2001-2010",
+   "fragil": "2001-2030"
+  },
+  "prueba": []
+ }
+}

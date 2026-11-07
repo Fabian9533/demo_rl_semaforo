@@ -1,0 +1,19 @@
+<additional>
+    <!-- Fijo desde 10 s (ganador de la etapa gruesa de barrer_fino.py, plan3) para dem_corredor_t2715:
+         rejilla de barrer_fijo (avenida 10/15/20/25/30/35 s x transversal 10/15/20/25 s x desfase del
+         segundo cruce en 0, 10, 20, 25 y 30 s); 119 planes con las semillas 2001-2003 (regulares).
+         Ganador: avenida 25 s, transversal 10 s, ciclo 41 s, desfases 0/0; retraso total 46.73 s (sd
+         0.58), timeLoss 46.1 s. -->
+    <tlLogic id="semaforo_C1" type="static" programID="fijo" offset="0">
+        <phase duration="10" state="GGgrrrGGgrrr"/>
+        <phase duration="3" state="yyyrrryyyrrr"/>
+        <phase duration="25" state="rrrGGgrrrGGg"/>
+        <phase duration="3" state="rrryyyrrryyy"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C2" type="static" programID="fijo" offset="0">
+        <phase duration="10" state="GGgrrrGGgrrr"/>
+        <phase duration="3" state="yyyrrryyyrrr"/>
+        <phase duration="25" state="rrrGGgrrrGGg"/>
+        <phase duration="3" state="rrryyyrrryyy"/>
+    </tlLogic>
+</additional>

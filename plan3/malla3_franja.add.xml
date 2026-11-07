@@ -1,0 +1,151 @@
+<additional>
+    <!-- Fijo por franja (franja.py, plan3; prerregistro, seccion 5) para malla3, llegadas regulares: los
+         3 mejores planes de cada media hora segun el puntaje por periodo de barrer_fino (2001-2003), 9
+         pares con WAUT por semaforo en su instante limpio; las 3 mejores con 2001-2010. Ganador:
+         0:v28_t13_o0_23_0_23_0_23_0_23_0_ajedrez | 1800:v28_t13_o0_23_0_23_0_23_0_23_0_ajedrez; retraso
+         total 21.09 s (sd 0.15), timeLoss 20.62 s sobre 2001-2010. -->
+    <tlLogic id="semaforo_C11" type="static" programID="franja1" offset="0">
+        <phase duration="28" state="rrrrGGGgrrrrGGGg"/>
+        <phase duration="3" state="rrrryyyyrrrryyyy"/>
+        <phase duration="13" state="GGGgrrrrGGGgrrrr"/>
+        <phase duration="3" state="yyyyrrrryyyyrrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C12" type="static" programID="franja1" offset="23">
+        <phase duration="28" state="rrrrGGGgrrrrGGGg"/>
+        <phase duration="3" state="rrrryyyyrrrryyyy"/>
+        <phase duration="13" state="GGGgrrrrGGGgrrrr"/>
+        <phase duration="3" state="yyyyrrrryyyyrrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C13" type="static" programID="franja1" offset="0">
+        <phase duration="28" state="rrrrGGGgrrrrGGGg"/>
+        <phase duration="3" state="rrrryyyyrrrryyyy"/>
+        <phase duration="13" state="GGGgrrrrGGGgrrrr"/>
+        <phase duration="3" state="yyyyrrrryyyyrrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C21" type="static" programID="franja1" offset="23">
+        <phase duration="28" state="rrrrGGGgrrrrGGGg"/>
+        <phase duration="3" state="rrrryyyyrrrryyyy"/>
+        <phase duration="13" state="GGGgrrrrGGGgrrrr"/>
+        <phase duration="3" state="yyyyrrrryyyyrrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C22" type="static" programID="franja1" offset="0">
+        <phase duration="28" state="rrrrGGGgrrrrGGGg"/>
+        <phase duration="3" state="rrrryyyyrrrryyyy"/>
+        <phase duration="13" state="GGGgrrrrGGGgrrrr"/>
+        <phase duration="3" state="yyyyrrrryyyyrrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C23" type="static" programID="franja1" offset="23">
+        <phase duration="28" state="rrrrGGGgrrrrGGGg"/>
+        <phase duration="3" state="rrrryyyyrrrryyyy"/>
+        <phase duration="13" state="GGGgrrrrGGGgrrrr"/>
+        <phase duration="3" state="yyyyrrrryyyyrrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C31" type="static" programID="franja1" offset="0">
+        <phase duration="28" state="rrrrGGGgrrrrGGGg"/>
+        <phase duration="3" state="rrrryyyyrrrryyyy"/>
+        <phase duration="13" state="GGGgrrrrGGGgrrrr"/>
+        <phase duration="3" state="yyyyrrrryyyyrrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C32" type="static" programID="franja1" offset="23">
+        <phase duration="28" state="rrrrGGGgrrrrGGGg"/>
+        <phase duration="3" state="rrrryyyyrrrryyyy"/>
+        <phase duration="13" state="GGGgrrrrGGGgrrrr"/>
+        <phase duration="3" state="yyyyrrrryyyyrrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C33" type="static" programID="franja1" offset="0">
+        <phase duration="28" state="rrrrGGGgrrrrGGGg"/>
+        <phase duration="3" state="rrrryyyyrrrryyyy"/>
+        <phase duration="13" state="GGGgrrrrGGGgrrrr"/>
+        <phase duration="3" state="yyyyrrrryyyyrrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C11" type="static" programID="franja2" offset="0">
+        <phase duration="28" state="rrrrGGGgrrrrGGGg"/>
+        <phase duration="3" state="rrrryyyyrrrryyyy"/>
+        <phase duration="13" state="GGGgrrrrGGGgrrrr"/>
+        <phase duration="3" state="yyyyrrrryyyyrrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C12" type="static" programID="franja2" offset="23">
+        <phase duration="28" state="rrrrGGGgrrrrGGGg"/>
+        <phase duration="3" state="rrrryyyyrrrryyyy"/>
+        <phase duration="13" state="GGGgrrrrGGGgrrrr"/>
+        <phase duration="3" state="yyyyrrrryyyyrrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C13" type="static" programID="franja2" offset="0">
+        <phase duration="28" state="rrrrGGGgrrrrGGGg"/>
+        <phase duration="3" state="rrrryyyyrrrryyyy"/>
+        <phase duration="13" state="GGGgrrrrGGGgrrrr"/>
+        <phase duration="3" state="yyyyrrrryyyyrrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C21" type="static" programID="franja2" offset="23">
+        <phase duration="28" state="rrrrGGGgrrrrGGGg"/>
+        <phase duration="3" state="rrrryyyyrrrryyyy"/>
+        <phase duration="13" state="GGGgrrrrGGGgrrrr"/>
+        <phase duration="3" state="yyyyrrrryyyyrrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C22" type="static" programID="franja2" offset="0">
+        <phase duration="28" state="rrrrGGGgrrrrGGGg"/>
+        <phase duration="3" state="rrrryyyyrrrryyyy"/>
+        <phase duration="13" state="GGGgrrrrGGGgrrrr"/>
+        <phase duration="3" state="yyyyrrrryyyyrrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C23" type="static" programID="franja2" offset="23">
+        <phase duration="28" state="rrrrGGGgrrrrGGGg"/>
+        <phase duration="3" state="rrrryyyyrrrryyyy"/>
+        <phase duration="13" state="GGGgrrrrGGGgrrrr"/>
+        <phase duration="3" state="yyyyrrrryyyyrrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C31" type="static" programID="franja2" offset="0">
+        <phase duration="28" state="rrrrGGGgrrrrGGGg"/>
+        <phase duration="3" state="rrrryyyyrrrryyyy"/>
+        <phase duration="13" state="GGGgrrrrGGGgrrrr"/>
+        <phase duration="3" state="yyyyrrrryyyyrrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C32" type="static" programID="franja2" offset="23">
+        <phase duration="28" state="rrrrGGGgrrrrGGGg"/>
+        <phase duration="3" state="rrrryyyyrrrryyyy"/>
+        <phase duration="13" state="GGGgrrrrGGGgrrrr"/>
+        <phase duration="3" state="yyyyrrrryyyyrrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C33" type="static" programID="franja2" offset="0">
+        <phase duration="28" state="rrrrGGGgrrrrGGGg"/>
+        <phase duration="3" state="rrrryyyyrrrryyyy"/>
+        <phase duration="13" state="GGGgrrrrGGGgrrrr"/>
+        <phase duration="3" state="yyyyrrrryyyyrrrr"/>
+    </tlLogic>
+    <WAUT refTime="0" id="franja_semaforo_C11" startProg="franja1">
+        <wautSwitch time="1800" to="franja2"/>
+    </WAUT>
+    <wautJunction wautID="franja_semaforo_C11" junctionID="semaforo_C11"/>
+    <WAUT refTime="0" id="franja_semaforo_C12" startProg="franja1">
+        <wautSwitch time="1800" to="franja2"/>
+    </WAUT>
+    <wautJunction wautID="franja_semaforo_C12" junctionID="semaforo_C12"/>
+    <WAUT refTime="0" id="franja_semaforo_C13" startProg="franja1">
+        <wautSwitch time="1800" to="franja2"/>
+    </WAUT>
+    <wautJunction wautID="franja_semaforo_C13" junctionID="semaforo_C13"/>
+    <WAUT refTime="0" id="franja_semaforo_C21" startProg="franja1">
+        <wautSwitch time="1800" to="franja2"/>
+    </WAUT>
+    <wautJunction wautID="franja_semaforo_C21" junctionID="semaforo_C21"/>
+    <WAUT refTime="0" id="franja_semaforo_C22" startProg="franja1">
+        <wautSwitch time="1800" to="franja2"/>
+    </WAUT>
+    <wautJunction wautID="franja_semaforo_C22" junctionID="semaforo_C22"/>
+    <WAUT refTime="0" id="franja_semaforo_C23" startProg="franja1">
+        <wautSwitch time="1800" to="franja2"/>
+    </WAUT>
+    <wautJunction wautID="franja_semaforo_C23" junctionID="semaforo_C23"/>
+    <WAUT refTime="0" id="franja_semaforo_C31" startProg="franja1">
+        <wautSwitch time="1800" to="franja2"/>
+    </WAUT>
+    <wautJunction wautID="franja_semaforo_C31" junctionID="semaforo_C31"/>
+    <WAUT refTime="0" id="franja_semaforo_C32" startProg="franja1">
+        <wautSwitch time="1800" to="franja2"/>
+    </WAUT>
+    <wautJunction wautID="franja_semaforo_C32" junctionID="semaforo_C32"/>
+    <WAUT refTime="0" id="franja_semaforo_C33" startProg="franja1">
+        <wautSwitch time="1800" to="franja2"/>
+    </WAUT>
+    <wautJunction wautID="franja_semaforo_C33" junctionID="semaforo_C33"/>
+</additional>

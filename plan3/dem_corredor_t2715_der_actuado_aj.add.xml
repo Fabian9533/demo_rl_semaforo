@@ -1,0 +1,20 @@
+<additional>
+    <!-- Actuado ajustado (actuado.py, plan3; prerregistro, seccion 5) para dem_corredor_t2715_der,
+         llegadas regulares: descenso por coordenadas en cadena con 2001-2003 (22 variantes) y las
+         finalistas con 2001-2010. Ganadora act_mg2_dg2_jt-1_av45_tr20: retraso total 26.67 s (sd 0.39),
+         timeLoss 26.03 s. -->
+    <tlLogic id="semaforo_C1" type="actuated" programID="actuado_aj" offset="0">
+        <param key="max-gap" value="2"/>
+        <phase duration="25" minDur="10" maxDur="20" state="GGgrrrGGgrrr"/>
+        <phase duration="3" state="yyyrrryyyrrr"/>
+        <phase duration="25" minDur="10" maxDur="45" state="rrrGGgrrrGGg"/>
+        <phase duration="3" state="rrryyyrrryyy"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C2" type="actuated" programID="actuado_aj" offset="0">
+        <param key="max-gap" value="2"/>
+        <phase duration="25" minDur="10" maxDur="20" state="GGgrrrGGgrrr"/>
+        <phase duration="3" state="yyyrrryyyrrr"/>
+        <phase duration="25" minDur="10" maxDur="45" state="rrrGGgrrrGGg"/>
+        <phase duration="3" state="rrryyyrrryyy"/>
+    </tlLogic>
+</additional>

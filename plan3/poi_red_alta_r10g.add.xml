@@ -1,0 +1,25 @@
+<additional>
+    <!-- Fijo desde 10 s (ganador de la etapa gruesa de barrer_fino.py, plan3) para poi_red_alta: rejilla
+         de barrer_fijo (avenida 10/15/20/25/30/35 s x transversal 10/15/20 s x desfase del segundo cruce
+         de 0 a 40 s cada 5 s y 23 s; tercero en 0, el del segundo o el doble); 471 planes con las
+         semillas 2001-2010 (aleatorias). Ganador: avenida 10 s, transversal 10 s, ciclo 26 s, desfases
+         0/25/25; retraso total 29.44 s (sd 1.97), timeLoss 27.34 s. -->
+    <tlLogic id="semaforo_C1" type="static" programID="fijo" offset="0">
+        <phase duration="10" state="rrrGGGgrrrGGGg"/>
+        <phase duration="3" state="rrryyyyrrryyyy"/>
+        <phase duration="10" state="GGgrrrrGGgrrrr"/>
+        <phase duration="3" state="yyyrrrryyyrrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C2" type="static" programID="fijo" offset="25">
+        <phase duration="10" state="rrrGGGgrrrGGGg"/>
+        <phase duration="3" state="rrryyyyrrryyyy"/>
+        <phase duration="10" state="GGgrrrrGGgrrrr"/>
+        <phase duration="3" state="yyyrrrryyyrrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C3" type="static" programID="fijo" offset="25">
+        <phase duration="10" state="rrrGGGgrrrGGGg"/>
+        <phase duration="3" state="rrryyyyrrryyyy"/>
+        <phase duration="10" state="GGgrrrrGGgrrrr"/>
+        <phase duration="3" state="yyyrrrryyyrrrr"/>
+    </tlLogic>
+</additional>

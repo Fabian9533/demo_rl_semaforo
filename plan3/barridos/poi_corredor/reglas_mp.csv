@@ -1,0 +1,5 @@
+etapa,regla,semillas,retraso_total_prom,timeloss_prom,retraso_insercion_prom,espera_prom,paradas_prom,throughput,co2_prom,no_insertados,no_terminados,vehiculos,cambios_fase,decisiones,decisiones_libres,retraso_total_sd,mediana,peor
+mp,mp_c60,2001-2003,31.79,30.25,1.54,13.31,1.05,1767.33,235.6,0.0,0.0,1824.67,329.0,1291.67,960.0,1.92,32.25,33.44
+mp,mp,2001-2003,34.35,32.81,1.53,16.12,1.05,1768.67,238.5,0.0,0.0,1824.67,302.0,1312.33,973.33,3.15,32.64,37.99
+mp,mp_c90,2001-2003,34.35,32.81,1.53,16.12,1.05,1768.67,238.5,0.0,0.0,1824.67,302.33,1312.0,973.0,3.15,32.64,37.99
+mp,mp_det,2001-2003,36.8,35.25,1.54,12.36,1.57,1768.33,247.9,0.0,0.0,1824.67,451.33,1217.33,760.33,3.66,34.8,41.02

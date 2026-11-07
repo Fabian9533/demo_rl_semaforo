@@ -1,0 +1,4 @@
+verde,izquierda,verde_transversal,offsets,retraso_total_prom,timeloss_prom,retraso_insercion_prom,espera_prom,paradas_prom,throughput,co2_prom,retraso_total_sd,timeloss_sd,semillas,ciclo,etapa,region,clave,mediana,peor,trabadas,total_p1,noins_p1,total_p2,noins_p2
+10,,10,0/0,15.89,15.52,0.37,3.81,0.58,890.0,208.49,0.24,0.24,2001-2030,26,fragil,,v10_t10_o0_0,15.89,16.49,0,15.82,0.0,15.96,0.0
+10,,10,0/1,16.04,15.67,0.37,3.85,0.59,889.83,208.74,0.23,0.23,2001-2030,26,fragil,,v10_t10_o0_1,16.02,16.62,0,15.98,0.0,16.09,0.0
+10,,10,0/25,16.08,15.71,0.37,3.86,0.59,890.03,208.82,0.23,0.23,2001-2030,26,fragil,,v10_t10_o0_25,16.09,16.5,0,15.93,0.0,16.22,0.0

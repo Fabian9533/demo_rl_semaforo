@@ -1,0 +1,21 @@
+<additional>
+    <!-- Actuado ajustado (actuado.py, plan3; prerregistro, seccion 5) para poi_corredor, llegadas
+         aleatorias: descenso por coordenadas en cadena con 2001-2003 (22 variantes) y las finalistas con
+         2001-2030. Ganadora del_dr200_mt1_av60_tr20: retraso total 25.62 s (sd 1.91), timeLoss 24.18 s. -->
+    <tlLogic id="semaforo_C1" type="delay_based" programID="actuado_aj" offset="0">
+        <param key="detectorRange" value="200"/>
+        <param key="minTimeloss" value="1"/>
+        <phase duration="25" minDur="10" maxDur="20" state="GGgrrrGGgrrr"/>
+        <phase duration="3" state="yyyrrryyyrrr"/>
+        <phase duration="25" minDur="10" maxDur="60" state="rrrGGgrrrGGg"/>
+        <phase duration="3" state="rrryyyrrryyy"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C2" type="delay_based" programID="actuado_aj" offset="0">
+        <param key="detectorRange" value="200"/>
+        <param key="minTimeloss" value="1"/>
+        <phase duration="25" minDur="10" maxDur="20" state="GGgrrrGGgrrr"/>
+        <phase duration="3" state="yyyrrryyyrrr"/>
+        <phase duration="25" minDur="10" maxDur="60" state="rrrGGgrrrGGg"/>
+        <phase duration="3" state="rrryyyrrryyy"/>
+    </tlLogic>
+</additional>

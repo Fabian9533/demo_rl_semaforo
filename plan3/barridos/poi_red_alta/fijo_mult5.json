@@ -1,0 +1,63 @@
+{
+ "escenario": "poi_red_alta",
+ "llegadas": "aleatorias",
+ "archivo": "poi_red_alta_m5f.add.xml",
+ "sha256": "91396d44b71d5c3fda89fc1ea5500c8698b0f3964b34e98cdb1ee0b59774d7f7",
+ "huella": "b4b6973631a2",
+ "cortes": [
+  1800
+ ],
+ "verde": 10,
+ "verde_transversal": 10,
+ "offsets": [
+  0,
+  1,
+  25
+ ],
+ "esquema": "",
+ "ciclo": 26,
+ "clave": "v10_t10_o0_1_25",
+ "ids": [
+  "semaforo_C1",
+  "semaforo_C2",
+  "semaforo_C3"
+ ],
+ "fases_avenida": [
+  0,
+  0,
+  0
+ ],
+ "retraso_total_prom": 29.46,
+ "retraso_total_sd": 3.47,
+ "timeloss_prom": 27.26,
+ "mediana": 28.62,
+ "peor": 41.35,
+ "trabadas": 6,
+ "semillas": "2001-2030",
+ "semillas_regla": {
+  "barrido": "2001-2010",
+  "desempate": "2001-2030",
+  "fragil": "2001-2030"
+ },
+ "traza": {
+  "dos_primeros_a_2pct": true,
+  "semillas_trabadas_ganador": 6,
+  "fragil": true,
+  "semillas_desempate": "2001-2030",
+  "desempate_fragil": [
+   "v10_t10_o0_1_25",
+   "v10_t10_o0_0_25",
+   "v10_t10_o0_0_24"
+  ],
+  "semillas_fragil": "2001-2030"
+ },
+ "registro": {
+  "llegadas": "aleatorias",
+  "semillas": {
+   "barrido": "2001-2010",
+   "desempate": "2001-2030",
+   "fragil": "2001-2030"
+  },
+  "prueba": []
+ }
+}

@@ -1,0 +1,27 @@
+{
+ "escenario": "malla3",
+ "llegadas": "regulares",
+ "huella": "85733a69732d",
+ "familia": "regla",
+ "regla": "regla_u3g30",
+ "finalistas": [
+  "regla_u3g30",
+  "regla_u3g60",
+  "regla_u4g30"
+ ],
+ "semillas_barrido": "2001-2003",
+ "retraso_total_prom": 21.24,
+ "retraso_total_sd": 0.08,
+ "timeloss_prom": 20.78,
+ "mediana": 21.25,
+ "peor": 21.35,
+ "semillas": "2001-2010",
+ "registro": {
+  "llegadas": "regulares",
+  "semillas": {
+   "barrido": "2001-2003",
+   "final": "2001-2010"
+  },
+  "prueba": []
+ }
+}

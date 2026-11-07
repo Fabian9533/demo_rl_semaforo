@@ -1,0 +1,34 @@
+{
+ "escenario": "poi_red",
+ "llegadas": "aleatorias",
+ "huella": "112f5475f956",
+ "familia": "regla",
+ "regla": "regla_u2g30",
+ "finalistas": [
+  "regla_u2g30",
+  "regla_u2g60",
+  "regla_u3g30",
+  "regla_u3g60",
+  "regla_u4g30",
+  "regla_u4g60",
+  "regla_u6g30",
+  "regla_u6g60",
+  "regla_u1g30",
+  "regla_u1g60"
+ ],
+ "semillas_barrido": "2001-2003",
+ "retraso_total_prom": 22.67,
+ "retraso_total_sd": 0.71,
+ "timeloss_prom": 21.24,
+ "mediana": 22.52,
+ "peor": 24.3,
+ "semillas": "2001-2030",
+ "registro": {
+  "llegadas": "aleatorias",
+  "semillas": {
+   "barrido": "2001-2003",
+   "final": "2001-2030"
+  },
+  "prueba": []
+ }
+}

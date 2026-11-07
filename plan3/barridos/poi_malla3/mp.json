@@ -1,0 +1,28 @@
+{
+ "escenario": "poi_malla3",
+ "llegadas": "aleatorias",
+ "huella": "45cab20ae125",
+ "familia": "mp",
+ "regla": "mp_det",
+ "finalistas": [
+  "mp_det",
+  "mp_c60",
+  "mp",
+  "mp_c90"
+ ],
+ "semillas_barrido": "2001-2003",
+ "retraso_total_prom": 31.29,
+ "retraso_total_sd": 0.44,
+ "timeloss_prom": 30.68,
+ "mediana": 31.38,
+ "peor": 31.91,
+ "semillas": "2001-2030",
+ "registro": {
+  "llegadas": "aleatorias",
+  "semillas": {
+   "barrido": "2001-2003",
+   "final": "2001-2030"
+  },
+  "prueba": []
+ }
+}

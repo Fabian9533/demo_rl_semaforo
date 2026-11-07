@@ -1,0 +1,27 @@
+{
+ "escenario": "red_alta",
+ "llegadas": "regulares",
+ "huella": "65b387407bc1",
+ "familia": "mp",
+ "regla": "mp_c60",
+ "finalistas": [
+  "mp_c60",
+  "mp",
+  "mp_c90"
+ ],
+ "semillas_barrido": "2001-2003",
+ "retraso_total_prom": 32.17,
+ "retraso_total_sd": 1.93,
+ "timeloss_prom": 31.84,
+ "mediana": 32.12,
+ "peor": 36.19,
+ "semillas": "2001-2010",
+ "registro": {
+  "llegadas": "regulares",
+  "semillas": {
+   "barrido": "2001-2003",
+   "final": "2001-2010"
+  },
+  "prueba": []
+ }
+}

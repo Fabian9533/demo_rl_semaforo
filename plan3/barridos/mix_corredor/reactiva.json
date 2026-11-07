@@ -1,0 +1,29 @@
+{
+ "escenario": "mix_corredor",
+ "llegadas": "aleatorias",
+ "huella": "20f2af6f5c08",
+ "familia": "reactiva",
+ "regla": "reactiva_d50",
+ "finalistas": [
+  "reactiva_d25",
+  "reactiva_d50",
+  "reactiva_d35",
+  "reactiva_d70",
+  "reactiva_d15"
+ ],
+ "semillas_barrido": "2001-2003",
+ "retraso_total_prom": 25.39,
+ "retraso_total_sd": 1.28,
+ "timeloss_prom": 24.07,
+ "mediana": 25.42,
+ "peor": 29.72,
+ "semillas": "2001-2030",
+ "registro": {
+  "llegadas": "aleatorias",
+  "semillas": {
+   "barrido": "2001-2003",
+   "final": "2001-2030"
+  },
+  "prueba": []
+ }
+}

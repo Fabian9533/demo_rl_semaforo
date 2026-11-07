@@ -1,0 +1,95 @@
+<additional>
+    <!-- Fijo por bloques de 600 s (franja.py - -bloques, plan3; prerregistro, seccion 5) para
+         per_corredor, llegadas aleatorias: el mejor plan de cada bloque segun el puntaje por bloque de
+         barrer_fino (2001-2010), WAUT por semaforo en su instante limpio; secuencia verificada con
+         2001-2030: 0:v22_t10_o0_25 | 600:v23_t11_o0_25 | 1200:v29_t11_o0_25 | 1800:v27_t11_o0_20 |
+         2400:v28_t11_o0_25 | 3000:v26_t10_o0_25; retraso total 45.18 s (sd 12.55), timeLoss 43.4 s. -->
+    <tlLogic id="semaforo_C1" type="static" programID="bloque1" offset="0">
+        <phase duration="10" state="GGgrrrGGgrrr"/>
+        <phase duration="3" state="yyyrrryyyrrr"/>
+        <phase duration="22" state="rrrGGgrrrGGg"/>
+        <phase duration="3" state="rrryyyrrryyy"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C2" type="static" programID="bloque1" offset="25">
+        <phase duration="10" state="GGgrrrGGgrrr"/>
+        <phase duration="3" state="yyyrrryyyrrr"/>
+        <phase duration="22" state="rrrGGgrrrGGg"/>
+        <phase duration="3" state="rrryyyrrryyy"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C1" type="static" programID="bloque2" offset="0">
+        <phase duration="11" state="GGgrrrGGgrrr"/>
+        <phase duration="3" state="yyyrrryyyrrr"/>
+        <phase duration="23" state="rrrGGgrrrGGg"/>
+        <phase duration="3" state="rrryyyrrryyy"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C2" type="static" programID="bloque2" offset="25">
+        <phase duration="11" state="GGgrrrGGgrrr"/>
+        <phase duration="3" state="yyyrrryyyrrr"/>
+        <phase duration="23" state="rrrGGgrrrGGg"/>
+        <phase duration="3" state="rrryyyrrryyy"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C1" type="static" programID="bloque3" offset="0">
+        <phase duration="11" state="GGgrrrGGgrrr"/>
+        <phase duration="3" state="yyyrrryyyrrr"/>
+        <phase duration="29" state="rrrGGgrrrGGg"/>
+        <phase duration="3" state="rrryyyrrryyy"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C2" type="static" programID="bloque3" offset="25">
+        <phase duration="11" state="GGgrrrGGgrrr"/>
+        <phase duration="3" state="yyyrrryyyrrr"/>
+        <phase duration="29" state="rrrGGgrrrGGg"/>
+        <phase duration="3" state="rrryyyrrryyy"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C1" type="static" programID="bloque4" offset="0">
+        <phase duration="11" state="GGgrrrGGgrrr"/>
+        <phase duration="3" state="yyyrrryyyrrr"/>
+        <phase duration="27" state="rrrGGgrrrGGg"/>
+        <phase duration="3" state="rrryyyrrryyy"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C2" type="static" programID="bloque4" offset="20">
+        <phase duration="11" state="GGgrrrGGgrrr"/>
+        <phase duration="3" state="yyyrrryyyrrr"/>
+        <phase duration="27" state="rrrGGgrrrGGg"/>
+        <phase duration="3" state="rrryyyrrryyy"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C1" type="static" programID="bloque5" offset="0">
+        <phase duration="11" state="GGgrrrGGgrrr"/>
+        <phase duration="3" state="yyyrrryyyrrr"/>
+        <phase duration="28" state="rrrGGgrrrGGg"/>
+        <phase duration="3" state="rrryyyrrryyy"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C2" type="static" programID="bloque5" offset="25">
+        <phase duration="11" state="GGgrrrGGgrrr"/>
+        <phase duration="3" state="yyyrrryyyrrr"/>
+        <phase duration="28" state="rrrGGgrrrGGg"/>
+        <phase duration="3" state="rrryyyrrryyy"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C1" type="static" programID="bloque6" offset="0">
+        <phase duration="10" state="GGgrrrGGgrrr"/>
+        <phase duration="3" state="yyyrrryyyrrr"/>
+        <phase duration="26" state="rrrGGgrrrGGg"/>
+        <phase duration="3" state="rrryyyrrryyy"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C2" type="static" programID="bloque6" offset="25">
+        <phase duration="10" state="GGgrrrGGgrrr"/>
+        <phase duration="3" state="yyyrrryyyrrr"/>
+        <phase duration="26" state="rrrGGgrrrGGg"/>
+        <phase duration="3" state="rrryyyrrryyy"/>
+    </tlLogic>
+    <WAUT refTime="0" id="bloques_semaforo_C1" startProg="bloque1">
+        <wautSwitch time="609" to="bloque2"/>
+        <wautSwitch time="1201" to="bloque3"/>
+        <wautSwitch time="1819" to="bloque4"/>
+        <wautSwitch time="2400" to="bloque5"/>
+        <wautSwitch time="3000" to="bloque6"/>
+    </WAUT>
+    <wautJunction wautID="bloques_semaforo_C1" junctionID="semaforo_C1"/>
+    <WAUT refTime="0" id="bloques_semaforo_C2" startProg="bloque1">
+        <wautSwitch time="609" to="bloque2"/>
+        <wautSwitch time="1200" to="bloque3"/>
+        <wautSwitch time="1800" to="bloque4"/>
+        <wautSwitch time="2425" to="bloque5"/>
+        <wautSwitch time="3021" to="bloque6"/>
+    </WAUT>
+    <wautJunction wautID="bloques_semaforo_C2" junctionID="semaforo_C2"/>
+</additional>

@@ -1,0 +1,128 @@
+{
+ "escenario": "dem_corredor_t2715_der",
+ "huella": "9ae443ffbb50",
+ "paso": 6,
+ "coordenada": "familia",
+ "semillas": "2001-2003",
+ "partida": {
+  "tipo": "actuated",
+  "max-gap": 2.0,
+  "detector-gap": 2.0,
+  "jam-threshold": -1,
+  "maxdur_av": 45,
+  "maxdur_tr": 60,
+  "coordinado": false
+ },
+ "variantes": [
+  {
+   "tipo": "actuated",
+   "max-gap": 2.0,
+   "detector-gap": 2.0,
+   "jam-threshold": -1,
+   "maxdur_av": 45,
+   "maxdur_tr": 60,
+   "coordinado": false
+  },
+  {
+   "maxdur_av": 45,
+   "maxdur_tr": 60,
+   "tipo": "delay_based",
+   "detectorRange": 50,
+   "minTimeLoss": 1,
+   "coordinado": false
+  },
+  {
+   "maxdur_av": 45,
+   "maxdur_tr": 60,
+   "tipo": "delay_based",
+   "detectorRange": 50,
+   "minTimeLoss": 3,
+   "coordinado": false
+  },
+  {
+   "maxdur_av": 45,
+   "maxdur_tr": 60,
+   "tipo": "delay_based",
+   "detectorRange": 100,
+   "minTimeLoss": 1,
+   "coordinado": false
+  },
+  {
+   "maxdur_av": 45,
+   "maxdur_tr": 60,
+   "tipo": "delay_based",
+   "detectorRange": 100,
+   "minTimeLoss": 3,
+   "coordinado": false
+  },
+  {
+   "maxdur_av": 45,
+   "maxdur_tr": 60,
+   "tipo": "delay_based",
+   "detectorRange": 200,
+   "minTimeLoss": 1,
+   "coordinado": false
+  },
+  {
+   "maxdur_av": 45,
+   "maxdur_tr": 60,
+   "tipo": "delay_based",
+   "detectorRange": 200,
+   "minTimeLoss": 3,
+   "coordinado": false
+  },
+  {
+   "tipo": "actuated",
+   "max-gap": 2.0,
+   "detector-gap": 2.0,
+   "jam-threshold": -1,
+   "maxdur_av": 45,
+   "maxdur_tr": 60,
+   "coordinado": true,
+   "ciclo": 52,
+   "offsets": [
+    0,
+    27
+   ],
+   "verde": 33,
+   "verde_transversal": 13,
+   "fino_sha256": "27798720ee7c837c675824b37693f28043d40f9e891c5d547ad55f185b931103"
+  },
+  {
+   "tipo": "actuated",
+   "max-gap": 2.0,
+   "detector-gap": 2.0,
+   "jam-threshold": -1,
+   "maxdur_av": 45,
+   "maxdur_tr": 60,
+   "coordinado": true,
+   "ciclo": 52,
+   "offsets": [
+    0,
+    27
+   ],
+   "verde": 33,
+   "verde_transversal": 13,
+   "fino_sha256": "27798720ee7c837c675824b37693f28043d40f9e891c5d547ad55f185b931103",
+   "fin_fijo": true
+  }
+ ],
+ "elegida": {
+  "tipo": "actuated",
+  "max-gap": 2.0,
+  "detector-gap": 2.0,
+  "jam-threshold": -1,
+  "maxdur_av": 45,
+  "maxdur_tr": 60,
+  "coordinado": false
+ },
+ "registro": {
+  "llegadas": "regulares",
+  "semillas": {
+   "barrido": "2001-2003",
+   "desempate": "2001-2010",
+   "fragil": "2001-2030"
+  },
+  "prueba": []
+ }
+}

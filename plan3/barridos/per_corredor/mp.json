@@ -1,0 +1,28 @@
+{
+ "escenario": "per_corredor",
+ "llegadas": "aleatorias",
+ "huella": "03064ce27e81",
+ "familia": "mp",
+ "regla": "mp_c60",
+ "finalistas": [
+  "mp",
+  "mp_c90",
+  "mp_c60",
+  "mp_det"
+ ],
+ "semillas_barrido": "2001-2003",
+ "retraso_total_prom": 47.56,
+ "retraso_total_sd": 11.88,
+ "timeloss_prom": 45.83,
+ "mediana": 44.68,
+ "peor": 82.7,
+ "semillas": "2001-2030",
+ "registro": {
+  "llegadas": "aleatorias",
+  "semillas": {
+   "barrido": "2001-2003",
+   "final": "2001-2030"
+  },
+  "prueba": []
+ }
+}

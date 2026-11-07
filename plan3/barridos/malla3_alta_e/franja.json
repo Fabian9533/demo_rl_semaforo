@@ -1,0 +1,189 @@
+{
+ "escenario": "malla3_alta_e",
+ "llegadas": "regulares",
+ "archivo": "malla3_alta_e_franja.add.xml",
+ "sha256": "1fac85f490f9eac883359dbc3d17d9f2d0a2352f324ef75a4e9559ad7f226d84",
+ "huella": "7cbef1b485e2",
+ "clave": "fr_v25_t15_o0_23_0_23_0_23_0_23_0__v14_t10_o0_0_0_0_0_0_0_0_0",
+ "programas": [
+  {
+   "desde": 0,
+   "programID": "franja1",
+   "verde": 25,
+   "verde_transversal": 15,
+   "offsets": [
+    0,
+    23,
+    0,
+    23,
+    0,
+    23,
+    0,
+    23,
+    0
+   ],
+   "esquema": "ajedrez",
+   "ciclo": 46,
+   "clave": "v25_t15_o0_23_0_23_0_23_0_23_0"
+  },
+  {
+   "desde": 1800,
+   "programID": "franja2",
+   "verde": 14,
+   "verde_transversal": 10,
+   "offsets": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "esquema": "cero",
+   "ciclo": 30,
+   "clave": "v14_t10_o0_0_0_0_0_0_0_0_0"
+  }
+ ],
+ "instantes": {
+  "semaforo_C11": [
+   1801
+  ],
+  "semaforo_C12": [
+   1831
+  ],
+  "semaforo_C13": [
+   1801
+  ],
+  "semaforo_C21": [
+   1831
+  ],
+  "semaforo_C22": [
+   1801
+  ],
+  "semaforo_C23": [
+   1831
+  ],
+  "semaforo_C31": [
+   1801
+  ],
+  "semaforo_C32": [
+   1831
+  ],
+  "semaforo_C33": [
+   1801
+  ]
+ },
+ "cambios": {
+  "por_semaforo": {
+   "semaforo_C11": [
+    {
+     "nominal": 1800,
+     "instante": 1801,
+     "retraso": 1,
+     "regla": "estricta",
+     "problemas": []
+    }
+   ],
+   "semaforo_C12": [
+    {
+     "nominal": 1800,
+     "instante": 1831,
+     "retraso": 31,
+     "regla": "estricta",
+     "problemas": []
+    }
+   ],
+   "semaforo_C13": [
+    {
+     "nominal": 1800,
+     "instante": 1801,
+     "retraso": 1,
+     "regla": "estricta",
+     "problemas": []
+    }
+   ],
+   "semaforo_C21": [
+    {
+     "nominal": 1800,
+     "instante": 1831,
+     "retraso": 31,
+     "regla": "estricta",
+     "problemas": []
+    }
+   ],
+   "semaforo_C22": [
+    {
+     "nominal": 1800,
+     "instante": 1801,
+     "retraso": 1,
+     "regla": "estricta",
+     "problemas": []
+    }
+   ],
+   "semaforo_C23": [
+    {
+     "nominal": 1800,
+     "instante": 1831,
+     "retraso": 31,
+     "regla": "estricta",
+     "problemas": []
+    }
+   ],
+   "semaforo_C31": [
+    {
+     "nominal": 1800,
+     "instante": 1801,
+     "retraso": 1,
+     "regla": "estricta",
+     "problemas": []
+    }
+   ],
+   "semaforo_C32": [
+    {
+     "nominal": 1800,
+     "instante": 1831,
+     "retraso": 31,
+     "regla": "estricta",
+     "problemas": []
+    }
+   ],
+   "semaforo_C33": [
+    {
+     "nominal": 1800,
+     "instante": 1801,
+     "retraso": 1,
+     "regla": "estricta",
+     "problemas": []
+    }
+   ]
+  },
+  "reglas": {
+   "estricta": 9,
+   "relajada": 0,
+   "respaldo": 0,
+   "forzado": 0
+  },
+  "retraso_maximo": 31,
+  "tardios": [],
+  "aviso": null
+ },
+ "retraso_total_prom": 31.2,
+ "retraso_total_sd": 0.75,
+ "timeloss_prom": 30.92,
+ "mediana": 31.12,
+ "peor": 32.74,
+ "trabadas": 0,
+ "semillas": "2001-2010",
+ "registro": {
+  "llegadas": "regulares",
+  "semillas": {
+   "barrido": "2001-2003",
+   "desempate": "2001-2010",
+   "fragil": "2001-2030"
+  },
+  "prueba": []
+ }
+}

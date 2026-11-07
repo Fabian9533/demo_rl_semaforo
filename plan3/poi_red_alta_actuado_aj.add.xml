@@ -1,0 +1,33 @@
+<additional>
+    <!-- Actuado ajustado (actuado.py, plan3; prerregistro, seccion 5) para poi_red_alta, llegadas
+         aleatorias: descenso por coordenadas en cadena con 2001-2003 (22 variantes) y las finalistas con
+         2001-2030. Ganadora act_mg1.5_dg2_jt-1_av60_tr60_coord62549973_finfijo: retraso total 29.46 s
+         (sd 3.47), timeLoss 27.26 s. -->
+    <tlLogic id="semaforo_C1" type="actuated" programID="actuado_aj" offset="13">
+        <param key="max-gap" value="1.5"/>
+        <param key="coordinated" value="true"/>
+        <param key="cycleTime" value="26"/>
+        <phase duration="10" minDur="10" maxDur="60" state="rrrGGGgrrrGGGg" earliestEnd="23" latestEnd="23"/>
+        <phase duration="3" state="rrryyyyrrryyyy"/>
+        <phase duration="10" minDur="10" maxDur="60" state="GGgrrrrGGgrrrr" latestEnd="10"/>
+        <phase duration="3" state="yyyrrrryyyrrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C2" type="actuated" programID="actuado_aj" offset="14">
+        <param key="max-gap" value="1.5"/>
+        <param key="coordinated" value="true"/>
+        <param key="cycleTime" value="26"/>
+        <phase duration="10" minDur="10" maxDur="60" state="rrrGGGgrrrGGGg" earliestEnd="23" latestEnd="23"/>
+        <phase duration="3" state="rrryyyyrrryyyy"/>
+        <phase duration="10" minDur="10" maxDur="60" state="GGgrrrrGGgrrrr" latestEnd="10"/>
+        <phase duration="3" state="yyyrrrryyyrrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C3" type="actuated" programID="actuado_aj" offset="12">
+        <param key="max-gap" value="1.5"/>
+        <param key="coordinated" value="true"/>
+        <param key="cycleTime" value="26"/>
+        <phase duration="10" minDur="10" maxDur="60" state="rrrGGGgrrrGGGg" earliestEnd="23" latestEnd="23"/>
+        <phase duration="3" state="rrryyyyrrryyyy"/>
+        <phase duration="10" minDur="10" maxDur="60" state="GGgrrrrGGgrrrr" latestEnd="10"/>
+        <phase duration="3" state="yyyrrrryyyrrrr"/>
+    </tlLogic>
+</additional>

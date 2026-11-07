@@ -1,0 +1,5 @@
+etapa,clave,tipo,max-gap,detector-gap,jam-threshold,maxdur_av,maxdur_tr,detectorRange,minTimeLoss,coordinado,fin_fijo,retraso_total_prom,timeloss_prom,retraso_insercion_prom,espera_prom,paradas_prom,throughput,co2_prom,retraso_total_sd,timeloss_sd,semillas,mediana,peor,trabadas,total_p1,noins_p1,total_p2,noins_p2
+paso2,act_mg1_dg2_jt-1_av60_tr60,actuated,1.0,2.0,-1,60,60,,,0,0,23.06,22.6,0.47,5.9,1.09,4203.0,293.6,0.64,0.65,2001-2003,22.74,23.8,0,22.24,0.0,23.89,0.0
+paso2,act_mg1_dg1_jt-1_av60_tr60,actuated,1.0,1.0,-1,60,60,,,0,0,23.22,22.75,0.47,5.85,1.07,4203.0,294.87,0.5,0.51,2001-2003,23.21,23.72,0,22.33,0.0,24.11,0.0
+paso2,act_mg1_dg3_jt-1_av60_tr60,actuated,1.0,3.0,-1,60,60,,,0,0,24.99,24.52,0.47,7.25,1.22,4204.67,297.8,0.26,0.26,2001-2003,25.0,25.24,0,24.47,0.0,25.51,0.0
+paso2,act_mg1_dg4_jt-1_av60_tr60,actuated,1.0,4.0,-1,60,60,,,0,0,26.24,25.77,0.47,8.13,1.29,4203.33,300.43,0.34,0.34,2001-2003,26.31,26.54,0,26.19,0.0,26.29,0.0

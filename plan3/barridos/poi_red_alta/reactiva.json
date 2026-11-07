@@ -1,0 +1,29 @@
+{
+ "escenario": "poi_red_alta",
+ "llegadas": "aleatorias",
+ "huella": "456dc1983dd8",
+ "familia": "reactiva",
+ "regla": "reactiva_d25",
+ "finalistas": [
+  "reactiva_d35",
+  "reactiva_d25",
+  "reactiva_d15",
+  "reactiva_d50",
+  "reactiva_d70"
+ ],
+ "semillas_barrido": "2001-2003",
+ "retraso_total_prom": 32.66,
+ "retraso_total_sd": 2.55,
+ "timeloss_prom": 30.47,
+ "mediana": 32.2,
+ "peor": 40.08,
+ "semillas": "2001-2030",
+ "registro": {
+  "llegadas": "aleatorias",
+  "semillas": {
+   "barrido": "2001-2003",
+   "final": "2001-2030"
+  },
+  "prueba": []
+ }
+}

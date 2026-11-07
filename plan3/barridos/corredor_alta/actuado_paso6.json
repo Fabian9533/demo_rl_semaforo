@@ -1,0 +1,137 @@
+{
+ "escenario": "corredor_alta",
+ "huella": "9b355d54750e",
+ "paso": 6,
+ "coordenada": "familia",
+ "semillas": "2001-2003",
+ "partida": {
+  "tipo": "actuated",
+  "max-gap": 3.0,
+  "detector-gap": 4.0,
+  "jam-threshold": 30,
+  "maxdur_av": 60,
+  "maxdur_tr": 60,
+  "coordinado": false
+ },
+ "variantes": [
+  {
+   "tipo": "actuated",
+   "max-gap": 3.0,
+   "detector-gap": 4.0,
+   "jam-threshold": 30,
+   "maxdur_av": 60,
+   "maxdur_tr": 60,
+   "coordinado": false
+  },
+  {
+   "maxdur_av": 60,
+   "maxdur_tr": 60,
+   "tipo": "delay_based",
+   "detectorRange": 50,
+   "minTimeLoss": 1,
+   "coordinado": false
+  },
+  {
+   "maxdur_av": 60,
+   "maxdur_tr": 60,
+   "tipo": "delay_based",
+   "detectorRange": 50,
+   "minTimeLoss": 3,
+   "coordinado": false
+  },
+  {
+   "maxdur_av": 60,
+   "maxdur_tr": 60,
+   "tipo": "delay_based",
+   "detectorRange": 100,
+   "minTimeLoss": 1,
+   "coordinado": false
+  },
+  {
+   "maxdur_av": 60,
+   "maxdur_tr": 60,
+   "tipo": "delay_based",
+   "detectorRange": 100,
+   "minTimeLoss": 3,
+   "coordinado": false
+  },
+  {
+   "maxdur_av": 60,
+   "maxdur_tr": 60,
+   "tipo": "delay_based",
+   "detectorRange": 200,
+   "minTimeLoss": 1,
+   "coordinado": false
+  },
+  {
+   "maxdur_av": 60,
+   "maxdur_tr": 60,
+   "tipo": "delay_based",
+   "detectorRange": 200,
+   "minTimeLoss": 3,
+   "coordinado": false
+  },
+  {
+   "tipo": "actuated",
+   "max-gap": 3.0,
+   "detector-gap": 4.0,
+   "jam-threshold": 30,
+   "maxdur_av": 60,
+   "maxdur_tr": 60,
+   "coordinado": true,
+   "ciclo": 44,
+   "offsets": [
+    0,
+    21
+   ],
+   "verde": 25,
+   "verde_transversal": 13,
+   "fino_sha256": "874c91011ab834d975e62f7402bb4594d94334e9d5b565ce07c370f1bbbf0399"
+  },
+  {
+   "tipo": "actuated",
+   "max-gap": 3.0,
+   "detector-gap": 4.0,
+   "jam-threshold": 30,
+   "maxdur_av": 60,
+   "maxdur_tr": 60,
+   "coordinado": true,
+   "ciclo": 44,
+   "offsets": [
+    0,
+    21
+   ],
+   "verde": 25,
+   "verde_transversal": 13,
+   "fino_sha256": "874c91011ab834d975e62f7402bb4594d94334e9d5b565ce07c370f1bbbf0399",
+   "fin_fijo": true
+  }
+ ],
+ "elegida": {
+  "tipo": "actuated",
+  "max-gap": 3.0,
+  "detector-gap": 4.0,
+  "jam-threshold": 30,
+  "maxdur_av": 60,
+  "maxdur_tr": 60,
+  "coordinado": true,
+  "ciclo": 44,
+  "offsets": [
+   0,
+   21
+  ],
+  "verde": 25,
+  "verde_transversal": 13,
+  "fino_sha256": "874c91011ab834d975e62f7402bb4594d94334e9d5b565ce07c370f1bbbf0399",
+  "fin_fijo": true
+ },
+ "registro": {
+  "llegadas": "regulares",
+  "semillas": {
+   "barrido": "2001-2003",
+   "desempate": "2001-2010",
+   "fragil": "2001-2030"
+  },
+  "prueba": []
+ }
+}

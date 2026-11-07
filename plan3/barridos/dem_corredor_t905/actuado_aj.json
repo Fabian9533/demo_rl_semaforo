@@ -1,0 +1,40 @@
+{
+ "escenario": "dem_corredor_t905",
+ "llegadas": "regulares",
+ "huella": "1e0f6764f6eb",
+ "clave": "act_mg1.5_dg2_jt-1_av60_tr60",
+ "variante": {
+  "tipo": "actuated",
+  "max-gap": 1.5,
+  "detector-gap": 2.0,
+  "jam-threshold": -1,
+  "maxdur_av": 60,
+  "maxdur_tr": 60,
+  "coordinado": false
+ },
+ "variantes_probadas": 22,
+ "semillas_pasos": "2001-2003",
+ "finalistas": [
+  "act_mg1.5_dg2_jt-1_av60_tr60",
+  "act_mg1.5_dg2_jt10_av60_tr60",
+  "act_mg1.5_dg2_jt30_av60_tr60"
+ ],
+ "retraso_total_prom": 15.53,
+ "retraso_total_sd": 0.36,
+ "timeloss_prom": 15.16,
+ "mediana": 15.43,
+ "peor": 16.26,
+ "trabadas": 0,
+ "semillas": "2001-2010",
+ "registro": {
+  "llegadas": "regulares",
+  "semillas": {
+   "barrido": "2001-2003",
+   "desempate": "2001-2010",
+   "fragil": "2001-2030"
+  },
+  "prueba": []
+ },
+ "archivo": "dem_corredor_t905_actuado_aj.add.xml",
+ "sha256": "41e0a885ac8cad632e6bd51154c49d47cf1bee9218b467c8db7667d1b434222a"
+}

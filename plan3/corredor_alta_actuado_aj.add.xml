@@ -1,0 +1,26 @@
+<additional>
+    <!-- Actuado ajustado (actuado.py, plan3; prerregistro, seccion 5) para corredor_alta, llegadas
+         regulares: descenso por coordenadas en cadena con 2001-2003 (22 variantes) y las finalistas con
+         2001-2010. Ganadora act_mg3_dg4_jt30_av60_tr60_coord409b57cd_finfijo: retraso total 366.86 s (sd
+         9.5), timeLoss 153.87 s. -->
+    <tlLogic id="semaforo_C1" type="actuated" programID="actuado_aj" offset="0">
+        <param key="detector-gap" value="4"/>
+        <param key="jam-threshold" value="30"/>
+        <param key="coordinated" value="true"/>
+        <param key="cycleTime" value="44"/>
+        <phase duration="13" minDur="10" maxDur="60" state="GGgrrrGGgrrr" latestEnd="13"/>
+        <phase duration="3" state="yyyrrryyyrrr"/>
+        <phase duration="25" minDur="10" maxDur="60" state="rrrGGgrrrGGg" earliestEnd="41" latestEnd="41"/>
+        <phase duration="3" state="rrryyyrrryyy"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C2" type="actuated" programID="actuado_aj" offset="21">
+        <param key="detector-gap" value="4"/>
+        <param key="jam-threshold" value="30"/>
+        <param key="coordinated" value="true"/>
+        <param key="cycleTime" value="44"/>
+        <phase duration="13" minDur="10" maxDur="60" state="GGgrrrGGgrrr" latestEnd="13"/>
+        <phase duration="3" state="yyyrrryyyrrr"/>
+        <phase duration="25" minDur="10" maxDur="60" state="rrrGGgrrrGGg" earliestEnd="41" latestEnd="41"/>
+        <phase duration="3" state="rrryyyrrryyy"/>
+    </tlLogic>
+</additional>

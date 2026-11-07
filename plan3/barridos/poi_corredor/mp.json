@@ -1,0 +1,28 @@
+{
+ "escenario": "poi_corredor",
+ "llegadas": "aleatorias",
+ "huella": "f617ff8b7350",
+ "familia": "mp",
+ "regla": "mp_c60",
+ "finalistas": [
+  "mp_c60",
+  "mp",
+  "mp_c90",
+  "mp_det"
+ ],
+ "semillas_barrido": "2001-2003",
+ "retraso_total_prom": 31.48,
+ "retraso_total_sd": 2.29,
+ "timeloss_prom": 30.04,
+ "mediana": 31.71,
+ "peor": 36.63,
+ "semillas": "2001-2030",
+ "registro": {
+  "llegadas": "aleatorias",
+  "semillas": {
+   "barrido": "2001-2003",
+   "final": "2001-2030"
+  },
+  "prueba": []
+ }
+}

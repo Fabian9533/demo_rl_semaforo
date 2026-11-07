@@ -1,0 +1,91 @@
+{
+ "escenario": "dem_corredor_t2715_der",
+ "llegadas": "regulares",
+ "archivo": "dem_corredor_t2715_der_r10g.add.xml",
+ "sha256": "071bbdafce55a718035f1ffce0a3555bc2f034a50a6c1f68a484c6705f018482",
+ "huella": "9ae443ffbb50",
+ "cortes": [
+  1800
+ ],
+ "verde": 35,
+ "verde_transversal": 15,
+ "offsets": [
+  0,
+  30
+ ],
+ "esquema": "",
+ "ciclo": 56,
+ "clave": "v35_t15_o0_30",
+ "ids": [
+  "semaforo_C1",
+  "semaforo_C2"
+ ],
+ "fases_avenida": [
+  2,
+  2
+ ],
+ "retraso_total_prom": 28.57,
+ "retraso_total_sd": 0.29,
+ "timeloss_prom": 27.94,
+ "mediana": 28.54,
+ "peor": 28.88,
+ "trabadas": 0,
+ "semillas": "2001-2003",
+ "semillas_regla": {
+  "barrido": "2001-2003",
+  "desempate": "2001-2010",
+  "fragil": "2001-2030"
+ },
+ "traza": {
+  "ejes": [
+   [
+    10,
+    15,
+    20,
+    25,
+    30,
+    35,
+    40
+   ],
+   [
+    10,
+    15,
+    20,
+    25
+   ]
+  ],
+  "planes": 139
+ },
+ "registro": {
+  "llegadas": "regulares",
+  "semillas": {
+   "barrido": "2001-2003",
+   "desempate": "2001-2010",
+   "fragil": "2001-2030"
+  },
+  "ejes_iniciales": [
+   [
+    10,
+    15,
+    20,
+    25,
+    30,
+    35
+   ],
+   [
+    10,
+    15,
+    20,
+    25
+   ]
+  ],
+  "desplegado": [
+   [
+    25,
+    15
+   ]
+  ],
+  "limite": null,
+  "prueba": []
+ }
+}

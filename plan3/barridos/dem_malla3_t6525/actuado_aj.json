@@ -1,0 +1,55 @@
+{
+ "escenario": "dem_malla3_t6525",
+ "llegadas": "regulares",
+ "huella": "ead8d48da185",
+ "clave": "act_mg1.5_dg2_jt-1_av60_tr60_coord44b14435",
+ "variante": {
+  "tipo": "actuated",
+  "max-gap": 1.5,
+  "detector-gap": 2.0,
+  "jam-threshold": -1,
+  "maxdur_av": 60,
+  "maxdur_tr": 60,
+  "coordinado": true,
+  "ciclo": 47,
+  "offsets": [
+   0,
+   23,
+   0,
+   23,
+   0,
+   23,
+   0,
+   23,
+   0
+  ],
+  "verde": 27,
+  "verde_transversal": 14,
+  "fino_sha256": "d97d40b6b827990259dbb00b3ac2328094129993ef2a5b67b8626b1a4b232b4d"
+ },
+ "variantes_probadas": 22,
+ "semillas_pasos": "2001-2003",
+ "finalistas": [
+  "act_mg1.5_dg2_jt-1_av60_tr60_coord44b14435",
+  "act_mg1.5_dg2_jt-1_av60_tr60_coord44b14435_finfijo",
+  "act_mg1.5_dg2_jt-1_av60_tr60"
+ ],
+ "retraso_total_prom": 25.65,
+ "retraso_total_sd": 0.35,
+ "timeloss_prom": 24.95,
+ "mediana": 25.62,
+ "peor": 26.22,
+ "trabadas": 0,
+ "semillas": "2001-2010",
+ "registro": {
+  "llegadas": "regulares",
+  "semillas": {
+   "barrido": "2001-2003",
+   "desempate": "2001-2010",
+   "fragil": "2001-2030"
+  },
+  "prueba": []
+ },
+ "archivo": "dem_malla3_t6525_actuado_aj.add.xml",
+ "sha256": "a24e839ce749d853d2326b46f10486beffe24236f8694be004099c20419b76cd"
+}

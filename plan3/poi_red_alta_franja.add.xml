@@ -1,0 +1,55 @@
+<additional>
+    <!-- Fijo por franja (franja.py, plan3; prerregistro, seccion 5) para poi_red_alta, llegadas
+         aleatorias: los 3 mejores planes de cada media hora segun el puntaje por periodo de barrer_fino
+         (2001-2010), 9 pares con WAUT por semaforo en su instante limpio; las 10 mejores con 2001-2030.
+         Ganador: 0:v10_t10_o0_25_25 | 1800:v10_t10_o0_1_25; retraso total 29.28 s (sd 3.47), timeLoss
+         27.08 s sobre 2001-2030. -->
+    <tlLogic id="semaforo_C1" type="static" programID="franja1" offset="0">
+        <phase duration="10" state="rrrGGGgrrrGGGg"/>
+        <phase duration="3" state="rrryyyyrrryyyy"/>
+        <phase duration="10" state="GGgrrrrGGgrrrr"/>
+        <phase duration="3" state="yyyrrrryyyrrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C2" type="static" programID="franja1" offset="25">
+        <phase duration="10" state="rrrGGGgrrrGGGg"/>
+        <phase duration="3" state="rrryyyyrrryyyy"/>
+        <phase duration="10" state="GGgrrrrGGgrrrr"/>
+        <phase duration="3" state="yyyrrrryyyrrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C3" type="static" programID="franja1" offset="25">
+        <phase duration="10" state="rrrGGGgrrrGGGg"/>
+        <phase duration="3" state="rrryyyyrrryyyy"/>
+        <phase duration="10" state="GGgrrrrGGgrrrr"/>
+        <phase duration="3" state="yyyrrrryyyrrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C1" type="static" programID="franja2" offset="0">
+        <phase duration="10" state="rrrGGGgrrrGGGg"/>
+        <phase duration="3" state="rrryyyyrrryyyy"/>
+        <phase duration="10" state="GGgrrrrGGgrrrr"/>
+        <phase duration="3" state="yyyrrrryyyrrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C2" type="static" programID="franja2" offset="1">
+        <phase duration="10" state="rrrGGGgrrrGGGg"/>
+        <phase duration="3" state="rrryyyyrrryyyy"/>
+        <phase duration="10" state="GGgrrrrGGgrrrr"/>
+        <phase duration="3" state="yyyrrrryyyrrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C3" type="static" programID="franja2" offset="25">
+        <phase duration="10" state="rrrGGGgrrrGGGg"/>
+        <phase duration="3" state="rrryyyyrrryyyy"/>
+        <phase duration="10" state="GGgrrrrGGgrrrr"/>
+        <phase duration="3" state="yyyrrrryyyrrrr"/>
+    </tlLogic>
+    <WAUT refTime="0" id="franja_semaforo_C1" startProg="franja1">
+        <wautSwitch time="1800" to="franja2"/>
+    </WAUT>
+    <wautJunction wautID="franja_semaforo_C1" junctionID="semaforo_C1"/>
+    <WAUT refTime="0" id="franja_semaforo_C2" startProg="franja1">
+        <wautSwitch time="1800" to="franja2"/>
+    </WAUT>
+    <wautJunction wautID="franja_semaforo_C2" junctionID="semaforo_C2"/>
+    <WAUT refTime="0" id="franja_semaforo_C3" startProg="franja1">
+        <wautSwitch time="1800" to="franja2"/>
+    </WAUT>
+    <wautJunction wautID="franja_semaforo_C3" junctionID="semaforo_C3"/>
+</additional>

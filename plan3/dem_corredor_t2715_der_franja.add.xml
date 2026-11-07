@@ -1,0 +1,39 @@
+<additional>
+    <!-- Fijo por franja (franja.py, plan3; prerregistro, seccion 5) para dem_corredor_t2715_der,
+         llegadas regulares: los 3 mejores planes de cada media hora segun el puntaje por periodo de
+         barrer_fino (2001-2003), 9 pares con WAUT por semaforo en su instante limpio; las 3 mejores con
+         2001-2010. Ganador: 0:v33_t13_o0_27 | 1800:v33_t13_o0_24; retraso total 27.09 s (sd 0.77),
+         timeLoss 26.46 s sobre 2001-2010. -->
+    <tlLogic id="semaforo_C1" type="static" programID="franja1" offset="0">
+        <phase duration="13" state="GGgrrrGGgrrr"/>
+        <phase duration="3" state="yyyrrryyyrrr"/>
+        <phase duration="33" state="rrrGGgrrrGGg"/>
+        <phase duration="3" state="rrryyyrrryyy"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C2" type="static" programID="franja1" offset="27">
+        <phase duration="13" state="GGgrrrGGgrrr"/>
+        <phase duration="3" state="yyyrrryyyrrr"/>
+        <phase duration="33" state="rrrGGgrrrGGg"/>
+        <phase duration="3" state="rrryyyrrryyy"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C1" type="static" programID="franja2" offset="0">
+        <phase duration="13" state="GGgrrrGGgrrr"/>
+        <phase duration="3" state="yyyrrryyyrrr"/>
+        <phase duration="33" state="rrrGGgrrrGGg"/>
+        <phase duration="3" state="rrryyyrrryyy"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C2" type="static" programID="franja2" offset="24">
+        <phase duration="13" state="GGgrrrGGgrrr"/>
+        <phase duration="3" state="yyyrrryyyrrr"/>
+        <phase duration="33" state="rrrGGgrrrGGg"/>
+        <phase duration="3" state="rrryyyrrryyy"/>
+    </tlLogic>
+    <WAUT refTime="0" id="franja_semaforo_C1" startProg="franja1">
+        <wautSwitch time="1800" to="franja2"/>
+    </WAUT>
+    <wautJunction wautID="franja_semaforo_C1" junctionID="semaforo_C1"/>
+    <WAUT refTime="0" id="franja_semaforo_C2" startProg="franja1">
+        <wautSwitch time="1800" to="franja2"/>
+    </WAUT>
+    <wautJunction wautID="franja_semaforo_C2" junctionID="semaforo_C2"/>
+</additional>

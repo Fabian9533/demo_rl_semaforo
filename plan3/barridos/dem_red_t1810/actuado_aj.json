@@ -1,0 +1,39 @@
+{
+ "escenario": "dem_red_t1810",
+ "llegadas": "regulares",
+ "huella": "e4bdef29d057",
+ "clave": "del_dr50_mt1_av30_tr60",
+ "variante": {
+  "maxdur_av": 30,
+  "maxdur_tr": 60,
+  "tipo": "delay_based",
+  "detectorRange": 50,
+  "minTimeLoss": 1,
+  "coordinado": false
+ },
+ "variantes_probadas": 22,
+ "semillas_pasos": "2001-2003",
+ "finalistas": [
+  "del_dr50_mt1_av30_tr60",
+  "del_dr50_mt3_av30_tr60",
+  "act_mg3_dg4_jt-1_av30_tr60"
+ ],
+ "retraso_total_prom": 18.2,
+ "retraso_total_sd": 0.19,
+ "timeloss_prom": 17.64,
+ "mediana": 18.25,
+ "peor": 18.42,
+ "trabadas": 0,
+ "semillas": "2001-2010",
+ "registro": {
+  "llegadas": "regulares",
+  "semillas": {
+   "barrido": "2001-2003",
+   "desempate": "2001-2010",
+   "fragil": "2001-2030"
+  },
+  "prueba": []
+ },
+ "archivo": "dem_red_t1810_actuado_aj.add.xml",
+ "sha256": "bde6e1a517280e450bbf86cfd77f0a3f3e24aa7d200cb19c305efff9a1f34623"
+}

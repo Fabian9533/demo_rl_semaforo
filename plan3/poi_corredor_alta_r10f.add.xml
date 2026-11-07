@@ -1,0 +1,19 @@
+<additional>
+    <!-- Fijo fino (barrer_fino.py, plan3; regla del prerregistro, seccion 5) para poi_corredor_alta,
+         llegadas aleatorias: 259 planes con las semillas 2001-2010; las 10 mejores con 2001-2030;
+         ganador fragil, desempate de los 3 primeros con 2001-2030. Ganador: avenida 34 s, transversal 16
+         s, ciclo 56 s, desfases 0/32; retraso total 461.51 s (sd 49.26, peor 566.38), timeLoss 177.23 s
+         sobre 2001-2030. -->
+    <tlLogic id="semaforo_C1" type="static" programID="fijo" offset="0">
+        <phase duration="16" state="GGgrrrGGgrrr"/>
+        <phase duration="3" state="yyyrrryyyrrr"/>
+        <phase duration="34" state="rrrGGgrrrGGg"/>
+        <phase duration="3" state="rrryyyrrryyy"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C2" type="static" programID="fijo" offset="32">
+        <phase duration="16" state="GGgrrrGGgrrr"/>
+        <phase duration="3" state="yyyrrryyyrrr"/>
+        <phase duration="34" state="rrrGGgrrrGGg"/>
+        <phase duration="3" state="rrryyyrrryyy"/>
+    </tlLogic>
+</additional>

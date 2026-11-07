@@ -1,0 +1,208 @@
+{
+ "escenario": "per_corredor",
+ "llegadas": "aleatorias",
+ "archivo": "per_corredor_bloques.add.xml",
+ "sha256": "902d4fb92a8d70889f2b909507fc53c118fcda6ace42d1e17901c3fd756e4645",
+ "huella": "a1e5313ade6b",
+ "clave": "bl_00f0fdecd4a7",
+ "programas": [
+  {
+   "desde": 0,
+   "programID": "bloque1",
+   "verde": 22,
+   "verde_transversal": 10,
+   "offsets": [
+    0,
+    25
+   ],
+   "esquema": "",
+   "ciclo": 38,
+   "clave": "v22_t10_o0_25"
+  },
+  {
+   "desde": 600,
+   "programID": "bloque2",
+   "verde": 23,
+   "verde_transversal": 11,
+   "offsets": [
+    0,
+    25
+   ],
+   "esquema": "",
+   "ciclo": 40,
+   "clave": "v23_t11_o0_25"
+  },
+  {
+   "desde": 1200,
+   "programID": "bloque3",
+   "verde": 29,
+   "verde_transversal": 11,
+   "offsets": [
+    0,
+    25
+   ],
+   "esquema": "",
+   "ciclo": 46,
+   "clave": "v29_t11_o0_25"
+  },
+  {
+   "desde": 1800,
+   "programID": "bloque4",
+   "verde": 27,
+   "verde_transversal": 11,
+   "offsets": [
+    0,
+    20
+   ],
+   "esquema": "",
+   "ciclo": 44,
+   "clave": "v27_t11_o0_20"
+  },
+  {
+   "desde": 2400,
+   "programID": "bloque5",
+   "verde": 28,
+   "verde_transversal": 11,
+   "offsets": [
+    0,
+    25
+   ],
+   "esquema": "",
+   "ciclo": 45,
+   "clave": "v28_t11_o0_25"
+  },
+  {
+   "desde": 3000,
+   "programID": "bloque6",
+   "verde": 26,
+   "verde_transversal": 10,
+   "offsets": [
+    0,
+    25
+   ],
+   "esquema": "",
+   "ciclo": 42,
+   "clave": "v26_t10_o0_25"
+  }
+ ],
+ "instantes": {
+  "semaforo_C1": [
+   609,
+   1201,
+   1819,
+   2400,
+   3000
+  ],
+  "semaforo_C2": [
+   609,
+   1200,
+   1800,
+   2425,
+   3021
+  ]
+ },
+ "cambios": {
+  "por_semaforo": {
+   "semaforo_C1": [
+    {
+     "nominal": 600,
+     "instante": 609,
+     "retraso": 9,
+     "regla": "estricta",
+     "problemas": []
+    },
+    {
+     "nominal": 1200,
+     "instante": 1201,
+     "retraso": 1,
+     "regla": "estricta",
+     "problemas": []
+    },
+    {
+     "nominal": 1800,
+     "instante": 1819,
+     "retraso": 19,
+     "regla": "estricta",
+     "problemas": []
+    },
+    {
+     "nominal": 2400,
+     "instante": 2400,
+     "retraso": 0,
+     "regla": "estricta",
+     "problemas": []
+    },
+    {
+     "nominal": 3000,
+     "instante": 3000,
+     "retraso": 0,
+     "regla": "estricta",
+     "problemas": []
+    }
+   ],
+   "semaforo_C2": [
+    {
+     "nominal": 600,
+     "instante": 609,
+     "retraso": 9,
+     "regla": "estricta",
+     "problemas": []
+    },
+    {
+     "nominal": 1200,
+     "instante": 1200,
+     "retraso": 0,
+     "regla": "estricta",
+     "problemas": []
+    },
+    {
+     "nominal": 1800,
+     "instante": 1800,
+     "retraso": 0,
+     "regla": "estricta",
+     "problemas": []
+    },
+    {
+     "nominal": 2400,
+     "instante": 2425,
+     "retraso": 25,
+     "regla": "estricta",
+     "problemas": []
+    },
+    {
+     "nominal": 3000,
+     "instante": 3021,
+     "retraso": 21,
+     "regla": "estricta",
+     "problemas": []
+    }
+   ]
+  },
+  "reglas": {
+   "estricta": 10,
+   "relajada": 0,
+   "respaldo": 0,
+   "forzado": 0
+  },
+  "retraso_maximo": 25,
+  "tardios": [],
+  "aviso": null
+ },
+ "retraso_total_prom": 45.18,
+ "retraso_total_sd": 12.55,
+ "timeloss_prom": 43.4,
+ "mediana": 42.28,
+ "peor": 85.57,
+ "trabadas": 10,
+ "semillas": "2001-2030",
+ "fijo_fino_mismas_semillas": 43.69,
+ "registro": {
+  "llegadas": "aleatorias",
+  "semillas": {
+   "barrido": "2001-2010",
+   "desempate": "2001-2030",
+   "fragil": "2001-2030"
+  },
+  "prueba": []
+ }
+}

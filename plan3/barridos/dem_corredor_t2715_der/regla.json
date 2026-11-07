@@ -1,0 +1,27 @@
+{
+ "escenario": "dem_corredor_t2715_der",
+ "llegadas": "regulares",
+ "huella": "962dcf7b33e3",
+ "familia": "regla",
+ "regla": "regla_u1g60",
+ "finalistas": [
+  "regla_u1g60",
+  "regla_u1g30",
+  "regla_u2g60"
+ ],
+ "semillas_barrido": "2001-2003",
+ "retraso_total_prom": 45.99,
+ "retraso_total_sd": 1.83,
+ "timeloss_prom": 45.35,
+ "mediana": 45.24,
+ "peor": 48.97,
+ "semillas": "2001-2010",
+ "registro": {
+  "llegadas": "regulares",
+  "semillas": {
+   "barrido": "2001-2003",
+   "final": "2001-2010"
+  },
+  "prueba": []
+ }
+}

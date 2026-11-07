@@ -1,0 +1,19 @@
+<additional>
+    <!-- Fijo fino (barrer_fino.py, plan3; regla del prerregistro, seccion 5) para dem_corredor_t905,
+         llegadas regulares: 216 planes con las semillas 2001-2003; las 10 mejores con 2001-2010; ganador
+         fragil, desempate de los 3 primeros con 2001-2030. Ganador: avenida 10 s, transversal 10 s,
+         ciclo 26 s, desfases 0/0; retraso total 15.89 s (sd 0.24, peor 16.49), timeLoss 15.52 s sobre
+         2001-2030. -->
+    <tlLogic id="semaforo_C1" type="static" programID="fijo" offset="0">
+        <phase duration="10" state="GGgrrrGGgrrr"/>
+        <phase duration="3" state="yyyrrryyyrrr"/>
+        <phase duration="10" state="rrrGGgrrrGGg"/>
+        <phase duration="3" state="rrryyyrrryyy"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C2" type="static" programID="fijo" offset="0">
+        <phase duration="10" state="GGgrrrGGgrrr"/>
+        <phase duration="3" state="yyyrrryyyrrr"/>
+        <phase duration="10" state="rrrGGgrrrGGg"/>
+        <phase duration="3" state="rrryyyrrryyy"/>
+    </tlLogic>
+</additional>
