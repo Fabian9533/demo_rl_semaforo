@@ -56,6 +56,13 @@ evaluación del examen. Va más allá de lo que permite la §14, así que se dec
 
 El detalle está en `plan3/doc/enmienda_2.md`.
 
+**Efecto que se vio después del tag (07.11, revisión de veredicto3).**
+- Con las decisiones de promoción regulares salió también `promo_juntar`, que las pedía. La cola ya no escribe
+  `promocion.json`.
+- `veredicto3.py` lee la decisión de cada celda aleatoria en el archivo que escribe su trabajo
+  `p3_promocion decidir` (`promocion/<esc>.json`). Ese archivo se sella y se vuelve a calcular en el cierre.
+- No cambia la regla ni la lista de trabajos: `juntar` solo reunía esas decisiones en un archivo.
+
 ## 2. Cambios de fase: corrección de un error de conteo (05.11.2026)
 
 **Qué pasó.** `rl_ippo.py` cuenta un cambio de más por cada semáforo que la plantilla arranca fuera de su primer verde.
