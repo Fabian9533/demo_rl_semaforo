@@ -247,12 +247,14 @@ def binario(ruta):
         return f.read()
 
 
-ESC_PROMO = "corredor_alta"         # P2 regular: con la enmienda 1, corredor (P1) ya no tiene candidatas ni promocion
+ESC_PROMO = "poi_corredor_alta"     # P2 aleatoria: con la enmienda 2 no queda ninguna promocion regular
 
 
 def cambiar_promocion(p3):
-    """Lo que querria cambiar quien resella despues de ver los datos: la promocion de corredor_alta al reves, con
-    promocion/corredor_alta.json y promocion.json de acuerdo entre si (como los escribe p3_promocion)."""
+    """Lo que querria cambiar quien resella despues de ver los datos: la promocion de poi_corredor_alta al reves, en
+    promocion/poi_corredor_alta.json (como la escribe p3_promocion) y, si existe, en promocion.json de acuerdo con
+    ella (con la enmienda 2 no hay promocion.json: salio el trabajo que junta las decisiones). Devuelve lo que
+    cambio (rutas del repositorio)."""
     ruta = os.path.join(p3, "promocion", f"{ESC_PROMO}.json")
     d = leer(ruta)
     d["promovido"] = not d["promovido"]
@@ -260,13 +262,16 @@ def cambiar_promocion(p3):
     d["modelo_citado"], d["csv_citado"] = citado["brazo"], citado["csv"]
     with open(ruta, "w", encoding="utf-8") as f:                    # como p3_promocion.escribir
         json.dump(d, f, indent=1, ensure_ascii=False)
+    rutas = [f"plan3/promocion/{ESC_PROMO}.json"]
     ruta_p = os.path.join(p3, "promocion.json")
-    todo = leer(ruta_p)
-    todo["celdas"][ESC_PROMO].update(sha256=hashlib.sha256(binario(ruta)).hexdigest(),
-                                     modelo_citado=d["modelo_citado"], promovido=d["promovido"])
-    with open(ruta_p, "w", encoding="utf-8") as f:
-        json.dump(todo, f, indent=1, ensure_ascii=False)
-    return [f"plan3/promocion/{ESC_PROMO}.json", "plan3/promocion.json"]
+    if os.path.exists(ruta_p):
+        todo = leer(ruta_p)
+        todo["celdas"][ESC_PROMO].update(sha256=hashlib.sha256(binario(ruta)).hexdigest(),
+                                         modelo_citado=d["modelo_citado"], promovido=d["promovido"])
+        with open(ruta_p, "w", encoding="utf-8") as f:
+            json.dump(todo, f, indent=1, ensure_ascii=False)
+        rutas.append("plan3/promocion.json")
+    return rutas
 
 
 def resellar(r):
@@ -685,11 +690,10 @@ def ataques_antes_del_cierre():
     commit(r, "cierre (reescrito)", "plan3/cola", "plan3/listo", forzar=["plan3/ciego"])
     se_niega("un CSV cambiado, sus mañanas reescritas y push forzado antes del primer --final (P1-H3: el reflog de "
              "origin/plan3)", final(p3), "se reescribió (push forzado)")
-    # P1-H6: la promocion dada vuelta antes del cierre (los dos archivos de acuerdo) y sellada
+    # P1-H6: la promocion dada vuelta antes del cierre (de acuerdo con promocion.json, si lo hay) y sellada
     r = copia_de("pre_cierre", "promocion")
     p3 = os.path.join(r, "plan3")
-    cambiar_promocion(p3)
-    commit(r, "promocion cambiada", "plan3/promocion.json", "plan3/promocion")
+    commit(r, "promocion cambiada", *cambiar_promocion(p3))
     correr(p3, "manifiesto.py", "cierre")
     commit(r, "cierre", "plan3/cola", "plan3/listo", forzar=["plan3/ciego"])
     se_niega("la promoción dada vuelta antes del cierre, commiteada y sellada (P1-H6: se vuelve a calcular)",

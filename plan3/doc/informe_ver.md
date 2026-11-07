@@ -2,8 +2,9 @@
 
 05.11.2026, con la revisión de la tarde, el ajuste de la noche al generador nuevo, el seguimiento de la revisión de
 referencias, la revisión adversarial de 13fd132, la segunda revisión (la historia de git anclada a la rama empujada) y
-la tercera (recuperar los errores honestos y ver las manipulaciones); el 06.11, el ajuste a la enmienda 1. Rama
-`plan3-ver` (nació de `plan3-dev` en cff0d61 y trae `plan3-dev` fusionada hasta 4031d93). No se simuló nada
+la tercera (recuperar los errores honestos y ver las manipulaciones); el 06.11, el ajuste a la enmienda 1, y el 07.11,
+el de la enmienda 2 (rama `plan3-vere2`, desde `plan3-dev` en 942a44f). Rama `plan3-ver` (nació de `plan3-dev` en
+cff0d61 y trae `plan3-dev` fusionada hasta 4031d93). No se simuló nada
 con semillas del examen ni se abrió ningún resultado decisivo (todavía no existen): todo se probó con lo entregado de
 `plan2/` (solo lectura), con datos sintéticos que usan las semillas de humo (424301-424360) en `plan3/tmp_ver/`
 (ignorada por git) y, para la evidencia de k, con evaluar3 en semillas de humo (424301-424303). El ensayo del protocolo
@@ -16,14 +17,18 @@ nada.
   las reglas del prerregistro (parte A), las etiquetas de cada celda (T1, T2 y citable), el modelo citado, el sentido
   entre entrenamientos, todas las hipótesis de §8 con sus familias y Holm, el número único, las lecturas obligadas y el
   informe de vehículos sin entrar al cierre (§4).
-- **Modos.** `--probar` (202 pruebas, ~3 min), `--final` (se niega si algo sellado cambió, si un CSV de `ciego/`
+- **Modos.** `--probar` (199 pruebas, ~3 min), `--final` (se niega si algo sellado cambió, si un CSV de `ciego/`
   no es el de su primera mañana, si falta un trabajo, un meta o una base sin declararla caída, o si la historia de git
   no es la empujada), `--prueba-final LISTA.json` (§13: valida todo, luego crea el candado en exclusiva y corre una
   sola vez), `--sha-lista LISTA.json`, `--holdout LISTA.json` (valida la lista y escribe `listo/holdout.ok`),
   `--preflight cierre|holdout` (antes de cada push que no se deshace) y `--verificar-prueba-final`.
-- **Pruebas: 202 de 202 pasan** en `plan3-dev` fusionada (`plan3/pruebas/ver/prueba_veredicto3.txt`; el registro
-  sale igual byte a byte en dos corridas). **El protocolo de punta a punta, con los programas de verdad y un `origin` de
-  prueba: 73 de 73** (`plan3/pruebas/ver/salidas/prueba_protocolo.txt`).
+- **Pruebas: 199 de 199 pasan** con la enmienda 2 (`plan3/pruebas/ver/prueba_veredicto3.txt`; el registro sale igual
+  byte a byte en dos corridas). **El protocolo de punta a punta, con los programas de verdad y un `origin` de prueba:
+  73 de 73** (`plan3/pruebas/ver/salidas/prueba_protocolo.txt`).
+- **Enmienda 2 (07.11).** Con llegadas regulares solo queda la V2 de cada base frente al fijo fino, con el veto del
+  actuado ajustado, en P1-P6 y P6e (98 CSV): la etiqueta por caso, H3, H3e y H6. H1, H2, H4, H7r, H8a, H10 y H14
+  regular en D dicen "no se corre (enmienda 2)"; no queda ninguna promoción regular. Como la enmienda sacó el trabajo
+  que juntaba las decisiones (`promo_juntar`), cada celda aleatoria lee su `promocion/<esc>.json`.
 - **Enmienda 1 (06.11).** Con llegadas regulares, H8c, H12 y las partes regulares de H15 y H9 dicen "no se corre
   (enmienda 1)": no son una falta, una caída ni un "no pasa". H14 regular queda con D y Holm va sobre lo que queda.
   P1, P3, P4, P5 y P6 regulares citan V2 sin decisión de promoción. El `.md` abre con la línea de la enmienda.
@@ -62,6 +67,24 @@ la enmienda y, si no coinciden, es ERROR.
 | 5 | P1, P3, P4, P5 y P6 regulares citan V2 | Sin candidatas no se busca `promocion/<esc>.json`, tampoco en `--final`, aunque apareciera un CSV de un brazo quitado. `p3_promocion juntar` junta solo las decisiones que recibe y `manifiesto.py` sella los `promocion/*.json` que existen: nada espera una decisión por celda. Quedan 9 decisiones: P2, D y 2715 regulares y los 6 casos aleatorios | E04, E05 |
 | 6 | Lo quitado no se entrena | Declarar caída una base de un brazo quitado es ERROR (no es un entrenamiento del plan, `gt.validar_caida`) | N20 |
 | 7 | El mundo sintético | 1489 CSV del generador (antes 1710). La promoción gana en P2 regular; N21 y M36 usan la 3b aleatoria (M36: 10 bases) | M08, M24, M28c, N21, M36 |
+
+## Enmienda 2 (07.11): solo un análisis regular simple
+
+`plan3/doc/enmienda_2.md`: con llegadas regulares quedan la V2 de cada base, el fijo fino y el actuado ajustado en P1-P6
+y P6e, con T1 y T2 (98 CSV). Qué queda lo dice el generador: `gt.aplicar_enmienda2` saca los trabajos de
+`doc/enmienda_2_quitados.txt` y veredicto3 lee el manifiesto que queda (`plan_regular`), sin otra lista. Una prueba
+regular con un brazo que el plan ya no evalúa no se corre. Si el plan dejara una prueba de una familia que la enmienda
+deja sin casos (`N_FAMILIA_ENMIENDA2`), es ERROR.
+
+| # | Qué dice la enmienda | Qué hace veredicto3 | Prueba |
+|---|---|---|---|
+| 1 | H1, H2, H4, H7r, H8a, H10 (la Etapa 4 no entró a la lista) y H14 regular en D no se corren | Una sola fila por hipótesis, la del resumen: "no se corre (enmienda 2)", sin "sí" ni "no", con los casos en la nota (la de H14 regular nombra las dos enmiendas). No cuentan entre las que pasan | E06, E06b, E07, E10, E11 |
+| 2 | Sale lo demás con llegadas regulares: ablación, cuadro 2x2, puente, la V2 aleatoria jugada con ellas, limpiezas, entropía, reloj sin forzadas, a3 y las otras referencias | No se calcula; lo nombra la línea del `.md`. El número único regular frente al fijo entregado dice "no se corre (enmienda 2)" y la columna del ciclo mínimo queda vacía | E06, E10, M10, M24 |
+| 3 | Queda la V2 regular frente al fijo fino, con el veto del actuado ajustado | Sin cambios: la etiqueta por caso, H3, H3e y H6 salen de los 98 CSV regulares | M06, M07, M16, M18, E08 |
+| 4 | No queda ninguna promoción regular, tampoco en P2, D ni 2715 | Las celdas regulares no tienen candidatas, aunque apareciera un CSV de un brazo quitado: citan V2 | E04, E05, E09 |
+| 5 | Sale `promo_juntar` (pedía también las decisiones regulares): nadie escribe `promocion.json` | Sin `promocion.json` ni trabajo que lo escriba, cada celda aleatoria lee su `promocion/<esc>.json`, la `--salida` de su trabajo de `p3_promocion decidir`. En `--final` esa decisión está sellada, commiteada antes del cierre y se vuelve a calcular (`comprobar_decisiones`) | E09, M04c, M07b, M31 |
+| 6 | La lista de la enmienda decide qué no se corre | `doc/enmienda_2_quitados.txt` entra en `CODIGO`: sin cambios sin commitear en `--final` y su blob va en la procedencia | — |
+| 7 | El mundo sintético | 763 CSV del generador (767 de la enmienda menos las dos bases caídas), sin la política por red. El veto en P2 regular, la promoción en P1 aleatoria (reloj de 2 s), el ciclo mínimo en la mezcla en la red y las referencias que faltan en el arranque lento | M00, M06-M10, M28e, M28j |
 
 ## Ajuste al generador nuevo y al sello real (05.11, noche)
 
@@ -281,7 +304,7 @@ ningún sello commiteado tiene sus CSV; cada brazo de la lista es el del generad
 | `cola/reemplazos.json` | Salidas viejas que se conservan y que otra reemplaza (§14, `_r2`) |
 | CSV de `evaluar3.py` (`ciego/...`, `parciales/...`) | Una fila por semilla; principal `retraso_total_prom`; secundarias, `generados` y `no_insertados` |
 | `politica_*.json`, `insumos/entregado/politica_*.json` | `val_elegido`, `ep_elegido`, `val_total_serie` (o la serie con que se eligió), criterio y semillas de validación |
-| `promocion.json` y `promocion/<escenario>.json` | Modelo citado (§12), con su sha256 |
+| `promocion.json` y `promocion/<escenario>.json` | Modelo citado (§12), con su sha256; con la enmienda 2 no hay `promocion.json` y cada celda lee su `promocion/<escenario>.json` |
 | `insumos/puente/eval_<esc>_*.csv` e `insumos/manifiesto.json` | Fijo e IPPO entregados en 1001-1030 (puente) y sus sha256 |
 | `<esc>.sumocfg` con su red y sus `.add.xml` (la plantilla versionada) | k de cada plantilla, para corregir los cambios de fase; en `--final`, cotejados con `insumos/manifiesto.json["."]` o con git desde `plan3-prerregistro-A` |
 | `listo/cierre.ok`, `cola/manifiesto_cierre.json`, `cola/manifiesto_ciego.json` y `listo/holdout.ok` en la historia de git, anclada a `origin/plan3` | `--final` y `--prueba-final` |
@@ -338,7 +361,7 @@ con `estricto` y `sello` (modo `--final`) exige todo lo de arriba.
 | `pub_info` | Versión publicada por `p3_elegir mediana`: **comprueba** que su base es la mediana de sus candidatas |
 | `entrada`, `filas_csv`, `serie`, `serie_insumo`, `k_cambios`, `plantilla_sin_verificar` | El CSV de un brazo en una tanda; T1x = t1r + h1t1; cotejo de semillas, brazo y base; los cambios de fase de rl_ippo menos k, y si k quedó sin verificar |
 | `comp`, `convergencia` | Comparación con caché (motivo si faltan datos o cambian los vehículos); convergencia de la versión [AMB-28] |
-| `promocion`, `citado` | Decisión de promoción por escenario (con sha256) y modelo citado [AMB-20] |
+| `promocion`, `citado` | Decisión de promoción por escenario (con sha256; sin `promocion.json`, la de `archivo_decision`) y modelo citado [AMB-20] |
 
 **Análisis y salidas.** `etiqueta_brazo`, `sentido_brazo`, `referencias_al_lado`, `filas_no_insertados`,
 `fila_celda` (fila de `veredicto3_celdas.csv` con las lecturas obligadas), `tabla_bases`, `pruebas_definidas` (todas las
@@ -358,7 +381,7 @@ con `p3_promocion`; dos mañanas commiteadas; el sello de `manifiesto.py` y el c
 `promocion_mundo`) las usa también `pruebas/ver/prueba_protocolo.py`. Aparte, `pruebas/ver/prueba_k_humo.py` (corre
 SUMO) y `pruebas/ver/prueba_protocolo.py` (el protocolo con los programas de verdad); ninguno entra en `--probar`.
 
-## Pruebas y resultados (202 de 202 pasan; el protocolo, 73 de 73)
+## Pruebas y resultados (199 de 199 pasan; el protocolo, 73 de 73)
 
 **1. Las del prototipo, con lo entregado de `plan2/` (solo lectura).** P01-P18 y P08b: la regla no cambió
 (`veredicto.probar()`); la V2 de P6 da meseta 3.19 % y estabilidad 0.00 % (P02; con x[3], 9.43 % y "no convergió");
@@ -380,21 +403,22 @@ A5), margen +2 %, demanda con `exp()`, mismos vehículos en P1, H6 y no inferior
 | N14 semillas del prerregistro; N15 lectura conjunta de la no inferioridad (8 casos); N16 `acuerdo` sin StopIteration; N17 criterio y semillas de las bases; N18 k de las plantillas de plan3 y por dónde corre cada brazo; N19 plantilla con un archivo que falta (k None) y lo que se verifica en `--final`; N20 las reglas de `cola/caidas.json`, iguales en el generador y en veredicto3 (también `p3c0`, un escenario mal escrito y otra celda) | pasan |
 | N21 una corrida rehecha (`r2`); N22 `cambio_desde_tag` frente a un repositorio de prueba; N23 JSON con BOM e inválido; N24 sha256 de la lista sin CR; N25 una familia sin bases en el generador; N26 las reglas de `cola/reemplazos.json`; N27 `holdout.ok` en UTF-16, con BOM o con dos líneas; N28 rutas con './', '\' u otra mayúscula; N29 el origin de PLAN3.md §5 | pasan |
 
-**3. Mundo sintético de punta a punta** (`tmp_ver/mundo/plan3`: 32 celdas, 1515 CSV = 1489 del generador + 30 de la
-política por red − 4 referencias quitadas).
+**3. Mundo sintético de punta a punta** (`tmp_ver/mundo/plan3`: 19 celdas, 759 CSV = 763 del generador − 4
+referencias quitadas; con la enmienda 2 ya no se agrega la política por red).
 
 | Prueba | Resultado |
 |---|---|
 | M00-M00b: el manifiesto es el del generador, sin duplicados; solo se agrega lo que falta (y una segunda vez nada); el generador no evalúa las bases caídas; el sello es el de `manifiesto.py` (CSV, cada `.pt` y `.json`, otros, último commit de la mañana) | pasan |
 | M01-M04w: `--final` se niega sin `cierre.ok`, con un CSV o un meta cambiado después del cierre, sin sello, con semillas de humo, con `promocion.json` cambiado o `caidas.json` sin sellar; ERROR con un meta que se lee sin sellar, un CSV de `ciego/` que no está en ninguna mañana o que cambió después de su mañana (aunque se vuelva a sellar), una base con CSV sin meta, una base sin CSV sin declarar, `caidas.json` sin los dos intentos o con una corrida que no es de su base (y se acepta la fecha una vez por declaración), un CSV con otro brazo que el de su trabajo (política, fijo fino con el nombre del de 5 en 5, regla simple con nombre de Max-Pressure, reactiva con nombre de regla simple), un CSV dos veces en el manifiesto, dos CSV con el mismo brazo y sin `trabajos.jsonl`; el cierre no pide sellar el CSV que no existe de una base caída declarada, y sí el de una base sin declarar; una base declarada caída con CSV (en disco o en una mañana): ERROR; un sello nuevo con otro meta, o con un manifiesto que suma algo que no es la prueba final: se niega | pasan |
-| M05 las 6 salidas; M06 etiqueta citable de V2 en 17 celdas (todas las filas de la tabla de §7, PENDIENTE por convergencia y por referencia faltante); M06b las 6 celdas de perfil, mezcla y arranque lento | 18/18 |
-| M07-M11d: veto en D y citado PENDIENTE sin decisión de promoción; P2 promovida por `p3_promocion` (−3.27 % en la validación) con V2 al lado; "se repite 4 de 5" y la lectura de P6; ciclo mínimo; probabilidad por ruido; P4 aleatoria con dos bases caídas: 3 de 5; vehículos sin entrar en P2 aleatoria con su lectura | pasan |
-| M12-M24b: H1 (global no pasa y nombra "P5 es peor en T2x (+6.07 %)"; P5 contradictorio), H2, H3/H3e, H5 (4 de 6: P4 cae por las bases caídas), H6, H7r (lectura de §11), H8a/H8b, H12 (no se corre), H10 (red sin datos: "no se pudo correr en 7"; corredor con la política por red: 4 de 5 niveles, pasa), H14 y H15 (AMB-18), número único = cálculo directo y "provisional en P3" | pasan |
-| M25-M28j: vehículos distintos en una referencia (m2715, fijo ajustado desde 10 s), tabla de bases (convergencia, candidatas, caídas con sus intentos), `.md` (tabla, lecturas, no insertados, promoción, frase de §17), avisos (una línea para promo), a3 (42 filas, todas "mayor"), perfil y mezcla (6 celdas, bloques al lado en el perfil), C0 aleatorio con `v2reg3poi`, celda sin modelo principal, regla reactiva (lectura en P3 regular, no en P1; en H0) | pasan |
-| M29-M31: versión publicada que no es la mediana, CSV con una semilla de más y promoción alterada: ERROR | pasan |
+| M05 las 6 salidas; M06 etiqueta citable de V2 en 14 celdas (todas las filas de la tabla de §7, PENDIENTE por convergencia y por referencia faltante); M06b las 6 celdas de perfil, mezcla y arranque lento | 15/15 |
+| M07-M11d: veto en P2 regular; citado PENDIENTE sin decisión de promoción (P3 aleatoria); P1 aleatoria promovida por `p3_promocion` (reloj de 2 s, −3 % en la validación) con V2 al lado; "se repite 4 de 5" y la lectura de P6; ciclo mínimo (la mezcla en la red; con llegadas regulares, vacío); probabilidad por ruido; P4 aleatoria con dos bases caídas: 3 de 5; vehículos sin entrar en P2 aleatoria con su lectura | pasan |
+| M16-M24b: H3/H3e, H5 (4 de 6: P4 cae por las bases caídas), H6, H8b, H12 (no se corre), H14 y H15 (AMB-18), número único = cálculo directo (frente al fijo entregado, con llegadas regulares: no se corre) y "provisional en P3" | pasan |
+| M25-M28j: vehículos distintos en una referencia (P5 aleatoria, fijo por franja), tabla de bases (convergencia, candidatas, caídas con sus intentos), `.md` (tabla, lecturas, no insertados, promoción, frase de §17), avisos (una línea para promo), a3 (24 filas, todas "mayor"), perfil y mezcla (6 celdas, bloques al lado en el perfil), C0 aleatorio con `v2reg3poi`, celda sin modelo principal, regla reactiva (lectura en la mezcla en la red, no en P1 aleatoria; en H0) | pasan |
+| M29-M31: versión publicada que no es la mediana, CSV con una semilla de más y una decisión de promoción que es la de otra celda: ERROR | pasan |
 | M32-M38: prueba final (tanda de uso 'final' simulada con humo): no entra al veredicto; el sello nuevo sale sin problemas, no sella sus CSV y solo agrega la prueba final (se acepta); un sello con sus CSV se niega; sin `holdout.ok` o con otro sha256 se niega; sin el bloque completo, con una métrica vacía, con otros vehículos, con un CSV que ya estaba en una mañana anterior a `holdout.ok`, que cambió después de su mañana o que está en el sello, se niega sin cerrar el candado; corre una vez y no dos. Un sello cuya última mañana no está en la historia, una mañana posterior con otro sha256 y una mañana con un CSV de T1 que el cierre no selló: se niega. Caídas por corrida, con o sin la corrida en la declaración: las mismas 10 bases que deja de evaluar el generador. Cambios de fase: a V2 y a la regla de P1 se les resta 1 y al fijo fino nada; en P3, 0; el k de la nota de cada fila es el que se le resta al citado; una plantilla sin verificar marca la fila | pasan |
 | M39 `manifiesto.py revisar` nombra la base caída declarada después; M40 un clon superficial; M41 un push forzado desde otro clon: se niega en cada corrida (no solo la primera) y con la rama de vuelta corre; M07b sin la decisión de promoción, el citado queda PENDIENTE; M35d-M35e un reemplazo que no es una corrida rehecha | pasan |
-| E01-E05 (enmienda 1): la lista de pruebas sin lo quitado y Holm sobre lo que queda; ERROR si el generador quita otra cosa que la tabla de la enmienda; "no se corre (enmienda 1)" en el CSV y el `.md`; las 5 celdas regulares sin candidatas citan V2 sin decisión de promoción (también con un CSV de un brazo quitado y en `--final`) | pasan |
+| E01-E05 (enmienda 1): la lista de pruebas sin lo quitado y Holm sobre lo que queda; ERROR si el generador quita otra cosa que la tabla de la enmienda; "no se corre (enmienda 1)" en el CSV y el `.md`; con la 2, las 7 celdas regulares sin candidatas citan V2 sin decisión de promoción (también con un CSV de un brazo quitado y en `--final`) | pasan |
+| E06-E11 (enmienda 2): el plan tiene los 767 CSV y ninguno de los 796 trabajos quitados; no queda ninguna prueba regular, y ERROR si el plan dejara una de las familias que la enmienda deja sin casos; "no se corre (enmienda 2)" en el CSV y el `.md`; H3, H3e y H6 con los 98 CSV regulares; sin promoción regular ni `promocion.json`; un CSV regular de lo quitado no revive H1 | pasan |
 | G01 `git status --porcelain --ignored -- plan2 TESIS` vacío, rc 0 | pasa |
 
 ## Ambigüedades del prerregistro y lectura implementada
