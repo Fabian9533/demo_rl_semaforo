@@ -46,6 +46,16 @@ Con llegadas regulares, la Etapa 3 corre solo en 2715, D y P2, y la 3b no corre.
 evaluación del examen. Va más allá de lo que permite la §14, así que se declara como desviación. El detalle está en
 `plan3/doc/enmienda_1.md`.
 
+## 5. Enmienda 2: solo tráfico aleatorio, más un análisis regular simple (07.11.2026)
+
+- Con llegadas regulares quedan solo la V2 regular de cada base, el fijo afinado y el actuado afinado en P1-P6 y P6e
+  (98 evaluaciones), lo que lo aleatorio necesita y lo ya hecho.
+- Salen 796 trabajos pendientes y la Etapa 4.
+- Se decidió antes de cualquier evaluación del examen.
+- Va más allá de lo que permite la §14, así que se declara como desviación.
+
+El detalle está en `plan3/doc/enmienda_2.md`.
+
 ## 2. Cambios de fase: corrección de un error de conteo (05.11.2026)
 
 **Qué pasó.** `rl_ippo.py` cuenta un cambio de más por cada semáforo que la plantilla arranca fuera de su primer verde.

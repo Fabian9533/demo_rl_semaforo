@@ -261,6 +261,29 @@ def queda(et, celda):
     return et.endswith("poi") or (et, celda) not in QUITADOS_ENMIENDA1
 
 
+# ---------------- Enmienda 2 (07.11.2026): solo trafico aleatorio, con un analisis regular simple (enmienda_2.md) ----
+# Con llegadas regulares quedan la V2 regular por base y el fijo fino en P1-P6 y P6e (T1 y T2), lo que lo aleatorio
+# necesita y lo ya hecho. Los trabajos que salen, todos pendientes al fijarla, van por id en doc/enmienda_2_quitados.txt
+# (la lista la arma la regla de enmienda_2.md; aqui solo se aplica). La Etapa 4 no se agrega.
+QUITADOS_E2_TXT = os.path.join(PLAN3, "doc", "enmienda_2_quitados.txt")
+
+
+def quitados_enmienda2():
+    with open(QUITADOS_E2_TXT, encoding="utf-8") as f:
+        return {linea.strip() for linea in f if linea.strip()}
+
+
+def aplicar_enmienda2(lista):
+    """Saca de la lista y del manifiesto los trabajos de la enmienda 2; ninguno de los que quedan puede requerirlos."""
+    fuera = quitados_enmienda2()
+    lista.trabajos = [t for t in lista.trabajos if t["id"] not in fuera]
+    lista.ids -= fuera
+    lista.manifiesto = [m for m in lista.manifiesto if m["trabajo"] not in fuera]
+    malos = [(t["id"], r) for t in lista.trabajos for r in t["requiere"] if r.startswith("trabajo:") and r[8:] in fuera]
+    if malos:
+        raise ValueError(f"enmienda 2: {len(malos)} trabajos que quedan requieren uno quitado, p. ej. {malos[0]}")
+
+
 def etapa3b(lista, tipos=TIPOS_3B):
     op = "--v2 --lr-horizonte 200 --lr-piso 0.1"
     for tipo, celdas, et_v2, et, pref_v2 in (("reg", CASOS, "p3v2reg", "p3e400", "e1_v2reg"),
@@ -1069,6 +1092,7 @@ def generar(partes):
     lista = Lista()
     for p in partes:
         PARTES[p](lista)
+    aplicar_enmienda2(lista)
     return lista.trabajos
 
 
@@ -1078,6 +1102,7 @@ def generar_con_manifiesto(partes):
     lista = Lista()
     for p in partes:
         PARTES[p](lista)
+    aplicar_enmienda2(lista)
     return lista.trabajos, lista.manifiesto
 
 
