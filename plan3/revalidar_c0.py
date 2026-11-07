@@ -40,8 +40,18 @@ def validar(a, rl_ippo):
     eps = [int(x) for x in a.eps.split(",")]
     res = {"escenario": a.escenario, "corrida": a.corrida, "origen": a.origen, "val_seeds": semillas,
            "checkpoints": []}
-    if os.path.exists(a.salida):
+    # El avance va a <salida>.parcial; la salida declarada se escribe solo completa, al final. Si el proceso o la cola
+    # se cortan, la salida no existe y la cola no da el trabajo por hecho (06.11: un corte dejo diez salidas a medias
+    # que la cola tomo por completas). Una salida incompleta de antes se pasa a .parcial y se retoma desde ahi.
+    parcial = a.salida + ".parcial"
+    if os.path.exists(a.salida) and not os.path.exists(parcial):
         with open(a.salida, encoding="utf-8") as f:
+            previa = json.load(f)
+        if sorted(c["ep"] for c in previa["checkpoints"]) != sorted(eps):
+            os.replace(a.salida, parcial)
+    fuente = parcial if os.path.exists(parcial) else (a.salida if os.path.exists(a.salida) else None)
+    if fuente:
+        with open(fuente, encoding="utf-8") as f:
             res = json.load(f)
         assert res["val_seeds"] == semillas and res["corrida"] == a.corrida, "otra validacion en el mismo archivo"
     hechos = {c["ep"] for c in res["checkpoints"]}
@@ -52,7 +62,7 @@ def validar(a, rl_ippo):
     os.makedirs(carpeta_tmp, exist_ok=True)
     tripinfo = os.path.join(carpeta_tmp, f"tripinfo_{os.path.splitext(os.path.basename(a.salida))[0]}_val.xml")
     try:
-        _validar_checkpoints(a, rl_ippo, res, hechos, eps, semillas, tripinfo)
+        _validar_checkpoints(a, rl_ippo, res, hechos, eps, semillas, tripinfo, parcial)
     finally:
         import shutil
         shutil.rmtree(carpeta_tmp, ignore_errors=True)
@@ -60,9 +70,11 @@ def validar(a, rl_ippo):
     if faltan:
         sys.exit(f"faltan checkpoints: {faltan}")
     escribir_json(a.salida, res)
+    if os.path.exists(parcial):
+        os.remove(parcial)
 
 
-def _validar_checkpoints(a, rl_ippo, res, hechos, eps, semillas, tripinfo):
+def _validar_checkpoints(a, rl_ippo, res, hechos, eps, semillas, tripinfo, destino):
     for ep in eps:
         if ep in hechos:
             continue
@@ -89,7 +101,7 @@ def _validar_checkpoints(a, rl_ippo, res, hechos, eps, semillas, tripinfo):
                                    **{f"val_total_{s}": fila[f"val_total_{s}"] for s in semillas},
                                    "control_reproducido": sorted(control), "segundos": round(time.time() - t0, 1)})
         res["checkpoints"].sort(key=lambda c: c["ep"])
-        escribir_json(a.salida, res)
+        escribir_json(destino, res)             # el avance, en .parcial (la salida va completa al final)
         print(f"{a.corrida} ep{ep:03d} en {a.escenario}: validado ({res['checkpoints'][-1]['segundos']} s; "
               f"control {sorted(control) or 'no aplica'})", flush=True)
 
