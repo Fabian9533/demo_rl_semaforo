@@ -1,0 +1,317 @@
+{
+ "escenario": "corredor",
+ "variante": "vecinos",
+ "algoritmo": "ippo",
+ "recompensa": "retraso",
+ "etiqueta": "p3v2viejamed",
+ "opciones": {
+  "v2": true,
+  "recompensa_insercion": false,
+  "etiqueta": "p3v2reg",
+  "criterio_val": "total"
+ },
+ "descuento": "por segundo: gamma^(dt/5)",
+ "exploracion": "comun: un u por segundo, default_rng(semilla + 104729)",
+ "recompensa_insercion": "no",
+ "criterio_validacion": "timeLoss medio en 999 y 1999 (regla del 25.09)",
+ "base": 42,
+ "episodios": 200,
+ "dim_obs": 31,
+ "n_id": 3,
+ "lados": [
+  "oeste",
+  "este"
+ ],
+ "ocultas": 64,
+ "hiper": {
+  "gamma": 0.95,
+  "lam": 0.95,
+  "clip": 0.2,
+  "epocas": 10,
+  "minibatch": 64,
+  "lr": 0.001,
+  "ent": 0.01,
+  "valor": 0.5,
+  "grad": 0.5
+ },
+ "w1": 1.0,
+ "w2": 0.01,
+ "w3": 2.0,
+ "w4": 2.0,
+ "escala_r": 0.02,
+ "fase_av": {
+  "semaforo_C1": 1,
+  "semaforo_C2": 1
+ },
+ "vecinos": {
+  "semaforo_C1": {
+   "oeste": null,
+   "este": [
+    "semaforo_C2",
+    "C2_C1",
+    "C1_C2"
+   ]
+  },
+  "semaforo_C2": {
+   "oeste": [
+    "semaforo_C1",
+    "C1_C2",
+    "C2_C1"
+   ],
+   "este": null
+  }
+ },
+ "cap": {
+  "W_C1": 52,
+  "C2_C1": 38,
+  "N1_C1": 52,
+  "S1_C1": 52,
+  "C1_C2": 38,
+  "E_C2": 52,
+  "N2_C2": 52,
+  "S2_C2": 52
+ },
+ "plazas": {
+  "C1_C2": 38,
+  "C2_C1": 38
+ },
+ "umbral_spillback": 0.9,
+ "latencia_entrenamiento": 0,
+ "perdida_entrenamiento": 0.0,
+ "val_seeds": [
+  999,
+  1999,
+  2999,
+  3999,
+  4999,
+  7999,
+  8999,
+  9999,
+  15001,
+  15002,
+  15003,
+  15004,
+  15005,
+  15006,
+  15007,
+  15008
+ ],
+ "eval_seed": 999,
+ "torch": "2.14.0+cpu",
+ "python": "3.14.6",
+ "sumo": "1.25.0",
+ "git": "8cc7921",
+ "features": [
+  "cola_o",
+  "cola_e",
+  "cola_n",
+  "cola_s",
+  "movil_o",
+  "movil_e",
+  "movil_n",
+  "movil_s",
+  "fase_0",
+  "fase_1",
+  "t_verde",
+  "puede_cambiar",
+  "id_C1",
+  "id_C2",
+  "id_libre2",
+  "oeste_presente",
+  "oeste_verde_hacia_mi",
+  "oeste_ambar",
+  "oeste_t_fase",
+  "oeste_outflow",
+  "oeste_cola_alimentadora",
+  "oeste_cola_mi_salida",
+  "oeste_edad",
+  "este_presente",
+  "este_verde_hacia_mi",
+  "este_ambar",
+  "este_t_fase",
+  "este_outflow",
+  "este_cola_alimentadora",
+  "este_cola_mi_salida",
+  "este_edad"
+ ],
+ "ep_checkpoint": 180,
+ "val_checkpoint": 19.752,
+ "val_999": 19.77,
+ "val_1999": 19.44,
+ "val_2999": 19.36,
+ "val_3999": 19.6,
+ "val_4999": 19.59,
+ "val_7999": 19.97,
+ "val_8999": 20.36,
+ "val_9999": 20.02,
+ "val_15001": 19.89,
+ "val_15002": 19.41,
+ "val_15003": 19.69,
+ "val_15004": 19.81,
+ "val_15005": 20.51,
+ "val_15006": 19.66,
+ "val_15007": 19.21,
+ "val_15008": 19.74,
+ "val_total_checkpoint": 20.126,
+ "val_total_999": 20.14,
+ "val_total_1999": 19.81,
+ "val_total_2999": 19.73,
+ "val_total_3999": 19.97,
+ "val_total_4999": 19.97,
+ "val_total_7999": 20.34,
+ "val_total_8999": 20.74,
+ "val_total_9999": 20.4,
+ "val_total_15001": 20.26,
+ "val_total_15002": 19.79,
+ "val_total_15003": 20.06,
+ "val_total_15004": 20.18,
+ "val_total_15005": 20.89,
+ "val_total_15006": 20.03,
+ "val_total_15007": 19.59,
+ "val_total_15008": 20.12,
+ "ep_elegido": 180,
+ "val_elegido": 19.605,
+ "regla_eleccion": "vieja",
+ "corrida_origen": "corredor_ippo_vecinos_p3v2reg_s42",
+ "serie_eleccion": [
+  [
+   10,
+   21.41,
+   21.36,
+   21.385
+  ],
+  [
+   20,
+   20.75,
+   20.93,
+   20.84
+  ],
+  [
+   30,
+   21.27,
+   20.85,
+   21.06
+  ],
+  [
+   40,
+   21.16,
+   20.34,
+   20.75
+  ],
+  [
+   50,
+   20.35,
+   20.21,
+   20.28
+  ],
+  [
+   60,
+   21.02,
+   20.25,
+   20.635
+  ],
+  [
+   70,
+   19.76,
+   20.65,
+   20.205
+  ],
+  [
+   80,
+   20.07,
+   20.14,
+   20.105
+  ],
+  [
+   90,
+   20.55,
+   20.4,
+   20.475
+  ],
+  [
+   100,
+   20.35,
+   20.1,
+   20.225
+  ],
+  [
+   110,
+   19.75,
+   19.48,
+   19.615
+  ],
+  [
+   120,
+   19.93,
+   20.17,
+   20.05
+  ],
+  [
+   130,
+   20.05,
+   19.69,
+   19.87
+  ],
+  [
+   140,
+   20.44,
+   20.2,
+   20.32
+  ],
+  [
+   150,
+   20.57,
+   20.93,
+   20.75
+  ],
+  [
+   160,
+   19.74,
+   20.07,
+   19.905
+  ],
+  [
+   170,
+   20.11,
+   20.01,
+   20.06
+  ],
+  [
+   180,
+   19.77,
+   19.44,
+   19.605
+  ],
+  [
+   190,
+   20.27,
+   19.62,
+   19.945
+  ],
+  [
+   200,
+   19.88,
+   19.92,
+   19.9
+  ]
+ ],
+ "version_evaluada": true,
+ "base_elegida": 42,
+ "candidatas": [
+  {
+   "base": 4042,
+   "val_elegido": 19.56,
+   "politica": "politica_corredor_vecinos_p3v2vieja_s4042.pt"
+  },
+  {
+   "base": 42,
+   "val_elegido": 19.605,
+   "politica": "politica_corredor_vecinos_p3v2vieja_s42.pt"
+  },
+  {
+   "base": 2042,
+   "val_elegido": 19.88,
+   "politica": "politica_corredor_vecinos_p3v2vieja_s2042.pt"
+  }
+ ]
+}

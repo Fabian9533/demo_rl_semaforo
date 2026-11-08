@@ -1,0 +1,257 @@
+{
+ "escenario": "dem_corredor_t2715",
+ "variante": "vecinos",
+ "algoritmo": "ippo",
+ "recompensa": "retraso",
+ "base": 2042,
+ "episodios": 200,
+ "dim_obs": 31,
+ "n_id": 3,
+ "lados": [
+  "oeste",
+  "este"
+ ],
+ "ocultas": 64,
+ "hiper": {
+  "gamma": 0.95,
+  "lam": 0.95,
+  "clip": 0.2,
+  "epocas": 10,
+  "minibatch": 64,
+  "lr": 0.001,
+  "ent": 0.01,
+  "valor": 0.5,
+  "grad": 0.5
+ },
+ "w1": 1.0,
+ "w2": 0.01,
+ "w3": 2.0,
+ "w4": 2.0,
+ "escala_r": 0.02,
+ "fase_av": {
+  "semaforo_C1": 1,
+  "semaforo_C2": 1
+ },
+ "vecinos": {
+  "semaforo_C1": {
+   "oeste": null,
+   "este": [
+    "semaforo_C2",
+    "C2_C1",
+    "C1_C2"
+   ]
+  },
+  "semaforo_C2": {
+   "oeste": [
+    "semaforo_C1",
+    "C1_C2",
+    "C2_C1"
+   ],
+   "este": null
+  }
+ },
+ "cap": {
+  "W_C1": 52,
+  "C2_C1": 38,
+  "N1_C1": 52,
+  "S1_C1": 52,
+  "C1_C2": 38,
+  "E_C2": 52,
+  "N2_C2": 52,
+  "S2_C2": 52
+ },
+ "plazas": {
+  "C1_C2": 38,
+  "C2_C1": 38
+ },
+ "umbral_spillback": 0.9,
+ "latencia_entrenamiento": 0,
+ "perdida_entrenamiento": 0.0,
+ "val_seeds": [
+  999,
+  1999
+ ],
+ "eval_seed": 999,
+ "torch": "2.14.0+cpu",
+ "python": "3.14.6",
+ "sumo": "1.25.0",
+ "git": "7181ab8",
+ "features": [
+  "cola_o",
+  "cola_e",
+  "cola_n",
+  "cola_s",
+  "movil_o",
+  "movil_e",
+  "movil_n",
+  "movil_s",
+  "fase_0",
+  "fase_1",
+  "t_verde",
+  "puede_cambiar",
+  "id_C1",
+  "id_C2",
+  "id_libre2",
+  "oeste_presente",
+  "oeste_verde_hacia_mi",
+  "oeste_ambar",
+  "oeste_t_fase",
+  "oeste_outflow",
+  "oeste_cola_alimentadora",
+  "oeste_cola_mi_salida",
+  "oeste_edad",
+  "este_presente",
+  "este_verde_hacia_mi",
+  "este_ambar",
+  "este_t_fase",
+  "este_outflow",
+  "este_cola_alimentadora",
+  "este_cola_mi_salida",
+  "este_edad"
+ ],
+ "ep_elegido": 180,
+ "val_elegido": 55.78,
+ "val_serie": [
+  [
+   10,
+   106.36,
+   101.94,
+   104.15
+  ],
+  [
+   20,
+   80.72,
+   81.55,
+   81.135
+  ],
+  [
+   30,
+   67.87,
+   64.24,
+   66.055
+  ],
+  [
+   40,
+   61.42,
+   66.53,
+   63.975
+  ],
+  [
+   50,
+   59.57,
+   64.17,
+   61.87
+  ],
+  [
+   60,
+   58.49,
+   61.32,
+   59.905
+  ],
+  [
+   70,
+   53.82,
+   63.26,
+   58.54
+  ],
+  [
+   80,
+   60.15,
+   57.52,
+   58.835
+  ],
+  [
+   90,
+   62.1,
+   61.06,
+   61.58
+  ],
+  [
+   100,
+   56.61,
+   58.02,
+   57.315
+  ],
+  [
+   110,
+   60.21,
+   57.05,
+   58.63
+  ],
+  [
+   120,
+   57.23,
+   57.09,
+   57.16
+  ],
+  [
+   130,
+   60.24,
+   60.26,
+   60.25
+  ],
+  [
+   140,
+   60.9,
+   60.11,
+   60.505
+  ],
+  [
+   150,
+   56.49,
+   59.27,
+   57.88
+  ],
+  [
+   160,
+   56.61,
+   60.46,
+   58.535
+  ],
+  [
+   170,
+   55.41,
+   56.76,
+   56.085
+  ],
+  [
+   180,
+   56.99,
+   54.57,
+   55.78
+  ],
+  [
+   190,
+   58.45,
+   59.22,
+   58.835
+  ],
+  [
+   200,
+   56.44,
+   59.15,
+   57.795
+  ]
+ ],
+ "eval_999_final": 56.44,
+ "etiqueta": "p3entmed",
+ "version_evaluada": true,
+ "base_elegida": 2042,
+ "candidatas": [
+  {
+   "base": 4042,
+   "val_elegido": 55.37,
+   "politica": "insumos/entregado/politica_dem_corredor_t2715_vecinos_s4042.pt"
+  },
+  {
+   "base": 2042,
+   "val_elegido": 55.78,
+   "politica": "insumos/entregado/politica_dem_corredor_t2715_vecinos_s2042.pt"
+  },
+  {
+   "base": 42,
+   "val_elegido": 57.195,
+   "politica": "insumos/entregado/politica_dem_corredor_t2715_vecinos_s42.pt"
+  }
+ ]
+}

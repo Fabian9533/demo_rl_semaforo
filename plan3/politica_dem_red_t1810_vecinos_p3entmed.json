@@ -1,0 +1,276 @@
+{
+ "escenario": "dem_red_t1810",
+ "variante": "vecinos",
+ "algoritmo": "ippo",
+ "recompensa": "retraso",
+ "base": 2042,
+ "episodios": 200,
+ "dim_obs": 31,
+ "n_id": 3,
+ "lados": [
+  "oeste",
+  "este"
+ ],
+ "ocultas": 64,
+ "hiper": {
+  "gamma": 0.95,
+  "lam": 0.95,
+  "clip": 0.2,
+  "epocas": 10,
+  "minibatch": 64,
+  "lr": 0.001,
+  "ent": 0.01,
+  "valor": 0.5,
+  "grad": 0.5
+ },
+ "w1": 1.0,
+ "w2": 0.01,
+ "w3": 2.0,
+ "w4": 2.0,
+ "escala_r": 0.02,
+ "fase_av": {
+  "semaforo_C1": 0,
+  "semaforo_C2": 0,
+  "semaforo_C3": 0
+ },
+ "vecinos": {
+  "semaforo_C1": {
+   "oeste": null,
+   "este": [
+    "semaforo_C2",
+    "C2_C1",
+    "C1_C2"
+   ]
+  },
+  "semaforo_C2": {
+   "oeste": [
+    "semaforo_C1",
+    "C1_C2",
+    "C2_C1"
+   ],
+   "este": [
+    "semaforo_C3",
+    "C3_C2",
+    "C2_C3"
+   ]
+  },
+  "semaforo_C3": {
+   "oeste": [
+    "semaforo_C2",
+    "C2_C3",
+    "C3_C2"
+   ],
+   "este": null
+  }
+ },
+ "cap": {
+  "RE_C1": 72,
+  "C2_C1": 76,
+  "N1_C1": 38,
+  "S1_C1": 38,
+  "C1_C2": 76,
+  "C3_C2": 76,
+  "N2_C2": 38,
+  "S2_C2": 38,
+  "C2_C3": 76,
+  "E_C3": 104,
+  "N3_C3": 38,
+  "S3_C3": 38
+ },
+ "plazas": {
+  "C1_C2": 38,
+  "C2_C1": 38,
+  "C2_C3": 38,
+  "C3_C2": 38
+ },
+ "umbral_spillback": 0.9,
+ "latencia_entrenamiento": 0,
+ "perdida_entrenamiento": 0.0,
+ "val_seeds": [
+  999,
+  1999
+ ],
+ "eval_seed": 999,
+ "torch": "2.14.0+cpu",
+ "python": "3.14.6",
+ "sumo": "1.25.0",
+ "git": "7181ab8",
+ "features": [
+  "cola_o",
+  "cola_e",
+  "cola_n",
+  "cola_s",
+  "movil_o",
+  "movil_e",
+  "movil_n",
+  "movil_s",
+  "fase_0",
+  "fase_1",
+  "t_verde",
+  "puede_cambiar",
+  "id_C1",
+  "id_C2",
+  "id_C3",
+  "oeste_presente",
+  "oeste_verde_hacia_mi",
+  "oeste_ambar",
+  "oeste_t_fase",
+  "oeste_outflow",
+  "oeste_cola_alimentadora",
+  "oeste_cola_mi_salida",
+  "oeste_edad",
+  "este_presente",
+  "este_verde_hacia_mi",
+  "este_ambar",
+  "este_t_fase",
+  "este_outflow",
+  "este_cola_alimentadora",
+  "este_cola_mi_salida",
+  "este_edad"
+ ],
+ "ep_elegido": 20,
+ "val_elegido": 19.695,
+ "val_serie": [
+  [
+   10,
+   20.78,
+   20.77,
+   20.775
+  ],
+  [
+   20,
+   18.7,
+   20.69,
+   19.695
+  ],
+  [
+   30,
+   20.8,
+   20.3,
+   20.55
+  ],
+  [
+   40,
+   20.12,
+   20.27,
+   20.195
+  ],
+  [
+   50,
+   21.08,
+   20.9,
+   20.99
+  ],
+  [
+   60,
+   20.16,
+   20.47,
+   20.315
+  ],
+  [
+   70,
+   20.66,
+   20.17,
+   20.415
+  ],
+  [
+   80,
+   20.11,
+   20.14,
+   20.125
+  ],
+  [
+   90,
+   20.79,
+   20.24,
+   20.515
+  ],
+  [
+   100,
+   19.93,
+   20.88,
+   20.405
+  ],
+  [
+   110,
+   20.4,
+   20.76,
+   20.58
+  ],
+  [
+   120,
+   20.06,
+   20.57,
+   20.315
+  ],
+  [
+   130,
+   20.82,
+   20.62,
+   20.72
+  ],
+  [
+   140,
+   20.51,
+   20.58,
+   20.545
+  ],
+  [
+   150,
+   19.94,
+   20.29,
+   20.115
+  ],
+  [
+   160,
+   20.33,
+   20.59,
+   20.46
+  ],
+  [
+   170,
+   19.91,
+   20.41,
+   20.16
+  ],
+  [
+   180,
+   20.44,
+   20.24,
+   20.34
+  ],
+  [
+   190,
+   20.02,
+   20.29,
+   20.155
+  ],
+  [
+   200,
+   20.11,
+   20.36,
+   20.235
+  ]
+ ],
+ "eval_999_final": 20.11,
+ "etiqueta": "p3entmed",
+ "version_evaluada": true,
+ "base_elegida": 2042,
+ "candidatas": [
+  {
+   "base": 4042,
+   "val_elegido": 18.735,
+   "politica": "insumos/entregado/politica_dem_red_t1810_vecinos_s4042.pt"
+  },
+  {
+   "base": 2042,
+   "val_elegido": 19.695,
+   "politica": "insumos/entregado/politica_dem_red_t1810_vecinos_s2042.pt"
+  },
+  {
+   "base": 42,
+   "val_elegido": 19.825,
+   "politica": "insumos/entregado/politica_dem_red_t1810_vecinos_s42.pt"
+  }
+ ]
+}
