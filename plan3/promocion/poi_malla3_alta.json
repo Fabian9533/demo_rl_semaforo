@@ -1,0 +1,52 @@
+{
+ "celda": "poi_malla3_alta",
+ "semillas": "15009-15024",
+ "margen_pct": -1.0,
+ "v2": {
+  "brazo": "ippo_vecinos_p3v2poi3med_s4042",
+  "csv": "parciales/promo/eval_poi_malla3_alta__p3v2poi3med.csv",
+  "retraso_total_medio": 42.62
+ },
+ "candidatos": [
+  {
+   "brazo": "ippo_vecinos_p3completopoimed_s2042",
+   "csv": "parciales/promo/eval_poi_malla3_alta__p3completopoimed.csv",
+   "retraso_total_medio": 38.8738,
+   "cambio_vs_v2_pct": -8.79
+  },
+  {
+   "brazo": "ippo_vecinos_p3obspoimed_s2042",
+   "csv": "parciales/promo/eval_poi_malla3_alta__p3obspoimed.csv",
+   "retraso_total_medio": 39.6838,
+   "cambio_vs_v2_pct": -6.889
+  },
+  {
+   "brazo": "ippo_vecinos_p3e400poimed_s4042",
+   "csv": "parciales/promo/eval_poi_malla3_alta__p3e400poimed.csv",
+   "retraso_total_medio": 40.3862,
+   "cambio_vs_v2_pct": -5.241
+  },
+  {
+   "brazo": "ippo_vecinos_p3v2poi3med_s4042",
+   "csv": "parciales/promo/eval_poi_malla3_alta__p3v2poi3med.csv",
+   "retraso_total_medio": 42.62,
+   "cambio_vs_v2_pct": 0.0
+  },
+  {
+   "brazo": "ippo_vecinos_p3reloj2poimed_s2042",
+   "csv": "parciales/promo/eval_poi_malla3_alta__p3reloj2poimed.csv",
+   "retraso_total_medio": 44.185,
+   "cambio_vs_v2_pct": 3.672
+  }
+ ],
+ "promovido": true,
+ "modelo_citado": "ippo_vecinos_p3completopoimed_s2042",
+ "csv_citado": "parciales/promo/eval_poi_malla3_alta__p3completopoimed.csv",
+ "sha256": {
+  "parciales/promo/eval_poi_malla3_alta__p3completopoimed.csv": "56b8320dd860626d4086f83a9fdcdf0cdbdf616b88b86d2c316bfa8e5805995f",
+  "parciales/promo/eval_poi_malla3_alta__p3obspoimed.csv": "a99bf3334ee90fdeb7d4078ca0fb23e1891f965d8a09d301027c6f5b77d503c6",
+  "parciales/promo/eval_poi_malla3_alta__p3e400poimed.csv": "661fdf4e98bfc830dad0ae755db8ab0691f741068865032a0eae7c461269355b",
+  "parciales/promo/eval_poi_malla3_alta__p3v2poi3med.csv": "fbb255dd5266e71433844a9f79c69e101b0f948f5b6cd636da61f3da26821792",
+  "parciales/promo/eval_poi_malla3_alta__p3reloj2poimed.csv": "a8ffa2881392982976cfccc48d956da7763463a74fa3f5a25449a34ad794297c"
+ }
+}
