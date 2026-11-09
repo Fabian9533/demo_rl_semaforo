@@ -1,0 +1,741 @@
+celda,escenario,llegadas,tanda,tipo,base,nombre,brazo,semillas,semillas_con_no_insertados,vehiculos_no_insertados
+P1,corredor,regulares,t1r,ref_actuadoaj,,actuado ajustado,actuado_aj,30,0,0
+P1,corredor,regulares,t2r,ref_actuadoaj,,actuado ajustado,actuado_aj,30,0,0
+P1,corredor,regulares,t1r,ref_fino,,fijo fino,fijo_fino,30,0,0
+P1,corredor,regulares,t2r,ref_fino,,fijo fino,fijo_fino,30,0,0
+P1,corredor,regulares,t1r,v2reg,42,"IPPO con mensajes corregido, base 42",ippo_vecinos_p3v2reg_s42,30,0,0
+P1,corredor,regulares,t2r,v2reg,42,"IPPO con mensajes corregido, base 42",ippo_vecinos_p3v2reg_s42,30,0,0
+P1,corredor,regulares,t1r,v2reg,2042,"IPPO con mensajes corregido, base 2042",ippo_vecinos_p3v2reg_s2042,30,0,0
+P1,corredor,regulares,t2r,v2reg,2042,"IPPO con mensajes corregido, base 2042",ippo_vecinos_p3v2reg_s2042,30,0,0
+P1,corredor,regulares,t1r,v2reg,4042,"IPPO con mensajes corregido, base 4042",ippo_vecinos_p3v2reg_s4042,30,0,0
+P1,corredor,regulares,t2r,v2reg,4042,"IPPO con mensajes corregido, base 4042",ippo_vecinos_p3v2reg_s4042,30,0,0
+P1,corredor,regulares,t1r,v2reg,14042,"IPPO con mensajes corregido, base 14042",ippo_vecinos_p3v2reg_s14042,30,0,0
+P1,corredor,regulares,t2r,v2reg,14042,"IPPO con mensajes corregido, base 14042",ippo_vecinos_p3v2reg_s14042,30,0,0
+P1,corredor,regulares,t1r,v2reg,16042,"IPPO con mensajes corregido, base 16042",ippo_vecinos_p3v2reg_s16042,30,0,0
+P1,corredor,regulares,t2r,v2reg,16042,"IPPO con mensajes corregido, base 16042",ippo_vecinos_p3v2reg_s16042,30,0,0
+P2,corredor_alta,regulares,t1r,ref_actuadoaj,,actuado ajustado,actuado_aj,30,0,0
+P2,corredor_alta,regulares,t2r,ref_actuadoaj,,actuado ajustado,actuado_aj,30,0,0
+P2,corredor_alta,regulares,t1r,ref_fino,,fijo fino,fijo_fino,30,0,0
+P2,corredor_alta,regulares,t2r,ref_fino,,fijo fino,fijo_fino,30,0,0
+P2,corredor_alta,regulares,t1r,v2reg,42,"IPPO con mensajes corregido, base 42",ippo_vecinos_p3v2reg_s42,30,0,0
+P2,corredor_alta,regulares,t2r,v2reg,42,"IPPO con mensajes corregido, base 42",ippo_vecinos_p3v2reg_s42,30,0,0
+P2,corredor_alta,regulares,t1r,v2reg,2042,"IPPO con mensajes corregido, base 2042",ippo_vecinos_p3v2reg_s2042,30,0,0
+P2,corredor_alta,regulares,t2r,v2reg,2042,"IPPO con mensajes corregido, base 2042",ippo_vecinos_p3v2reg_s2042,30,0,0
+P2,corredor_alta,regulares,t1r,v2reg,4042,"IPPO con mensajes corregido, base 4042",ippo_vecinos_p3v2reg_s4042,30,0,0
+P2,corredor_alta,regulares,t2r,v2reg,4042,"IPPO con mensajes corregido, base 4042",ippo_vecinos_p3v2reg_s4042,30,0,0
+P2,corredor_alta,regulares,t1r,v2reg,14042,"IPPO con mensajes corregido, base 14042",ippo_vecinos_p3v2reg_s14042,30,0,0
+P2,corredor_alta,regulares,t2r,v2reg,14042,"IPPO con mensajes corregido, base 14042",ippo_vecinos_p3v2reg_s14042,30,0,0
+P2,corredor_alta,regulares,t1r,v2reg,16042,"IPPO con mensajes corregido, base 16042",ippo_vecinos_p3v2reg_s16042,30,0,0
+P2,corredor_alta,regulares,t2r,v2reg,16042,"IPPO con mensajes corregido, base 16042",ippo_vecinos_p3v2reg_s16042,30,0,0
+P3,red,regulares,t1r,ref_actuadoaj,,actuado ajustado,actuado_aj,30,0,0
+P3,red,regulares,t2r,ref_actuadoaj,,actuado ajustado,actuado_aj,30,0,0
+P3,red,regulares,t1r,ref_fino,,fijo fino,fijo_fino,30,0,0
+P3,red,regulares,t2r,ref_fino,,fijo fino,fijo_fino,30,0,0
+P3,red,regulares,t1r,v2reg,42,"IPPO con mensajes corregido, base 42",ippo_vecinos_p3v2reg_s42,30,0,0
+P3,red,regulares,t2r,v2reg,42,"IPPO con mensajes corregido, base 42",ippo_vecinos_p3v2reg_s42,30,0,0
+P3,red,regulares,t1r,v2reg,2042,"IPPO con mensajes corregido, base 2042",ippo_vecinos_p3v2reg_s2042,30,0,0
+P3,red,regulares,t2r,v2reg,2042,"IPPO con mensajes corregido, base 2042",ippo_vecinos_p3v2reg_s2042,30,0,0
+P3,red,regulares,t1r,v2reg,4042,"IPPO con mensajes corregido, base 4042",ippo_vecinos_p3v2reg_s4042,30,0,0
+P3,red,regulares,t2r,v2reg,4042,"IPPO con mensajes corregido, base 4042",ippo_vecinos_p3v2reg_s4042,30,0,0
+P3,red,regulares,t1r,v2reg,14042,"IPPO con mensajes corregido, base 14042",ippo_vecinos_p3v2reg_s14042,30,0,0
+P3,red,regulares,t2r,v2reg,14042,"IPPO con mensajes corregido, base 14042",ippo_vecinos_p3v2reg_s14042,30,0,0
+P3,red,regulares,t1r,v2reg,16042,"IPPO con mensajes corregido, base 16042",ippo_vecinos_p3v2reg_s16042,30,0,0
+P3,red,regulares,t2r,v2reg,16042,"IPPO con mensajes corregido, base 16042",ippo_vecinos_p3v2reg_s16042,30,0,0
+P4,red_alta,regulares,t1r,ref_actuadoaj,,actuado ajustado,actuado_aj,30,0,0
+P4,red_alta,regulares,t2r,ref_actuadoaj,,actuado ajustado,actuado_aj,30,0,0
+P4,red_alta,regulares,t1r,ref_fino,,fijo fino,fijo_fino,30,0,0
+P4,red_alta,regulares,t2r,ref_fino,,fijo fino,fijo_fino,30,0,0
+P4,red_alta,regulares,t1r,v2reg,42,"IPPO con mensajes corregido, base 42",ippo_vecinos_p3v2reg_s42,30,0,0
+P4,red_alta,regulares,t2r,v2reg,42,"IPPO con mensajes corregido, base 42",ippo_vecinos_p3v2reg_s42,30,0,0
+P4,red_alta,regulares,t1r,v2reg,2042,"IPPO con mensajes corregido, base 2042",ippo_vecinos_p3v2reg_s2042,30,0,0
+P4,red_alta,regulares,t2r,v2reg,2042,"IPPO con mensajes corregido, base 2042",ippo_vecinos_p3v2reg_s2042,30,0,0
+P4,red_alta,regulares,t1r,v2reg,4042,"IPPO con mensajes corregido, base 4042",ippo_vecinos_p3v2reg_s4042,30,0,0
+P4,red_alta,regulares,t2r,v2reg,4042,"IPPO con mensajes corregido, base 4042",ippo_vecinos_p3v2reg_s4042,30,0,0
+P4,red_alta,regulares,t1r,v2reg,14042,"IPPO con mensajes corregido, base 14042",ippo_vecinos_p3v2reg_s14042,30,0,0
+P4,red_alta,regulares,t2r,v2reg,14042,"IPPO con mensajes corregido, base 14042",ippo_vecinos_p3v2reg_s14042,30,0,0
+P4,red_alta,regulares,t1r,v2reg,16042,"IPPO con mensajes corregido, base 16042",ippo_vecinos_p3v2reg_s16042,30,0,0
+P4,red_alta,regulares,t2r,v2reg,16042,"IPPO con mensajes corregido, base 16042",ippo_vecinos_p3v2reg_s16042,30,0,0
+P5,malla3,regulares,t1r,ref_actuadoaj,,actuado ajustado,actuado_aj,30,0,0
+P5,malla3,regulares,t2r,ref_actuadoaj,,actuado ajustado,actuado_aj,30,0,0
+P5,malla3,regulares,t1r,ref_fino,,fijo fino,fijo_fino,30,0,0
+P5,malla3,regulares,t2r,ref_fino,,fijo fino,fijo_fino,30,0,0
+P5,malla3,regulares,t1r,v2reg,42,"IPPO con mensajes corregido, base 42",ippo_vecinos_p3v2reg_s42,30,0,0
+P5,malla3,regulares,t2r,v2reg,42,"IPPO con mensajes corregido, base 42",ippo_vecinos_p3v2reg_s42,30,0,0
+P5,malla3,regulares,t1r,v2reg,2042,"IPPO con mensajes corregido, base 2042",ippo_vecinos_p3v2reg_s2042,30,0,0
+P5,malla3,regulares,t2r,v2reg,2042,"IPPO con mensajes corregido, base 2042",ippo_vecinos_p3v2reg_s2042,30,0,0
+P5,malla3,regulares,t1r,v2reg,4042,"IPPO con mensajes corregido, base 4042",ippo_vecinos_p3v2reg_s4042,30,0,0
+P5,malla3,regulares,t2r,v2reg,4042,"IPPO con mensajes corregido, base 4042",ippo_vecinos_p3v2reg_s4042,30,0,0
+P5,malla3,regulares,t1r,v2reg,14042,"IPPO con mensajes corregido, base 14042",ippo_vecinos_p3v2reg_s14042,30,0,0
+P5,malla3,regulares,t2r,v2reg,14042,"IPPO con mensajes corregido, base 14042",ippo_vecinos_p3v2reg_s14042,30,0,0
+P5,malla3,regulares,t1r,v2reg,16042,"IPPO con mensajes corregido, base 16042",ippo_vecinos_p3v2reg_s16042,30,0,0
+P5,malla3,regulares,t2r,v2reg,16042,"IPPO con mensajes corregido, base 16042",ippo_vecinos_p3v2reg_s16042,30,0,0
+P6,malla3_alta,regulares,t1r,ref_actuadoaj,,actuado ajustado,actuado_aj,30,0,0
+P6,malla3_alta,regulares,t2r,ref_actuadoaj,,actuado ajustado,actuado_aj,30,0,0
+P6,malla3_alta,regulares,t1r,ref_fino,,fijo fino,fijo_fino,30,0,0
+P6,malla3_alta,regulares,t2r,ref_fino,,fijo fino,fijo_fino,30,0,0
+P6,malla3_alta,regulares,t1r,v2reg,42,"IPPO con mensajes corregido, base 42",ippo_vecinos_p3v2reg_s42,30,0,0
+P6,malla3_alta,regulares,t2r,v2reg,42,"IPPO con mensajes corregido, base 42",ippo_vecinos_p3v2reg_s42,30,0,0
+P6,malla3_alta,regulares,t1r,v2reg,2042,"IPPO con mensajes corregido, base 2042",ippo_vecinos_p3v2reg_s2042,30,0,0
+P6,malla3_alta,regulares,t2r,v2reg,2042,"IPPO con mensajes corregido, base 2042",ippo_vecinos_p3v2reg_s2042,30,0,0
+P6,malla3_alta,regulares,t1r,v2reg,4042,"IPPO con mensajes corregido, base 4042",ippo_vecinos_p3v2reg_s4042,30,0,0
+P6,malla3_alta,regulares,t2r,v2reg,4042,"IPPO con mensajes corregido, base 4042",ippo_vecinos_p3v2reg_s4042,30,0,0
+P6,malla3_alta,regulares,t1r,v2reg,14042,"IPPO con mensajes corregido, base 14042",ippo_vecinos_p3v2reg_s14042,30,0,0
+P6,malla3_alta,regulares,t2r,v2reg,14042,"IPPO con mensajes corregido, base 14042",ippo_vecinos_p3v2reg_s14042,30,0,0
+P6,malla3_alta,regulares,t1r,v2reg,16042,"IPPO con mensajes corregido, base 16042",ippo_vecinos_p3v2reg_s16042,30,0,0
+P6,malla3_alta,regulares,t2r,v2reg,16042,"IPPO con mensajes corregido, base 16042",ippo_vecinos_p3v2reg_s16042,30,0,0
+P6e,malla3_alta_e,regulares,t1r,ref_actuadoaj,,actuado ajustado,actuado_aj,30,0,0
+P6e,malla3_alta_e,regulares,t2r,ref_actuadoaj,,actuado ajustado,actuado_aj,30,0,0
+P6e,malla3_alta_e,regulares,t1r,ref_fino,,fijo fino,fijo_fino,30,0,0
+P6e,malla3_alta_e,regulares,t2r,ref_fino,,fijo fino,fijo_fino,30,0,0
+P6e,malla3_alta_e,regulares,t1r,v2reg,42,"IPPO con mensajes corregido, base 42",ippo_vecinos_p3v2reg_s42,30,0,0
+P6e,malla3_alta_e,regulares,t2r,v2reg,42,"IPPO con mensajes corregido, base 42",ippo_vecinos_p3v2reg_s42,30,0,0
+P6e,malla3_alta_e,regulares,t1r,v2reg,2042,"IPPO con mensajes corregido, base 2042",ippo_vecinos_p3v2reg_s2042,30,0,0
+P6e,malla3_alta_e,regulares,t2r,v2reg,2042,"IPPO con mensajes corregido, base 2042",ippo_vecinos_p3v2reg_s2042,30,0,0
+P6e,malla3_alta_e,regulares,t1r,v2reg,4042,"IPPO con mensajes corregido, base 4042",ippo_vecinos_p3v2reg_s4042,30,0,0
+P6e,malla3_alta_e,regulares,t2r,v2reg,4042,"IPPO con mensajes corregido, base 4042",ippo_vecinos_p3v2reg_s4042,30,0,0
+P6e,malla3_alta_e,regulares,t1r,v2reg,14042,"IPPO con mensajes corregido, base 14042",ippo_vecinos_p3v2reg_s14042,30,0,0
+P6e,malla3_alta_e,regulares,t2r,v2reg,14042,"IPPO con mensajes corregido, base 14042",ippo_vecinos_p3v2reg_s14042,30,0,0
+P6e,malla3_alta_e,regulares,t1r,v2reg,16042,"IPPO con mensajes corregido, base 16042",ippo_vecinos_p3v2reg_s16042,30,0,0
+P6e,malla3_alta_e,regulares,t2r,v2reg,16042,"IPPO con mensajes corregido, base 16042",ippo_vecinos_p3v2reg_s16042,30,0,0
+P1,poi_corredor,aleatorias,t1a,a3colas0_p3obspoimed,,"observación nueva (3 bases, llegadas aleatorias) con las colas en cero",ippo_vecinos_p3obspoimed_s4042_colas0,100,0,0
+P1,poi_corredor,aleatorias,t2a,a3colas0_p3obspoimed,,"observación nueva (3 bases, llegadas aleatorias) con las colas en cero",ippo_vecinos_p3obspoimed_s4042_colas0,100,0,0
+P1,poi_corredor,aleatorias,t1a,a3colas0_v2poi3med,,"IPPO con mensajes corregido (3 bases, llegadas aleatorias) con las colas en cero",ippo_vecinos_p3v2poi3med_s2042_colas0,100,0,0
+P1,poi_corredor,aleatorias,t2a,a3colas0_v2poi3med,,"IPPO con mensajes corregido (3 bases, llegadas aleatorias) con las colas en cero",ippo_vecinos_p3v2poi3med_s2042_colas0,100,0,0
+P1,poi_corredor,aleatorias,t1a,a3msg0_p3obspoimed,,"observación nueva (3 bases, llegadas aleatorias) con los mensajes cortados",ippo_vecinos_p3obspoimed_s4042_L0p100_p100,100,0,0
+P1,poi_corredor,aleatorias,t2a,a3msg0_p3obspoimed,,"observación nueva (3 bases, llegadas aleatorias) con los mensajes cortados",ippo_vecinos_p3obspoimed_s4042_L0p100_p100,100,0,0
+P1,poi_corredor,aleatorias,t1a,a3msg0_v2poi3med,,"IPPO con mensajes corregido (3 bases, llegadas aleatorias) con los mensajes cortados",ippo_vecinos_p3v2poi3med_s2042_L0p100_p100,100,0,0
+P1,poi_corredor,aleatorias,t2a,a3msg0_v2poi3med,,"IPPO con mensajes corregido (3 bases, llegadas aleatorias) con los mensajes cortados",ippo_vecinos_p3v2poi3med_s2042_L0p100_p100,100,0,0
+P1,poi_corredor,aleatorias,t1a,c0poimed,,C0 con llegadas aleatorias,ippo_vecinos_p3c0poimed_s42,100,0,0
+P1,poi_corredor,aleatorias,t2a,c0poimed,,C0 con llegadas aleatorias,ippo_vecinos_p3c0poimed_s42,100,0,0
+P1,poi_corredor,aleatorias,t1a,entmed,,IPPO entregado,ippo_vecinos_p3entmed_s4042,100,0,0
+P1,poi_corredor,aleatorias,t2a,entmed,,IPPO entregado,ippo_vecinos_p3entmed_s4042,100,0,0
+P1,poi_corredor,aleatorias,t1a,p3completopoi,42,"modelo completo, base 42",ippo_vecinos_p3completopoi_s42,100,0,0
+P1,poi_corredor,aleatorias,t2a,p3completopoi,42,"modelo completo, base 42",ippo_vecinos_p3completopoi_s42,100,0,0
+P1,poi_corredor,aleatorias,t1a,p3completopoi,2042,"modelo completo, base 2042",ippo_vecinos_p3completopoi_s2042,100,0,0
+P1,poi_corredor,aleatorias,t2a,p3completopoi,2042,"modelo completo, base 2042",ippo_vecinos_p3completopoi_s2042,100,0,0
+P1,poi_corredor,aleatorias,t1a,p3completopoi,4042,"modelo completo, base 4042",ippo_vecinos_p3completopoi_s4042,100,0,0
+P1,poi_corredor,aleatorias,t2a,p3completopoi,4042,"modelo completo, base 4042",ippo_vecinos_p3completopoi_s4042,100,0,0
+P1,poi_corredor,aleatorias,t1a,p3e400c20poi,42,"400 episodios eligiendo entre 20, base 42",ippo_vecinos_p3e400c20poi_s42,100,0,0
+P1,poi_corredor,aleatorias,t2a,p3e400c20poi,42,"400 episodios eligiendo entre 20, base 42",ippo_vecinos_p3e400c20poi_s42,100,0,0
+P1,poi_corredor,aleatorias,t1a,p3e400c20poi,2042,"400 episodios eligiendo entre 20, base 2042",ippo_vecinos_p3e400c20poi_s2042,100,0,0
+P1,poi_corredor,aleatorias,t2a,p3e400c20poi,2042,"400 episodios eligiendo entre 20, base 2042",ippo_vecinos_p3e400c20poi_s2042,100,0,0
+P1,poi_corredor,aleatorias,t1a,p3e400c20poi,4042,"400 episodios eligiendo entre 20, base 4042",ippo_vecinos_p3e400c20poi_s4042,100,0,0
+P1,poi_corredor,aleatorias,t2a,p3e400c20poi,4042,"400 episodios eligiendo entre 20, base 4042",ippo_vecinos_p3e400c20poi_s4042,100,0,0
+P1,poi_corredor,aleatorias,t1a,p3e400poi,42,"400 episodios, base 42",ippo_vecinos_p3e400poi_s42,100,0,0
+P1,poi_corredor,aleatorias,t2a,p3e400poi,42,"400 episodios, base 42",ippo_vecinos_p3e400poi_s42,100,0,0
+P1,poi_corredor,aleatorias,t1a,p3e400poi,2042,"400 episodios, base 2042",ippo_vecinos_p3e400poi_s2042,100,0,0
+P1,poi_corredor,aleatorias,t2a,p3e400poi,2042,"400 episodios, base 2042",ippo_vecinos_p3e400poi_s2042,100,0,0
+P1,poi_corredor,aleatorias,t1a,p3e400poi,4042,"400 episodios, base 4042",ippo_vecinos_p3e400poi_s4042,100,0,0
+P1,poi_corredor,aleatorias,t2a,p3e400poi,4042,"400 episodios, base 4042",ippo_vecinos_p3e400poi_s4042,100,0,0
+P1,poi_corredor,aleatorias,t1a,p3obspoi,42,"observación nueva, base 42",ippo_vecinos_p3obspoi_s42,100,0,0
+P1,poi_corredor,aleatorias,t2a,p3obspoi,42,"observación nueva, base 42",ippo_vecinos_p3obspoi_s42,100,0,0
+P1,poi_corredor,aleatorias,t1a,p3obspoi,2042,"observación nueva, base 2042",ippo_vecinos_p3obspoi_s2042,100,0,0
+P1,poi_corredor,aleatorias,t2a,p3obspoi,2042,"observación nueva, base 2042",ippo_vecinos_p3obspoi_s2042,100,0,0
+P1,poi_corredor,aleatorias,t1a,p3obspoi,4042,"observación nueva, base 4042",ippo_vecinos_p3obspoi_s4042,100,0,0
+P1,poi_corredor,aleatorias,t2a,p3obspoi,4042,"observación nueva, base 4042",ippo_vecinos_p3obspoi_s4042,100,0,0
+P1,poi_corredor,aleatorias,t1a,p3piso200poi,42,"200 episodios con piso de la tasa, base 42",ippo_vecinos_p3piso200poi_s42,100,0,0
+P1,poi_corredor,aleatorias,t2a,p3piso200poi,42,"200 episodios con piso de la tasa, base 42",ippo_vecinos_p3piso200poi_s42,100,0,0
+P1,poi_corredor,aleatorias,t1a,p3piso200poi,2042,"200 episodios con piso de la tasa, base 2042",ippo_vecinos_p3piso200poi_s2042,100,0,0
+P1,poi_corredor,aleatorias,t2a,p3piso200poi,2042,"200 episodios con piso de la tasa, base 2042",ippo_vecinos_p3piso200poi_s2042,100,0,0
+P1,poi_corredor,aleatorias,t1a,p3piso200poi,4042,"200 episodios con piso de la tasa, base 4042",ippo_vecinos_p3piso200poi_s4042,100,0,0
+P1,poi_corredor,aleatorias,t2a,p3piso200poi,4042,"200 episodios con piso de la tasa, base 4042",ippo_vecinos_p3piso200poi_s4042,100,0,0
+P1,poi_corredor,aleatorias,t1a,p3reloj2poi,42,"reloj de 2 s, base 42",ippo_vecinos_p3reloj2poi_s42,100,0,0
+P1,poi_corredor,aleatorias,t2a,p3reloj2poi,42,"reloj de 2 s, base 42",ippo_vecinos_p3reloj2poi_s42,100,0,0
+P1,poi_corredor,aleatorias,t1a,p3reloj2poi,2042,"reloj de 2 s, base 2042",ippo_vecinos_p3reloj2poi_s2042,100,0,0
+P1,poi_corredor,aleatorias,t2a,p3reloj2poi,2042,"reloj de 2 s, base 2042",ippo_vecinos_p3reloj2poi_s2042,100,0,0
+P1,poi_corredor,aleatorias,t1a,p3reloj2poi,4042,"reloj de 2 s, base 4042",ippo_vecinos_p3reloj2poi_s4042,100,0,0
+P1,poi_corredor,aleatorias,t2a,p3reloj2poi,4042,"reloj de 2 s, base 4042",ippo_vecinos_p3reloj2poi_s4042,100,0,0
+P1,poi_corredor,aleatorias,t1a,ref_actuado,,actuado por defecto,actuado,100,0,0
+P1,poi_corredor,aleatorias,t2a,ref_actuado,,actuado por defecto,actuado,100,0,0
+P1,poi_corredor,aleatorias,t1a,ref_actuadoaj,,actuado ajustado,actuado_aj,100,0,0
+P1,poi_corredor,aleatorias,t2a,ref_actuadoaj,,actuado ajustado,actuado_aj,100,0,0
+P1,poi_corredor,aleatorias,t1a,ref_fijo,,fijo entregado,fijo,100,0,0
+P1,poi_corredor,aleatorias,t2a,ref_fijo,,fijo entregado,fijo,100,0,0
+P1,poi_corredor,aleatorias,t1a,ref_fino,,fijo fino,fijo_fino,100,0,0
+P1,poi_corredor,aleatorias,t2a,ref_fino,,fijo fino,fijo_fino,100,0,0
+P1,poi_corredor,aleatorias,t1a,ref_fino5,,fijo de verdes de 5 en 5,fijo_mult5,100,0,0
+P1,poi_corredor,aleatorias,t2a,ref_fino5,,fijo de verdes de 5 en 5,fijo_mult5,100,0,0
+P1,poi_corredor,aleatorias,t1a,ref_franja,,fijo por franja,franja,100,0,0
+P1,poi_corredor,aleatorias,t2a,ref_franja,,fijo por franja,franja,100,0,0
+P1,poi_corredor,aleatorias,t1a,ref_mp,,Max-Pressure,mp_c60,100,0,0
+P1,poi_corredor,aleatorias,t2a,ref_mp,,Max-Pressure,mp_c60,100,0,0
+P1,poi_corredor,aleatorias,t1a,ref_reactiva,,regla reactiva,reactiva_d25,100,0,0
+P1,poi_corredor,aleatorias,t2a,ref_reactiva,,regla reactiva,reactiva_d25,100,0,0
+P1,poi_corredor,aleatorias,t1a,ref_regla,,regla simple,regla_u1g60,100,0,0
+P1,poi_corredor,aleatorias,t2a,ref_regla,,regla simple,regla_u1g60,100,0,0
+P1,poi_corredor,aleatorias,t1a,ref_trivial,,ciclo mínimo,trivial,100,0,0
+P1,poi_corredor,aleatorias,t2a,ref_trivial,,ciclo mínimo,trivial,100,0,0
+P1,poi_corredor,aleatorias,t1a,v2poi,42,"IPPO con mensajes corregido (entrenado con llegadas aleatorias), base 42",ippo_vecinos_p3v2poi_s42,100,0,0
+P1,poi_corredor,aleatorias,t2a,v2poi,42,"IPPO con mensajes corregido (entrenado con llegadas aleatorias), base 42",ippo_vecinos_p3v2poi_s42,100,0,0
+P1,poi_corredor,aleatorias,t1a,v2poi,2042,"IPPO con mensajes corregido (entrenado con llegadas aleatorias), base 2042",ippo_vecinos_p3v2poi_s2042,100,0,0
+P1,poi_corredor,aleatorias,t2a,v2poi,2042,"IPPO con mensajes corregido (entrenado con llegadas aleatorias), base 2042",ippo_vecinos_p3v2poi_s2042,100,0,0
+P1,poi_corredor,aleatorias,t1a,v2poi,4042,"IPPO con mensajes corregido (entrenado con llegadas aleatorias), base 4042",ippo_vecinos_p3v2poi_s4042,100,0,0
+P1,poi_corredor,aleatorias,t2a,v2poi,4042,"IPPO con mensajes corregido (entrenado con llegadas aleatorias), base 4042",ippo_vecinos_p3v2poi_s4042,100,0,0
+P1,poi_corredor,aleatorias,t1a,v2poi,14042,"IPPO con mensajes corregido (entrenado con llegadas aleatorias), base 14042",ippo_vecinos_p3v2poi_s14042,100,0,0
+P1,poi_corredor,aleatorias,t2a,v2poi,14042,"IPPO con mensajes corregido (entrenado con llegadas aleatorias), base 14042",ippo_vecinos_p3v2poi_s14042,100,0,0
+P1,poi_corredor,aleatorias,t1a,v2poi,16042,"IPPO con mensajes corregido (entrenado con llegadas aleatorias), base 16042",ippo_vecinos_p3v2poi_s16042,100,0,0
+P1,poi_corredor,aleatorias,t2a,v2poi,16042,"IPPO con mensajes corregido (entrenado con llegadas aleatorias), base 16042",ippo_vecinos_p3v2poi_s16042,100,0,0
+P1,poi_corredor,aleatorias,t1a,v2poiloc,42,"IPPO sin mensajes corregido (llegadas aleatorias), base 42",ippo_local_p3v2poi_s42,100,0,0
+P1,poi_corredor,aleatorias,t2a,v2poiloc,42,"IPPO sin mensajes corregido (llegadas aleatorias), base 42",ippo_local_p3v2poi_s42,100,0,0
+P1,poi_corredor,aleatorias,t1a,v2poiloc,2042,"IPPO sin mensajes corregido (llegadas aleatorias), base 2042",ippo_local_p3v2poi_s2042,100,0,0
+P1,poi_corredor,aleatorias,t2a,v2poiloc,2042,"IPPO sin mensajes corregido (llegadas aleatorias), base 2042",ippo_local_p3v2poi_s2042,100,0,0
+P1,poi_corredor,aleatorias,t1a,v2poiloc,4042,"IPPO sin mensajes corregido (llegadas aleatorias), base 4042",ippo_local_p3v2poi_s4042,100,0,0
+P1,poi_corredor,aleatorias,t2a,v2poiloc,4042,"IPPO sin mensajes corregido (llegadas aleatorias), base 4042",ippo_local_p3v2poi_s4042,100,0,0
+P1,poi_corredor,aleatorias,t1a,v2reg3poi,,"IPPO con mensajes corregido de 3 bases, entrenado con llegadas regulares",ippo_vecinos_p3v2reg3med_s42,100,0,0
+P1,poi_corredor,aleatorias,t2a,v2reg3poi,,"IPPO con mensajes corregido de 3 bases, entrenado con llegadas regulares",ippo_vecinos_p3v2reg3med_s42,100,0,0
+P1,poi_corredor,aleatorias,t1a,v2regmed,,"IPPO con mensajes corregido, entrenado con llegadas regulares",ippo_vecinos_p3v2regmed_s16042,100,0,0
+P1,poi_corredor,aleatorias,t2a,v2regmed,,"IPPO con mensajes corregido, entrenado con llegadas regulares",ippo_vecinos_p3v2regmed_s16042,100,0,0
+P2,poi_corredor_alta,aleatorias,t1a,a3colas0_p3obspoimed,,"observación nueva (3 bases, llegadas aleatorias) con las colas en cero",ippo_vecinos_p3obspoimed_s2042_colas0,100,0,0
+P2,poi_corredor_alta,aleatorias,t2a,a3colas0_p3obspoimed,,"observación nueva (3 bases, llegadas aleatorias) con las colas en cero",ippo_vecinos_p3obspoimed_s2042_colas0,100,0,0
+P2,poi_corredor_alta,aleatorias,t1a,a3colas0_v2poi3med,,"IPPO con mensajes corregido (3 bases, llegadas aleatorias) con las colas en cero",ippo_vecinos_p3v2poi3med_s42_colas0,100,0,0
+P2,poi_corredor_alta,aleatorias,t2a,a3colas0_v2poi3med,,"IPPO con mensajes corregido (3 bases, llegadas aleatorias) con las colas en cero",ippo_vecinos_p3v2poi3med_s42_colas0,100,0,0
+P2,poi_corredor_alta,aleatorias,t1a,a3msg0_p3obspoimed,,"observación nueva (3 bases, llegadas aleatorias) con los mensajes cortados",ippo_vecinos_p3obspoimed_s2042_L0p100_p100,100,0,0
+P2,poi_corredor_alta,aleatorias,t2a,a3msg0_p3obspoimed,,"observación nueva (3 bases, llegadas aleatorias) con los mensajes cortados",ippo_vecinos_p3obspoimed_s2042_L0p100_p100,100,0,0
+P2,poi_corredor_alta,aleatorias,t1a,a3msg0_v2poi3med,,"IPPO con mensajes corregido (3 bases, llegadas aleatorias) con los mensajes cortados",ippo_vecinos_p3v2poi3med_s42_L0p100_p100,100,0,0
+P2,poi_corredor_alta,aleatorias,t2a,a3msg0_v2poi3med,,"IPPO con mensajes corregido (3 bases, llegadas aleatorias) con los mensajes cortados",ippo_vecinos_p3v2poi3med_s42_L0p100_p100,100,0,0
+P2,poi_corredor_alta,aleatorias,t1a,c0poimed,,C0 con llegadas aleatorias,ippo_vecinos_p3c0poimed_s42,100,0,0
+P2,poi_corredor_alta,aleatorias,t2a,c0poimed,,C0 con llegadas aleatorias,ippo_vecinos_p3c0poimed_s42,100,0,0
+P2,poi_corredor_alta,aleatorias,t1a,entmed,,IPPO entregado,ippo_vecinos_p3entmed_s2042,100,0,0
+P2,poi_corredor_alta,aleatorias,t2a,entmed,,IPPO entregado,ippo_vecinos_p3entmed_s2042,100,0,0
+P2,poi_corredor_alta,aleatorias,t1a,p3completopoi,42,"modelo completo, base 42",ippo_vecinos_p3completopoi_s42,100,0,0
+P2,poi_corredor_alta,aleatorias,t2a,p3completopoi,42,"modelo completo, base 42",ippo_vecinos_p3completopoi_s42,100,0,0
+P2,poi_corredor_alta,aleatorias,t1a,p3completopoi,2042,"modelo completo, base 2042",ippo_vecinos_p3completopoi_s2042,100,0,0
+P2,poi_corredor_alta,aleatorias,t2a,p3completopoi,2042,"modelo completo, base 2042",ippo_vecinos_p3completopoi_s2042,100,0,0
+P2,poi_corredor_alta,aleatorias,t1a,p3completopoi,4042,"modelo completo, base 4042",ippo_vecinos_p3completopoi_s4042,100,0,0
+P2,poi_corredor_alta,aleatorias,t2a,p3completopoi,4042,"modelo completo, base 4042",ippo_vecinos_p3completopoi_s4042,100,0,0
+P2,poi_corredor_alta,aleatorias,t1a,p3e400c20poi,42,"400 episodios eligiendo entre 20, base 42",ippo_vecinos_p3e400c20poi_s42,100,0,0
+P2,poi_corredor_alta,aleatorias,t2a,p3e400c20poi,42,"400 episodios eligiendo entre 20, base 42",ippo_vecinos_p3e400c20poi_s42,100,0,0
+P2,poi_corredor_alta,aleatorias,t1a,p3e400c20poi,2042,"400 episodios eligiendo entre 20, base 2042",ippo_vecinos_p3e400c20poi_s2042,100,0,0
+P2,poi_corredor_alta,aleatorias,t2a,p3e400c20poi,2042,"400 episodios eligiendo entre 20, base 2042",ippo_vecinos_p3e400c20poi_s2042,100,0,0
+P2,poi_corredor_alta,aleatorias,t1a,p3e400c20poi,4042,"400 episodios eligiendo entre 20, base 4042",ippo_vecinos_p3e400c20poi_s4042,100,0,0
+P2,poi_corredor_alta,aleatorias,t2a,p3e400c20poi,4042,"400 episodios eligiendo entre 20, base 4042",ippo_vecinos_p3e400c20poi_s4042,100,0,0
+P2,poi_corredor_alta,aleatorias,t1a,p3e400poi,42,"400 episodios, base 42",ippo_vecinos_p3e400poi_s42,100,0,0
+P2,poi_corredor_alta,aleatorias,t2a,p3e400poi,42,"400 episodios, base 42",ippo_vecinos_p3e400poi_s42,100,0,0
+P2,poi_corredor_alta,aleatorias,t1a,p3e400poi,2042,"400 episodios, base 2042",ippo_vecinos_p3e400poi_s2042,100,0,0
+P2,poi_corredor_alta,aleatorias,t2a,p3e400poi,2042,"400 episodios, base 2042",ippo_vecinos_p3e400poi_s2042,100,0,0
+P2,poi_corredor_alta,aleatorias,t1a,p3e400poi,4042,"400 episodios, base 4042",ippo_vecinos_p3e400poi_s4042,100,0,0
+P2,poi_corredor_alta,aleatorias,t2a,p3e400poi,4042,"400 episodios, base 4042",ippo_vecinos_p3e400poi_s4042,100,0,0
+P2,poi_corredor_alta,aleatorias,t1a,p3obspoi,42,"observación nueva, base 42",ippo_vecinos_p3obspoi_s42,100,0,0
+P2,poi_corredor_alta,aleatorias,t2a,p3obspoi,42,"observación nueva, base 42",ippo_vecinos_p3obspoi_s42,100,0,0
+P2,poi_corredor_alta,aleatorias,t1a,p3obspoi,2042,"observación nueva, base 2042",ippo_vecinos_p3obspoi_s2042,100,0,0
+P2,poi_corredor_alta,aleatorias,t2a,p3obspoi,2042,"observación nueva, base 2042",ippo_vecinos_p3obspoi_s2042,100,0,0
+P2,poi_corredor_alta,aleatorias,t1a,p3obspoi,4042,"observación nueva, base 4042",ippo_vecinos_p3obspoi_s4042,100,0,0
+P2,poi_corredor_alta,aleatorias,t2a,p3obspoi,4042,"observación nueva, base 4042",ippo_vecinos_p3obspoi_s4042,100,0,0
+P2,poi_corredor_alta,aleatorias,t1a,p3piso200poi,42,"200 episodios con piso de la tasa, base 42",ippo_vecinos_p3piso200poi_s42,100,0,0
+P2,poi_corredor_alta,aleatorias,t2a,p3piso200poi,42,"200 episodios con piso de la tasa, base 42",ippo_vecinos_p3piso200poi_s42,100,0,0
+P2,poi_corredor_alta,aleatorias,t1a,p3piso200poi,2042,"200 episodios con piso de la tasa, base 2042",ippo_vecinos_p3piso200poi_s2042,100,0,0
+P2,poi_corredor_alta,aleatorias,t2a,p3piso200poi,2042,"200 episodios con piso de la tasa, base 2042",ippo_vecinos_p3piso200poi_s2042,100,0,0
+P2,poi_corredor_alta,aleatorias,t1a,p3piso200poi,4042,"200 episodios con piso de la tasa, base 4042",ippo_vecinos_p3piso200poi_s4042,100,0,0
+P2,poi_corredor_alta,aleatorias,t2a,p3piso200poi,4042,"200 episodios con piso de la tasa, base 4042",ippo_vecinos_p3piso200poi_s4042,100,0,0
+P2,poi_corredor_alta,aleatorias,t1a,p3reloj2poi,42,"reloj de 2 s, base 42",ippo_vecinos_p3reloj2poi_s42,100,0,0
+P2,poi_corredor_alta,aleatorias,t2a,p3reloj2poi,42,"reloj de 2 s, base 42",ippo_vecinos_p3reloj2poi_s42,100,0,0
+P2,poi_corredor_alta,aleatorias,t1a,p3reloj2poi,2042,"reloj de 2 s, base 2042",ippo_vecinos_p3reloj2poi_s2042,100,0,0
+P2,poi_corredor_alta,aleatorias,t2a,p3reloj2poi,2042,"reloj de 2 s, base 2042",ippo_vecinos_p3reloj2poi_s2042,100,0,0
+P2,poi_corredor_alta,aleatorias,t1a,p3reloj2poi,4042,"reloj de 2 s, base 4042",ippo_vecinos_p3reloj2poi_s4042,100,0,0
+P2,poi_corredor_alta,aleatorias,t2a,p3reloj2poi,4042,"reloj de 2 s, base 4042",ippo_vecinos_p3reloj2poi_s4042,100,0,0
+P2,poi_corredor_alta,aleatorias,t1a,ref_actuado,,actuado por defecto,actuado,100,0,0
+P2,poi_corredor_alta,aleatorias,t2a,ref_actuado,,actuado por defecto,actuado,100,0,0
+P2,poi_corredor_alta,aleatorias,t1a,ref_actuadoaj,,actuado ajustado,actuado_aj,100,0,0
+P2,poi_corredor_alta,aleatorias,t2a,ref_actuadoaj,,actuado ajustado,actuado_aj,100,0,0
+P2,poi_corredor_alta,aleatorias,t1a,ref_fijo,,fijo entregado,fijo,100,0,0
+P2,poi_corredor_alta,aleatorias,t2a,ref_fijo,,fijo entregado,fijo,100,0,0
+P2,poi_corredor_alta,aleatorias,t1a,ref_fino,,fijo fino,fijo_fino,100,0,0
+P2,poi_corredor_alta,aleatorias,t2a,ref_fino,,fijo fino,fijo_fino,100,0,0
+P2,poi_corredor_alta,aleatorias,t1a,ref_fino5,,fijo de verdes de 5 en 5,fijo_mult5,100,0,0
+P2,poi_corredor_alta,aleatorias,t2a,ref_fino5,,fijo de verdes de 5 en 5,fijo_mult5,100,0,0
+P2,poi_corredor_alta,aleatorias,t1a,ref_franja,,fijo por franja,franja,100,0,0
+P2,poi_corredor_alta,aleatorias,t2a,ref_franja,,fijo por franja,franja,100,0,0
+P2,poi_corredor_alta,aleatorias,t1a,ref_mp,,Max-Pressure,mp_c60,100,0,0
+P2,poi_corredor_alta,aleatorias,t2a,ref_mp,,Max-Pressure,mp_c60,100,0,0
+P2,poi_corredor_alta,aleatorias,t1a,ref_reactiva,,regla reactiva,reactiva_d25,100,1,28
+P2,poi_corredor_alta,aleatorias,t2a,ref_reactiva,,regla reactiva,reactiva_d25,100,0,0
+P2,poi_corredor_alta,aleatorias,t1a,ref_regla,,regla simple,regla_u2g30,100,0,0
+P2,poi_corredor_alta,aleatorias,t2a,ref_regla,,regla simple,regla_u2g30,100,0,0
+P2,poi_corredor_alta,aleatorias,t1a,ref_trivial,,ciclo mínimo,trivial,100,100,20877
+P2,poi_corredor_alta,aleatorias,t2a,ref_trivial,,ciclo mínimo,trivial,100,100,20606
+P2,poi_corredor_alta,aleatorias,t1a,v2poi,42,"IPPO con mensajes corregido (entrenado con llegadas aleatorias), base 42",ippo_vecinos_p3v2poi_s42,100,0,0
+P2,poi_corredor_alta,aleatorias,t2a,v2poi,42,"IPPO con mensajes corregido (entrenado con llegadas aleatorias), base 42",ippo_vecinos_p3v2poi_s42,100,0,0
+P2,poi_corredor_alta,aleatorias,t1a,v2poi,2042,"IPPO con mensajes corregido (entrenado con llegadas aleatorias), base 2042",ippo_vecinos_p3v2poi_s2042,100,0,0
+P2,poi_corredor_alta,aleatorias,t2a,v2poi,2042,"IPPO con mensajes corregido (entrenado con llegadas aleatorias), base 2042",ippo_vecinos_p3v2poi_s2042,100,0,0
+P2,poi_corredor_alta,aleatorias,t1a,v2poi,4042,"IPPO con mensajes corregido (entrenado con llegadas aleatorias), base 4042",ippo_vecinos_p3v2poi_s4042,100,0,0
+P2,poi_corredor_alta,aleatorias,t2a,v2poi,4042,"IPPO con mensajes corregido (entrenado con llegadas aleatorias), base 4042",ippo_vecinos_p3v2poi_s4042,100,0,0
+P2,poi_corredor_alta,aleatorias,t1a,v2poi,14042,"IPPO con mensajes corregido (entrenado con llegadas aleatorias), base 14042",ippo_vecinos_p3v2poi_s14042,100,0,0
+P2,poi_corredor_alta,aleatorias,t2a,v2poi,14042,"IPPO con mensajes corregido (entrenado con llegadas aleatorias), base 14042",ippo_vecinos_p3v2poi_s14042,100,0,0
+P2,poi_corredor_alta,aleatorias,t1a,v2poi,16042,"IPPO con mensajes corregido (entrenado con llegadas aleatorias), base 16042",ippo_vecinos_p3v2poi_s16042,100,0,0
+P2,poi_corredor_alta,aleatorias,t2a,v2poi,16042,"IPPO con mensajes corregido (entrenado con llegadas aleatorias), base 16042",ippo_vecinos_p3v2poi_s16042,100,0,0
+P2,poi_corredor_alta,aleatorias,t1a,v2poiloc,42,"IPPO sin mensajes corregido (llegadas aleatorias), base 42",ippo_local_p3v2poi_s42,100,0,0
+P2,poi_corredor_alta,aleatorias,t2a,v2poiloc,42,"IPPO sin mensajes corregido (llegadas aleatorias), base 42",ippo_local_p3v2poi_s42,100,0,0
+P2,poi_corredor_alta,aleatorias,t1a,v2poiloc,2042,"IPPO sin mensajes corregido (llegadas aleatorias), base 2042",ippo_local_p3v2poi_s2042,100,0,0
+P2,poi_corredor_alta,aleatorias,t2a,v2poiloc,2042,"IPPO sin mensajes corregido (llegadas aleatorias), base 2042",ippo_local_p3v2poi_s2042,100,0,0
+P2,poi_corredor_alta,aleatorias,t1a,v2poiloc,4042,"IPPO sin mensajes corregido (llegadas aleatorias), base 4042",ippo_local_p3v2poi_s4042,100,0,0
+P2,poi_corredor_alta,aleatorias,t2a,v2poiloc,4042,"IPPO sin mensajes corregido (llegadas aleatorias), base 4042",ippo_local_p3v2poi_s4042,100,0,0
+P2,poi_corredor_alta,aleatorias,t1a,v2reg3poi,,"IPPO con mensajes corregido de 3 bases, entrenado con llegadas regulares",ippo_vecinos_p3v2reg3med_s42,100,0,0
+P2,poi_corredor_alta,aleatorias,t2a,v2reg3poi,,"IPPO con mensajes corregido de 3 bases, entrenado con llegadas regulares",ippo_vecinos_p3v2reg3med_s42,100,0,0
+P2,poi_corredor_alta,aleatorias,t1a,v2regmed,,"IPPO con mensajes corregido, entrenado con llegadas regulares",ippo_vecinos_p3v2regmed_s42,100,0,0
+P2,poi_corredor_alta,aleatorias,t2a,v2regmed,,"IPPO con mensajes corregido, entrenado con llegadas regulares",ippo_vecinos_p3v2regmed_s42,100,0,0
+P3,poi_red,aleatorias,t1a,a3colas0_p3obspoimed,,"observación nueva (3 bases, llegadas aleatorias) con las colas en cero",ippo_vecinos_p3obspoimed_s42_colas0,100,0,0
+P3,poi_red,aleatorias,t2a,a3colas0_p3obspoimed,,"observación nueva (3 bases, llegadas aleatorias) con las colas en cero",ippo_vecinos_p3obspoimed_s42_colas0,100,0,0
+P3,poi_red,aleatorias,t1a,a3colas0_v2poi3med,,"IPPO con mensajes corregido (3 bases, llegadas aleatorias) con las colas en cero",ippo_vecinos_p3v2poi3med_s42_colas0,100,0,0
+P3,poi_red,aleatorias,t2a,a3colas0_v2poi3med,,"IPPO con mensajes corregido (3 bases, llegadas aleatorias) con las colas en cero",ippo_vecinos_p3v2poi3med_s42_colas0,100,0,0
+P3,poi_red,aleatorias,t1a,a3msg0_p3obspoimed,,"observación nueva (3 bases, llegadas aleatorias) con los mensajes cortados",ippo_vecinos_p3obspoimed_s42_L0p100_p100,100,0,0
+P3,poi_red,aleatorias,t2a,a3msg0_p3obspoimed,,"observación nueva (3 bases, llegadas aleatorias) con los mensajes cortados",ippo_vecinos_p3obspoimed_s42_L0p100_p100,100,0,0
+P3,poi_red,aleatorias,t1a,a3msg0_v2poi3med,,"IPPO con mensajes corregido (3 bases, llegadas aleatorias) con los mensajes cortados",ippo_vecinos_p3v2poi3med_s42_L0p100_p100,100,0,0
+P3,poi_red,aleatorias,t2a,a3msg0_v2poi3med,,"IPPO con mensajes corregido (3 bases, llegadas aleatorias) con los mensajes cortados",ippo_vecinos_p3v2poi3med_s42_L0p100_p100,100,0,0
+P3,poi_red,aleatorias,t1a,c0poimed,,C0 con llegadas aleatorias,ippo_vecinos_p3c0poimed_s2042,100,0,0
+P3,poi_red,aleatorias,t2a,c0poimed,,C0 con llegadas aleatorias,ippo_vecinos_p3c0poimed_s2042,100,0,0
+P3,poi_red,aleatorias,t1a,entmed,,IPPO entregado,ippo_vecinos_p3entmed_s4042,100,0,0
+P3,poi_red,aleatorias,t2a,entmed,,IPPO entregado,ippo_vecinos_p3entmed_s4042,100,0,0
+P3,poi_red,aleatorias,t1a,p3completopoi,42,"modelo completo, base 42",ippo_vecinos_p3completopoi_s42,100,0,0
+P3,poi_red,aleatorias,t2a,p3completopoi,42,"modelo completo, base 42",ippo_vecinos_p3completopoi_s42,100,0,0
+P3,poi_red,aleatorias,t1a,p3completopoi,2042,"modelo completo, base 2042",ippo_vecinos_p3completopoi_s2042,100,0,0
+P3,poi_red,aleatorias,t2a,p3completopoi,2042,"modelo completo, base 2042",ippo_vecinos_p3completopoi_s2042,100,0,0
+P3,poi_red,aleatorias,t1a,p3completopoi,4042,"modelo completo, base 4042",ippo_vecinos_p3completopoi_s4042,100,0,0
+P3,poi_red,aleatorias,t2a,p3completopoi,4042,"modelo completo, base 4042",ippo_vecinos_p3completopoi_s4042,100,0,0
+P3,poi_red,aleatorias,t1a,p3e400c20poi,42,"400 episodios eligiendo entre 20, base 42",ippo_vecinos_p3e400c20poi_s42,100,0,0
+P3,poi_red,aleatorias,t2a,p3e400c20poi,42,"400 episodios eligiendo entre 20, base 42",ippo_vecinos_p3e400c20poi_s42,100,0,0
+P3,poi_red,aleatorias,t1a,p3e400c20poi,2042,"400 episodios eligiendo entre 20, base 2042",ippo_vecinos_p3e400c20poi_s2042,100,0,0
+P3,poi_red,aleatorias,t2a,p3e400c20poi,2042,"400 episodios eligiendo entre 20, base 2042",ippo_vecinos_p3e400c20poi_s2042,100,0,0
+P3,poi_red,aleatorias,t1a,p3e400c20poi,4042,"400 episodios eligiendo entre 20, base 4042",ippo_vecinos_p3e400c20poi_s4042,100,0,0
+P3,poi_red,aleatorias,t2a,p3e400c20poi,4042,"400 episodios eligiendo entre 20, base 4042",ippo_vecinos_p3e400c20poi_s4042,100,0,0
+P3,poi_red,aleatorias,t1a,p3e400poi,42,"400 episodios, base 42",ippo_vecinos_p3e400poi_s42,100,0,0
+P3,poi_red,aleatorias,t2a,p3e400poi,42,"400 episodios, base 42",ippo_vecinos_p3e400poi_s42,100,0,0
+P3,poi_red,aleatorias,t1a,p3e400poi,2042,"400 episodios, base 2042",ippo_vecinos_p3e400poi_s2042,100,0,0
+P3,poi_red,aleatorias,t2a,p3e400poi,2042,"400 episodios, base 2042",ippo_vecinos_p3e400poi_s2042,100,0,0
+P3,poi_red,aleatorias,t1a,p3e400poi,4042,"400 episodios, base 4042",ippo_vecinos_p3e400poi_s4042,100,0,0
+P3,poi_red,aleatorias,t2a,p3e400poi,4042,"400 episodios, base 4042",ippo_vecinos_p3e400poi_s4042,100,0,0
+P3,poi_red,aleatorias,t1a,p3obspoi,42,"observación nueva, base 42",ippo_vecinos_p3obspoi_s42,100,0,0
+P3,poi_red,aleatorias,t2a,p3obspoi,42,"observación nueva, base 42",ippo_vecinos_p3obspoi_s42,100,0,0
+P3,poi_red,aleatorias,t1a,p3obspoi,2042,"observación nueva, base 2042",ippo_vecinos_p3obspoi_s2042,100,0,0
+P3,poi_red,aleatorias,t2a,p3obspoi,2042,"observación nueva, base 2042",ippo_vecinos_p3obspoi_s2042,100,0,0
+P3,poi_red,aleatorias,t1a,p3obspoi,4042,"observación nueva, base 4042",ippo_vecinos_p3obspoi_s4042,100,0,0
+P3,poi_red,aleatorias,t2a,p3obspoi,4042,"observación nueva, base 4042",ippo_vecinos_p3obspoi_s4042,100,0,0
+P3,poi_red,aleatorias,t1a,p3piso200poi,42,"200 episodios con piso de la tasa, base 42",ippo_vecinos_p3piso200poi_s42,100,0,0
+P3,poi_red,aleatorias,t2a,p3piso200poi,42,"200 episodios con piso de la tasa, base 42",ippo_vecinos_p3piso200poi_s42,100,0,0
+P3,poi_red,aleatorias,t1a,p3piso200poi,2042,"200 episodios con piso de la tasa, base 2042",ippo_vecinos_p3piso200poi_s2042,100,0,0
+P3,poi_red,aleatorias,t2a,p3piso200poi,2042,"200 episodios con piso de la tasa, base 2042",ippo_vecinos_p3piso200poi_s2042,100,0,0
+P3,poi_red,aleatorias,t1a,p3piso200poi,4042,"200 episodios con piso de la tasa, base 4042",ippo_vecinos_p3piso200poi_s4042,100,0,0
+P3,poi_red,aleatorias,t2a,p3piso200poi,4042,"200 episodios con piso de la tasa, base 4042",ippo_vecinos_p3piso200poi_s4042,100,0,0
+P3,poi_red,aleatorias,t1a,ref_actuado,,actuado por defecto,actuado,100,0,0
+P3,poi_red,aleatorias,t2a,ref_actuado,,actuado por defecto,actuado,100,0,0
+P3,poi_red,aleatorias,t1a,ref_actuadoaj,,actuado ajustado,actuado_aj,100,0,0
+P3,poi_red,aleatorias,t2a,ref_actuadoaj,,actuado ajustado,actuado_aj,100,0,0
+P3,poi_red,aleatorias,t1a,ref_fijo,,fijo entregado,fijo,100,0,0
+P3,poi_red,aleatorias,t2a,ref_fijo,,fijo entregado,fijo,100,0,0
+P3,poi_red,aleatorias,t1a,ref_fino,,fijo fino,fijo_fino,100,0,0
+P3,poi_red,aleatorias,t2a,ref_fino,,fijo fino,fijo_fino,100,0,0
+P3,poi_red,aleatorias,t1a,ref_fino5,,fijo de verdes de 5 en 5,fijo_mult5,100,0,0
+P3,poi_red,aleatorias,t2a,ref_fino5,,fijo de verdes de 5 en 5,fijo_mult5,100,0,0
+P3,poi_red,aleatorias,t1a,ref_franja,,fijo por franja,franja,100,0,0
+P3,poi_red,aleatorias,t2a,ref_franja,,fijo por franja,franja,100,0,0
+P3,poi_red,aleatorias,t1a,ref_mp,,Max-Pressure,mp_c60,100,0,0
+P3,poi_red,aleatorias,t2a,ref_mp,,Max-Pressure,mp_c60,100,0,0
+P3,poi_red,aleatorias,t1a,ref_reactiva,,regla reactiva,reactiva_d35,100,0,0
+P3,poi_red,aleatorias,t2a,ref_reactiva,,regla reactiva,reactiva_d35,100,0,0
+P3,poi_red,aleatorias,t1a,ref_regla,,regla simple,regla_u2g30,100,0,0
+P3,poi_red,aleatorias,t2a,ref_regla,,regla simple,regla_u2g30,100,0,0
+P3,poi_red,aleatorias,t1a,ref_trivial,,ciclo mínimo,trivial,100,0,0
+P3,poi_red,aleatorias,t2a,ref_trivial,,ciclo mínimo,trivial,100,0,0
+P3,poi_red,aleatorias,t1a,v2poi,42,"IPPO con mensajes corregido (entrenado con llegadas aleatorias), base 42",ippo_vecinos_p3v2poi_s42,100,0,0
+P3,poi_red,aleatorias,t2a,v2poi,42,"IPPO con mensajes corregido (entrenado con llegadas aleatorias), base 42",ippo_vecinos_p3v2poi_s42,100,0,0
+P3,poi_red,aleatorias,t1a,v2poi,2042,"IPPO con mensajes corregido (entrenado con llegadas aleatorias), base 2042",ippo_vecinos_p3v2poi_s2042,100,0,0
+P3,poi_red,aleatorias,t2a,v2poi,2042,"IPPO con mensajes corregido (entrenado con llegadas aleatorias), base 2042",ippo_vecinos_p3v2poi_s2042,100,0,0
+P3,poi_red,aleatorias,t1a,v2poi,4042,"IPPO con mensajes corregido (entrenado con llegadas aleatorias), base 4042",ippo_vecinos_p3v2poi_s4042,100,0,0
+P3,poi_red,aleatorias,t2a,v2poi,4042,"IPPO con mensajes corregido (entrenado con llegadas aleatorias), base 4042",ippo_vecinos_p3v2poi_s4042,100,0,0
+P3,poi_red,aleatorias,t1a,v2poi,14042,"IPPO con mensajes corregido (entrenado con llegadas aleatorias), base 14042",ippo_vecinos_p3v2poi_s14042,100,0,0
+P3,poi_red,aleatorias,t2a,v2poi,14042,"IPPO con mensajes corregido (entrenado con llegadas aleatorias), base 14042",ippo_vecinos_p3v2poi_s14042,100,0,0
+P3,poi_red,aleatorias,t1a,v2poi,16042,"IPPO con mensajes corregido (entrenado con llegadas aleatorias), base 16042",ippo_vecinos_p3v2poi_s16042,100,0,0
+P3,poi_red,aleatorias,t2a,v2poi,16042,"IPPO con mensajes corregido (entrenado con llegadas aleatorias), base 16042",ippo_vecinos_p3v2poi_s16042,100,0,0
+P3,poi_red,aleatorias,t1a,v2poiloc,42,"IPPO sin mensajes corregido (llegadas aleatorias), base 42",ippo_local_p3v2poi_s42,100,0,0
+P3,poi_red,aleatorias,t2a,v2poiloc,42,"IPPO sin mensajes corregido (llegadas aleatorias), base 42",ippo_local_p3v2poi_s42,100,0,0
+P3,poi_red,aleatorias,t1a,v2poiloc,2042,"IPPO sin mensajes corregido (llegadas aleatorias), base 2042",ippo_local_p3v2poi_s2042,100,0,0
+P3,poi_red,aleatorias,t2a,v2poiloc,2042,"IPPO sin mensajes corregido (llegadas aleatorias), base 2042",ippo_local_p3v2poi_s2042,100,0,0
+P3,poi_red,aleatorias,t1a,v2poiloc,4042,"IPPO sin mensajes corregido (llegadas aleatorias), base 4042",ippo_local_p3v2poi_s4042,100,0,0
+P3,poi_red,aleatorias,t2a,v2poiloc,4042,"IPPO sin mensajes corregido (llegadas aleatorias), base 4042",ippo_local_p3v2poi_s4042,100,0,0
+P3,poi_red,aleatorias,t1a,v2reg3poi,,"IPPO con mensajes corregido de 3 bases, entrenado con llegadas regulares",ippo_vecinos_p3v2reg3med_s42,100,0,0
+P3,poi_red,aleatorias,t2a,v2reg3poi,,"IPPO con mensajes corregido de 3 bases, entrenado con llegadas regulares",ippo_vecinos_p3v2reg3med_s42,100,0,0
+P3,poi_red,aleatorias,t1a,v2regmed,,"IPPO con mensajes corregido, entrenado con llegadas regulares",ippo_vecinos_p3v2regmed_s42,100,0,0
+P3,poi_red,aleatorias,t2a,v2regmed,,"IPPO con mensajes corregido, entrenado con llegadas regulares",ippo_vecinos_p3v2regmed_s42,100,0,0
+P4,poi_red_alta,aleatorias,t1a,a3colas0_p3obspoimed,,"observación nueva (3 bases, llegadas aleatorias) con las colas en cero",ippo_vecinos_p3obspoimed_s2042_colas0,100,0,0
+P4,poi_red_alta,aleatorias,t2a,a3colas0_p3obspoimed,,"observación nueva (3 bases, llegadas aleatorias) con las colas en cero",ippo_vecinos_p3obspoimed_s2042_colas0,100,0,0
+P4,poi_red_alta,aleatorias,t1a,a3colas0_v2poi3med,,"IPPO con mensajes corregido (3 bases, llegadas aleatorias) con las colas en cero",ippo_vecinos_p3v2poi3med_s2042_colas0,100,0,0
+P4,poi_red_alta,aleatorias,t2a,a3colas0_v2poi3med,,"IPPO con mensajes corregido (3 bases, llegadas aleatorias) con las colas en cero",ippo_vecinos_p3v2poi3med_s2042_colas0,100,0,0
+P4,poi_red_alta,aleatorias,t1a,a3msg0_p3obspoimed,,"observación nueva (3 bases, llegadas aleatorias) con los mensajes cortados",ippo_vecinos_p3obspoimed_s2042_L0p100_p100,100,0,0
+P4,poi_red_alta,aleatorias,t2a,a3msg0_p3obspoimed,,"observación nueva (3 bases, llegadas aleatorias) con los mensajes cortados",ippo_vecinos_p3obspoimed_s2042_L0p100_p100,100,0,0
+P4,poi_red_alta,aleatorias,t1a,a3msg0_v2poi3med,,"IPPO con mensajes corregido (3 bases, llegadas aleatorias) con los mensajes cortados",ippo_vecinos_p3v2poi3med_s2042_L0p100_p100,100,0,0
+P4,poi_red_alta,aleatorias,t2a,a3msg0_v2poi3med,,"IPPO con mensajes corregido (3 bases, llegadas aleatorias) con los mensajes cortados",ippo_vecinos_p3v2poi3med_s2042_L0p100_p100,100,0,0
+P4,poi_red_alta,aleatorias,t1a,c0poimed,,C0 con llegadas aleatorias,ippo_vecinos_p3c0poimed_s4042,100,0,0
+P4,poi_red_alta,aleatorias,t2a,c0poimed,,C0 con llegadas aleatorias,ippo_vecinos_p3c0poimed_s4042,100,0,0
+P4,poi_red_alta,aleatorias,t1a,entmed,,IPPO entregado,ippo_vecinos_p3entmed_s42,100,0,0
+P4,poi_red_alta,aleatorias,t2a,entmed,,IPPO entregado,ippo_vecinos_p3entmed_s42,100,0,0
+P4,poi_red_alta,aleatorias,t1a,p3completopoi,42,"modelo completo, base 42",ippo_vecinos_p3completopoi_s42,100,0,0
+P4,poi_red_alta,aleatorias,t2a,p3completopoi,42,"modelo completo, base 42",ippo_vecinos_p3completopoi_s42,100,0,0
+P4,poi_red_alta,aleatorias,t1a,p3completopoi,2042,"modelo completo, base 2042",ippo_vecinos_p3completopoi_s2042,100,0,0
+P4,poi_red_alta,aleatorias,t2a,p3completopoi,2042,"modelo completo, base 2042",ippo_vecinos_p3completopoi_s2042,100,0,0
+P4,poi_red_alta,aleatorias,t1a,p3completopoi,4042,"modelo completo, base 4042",ippo_vecinos_p3completopoi_s4042,100,0,0
+P4,poi_red_alta,aleatorias,t2a,p3completopoi,4042,"modelo completo, base 4042",ippo_vecinos_p3completopoi_s4042,100,0,0
+P4,poi_red_alta,aleatorias,t1a,p3e400c20poi,42,"400 episodios eligiendo entre 20, base 42",ippo_vecinos_p3e400c20poi_s42,100,0,0
+P4,poi_red_alta,aleatorias,t2a,p3e400c20poi,42,"400 episodios eligiendo entre 20, base 42",ippo_vecinos_p3e400c20poi_s42,100,0,0
+P4,poi_red_alta,aleatorias,t1a,p3e400c20poi,2042,"400 episodios eligiendo entre 20, base 2042",ippo_vecinos_p3e400c20poi_s2042,100,0,0
+P4,poi_red_alta,aleatorias,t2a,p3e400c20poi,2042,"400 episodios eligiendo entre 20, base 2042",ippo_vecinos_p3e400c20poi_s2042,100,0,0
+P4,poi_red_alta,aleatorias,t1a,p3e400c20poi,4042,"400 episodios eligiendo entre 20, base 4042",ippo_vecinos_p3e400c20poi_s4042,100,0,0
+P4,poi_red_alta,aleatorias,t2a,p3e400c20poi,4042,"400 episodios eligiendo entre 20, base 4042",ippo_vecinos_p3e400c20poi_s4042,100,0,0
+P4,poi_red_alta,aleatorias,t1a,p3e400poi,42,"400 episodios, base 42",ippo_vecinos_p3e400poi_s42,100,0,0
+P4,poi_red_alta,aleatorias,t2a,p3e400poi,42,"400 episodios, base 42",ippo_vecinos_p3e400poi_s42,100,0,0
+P4,poi_red_alta,aleatorias,t1a,p3e400poi,2042,"400 episodios, base 2042",ippo_vecinos_p3e400poi_s2042,100,0,0
+P4,poi_red_alta,aleatorias,t2a,p3e400poi,2042,"400 episodios, base 2042",ippo_vecinos_p3e400poi_s2042,100,0,0
+P4,poi_red_alta,aleatorias,t1a,p3e400poi,4042,"400 episodios, base 4042",ippo_vecinos_p3e400poi_s4042,100,0,0
+P4,poi_red_alta,aleatorias,t2a,p3e400poi,4042,"400 episodios, base 4042",ippo_vecinos_p3e400poi_s4042,100,0,0
+P4,poi_red_alta,aleatorias,t1a,p3obspoi,42,"observación nueva, base 42",ippo_vecinos_p3obspoi_s42,100,0,0
+P4,poi_red_alta,aleatorias,t2a,p3obspoi,42,"observación nueva, base 42",ippo_vecinos_p3obspoi_s42,100,0,0
+P4,poi_red_alta,aleatorias,t1a,p3obspoi,2042,"observación nueva, base 2042",ippo_vecinos_p3obspoi_s2042,100,0,0
+P4,poi_red_alta,aleatorias,t2a,p3obspoi,2042,"observación nueva, base 2042",ippo_vecinos_p3obspoi_s2042,100,0,0
+P4,poi_red_alta,aleatorias,t1a,p3obspoi,4042,"observación nueva, base 4042",ippo_vecinos_p3obspoi_s4042,100,0,0
+P4,poi_red_alta,aleatorias,t2a,p3obspoi,4042,"observación nueva, base 4042",ippo_vecinos_p3obspoi_s4042,100,0,0
+P4,poi_red_alta,aleatorias,t1a,p3piso200poi,42,"200 episodios con piso de la tasa, base 42",ippo_vecinos_p3piso200poi_s42,100,0,0
+P4,poi_red_alta,aleatorias,t2a,p3piso200poi,42,"200 episodios con piso de la tasa, base 42",ippo_vecinos_p3piso200poi_s42,100,0,0
+P4,poi_red_alta,aleatorias,t1a,p3piso200poi,2042,"200 episodios con piso de la tasa, base 2042",ippo_vecinos_p3piso200poi_s2042,100,0,0
+P4,poi_red_alta,aleatorias,t2a,p3piso200poi,2042,"200 episodios con piso de la tasa, base 2042",ippo_vecinos_p3piso200poi_s2042,100,0,0
+P4,poi_red_alta,aleatorias,t1a,p3piso200poi,4042,"200 episodios con piso de la tasa, base 4042",ippo_vecinos_p3piso200poi_s4042,100,0,0
+P4,poi_red_alta,aleatorias,t2a,p3piso200poi,4042,"200 episodios con piso de la tasa, base 4042",ippo_vecinos_p3piso200poi_s4042,100,0,0
+P4,poi_red_alta,aleatorias,t1a,ref_actuado,,actuado por defecto,actuado,100,0,0
+P4,poi_red_alta,aleatorias,t2a,ref_actuado,,actuado por defecto,actuado,100,0,0
+P4,poi_red_alta,aleatorias,t1a,ref_actuadoaj,,actuado ajustado,actuado_aj,100,0,0
+P4,poi_red_alta,aleatorias,t2a,ref_actuadoaj,,actuado ajustado,actuado_aj,100,0,0
+P4,poi_red_alta,aleatorias,t1a,ref_fijo,,fijo entregado,fijo,100,0,0
+P4,poi_red_alta,aleatorias,t2a,ref_fijo,,fijo entregado,fijo,100,0,0
+P4,poi_red_alta,aleatorias,t1a,ref_fino,,fijo fino,fijo_fino,100,0,0
+P4,poi_red_alta,aleatorias,t2a,ref_fino,,fijo fino,fijo_fino,100,0,0
+P4,poi_red_alta,aleatorias,t1a,ref_fino5,,fijo de verdes de 5 en 5,fijo_mult5,100,0,0
+P4,poi_red_alta,aleatorias,t2a,ref_fino5,,fijo de verdes de 5 en 5,fijo_mult5,100,0,0
+P4,poi_red_alta,aleatorias,t1a,ref_franja,,fijo por franja,franja,100,0,0
+P4,poi_red_alta,aleatorias,t2a,ref_franja,,fijo por franja,franja,100,0,0
+P4,poi_red_alta,aleatorias,t1a,ref_mp,,Max-Pressure,mp_c60,100,0,0
+P4,poi_red_alta,aleatorias,t2a,ref_mp,,Max-Pressure,mp_c60,100,0,0
+P4,poi_red_alta,aleatorias,t1a,ref_reactiva,,regla reactiva,reactiva_d25,100,0,0
+P4,poi_red_alta,aleatorias,t2a,ref_reactiva,,regla reactiva,reactiva_d25,100,0,0
+P4,poi_red_alta,aleatorias,t1a,ref_regla,,regla simple,regla_u4g30,100,0,0
+P4,poi_red_alta,aleatorias,t2a,ref_regla,,regla simple,regla_u4g30,100,0,0
+P4,poi_red_alta,aleatorias,t1a,ref_trivial,,ciclo mínimo,trivial,100,0,0
+P4,poi_red_alta,aleatorias,t2a,ref_trivial,,ciclo mínimo,trivial,100,0,0
+P4,poi_red_alta,aleatorias,t1a,v2poi,42,"IPPO con mensajes corregido (entrenado con llegadas aleatorias), base 42",ippo_vecinos_p3v2poi_s42,100,0,0
+P4,poi_red_alta,aleatorias,t2a,v2poi,42,"IPPO con mensajes corregido (entrenado con llegadas aleatorias), base 42",ippo_vecinos_p3v2poi_s42,100,0,0
+P4,poi_red_alta,aleatorias,t1a,v2poi,2042,"IPPO con mensajes corregido (entrenado con llegadas aleatorias), base 2042",ippo_vecinos_p3v2poi_s2042,100,0,0
+P4,poi_red_alta,aleatorias,t2a,v2poi,2042,"IPPO con mensajes corregido (entrenado con llegadas aleatorias), base 2042",ippo_vecinos_p3v2poi_s2042,100,0,0
+P4,poi_red_alta,aleatorias,t1a,v2poi,4042,"IPPO con mensajes corregido (entrenado con llegadas aleatorias), base 4042",ippo_vecinos_p3v2poi_s4042,100,0,0
+P4,poi_red_alta,aleatorias,t2a,v2poi,4042,"IPPO con mensajes corregido (entrenado con llegadas aleatorias), base 4042",ippo_vecinos_p3v2poi_s4042,100,0,0
+P4,poi_red_alta,aleatorias,t1a,v2poi,14042,"IPPO con mensajes corregido (entrenado con llegadas aleatorias), base 14042",ippo_vecinos_p3v2poi_s14042,100,0,0
+P4,poi_red_alta,aleatorias,t2a,v2poi,14042,"IPPO con mensajes corregido (entrenado con llegadas aleatorias), base 14042",ippo_vecinos_p3v2poi_s14042,100,0,0
+P4,poi_red_alta,aleatorias,t1a,v2poi,16042,"IPPO con mensajes corregido (entrenado con llegadas aleatorias), base 16042",ippo_vecinos_p3v2poi_s16042,100,0,0
+P4,poi_red_alta,aleatorias,t2a,v2poi,16042,"IPPO con mensajes corregido (entrenado con llegadas aleatorias), base 16042",ippo_vecinos_p3v2poi_s16042,100,0,0
+P4,poi_red_alta,aleatorias,t1a,v2poiloc,42,"IPPO sin mensajes corregido (llegadas aleatorias), base 42",ippo_local_p3v2poi_s42,100,0,0
+P4,poi_red_alta,aleatorias,t2a,v2poiloc,42,"IPPO sin mensajes corregido (llegadas aleatorias), base 42",ippo_local_p3v2poi_s42,100,0,0
+P4,poi_red_alta,aleatorias,t1a,v2poiloc,2042,"IPPO sin mensajes corregido (llegadas aleatorias), base 2042",ippo_local_p3v2poi_s2042,100,0,0
+P4,poi_red_alta,aleatorias,t2a,v2poiloc,2042,"IPPO sin mensajes corregido (llegadas aleatorias), base 2042",ippo_local_p3v2poi_s2042,100,0,0
+P4,poi_red_alta,aleatorias,t1a,v2poiloc,4042,"IPPO sin mensajes corregido (llegadas aleatorias), base 4042",ippo_local_p3v2poi_s4042,100,0,0
+P4,poi_red_alta,aleatorias,t2a,v2poiloc,4042,"IPPO sin mensajes corregido (llegadas aleatorias), base 4042",ippo_local_p3v2poi_s4042,100,0,0
+P4,poi_red_alta,aleatorias,t1a,v2reg3poi,,"IPPO con mensajes corregido de 3 bases, entrenado con llegadas regulares",ippo_vecinos_p3v2reg3med_s2042,100,0,0
+P4,poi_red_alta,aleatorias,t2a,v2reg3poi,,"IPPO con mensajes corregido de 3 bases, entrenado con llegadas regulares",ippo_vecinos_p3v2reg3med_s2042,100,0,0
+P4,poi_red_alta,aleatorias,t1a,v2regmed,,"IPPO con mensajes corregido, entrenado con llegadas regulares",ippo_vecinos_p3v2regmed_s2042,100,0,0
+P4,poi_red_alta,aleatorias,t2a,v2regmed,,"IPPO con mensajes corregido, entrenado con llegadas regulares",ippo_vecinos_p3v2regmed_s2042,100,0,0
+P5,poi_malla3,aleatorias,t1a,a3colas0_p3obspoimed,,"observación nueva (3 bases, llegadas aleatorias) con las colas en cero",ippo_vecinos_p3obspoimed_s42_colas0,100,0,0
+P5,poi_malla3,aleatorias,t2a,a3colas0_p3obspoimed,,"observación nueva (3 bases, llegadas aleatorias) con las colas en cero",ippo_vecinos_p3obspoimed_s42_colas0,100,0,0
+P5,poi_malla3,aleatorias,t1a,a3colas0_v2poi3med,,"IPPO con mensajes corregido (3 bases, llegadas aleatorias) con las colas en cero",ippo_vecinos_p3v2poi3med_s4042_colas0,100,0,0
+P5,poi_malla3,aleatorias,t2a,a3colas0_v2poi3med,,"IPPO con mensajes corregido (3 bases, llegadas aleatorias) con las colas en cero",ippo_vecinos_p3v2poi3med_s4042_colas0,100,0,0
+P5,poi_malla3,aleatorias,t1a,a3msg0_p3obspoimed,,"observación nueva (3 bases, llegadas aleatorias) con los mensajes cortados",ippo_vecinos_p3obspoimed_s42_L0p100_p100,100,0,0
+P5,poi_malla3,aleatorias,t2a,a3msg0_p3obspoimed,,"observación nueva (3 bases, llegadas aleatorias) con los mensajes cortados",ippo_vecinos_p3obspoimed_s42_L0p100_p100,100,0,0
+P5,poi_malla3,aleatorias,t1a,a3msg0_v2poi3med,,"IPPO con mensajes corregido (3 bases, llegadas aleatorias) con los mensajes cortados",ippo_vecinos_p3v2poi3med_s4042_L0p100_p100,100,0,0
+P5,poi_malla3,aleatorias,t2a,a3msg0_v2poi3med,,"IPPO con mensajes corregido (3 bases, llegadas aleatorias) con los mensajes cortados",ippo_vecinos_p3v2poi3med_s4042_L0p100_p100,100,0,0
+P5,poi_malla3,aleatorias,t1a,c0poimed,,C0 con llegadas aleatorias,ippo_vecinos_p3c0poimed_s42,100,0,0
+P5,poi_malla3,aleatorias,t2a,c0poimed,,C0 con llegadas aleatorias,ippo_vecinos_p3c0poimed_s42,100,0,0
+P5,poi_malla3,aleatorias,t1a,entmed,,IPPO entregado,ippo_vecinos_p3entmed_s2042,100,0,0
+P5,poi_malla3,aleatorias,t2a,entmed,,IPPO entregado,ippo_vecinos_p3entmed_s2042,100,0,0
+P5,poi_malla3,aleatorias,t1a,p3completopoi,42,"modelo completo, base 42",ippo_vecinos_p3completopoi_s42,100,0,0
+P5,poi_malla3,aleatorias,t2a,p3completopoi,42,"modelo completo, base 42",ippo_vecinos_p3completopoi_s42,100,0,0
+P5,poi_malla3,aleatorias,t1a,p3completopoi,2042,"modelo completo, base 2042",ippo_vecinos_p3completopoi_s2042,100,0,0
+P5,poi_malla3,aleatorias,t2a,p3completopoi,2042,"modelo completo, base 2042",ippo_vecinos_p3completopoi_s2042,100,0,0
+P5,poi_malla3,aleatorias,t1a,p3completopoi,4042,"modelo completo, base 4042",ippo_vecinos_p3completopoi_s4042,100,0,0
+P5,poi_malla3,aleatorias,t2a,p3completopoi,4042,"modelo completo, base 4042",ippo_vecinos_p3completopoi_s4042,100,0,0
+P5,poi_malla3,aleatorias,t1a,p3e400c20poi,42,"400 episodios eligiendo entre 20, base 42",ippo_vecinos_p3e400c20poi_s42,100,0,0
+P5,poi_malla3,aleatorias,t2a,p3e400c20poi,42,"400 episodios eligiendo entre 20, base 42",ippo_vecinos_p3e400c20poi_s42,100,0,0
+P5,poi_malla3,aleatorias,t1a,p3e400c20poi,2042,"400 episodios eligiendo entre 20, base 2042",ippo_vecinos_p3e400c20poi_s2042,100,0,0
+P5,poi_malla3,aleatorias,t2a,p3e400c20poi,2042,"400 episodios eligiendo entre 20, base 2042",ippo_vecinos_p3e400c20poi_s2042,100,0,0
+P5,poi_malla3,aleatorias,t1a,p3e400c20poi,4042,"400 episodios eligiendo entre 20, base 4042",ippo_vecinos_p3e400c20poi_s4042,100,0,0
+P5,poi_malla3,aleatorias,t2a,p3e400c20poi,4042,"400 episodios eligiendo entre 20, base 4042",ippo_vecinos_p3e400c20poi_s4042,100,0,0
+P5,poi_malla3,aleatorias,t1a,p3e400poi,42,"400 episodios, base 42",ippo_vecinos_p3e400poi_s42,100,0,0
+P5,poi_malla3,aleatorias,t2a,p3e400poi,42,"400 episodios, base 42",ippo_vecinos_p3e400poi_s42,100,0,0
+P5,poi_malla3,aleatorias,t1a,p3e400poi,2042,"400 episodios, base 2042",ippo_vecinos_p3e400poi_s2042,100,0,0
+P5,poi_malla3,aleatorias,t2a,p3e400poi,2042,"400 episodios, base 2042",ippo_vecinos_p3e400poi_s2042,100,0,0
+P5,poi_malla3,aleatorias,t1a,p3e400poi,4042,"400 episodios, base 4042",ippo_vecinos_p3e400poi_s4042,100,0,0
+P5,poi_malla3,aleatorias,t2a,p3e400poi,4042,"400 episodios, base 4042",ippo_vecinos_p3e400poi_s4042,100,0,0
+P5,poi_malla3,aleatorias,t1a,p3obspoi,42,"observación nueva, base 42",ippo_vecinos_p3obspoi_s42,100,0,0
+P5,poi_malla3,aleatorias,t2a,p3obspoi,42,"observación nueva, base 42",ippo_vecinos_p3obspoi_s42,100,0,0
+P5,poi_malla3,aleatorias,t1a,p3obspoi,2042,"observación nueva, base 2042",ippo_vecinos_p3obspoi_s2042,100,0,0
+P5,poi_malla3,aleatorias,t2a,p3obspoi,2042,"observación nueva, base 2042",ippo_vecinos_p3obspoi_s2042,100,0,0
+P5,poi_malla3,aleatorias,t1a,p3obspoi,4042,"observación nueva, base 4042",ippo_vecinos_p3obspoi_s4042,100,0,0
+P5,poi_malla3,aleatorias,t2a,p3obspoi,4042,"observación nueva, base 4042",ippo_vecinos_p3obspoi_s4042,100,0,0
+P5,poi_malla3,aleatorias,t1a,p3piso200poi,42,"200 episodios con piso de la tasa, base 42",ippo_vecinos_p3piso200poi_s42,100,0,0
+P5,poi_malla3,aleatorias,t2a,p3piso200poi,42,"200 episodios con piso de la tasa, base 42",ippo_vecinos_p3piso200poi_s42,100,0,0
+P5,poi_malla3,aleatorias,t1a,p3piso200poi,2042,"200 episodios con piso de la tasa, base 2042",ippo_vecinos_p3piso200poi_s2042,100,0,0
+P5,poi_malla3,aleatorias,t2a,p3piso200poi,2042,"200 episodios con piso de la tasa, base 2042",ippo_vecinos_p3piso200poi_s2042,100,0,0
+P5,poi_malla3,aleatorias,t1a,p3piso200poi,4042,"200 episodios con piso de la tasa, base 4042",ippo_vecinos_p3piso200poi_s4042,100,0,0
+P5,poi_malla3,aleatorias,t2a,p3piso200poi,4042,"200 episodios con piso de la tasa, base 4042",ippo_vecinos_p3piso200poi_s4042,100,0,0
+P5,poi_malla3,aleatorias,t1a,ref_actuado,,actuado por defecto,actuado,100,0,0
+P5,poi_malla3,aleatorias,t2a,ref_actuado,,actuado por defecto,actuado,100,0,0
+P5,poi_malla3,aleatorias,t1a,ref_actuadoaj,,actuado ajustado,actuado_aj,100,0,0
+P5,poi_malla3,aleatorias,t2a,ref_actuadoaj,,actuado ajustado,actuado_aj,100,0,0
+P5,poi_malla3,aleatorias,t1a,ref_fijo,,fijo entregado,fijo,100,0,0
+P5,poi_malla3,aleatorias,t2a,ref_fijo,,fijo entregado,fijo,100,0,0
+P5,poi_malla3,aleatorias,t1a,ref_fino,,fijo fino,fijo_fino,100,0,0
+P5,poi_malla3,aleatorias,t2a,ref_fino,,fijo fino,fijo_fino,100,0,0
+P5,poi_malla3,aleatorias,t1a,ref_fino5,,fijo de verdes de 5 en 5,fijo_mult5,100,0,0
+P5,poi_malla3,aleatorias,t2a,ref_fino5,,fijo de verdes de 5 en 5,fijo_mult5,100,0,0
+P5,poi_malla3,aleatorias,t1a,ref_franja,,fijo por franja,franja,100,0,0
+P5,poi_malla3,aleatorias,t2a,ref_franja,,fijo por franja,franja,100,0,0
+P5,poi_malla3,aleatorias,t1a,ref_mp,,Max-Pressure,mp_det,100,0,0
+P5,poi_malla3,aleatorias,t2a,ref_mp,,Max-Pressure,mp_det,100,0,0
+P5,poi_malla3,aleatorias,t1a,ref_reactiva,,regla reactiva,reactiva_d25,100,0,0
+P5,poi_malla3,aleatorias,t2a,ref_reactiva,,regla reactiva,reactiva_d25,100,0,0
+P5,poi_malla3,aleatorias,t1a,ref_regla,,regla simple,regla_u6g30,100,0,0
+P5,poi_malla3,aleatorias,t2a,ref_regla,,regla simple,regla_u6g30,100,0,0
+P5,poi_malla3,aleatorias,t1a,ref_trivial,,ciclo mínimo,trivial,100,0,0
+P5,poi_malla3,aleatorias,t2a,ref_trivial,,ciclo mínimo,trivial,100,0,0
+P5,poi_malla3,aleatorias,t1a,v2poi,42,"IPPO con mensajes corregido (entrenado con llegadas aleatorias), base 42",ippo_vecinos_p3v2poi_s42,100,0,0
+P5,poi_malla3,aleatorias,t2a,v2poi,42,"IPPO con mensajes corregido (entrenado con llegadas aleatorias), base 42",ippo_vecinos_p3v2poi_s42,100,0,0
+P5,poi_malla3,aleatorias,t1a,v2poi,2042,"IPPO con mensajes corregido (entrenado con llegadas aleatorias), base 2042",ippo_vecinos_p3v2poi_s2042,100,0,0
+P5,poi_malla3,aleatorias,t2a,v2poi,2042,"IPPO con mensajes corregido (entrenado con llegadas aleatorias), base 2042",ippo_vecinos_p3v2poi_s2042,100,0,0
+P5,poi_malla3,aleatorias,t1a,v2poi,4042,"IPPO con mensajes corregido (entrenado con llegadas aleatorias), base 4042",ippo_vecinos_p3v2poi_s4042,100,0,0
+P5,poi_malla3,aleatorias,t2a,v2poi,4042,"IPPO con mensajes corregido (entrenado con llegadas aleatorias), base 4042",ippo_vecinos_p3v2poi_s4042,100,0,0
+P5,poi_malla3,aleatorias,t1a,v2poi,14042,"IPPO con mensajes corregido (entrenado con llegadas aleatorias), base 14042",ippo_vecinos_p3v2poi_s14042,100,0,0
+P5,poi_malla3,aleatorias,t2a,v2poi,14042,"IPPO con mensajes corregido (entrenado con llegadas aleatorias), base 14042",ippo_vecinos_p3v2poi_s14042,100,0,0
+P5,poi_malla3,aleatorias,t1a,v2poi,16042,"IPPO con mensajes corregido (entrenado con llegadas aleatorias), base 16042",ippo_vecinos_p3v2poi_s16042,100,0,0
+P5,poi_malla3,aleatorias,t2a,v2poi,16042,"IPPO con mensajes corregido (entrenado con llegadas aleatorias), base 16042",ippo_vecinos_p3v2poi_s16042,100,0,0
+P5,poi_malla3,aleatorias,t1a,v2poiloc,42,"IPPO sin mensajes corregido (llegadas aleatorias), base 42",ippo_local_p3v2poi_s42,100,0,0
+P5,poi_malla3,aleatorias,t2a,v2poiloc,42,"IPPO sin mensajes corregido (llegadas aleatorias), base 42",ippo_local_p3v2poi_s42,100,0,0
+P5,poi_malla3,aleatorias,t1a,v2poiloc,2042,"IPPO sin mensajes corregido (llegadas aleatorias), base 2042",ippo_local_p3v2poi_s2042,100,0,0
+P5,poi_malla3,aleatorias,t2a,v2poiloc,2042,"IPPO sin mensajes corregido (llegadas aleatorias), base 2042",ippo_local_p3v2poi_s2042,100,0,0
+P5,poi_malla3,aleatorias,t1a,v2poiloc,4042,"IPPO sin mensajes corregido (llegadas aleatorias), base 4042",ippo_local_p3v2poi_s4042,100,0,0
+P5,poi_malla3,aleatorias,t2a,v2poiloc,4042,"IPPO sin mensajes corregido (llegadas aleatorias), base 4042",ippo_local_p3v2poi_s4042,100,0,0
+P5,poi_malla3,aleatorias,t1a,v2reg3poi,,"IPPO con mensajes corregido de 3 bases, entrenado con llegadas regulares",ippo_vecinos_p3v2reg3med_s2042,100,0,0
+P5,poi_malla3,aleatorias,t2a,v2reg3poi,,"IPPO con mensajes corregido de 3 bases, entrenado con llegadas regulares",ippo_vecinos_p3v2reg3med_s2042,100,0,0
+P5,poi_malla3,aleatorias,t1a,v2regmed,,"IPPO con mensajes corregido, entrenado con llegadas regulares",ippo_vecinos_p3v2regmed_s2042,100,0,0
+P5,poi_malla3,aleatorias,t2a,v2regmed,,"IPPO con mensajes corregido, entrenado con llegadas regulares",ippo_vecinos_p3v2regmed_s2042,100,0,0
+P6,poi_malla3_alta,aleatorias,t1a,a3colas0_p3obspoimed,,"observación nueva (3 bases, llegadas aleatorias) con las colas en cero",ippo_vecinos_p3obspoimed_s2042_colas0,100,0,0
+P6,poi_malla3_alta,aleatorias,t2a,a3colas0_p3obspoimed,,"observación nueva (3 bases, llegadas aleatorias) con las colas en cero",ippo_vecinos_p3obspoimed_s2042_colas0,100,0,0
+P6,poi_malla3_alta,aleatorias,t1a,a3colas0_v2poi3med,,"IPPO con mensajes corregido (3 bases, llegadas aleatorias) con las colas en cero",ippo_vecinos_p3v2poi3med_s4042_colas0,100,0,0
+P6,poi_malla3_alta,aleatorias,t2a,a3colas0_v2poi3med,,"IPPO con mensajes corregido (3 bases, llegadas aleatorias) con las colas en cero",ippo_vecinos_p3v2poi3med_s4042_colas0,100,0,0
+P6,poi_malla3_alta,aleatorias,t1a,a3msg0_p3obspoimed,,"observación nueva (3 bases, llegadas aleatorias) con los mensajes cortados",ippo_vecinos_p3obspoimed_s2042_L0p100_p100,100,0,0
+P6,poi_malla3_alta,aleatorias,t2a,a3msg0_p3obspoimed,,"observación nueva (3 bases, llegadas aleatorias) con los mensajes cortados",ippo_vecinos_p3obspoimed_s2042_L0p100_p100,100,0,0
+P6,poi_malla3_alta,aleatorias,t1a,a3msg0_v2poi3med,,"IPPO con mensajes corregido (3 bases, llegadas aleatorias) con los mensajes cortados",ippo_vecinos_p3v2poi3med_s4042_L0p100_p100,100,0,0
+P6,poi_malla3_alta,aleatorias,t2a,a3msg0_v2poi3med,,"IPPO con mensajes corregido (3 bases, llegadas aleatorias) con los mensajes cortados",ippo_vecinos_p3v2poi3med_s4042_L0p100_p100,100,0,0
+P6,poi_malla3_alta,aleatorias,t1a,c0poimed,,C0 con llegadas aleatorias,ippo_vecinos_p3c0poimed_s2042,100,0,0
+P6,poi_malla3_alta,aleatorias,t2a,c0poimed,,C0 con llegadas aleatorias,ippo_vecinos_p3c0poimed_s2042,100,0,0
+P6,poi_malla3_alta,aleatorias,t1a,entmed,,IPPO entregado,ippo_vecinos_p3entmed_s42,100,0,0
+P6,poi_malla3_alta,aleatorias,t2a,entmed,,IPPO entregado,ippo_vecinos_p3entmed_s42,100,0,0
+P6,poi_malla3_alta,aleatorias,t1a,p3completopoi,42,"modelo completo, base 42",ippo_vecinos_p3completopoi_s42,100,0,0
+P6,poi_malla3_alta,aleatorias,t2a,p3completopoi,42,"modelo completo, base 42",ippo_vecinos_p3completopoi_s42,100,0,0
+P6,poi_malla3_alta,aleatorias,t1a,p3completopoi,2042,"modelo completo, base 2042",ippo_vecinos_p3completopoi_s2042,100,0,0
+P6,poi_malla3_alta,aleatorias,t2a,p3completopoi,2042,"modelo completo, base 2042",ippo_vecinos_p3completopoi_s2042,100,0,0
+P6,poi_malla3_alta,aleatorias,t1a,p3completopoi,4042,"modelo completo, base 4042",ippo_vecinos_p3completopoi_s4042,100,0,0
+P6,poi_malla3_alta,aleatorias,t2a,p3completopoi,4042,"modelo completo, base 4042",ippo_vecinos_p3completopoi_s4042,100,0,0
+P6,poi_malla3_alta,aleatorias,t1a,p3e400c20poi,42,"400 episodios eligiendo entre 20, base 42",ippo_vecinos_p3e400c20poi_s42,100,0,0
+P6,poi_malla3_alta,aleatorias,t2a,p3e400c20poi,42,"400 episodios eligiendo entre 20, base 42",ippo_vecinos_p3e400c20poi_s42,100,0,0
+P6,poi_malla3_alta,aleatorias,t1a,p3e400c20poi,2042,"400 episodios eligiendo entre 20, base 2042",ippo_vecinos_p3e400c20poi_s2042,100,0,0
+P6,poi_malla3_alta,aleatorias,t2a,p3e400c20poi,2042,"400 episodios eligiendo entre 20, base 2042",ippo_vecinos_p3e400c20poi_s2042,100,0,0
+P6,poi_malla3_alta,aleatorias,t1a,p3e400c20poi,4042,"400 episodios eligiendo entre 20, base 4042",ippo_vecinos_p3e400c20poi_s4042,100,0,0
+P6,poi_malla3_alta,aleatorias,t2a,p3e400c20poi,4042,"400 episodios eligiendo entre 20, base 4042",ippo_vecinos_p3e400c20poi_s4042,100,0,0
+P6,poi_malla3_alta,aleatorias,t1a,p3e400poi,42,"400 episodios, base 42",ippo_vecinos_p3e400poi_s42,100,0,0
+P6,poi_malla3_alta,aleatorias,t2a,p3e400poi,42,"400 episodios, base 42",ippo_vecinos_p3e400poi_s42,100,0,0
+P6,poi_malla3_alta,aleatorias,t1a,p3e400poi,2042,"400 episodios, base 2042",ippo_vecinos_p3e400poi_s2042,100,0,0
+P6,poi_malla3_alta,aleatorias,t2a,p3e400poi,2042,"400 episodios, base 2042",ippo_vecinos_p3e400poi_s2042,100,0,0
+P6,poi_malla3_alta,aleatorias,t1a,p3e400poi,4042,"400 episodios, base 4042",ippo_vecinos_p3e400poi_s4042,100,0,0
+P6,poi_malla3_alta,aleatorias,t2a,p3e400poi,4042,"400 episodios, base 4042",ippo_vecinos_p3e400poi_s4042,100,0,0
+P6,poi_malla3_alta,aleatorias,t1a,p3obspoi,42,"observación nueva, base 42",ippo_vecinos_p3obspoi_s42,100,0,0
+P6,poi_malla3_alta,aleatorias,t2a,p3obspoi,42,"observación nueva, base 42",ippo_vecinos_p3obspoi_s42,100,0,0
+P6,poi_malla3_alta,aleatorias,t1a,p3obspoi,2042,"observación nueva, base 2042",ippo_vecinos_p3obspoi_s2042,100,0,0
+P6,poi_malla3_alta,aleatorias,t2a,p3obspoi,2042,"observación nueva, base 2042",ippo_vecinos_p3obspoi_s2042,100,0,0
+P6,poi_malla3_alta,aleatorias,t1a,p3obspoi,4042,"observación nueva, base 4042",ippo_vecinos_p3obspoi_s4042,100,0,0
+P6,poi_malla3_alta,aleatorias,t2a,p3obspoi,4042,"observación nueva, base 4042",ippo_vecinos_p3obspoi_s4042,100,0,0
+P6,poi_malla3_alta,aleatorias,t1a,p3piso200poi,42,"200 episodios con piso de la tasa, base 42",ippo_vecinos_p3piso200poi_s42,100,0,0
+P6,poi_malla3_alta,aleatorias,t2a,p3piso200poi,42,"200 episodios con piso de la tasa, base 42",ippo_vecinos_p3piso200poi_s42,100,0,0
+P6,poi_malla3_alta,aleatorias,t1a,p3piso200poi,2042,"200 episodios con piso de la tasa, base 2042",ippo_vecinos_p3piso200poi_s2042,100,0,0
+P6,poi_malla3_alta,aleatorias,t2a,p3piso200poi,2042,"200 episodios con piso de la tasa, base 2042",ippo_vecinos_p3piso200poi_s2042,100,0,0
+P6,poi_malla3_alta,aleatorias,t1a,p3piso200poi,4042,"200 episodios con piso de la tasa, base 4042",ippo_vecinos_p3piso200poi_s4042,100,0,0
+P6,poi_malla3_alta,aleatorias,t2a,p3piso200poi,4042,"200 episodios con piso de la tasa, base 4042",ippo_vecinos_p3piso200poi_s4042,100,0,0
+P6,poi_malla3_alta,aleatorias,t1a,p3reloj2poi,42,"reloj de 2 s, base 42",ippo_vecinos_p3reloj2poi_s42,100,0,0
+P6,poi_malla3_alta,aleatorias,t2a,p3reloj2poi,42,"reloj de 2 s, base 42",ippo_vecinos_p3reloj2poi_s42,100,0,0
+P6,poi_malla3_alta,aleatorias,t1a,p3reloj2poi,2042,"reloj de 2 s, base 2042",ippo_vecinos_p3reloj2poi_s2042,100,0,0
+P6,poi_malla3_alta,aleatorias,t2a,p3reloj2poi,2042,"reloj de 2 s, base 2042",ippo_vecinos_p3reloj2poi_s2042,100,0,0
+P6,poi_malla3_alta,aleatorias,t1a,p3reloj2poi,4042,"reloj de 2 s, base 4042",ippo_vecinos_p3reloj2poi_s4042,100,0,0
+P6,poi_malla3_alta,aleatorias,t2a,p3reloj2poi,4042,"reloj de 2 s, base 4042",ippo_vecinos_p3reloj2poi_s4042,100,0,0
+P6,poi_malla3_alta,aleatorias,t1a,ref_actuado,,actuado por defecto,actuado,100,0,0
+P6,poi_malla3_alta,aleatorias,t2a,ref_actuado,,actuado por defecto,actuado,100,0,0
+P6,poi_malla3_alta,aleatorias,t1a,ref_actuadoaj,,actuado ajustado,actuado_aj,100,0,0
+P6,poi_malla3_alta,aleatorias,t2a,ref_actuadoaj,,actuado ajustado,actuado_aj,100,0,0
+P6,poi_malla3_alta,aleatorias,t1a,ref_fijo,,fijo entregado,fijo,100,0,0
+P6,poi_malla3_alta,aleatorias,t2a,ref_fijo,,fijo entregado,fijo,100,0,0
+P6,poi_malla3_alta,aleatorias,t1a,ref_fino,,fijo fino,fijo_fino,100,0,0
+P6,poi_malla3_alta,aleatorias,t2a,ref_fino,,fijo fino,fijo_fino,100,0,0
+P6,poi_malla3_alta,aleatorias,t1a,ref_fino5,,fijo de verdes de 5 en 5,fijo_mult5,100,0,0
+P6,poi_malla3_alta,aleatorias,t2a,ref_fino5,,fijo de verdes de 5 en 5,fijo_mult5,100,0,0
+P6,poi_malla3_alta,aleatorias,t1a,ref_franja,,fijo por franja,franja,100,0,0
+P6,poi_malla3_alta,aleatorias,t2a,ref_franja,,fijo por franja,franja,100,0,0
+P6,poi_malla3_alta,aleatorias,t1a,ref_mp,,Max-Pressure,mp_c60,100,0,0
+P6,poi_malla3_alta,aleatorias,t2a,ref_mp,,Max-Pressure,mp_c60,100,0,0
+P6,poi_malla3_alta,aleatorias,t1a,ref_reactiva,,regla reactiva,reactiva_d15,100,0,0
+P6,poi_malla3_alta,aleatorias,t2a,ref_reactiva,,regla reactiva,reactiva_d15,100,0,0
+P6,poi_malla3_alta,aleatorias,t1a,ref_regla,,regla simple,regla_u1g30,100,0,0
+P6,poi_malla3_alta,aleatorias,t2a,ref_regla,,regla simple,regla_u1g30,100,0,0
+P6,poi_malla3_alta,aleatorias,t1a,ref_trivial,,ciclo mínimo,trivial,100,13,2855
+P6,poi_malla3_alta,aleatorias,t2a,ref_trivial,,ciclo mínimo,trivial,100,14,6323
+P6,poi_malla3_alta,aleatorias,t1a,v2poi,42,"IPPO con mensajes corregido (entrenado con llegadas aleatorias), base 42",ippo_vecinos_p3v2poi_s42,100,0,0
+P6,poi_malla3_alta,aleatorias,t2a,v2poi,42,"IPPO con mensajes corregido (entrenado con llegadas aleatorias), base 42",ippo_vecinos_p3v2poi_s42,100,0,0
+P6,poi_malla3_alta,aleatorias,t1a,v2poi,2042,"IPPO con mensajes corregido (entrenado con llegadas aleatorias), base 2042",ippo_vecinos_p3v2poi_s2042,100,0,0
+P6,poi_malla3_alta,aleatorias,t2a,v2poi,2042,"IPPO con mensajes corregido (entrenado con llegadas aleatorias), base 2042",ippo_vecinos_p3v2poi_s2042,100,0,0
+P6,poi_malla3_alta,aleatorias,t1a,v2poi,4042,"IPPO con mensajes corregido (entrenado con llegadas aleatorias), base 4042",ippo_vecinos_p3v2poi_s4042,100,0,0
+P6,poi_malla3_alta,aleatorias,t2a,v2poi,4042,"IPPO con mensajes corregido (entrenado con llegadas aleatorias), base 4042",ippo_vecinos_p3v2poi_s4042,100,0,0
+P6,poi_malla3_alta,aleatorias,t1a,v2poi,14042,"IPPO con mensajes corregido (entrenado con llegadas aleatorias), base 14042",ippo_vecinos_p3v2poi_s14042,100,0,0
+P6,poi_malla3_alta,aleatorias,t2a,v2poi,14042,"IPPO con mensajes corregido (entrenado con llegadas aleatorias), base 14042",ippo_vecinos_p3v2poi_s14042,100,0,0
+P6,poi_malla3_alta,aleatorias,t1a,v2poi,16042,"IPPO con mensajes corregido (entrenado con llegadas aleatorias), base 16042",ippo_vecinos_p3v2poi_s16042,100,0,0
+P6,poi_malla3_alta,aleatorias,t2a,v2poi,16042,"IPPO con mensajes corregido (entrenado con llegadas aleatorias), base 16042",ippo_vecinos_p3v2poi_s16042,100,0,0
+P6,poi_malla3_alta,aleatorias,t1a,v2poiloc,42,"IPPO sin mensajes corregido (llegadas aleatorias), base 42",ippo_local_p3v2poi_s42,100,0,0
+P6,poi_malla3_alta,aleatorias,t2a,v2poiloc,42,"IPPO sin mensajes corregido (llegadas aleatorias), base 42",ippo_local_p3v2poi_s42,100,0,0
+P6,poi_malla3_alta,aleatorias,t1a,v2poiloc,2042,"IPPO sin mensajes corregido (llegadas aleatorias), base 2042",ippo_local_p3v2poi_s2042,100,0,0
+P6,poi_malla3_alta,aleatorias,t2a,v2poiloc,2042,"IPPO sin mensajes corregido (llegadas aleatorias), base 2042",ippo_local_p3v2poi_s2042,100,0,0
+P6,poi_malla3_alta,aleatorias,t1a,v2poiloc,4042,"IPPO sin mensajes corregido (llegadas aleatorias), base 4042",ippo_local_p3v2poi_s4042,100,0,0
+P6,poi_malla3_alta,aleatorias,t2a,v2poiloc,4042,"IPPO sin mensajes corregido (llegadas aleatorias), base 4042",ippo_local_p3v2poi_s4042,100,0,0
+P6,poi_malla3_alta,aleatorias,t1a,v2reg3poi,,"IPPO con mensajes corregido de 3 bases, entrenado con llegadas regulares",ippo_vecinos_p3v2reg3med_s2042,100,0,0
+P6,poi_malla3_alta,aleatorias,t2a,v2reg3poi,,"IPPO con mensajes corregido de 3 bases, entrenado con llegadas regulares",ippo_vecinos_p3v2reg3med_s2042,100,0,0
+P6,poi_malla3_alta,aleatorias,t1a,v2regmed,,"IPPO con mensajes corregido, entrenado con llegadas regulares",ippo_vecinos_p3v2regmed_s2042,100,0,0
+P6,poi_malla3_alta,aleatorias,t2a,v2regmed,,"IPPO con mensajes corregido, entrenado con llegadas regulares",ippo_vecinos_p3v2regmed_s2042,100,0,0
+mix1,mix_corredor,aleatorias,t1a,ref_actuado,,actuado por defecto,actuado,100,0,0
+mix1,mix_corredor,aleatorias,t2a,ref_actuado,,actuado por defecto,actuado,100,0,0
+mix1,mix_corredor,aleatorias,t1a,ref_actuadoaj,,actuado ajustado,actuado_aj,100,0,0
+mix1,mix_corredor,aleatorias,t2a,ref_actuadoaj,,actuado ajustado,actuado_aj,100,0,0
+mix1,mix_corredor,aleatorias,t1a,ref_fijo,,fijo entregado,fijo,100,0,0
+mix1,mix_corredor,aleatorias,t2a,ref_fijo,,fijo entregado,fijo,100,0,0
+mix1,mix_corredor,aleatorias,t1a,ref_fino,,fijo fino,fijo_fino,100,0,0
+mix1,mix_corredor,aleatorias,t2a,ref_fino,,fijo fino,fijo_fino,100,0,0
+mix1,mix_corredor,aleatorias,t1a,ref_reactiva,,regla reactiva,reactiva_d50,100,0,0
+mix1,mix_corredor,aleatorias,t2a,ref_reactiva,,regla reactiva,reactiva_d50,100,0,0
+mix1,mix_corredor,aleatorias,t1a,ref_regla,,regla simple,regla_u1g60,100,0,0
+mix1,mix_corredor,aleatorias,t2a,ref_regla,,regla simple,regla_u1g60,100,0,0
+mix1,mix_corredor,aleatorias,t1a,ref_trivial,,ciclo mínimo,trivial,100,0,0
+mix1,mix_corredor,aleatorias,t2a,ref_trivial,,ciclo mínimo,trivial,100,0,0
+mix1,mix_corredor,aleatorias,t1a,v2mix,42,"IPPO con mensajes corregido (entrenado con la mezcla), base 42",ippo_vecinos_p3v2mix_s42,100,0,0
+mix1,mix_corredor,aleatorias,t2a,v2mix,42,"IPPO con mensajes corregido (entrenado con la mezcla), base 42",ippo_vecinos_p3v2mix_s42,100,0,0
+mix1,mix_corredor,aleatorias,t1a,v2mix,2042,"IPPO con mensajes corregido (entrenado con la mezcla), base 2042",ippo_vecinos_p3v2mix_s2042,100,0,0
+mix1,mix_corredor,aleatorias,t2a,v2mix,2042,"IPPO con mensajes corregido (entrenado con la mezcla), base 2042",ippo_vecinos_p3v2mix_s2042,100,0,0
+mix1,mix_corredor,aleatorias,t1a,v2mix,4042,"IPPO con mensajes corregido (entrenado con la mezcla), base 4042",ippo_vecinos_p3v2mix_s4042,100,0,0
+mix1,mix_corredor,aleatorias,t2a,v2mix,4042,"IPPO con mensajes corregido (entrenado con la mezcla), base 4042",ippo_vecinos_p3v2mix_s4042,100,0,0
+mix3,mix_red,aleatorias,t1a,ref_actuado,,actuado por defecto,actuado,100,0,0
+mix3,mix_red,aleatorias,t2a,ref_actuado,,actuado por defecto,actuado,100,0,0
+mix3,mix_red,aleatorias,t1a,ref_actuadoaj,,actuado ajustado,actuado_aj,100,0,0
+mix3,mix_red,aleatorias,t2a,ref_actuadoaj,,actuado ajustado,actuado_aj,100,0,0
+mix3,mix_red,aleatorias,t1a,ref_fijo,,fijo entregado,fijo,100,0,0
+mix3,mix_red,aleatorias,t2a,ref_fijo,,fijo entregado,fijo,100,0,0
+mix3,mix_red,aleatorias,t1a,ref_fino,,fijo fino,fijo_fino,100,0,0
+mix3,mix_red,aleatorias,t2a,ref_fino,,fijo fino,fijo_fino,100,0,0
+mix3,mix_red,aleatorias,t1a,ref_reactiva,,regla reactiva,reactiva_d50,100,0,0
+mix3,mix_red,aleatorias,t2a,ref_reactiva,,regla reactiva,reactiva_d50,100,0,0
+mix3,mix_red,aleatorias,t1a,ref_regla,,regla simple,regla_u2g30,100,0,0
+mix3,mix_red,aleatorias,t2a,ref_regla,,regla simple,regla_u2g30,100,0,0
+mix3,mix_red,aleatorias,t1a,ref_trivial,,ciclo mínimo,trivial,100,0,0
+mix3,mix_red,aleatorias,t2a,ref_trivial,,ciclo mínimo,trivial,100,0,0
+mix3,mix_red,aleatorias,t1a,v2mix,42,"IPPO con mensajes corregido (entrenado con la mezcla), base 42",ippo_vecinos_p3v2mix_s42,100,0,0
+mix3,mix_red,aleatorias,t2a,v2mix,42,"IPPO con mensajes corregido (entrenado con la mezcla), base 42",ippo_vecinos_p3v2mix_s42,100,0,0
+mix3,mix_red,aleatorias,t1a,v2mix,2042,"IPPO con mensajes corregido (entrenado con la mezcla), base 2042",ippo_vecinos_p3v2mix_s2042,100,0,0
+mix3,mix_red,aleatorias,t2a,v2mix,2042,"IPPO con mensajes corregido (entrenado con la mezcla), base 2042",ippo_vecinos_p3v2mix_s2042,100,0,0
+mix3,mix_red,aleatorias,t1a,v2mix,4042,"IPPO con mensajes corregido (entrenado con la mezcla), base 4042",ippo_vecinos_p3v2mix_s4042,100,0,0
+mix3,mix_red,aleatorias,t2a,v2mix,4042,"IPPO con mensajes corregido (entrenado con la mezcla), base 4042",ippo_vecinos_p3v2mix_s4042,100,0,0
+mixa1,mixa_corredor,aleatorias,t1a,ref_actuado,,actuado por defecto,actuado,100,0,0
+mixa1,mixa_corredor,aleatorias,t2a,ref_actuado,,actuado por defecto,actuado,100,0,0
+mixa1,mixa_corredor,aleatorias,t1a,ref_actuadoaj,,actuado ajustado,actuado_aj,100,0,0
+mixa1,mixa_corredor,aleatorias,t2a,ref_actuadoaj,,actuado ajustado,actuado_aj,100,0,0
+mixa1,mixa_corredor,aleatorias,t1a,ref_fijo,,fijo entregado,fijo,100,0,0
+mixa1,mixa_corredor,aleatorias,t2a,ref_fijo,,fijo entregado,fijo,100,0,0
+mixa1,mixa_corredor,aleatorias,t1a,ref_fino,,fijo fino,fijo_fino,100,0,0
+mixa1,mixa_corredor,aleatorias,t2a,ref_fino,,fijo fino,fijo_fino,100,0,0
+mixa1,mixa_corredor,aleatorias,t1a,ref_reactiva,,regla reactiva,reactiva_d50,100,0,0
+mixa1,mixa_corredor,aleatorias,t2a,ref_reactiva,,regla reactiva,reactiva_d50,100,0,0
+mixa1,mixa_corredor,aleatorias,t1a,ref_regla,,regla simple,regla_u1g60,100,0,0
+mixa1,mixa_corredor,aleatorias,t2a,ref_regla,,regla simple,regla_u1g60,100,0,0
+mixa1,mixa_corredor,aleatorias,t1a,ref_trivial,,ciclo mínimo,trivial,100,0,0
+mixa1,mixa_corredor,aleatorias,t2a,ref_trivial,,ciclo mínimo,trivial,100,0,0
+mixa1,mixa_corredor,aleatorias,t1a,v2mix,42,"IPPO con mensajes corregido (entrenado con la mezcla), base 42",ippo_vecinos_p3v2mix_s42,100,0,0
+mixa1,mixa_corredor,aleatorias,t2a,v2mix,42,"IPPO con mensajes corregido (entrenado con la mezcla), base 42",ippo_vecinos_p3v2mix_s42,100,0,0
+mixa1,mixa_corredor,aleatorias,t1a,v2mix,2042,"IPPO con mensajes corregido (entrenado con la mezcla), base 2042",ippo_vecinos_p3v2mix_s2042,100,0,0
+mixa1,mixa_corredor,aleatorias,t2a,v2mix,2042,"IPPO con mensajes corregido (entrenado con la mezcla), base 2042",ippo_vecinos_p3v2mix_s2042,100,0,0
+mixa1,mixa_corredor,aleatorias,t1a,v2mix,4042,"IPPO con mensajes corregido (entrenado con la mezcla), base 4042",ippo_vecinos_p3v2mix_s4042,100,0,0
+mixa1,mixa_corredor,aleatorias,t2a,v2mix,4042,"IPPO con mensajes corregido (entrenado con la mezcla), base 4042",ippo_vecinos_p3v2mix_s4042,100,0,0
+mixa3,mixa_red,aleatorias,t1a,ref_actuado,,actuado por defecto,actuado,100,0,0
+mixa3,mixa_red,aleatorias,t2a,ref_actuado,,actuado por defecto,actuado,100,0,0
+mixa3,mixa_red,aleatorias,t1a,ref_actuadoaj,,actuado ajustado,actuado_aj,100,0,0
+mixa3,mixa_red,aleatorias,t2a,ref_actuadoaj,,actuado ajustado,actuado_aj,100,0,0
+mixa3,mixa_red,aleatorias,t1a,ref_fijo,,fijo entregado,fijo,100,0,0
+mixa3,mixa_red,aleatorias,t2a,ref_fijo,,fijo entregado,fijo,100,0,0
+mixa3,mixa_red,aleatorias,t1a,ref_fino,,fijo fino,fijo_fino,100,0,0
+mixa3,mixa_red,aleatorias,t2a,ref_fino,,fijo fino,fijo_fino,100,0,0
+mixa3,mixa_red,aleatorias,t1a,ref_reactiva,,regla reactiva,reactiva_d50,100,0,0
+mixa3,mixa_red,aleatorias,t2a,ref_reactiva,,regla reactiva,reactiva_d50,100,0,0
+mixa3,mixa_red,aleatorias,t1a,ref_regla,,regla simple,regla_u2g30,100,0,0
+mixa3,mixa_red,aleatorias,t2a,ref_regla,,regla simple,regla_u2g30,100,0,0
+mixa3,mixa_red,aleatorias,t1a,ref_trivial,,ciclo mínimo,trivial,100,0,0
+mixa3,mixa_red,aleatorias,t2a,ref_trivial,,ciclo mínimo,trivial,100,0,0
+mixa3,mixa_red,aleatorias,t1a,v2mix,42,"IPPO con mensajes corregido (entrenado con la mezcla), base 42",ippo_vecinos_p3v2mix_s42,100,0,0
+mixa3,mixa_red,aleatorias,t2a,v2mix,42,"IPPO con mensajes corregido (entrenado con la mezcla), base 42",ippo_vecinos_p3v2mix_s42,100,0,0
+mixa3,mixa_red,aleatorias,t1a,v2mix,2042,"IPPO con mensajes corregido (entrenado con la mezcla), base 2042",ippo_vecinos_p3v2mix_s2042,100,0,0
+mixa3,mixa_red,aleatorias,t2a,v2mix,2042,"IPPO con mensajes corregido (entrenado con la mezcla), base 2042",ippo_vecinos_p3v2mix_s2042,100,0,0
+mixa3,mixa_red,aleatorias,t1a,v2mix,4042,"IPPO con mensajes corregido (entrenado con la mezcla), base 4042",ippo_vecinos_p3v2mix_s4042,100,0,0
+mixa3,mixa_red,aleatorias,t2a,v2mix,4042,"IPPO con mensajes corregido (entrenado con la mezcla), base 4042",ippo_vecinos_p3v2mix_s4042,100,0,0
+per1,per_corredor,aleatorias,t1a,ref_actuado,,actuado por defecto,actuado,100,0,0
+per1,per_corredor,aleatorias,t2a,ref_actuado,,actuado por defecto,actuado,100,0,0
+per1,per_corredor,aleatorias,t1a,ref_actuadoaj,,actuado ajustado,actuado_aj,100,0,0
+per1,per_corredor,aleatorias,t2a,ref_actuadoaj,,actuado ajustado,actuado_aj,100,0,0
+per1,per_corredor,aleatorias,t1a,ref_bloques,,fijo por bloques,bloques,100,0,0
+per1,per_corredor,aleatorias,t2a,ref_bloques,,fijo por bloques,bloques,100,0,0
+per1,per_corredor,aleatorias,t1a,ref_fijo,,fijo entregado,fijo,100,0,0
+per1,per_corredor,aleatorias,t2a,ref_fijo,,fijo entregado,fijo,100,0,0
+per1,per_corredor,aleatorias,t1a,ref_fino,,fijo fino,fijo_fino,100,0,0
+per1,per_corredor,aleatorias,t2a,ref_fino,,fijo fino,fijo_fino,100,0,0
+per1,per_corredor,aleatorias,t1a,ref_mp,,Max-Pressure,mp_c60,100,0,0
+per1,per_corredor,aleatorias,t2a,ref_mp,,Max-Pressure,mp_c60,100,0,0
+per1,per_corredor,aleatorias,t1a,ref_reactiva,,regla reactiva,reactiva_d25,100,0,0
+per1,per_corredor,aleatorias,t2a,ref_reactiva,,regla reactiva,reactiva_d25,100,0,0
+per1,per_corredor,aleatorias,t1a,ref_regla,,regla simple,regla_u1g30,100,0,0
+per1,per_corredor,aleatorias,t2a,ref_regla,,regla simple,regla_u1g30,100,0,0
+per1,per_corredor,aleatorias,t1a,ref_trivial,,ciclo mínimo,trivial,100,0,0
+per1,per_corredor,aleatorias,t2a,ref_trivial,,ciclo mínimo,trivial,100,0,0
+per1,per_corredor,aleatorias,t1a,v2per,42,"IPPO con mensajes corregido (entrenado con el perfil), base 42",ippo_vecinos_p3v2per_s42,100,0,0
+per1,per_corredor,aleatorias,t2a,v2per,42,"IPPO con mensajes corregido (entrenado con el perfil), base 42",ippo_vecinos_p3v2per_s42,100,0,0
+per1,per_corredor,aleatorias,t1a,v2per,2042,"IPPO con mensajes corregido (entrenado con el perfil), base 2042",ippo_vecinos_p3v2per_s2042,100,0,0
+per1,per_corredor,aleatorias,t2a,v2per,2042,"IPPO con mensajes corregido (entrenado con el perfil), base 2042",ippo_vecinos_p3v2per_s2042,100,0,0
+per1,per_corredor,aleatorias,t1a,v2per,4042,"IPPO con mensajes corregido (entrenado con el perfil), base 4042",ippo_vecinos_p3v2per_s4042,100,0,0
+per1,per_corredor,aleatorias,t2a,v2per,4042,"IPPO con mensajes corregido (entrenado con el perfil), base 4042",ippo_vecinos_p3v2per_s4042,100,0,0
+per1,per_corredor,aleatorias,t1a,v2poimed,,"IPPO con mensajes corregido, entrenado con llegadas aleatorias",ippo_vecinos_p3v2poimed_s16042,100,0,0
+per1,per_corredor,aleatorias,t2a,v2poimed,,"IPPO con mensajes corregido, entrenado con llegadas aleatorias",ippo_vecinos_p3v2poimed_s16042,100,0,0
+per3,per_red,aleatorias,t1a,ref_actuado,,actuado por defecto,actuado,100,0,0
+per3,per_red,aleatorias,t2a,ref_actuado,,actuado por defecto,actuado,100,0,0
+per3,per_red,aleatorias,t1a,ref_actuadoaj,,actuado ajustado,actuado_aj,100,0,0
+per3,per_red,aleatorias,t2a,ref_actuadoaj,,actuado ajustado,actuado_aj,100,0,0
+per3,per_red,aleatorias,t1a,ref_bloques,,fijo por bloques,bloques,100,0,0
+per3,per_red,aleatorias,t2a,ref_bloques,,fijo por bloques,bloques,100,0,0
+per3,per_red,aleatorias,t1a,ref_fijo,,fijo entregado,fijo,100,0,0
+per3,per_red,aleatorias,t2a,ref_fijo,,fijo entregado,fijo,100,0,0
+per3,per_red,aleatorias,t1a,ref_fino,,fijo fino,fijo_fino,100,0,0
+per3,per_red,aleatorias,t2a,ref_fino,,fijo fino,fijo_fino,100,0,0
+per3,per_red,aleatorias,t1a,ref_mp,,Max-Pressure,mp_c60,100,0,0
+per3,per_red,aleatorias,t2a,ref_mp,,Max-Pressure,mp_c60,100,0,0
+per3,per_red,aleatorias,t1a,ref_reactiva,,regla reactiva,reactiva_d25,100,0,0
+per3,per_red,aleatorias,t2a,ref_reactiva,,regla reactiva,reactiva_d25,100,0,0
+per3,per_red,aleatorias,t1a,ref_regla,,regla simple,regla_u3g30,100,0,0
+per3,per_red,aleatorias,t2a,ref_regla,,regla simple,regla_u3g30,100,0,0
+per3,per_red,aleatorias,t1a,ref_trivial,,ciclo mínimo,trivial,100,0,0
+per3,per_red,aleatorias,t2a,ref_trivial,,ciclo mínimo,trivial,100,0,0
+per3,per_red,aleatorias,t1a,v2per,42,"IPPO con mensajes corregido (entrenado con el perfil), base 42",ippo_vecinos_p3v2per_s42,100,0,0
+per3,per_red,aleatorias,t2a,v2per,42,"IPPO con mensajes corregido (entrenado con el perfil), base 42",ippo_vecinos_p3v2per_s42,100,0,0
+per3,per_red,aleatorias,t1a,v2per,2042,"IPPO con mensajes corregido (entrenado con el perfil), base 2042",ippo_vecinos_p3v2per_s2042,100,0,0
+per3,per_red,aleatorias,t2a,v2per,2042,"IPPO con mensajes corregido (entrenado con el perfil), base 2042",ippo_vecinos_p3v2per_s2042,100,0,0
+per3,per_red,aleatorias,t1a,v2per,4042,"IPPO con mensajes corregido (entrenado con el perfil), base 4042",ippo_vecinos_p3v2per_s4042,100,0,0
+per3,per_red,aleatorias,t2a,v2per,4042,"IPPO con mensajes corregido (entrenado con el perfil), base 4042",ippo_vecinos_p3v2per_s4042,100,0,0
+per3,per_red,aleatorias,t1a,v2poimed,,"IPPO con mensajes corregido, entrenado con llegadas aleatorias",ippo_vecinos_p3v2poimed_s4042,100,0,0
+per3,per_red,aleatorias,t2a,v2poimed,,"IPPO con mensajes corregido, entrenado con llegadas aleatorias",ippo_vecinos_p3v2poimed_s4042,100,0,0

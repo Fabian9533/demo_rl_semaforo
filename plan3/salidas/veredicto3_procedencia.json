@@ -1,0 +1,28 @@
+{
+ "commit": "fc7433534bd58f6c1cd83eeeb3513468488f885a",
+ "ancla": "fc7433534bd58f6c1cd83eeeb3513468488f885a",
+ "nombre_ancla": "origin/plan3",
+ "sha256_sello": "f7e4f611cb0087ebbf68a176b4f8a17f631acb7a82172bdaeca3317b498a31fd",
+ "codigo": {
+  "veredicto3.py": "2072772fae006771a5b8a11c9083a2fa01a233db",
+  "manifiesto.py": "6d08ee4b7b22c97e30d7eab6dee1f58108cc4cb0",
+  "generar_trabajos3.py": "8bacab782de0350b12d446c04679c9366f5ff5a7",
+  "protecciones.py": "fa10a6f1fcc6102487e2512fd2f12ab25b89bc14",
+  "anclaje.py": "8ef0d643a6a1e3d408b6a852450b363709151ff2",
+  "p3_promocion.py": "70c021f2e6583d194ef9a1cbdc066c52f15de46c",
+  "PRERREGISTRO.md": "d38d9c04a86d3b8cd83ab3563bd090655dcd978c",
+  "doc/enmienda_2_quitados.txt": "74eea802262dee3381fa8ae5dff2987557037120",
+  "../veredicto.py": "d9fe64cd863244c0114b9040428d72516383f52c",
+  "../consolidar.py": "083b9cd1c335b5a2086c37c5e1fcf90f6b22202f",
+  "../sintesis_plan.py": "942019b4a46390917712019863d2e4a7f8f340b6"
+ },
+ "sin_commitear": [],
+ "salidas": {
+  "veredicto3_celdas.csv": "9f79fe4628a70772177b67b6316f35e2ef4b1a98b01c9bea7aa9d725914927cd",
+  "veredicto3_bases.csv": "7022ff1d1d534a6a5d69a599b9f3a2954c317145e222b773131086ee759b88bf",
+  "veredicto3_hipotesis.csv": "3afb726a30775af7624220990c7ab8ecc32124e65ee7810a4542504fa8f22728",
+  "veredicto3_comparaciones.csv": "ad85cbbca338d031cb29864ff956ff063d664c288b1cc3e3575db8eba85603a8",
+  "veredicto3_no_insertados.csv": "9151f8f9db5b2049aea1c9065cc9a17f3c98e6c004d36982c411fead64ee0208",
+  "veredicto3.md": "5ecc7fdb70682a79fbcc7c87a3a300adb77e57098110c6b125540fa5c494a5c8"
+ }
+}
