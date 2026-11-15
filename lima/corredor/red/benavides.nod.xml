@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Generado por corredor.py. No editar a mano. -->
+<nodes>
+    <node id="W" x="-600.0" y="0.0" type="priority"/>
+    <node id="E" x="1828.0" y="0.0" type="priority"/>
+    <node id="C1" x="0.0" y="0.0" type="traffic_light" tl="semaforo_C1"/>
+    <node id="N1" x="0.0" y="600.0" type="priority"/>
+    <node id="S1" x="0.0" y="-600.0" type="priority"/>
+    <node id="C2" x="162.0" y="0.0" type="traffic_light" tl="semaforo_C2"/>
+    <node id="N2" x="162.0" y="600.0" type="priority"/>
+    <node id="S2" x="162.0" y="-600.0" type="priority"/>
+    <node id="C3" x="270.0" y="0.0" type="traffic_light" tl="semaforo_C3"/>
+    <node id="N3" x="270.0" y="600.0" type="priority"/>
+    <node id="S3" x="270.0" y="-600.0" type="priority"/>
+    <node id="C4" x="566.0" y="0.0" type="traffic_light" tl="semaforo_C4"/>
+    <node id="N4" x="566.0" y="600.0" type="priority"/>
+    <node id="S4" x="566.0" y="-600.0" type="priority"/>
+    <node id="C5" x="685.0" y="0.0" type="traffic_light" tl="semaforo_C5"/>
+    <node id="N5" x="685.0" y="600.0" type="priority"/>
+    <node id="S5" x="685.0" y="-600.0" type="priority"/>
+    <node id="C6" x="1228.0" y="0.0" type="traffic_light" tl="semaforo_C6"/>
+    <node id="N6" x="1228.0" y="600.0" type="priority"/>
+    <node id="S6" x="1228.0" y="-600.0" type="priority"/>
+</nodes>

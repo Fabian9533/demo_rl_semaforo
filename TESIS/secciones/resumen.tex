@@ -1,24 +1,28 @@
 \customchapter{RESUMEN}
 % Entrega 3 (24.10.2026): siglas y veredictos sin cortar al final de la linea en todo el documento (antes salian
-% IP-PO, MAP-PO y EM-PATA). No cambia el contenido del resumen.
+% IP-PO, MAP-PO y EM-PATA).
+% Reduccion del 09.11.2026 (notas/plan_reduccion_2026-11-09.md; autorizado por Fabian: "haz todo de una vez"): el
+% resultado central pasa a ser el segundo estudio. Las frases del tercer parrafo siguen la plantilla del registro
+% previo (plan3/PRERREGISTRO.md §17).
 \hyphenation{IPPO MAPPO SARSA EMPATA FUNCIONA MEJORA FALLA PENDIENTE}
 
 En Lima Metropolitana hay puntos críticos de congestión en intersecciones y corredores de alto tráfico. Esta tesis pregunta si un control de semáforos que aprende con \textbf{aprendizaje por refuerzo (RL)} y que recibe información de sus semáforos vecinos reduce el \textbf{retraso por vehículo} frente a un programa de tiempo fijo bien ajustado, sin quedar por detrás del control actuado, que son las dos referencias habituales en ingeniería de tránsito.
 
-Se construyó en \textbf{SUMO} un banco de pruebas con tres redes sintéticas (un corredor de dos semáforos, una red de tres semáforos con una rotonda y una malla de nueve), cada una con demanda nominal y alta: seis casos en total. Se programaron desde cero los agentes, uno por semáforo, y el intercambio de mensajes entre vecinos (IPPO con mensajes), y se compararon con IPPO sin mensajes, MAPPO, Double DQN, Q-learning y SARSA. Antes de evaluar se fijaron el protocolo (tres entrenamientos de 200 episodios por modelo, 30 semillas de evaluación, intervalos de confianza y prueba de Wilcoxon) y una regla de veredicto para cada modelo en cada caso.
-% fuente: Tabla tab:plan2-casos y Seccion sec:protocolo (Cap. III); plan2/ESPEC.md
+Se construyó en \textbf{SUMO} un banco de pruebas con tres redes sintéticas (un corredor de dos semáforos, una red de tres semáforos con una rotonda y una malla de nueve), cada una con demanda nominal y alta: seis casos. Se programaron desde cero los agentes, uno por semáforo, y el intercambio de mensajes entre vecinos (IPPO con mensajes), y se compararon con IPPO sin mensajes, MAPPO, Double DQN, Q-learning y SARSA. La evaluación tiene dos estudios. El primero usa vehículos que llegan a intervalos regulares. El segundo, más exigente, usa llegadas al azar, vuelve a ajustar el plan fijo al segundo para cada caso, publica sus reglas antes de entrenar y evalúa a ciegas, con dos tandas independientes de 100 semillas. Después, el método se llevó a dos lugares de Miraflores, en Lima, armados con la geometría real y con volúmenes publicados: un nudo de un solo cruce, con su semáforo medido en el sitio, y un corredor de seis cruces.
+% fuente: Tabla tab:plan2-casos y Seccion sec:protocolo (Cap. III); plan2/ESPEC.md; plan3/PRERREGISTRO.md §3 y §14;
+% casos de Lima: capitulo5.tex, sec:caso-lima, y anexo_d_osm.tex
 
-Con esa regla, IPPO con mensajes reduce el retraso frente al fijo ajustado en el corredor y en la red con rotonda (entre un 3.6 y un 23.3\,\%), empata con él en la malla (con demanda alta, de forma provisional) y tiene menos retraso que el actuado en los seis casos. Resumido en un número, el cambio es de $-6.83$\,\% frente al fijo y de $-14.35$\,\% frente al actuado. Salvo en el corredor con demanda alta, lo que separa funcionar de fallar es la información del vecino: sin mensajes, la misma red neuronal falla en la red con rotonda y en la malla y, resumida en un número, queda un 1.35\,\% por encima del fijo; Q-learning y SARSA pierden contra él en todos los casos con demanda nominal.
-% fuente: plan2/veredicto.csv (ippo_vecinos: delta_fijo -6.8, -23.3, -8.8, -3.6 en P1-P4; P5 EMPATA; P6 PENDIENTE,
-% provisional EMPATA; delta_act negativo en los seis); plan2/sintesis_numero_unico.csv (ippo_vecinos -6.83 y
-% -14.35; ippo_local +1.35 frente a fijo_2509); ql y sarsa FALLA en P1, P3 y P5
+Con llegadas al azar, IPPO con mensajes entrenado con ese desorden le gana a un plan fijo re-ajustado con el mismo desorden en 3 de 6 casos: el corredor con sus dos demandas y la malla con demanda alta. En ellos, el mejor modelo registrado baja el retraso total entre un 16 y un 27\,\% y tiene también menos retraso que el actuado ajustado. En la red con rotonda y en la malla con demanda nominal empata o pierde por menos de un 2\,\%. Resumido en un número, frente al plan fijo ajustado al segundo el cambio es de $-10.8$\,\% en la tanda 1 y de $-11.1$\,\% en la tanda 2 (frente al plan fijo entregado: $-15.8$ y $-14.5$\,\%).
+% fuente: plan3/salidas/veredicto3.md ("Respuesta corta"; H5 pasa en 3 de 6: P1, P2 y P6; "Referencias al lado") y
+% veredicto3_celdas.csv (modelo citado: P1 -16.3 y -17.1; P2 -19.8 y -20.2, provisional; P6 -25.7 y -26.9; P3 +1.6 y
+% +1.6; P4 -0.5 y 0.0; P5 +0.2 y +0.3)
 
-La mejora queda por debajo de la meta de reducir el retraso entre un 25 y un 40\,\%, que no se alcanza en ningún caso, y de la mediana publicada frente a un fijo ajustado, un plan de Webster o el plan real ($-35.7$\,\%), porque la referencia está bien ajustada. Con una medición más estricta, decidida después del veredicto, que suma la espera para entrar a la red y ajusta el fijo desde el verde mínimo, la ventaja frente al fijo solo se mantiene con claridad en el corredor con demanda nominal y el resumen en un número queda en $-0.03$\,\%; frente al actuado se mantiene ($-11.45$\,\%). Con llegadas regulares, un fijo bien ajustado es casi óptimo. El cruce real de Lima se importó de OpenStreetMap, pero no se evaluó.
-% fuente: Tabla tab:metas (Cap. V); mediana publicada: Tabla tab:comparacion-referencia (Cap. V; mediana de 10 obras del Anexo E);
-% plan2/robustez_veredicto.csv (P1 -6.7 FUNCIONA; P3 -0.5 "MEJORA (= trivial)"; P2, P4, P5 y P6 entre +1.1 y +2.6)
-% y plan2/robustez_sintesis_numero_unico.csv (ippo_vecinos -0.03 [-0.56, 0.53] frente al fijo, -11.45 frente al actuado)
-% Reestructura del 14.10.2026 (asesoria del 09.10): resumen en cuatro parrafos, sin codigos P1-P6 y sin el
-% diagnostico posterior del entrenamiento (decision del 28.09); autorizado por Fabian el 14.10.
+Con llegadas regulares, un fijo bien ajustado es casi óptimo: el modelo reduce el retraso un 6.83\,\% frente al fijo del primer estudio y un 14.35\,\% frente al actuado, pero empata con el fijo ajustado al segundo ($-0.4$\,\% en las dos tandas). Los tres casos donde el modelo gana son los mismos donde el actuado ajustado también mejora al fijo: el control aprendido rinde donde reaccionar al tráfico sirve. La meta de reducir el retraso entre un 25 y un 40\,\% solo se alcanza en la malla con demanda alta. En los dos casos de Lima, el modelo baja el retraso frente al mejor plan fijo: un 9\,\% en el corredor (un 20\,\% con una demanda un 20\,\% mayor), donde también supera al actuado ajustado, y entre un 4 y un 7\,\% en el nudo, donde el actuado ajustado es mejor. La demanda de esos casos es en parte un supuesto y no se calibró con datos de tráfico.
+% fuente: secciones/tablas/lima_resumen.tex (corredor -8.8 y -8.9 frente al fijo y -8.1 y -7.9 frente al actuado
+% ajustado; con la demanda alta, -19.9 y -19.9, y -10.4 y -10.6; nudo -4.4 y -4.5, y -5.7 y -6.6 frente al fijo; +3.4 y +3.6, y +4.3 y +3.3 frente al actuado ajustado)
+% fuente: plan2/sintesis_numero_unico.csv (-6.83 y -14.35); plan3/salidas/veredicto3.md (regulares: -0.4 % [-1.0, 0.1]
+% y -0.4 % [-0.8, 0.1]; H0: en 3 de 6 casos, P1, P2 y P6, el actuado ajustado da MEJORA o FUNCIONA frente al fijo
+% ajustado al segundo; P6 -25.7 y -26.9 %, unico caso que llega a -25 %)
 
 \noindent \textbf{Palabras clave:}\\
 \noindent semáforos inteligentes; aprendizaje por refuerzo; coordinación distribuida; SUMO; Lima Metropolitana; control de tráfico

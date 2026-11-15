@@ -1,0 +1,19 @@
+% Generado por tablas_plan3.py a partir de plan3/salidas/. No editar a mano.
+% Resultado central (segundo estudio, llegadas aleatorias): retraso total por vehiculo con el fijo ajustado
+% al segundo y con el modelo citado en la tanda 1, cambio del modelo frente al fijo en las dos tandas
+% (100 semillas cada una) y veredicto que se repite en las dos.
+% fuente: plan3/salidas/veredicto3_comparaciones.csv (tanda T1, referencia 'fijo fino', fila del modelo
+% citado: media_ref y media_brazo) y veredicto3_celdas.csv (cambio_T1, cambio_T2 y etiqueta_citable).
+% Entorno: \setstretch{1}, \footnotesize y \setlength{\tabcolsep}{3pt}.
+\begin{tabular}{l>{\raggedright\arraybackslash}p{2.8cm}r>{\raggedright\arraybackslash}p{2.2cm}>{\raggedright\arraybackslash}p{1.9cm}>{\raggedright\arraybackslash}p{2.4cm}>{\raggedright\arraybackslash}p{2.4cm}}
+\toprule
+Caso & Red y demanda & Veh/h & Retraso con el fijo ajustado al segundo (s/veh) & Retraso con el modelo (s/veh) & Cambio, tandas 1 y 2 (\%) & Veredicto \\
+\midrule
+P1 & Corredor, nominal & 1810 & 29.2 & 24.4 & $-16.3$ y $-17.1$ & FUNCIONA \\
+P2 & Corredor, alta & 3620 & 458.4 & 367.8 & $-19.8$ y $-20.2$ & PENDIENTE (provisional: FUNCIONA) \\
+P3 & Red con rotonda, nominal & 2150 & 22.7 & 23.1 & $+1.6$ y $+1.6$ & FALLA \\
+P4 & Red con rotonda, alta & 2580 & 28.7 & 28.5 & $-0.5$ y $0.0$ & EMPATA \\
+P5 & Malla, nominal & 4350 & 22.5 & 22.5 & $+0.2$ y $+0.3$ & EMPATA \\
+P6 & Malla, alta & 8700 & 51.3 & 38.1 & $-25.7$ y $-26.9$ & FUNCIONA \\
+\bottomrule
+\end{tabular}

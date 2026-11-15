@@ -1,0 +1,51 @@
+<additional>
+    <!-- Actuado ajustado del corredor (estudio_corredor.py): por retraso, alcance 100 m, retraso minimo 1 s, maximos 60 -->
+    <tlLogic id="semaforo_C1" type="delay_based" programID="actuado_ajustado" offset="0">
+        <param key="detectorRange" value="100"/>
+        <param key="minTimeloss" value="1"/>
+        <phase duration="10" minDur="10" maxDur="60" state="rGGGGrrrrrGGG"/>
+        <phase duration="3" state="ryyyyrrrrryyy"/>
+        <phase duration="10" minDur="10" maxDur="60" state="GrrrrGGGGGrrr"/>
+        <phase duration="3" state="yrrrryyyyyrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C2" type="delay_based" programID="actuado_ajustado" offset="0">
+        <param key="detectorRange" value="100"/>
+        <param key="minTimeloss" value="1"/>
+        <phase duration="10" minDur="10" maxDur="60" state="rrrrGGGrGGGG"/>
+        <phase duration="3" state="rrrryyyryyyy"/>
+        <phase duration="10" minDur="10" maxDur="60" state="GGGGrrrGrrrr"/>
+        <phase duration="3" state="yyyyrrryrrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C3" type="delay_based" programID="actuado_ajustado" offset="0">
+        <param key="detectorRange" value="100"/>
+        <param key="minTimeloss" value="1"/>
+        <phase duration="10" minDur="10" maxDur="60" state="rGGGGrrrrGGG"/>
+        <phase duration="3" state="ryyyyrrrryyy"/>
+        <phase duration="10" minDur="10" maxDur="60" state="GrrrrGGGGrrr"/>
+        <phase duration="3" state="yrrrryyyyrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C4" type="delay_based" programID="actuado_ajustado" offset="0">
+        <param key="detectorRange" value="100"/>
+        <param key="minTimeloss" value="1"/>
+        <phase duration="10" minDur="10" maxDur="60" state="rrrGGGGrrrGGG"/>
+        <phase duration="3" state="rrryyyyrrryyy"/>
+        <phase duration="10" minDur="10" maxDur="60" state="GGGrrrrGGGrrr"/>
+        <phase duration="3" state="yyyrrrryyyrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C5" type="delay_based" programID="actuado_ajustado" offset="0">
+        <param key="detectorRange" value="100"/>
+        <param key="minTimeloss" value="1"/>
+        <phase duration="10" minDur="10" maxDur="60" state="rrrGGGrrrGGG"/>
+        <phase duration="3" state="rrryyyrrryyy"/>
+        <phase duration="10" minDur="10" maxDur="60" state="GGGrrrGGGrrr"/>
+        <phase duration="3" state="yyyrrryyyrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C6" type="delay_based" programID="actuado_ajustado" offset="0">
+        <param key="detectorRange" value="100"/>
+        <param key="minTimeloss" value="1"/>
+        <phase duration="10" minDur="10" maxDur="60" state="rrrGGGrrrGGG"/>
+        <phase duration="3" state="rrryyyrrryyy"/>
+        <phase duration="10" minDur="10" maxDur="60" state="GGGrrrGGGrrr"/>
+        <phase duration="3" state="yyyrrryyyrrr"/>
+    </tlLogic>
+</additional>

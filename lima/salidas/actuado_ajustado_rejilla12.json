@@ -1,0 +1,152 @@
+{
+ "ganador": {
+  "max-gap": 2.0,
+  "detector-gap": 2.0,
+  "maximos": [
+   60,
+   32,
+   60
+  ],
+  "esquema": "doble del fijo",
+  "retraso_total_10": 55.679,
+  "retraso_total_30": 55.277
+ },
+ "actuado_por_defecto_30": 59.509,
+ "candidatos": [
+  {
+   "max-gap": 2.0,
+   "detector-gap": 1.0,
+   "maximos": [
+    60,
+    60,
+    60
+   ],
+   "esquema": "60",
+   "retraso_total_10": 58.556,
+   "retraso_total_30": 57.83566666666667
+  },
+  {
+   "max-gap": 2.0,
+   "detector-gap": 1.0,
+   "maximos": [
+    60,
+    32,
+    60
+   ],
+   "esquema": "doble del fijo",
+   "retraso_total_10": 58.682
+  },
+  {
+   "max-gap": 2.0,
+   "detector-gap": 2.0,
+   "maximos": [
+    60,
+    60,
+    60
+   ],
+   "esquema": "60",
+   "retraso_total_10": 55.82,
+   "retraso_total_30": 55.324
+  },
+  {
+   "max-gap": 2.0,
+   "detector-gap": 2.0,
+   "maximos": [
+    60,
+    32,
+    60
+   ],
+   "esquema": "doble del fijo",
+   "retraso_total_10": 55.679,
+   "retraso_total_30": 55.277
+  },
+  {
+   "max-gap": 3.0,
+   "detector-gap": 1.0,
+   "maximos": [
+    60,
+    60,
+    60
+   ],
+   "esquema": "60",
+   "retraso_total_10": 62.441
+  },
+  {
+   "max-gap": 3.0,
+   "detector-gap": 1.0,
+   "maximos": [
+    60,
+    32,
+    60
+   ],
+   "esquema": "doble del fijo",
+   "retraso_total_10": 62.512
+  },
+  {
+   "max-gap": 3.0,
+   "detector-gap": 2.0,
+   "maximos": [
+    60,
+    60,
+    60
+   ],
+   "esquema": "60",
+   "retraso_total_10": 60.192
+  },
+  {
+   "max-gap": 3.0,
+   "detector-gap": 2.0,
+   "maximos": [
+    60,
+    32,
+    60
+   ],
+   "esquema": "doble del fijo",
+   "retraso_total_10": 60.074
+  },
+  {
+   "max-gap": 4.0,
+   "detector-gap": 1.0,
+   "maximos": [
+    60,
+    60,
+    60
+   ],
+   "esquema": "60",
+   "retraso_total_10": 65.53399999999999
+  },
+  {
+   "max-gap": 4.0,
+   "detector-gap": 1.0,
+   "maximos": [
+    60,
+    32,
+    60
+   ],
+   "esquema": "doble del fijo",
+   "retraso_total_10": 64.999
+  },
+  {
+   "max-gap": 4.0,
+   "detector-gap": 2.0,
+   "maximos": [
+    60,
+    60,
+    60
+   ],
+   "esquema": "60",
+   "retraso_total_10": 63.631
+  },
+  {
+   "max-gap": 4.0,
+   "detector-gap": 2.0,
+   "maximos": [
+    60,
+    32,
+    60
+   ],
+   "esquema": "doble del fijo",
+   "retraso_total_10": 63.370999999999995
+  }
+ ]
+}

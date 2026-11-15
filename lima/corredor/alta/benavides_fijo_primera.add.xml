@@ -1,0 +1,39 @@
+<additional>
+    <!-- Fijo ajustado al segundo del corredor (estudio_corredor.py): ciclo 62 s, transversales [25, 21, 25, 25, 18, 25], desfases [0, 48, 44, 15, 13, 30] -->
+    <tlLogic id="semaforo_C1" type="static" programID="fijo_ajustado" offset="0">
+        <phase duration="31" state="rGGGGrrrrrGGG"/>
+        <phase duration="3" state="ryyyyrrrrryyy"/>
+        <phase duration="25" state="GrrrrGGGGGrrr"/>
+        <phase duration="3" state="yrrrryyyyyrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C2" type="static" programID="fijo_ajustado" offset="48">
+        <phase duration="35" state="rrrrGGGrGGGG"/>
+        <phase duration="3" state="rrrryyyryyyy"/>
+        <phase duration="21" state="GGGGrrrGrrrr"/>
+        <phase duration="3" state="yyyyrrryrrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C3" type="static" programID="fijo_ajustado" offset="44">
+        <phase duration="31" state="rGGGGrrrrGGG"/>
+        <phase duration="3" state="ryyyyrrrryyy"/>
+        <phase duration="25" state="GrrrrGGGGrrr"/>
+        <phase duration="3" state="yrrrryyyyrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C4" type="static" programID="fijo_ajustado" offset="15">
+        <phase duration="31" state="rrrGGGGrrrGGG"/>
+        <phase duration="3" state="rrryyyyrrryyy"/>
+        <phase duration="25" state="GGGrrrrGGGrrr"/>
+        <phase duration="3" state="yyyrrrryyyrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C5" type="static" programID="fijo_ajustado" offset="13">
+        <phase duration="38" state="rrrGGGrrrGGG"/>
+        <phase duration="3" state="rrryyyrrryyy"/>
+        <phase duration="18" state="GGGrrrGGGrrr"/>
+        <phase duration="3" state="yyyrrryyyrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C6" type="static" programID="fijo_ajustado" offset="30">
+        <phase duration="31" state="rrrGGGrrrGGG"/>
+        <phase duration="3" state="rrryyyrrryyy"/>
+        <phase duration="25" state="GGGrrrGGGrrr"/>
+        <phase duration="3" state="yyyrrryyyrrr"/>
+    </tlLogic>
+</additional>

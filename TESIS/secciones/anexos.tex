@@ -1,216 +1,162 @@
 \customchapter{ANEXOS}
 
-\section*{Anexo A. Tablas completas del plan de pruebas}
+\section*{Anexo A. Tablas del primer estudio}
 \phantomsection
-\addcontentsline{toc}{subsection}{Anexo A. Tablas completas del plan de pruebas}
+\addcontentsline{toc}{subsection}{Anexo A. Tablas del primer estudio}
 \setcounter{table}{0}
 \renewcommand{\thetable}{A.\arabic{table}}
 \renewcommand{\theHtable}{A.\arabic{table}}
 
-Las seis primeras tablas acompañan al resultado principal del
-Capítulo~\ref{cap:resultados} (Tabla~\ref{tab:resultado-principal}):
-el retraso y el cambio frente al fijo ajustado de todos los modelos, el
-resumen en un número de cada modelo, el reparto de la variación del
-resultado entre el caso y el modelo, y el veredicto detallado del
-actuado, de Q-learning y de IPPO con mensajes.
-% Reestructura del 14.10.2026: estas tablas estaban en las secciones "Resultado global" y "Lectura por caso"
-% del Cap. V; se generan igual (veredicto.py, plan2/tablas_cap5.py y sintesis_plan.py con --metrica timeloss_prom
-% --fijo fijo_2509 --sin-trivial)
-\input{secciones/tablas/plan2_resumen}
-\input{secciones/tablas/plan2_numero_unico}
+Este anexo reúne las tablas con las que se comprueba el resultado del
+primer estudio, el plan de pruebas
+(Sección~\ref{sec:resultado-principal}). Todas siguen su protocolo
+(Sección~\ref{sec:protocolo}): tres entrenamientos de 200 episodios por
+modelo y caso, versión evaluada elegida por validación y evaluación con
+las semillas 1001 a 1030, las mismas para todos los controles. La
+métrica es el retraso y la referencia, el fijo ajustado de cada caso.
+Un cambio negativo es menos retraso que la referencia.
+% fuente: plan2/veredicto.csv de la corrida principal (python veredicto.py --metrica timeloss_prom
+% --fijo fijo_2509 --sin-trivial), igual a plan2/veredicto_congelado_0355.csv en las 45 celdas de P1-P5 y en
+% todas las columnas; brazo fijo_2509: plan2/fijo_2509.py; P6: cabecera de plan2/malla3_alta.add.xml
+% (barrer_fijo.py --metrica timeloss_prom, semillas 2001-2003) y
+% plan2/evaluacion_malla3_alta_resumen_fijo_2509.csv (fijo_2509 timeloss_prom 36.726, n = 30)
 
-La Tabla~\ref{tab:plan2-anova} reparte la variación del cambio del
-retraso frente al fijo entre el caso, el modelo, su interacción y el
-entrenamiento, es decir, cuál de los tres entrenamientos de cada modelo
-(Sección~\ref{sec:analisis-complementarios}). El resultado depende ante
-todo del caso. Con los seis aprendices y los seis casos, el caso
-explica el $53.7$\,\% de la variación y el modelo, el $36.5$\,\%; la
-interacción, el $7.4$\,\%, y el entrenamiento, el $2.4$\,\%. Con los
-cuatro de redes neuronales el caso pesa aún más: $79.5$\,\%, frente a
-un $7.4$\,\% del modelo, un $10.0$\,\% de la interacción y un
-$3.1$\,\% del entrenamiento. Una vez elegido un aprendiz con redes
-neuronales, lo que más cambia el resultado es el escenario, y el peso
-del modelo viene sobre todo de la distancia entre los tabulares y los de
-redes neuronales. Sobre P1 a P5 el reparto era casi el mismo. El reparto
-describe esta muestra de casos y modelos y no es una prueba de
-hipótesis. El Anexo~F muestra que con la medición más estricta el
-reparto se invierte.
-% fuente: plan2/sintesis_anova.csv (P1-P6: Todos 53.7/36.5/7.4/2.4; Profundos 79.5/7.4/10.0/3.1); P1-P5 (Todos
-% 52.5/37.7/7.7/2.1; Profundos 76.5/11.5/9.5/2.5): plan2/p1p5_sintesis_anova.csv (28.09.2026); reparto con la
-% medicion mas estricta: plan2/robustez_sintesis_anova.csv (P1-P6: caso 23.5, modelo 55.5). Entrega 3, fase 2
-% (23.10.2026): esta tabla y su lectura estaban en capitulo5.tex (l. 797-834 del commit 7181ab8, "De que depende el
-% resultado"); la lectura se condenso: salen la media de delta_fijo por caso (P1 0.88, P2 -14.88, P3 1.25, P4 2.37,
-% P5 20.17, P6 14.07, calculada de plan2/veredicto.csv) y las cifras de P1-P5, que siguen en esos archivos
+Las tablas de veredicto de los demás modelos y las de sus
+entrenamientos no se imprimen: están en el repositorio del proyecto
+(Anexo~B), en la carpeta \texttt{plan2/}. El veredicto de cada modelo
+en cada caso se lee, abreviado, en la Tabla~\ref{tab:plan2-resumen}.
+% fuente: plan2/veredicto.csv y plan2/veredicto.md (matriz y una tabla por modelo, con intervalos, valores p y
+% cambio frente al actuado); los tres entrenamientos de cada modelo y caso: plan2/evaluacion_<esc>_resumen.csv y
+% los meta de cada politica. Las tablas ya compuestas que este anexo dejo de incluir siguen en
+% TESIS/secciones/tablas/ (veredicto_<modelo>.tex, veredicto_bases.tex y veredicto_matriz.tex, que escribe
+% veredicto.py)
+
+\noindent\textbf{Todos los modelos.} La Tabla~\ref{tab:plan2-resumen}
+da el retraso de cada modelo, su cambio frente al fijo ajustado y su
+veredicto. IPPO con mensajes funciona en P1, P2 y P3, mejora en P4,
+empata en P5 y queda pendiente en P6, con un empate provisional. Ningún
+otro modelo tiene un registro mejor. Resumido en un número
+(Tabla~\ref{tab:plan2-numero-unico}), IPPO con mensajes baja el retraso
+un 6.83\,\% frente al fijo ajustado y un 14.35\,\% frente al actuado.
+La primera cifra depende sobre todo de P2: sin ese caso queda en
+$-3.14$\,\%.
+% fuente: plan2/veredicto.csv (columna veredicto); plan2/sintesis_numero_unico.csv (ippo_vecinos frente a
+% fijo_2509 y al actuado: delta_geo -6.83 [-7.53, -6.12] y -14.35 [-15.08, -13.64]; sin_P2 -3.14)
+% fuente de las tablas: plan2/tablas_cap5.py y sintesis_plan.py, con --metrica timeloss_prom --fijo fijo_2509
+% --sin-trivial
+\input{secciones/tablas/plan2_resumen}
+
+% Orden de este anexo: las tablas llevan [H] y no se parten; por eso despues de cada tabla grande va un parrafo, que
+% llena el resto de la pagina, y la Tabla A.2 va junto a la A.3.
+\noindent\textbf{De qué depende el resultado.} Ante todo, del caso
+(Tabla~\ref{tab:plan2-anova}). La tabla reparte la variación del cambio
+del retraso frente al fijo entre el caso, el modelo, su interacción y
+cuál de los tres entrenamientos se mira
+(Sección~\ref{sec:analisis-complementarios}). Entre los seis
+aprendices (fila Todos), el caso explica el 53.7\,\% de la variación y
+el modelo, el 36.5\,\%. Entre los cuatro con redes neuronales (fila
+Profundos), el caso explica el 79.5\,\% y el modelo, el 7.4\,\%: el
+peso del modelo viene sobre todo de la distancia entre los aprendices
+tabulares y los de redes neuronales. El reparto describe esta muestra
+de casos y modelos y no es una prueba de hipótesis. Con la medición más
+estricta se invierte (Anexo~F).
+% fuente: plan2/sintesis_anova.csv (P1-P6: Todos 53.7/36.5/7.4/2.4; Profundos 79.5/7.4/10.0/3.1); reparto con la
+% medicion mas estricta: plan2/robustez_sintesis_anova.csv (P1-P6: caso 23.5, modelo 55.5)
 % fuente de la tabla: python sintesis_plan.py --metrica timeloss_prom --fijo fijo_2509 --sin-trivial (desde demo_rl/)
 % -> plan2/sintesis_anova.csv
+\input{secciones/tablas/plan2_numero_unico}
 \input{secciones/tablas/plan2_anova}
 
-\input{secciones/tablas/veredicto_actuado}
-\input{secciones/tablas/veredicto_ql}
+\noindent\textbf{IPPO con mensajes.} La
+Tabla~\ref{tab:veredicto-ippo-vecinos} da su veredicto con los
+intervalos y los valores~$p$. Frente al actuado, su retraso es menor en
+los seis casos. En P5 el intervalo del cambio frente al fijo no toca el
+cero, pero la prueba de Wilcoxon no muestra diferencia ($p = 0.523$) y
+la regla exige las dos cosas: el veredicto es EMPATA. La columna Conv.
+indica si el entrenamiento de la versión evaluada convergió, es decir,
+si se estabilizó (Sección~\ref{sec:veredicto}), y cuántos de los tres
+lo hicieron.
+% fuente: plan2/veredicto.csv, filas ippo_vecinos (delta_act -5.8, -4.4, -7.8, -3.6, -16.4 y -41.0, con p_act
+% < 0.001; P5: ic_fijo [0.4, 3.4], p_fijo 0.523; convergen 3/3, 2/3, 3/3, 3/3, 3/3 y 1/3)
 \input{secciones/tablas/veredicto_ippo_vecinos}
 
-Las tablas de este anexo completan las del
-Capítulo~\ref{cap:resultados}: aquí quedan las tablas de entrenamientos
-de todos los modelos y las de veredicto de los modelos que el capítulo
-no incluye; las del análisis de robustez, en el Anexo~F y en el
-repositorio. Todas
-siguen el protocolo del plan de pruebas (Sección~\ref{sec:plan}): tres
-entrenamientos por modelo y caso, 200 episodios, versión guardada elegida por
-validación y evaluación final con las semillas 1001 a 1030, las mismas
-para todos los controles. Las escribe \texttt{veredicto.py} a partir de
-los archivos de \texttt{plan2/}. Las del resultado principal reproducen
-el veredicto del plan: el retraso
-es el \texttt{timeLoss} y la referencia es el fijo ajustado del
-plan. Agregan las evaluaciones de IPPO con penalización de
-\textit{spillback} que terminaron después del cierre y el caso P6,
-cerrado después. El fijo ajustado de P6 se eligió con la misma regla, el menor \texttt{timeLoss}
-del barrido (Sección~\ref{sec:referencias-fijas}).
-% fuente: plan2/veredicto.csv de la corrida principal (python veredicto.py --metrica timeloss_prom
-% --fijo fijo_2509 --sin-trivial, 28.09.2026 09:14), igual a plan2/veredicto_congelado_0355.csv en las 45
-% celdas de P1-P5 y en todas las columnas; brazo fijo_2509: plan2/fijo_2509.py (filas del fijo de
-% plan2/evaluacion_<esc>.csv en el commit 37f9680 del 25.09); P6: cabecera de plan2/malla3_alta.add.xml
-% (barrer_fijo.py --metrica timeloss_prom, semillas 2001-2003) y
-% plan2/evaluacion_malla3_alta_resumen_fijo_2509.csv (fijo_2509 timeloss_prom 36.726, n = 30); hechos_2509.md
-% Integracion de la reduccion del Anexo F (23.10.2026): antes decia "las del analisis de robustez estan en el Anexo
-% F"; ese anexo conserva solo las tablas del ciclo minimo, de IPPO con mensajes y de entrenamientos de Double DQN, y
-% remite para las demas a plan2/robustez_veredicto.csv y .md y a tablas/robustez_veredicto_bases.tex
+La Tabla~\ref{tab:plan2-entrenamientos-ippo} da el retraso de cada
+uno de sus tres entrenamientos. La versión evaluada sale del mediano de
+los tres según la validación, sin mirar las semillas de evaluación. En
+P3, dos entrenamientos quedan un 7.8 y un 8.8\,\% por debajo del fijo y
+el tercero lo iguala ($-0.1$\,\%). En P6 dan entre 37.54 y
+41.51~s/veh, un rango mayor que el IC95 de la versión evaluada
+($\pm 1.48$~s/veh), y el único que se estabiliza es el de mayor
+retraso.
 
-Las tablas de entrenamientos (Tablas~\ref{tab:veredicto-bases-ql}
-a~\ref{tab:veredicto-bases-mappo}) listan los tres entrenamientos de
-cada modelo y caso. La versión evaluada sale del entrenamiento mediano
-de los tres por la validación. El rango entre los tres indica cuánto
-cambia el resultado con la semilla de entrenamiento, y se compara con
-el IC95\,\% de una sola política. En P6, los tres entrenamientos de
-IPPO con mensajes dan entre 37.54 y 41.51~s/veh, un rango mayor que el
-IC95 de la versión evaluada ($\pm$1.48~s/veh), y el único que converge
-es el de mayor retraso.
-% Verificacion de la fase 2 (23.10.2026): "tablas de bases", "base mediana", "rango entre bases" y "semilla base"
-% pasan a "tablas de entrenamientos", "entrenamiento mediano", "rango entre los tres" y "entrenamiento", como dicen
-% ahora los titulos y encabezados de esas tablas (veredicto.py) y la tabla del ANOVA (sintesis_plan.py)
-% fuente: TESIS/secciones/tablas/veredicto_bases.tex, filas P6 de ippo_vecinos (s42 publicada 37.54 +/- 1.48,
-% no converge; s2042 41.51, converge; s4042 40.24, no converge); hechos_2509.md (rango entre bases 3.97 s/veh)
+\noindent\textbf{Combinaciones sin veredicto firme.} Doce de las 48
+combinaciones de modelo y caso no tienen veredicto firme. En dos no
+hay datos: Q-learning con recompensa de colas no se entrenó en P5 ni en
+P6. En las otras diez, el entrenamiento de la versión evaluada no se
+estabilizó (Tabla~\ref{tab:plan2-pendientes}). Su veredicto es
+provisional y se declara como un límite del estudio. Ninguna se entrenó
+con más episodios, para no romper la igualdad de método entre casos
+(Sección~\ref{sec:veredicto}).
 
-\noindent\textbf{Combinaciones sin veredicto firme.} De P1 a P5, cinco
-de las seis combinaciones de modelo y caso sin veredicto firme lo están
-porque la serie de validación del entrenamiento de su versión evaluada
-no cumple el criterio de la Tabla~\ref{tab:veredictos}; la sexta,
-Q-learning con recompensa de colas en P5, no tiene datos. En tres, la
-serie todavía baja en el último tramo y la meseta queda fuera del
-límite de $\pm 5$\,\%: MAPPO en P3 y P4 ($-6.1$ y $-6.7$\,\%) y Double
-DQN en P5 ($-5.5$\,\%). En Q-learning en P4 la serie salta de 32.6 a
-47.1~s en el episodio 150 y vuelve a bajar, y la regresión del último
-tramo da una meseta de $-23.8$\,\%. En Q-learning con recompensa de
-colas en P2 no converge ninguno de los tres entrenamientos: la
-validación del de la versión evaluada pasa de 159.1~s en el episodio 50
-a 188.4~s en el 200. En P6 no convergen cinco entrenamientos de
-versiones evaluadas: los de SARSA, Double DQN, IPPO con mensajes, IPPO
-con penalización de \textit{spillback} y MAPPO. En IPPO con mensajes y
-en IPPO con penalización la meseta queda dentro del límite ($+4.3$ y
-$-3.2$\,\%), pero la estabilidad no: 7.2 y 6.8\,\%, por encima del
-5\,\%. MAPPO no cumple ninguna de las dos condiciones ($-7.3$ y
-7.8\,\%). En Double DQN la serie sube en el último tramo (meseta de
-$+14.9$\,\%), y en SARSA todavía baja ($-24.7$\,\%). De los tres
-entrenamientos de cada uno, converge uno en IPPO con mensajes y en
-Double DQN, y ninguno en IPPO con penalización, MAPPO y SARSA. Entre
-los aprendices, solo IPPO sin mensajes, con sus tres entrenamientos, y
-Q-learning, con el de su versión evaluada, tienen en P6 un veredicto
-firme.
-% fuente: plan2/veredicto.csv (verificado el 23.10.2026; columnas plateau, estabilidad, convergen y veredicto:
-% P2 ql_colas 5.5 / 4.5 / 0/3; P3 mappo -6.1 / 0.2 / 2/3; P4 mappo -6.7 / 0.0 / 1/3; P4 ql -23.8 / 0.0 / 2/3; P5 dqn
-% -5.5 / 0.0 / 2/3; P6 sarsa -24.7 / 0.0 / 0/3, dqn 14.9 / 12.5 / 1/3, ippo_vecinos 4.3 / 7.2 / 1/3, ippo_spill -3.2 /
-% 6.8 / 0/3, mappo -7.3 / 7.8 / 0/3; P6 ippo_local 3/3 y ql con la base publicada convergida); val_serie de
-% plan2/q_table_red_alta_ql_s4042.meta.json (ep 140: 32.595; ep 150: 47.11) y
-% plan2/q_table_corredor_alta_ql_colas_s4042.meta.json (ep 50: 159.125; ep 200: 188.43). Verificacion de la fase 2
-% (23.10.2026; plan del 14.10, seccion 3.3: "las mesetas por celda van al Anexo A"): este parrafo estaba en el
-% Cap. V (capitulo5.tex l. 729-750 del commit 7181ab8, seccion "Aprendizaje y convergencia") y la reestructura lo
-% habia sacado sin pasarlo a ningun anexo; se repone aqui con los nombres del glosario
+% Las Tablas A.5 y A.6 van juntas, despues de sus dos parrafos, para que quepan en una misma pagina.
+\begin{table}[H]
+\setstretch{1}
+\centering
+\footnotesize
+\setlength{\tabcolsep}{5pt}
+\begin{tabular}{lrrrrc}
+\toprule
+ & \multicolumn{3}{c}{Semilla del entrenamiento} & & \\
+\cmidrule(lr){2-4}
+Caso & 42 & 2042 & 4042 & \makecell{Rango\\(s/veh)} & \makecell{Versión\\evaluada} \\
+\midrule
+P1 & 20.07 ($-5.7$) & 20.06 ($-5.8$) & 19.84 ($-6.8$) & 0.23 & 4042 \\
+P2 & 117.73 ($-23.9$)\rlap{\textsuperscript{a}} & 118.66 ($-23.3$) & 119.02 ($-23.1$) & 1.28 & 2042 \\
+P3 & 20.03 ($-7.8$) & 21.70 ($-0.1$) & 19.81 ($-8.8$) & 1.88 & 4042 \\
+P4 & 28.97 ($-3.6$) & 29.47 ($-1.9$) & 28.67 ($-4.6$) & 0.80 & 42 \\
+P5 & 21.07 ($+1.1$) & 21.21 ($+1.8$) & 20.82 ($-0.1$) & 0.39 & 2042 \\
+P6 & 37.54 ($+2.2$)\rlap{\textsuperscript{a}} & 41.51 ($+13.0$) & 40.24 ($+9.6$)\rlap{\textsuperscript{a}} & 3.97 & 42 \\
+\bottomrule
+\end{tabular}
+\caption[Entrenamientos de IPPO con mensajes]{IPPO con mensajes: retraso de cada uno de los tres entrenamientos (s/veh, semillas de evaluación 1001 a 1030) y, entre paréntesis, cambio frente al fijo ajustado (\%). Rango: del mayor al menor retraso. Versión evaluada: semilla del entrenamiento mediano por validación. (a) No se estabilizó.}
+\label{tab:plan2-entrenamientos-ippo}
+\end{table}
+% fuente: TESIS/secciones/tablas/veredicto_bases.tex, tabla "Entrenamientos de IPPO con mensajes" (la escribe
+% veredicto.py con plan2/evaluacion_<esc>_resumen.csv y los meta plan2/politica_<esc>_vecinos_s<base>.json): retraso
+% de evaluacion, cambio frente al fijo, columna "convergio" (no: P2 s42, P6 s42 y P6 s4042) y fila "rango entre los
+% tres"; entrenamiento marcado (evaluada): P1 4042, P2 2042, P3 4042, P4 42, P5 2042 y P6 42; P6: s42 37.54 +/- 1.48,
+% no se estabiliza; s2042 41.51, se estabiliza; s4042 40.24, no se estabiliza
 
-% fuente: plan2/veredicto.csv, plan2/evaluacion_<esc>_resumen.csv y los meta de cada politica
-% (q_table_<tag>.meta.json, politica_<esc>_<var>_s<base>.json); se regeneran con
-% "python veredicto.py --metrica timeloss_prom --fijo fijo_2509 --sin-trivial" desde demo_rl/.
-\input{secciones/tablas/veredicto_bases}
-
-SARSA usa la misma recompensa de retraso que Q-learning
-(Tabla~\ref{tab:veredicto-sarsa}) y falla en P1 a P5, con un cambio
-frente al fijo de entre $+6.6$ y $+40.0$\,\%. En P6 no converge ninguno
-de sus entrenamientos y su veredicto es provisional: falla, con
-$+23.5$\,\%. Q-learning con recompensa de colas es el mismo Q-learning
-con la recompensa de colas de la fase exploratoria
-(Tabla~\ref{tab:veredicto-ql-colas}). Falla en P1, P3 y P4, igual que
-Q-learning con la recompensa de retraso (en P4 el veredicto de
-Q-learning es provisional). En P2 no convergió (provisional: falla,
-$+6.8$\,\%), mientras que Q-learning con la recompensa de retraso mejora
-al fijo ($-8.8$\,\%). En P5 y P6 esta variante no se programó. Con demanda
-nominal o moderada, el techo de los agentes tabulares no se explica por
-la recompensa.
-% fuente: plan2/veredicto.csv (corrida principal), columnas delta_fijo y veredicto: sarsa (14.0, 6.6,
-% 11.2, 10.4, 40.0; FALLA en P1-P5; P6: 23.5, 0/3 convergen, PENDIENTE, provisional FALLA), ql_colas (10.6, 6.8 no convergio, 9.6, 9.8; P5 y P6 sin datos) y
-% ql (9.2, -8.8 MEJORA, 12.4, 9.9 no convergio); ql_colas no se programa en malla3 ni malla3_alta
-% (plan2/generar_trabajos.py)
-\input{secciones/tablas/veredicto_sarsa}
-\input{secciones/tablas/veredicto_ql_colas}
-
-DQN usa la misma observación y la misma recompensa que IPPO con
-mensajes (Tabla~\ref{tab:veredicto-dqn}). MAPPO usa la red del actor y
-la observación con mensajes de IPPO con mensajes, cambia el crítico por
-uno centralizado y entrena su propia política
-(Tabla~\ref{tab:veredicto-mappo}). En las combinaciones en las que el
-entrenamiento de la versión evaluada no convergió (DQN en P5 y P6;
-MAPPO en P3, P4 y P6) el veredicto es provisional y la combinación se
-declara como un límite del plan, sin reentrenarla
-(Sección~\ref{sec:veredicto}); lo mismo vale para Q-learning en P4,
-Q-learning con recompensa de colas en P2 y SARSA, IPPO con mensajes e
-IPPO con penalización de \textit{spillback} en P6. En P6 DQN y MAPPO quedan por encima del fijo
-($+11.1$ y $+12.5$\,\%; provisional: fallan) y muy por debajo del
-actuado ($-35.9$ y $-35.1$\,\%).
-% fuente: plan2/veredicto.csv (corrida principal), filas dqn, mappo, ql, ql_colas, sarsa, ippo_vecinos e
-% ippo_spill (convergio y veredicto); P6: dqn 11.1 / -35.9 (1/3 convergen), mappo 12.5 / -35.1 (0/3)
-\input{secciones/tablas/veredicto_dqn}
-\input{secciones/tablas/veredicto_mappo}
-
-IPPO sin mensajes (Tabla~\ref{tab:veredicto-ippo-local}) empata con el
-fijo en P1, funciona en P2 ($-22.8$\,\%) y falla en P3 a P6. En P6
-convergen sus tres entrenamientos y queda un $6.6$\,\% por encima del fijo.
-En P3, P4 y P5 la fila de IPPO con penalización de \textit{spillback}
-(Tabla~\ref{tab:veredicto-ippo-spill}) repite la de IPPO con mensajes:
-en esas redes el término de \textit{spillback} nunca se activa y la
-política resultante es idéntica, como se comprueba en la
-Sección~\ref{sec:spill-vecinos}. En P1 y P2 el término sí se activa y
-la variante se entrenó tres veces. En P6 también se activa: ninguna de
-sus tres políticas repite a la de IPPO con mensajes de la misma semilla
-de entrenamiento en ninguna de las treinta semillas de evaluación. Allí el entrenamiento
-de su versión evaluada no converge y el veredicto es provisional:
-empata, con $+3.6$\,\%.
-% fuente: plan2/veredicto.csv (corrida principal), filas ippo_local (EMPATA, FUNCIONA -22.8, FALLA en
-% P3-P6; P6: 6.6, 3/3 convergen) e ippo_spill (P6: 3.6 [0.6, 7.0], p 0.114, 0/3 convergen); regla en veredicto.spill_inactivo; cola_max_enlace de
-% plan2/resultados_<esc>_ippo_vecinos_s<base>.csv y plazas del meta politica_<esc>_vecinos_s<base>.json
-% (umbral plazas // 2); P6: hechos_2509.md, seccion IPPO spill frente a IPPO vecinos (malla3_alta, bases
-% 42, 2042 y 4042: 0 de 30 semillas identicas)
-
-En la tabla de entrenamientos de IPPO con penalización de
-\textit{spillback} (Tabla~\ref{tab:veredicto-bases-ippo-spill}), P3,
-P4 y P5 tienen sus tres filas. Esos entrenamientos se programaron al
-final de la cola, solo como comprobación. Al cierre del veredicto solo
-habían terminado los dos de P3 con las semillas 42 y 2042; los otros
-siete terminaron y se evaluaron después
-(Sección~\ref{sec:spill-vecinos}). Las nueve políticas dan, semilla a
-semilla, el mismo \texttt{timeLoss} que las de IPPO con mensajes de la
-misma semilla de entrenamiento, así que sus filas
-repiten las de la Tabla~\ref{tab:veredicto-bases-ippo-vecinos} y su
-veredicto en P3 a P5 sigue siendo el del cierre.
-% fuente: hechos_2509.md (P3, P4 y P5, bases 42, 2042 y 4042: 30 de 30 semillas identicas en todas las
-% metricas salvo ret_spill); filas de P3 al cierre: git show HEAD:TESIS/secciones/anexos.tex (dos filas,
-% bases 42 y 2042); plan2/evaluacion_red.csv, evaluacion_red_alta.csv y evaluacion_malla3.csv, brazos
-% ippo_spill_s<base> frente a ippo_vecinos_s<base>; veredicto de spill en P3-P5 igual al de
-% plan2/veredicto_congelado_0355.csv ("= vecinos")
-\input{secciones/tablas/veredicto_ippo_local}
-\input{secciones/tablas/veredicto_ippo_spill}
-
-% Entrega 3, integracion (23.10.2026; plan del 14.10, movimiento 8): aqui estaba el bloque "Tablas del analisis de
-% robustez" (l. 134-197 del commit 7181ab8). Sus 11 tablas generadas (robustez_veredicto_actuado, _trivial, _ql,
-% _sarsa, _ql_colas, _dqn, _ippo_local, _ippo_vecinos, _ippo_spill, _mappo y _bases) pasan al Anexo F, "Tablas por
-% modelo" (anexo_f_robustez.tex), con la frase que las presenta. Su primer parrafo repetia lo que el Anexo F dice en
-% "Que cambia" y el segundo, su "Lectura por caso"; los dos siguen en el commit 7181ab8.
+\begin{table}[H]
+\setstretch{1}
+\centering
+\footnotesize
+\setlength{\tabcolsep}{5pt}
+\begin{tabular}{llrrcl}
+\toprule
+Caso & Modelo & \makecell{Meseta\\(\%)} & \makecell{Estabilidad\\(\%)} & \makecell{Se\\estabilizan} & \makecell[l]{Veredicto\\provisional} \\
+\midrule
+P2 & Q-learning (colas) & $+5.5$ & 4.5 & 0 de 3 & FALLA \\
+P3 & MAPPO & $-6.1$ & 0.2 & 2 de 3 & FUNCIONA \\
+P4 & Q-learning & $-23.8$ & 0.0 & 2 de 3 & FALLA \\
+P4 & MAPPO & $-6.7$ & 0.0 & 1 de 3 & MEJORA \\
+P5 & DQN & $-5.5$ & 0.0 & 2 de 3 & FALLA \\
+P6 & SARSA & $-24.7$ & 0.0 & 0 de 3 & FALLA \\
+P6 & DQN & $+14.9$ & 12.5 & 1 de 3 & FALLA \\
+P6 & IPPO con mensajes & $+4.3$ & 7.2 & 1 de 3 & EMPATA \\
+P6 & IPPO con penalización & $-3.2$ & 6.8 & 0 de 3 & EMPATA \\
+P6 & MAPPO & $-7.3$ & 7.8 & 0 de 3 & FALLA \\
+\bottomrule
+\end{tabular}
+\caption[Combinaciones sin veredicto firme]{Combinaciones de modelo y caso en las que el entrenamiento de la versión evaluada no se estabilizó: la meseta queda fuera de $-5$ a $+5$\,\% o la estabilidad pasa del 5\,\% (Sección~\ref{sec:veredicto}). Se estabilizan: cuántos de los tres entrenamientos. DQN: Double DQN; los demás nombres, como en la Tabla~\ref{tab:plan2-resumen}.}
+\label{tab:plan2-pendientes}
+\end{table}
+% fuente: plan2/veredicto.csv, columnas plateau, estabilidad, convergen y veredicto de las 12 filas PENDIENTE entre
+% las 48 de aprendices: P2 ql_colas 5.5 / 4.5 / 0/3; P3 mappo -6.1 / 0.2 / 2/3; P4 ql -23.8 / 0.0 / 2/3; P4 mappo
+% -6.7 / 0.0 / 1/3; P5 dqn -5.5 / 0.0 / 2/3; P6 sarsa -24.7 / 0.0 / 0/3, dqn 14.9 / 12.5 / 1/3, ippo_vecinos 4.3 /
+% 7.2 / 1/3, ippo_spill -3.2 / 6.8 / 0/3 y mappo -7.3 / 7.8 / 0/3; P5 y P6 ql_colas "sin datos" (no se programa en
+% malla3 ni malla3_alta: plan2/generar_trabajos.py); criterio: veredicto.py (UMBRAL_CONVERGENCIA = 5.0 para la
+% meseta y la estabilidad) y capitulo3.tex, sec:veredicto
 
 \section*{Anexo B. Programas del proyecto}
 \phantomsection
@@ -220,38 +166,33 @@ veredicto en P3 a P5 sigue siendo el del cierre.
 \renewcommand{\theHtable}{B.\arabic{table}}
 
 La Tabla~\ref{tab:programas} lista los programas propios del proyecto,
-con la unidad del método a la que pertenece cada uno y lo que hace. Con
-ellos se obtuvieron los resultados del Capítulo~\ref{cap:resultados} y
-del Anexo~C (SUMO 1.25.0, Python 3.14). El código completo, con sus
-comentarios y sus salidas en español y sin tildes en los
-identificadores, está en el repositorio del proyecto,
+con la unidad del método a la que pertenece cada uno y lo que hace; la
+Tabla~\ref{tab:programas-segundo}, los que añade el segundo estudio, y
+la Tabla~\ref{tab:programas-lima}, los de los casos de Lima. Con ellos
+se obtuvieron los resultados del
+Capítulo~\ref{cap:resultados} y de los anexos (SUMO 1.25.0, Python
+3.14). El código completo, con sus comentarios y sus salidas en
+español, está en el repositorio del proyecto,
 \url{https://github.com/Fabian9533/demo_rl_semaforo}.
 % PENDIENTE: hash del commit final (Fabian aun no hace push). Cuando exista, agregarlo a la frase anterior:
 % "..., en el commit <hash>".
-% 22.10.2026 (entrega 3, sin codigo en la tesis): este anexo imprimia el codigo de los 15 programas de
-% TESIS/codigo/ (unas 94 paginas); siguen en el commit 5b9b7a6. La tabla toma la descripcion de cada uno del texto
-% anterior del anexo y de los titulos de sus listados; la unidad, de tab:pipeline (Cap. III)
 
 \begin{sloppypar}
-El código del diagnóstico posterior del entrenamiento
-(Anexo~G) no está en la tabla. Está en la carpeta
-\texttt{plan2/exploratorio\_coord/} del repositorio. Su subcarpeta
-\texttt{codigo/} guarda las dos variantes de \texttt{rl\_ippo.py} que
-usa el diagnóstico: \texttt{rl\_ippo\_smdp\_crn.py}, con el
-descuento por segundo y la exploración común, y
-\texttt{rl\_ippo\_norm\_smdp\_crn\_triv.py}, que añade la observación
-normalizada y el arranque en el ciclo mínimo. Cada una va con su
-diferencia frente a \texttt{rl\_ippo.py}, que es el único archivo que
-cambian. La carpeta reúne además el pre-registro con su huella
-sha256, las desviaciones, las versiones evaluadas, los CSV por
+El código del diagnóstico del entrenamiento (Anexo~G) no está en las
+tablas. Está en la carpeta \texttt{plan2/exploratorio\_coord/} del
+repositorio. Su subcarpeta \texttt{codigo/} guarda las dos variantes de
+\texttt{rl\_ippo.py} que usa el diagnóstico:
+\texttt{rl\_ippo\_smdp\_crn.py}, con el descuento por segundo y la
+exploración común, y \texttt{rl\_ippo\_norm\_smdp\_crn\_triv.py}, que
+añade la observación normalizada y el arranque en el ciclo mínimo. Cada
+una va con su diferencia frente a \texttt{rl\_ippo.py}, que es el único
+archivo que cambian. La carpeta reúne además el registro previo con su
+huella sha256, las desviaciones, las versiones evaluadas, los CSV por
 semilla y \texttt{verificar\_hechos.py}, que recalcula sus cifras con
-la misma estadística pareada del plan.
+la misma estadística pareada del primer estudio.
 \end{sloppypar}
-% 22.10.2026 (integracion): este parrafo iba despues de la Tabla B.1; va antes para que la tabla, que ocupa casi
-% una pagina, no deje en blanco la primera pagina del anexo. 23.10.2026: se quito el parrafo con las opciones de
-% linea de ordenes de veredicto.py y sintesis_plan.py (sin codigo en la tesis; la Seccion sec:reproducibilidad dice
-% en palabras que el resultado principal y la robustez salen de los mismos programas con dos configuraciones), y
-% "analisis exploratorio posterior" pasa a "diagnostico posterior del entrenamiento", como en la apertura del Cap. V
+% Este parrafo va antes de la Tabla B.1 para que la tabla, que ocupa casi una pagina, no deje en blanco la primera
+% pagina del anexo.
 
 \begin{table}[H]
 \setstretch{1}
@@ -296,18 +237,85 @@ en la que se usa cada programa (Tabla~\ref{tab:pipeline}). --: programa que no c
 resultados (penúltimo bloque) o de la fase exploratoria (último bloque, Anexo~C).}
 \label{tab:programas}
 \end{table}
-% fuente: anexos.tex del 14.10 (5b9b7a6), Anexo B: titulos de los 15 listados y parrafo de los scripts omitidos;
-% docstrings de cada programa; unidades: tab:pipeline de capitulo3.tex (U3 en rl_corredor.py y rl_ippo.py por
-% correr_episodio, que mide colas y retornos); nombres de los modelos segun el glosario del 14.10. Entrega 3, tareas
-% 4 y 5 (23.10.2026): fila nueva de curvas_demanda.py (docstring: junta los 12 niveles nuevos con P1-P6, aplica la
-% regla de veredicto.py y escribe plan2/demanda2/resumen_demanda2.csv, tablas/demanda2.tex e
+% fuente: docstrings de cada programa; unidades: tab:pipeline de capitulo3.tex (U3 en rl_corredor.py y rl_ippo.py por
+% correr_episodio, que mide colas y retornos); curvas_demanda.py (docstring: junta los 12 niveles nuevos con P1-P6,
+% aplica la regla de veredicto.py y escribe plan2/demanda2/resumen_demanda2.csv, tablas/demanda2.tex e
 % images/fig_demanda_bandas.pdf); barrido_demanda.py, modo preparar2 (docstring: escribe dem_<base>_t<veh/h>.rou.xml,
-% .sumocfg y .add.xml con la demanda de la red base escalada); su unidad sigue siendo U3, la de tab:pipeline, como
-% con el modo preparar del barrido del corredor. La tabla mide 580.2 pt en HEAD (1873eac) y \textheight es 615.4 pt
-% (medido con tesisutec.cls; cada linea de fila mide 12 pt): solo caben dos lineas mas, asi que la fila de
-% curvas_demanda.py dice en una linea lo que hace (aplica la regla de veredicto del plan a los niveles de demanda
-% adicionales y genera su tabla y su figura) y la de escenarios_plan2.py, que tambien registra los
-% dem_<base>_t<veh/h> (NIVELES_DEMANDA2), no cambia
+% .sumocfg y .add.xml con la demanda de la red base escalada).
+% CUIDADO al agregar filas: la tabla mide 580.2 pt y \textheight es 615.4 pt (medido con tesisutec.cls; cada linea de
+% fila mide 12 pt): solo caben dos lineas mas. Por eso los programas del segundo estudio van en otra tabla.
+
+El segundo estudio entrena, evalúa y mide con los programas de la
+Tabla~\ref{tab:programas}: IPPO con mensajes corregido y el modelo
+completo son opciones de \texttt{rl\_ippo.py}. Añade los de la
+Tabla~\ref{tab:programas-segundo}, casi todos en la carpeta
+\texttt{plan3/}. Esa carpeta guarda también las enmiendas del registro
+previo, las referencias congeladas antes de evaluar, los resultados de
+las evaluaciones y las salidas del veredicto, de las que salen las
+cifras del estudio (Anexo~H).
+
+\begin{table}[H]
+\setstretch{1}
+\centering
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{>{\raggedright\arraybackslash}p{5.3cm}>{\raggedright\arraybackslash}p{9.0cm}}
+\toprule
+Programas & Qué hacen \\
+\midrule
+\texttt{plan3/PRERREGISTRO.md} & registro previo: los casos, las semillas, las referencias, la regla de veredicto y las hipótesis del estudio, publicados antes de entrenar \\
+\texttt{escenarios\_plan3.py} y \texttt{plan3/demanda\_estocastica.py} & escenarios del estudio: llegadas aleatorias con la misma demanda media, mezcla de vehículos de Lima y perfil de demanda de 10~min \\
+\texttt{plan3/barrer\_fino.py}, \texttt{plan3/actuado.py}, \texttt{plan3/franja.py} y \texttt{plan3/reglas.py} & ajuste de las referencias en cada caso y con cada tipo de llegadas: el fijo ajustado al segundo, el actuado ajustado y las demás (fijo por franja, reglas y Max-Pressure) \\
+\texttt{plan3/generar\_trabajos3.py} y \texttt{plan3/cola.py} & lista de los entrenamientos y las evaluaciones del estudio, y cola que los ejecuta en paralelo \\
+\texttt{plan3/evaluar3.py} & evaluación a ciegas: evalúa un control en un caso y una tanda de semillas, y guarda el resultado sin mostrar ninguna métrica \\
+\texttt{plan3/p3\_promocion.py} y \texttt{plan3/veredicto3.py} & modelo citado de cada caso y veredicto del estudio: veredictos por tanda, hipótesis y resumen en un número, calculados una sola vez, al cierre \\
+\texttt{tablas\_plan3.py} & tablas y figuras del segundo estudio, a partir de las salidas del veredicto \\
+\texttt{curvas\_plan3.py} & curvas de aprendizaje del segundo estudio, con el fijo y el actuado ajustados medidos en las mismas semillas de validación \\
+\texttt{curvas\_entrenamiento.py} y \texttt{figura\_lectura.py} & figuras del Capítulo~\ref{cap:resultados}: la curva de aprendizaje por episodio del primer estudio, con la entropía de la política, y la figura de lectura de las llegadas y los veredictos \\
+\bottomrule
+\end{tabular}
+\caption[Programas del segundo estudio]{Programas que añade el segundo estudio. Los de \texttt{plan3/} están en esa carpeta del repositorio; los demás, en su raíz.}
+\label{tab:programas-segundo}
+\end{table}
+% fuente: docstrings de cada programa (plan3/*.py, escenarios_plan3.py, con_escenarios.py y tablas_plan3.py);
+% plan3/README.md (los programas de la raiz se llaman desde plan3/: ../rl_ippo.py, ../evaluar.py, ../barrer_fijo.py);
+% plan3/generar_trabajos3.py (OP_COMPLETO: opciones de rl_ippo.py del modelo completo; --v2: IPPO con mensajes
+% corregido); plan3/PRERREGISTRO.md (secciones 3 a 8, 12 y 14); plan3/doc/enmienda_1.md y enmienda_2.md,
+% plan3/referencias_congeladas.json y plan3/salidas/ (veredicto3.md y sus CSV)
+
+Los casos de Lima (Sección~\ref{sec:caso-lima}) entrenan el modelo
+completo con el mismo \texttt{rl\_ippo.py}, que para el nudo se amplió:
+ahora admite semáforos con más de dos estados con verde y con tramos en
+que todo está en rojo. En los casos anteriores da los mismos resultados
+que antes, dígito a dígito. Los demás programas están en la carpeta
+\texttt{lima/} (Tabla~\ref{tab:programas-lima}).
+
+\begin{table}[H]
+\setstretch{1}
+\centering
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{>{\raggedright\arraybackslash}p{5.3cm}>{\raggedright\arraybackslash}p{9.0cm}}
+\toprule
+Programas & Qué hacen \\
+\midrule
+\texttt{lima/REGISTRO.md} & reglas de los dos casos, escritas antes de ajustar las referencias, de entrenar y de evaluar \\
+\texttt{escenarios\_lima.py} & registra los dos escenarios: el nudo, con un semáforo de tres estados con verde, y el corredor, con seis cruces y los vecinos de cada uno \\
+\texttt{lima/armar\_red.py}, \texttt{lima/programa.py} y \texttt{lima/demanda.py} & el nudo: la red, con la geometría de OpenStreetMap y los carriles observados; el plan del semáforo medido en el sitio, y la demanda \\
+\texttt{lima/estudio.py} & el nudo: ajusta el fijo y el actuado, evalúa todos los controles en las dos tandas y aplica la regla de veredicto \\
+\texttt{lima/corredor/corredor.py} y \texttt{lima/corredor/\allowbreak estudio\_corredor.py} & lo mismo para el corredor de la Av.~Benavides: la red, el plan típico y la demanda; el ajuste de las referencias, la evaluación y el veredicto \\
+\texttt{lima/borde\_actuado.py} & comprobación del borde de la búsqueda del actuado ajustado: prueba un paso más allá de cada parámetro que quedó en el borde \\
+\texttt{lima/tablas\_lima.py}, \texttt{lima/dibujar\_red.py} y \texttt{lima/corredor/\allowbreak tablas\_corredor.py} & tablas y figuras de los dos casos, y la tabla y la figura del resultado final, que los junta con el segundo estudio \\
+\texttt{lima/ver\_en\_sumo.py} & abre la ventana de SUMO con un caso de Lima y dos o más controles lado a lado, con los mismos vehículos; solo para mirar \\
+\bottomrule
+\end{tabular}
+\caption[Programas de los casos de Lima]{Programas que añaden los casos de Lima. Están en la carpeta \texttt{lima/} del repositorio, salvo \texttt{escenarios\_lima.py}, que está en su raíz.}
+\label{tab:programas-lima}
+\end{table}
+% fuente: docstrings de cada programa (lima/*.py, lima/corredor/*.py y escenarios_lima.py); rl_ippo.py
+% (duracion_transiciones: ambar y rojo total entre dos verdes; C["n_fases"]); comprobacion de que no cambia los
+% casos anteriores: corredor, base 7, 3 episodios con las opciones del modelo completo, CSV y politica identicos
+% antes y despues del cambio (13.11.2026)
 
 \input{secciones/anexo_c_exploratoria}
 \input{secciones/anexo_d_osm}
@@ -315,3 +323,8 @@ resultados (penúltimo bloque) o de la fase exploratoria (último bloque, Anexo~
 % Entrega 3, fase 2 (23.10.2026): anexos nuevos con el material que sale del cuerpo (plan del 14.10, regla 3)
 \input{secciones/anexo_f_robustez}
 \input{secciones/anexo_g_diagnostico}
+% Segundo estudio (plan 3, 05-09.11.2026): llegadas aleatorias y fijo ajustado al segundo
+\input{secciones/anexo_h_segundo_estudio}
+% Reduccion del 09.11.2026: lo que sale del Capitulo IV (calibracion, prueba de humo, spillback inactivo, medicion mas
+% estricta en la implementacion y P6)
+\input{secciones/anexo_i_implementacion}

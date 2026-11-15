@@ -1,0 +1,166 @@
+{
+ "ganador": {
+  "tipo": "retraso",
+  "detectorRange": 200,
+  "minTimeLoss": 5,
+  "esquema": "doble del fijo",
+  "retraso_total_10": 63.241,
+  "retraso_total_30": 63.184333333333335,
+  "maximos": [
+   60,
+   38,
+   60
+  ]
+ },
+ "actuado_por_defecto_30": 69.558,
+ "procedimiento": "pasos del segundo estudio en cadena (hueco, detector, umbral de atasco y verde maximo), variante por retraso y los tres mejores con 30 semillas; despues, un paso mas alla de cada borde (borde_actuado.py)",
+ "candidatos": [
+  {
+   "tipo": "retraso",
+   "detectorRange": 100,
+   "minTimeLoss": 1,
+   "esquema": "doble del fijo",
+   "retraso_total_10": 63.269,
+   "retraso_total_30": 63.415
+  },
+  {
+   "tipo": "retraso",
+   "detectorRange": 200,
+   "minTimeLoss": 3,
+   "esquema": "doble del fijo",
+   "retraso_total_10": 63.409000000000006,
+   "retraso_total_30": 63.258
+  },
+  {
+   "tipo": "retraso",
+   "detectorRange": 200,
+   "minTimeLoss": 1,
+   "esquema": "doble del fijo",
+   "retraso_total_10": 64.625,
+   "retraso_total_30": 64.61833333333334
+  },
+  {
+   "tipo": "actuado",
+   "max-gap": 1.5,
+   "detector-gap": 2.0,
+   "jam-threshold": -1,
+   "esquema": "doble del fijo",
+   "retraso_total_10": 65.575
+  },
+  {
+   "tipo": "actuado",
+   "max-gap": 1.5,
+   "detector-gap": 2.0,
+   "jam-threshold": -1,
+   "esquema": "60",
+   "retraso_total_10": 65.598
+  },
+  {
+   "tipo": "actuado",
+   "max-gap": 1.5,
+   "detector-gap": 2.0,
+   "jam-threshold": 10,
+   "esquema": "60",
+   "retraso_total_10": 65.598
+  },
+  {
+   "tipo": "actuado",
+   "max-gap": 1.5,
+   "detector-gap": 2.0,
+   "jam-threshold": 30,
+   "esquema": "60",
+   "retraso_total_10": 65.598
+  },
+  {
+   "tipo": "actuado",
+   "max-gap": 1.5,
+   "detector-gap": 3.0,
+   "jam-threshold": -1,
+   "esquema": "60",
+   "retraso_total_10": 65.937
+  },
+  {
+   "tipo": "actuado",
+   "max-gap": 1.0,
+   "detector-gap": 2.0,
+   "jam-threshold": -1,
+   "esquema": "60",
+   "retraso_total_10": 66.584
+  },
+  {
+   "tipo": "actuado",
+   "max-gap": 2.0,
+   "detector-gap": 2.0,
+   "jam-threshold": -1,
+   "esquema": "60",
+   "retraso_total_10": 66.761
+  },
+  {
+   "tipo": "actuado",
+   "max-gap": 1.5,
+   "detector-gap": 4.0,
+   "jam-threshold": -1,
+   "esquema": "60",
+   "retraso_total_10": 66.967
+  },
+  {
+   "tipo": "actuado",
+   "max-gap": 1.5,
+   "detector-gap": 1.0,
+   "jam-threshold": -1,
+   "esquema": "60",
+   "retraso_total_10": 67.162
+  },
+  {
+   "tipo": "actuado",
+   "max-gap": 3.0,
+   "detector-gap": 2.0,
+   "jam-threshold": -1,
+   "esquema": "60",
+   "retraso_total_10": 69.667,
+   "retraso_total_30": 69.558
+  },
+  {
+   "tipo": "actuado",
+   "max-gap": 4.0,
+   "detector-gap": 2.0,
+   "jam-threshold": -1,
+   "esquema": "60",
+   "retraso_total_10": 72.115
+  },
+  {
+   "tipo": "retraso",
+   "detectorRange": 100,
+   "minTimeLoss": 3,
+   "esquema": "doble del fijo",
+   "retraso_total_10": 116.475
+  },
+  {
+   "tipo": "retraso",
+   "detectorRange": 50,
+   "minTimeLoss": 1,
+   "esquema": "doble del fijo",
+   "retraso_total_10": 197.76
+  },
+  {
+   "tipo": "retraso",
+   "detectorRange": 50,
+   "minTimeLoss": 3,
+   "esquema": "doble del fijo",
+   "retraso_total_10": 439.068
+  }
+ ],
+ "ganador_antes_del_borde": {
+  "tipo": "retraso",
+  "detectorRange": 200,
+  "minTimeLoss": 3,
+  "esquema": "doble del fijo",
+  "retraso_total_10": 63.409000000000006,
+  "retraso_total_30": 63.258,
+  "maximos": [
+   60,
+   38,
+   60
+  ]
+ }
+}

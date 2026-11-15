@@ -1,0 +1,96 @@
+% BORRADOR (13.11.2026) de la seccion del caso Lima para el Cap. V. Va despues de "Resultado central: el segundo
+% estudio" y antes de "Que explica el resultado". Los PENDIENTE se llenan con lima/salidas/ y lima/alta/salidas/.
+%----------------------------------------------------------------------
+\section{Caso Lima: el nudo de Reducto con 28 de Julio}
+\label{sec:caso-lima}
+\suppressfloats[t]
+
+Esta sección lleva el método a un cruce real de Lima. PENDIENTE: respuesta
+en dos o tres frases (frente al plan actual, frente al fijo ajustado al
+segundo y frente al actuado ajustado, con los dos niveles de demanda).
+
+\noindent\textbf{Qué se midió.} El caso es el nudo donde se cruzan la
+Av.~Reducto, la Av.~28 de Julio y la Av.~Vasco Núñez de Balboa, en
+Miraflores, junto al puente sobre la Vía Expresa. Todas las luces del
+nudo siguen un mismo programa: es un solo cruce, con un solo
+controlador. El Anexo~D cuenta cómo se armó el escenario:
+\begin{itemize}
+  \item \textbf{Red.} La forma del nudo sale de OpenStreetMap; los
+    carriles y los giros, de la observación en el sitio.
+  \item \textbf{Semáforo.} El plan que opera hoy se midió en el sitio,
+    en la hora punta de la tarde: un ciclo de 132~s, con tres estados
+    con verde y 34~s con todo en rojo. Todos los controles conservan
+    esos 34~s.
+  \item \textbf{Demanda.} No hay conteo por movimiento. Se usa el total
+    publicado, 4271~veh/h \citep{Miraflores2017_PMU}, repartido en
+    proporción al verde y a los carriles que el plan actual da a cada
+    movimiento: es el supuesto más favorable para ese plan. Como el
+    cruce está calificado como saturado, se añade una demanda alta, un
+    20\,\% mayor (5125~veh/h).
+  \item \textbf{Controles.} El plan actual, el fijo ajustado al segundo,
+    el actuado ajustado y el modelo completo. Todos usan los mismos
+    estados, en el mismo orden; solo cambia cuánto dura cada verde.
+  \item \textbf{Modelo.} El modelo completo del segundo estudio, sin
+    cambios, entrenado tres veces con cada demanda. Aquí es un solo
+    agente, que decide cuánto dura cada estado del programa: no hay
+    cruces vecinos ni mensajes.
+  \item \textbf{Evaluación.} Como en el segundo estudio: llegadas
+    aleatorias, dos tandas de 100 semillas, la misma regla de veredicto
+    y reglas escritas antes de entrenar.
+\end{itemize}
+% fuente: anexo_d_osm.tex; lima/REGISTRO.md (reglas del 13.11.2026, 19:30, y segundo nivel de demanda, 19:40);
+% lima/programa.py (PLAN, ROJO_TOTAL), lima/demanda.py (TOTAL_PUBLICADO, GRUPOS, DESTINOS; alta = factor 1.2),
+% lima/entrenar.sh y lima/entrenar_nivel.sh (opciones del modelo completo, bases 42, 2042 y 4042)
+
+% fuente: secciones/tablas/lima_resultado.tex (lima/tablas_lima.py): lima/salidas/ y lima/alta/salidas/,
+% eval_t1_*.csv y eval_t2_*.csv (retraso_total_prom)
+\begin{table}[!tbp]
+\setstretch{1}
+\centering
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\input{secciones/tablas/lima_resultado}
+\caption[Caso Lima: retraso total con cada control]{Caso Lima: retraso total por vehículo con cada control y cambio del modelo completo frente a cada uno, con la demanda publicada y con la demanda alta. Cada cifra se da para las dos tandas de evaluación, de 100 semillas cada una; un cambio negativo es menos retraso con el modelo. El IC95 de cada cambio está en la Tabla~\ref{tab:lima-completa}.}
+\label{tab:lima-resultado}
+\end{table}
+
+\noindent\textbf{Lectura.} PENDIENTE (tres puntos: frente al plan actual,
+frente al fijo ajustado al segundo y veredicto, frente al actuado
+ajustado).
+
+% fuente: images/fig_lima_retraso.pdf (lima/tablas_lima.py, figura_retraso): los retrasos de la tanda 1 de la
+% Tabla tab:lima-resultado
+\begin{figure}[!tbp]
+\centering
+\includegraphics[width=0.92\textwidth]{fig_lima_retraso.pdf}
+\caption[Caso Lima: retraso total por control]{Caso Lima: retraso total por vehículo (s/veh) con el plan actual, el fijo ajustado al segundo, el actuado ajustado y el modelo completo, en la tanda 1 (100 semillas). Un panel por nivel de demanda, cada uno con su escala.}
+\label{fig:lima-retraso}
+\end{figure}
+
+\noindent\textbf{Cómo aprendió el modelo.} PENDIENTE (una o dos frases con
+la Figura~\ref{fig:lima-aprendizaje} y la Tabla~\ref{tab:lima-entrenamientos}:
+en cuántos episodios alcanza a las referencias, si los tres
+entrenamientos coinciden y qué verdes usa).
+
+% fuente: images/fig_lima_aprendizaje.pdf (lima/tablas_lima.py, figura_aprendizaje): columna val_total de
+% resultados_lima_ippo_vecinos_completo_s<base>.csv y salidas/val_referencias.json de cada nivel
+\begin{figure}[!tbp]
+\centering
+\includegraphics[width=\textwidth]{fig_lima_aprendizaje.pdf}
+\caption[Caso Lima: aprendizaje del modelo]{Caso Lima: retraso total del modelo en las ocho semillas de validación a lo largo de sus tres entrenamientos, con cada nivel de demanda. Las líneas grises son el plan actual y el fijo ajustado al segundo en esas mismas semillas. La escala vertical corta los primeros episodios, que quedan muy por encima.}
+\label{fig:lima-aprendizaje}
+\end{figure}
+
+\noindent\textbf{Qué no dice este caso.}
+\begin{itemize}
+  \item \textbf{No prueba los mensajes.} Con un solo cruce no hay
+    coordinación entre vecinos, que es la otra mitad de la pregunta de
+    la tesis. Los vecinos de este nudo son los dos semáforos del puente,
+    que no están en la red.
+  \item \textbf{La demanda es un supuesto.} El total es el publicado,
+    pero el reparto entre movimientos no se contó.
+  \item \textbf{El retraso simulado no es el del nudo.} La simulación
+    no reproduce el bloqueo desde el puente, los cruces dentro del nudo
+    ni los peatones (Anexo~D). Sirve para comparar controles entre sí.
+\end{itemize}
+% fuente: lima/REGISTRO.md, "Limites conocidos de antemano"; anexo_d_osm.tex, "Lo que el escenario no reproduce"

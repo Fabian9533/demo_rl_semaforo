@@ -1,0 +1,26 @@
+% Generado por lima/tablas_lima.py a partir de lima/salidas/ y lima/alta/salidas/. No editar a mano.
+% Caso Lima: todos los controles, por nivel de demanda. Retraso total por vehiculo en las dos tandas y
+% cambio del modelo frente a cada control, con IC95 (bootstrap pareado, 10 000 remuestreos) y p de Wilcoxon
+% pareado. fuente: salidas/eval_t1_*.csv y eval_t2_*.csv de lima/ y lima/alta/.
+\begin{tabular}{>{\raggedright\arraybackslash}p{1.5cm}>{\raggedright\arraybackslash}p{2.6cm}>{\raggedright\arraybackslash}p{2.0cm}>{\raggedright\arraybackslash}p{4.0cm}>{\raggedright\arraybackslash}p{4.0cm}}
+\toprule
+Demanda & Control & Retraso total, tandas 1 y 2 (s/veh) & Cambio del modelo, tanda 1 (\%) & Cambio del modelo, tanda 2 (\%) \\
+\midrule
+Publicada & Plan actual & 59.1 y 58.7 & $-6.5$ [$-7.0$, $-6.0$], $p < 0.001$ & $-6.2$ [$-6.6$, $-5.7$], $p < 0.001$ \\
+ & Fijo ajustado al segundo & 57.8 y 57.7 & $-4.4$ [$-4.9$, $-3.9$], $p < 0.001$ & $-4.5$ [$-4.9$, $-4.1$], $p < 0.001$ \\
+ & Actuado ajustado & 53.4 y 53.2 & $+3.4$ [$+3.0$, $+3.9$], $p < 0.001$ & $+3.6$ [$+3.2$, $+4.1$], $p < 0.001$ \\
+ & Actuado por defecto & 59.4 y 59.1 & $-7.0$ [$-7.5$, $-6.5$], $p < 0.001$ & $-6.7$ [$-7.2$, $-6.3$], $p < 0.001$ \\
+ & Ciclo mínimo & 1189.0 y 1193.1 & $-95.4$ [$-95.4$, $-95.3$], $p < 0.001$ & $-95.4$ [$-95.4$, $-95.3$], $p < 0.001$ \\
+ & Actuado ajustado, primera búsqueda & 55.2 y 54.9 & $+0.2$ [$-0.4$, $+0.7$], $p = 0.952$ & $+0.3$ [$-0.1$, $+0.8$], $p = 0.608$ \\
+ & Modelo completo & 55.3 y 55.1 & --- & --- \\
+\midrule
+Alta & Plan actual & 89.1 y 85.6 & $-25.9$ [$-28.4$, $-23.4$], $p < 0.001$ & $-24.0$ [$-26.2$, $-21.8$], $p < 0.001$ \\
+ & Fijo ajustado al segundo & 70.1 y 69.6 & $-5.7$ [$-6.8$, $-4.6$], $p < 0.001$ & $-6.6$ [$-7.4$, $-5.7$], $p < 0.001$ \\
+ & Actuado ajustado & 63.3 y 63.0 & $+4.3$ [$+3.4$, $+5.5$], $p < 0.001$ & $+3.3$ [$+2.5$, $+4.2$], $p < 0.001$ \\
+ & Actuado por defecto & 69.9 y 69.6 & $-5.6$ [$-6.5$, $-4.5$], $p < 0.001$ & $-6.5$ [$-7.3$, $-5.7$], $p < 0.001$ \\
+ & Ciclo mínimo & 1590.3 y 1587.4 & $-95.8$ [$-95.9$, $-95.8$], $p < 0.001$ & $-95.9$ [$-95.9$, $-95.9$], $p < 0.001$ \\
+ & Actuado ajustado, primera búsqueda & 66.4 y 65.7 & $-0.5$ [$-1.5$, $+0.6$], $p = 0.007$ & $-1.1$ [$-1.8$, $-0.2$], $p < 0.001$ \\
+ & Actuado ajustado, antes de la comprobación del borde & 63.2 y 62.9 & $+4.4$ [$+3.5$, $+5.5$], $p < 0.001$ & $+3.3$ [$+2.5$, $+4.2$], $p < 0.001$ \\
+ & Modelo completo & 66.0 y 65.0 & --- & --- \\
+\bottomrule
+\end{tabular}

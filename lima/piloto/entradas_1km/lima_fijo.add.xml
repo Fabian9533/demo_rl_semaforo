@@ -1,0 +1,13 @@
+<additional>
+    <!-- Fijo ajustado al segundo del caso Lima (estudio.py ajustar-fijo): verdes [32, 20, 35, 26] -->
+    <tlLogic id="semaforo_S1" type="static" programID="fijo_ajustado" offset="0">
+        <phase duration="32" state="rrrrrGGGggrrrrrrGGGGr"/>  <!-- Reducto norte y sur -->
+        <phase duration="3" state="rrrrrGyyyyrrrrrryyyyr"/>  <!-- transicion -->
+        <phase duration="20" state="rrrrrGrrrrrrrrrrrrrrG"/>  <!-- Giros de Reducto hacia el puente -->
+        <phase duration="3" state="rrrrryrrrrrrrrrrrrrry"/>  <!-- transicion -->
+        <phase duration="35" state="GGgGGrrrrrrrrrrrrrrrr"/>  <!-- 28 de Julio desde el puente -->
+        <phase duration="3" state="yyyyyrrrrrrrrrrrrrrrr"/>  <!-- transicion -->
+        <phase duration="26" state="rrrrrrrrrrGGGGGGrrrrr"/>  <!-- Balboa -->
+        <phase duration="3" state="rrrrrrrrrryyyyyyrrrrr"/>  <!-- transicion -->
+    </tlLogic>
+</additional>

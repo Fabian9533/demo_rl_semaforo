@@ -1,0 +1,281 @@
+\section*{Anexo I. Detalles de implementación}
+\phantomsection
+\addcontentsline{toc}{subsection}{Anexo I. Detalles de implementación}
+\setcounter{table}{0}
+\renewcommand{\thetable}{I.\arabic{table}}
+\renewcommand{\theHtable}{I.\arabic{table}}
+\setcounter{figure}{0}
+\renewcommand{\thefigure}{I.\arabic{figure}}
+\renewcommand{\theHfigure}{I.\arabic{figure}}
+\setcounter{equation}{0}
+\renewcommand{\theequation}{I.\arabic{equation}}
+\renewcommand{\theHequation}{I.\arabic{equation}}
+% Los apartados de este anexo se numeran I.1 a I.5 con un contador propio. Asi las etiquetas sec:humo,
+% sec:spill-vecinos, sec:remedicion y sec:p6-demanda, que otros archivos citan con \ref, imprimen el numero de su
+% apartado: un \label puesto despues de un titulo con asterisco tomaria el numero de la ultima seccion numerada.
+\newcounter{anexoIapartado}
+\renewcommand{\theanexoIapartado}{I.\arabic{anexoIapartado}}
+
+Este anexo reúne cinco detalles de la implementación que el
+Capítulo~\ref{cap:implementacion} solo resume. Ninguno cambia un
+resultado: son el respaldo de decisiones que el cuerpo enuncia en una
+frase.
+
+\refstepcounter{anexoIapartado}
+\subsection*{\theanexoIapartado. Calibración de la demanda alta}
+
+Los casos de demanda alta (P2, P4 y P6) multiplican todos los flujos de
+su red por un factor $f$. El factor se eligió antes de entrenar, con el
+control actuado y las semillas de ajuste 2001 a 2003, y con un criterio
+fijado de antemano: el menor $f$ de una lista de candidatos con el que
+la cola detenida de algún carril de un enlace entre semáforos llega al
+90\,\% de sus plazas en al menos dos de las tres semillas. Ese umbral
+son 34 de 38 plazas en el corredor y en la red con rotonda, y 33 de 37
+en la malla.
+% fuente: cabeceras de plan2/red_alta.rou.xml y plan2/malla3_alta.rou.xml (criterio); comun.umbral_carril
+% (int(0.9 x plazas))
+
+\noindent\textbf{Corredor (P2).} Los candidatos fueron 1.3, 1.5 y 2.0.
+Con 1.3 el umbral no se alcanza en ninguna semilla; con 1.5, en una, y
+con 2.0, en las tres. Queda $f = 2$: 3620 vehículos en la hora y
+1200~veh/h en el sentido punta de la avenida.
+% fuente: LEEME.txt (corredor_alta: menor f de {1.3, 1.5, 2.0} con cola por carril >= 34 de 38 plazas en al menos 2
+% de 3 semillas; 1.3: 0/3; 1.5: 1/3; 2.0: 3/3); plan2/corredor_alta.rou.xml (1200 veh/h en p1_W_E)
+
+\noindent\textbf{Red con rotonda (P4).} Los candidatos fueron 1.5, 2.0,
+2.5 y 3.0, con una condición más: no dejar más del 10\,\% de los
+vehículos sin terminar. El criterio daba $f = 2.5$. No se usa, porque
+la rotonda, que no tiene semáforo, se satura mucho antes que los cruces
+(Tabla~\ref{tab:red-alta-factor}). Sus dos ramales de un carril ceden
+el paso a un anillo cada vez más cargado y se llenan desde $f = 1.3$.
+Desde ahí, cada vehículo de esos ramales pierde entre 400 y 700~s que
+ningún semáforo puede evitar, y ese retraso domina la media de la red.
+Por eso se aplicó una regla propia: la rotonda se considera saturada
+cuando la cola de un ramal llega al 90\,\% de sus plazas (32 de 36), y
+se toma el mayor $f$ que no la satura. Con 1.2 ninguna semilla llega a
+ese umbral; con 1.3 llegan dos de tres. Queda $f = 1.2$: 2580 vehículos
+en la hora. Con ese factor P4 no es un caso de \textit{spillback}: la
+cola de los enlaces entre cruces es de 5 vehículos por carril.
+
+\begin{table}[H]
+\setstretch{1}
+\centering
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{ccccc}
+\toprule
+$f$ & \makecell{Cola máx. en\\enlaces (veh)} & \makecell{Cola máx. en\\ramales (veh)} & \makecell{Semillas con\\ramal saturado} & \makecell{Retraso\\(s/veh)} \\
+\midrule
+1.0 & 4 / 4 / 4    & 3 / 3 / 4    & 0 de 3 & 21.6 / 21.0 / 21.7    \\
+1.1 & 4 / 5 / 5    & 7 / 6 / 9    & 0 de 3 & 23.1 / 22.6 / 23.6    \\
+1.2 & 5 / 5 / 5    & 11 / 17 / 27 & 0 de 3 & 27.0 / 28.4 / 33.2    \\
+1.3 & 6 / 6 / 5    & 27 / 32 / 36 & 2 de 3 & 36.4 / 36.4 / 40.2    \\
+1.4 & 6 / 6 / 6    & 36 / 36 / 36 & 3 de 3 & 53.2 / 52.9 / 52.9    \\
+1.5 & 8 / 6 / 6    & 36 / 36 / 36 & 3 de 3 & 56.5 / 56.4 / 57.8    \\
+2.0 & 12 / 14 / 15 & 36 / 36 / 36 & 3 de 3 & 74.2 / 77.7 / 78.6    \\
+2.5 & 37 / 36 / 37 & 36 / 36 / 36 & 3 de 3 & 103.6 / 100.1 / 106.0 \\
+3.0 & 38 / 38 / 38 & 36 / 36 / 36 & 3 de 3 & 126.7 / 129.0 / 134.1 \\
+\bottomrule
+\end{tabular}
+\caption[Calibración de la demanda alta de la red con rotonda (P4)]{Calibración del factor de
+demanda de la red con rotonda (P4), con el control actuado. Cada terna da el valor en las semillas
+2001, 2002 y 2003. Enlaces: máximo por carril de la cola detenida en los enlaces entre semáforos
+(38 plazas; umbral 34). Ramales: lo mismo en los dos ramales de un carril de la rotonda (36
+plazas); un ramal está saturado con 32 vehículos o más. Ningún vehículo quedó sin terminar con
+ningún factor. Se elige $f = 1.2$.}
+\label{tab:red-alta-factor}
+\end{table}
+% fuente: cabecera de plan2/red_alta.rou.xml (candidatos {1.5, 2.0, 2.5, 3.0}, sin mas del 10 % de vehiculos sin
+% terminar; resultado por factor, semillas 2001/2002/2003; enlace = cola_max_enlace de MedidorEnlaces; ramal = cola
+% maxima por carril en NR_RN o SR_RS; timeLoss en s/veh; sin terminar = 0 en todos; "con f >= 1.3 los vehiculos de
+% los ramales pierden 400-700 s cada uno"). La columna "espera max. para entrar" de esa cabecera no se imprime: trae
+% un solo valor por factor y ningun programa la calcula
+
+\noindent\textbf{Malla (P6).} Los candidatos y la condición fueron los
+de P4 (Tabla~\ref{tab:malla3-alta-factor}). Con 1.5 ninguna semilla llega al
+umbral; con 2.0 la cola llena los enlaces en las tres. Queda $f = 2$:
+8700 vehículos en la hora. Desde ese factor una parte grande del
+retraso es espera para entrar a la red, que el \texttt{timeLoss} no
+cuenta: con $f = 2$ la espera media llega a 46.2~s, y el retraso total
+queda entre 108.2 y 115.9~s/veh, frente a un \texttt{timeLoss} de 62.5
+a 69.7~s/veh.
+
+\begin{table}[H]
+\setstretch{1}
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{cccccc}
+\toprule
+$f$ & \makecell{Cola máx. en\\enlaces (veh)} & \makecell{Semillas con\\\textit{spillback}} & \makecell{\texttt{timeLoss}\\(s/veh)} & \makecell{Retraso total\\(s/veh)} & \makecell{Espera para\\entrar (s)} \\
+\midrule
+1.5 & 7 / 6 / 6    & 0 de 3 & 30.0 / 29.9 / 29.8    & 30.7 / 30.6 / 30.5    & 0.7 \\
+2.0 & 37 / 37 / 37 & 3 de 3 & 69.7 / 69.0 / 62.5    & 115.9 / 114.5 / 108.2 & 46.2 \\
+2.5 & 37 / 37 / 38 & 3 de 3 & 100.6 / 94.7 / 136.0  & 304.8 / 300.8 / 355.9 & 219.8 \\
+3.0 & 38 / 38 / 38 & 3 de 3 & 149.3 / 174.2 / 174.8 & 583.0 / 632.3 / 656.2 & 460.8 \\
+\bottomrule
+\end{tabular}
+\caption[Calibración de la demanda alta de la malla (P6)]{Calibración del factor de demanda de la
+malla (P6), con el control actuado. Cada terna da el valor en las semillas 2001, 2002 y 2003.
+Enlaces: máximo por carril de la cola detenida en los enlaces entre semáforos (37 plazas; umbral
+33). \texttt{timeLoss}: retraso dentro de la red. Retraso total: \texttt{timeLoss} más la espera
+para entrar a la red (Ecuación~\ref{eq:retraso-total}). Espera para entrar: la mayor de las tres
+medias por vehículo. Los vehículos sin terminar no pasan del 0.3\,\% con ningún factor. Se elige
+$f = 2$.}
+\label{tab:malla3-alta-factor}
+\end{table}
+% fuente: cabecera de plan2/malla3_alta.rou.xml, escrita por calibrar_demanda.py (columnas: spill = semillas con
+% spillback_eventos > 0, cola = cola_max_enlace, sin term. = max(no_terminados / vehiculos): 0.0, 0.0, 0.0 y
+% 0.3 %, timeLoss = timeloss_prom, total = retraso_total_prom, espera para entrar = max(retraso_insercion_prom));
+% 8700 veh/h = suma de vehsPerHour de malla3_alta.rou.xml; umbral 33 = int(0.9 x 37), comun.umbral_carril
+
+\refstepcounter{anexoIapartado}
+\subsection*{\theanexoIapartado. Lo que enseñó la prueba de humo}
+\phantomsection
+\label{sec:humo}
+
+Una prueba de humo es una corrida corta en un cruce aislado, que no es
+un caso del plan, para fijar o comprobar los hiperparámetros de un
+aprendiz antes de entrenarlo en los casos. A IPPO sin mensajes se le
+exigió bajar del fijo de ese cruce, 23.2~s/veh, en 60 episodios. La
+primera versión usaba la recompensa de colas
+(Ecuación~\ref{eq:recompensa}) y los hiperparámetros habituales de PPO.
+Falló tres veces, y cada fallo cambió una decisión de diseño:
+
+\begin{enumerate}
+  \item \textbf{Recorte de gradiente por red.} La política colapsó a
+    cambiar de fase en cuanto lo permitía el verde mínimo, con 131~s de
+    retraso. El gradiente del crítico era del orden de cien veces el
+    del actor, y el recorte conjunto dejaba al actor casi sin paso. Las
+    dos redes se recortan ahora por separado.
+  \item \textbf{Retraso en lugar de cola detenida.} La política siguió
+    derivando hacia cambiar. Cuando el verde cambia muy seguido, las
+    colas avanzan a paso lento y SUMO deja de contarlas como detenidas:
+    con esa política el retraso por vehículo era 9.6 veces la cola
+    detenida media, frente a 4.4 veces con el fijo. Con la recompensa
+    de retraso (Ecuación~\ref{eq:recompensa-u4}) la deriva desapareció.
+  \item \textbf{Más pasos de optimización por episodio.} La política
+    dejó de empeorar, pero no salió de un programa de verdes largos
+    (36.4~s/veh): con 24 pasos de gradiente por episodio casi no
+    cambiaba. Con una tasa de aprendizaje de $10^{-3}$, minilotes de 64
+    y 10 épocas, unos 100 pasos por episodio, termina en 14.8~s/veh.
+\end{enumerate}
+% fuente: LEEME.txt, "Prueba de humo" (131 s; gradiente del critico ~130 veces el del actor, ~100 en el comentario
+% de rl_ippo.actualizar; 9.6 y 4.4; 36.4 s; 14.8 s en 60 episodios) y registros de la carpeta humo/ del proyecto
+% (humo1_s42_recorte_global.csv, humo2y3_s42_recorte_por_red_y_recompensa_acumulada.csv,
+% humo4_s42_retraso_hiper_prerregistrados.csv y humo5_s43_lr1e-3_mb64_ep10.csv: 24 = 3 minilotes x 8 epocas)
+
+Con los tres ajustes, la política congelada da $15.05 \pm 0.21$~s/veh
+en diez semillas de evaluación: un 35\,\% menos que el fijo, al nivel
+del actuado (15.46~s/veh). Es un cruce aislado y un solo
+entrenamiento: la cifra no se compara con las de P1 a P6. Double DQN y
+MAPPO pasaron su prueba de humo al primer intento, sin cambiar ningún
+hiperparámetro. La fase exploratoria, de la que sale esta prueba, se
+resume en el Anexo~C.
+% fuente: evaluacion_cruce_resumen.csv (ippo_local 15.05, actuado 15.46, fijo 23.19; semillas 1001 a 1010);
+% humo/dqn_humo_cruce.csv y docstring de rl_mappo.py (pruebas de humo de Double DQN y MAPPO)
+
+\refstepcounter{anexoIapartado}
+\subsection*{\theanexoIapartado. El término de \textit{spillback} que no se activa}
+\phantomsection
+\label{sec:spill-vecinos}
+
+El término de \textit{spillback} de la
+Ecuación~\ref{eq:recompensa-u4} solo actúa cuando la cola detenida de
+un enlace de salida pasa de la mitad de sus plazas: 19 de 38, o 18 de
+37 en la malla. En la red con rotonda, con sus dos demandas, y en la
+malla con demanda nominal (P3, P4 y P5) eso nunca ocurre: en los
+entrenamientos de IPPO con mensajes, la cola máxima por carril de los
+enlaces llega a 9, 12 y 8 vehículos.
+
+Con el término siempre en cero, IPPO con penalización de
+\textit{spillback} recibe la misma recompensa que IPPO con mensajes,
+parte de los mismos pesos y consume la misma secuencia aleatoria: su
+política es idéntica bit a bit. Por eso en esos tres casos no es un
+modelo propio, y las tablas lo reportan como igual a IPPO con mensajes.
+La igualdad se comprobó además con sus nueve entrenamientos: cada
+episodio coincide con el de IPPO con mensajes, el término no se activa
+ninguna vez y la evaluación coincide semilla a semilla en todas las
+métricas.
+% fuente: plan2/resultados_<esc>_ippo_<var>_s<base>.csv (cola_max_enlace: maximo de los tres entrenamientos 9 en
+% red, 12 en red_alta y 8 en malla3; spill_activaciones = 0; comparacion fila a fila de spill con vecinos en las
+% nueve corridas completas: 0 filas distintas); plan2/evaluacion_<esc>.csv (ippo_spill_s<b> frente a
+% ippo_vecinos_s<b>, 30 semillas: 0 celdas distintas en las 30 columnas de metricas); veredicto.spill_inactivo
+% (umbral = min(plazas) // 2)
+
+En el corredor, con sus dos demandas, y en la malla con demanda alta
+(P1, P2 y P6) el término sí se activa, y la variante se entrena y se
+evalúa como un modelo propio.
+% fuente: spill_activaciones de plan2/resultados_corredor_ippo_spill_s<b>.csv y de corredor_alta (hasta 44 y 282
+% decisiones por episodio); plan2/resultados_malla3_alta_ippo_vecinos_s<b>.csv (cola_max_enlace > 18 en 109, 169 y
+% 120 de 200 episodios); veredicto.spill_inactivo(plan2, "malla3_alta") = False
+
+\refstepcounter{anexoIapartado}
+\subsection*{\theanexoIapartado. La medición más estricta en la implementación}
+\phantomsection
+\label{sec:remedicion}
+
+La medición más estricta (Sección~\ref{sec:diseno-robustez}) cambia la
+métrica y la referencia sin reentrenar ningún modelo. En la
+implementación son tres piezas:
+
+\begin{itemize}
+  \item \textbf{El retraso total.} Se calcula con la salida por
+    vehículo de SUMO y con su resumen de estadísticas, que da los
+    vehículos que no llegaron a entrar (Sección~\ref{sec:bucle}). El
+    cálculo se agregó después del primer estudio y no toca ninguna
+    métrica que ya se medía.
+  \item \textbf{El fijo ajustado desde 10~s.} El barrido se repite con
+    los dos verdes desde el mínimo de 10~s y con el retraso total como
+    criterio (Tabla~\ref{tab:robustez-fijo}).
+  \item \textbf{La evaluación.} Con las semillas 1001 a 1030 se evalúan
+    ese fijo, el actuado, el ciclo mínimo y todas las políticas ya
+    entrenadas. En P1 a P5 son 5 barridos y 132 evaluaciones, que suman
+    16.4~horas.
+\end{itemize}
+
+Lo que ya se había medido se reprodujo dígito a dígito: 117 archivos de
+evaluación, sin ninguna celda distinta. El fijo de cada caso y los
+resultados están en el Anexo~F y en la Sección~\ref{sec:robustez}.
+% fuente: comun.leer_tripinfo y comun.args_estadisticas (retraso_total_prom, retraso_insercion_prom y
+% no_insertados); plan2/cola/estado.json (137 trabajos de la medicion mas estricta, 59 086 s: 5 barridos y 132
+% evaluaciones); comparacion de cada plan2/parciales/eval_<esc>_<brazo>.csv re-evaluado con su version anterior,
+% revisada el 27.09.2026 (117 archivos con 0 celdas distintas en las columnas comunes: 110 politicas, 5 actuados
+% y el fijo de P1 y P2)
+
+\refstepcounter{anexoIapartado}
+\subsection*{\theanexoIapartado. P6 y el barrido de demanda}
+\phantomsection
+\label{sec:p6-demanda}
+
+\noindent\textbf{P6.} La malla con demanda alta se agregó después de P1
+a P5, con el mismo protocolo. En el barrido del fijo, el ganador quedó
+en el borde inferior de la rejilla, con 15~s de verde en la avenida. Se
+agregó el verde de 10~s y el ganador no cambió: 15~s de avenida y 10~s
+de transversal, sin desfases. Ese programa es también el de menor
+retraso total, así que en P6 el fijo ajustado y el fijo ajustado desde
+10~s son el mismo. Desde ese barrido, cada corrida se corta a los
+6000~s simulados: con el teletransporte desactivado, una configuración
+que traba la red no termina nunca. El caso suma 79.7~horas de proceso,
+de las que 70.9 son de sus 21 entrenamientos.
+% fuente: plan2/cola/logs/barrido_malla3_alta.log (aviso de borde en la avenida de 15 s y extension a 10 s);
+% plan2/barrido_malla3_alta.csv (72 filas; la fila de menor timeloss_prom, 36.91, es la de menor
+% retraso_total_prom, 82.63: 15/10 sin desfases); barrer_fijo.FIN_SIM = 6000 y su comentario; plan2/cola/estado.json
+% (47 trabajos de malla3_alta, 286 752 s; 21 entrenamientos, 255 136 s)
+
+\noindent\textbf{Barrido de demanda en el corredor.} Este análisis
+(Sección~\ref{sec:analisis-complementarios}) usa escenarios derivados
+de P1: su demanda multiplicada por un factor de 0.5 a 2.25, en pasos de
+0.25, y un perfil que cambia cada 10 minutos. En cada nivel se vuelve a
+barrer el fijo con la regla de la medición más estricta. Después se
+evalúan, sin reentrenar, ese fijo, el fijo de P1, el actuado y las
+versiones evaluadas de IPPO con mensajes de P1 y de P2. Son 9 barridos
+y 45 evaluaciones, que suman 7.0~horas. Con los factores 1 y 2 se
+comprueba que cada control reproduce, semilla a semilla, el retraso
+medido en P1 y en P2. Los resultados están en el Anexo~F
+(Tabla~\ref{tab:plan2-demanda} y Figura~\ref{fig:plan2-demanda}).
+% fuente: barrido_demanda.py (docstring, niveles, PERFIL 1.0, 1.5, 2.0, 2.0, 1.5 y 1.0 en bloques de 600 s,
+% preparar y comprobar: fijo, actuado e IPPO con mensajes de cada caso); escenarios_plan2.py (FACTORES_DEMANDA y
+% DERIVADOS); generar_trabajos.agregar_demanda (barrido con 2001-2003, por retraso total y rejilla desde 10 s;
+% evaluacion con 1001-1030); plan2/cola/estado.json (55 trabajos del barrido de demanda, 25 243 s: 9 barridos y 45
+% evaluaciones)

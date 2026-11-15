@@ -1,0 +1,271 @@
+% BORRADOR (13.11.2026) del Anexo D nuevo. Se pasa a TESIS/secciones/anexo_d_osm.tex cuando el caso Lima tenga
+% resultados, junto con la seccion del Cap. V que lo cita. Las tablas lima_*.tex y la figura fig_lima_nudo.png las
+% escriben lima/tablas_lima.py y lima/dibujar_red.py --tesis. Falta el numero de "Comprobacion" (PENDIENTE).
+\section*{Anexo D. Caso Lima: el nudo de Reducto con 28 de Julio}
+\phantomsection
+\addcontentsline{toc}{subsection}{Anexo D. Caso Lima: el nudo de Reducto con 28 de Julio}
+\setcounter{figure}{0}
+\renewcommand{\thefigure}{D.\arabic{figure}}
+\renewcommand{\theHfigure}{D.\arabic{figure}}
+\setcounter{table}{0}
+\renewcommand{\thetable}{D.\arabic{table}}
+\renewcommand{\theHtable}{D.\arabic{table}}
+
+Este anexo cuenta cómo se construyó el escenario del caso Lima
+(Sección~\ref{sec:caso-lima}): el nudo donde se cruzan la Av.~Reducto,
+la Av.~28 de Julio y la Av.~Vasco Núñez de Balboa, en Miraflores. La
+forma del nudo sale de OpenStreetMap (OSM); los carriles, los giros y el
+semáforo, de la observación en el sitio; la demanda, de un total
+publicado. Al final están las simplificaciones y la tabla completa de
+resultados.
+
+\subsection*{El lugar}
+
+El nudo está junto al puente de la Av.~28 de Julio sobre la Vía Expresa
+(12°07'45''~S, 77°01'25''~O). Tiene cuatro entradas y cuatro salidas.
+Cada entrada tiene sus luces, y los giros a la izquierda de Reducto, las
+suyas; todas siguen un mismo programa, así que el nudo es un solo cruce
+con un solo controlador:
+\begin{itemize}
+  \item \textbf{Av.~Reducto.} Dos calzadas, una hacia el sur y otra
+    hacia el norte. La que viene del norte llega con cuatro carriles: el
+    izquierdo es solo para girar a la izquierda, hacia el puente. La que
+    viene del sur es de tres carriles y, antes del cruce, se ensancha
+    con dos carriles más, solo para girar a la izquierda, hacia la
+    Av.~Larco.
+  \item \textbf{Av.~28 de Julio.} Llega desde el puente con tres
+    carriles, cruza toda la Av.~Reducto y sigue, en un solo sentido y
+    con dos carriles, hacia la Av.~Larco.
+  \item \textbf{Av.~Vasco Núñez de Balboa.} Entra al nudo en un solo
+    sentido, con tres carriles.
+\end{itemize}
+% fuente: descripcion de campo de Fabian Alvarado (lima.pdf y mensajes del 13.11.2026); coordenadas: las del punto
+% que dio el autor (-12.129167, -77.023778)
+
+\subsection*{Importación desde OpenStreetMap}
+
+La cartografía se descargó de OSM en un recorte de unos 870 por 780~m
+alrededor del nudo y se convirtió a una red de SUMO con
+\texttt{netconvert}. Una importación anterior de la misma zona, hecha
+con el asistente \texttt{osmWebWizard}, se muestra en la
+Figura~\ref{fig:osm-lima-cruda}.
+
+\begin{figure}[!tbp]
+  \centering
+  \includegraphics[width=\textwidth]{NETEDIT.PNG}
+  \caption[Importación cruda de la zona del nudo]{Importación cruda de la zona del puente de la Av.\ 28 de Julio (Lima), generada con \texttt{osmWebWizard} y abierta en \texttt{netedit}, sin limpiar. No se usa tal cual en el caso.}
+  \label{fig:osm-lima-cruda}
+\end{figure}
+
+La importación automática no se puede usar tal cual, por tres razones:
+\begin{itemize}
+  \item \textbf{El nudo queda partido.} En OSM son nueve nodos, uno por
+    cada cruce entre calzadas. \texttt{netconvert} no los une por sí
+    solo y no les pone semáforo.
+  \item \textbf{Los carriles no coinciden.} OSM da tres carriles a la
+    Av.~Reducto desde el norte y dos desde el sur; en el sitio son
+    cuatro y cinco.
+  \item \textbf{Faltan los giros y el semáforo.} OSM no dice qué
+    carriles son solo de giro ni qué estados tiene el semáforo.
+\end{itemize}
+% fuente: demo_rl/lima/bajar_osm.py (caja -77.0278, -12.1327, -77.0198, -12.1257), borrador/union.nod.xml (los nueve
+% nodos unidos) y la salida de netconvert ("Not joining junctions ... (6 incoming edges)"); carriles de OSM:
+% aristas 653645242#0 (3) y 653650083 (2) de borrador/lima_reducto.net.xml
+
+\subsection*{La red del caso}
+
+De OSM se tomó solo la geometría: la posición del nudo y el trazado de
+cada calle. Los carriles y los movimientos permitidos son los observados
+(Tabla~\ref{tab:lima-entradas}). La Figura~\ref{fig:lima-nudo} muestra
+la red y a dónde puede ir cada entrada: son 12 movimientos.
+
+\begin{table}[!tbp]
+\setstretch{1}
+\centering
+\footnotesize
+\begin{tabular}{>{\raggedright\arraybackslash}p{4.2cm}c>{\raggedright\arraybackslash}p{8.2cm}}
+\toprule
+Entrada & Carriles & A dónde puede ir \\
+\midrule
+Reducto, desde el norte & 4 & De frente, hacia Reducto sur (tres carriles; el derecho también gira hacia Larco). El carril izquierdo solo gira hacia el puente. \\
+Reducto, desde el sur & 5 & De frente, hacia Reducto norte (dos carriles). El carril derecho solo gira hacia el puente y los dos izquierdos solo giran hacia Larco. \\
+28 de Julio, desde el puente & 3 & De frente, hacia Larco (dos carriles; el derecho también gira hacia Reducto norte). El carril izquierdo solo gira hacia Reducto sur. \\
+Balboa & 3 & De frente, hacia el puente (los tres carriles). El derecho también gira hacia Reducto sur y el izquierdo también sube hacia Reducto norte. \\
+\bottomrule
+\end{tabular}
+\caption[Caso Lima: entradas del nudo]{Caso Lima: entradas del nudo, carriles en la línea de parada y movimientos permitidos. Las salidas tienen dos carriles hacia Larco, dos hacia Reducto norte, tres hacia Reducto sur y tres hacia el puente.}
+\label{tab:lima-entradas}
+\end{table}
+% fuente: demo_rl/lima/armar_red.py (ARISTAS y MOVIMIENTOS): carriles y giros de la descripcion de campo de Fabian
+% Alvarado (lima.pdf y mensajes del 13.11.2026); carriles de la salida hacia Reducto sur, de OSM
+
+\begin{figure}[!tbp]
+  \centering
+  \includegraphics[width=0.82\textwidth]{fig_lima_nudo.png}
+  \caption[Caso Lima: el nudo en la red de SUMO]{Caso Lima: el nudo en la red de SUMO, con el norte arriba. Cada línea gris es un carril; las líneas de color unen cada entrada con las salidas a las que puede ir.}
+  \label{fig:lima-nudo}
+\end{figure}
+% fuente: demo_rl/lima/dibujar_red.py --tesis, que lee lima.net.xml
+
+La red tiene tres simplificaciones:
+\begin{itemize}
+  \item \textbf{Entradas de 1~km.} Cada entrada conserva el trazado real
+    de sus últimos 300~m y sigue en recta hasta completar 1~km. Así la
+    cola cabe dentro de la red: se mide entera y el modelo la ve. En una
+    prueba previa con entradas de 300~m, la cola quedaba fuera de la red
+    y el modelo dejaba sin servir uno de los estados del semáforo.
+  \item \textbf{Carriles de giro completos.} Los dos carriles de giro a
+    la izquierda desde el sur, que en el sitio son un ensanche corto,
+    aquí tienen el largo de la entrada.
+  \item \textbf{Sin cruces dentro del nudo.} Un vehículo que pasa la
+    línea de parada aparece en su carril de salida: no se simula su
+    trayectoria dentro del nudo. La razón está en el apartado del
+    semáforo.
+\end{itemize}
+% fuente: demo_rl/lima/armar_red.py (LARGO_ENTRADA = 1000, TRAZADO_ENTRADA = 300 y la opcion --no-internal-links de
+% netconvert); prueba previa: demo_rl/lima/piloto/ (entrenamientos ens2l y lg2, base 7, datos provisionales: con
+% 300 m la politica daba siempre el minimo al estado de giros y quedaban 127 s/veh de espera para entrar)
+
+\subsection*{El semáforo}
+
+El plan que opera hoy se midió en el sitio el viernes 13 de noviembre de
+2026, en la hora punta de la tarde. El ciclo dura 132~s y tiene tres
+estados con verde y un tramo con todo en rojo
+(Tabla~\ref{tab:lima-semaforo}):
+\begin{itemize}
+  \item \textbf{Reducto de frente}, en los dos sentidos a la vez: 40~s.
+  \item \textbf{Giros a la izquierda de Reducto}, también los dos a la
+    vez: 18~s. Se prenden cuando el estado anterior pasa a rojo.
+  \item \textbf{Todo en rojo}: 34~s.
+  \item \textbf{28 de Julio y Balboa}, a la vez: 40~s.
+\end{itemize}
+
+\begin{table}[!tbp]
+\setstretch{1}
+\centering
+\footnotesize
+\input{secciones/tablas/lima_semaforo}
+\caption[Caso Lima: estados del semáforo]{Caso Lima: estados del semáforo del nudo, en su orden, con el verde del plan actual, el del fijo ajustado al segundo y el verde mínimo que puede dar cualquier control. Tras cada verde hay 3~s de ámbar y, tras los giros a la izquierda, 34~s con todo en rojo; esos tiempos son iguales en todos los controles.}
+\label{tab:lima-semaforo}
+\end{table}
+% fuente: secciones/tablas/lima_semaforo.tex (lima/tablas_lima.py): lima/programa.py (PLAN, TRANSICION y ROJO_TOTAL)
+% y lima/salidas/fijo_ajustado.json; medicion de Fabian Alvarado del 13.11.2026
+
+Al cargar el plan se tomaron cuatro decisiones:
+\begin{itemize}
+  \item \textbf{Ámbar.} En el sitio no se registró ámbar. El simulador
+    lo necesita para que los vehículos frenen, así que los últimos 3~s
+    de cada verde medido son ámbar y el ciclo sigue en 132~s.
+  \item \textbf{Dos segundos de diferencia.} Reducto de norte a sur y
+    28 de Julio tienen 38~s de verde en el sitio; aquí van con los 40~s
+    del movimiento con el que comparten estado.
+  \item \textbf{Todo en rojo.} Los 34~s se conservan iguales en todos
+    los controles. No se simulan peatones, pero si un control pudiera
+    quitar ese tiempo, ganaría solo por eso.
+  \item \textbf{Movimientos que se cruzan.} 28 de Julio y Balboa tienen
+    verde a la vez, aunque algunos de sus movimientos se cruzan. Con las
+    reglas de ceder el paso de SUMO, esos movimientos quedaban detenidos
+    más de 15~minutos y un vehículo dentro del nudo bloqueaba a Reducto
+    durante todo un verde, lo que no se observa en el sitio. Por eso no
+    se simulan los cruces dentro del nudo, y el giro de Balboa hacia
+    Larco, que entra al mismo carril que 28 de Julio, queda fuera del
+    modelo.
+\end{itemize}
+% fuente: lima/programa.py (cabecera) y lima/REGISTRO.md; pruebas con el plan actual y las semillas 424301-424303
+% antes de ajustar referencias o entrenar: con tramos internos, Balboa hacia Larco 1417 s/veh, Balboa hacia Reducto
+% norte 1147 y 28 de Julio hacia Reducto sur 863; sin tramos internos y sin el giro hacia Larco, todos los
+% movimientos entre 48 y 136 s/veh
+
+\subsection*{La demanda}
+
+No hay un conteo por movimiento. El dato publicado es el total del
+cruce en la hora punta de la tarde, 4271~veh/h, con nivel de servicio E
+y el nivel de saturación más alto de la escala del plan, que
+corresponde a más de un 20\,\% por encima de la capacidad
+\citep{Miraflores2017_PMU}. Ese total se repartió así:
+\begin{itemize}
+  \item \textbf{Entre grupos de movimientos}, en proporción a los
+    carriles y al verde que el plan actual le da a cada uno. Es el
+    supuesto más favorable para el plan actual: con él, todos los
+    grupos quedan igual de cargados.
+  \item \textbf{Dentro de cada grupo}, con lo que se estimó en el sitio
+    (de cada diez vehículos de Balboa, uno sube hacia Reducto norte; de
+    cada diez que vienen del puente, dos giran hacia Reducto sur) y, el
+    resto, con supuestos.
+\end{itemize}
+La Tabla~\ref{tab:lima-demanda} da el resultado. Los vehículos llegan al
+azar, con la misma demanda media durante toda la hora, y son una mezcla
+como la de Lima (autos, motos, combis, microbuses y buses), la misma del
+segundo estudio.
+
+\begin{table}[!tbp]
+\setstretch{1}
+\centering
+\footnotesize
+\input{secciones/tablas/lima_demanda}
+\caption[Caso Lima: demanda por entrada y destino]{Caso Lima: demanda supuesta en la hora punta de la tarde (veh/h), por entrada y destino. El total es el publicado; el reparto es un supuesto.}
+\label{tab:lima-demanda}
+\end{table}
+% fuente: secciones/tablas/lima_demanda.tex (lima/tablas_lima.py), que lee lima/demanda.py (TOTAL_PUBLICADO, GRUPOS y
+% DESTINOS); total: Plan de Movilidad Urbana de Miraflores 2017-2020, pag. 30 (cuadro de intersecciones criticas:
+% "28 de Julio / Reducto 4,271", nivel de servicio E, nivel de saturacion H; "nivel de saturacion H" = "mas de 20%
+% por encima de su capacidad") y pag. 31 (periodo PM; fuente P.U.D. Miraflores); estimaciones en el sitio: Fabian
+% Alvarado, 13.11.2026
+
+\subsection*{Comprobación}
+
+% PENDIENTE: retraso del plan actual en la evaluacion (lima/salidas/eval_t1_actual.csv y eval_t2_actual.csv)
+Con esa demanda, el plan actual da en la simulación un retraso total de
+unos PENDIENTE~s por vehículo. Corresponde al nivel de servicio E (de 55
+a 80~s por vehículo), que es el publicado para el cruce. No es una
+calibración: no hay tiempos de viaje medidos con que comparar.
+
+\subsection*{Lo que el escenario no reproduce}
+
+\begin{itemize}
+  \item \textbf{El bloqueo desde el puente.} En el sitio, la cola de
+    los vehículos que entran hacia el puente llega a veces hasta el nudo
+    y no deja avanzar a los que suben por Reducto. Los dos semáforos del
+    puente, a unos 80 y 145~m, no están en la red.
+  \item \textbf{Los cruces dentro del nudo}, como se explicó arriba.
+  \item \textbf{Los peatones.}
+  \item \textbf{La variación de la demanda} dentro de la hora y de un
+    día a otro.
+\end{itemize}
+Por eso el retraso simulado es una referencia para comparar controles
+entre sí, y no una predicción del retraso real del nudo.
+% fuente: observacion de campo de Fabian Alvarado (13.11.2026) y lima/REGISTRO.md, "Limites conocidos de antemano";
+% distancias a los semaforos del puente: centros de los cruces en borrador/lima_reducto.net.xml
+
+\subsection*{Resultados completos}
+
+La Tabla~\ref{tab:lima-completa} da el retraso de todos los controles y
+el cambio del modelo frente a cada uno, con su intervalo de confianza.
+
+\begin{table}[!tbp]
+\setstretch{1}
+\centering
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\input{secciones/tablas/lima_completa}
+\caption[Caso Lima: todos los controles]{Caso Lima: retraso total por vehículo de cada control en las dos tandas de evaluación, de 100 semillas cada una, y cambio del modelo completo frente a cada control (\%), con su IC95 y el valor $p$ de la prueba de Wilcoxon pareada. Un cambio negativo es menos retraso con el modelo.}
+\label{tab:lima-completa}
+\end{table}
+% fuente: secciones/tablas/lima_completa.tex (lima/tablas_lima.py), que lee lima/salidas/eval_t1_*.csv y eval_t2_*.csv
+% y los de lima/alta/salidas/
+
+El modelo se entrenó tres veces con cada demanda. La
+Tabla~\ref{tab:lima-entrenamientos} da los tres: se cita el de
+validación mediana.
+
+\begin{table}[!tbp]
+\setstretch{1}
+\centering
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\input{secciones/tablas/lima_entrenamientos}
+\caption[Caso Lima: los tres entrenamientos del modelo]{Caso Lima: los tres entrenamientos del modelo completo con cada nivel de demanda. La versión evaluada de cada uno es la de menor retraso total en las ocho semillas de validación; el entrenamiento citado es el de validación mediana entre los tres.}
+\label{tab:lima-entrenamientos}
+\end{table}
+% fuente: secciones/tablas/lima_entrenamientos.tex (lima/tablas_lima.py): politica_lima_vecinos_completo_s<base>.json
+% (ep_elegido y val_elegido) y salidas/eval_t*_completo_s<base>.csv de cada nivel

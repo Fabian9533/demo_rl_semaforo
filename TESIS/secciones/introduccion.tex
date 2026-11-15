@@ -1,23 +1,18 @@
 \customchapter{INTRODUCCIÓN}
+% Reduccion del 09.11.2026 (notas/plan_reduccion_2026-11-09.md): la introduccion pasa de 10 a 6 paginas. No cambian el
+% problema, las metas ni los objetivos (zonas protegidas: texto literal). Sale el estado de avance por unidad, se
+% presentan los dos estudios y las llegadas aleatorias dejan de estar en "No incluido", porque las mide el segundo
+% estudio (plan3/, cierre fc74335).
 
 \introsection{Presentación del tema de investigación}
 
-La congestión vehicular en Lima Metropolitana afecta de manera crítica la movilidad urbana, el tiempo de viaje y la calidad del aire.
-% TODO(reestructura): la afirmación sobre la congestión en Lima no tiene cita; falta una fuente (estudio o informe de movilidad de Lima Metropolitana) que la respalde.
-Este trabajo propone \textbf{optimizar el control semafórico} de una intersección, un corredor o una red pequeña de alto tráfico mediante \textbf{Aprendizaje por Refuerzo (RL)} y validación en el simulador \textbf{SUMO}, con un agente por intersección y una evaluación rigurosa frente a los esquemas tradicionales de tiempo fijo y actuado. El estudio se centra en el desarrollo de un \textit{pipeline} reproducible de datos \textrightarrow\ preprocesamiento \textrightarrow\ SUMO \textrightarrow\ RL \textrightarrow\ evaluación. Los conceptos de control semafórico y de aprendizaje por refuerzo que se mencionan en esta introducción se definen en el Capítulo~\ref{cap:teoria}.
+La congestión vehicular en Lima Metropolitana afecta de manera crítica la movilidad urbana, el tiempo de viaje y la calidad del aire. Este trabajo estudia si el \textbf{control semafórico} de un corredor o de una red pequeña mejora cuando cada semáforo aprende con \textbf{Aprendizaje por Refuerzo (RL)} y recibe información de sus semáforos vecinos, y lo valida en el simulador \textbf{SUMO} frente a los esquemas tradicionales de tiempo fijo y actuado. Los conceptos de control semafórico y de aprendizaje por refuerzo que se mencionan en esta introducción se definen en el Capítulo~\ref{cap:teoria}.
 
-El trabajo tuvo dos etapas. En una fase exploratoria se construyeron los primeros escenarios sintéticos y se probaron Q-learning tabular e IPPO (\textit{Independent Proximal Policy Optimization}: un agente PPO en cada semáforo, todos con la misma red neuronal) con protocolos que cambiaban según el modelo, de modo que sus casos no eran comparables entre sí; sus resultados se resumen en el Anexo~C. La etapa que reporta este documento corrige esas diferencias con un plan de pruebas de siete casos sintéticos, de los que ejecuta los seis primeros (P1 a P6: un corredor, una red con rotonda y una malla de nueve cruces, cada uno con una demanda nominal y una alta). En ellos todos los modelos se entrenan y evalúan con el mismo método, con control por agente aislado y con coordinación entre semáforos vecinos. La transferencia a un cruce real de Lima queda como trabajo siguiente.
-% fuente: Tabla tab:plan2-casos (P1 a P6, factores 2.0, 1.2 y 2.0 en P2, P4 y P6); P6: plan2/veredicto.csv
-% y plan2/evaluacion_malla3_alta_resumen_fijo_2509.csv (28.09.2026: fijo de malla3_alta barrido con la regla
-% del 25.09 y evaluado con 1001-1030 junto con las tres bases de cada modelo). Verificacion de la fase 2
-% (23.10.2026; ajuste A8): primera mencion de IPPO en el cuerpo, con su definicion (antes "PPO independiente por
-% semaforo"); un solo actor y un solo critico para todos los semaforos: docstring de rl_ippo.py desde el 06.09
-% (commit 6e31e26) y capitulo2.tex, sec:marl. El resumen (zona protegida) no se toco
+La evidencia se reúne en dos estudios sobre los mismos seis casos: un corredor, una red con rotonda y una malla de nueve cruces, cada uno con demanda nominal y alta. El primero, el plan de pruebas, compara los modelos con vehículos que llegan a intervalos regulares. El segundo da el resultado central de la tesis: repite la pregunta en condiciones más exigentes, con vehículos que llegan al azar, un plan fijo vuelto a ajustar al segundo para cada caso y reglas publicadas antes de entrenar. Después, el método se lleva a dos lugares reales de Miraflores, en Lima: un nudo, con su semáforo medido en el sitio, y un corredor de seis cruces. Una fase exploratoria previa, que sirvió para fijar el método, se resume en el Anexo~C.
 
 \introsection{Descripción de la situación problemática}
 
 En intersecciones y corredores urbanos de alto flujo se originan colas extensas, tiempos de espera elevados y variabilidad temporal significativa (picos laborales/escolares, eventos, incidentes). Los controladores semafóricos de \textit{tiempo fijo} no se ajustan a esa variación: un programa afinado para el eje en punta deja de serlo cuando el flujo dominante cambia de sentido. Los esquemas \textit{actuados} reaccionan a la demanda instantánea mediante detectores \citep{SUMO_TLS_Actuated}, pero deciden con información puramente local y sin anticipar la llegada de pelotones desde las intersecciones vecinas. La consecuencia es un aumento del retraso por vehículo, mayor número de paradas, menor \textit{throughput} (vehículos que completan su recorrido) y un incremento de emisiones contaminantes locales.
-% TODO(reestructura): falta una fuente de ingeniería de tránsito para la pérdida de vigencia de un programa fijo cuando el flujo dominante cambia de sentido y para la falta de anticipación del actuado aislado frente a los pelotones de los cruces vecinos.
 
 \introsection{Formulación del problema}
 
@@ -25,7 +20,7 @@ En intersecciones y corredores urbanos de alto flujo se originan colas extensas,
 
 La pregunta de investigación es la misma para cada modelo y cada caso de prueba: \emph{¿el modelo reduce el retraso por vehículo frente al tiempo fijo ajustado de ese caso, y no queda por detrás del actuado?} El fijo ajustado es el programa de tiempo fijo elegido por barrido para ese caso, y el actuado, el control actuado nativo de SUMO.
 
-Mientras el cruce real de Lima no está listo para simular, la pregunta se estudia en casos sintéticos de dificultad creciente. Cada caso agrega una dificultad al anterior (demanda por encima de la capacidad de un carril, más carriles con un elemento sin semáforo, más demanda en esa red, una red con vecinos en los dos ejes y, por último, esa misma red con el doble de demanda) y responde si el método sigue funcionando con ella.
+La pregunta se responde en tres partes: si el modelo reduce el retraso; de qué depende esa reducción (la información del vecino, lo que el agente ve y la demanda), y hasta dónde llega (dónde funciona, dónde no y por qué). Se estudia primero en casos sintéticos de dificultad creciente y después en dos casos de Lima.
 
 \textbf{Metas cuantificables} (todas referidas al control de tiempo fijo ajustado y medidas sobre las mismas semillas de evaluación con las que se mide el control actuado):
 \begin{itemize}
@@ -38,23 +33,18 @@ Mientras el cruce real de Lima no está listo para simular, la pregunta se estud
 % en el analisis); la Tabla tab:metas del Cap. V lo declara en su nota.
 
 La regla de veredicto del Capítulo~\ref{cap:metodologia} usa un umbral menor, una reducción del 5\,\%, que separa una diferencia estadísticamente clara pero pequeña de una mejora clara; las metas son más exigentes y se contrastan aparte, en el Capítulo~\ref{cap:resultados}.
-% fuente: plan2/veredicto.csv (ippo_vecinos: FUNCIONA, FUNCIONA, FUNCIONA, MEJORA, EMPATA en P1-P5;
-% P6 PENDIENTE, 1/3 bases convergen, provisional EMPATA); ningun aprendiz tiene veredicto firme sin FALLA en los seis
 
 \introsection{Arquitectura modular propuesta (visión general)}
 
-El sistema se organiza en cuatro unidades: U1, preprocesamiento (construcción de la red y la demanda de SUMO); U2, aprendizaje por refuerzo (agentes y entrenamiento sobre TraCI, la interfaz que permite controlar SUMO desde Python); U3, simulación y medición en SUMO; y U4, coordinación distribuida. U1 alimenta a U3 con la red y las rutas; U3 expone estados y métricas vía TraCI, y U2 decide las acciones (mantener la fase verde o pasar a la siguiente) que se aplican en U3. En U4 cada agente intercambia mensajes con sus intersecciones vecinas (fase actual, tiempo en esa fase, vehículos que descargan hacia el vecino, colas en la aproximación y en el enlace compartido) y amplía su estado con ellos para coordinar ondas verdes y evitar el \textit{spillback}. El aporte de la coordinación se mide con dos variantes de IPPO que solo difieren en los mensajes, IPPO sin mensajes e IPPO con mensajes, con la misma red neuronal y la misma recompensa. El Capítulo~\ref{cap:metodologia} describe cada unidad en detalle; la Figura~\ref{fig:arquitectura} muestra cómo se conectan.
+El sistema se organiza en cuatro unidades: U1, preprocesamiento (construcción de la red y la demanda de SUMO); U2, aprendizaje por refuerzo (agentes y entrenamiento sobre TraCI, la interfaz que permite controlar SUMO desde Python); U3, simulación y medición en SUMO; y U4, coordinación distribuida. En U4 cada agente intercambia mensajes con sus intersecciones vecinas (fase actual, tiempo en esa fase, vehículos que descargan hacia el vecino y colas) y amplía su estado con ellos. El aporte de la coordinación se mide con dos variantes que solo difieren en los mensajes, IPPO sin mensajes e IPPO con mensajes, con la misma red neuronal y la misma recompensa. El Capítulo~\ref{cap:metodologia} describe cada unidad; la Figura~\ref{fig:arquitectura} muestra cómo se conectan.
 
-\textbf{Aporte propio y trabajo computacional.} SUMO, TraCI, \texttt{netconvert} y el control actuado son herramientas de terceros. Lo propio es lo que se construyó sobre ellas: los seis escenarios y el barrido que ajusta el fijo de cada caso (U1); la formulación del control y los cinco algoritmos de aprendizaje, programados desde cero en Python y PyTorch, sin bibliotecas de aprendizaje por refuerzo (U2); el protocolo de evaluación, con semillas separadas, intervalos de confianza, pruebas pareadas y un veredicto automático (U3), y el canal de mensajes entre vecinos con la observación extendida y la penalización de \textit{spillback} (U4). En total se corrieron 174 entrenamientos de 200 episodios (138 del plan de pruebas y 36 de los niveles de demanda adicionales), es decir, 34\,800 episodios de una hora de tráfico simulado, que suman unas 171 horas de CPU solo en entrenamiento, más la evaluación con 30 semillas de cada control en cada caso y, en cada nivel de demanda adicional, del fijo ajustado, el actuado, el ciclo mínimo e IPPO con mensajes, en un procesador de escritorio sin GPU (Tabla~\ref{tab:hw}).
-% fuente: 138 archivos plan2/resultados_<esc>_<alg>_s<base>.csv de los seis casos (sin los v21 ni los dem_), 27 600
-% filas (episodios); suma de la columna segundos = 143.6 h (medido el 13.10.2026 y recalculado el 23.10.2026); 36
-% archivos plan2/resultados_dem_<esc>_ippo_vecinos_s<base>.csv de los 12 niveles de demanda adicionales, 7200 filas,
-% suma de la columna segundos = 26.9 h (23.10.2026); total: 174 archivos, 34 800 filas y 170.5 h; evaluaciones de
-% los niveles: 72 parciales plan2/demanda2/eval_dem_<esc>_<brazo>.csv con las semillas 1001-1030; equipo en tab:hw
-% (Cap. IV). Entrega 3, tareas 4 y 5 (23.10.2026): antes decia 138 entrenamientos, 27 600 episodios y unas 144 h.
-% Verificacion de las tareas 4 y 5 (23.10.2026): antes decia "la evaluacion de cada control con 30 semillas en cada
-% caso y en cada nivel de demanda", pero en los niveles adicionales solo se evaluaron seis brazos por nivel: fijo,
-% actuado, trivial e ippo_vecinos_s42, _s2042 y _s4042 (los 72 parciales; capitulo5.tex, sec:ejecucion-indicadores)
+\textbf{Aporte propio y trabajo computacional.} SUMO, TraCI, \texttt{netconvert} y el control actuado son herramientas de terceros. Lo propio es lo que se construyó sobre ellas: los seis escenarios, los dos casos de Lima y el ajuste del plan fijo de cada uno (U1); la formulación del control y los cinco algoritmos de aprendizaje, programados desde cero en Python y PyTorch, sin bibliotecas de aprendizaje por refuerzo (U2); el protocolo de evaluación, con semillas separadas, intervalos de confianza, pruebas pareadas y un veredicto automático (U3), y el canal de mensajes entre vecinos con la observación extendida (U4). En total se corrieron 375 entrenamientos, unos 79\,000 episodios de una hora de tráfico simulado: 174 en el primer estudio y 201 en el segundo, que además evaluó a ciegas 740 combinaciones de control, caso y tanda de semillas. Los dos casos de Lima suman otros 24 entrenamientos y 7200 episodios. Todo se ejecutó en un procesador de escritorio sin GPU (Tabla~\ref{tab:hw}).
+% fuente: primer estudio, 174 archivos plan2/resultados_*.csv (138 del plan y 36 de los niveles de demanda
+% adicionales), 34 800 episodios y 170.5 h de entrenamiento (medido el 23.10.2026); segundo estudio,
+% plan3/cola/trabajos.jsonl (201 cadenas de entrenamiento, 44 160 episodios; 642 + 98 evaluaciones del examen) y
+% plan3/cola/estado.json (1002 h de proceso con todo incluido); 34 800 + 44 160 = 78 960 episodios; casos de Lima:
+% 3 + 3 entrenamientos del nudo (lima/ y lima/alta/, 1200 episodios cada nivel) y 9 + 9 del corredor
+% (lima/corredor/ y lima/corredor/alta/, 2400 episodios cada nivel: 3 de 400 y 6 de 200): 24 entrenamientos y 7200
 
 \introsection{Objetivos de investigación}
 
@@ -69,13 +59,7 @@ El sistema se organiza en cuatro unidades: U1, preprocesamiento (construcción d
     \item Proponer buenas prácticas para reproducibilidad: semillas separadas para entrenamiento y evaluación, evaluación con la política congelada, intervalos de confianza al 95\% y pruebas de significancia pareadas.
 \end{itemize}
 
-\noindent Esta etapa ejecuta los cuatro objetivos por unidad. En U1 se construyen escenarios sintéticos con \texttt{netconvert} y demanda declarada por flujos; la recopilación de datos observados queda fuera de esta etapa. En U2 están implementados Q-learning y SARSA tabulares, PPO en su versión multiagente independiente (IPPO) y Double DQN con pesos compartidos.
-
-En U4, IPPO con mensajes, IPPO con penalización de \textit{spillback} (IPPO con mensajes que suma esa penalización a la recompensa), Double DQN y MAPPO usan la observación con mensajes, y MAPPO añade un crítico centralizado. Los mensajes transmiten la fase, el tiempo en ella, los vehículos que descargan hacia el vecino y las colas en la aproximación y en el enlace compartido; no incluyen una predicción de salidas. Todos los modelos se comparan en los seis casos del plan de pruebas (Sección~\ref{sec:plan2}). En P3 a P5 el término de \textit{spillback} no se activa e IPPO con penalización de \textit{spillback} repite a IPPO con mensajes; en P6 sí se activa. De las cuarenta y ocho combinaciones de aprendiz y caso, doce quedan pendientes: diez porque la política no convergió y dos sin datos (Capítulo~\ref{cap:resultados}). Seis de ellas están en P6.
-% fuente: Capitulo III (canal de mensajes, Tabla tab:obs-u4, Tabla tab:plan2-modelos); plan2/veredicto.csv
-% (8 aprendices x 6 casos; PENDIENTE: ql P4, ql_colas P2, dqn P5, mappo P3 y P4, y sarsa, dqn, ippo_vecinos,
-% ippo_spill y mappo en P6 por no converger; ql_colas sin datos en P5 y P6); spill frente a vecinos en P6:
-% 0 de 30 semillas identicas en las tres bases (hechos_2509.md)
+\noindent Los objetivos se ejecutan sobre escenarios sintéticos, con demanda declarada por flujos, y sobre dos casos de Lima, armados con la geometría de OpenStreetMap, volúmenes publicados y, en uno de ellos, el semáforo medido en el sitio. No se hicieron aforos propios. Están implementados Q-learning y SARSA tabulares, Double DQN y PPO en sus versiones multiagente (IPPO y MAPPO). Las conclusiones dicen, objetivo por objetivo, qué se cumplió y con qué medida.
 
 \introsection{Justificación}
 
@@ -83,51 +67,37 @@ En U4, IPPO con mensajes, IPPO con penalización de \textit{spillback} (IPPO con
 
 \introsection{Alcance y limitaciones / restricciones}
 
-\textbf{Alcance de esta etapa:}
+\textbf{Alcance:}
 \begin{itemize}
-    \item Seis casos sintéticos construidos con \texttt{netconvert}, cada uno con una hora de demanda y la punta invertida a la mitad, de modo que ningún programa fijo pueda ser óptimo en los dos periodos: un corredor de dos cruces con demanda nominal (P1) y doble (P2), una red de tres cruces con rotonda con demanda nominal (P3) y 1.2 veces la nominal (P4), y una malla de nueve cruces con demanda nominal (P5) y doble (P6). Los casos de una sola intersección (el cruce de dos fases y el de giros protegidos) se usaron en la fase exploratoria; el cruce de dos fases sirvió además para la prueba de humo de IPPO, DQN y MAPPO.
-    \item Entrenamiento, con el mismo protocolo y la misma recompensa de retraso, de Q-learning y SARSA tabulares, uno por intersección y sin comunicación, y de IPPO (sin mensajes, con mensajes entre vecinos y con penalización de \textit{spillback}, que suma ese término a la recompensa), Double DQN y MAPPO, sobre SUMO mediante TraCI. Una ablación de Q-learning con la recompensa de colas de la fase exploratoria mide cuánto del resultado se debe a la recompensa y cuánto al algoritmo.
-    \item Comparación con semaforización de tiempo fijo ajustada en cada caso (el programa de menor retraso en un barrido del verde de la avenida, el verde transversal y el desfase entre cruces) y con el control actuado nativo de SUMO, bajo las mismas restricciones de verde mínimo y máximo (10 y 60~s).
-    \item Un análisis de robustez, sin reentrenar, que repite la comparación con el retraso total por vehículo (el \texttt{timeLoss} más la espera para entrar a la red) y con un fijo cuyo barrido parte del verde mínimo de 10~s. Sus veredictos se reportan aparte y no reemplazan a los del resultado principal (Sección~\ref{sec:robustez}).
+    \item \textbf{Seis casos sintéticos}, cada uno con una hora de demanda y la punta invertida a la mitad: un corredor de dos cruces con demanda nominal (P1) y doble (P2), una red de tres cruces con rotonda con demanda nominal (P3) y 1.2 veces la nominal (P4), y una malla de nueve cruces con demanda nominal (P5) y doble (P6).
+    \item \textbf{Modelos}, con el mismo protocolo y la misma recompensa: Q-learning y SARSA tabulares, IPPO (sin mensajes, con mensajes y con penalización de \textit{spillback}), Double DQN y MAPPO.
+    \item \textbf{Referencias}: un plan de tiempo fijo ajustado en cada caso y el control actuado de SUMO, con los mismos límites de verde (10 y 60~s).
+    \item \textbf{Dos estudios}: el primero, con llegadas regulares; el segundo, con llegadas aleatorias, referencias vueltas a ajustar con ese tráfico y evaluación a ciegas (Sección~\ref{sec:segundo-estudio}).
+    \item \textbf{Dos casos de Lima}, en Miraflores: el nudo de la Av.~Reducto con la Av.~28 de Julio, con su semáforo medido en el sitio, y un corredor de seis cruces en la Av.~Benavides. Su demanda sale de volúmenes publicados, y cada uno se evalúa también con una demanda un 20\,\% mayor (Sección~\ref{sec:caso-lima}).
 \end{itemize}
 
-\textbf{No incluido en esta etapa:}
+\textbf{No incluido:}
 \begin{itemize}
-    \item Implementación en hardware real de semáforos.
-    \item Cobertura completa de toda la red vial de Lima.
-    \item El cruce real de Lima: su red se importó de OpenStreetMap, pero no se ha limpiado en \texttt{netedit} ni se ha evaluado. El procedimiento previsto de importación y limpieza se describe en el Anexo~D.
-    \item Datos observados de tráfico (aforos, matrices origen--destino): la demanda se define por flujos declarados.
-    \item El caso P7 (una red de cuatro por cuatro cruces con tres carriles y giro protegido), que repite el mismo protocolo sobre un escenario de mayor tamaño.
-    \item El entrenamiento con un canal de mensajes imperfecto: las políticas de coordinación se entrenaron con mensajes instantáneos; la latencia y la pérdida de mensajes solo se evaluaron en la fase exploratoria, sin reentrenar.
-    \item Las llegadas aleatorias (proceso de Poisson): en todos los casos las llegadas son equiespaciadas, de modo que la variabilidad entre semillas proviene solo del comportamiento de los conductores.
+    \item Implementación en hardware real de semáforos y cobertura de toda la red vial de Lima.
+    \item La calibración de los casos de Lima con aforos o tiempos de viaje medidos: su demanda sale de totales publicados y, en el corredor, los semáforos de hoy son un supuesto (Anexo~D).
+    \item Datos de tráfico propios (aforos, matrices origen--destino): en los seis casos sintéticos la demanda se define por flujos declarados.
+    \item Un reparto de la demanda entre calles que cambie de una simulación a otra: en cada caso, cada calle recibe siempre la misma parte, y lo aleatorio es el instante de cada llegada (Sección~\ref{sec:escenarios}).
+    \item El caso P7 (una red de cuatro por cuatro cruces con tres carriles y giro protegido).
+    \item El entrenamiento con un canal de mensajes imperfecto: las políticas se entrenaron con mensajes instantáneos; la latencia y la pérdida solo se evaluaron en la fase exploratoria.
 \end{itemize}
 
 \introsection{Áreas de investigación y herramientas}
 
 \begin{itemize}
-    \item \textbf{Ingeniería de transporte:} SUMO 1.25 con \texttt{netconvert} y métricas de tráfico. OpenStreetMap y \texttt{netedit} solo intervienen en el cruce real, importado en crudo y pendiente de limpieza (Anexo~D), que no forma parte de los casos evaluados.
-    \item \textbf{Inteligencia Artificial:} Python 3.14. Los agentes tabulares usan la biblioteca estándar; IPPO, Double DQN y MAPPO se implementan en PyTorch puro sobre CPU, sin Gym ni bibliotecas de RL de terceros. Los entrenamientos corren con un hilo cada uno y sin usar la GPU, en el equipo de la Tabla~\ref{tab:hw}.
-    \item \textbf{Procesamiento de datos:} Python (\texttt{csv}, \texttt{numpy}) y las salidas por vehículo de SUMO.
-    \item \textbf{Modelado y simulación:} SUMO + TraCI.
-    \item \textbf{Estadística y visualización:} \texttt{scipy} (intervalo de confianza de la media y prueba de Wilcoxon pareada), \texttt{numpy} (\textit{bootstrap} pareado por semilla y descomposición de la varianza del resultado) y \texttt{matplotlib}.
+    \item \textbf{Ingeniería de transporte y simulación:} SUMO 1.25 con \texttt{netconvert} y TraCI.
+    \item \textbf{Inteligencia Artificial:} Python 3.14; los agentes tabulares usan la biblioteca estándar, e IPPO, Double DQN y MAPPO se implementan en PyTorch sobre CPU, sin bibliotecas de RL de terceros.
+    \item \textbf{Estadística y visualización:} \texttt{numpy}, \texttt{scipy} y \texttt{matplotlib} (intervalos de confianza, \textit{bootstrap} pareado por semilla y prueba de Wilcoxon pareada).
 \end{itemize}
 
 \introsection{Métricas de evaluación}
 
-La métrica primaria es el retraso promedio por vehículo, medido con el atributo \texttt{timeLoss} de SUMO. Las secundarias son la espera detenida, la longitud de cola promedio y máxima, las paradas por vehículo y el \textit{throughput}; en los casos de varios semáforos se agregan el retraso de extremo a extremo, la progresión de los vehículos de paso y el \textit{spillback} en los enlaces entre cruces. El Capítulo~\ref{cap:teoria} define estas métricas y el Capítulo~\ref{cap:metodologia} describe cómo se miden.
-
-Cada corrida mide además los retornos de las tres recompensas del trabajo (de retraso, de colas y con penalización de \textit{spillback}), es decir, la suma de cada una a lo largo del episodio. Sirven de diagnóstico, porque dicen si un aprendiz optimizó lo que se le pidió, pero no entran en el veredicto.
-
-Cada modelo recibe en cada caso un veredicto (FUNCIONA, MEJORA, EMPATA, FALLA, o PENDIENTE si faltan datos o la política no convergió) que se decide solo con el retraso, frente al fijo ajustado y al actuado, con la regla prefijada del Capítulo~\ref{cap:metodologia}.
+La métrica primaria es el retraso promedio por vehículo, medido con el atributo \texttt{timeLoss} de SUMO. El segundo estudio usa el retraso total, que le suma la espera para entrar a la red (Ecuación~\ref{eq:retraso-total}). Las secundarias son la espera detenida, la longitud de cola promedio y máxima, las paradas por vehículo y el \textit{throughput}. Cada modelo recibe en cada caso un veredicto (FUNCIONA, MEJORA, EMPATA, FALLA, o PENDIENTE si el entrenamiento no se estabilizó), que se decide solo con el retraso, frente al fijo ajustado y al actuado, con la regla del Capítulo~\ref{cap:metodologia}.
 
 \introsection{Organización del documento}
 
-El Capítulo~\ref{cap:estado-arte} revisa tres trabajos cercanos, dos de control semafórico con RL y uno de optimización de ciclos a partir de la predicción de la demanda, junto con sus vacíos y las implicancias para el diseño. El Capítulo~\ref{cap:teoria} presenta el marco teórico en el orden en que el método lo usa: simulación de tráfico, control semafórico, métricas de desempeño, aprendizaje por refuerzo tabular, con aproximación de funciones y multiagente, y evaluación experimental. El Capítulo~\ref{cap:metodologia} describe el método: las unidades U1 a U4, los casos de prueba, la formulación del control como problema de RL, la coordinación entre semáforos, los modelos comparados, la medición y el plan de pruebas con su regla de veredicto y los análisis que lo complementan. El Capítulo~\ref{cap:implementacion} explica cómo se construyeron los escenarios y los programas de referencia, cómo se implementaron y entrenaron los aprendices y cómo se ejecutó el plan. El Capítulo~\ref{cap:resultados} recorre el camino del plan a la conclusión: recuerda el plan de pruebas, cuenta cómo se ejecutó y cómo la validación eligió la versión que se evalúa de cada modelo, da el resultado principal frente a las dos referencias y frente a las metas, compara lo esperado con lo obtenido, presenta el efecto de la demanda y lo que aporta cada pieza del modelo, resume un análisis de robustez que repite la comparación con otra medida del retraso y otro programa fijo de referencia, compara la mejora con la de otros trabajos y cierra con por qué el modelo funciona o no en cada red y con lo que el plan no permite afirmar. El detalle del análisis de robustez está en el Anexo~F, y el diagnóstico posterior del entrenamiento de IPPO con mensajes, que prueba una corrección con semillas propias, se reporta en el Anexo~G. Ninguno de los dos reemplaza un veredicto del resultado principal. Después vienen las conclusiones, que responden a los objetivos, y las recomendaciones. Los anexos reúnen las tablas completas del plan de pruebas (Anexo~A), los programas del proyecto y la dirección de su repositorio (Anexo~B), la fase exploratoria (Anexo~C), el procedimiento de importación de un cruce desde OpenStreetMap (Anexo~D), los trabajos con los que se comparan los resultados (Anexo~E), el análisis de robustez completo (Anexo~F) y el diagnóstico posterior del entrenamiento (Anexo~G).
-% 22.10.2026 (entrega 3, sin codigo en la tesis): el Anexo B ya no imprime el codigo fuente; es una tabla de
-% programas con la direccion del repositorio (anexos.tex, tab:programas)
-% 23.10.2026 (entrega 3, reestructura del Cap. V): el detalle del analisis de robustez pasa al Anexo F y el analisis
-% exploratorio posterior, con el nombre de diagnostico posterior del entrenamiento, al Anexo G; en el Cap. V queda
-% el resumen de la robustez (sec:robustez). La descripcion del Cap. V se rehace con la guia de lectura (plan del
-% 14.10, seccion 5.3). Verificacion de la fase 2 (23.10.2026): la frase del Cap. V sigue ahora el orden de sus
-% secciones 5.1 a 5.9 (antes describia la estructura anterior: por caso y por modelo, resumen en un numero, de que
-% depende el resultado, alcance)
+El Capítulo~\ref{cap:estado-arte} revisa los trabajos cercanos, sus vacíos y lo que implican para el diseño. El Capítulo~\ref{cap:teoria} presenta la teoría que el método usa: simulación de tráfico, control semafórico, métricas, aprendizaje por refuerzo y evaluación experimental. El Capítulo~\ref{cap:metodologia} describe el método: los casos, la formulación del control como problema de RL, la coordinación entre semáforos, los modelos comparados, la medición y el diseño de la evaluación, con sus dos estudios y su regla de veredicto. El Capítulo~\ref{cap:implementacion} explica cómo se construyeron los escenarios y las referencias y cómo se implementaron y entrenaron los modelos. El Capítulo~\ref{cap:resultados} presenta los resultados en el orden del método: el primer estudio y su medición más estricta, con llegadas regulares; los dos casos de Lima; el resultado central, que es el del segundo estudio, con llegadas aleatorias, junto con el de Lima, y su interpretación: lo que lo explica, la comparación con otros trabajos y el alcance. Siguen las conclusiones, por objetivo, y las recomendaciones. Los anexos traen el detalle: las tablas del primer estudio (A), los programas (B), la fase exploratoria (C), los casos de Lima (D), la comparación con otros trabajos (E), la medición más estricta (F), el diagnóstico del entrenamiento (G), el segundo estudio (H) y los detalles de implementación (I).

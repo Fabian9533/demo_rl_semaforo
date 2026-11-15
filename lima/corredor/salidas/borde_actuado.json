@@ -1,0 +1,90 @@
+{
+ "ganador_anterior": {
+  "tipo": "actuado",
+  "max-gap": 1.0,
+  "detector-gap": 2.0,
+  "jam-threshold": 10,
+  "esquema": "60",
+  "retraso_total_10": 34.869,
+  "retraso_total_30": 34.81633333333333,
+  "maximos": [
+   [
+    60,
+    60
+   ],
+   [
+    60,
+    60
+   ],
+   [
+    60,
+    60
+   ],
+   [
+    60,
+    60
+   ],
+   [
+    60,
+    60
+   ],
+   [
+    60,
+    60
+   ]
+  ]
+ },
+ "variantes": [
+  {
+   "tipo": "retraso",
+   "detectorRange": 100,
+   "minTimeLoss": 0.5,
+   "esquema": "60",
+   "retraso_total_10": 34.924
+  },
+  {
+   "tipo": "actuado",
+   "max-gap": 0.5,
+   "detector-gap": 2.0,
+   "jam-threshold": 10,
+   "esquema": "60",
+   "retraso_total_10": 36.329
+  }
+ ],
+ "cambia": false,
+ "ganador": {
+  "tipo": "actuado",
+  "max-gap": 1.0,
+  "detector-gap": 2.0,
+  "jam-threshold": 10,
+  "esquema": "60",
+  "retraso_total_10": 34.869,
+  "retraso_total_30": 34.81633333333333,
+  "maximos": [
+   [
+    60,
+    60
+   ],
+   [
+    60,
+    60
+   ],
+   [
+    60,
+    60
+   ],
+   [
+    60,
+    60
+   ],
+   [
+    60,
+    60
+   ],
+   [
+    60,
+    60
+   ]
+  ]
+ }
+}

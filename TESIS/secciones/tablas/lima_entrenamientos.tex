@@ -1,0 +1,21 @@
+% Generado por lima/tablas_lima.py a partir de lima/salidas/ y lima/alta/salidas/. No editar a mano.
+% Caso Lima: los tres entrenamientos del modelo completo en cada nivel de demanda. Episodio de la version
+% evaluada (menor retraso total en la validacion, semillas 21001-21008), ese retraso, retraso total en las
+% dos tandas de evaluacion, cambio frente al fijo ajustado al segundo y si el entrenamiento se estabilizo
+% (regla de la tesis: en el ultimo tercio de las validaciones, tendencia y estabilidad dentro del 5 %).
+% El citado es el de validacion mediana.
+% fuente: politica_lima_vecinos_completo_s<base>.json (ep_elegido, val_elegido), salidas/eval_t*_*.csv y la
+% columna val_total de resultados_lima_ippo_vecinos_completo_s<base>.csv; publicada 42: plateau +3.33 %, estabilidad 2.12 %; publicada 2042: plateau -0.23 %, estabilidad 0.00 %; publicada 4042: plateau +2.92 %, estabilidad 1.44 %; alta 42: plateau +6.73 %, estabilidad 4.99 %; alta 2042: plateau +2.96 %, estabilidad 2.60 %; alta 4042: plateau -1.79 %, estabilidad 0.12 %
+\begin{tabular}{>{\raggedright\arraybackslash}p{1.5cm}>{\raggedright\arraybackslash}p{1.8cm}>{\raggedright\arraybackslash}p{1.7cm}>{\raggedright\arraybackslash}p{1.9cm}>{\raggedright\arraybackslash}p{2.2cm}>{\raggedright\arraybackslash}p{2.0cm}>{\raggedright\arraybackslash}p{1.7cm}}
+\toprule
+Demanda & Base & Episodio de la versión evaluada & Retraso en la validación (s/veh) & Retraso en la evaluación, tandas 1 y 2 (s/veh) & Cambio frente al fijo ajustado (\%) & ¿Se estabilizó? \\
+\midrule
+Publicada & 42 (citado) & 160 & 54.7 & 55.3 y 55.1 & $-4.4$ y $-4.5$ & sí \\
+ & 2042 & 300 & 54.5 & 55.1 y 54.9 & $-4.6$ y $-4.8$ & sí \\
+ & 4042 & 280 & 54.7 & 55.2 y 54.8 & $-4.6$ y $-5.0$ & sí \\
+\midrule
+Alta & 42 (citado) & 260 & 65.0 & 66.0 y 65.0 & $-5.7$ y $-6.6$ & no \\
+ & 2042 & 300 & 64.2 & 65.4 y 64.9 & $-6.7$ y $-6.7$ & sí \\
+ & 4042 & 60 & 65.2 & 66.0 y 65.4 & $-5.8$ y $-6.0$ & sí \\
+\bottomrule
+\end{tabular}

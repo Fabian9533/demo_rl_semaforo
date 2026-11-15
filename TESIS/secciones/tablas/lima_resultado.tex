@@ -1,0 +1,19 @@
+% Generado por lima/tablas_lima.py a partir de lima/salidas/ y lima/alta/salidas/. No editar a mano.
+% Caso Lima: retraso total por vehiculo de cada control en las dos tandas de evaluacion (100 semillas cada
+% una) y cambio del modelo frente a cada control, por nivel de demanda.
+% fuente: salidas/eval_t1_*.csv y eval_t2_*.csv de lima/ y lima/alta/ (retraso_total_prom); modelo: publicada = completo_s42, alta = completo_s42.
+\begin{tabular}{>{\raggedright\arraybackslash}p{2.5cm}>{\raggedright\arraybackslash}p{3.7cm}>{\raggedright\arraybackslash}p{3.4cm}>{\raggedright\arraybackslash}p{4.0cm}}
+\toprule
+Demanda & Control & Retraso total, tandas 1 y 2 (s por vehículo) & Cambio del modelo frente a este control, tandas 1 y 2 (\%) \\
+\midrule
+Publicada (4271~veh/h) & Plan actual & 59.1 y 58.7 & $-6.5$ y $-6.2$ \\
+ & Fijo ajustado al segundo & 57.8 y 57.7 & $-4.4$ y $-4.5$ \\
+ & Actuado ajustado & 53.4 y 53.2 & $+3.4$ y $+3.6$ \\
+ & Modelo completo & 55.3 y 55.1 & --- \\
+\midrule
+Alta (5125~veh/h) & Plan actual & 89.1 y 85.6 & $-25.9$ y $-24.0$ \\
+ & Fijo ajustado al segundo & 70.1 y 69.6 & $-5.7$ y $-6.6$ \\
+ & Actuado ajustado & 63.3 y 63.0 & $+4.3$ y $+3.3$ \\
+ & Modelo completo & 66.0 y 65.0 & --- \\
+\bottomrule
+\end{tabular}

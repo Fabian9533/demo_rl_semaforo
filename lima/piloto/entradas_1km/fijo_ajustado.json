@@ -1,0 +1,612 @@
+{
+ "ganador": [
+  32,
+  20,
+  35,
+  26
+ ],
+ "retraso_total_30": 191.31566666666666,
+ "minimos": [
+  10,
+  5,
+  10,
+  10
+ ],
+ "plan_actual": [
+  40,
+  12,
+  35,
+  30
+ ],
+ "transicion": 3,
+ "semillas_ajuste": [
+  2001,
+  2010
+ ],
+ "semillas_desempate": [
+  2001,
+  2030
+ ],
+ "candidatos": [
+  {
+   "verdes": [
+    32,
+    20,
+    35,
+    26
+   ],
+   "semillas": 30,
+   "retraso_total": 191.3157
+  },
+  {
+   "verdes": [
+    30,
+    19,
+    35,
+    25
+   ],
+   "semillas": 10,
+   "retraso_total": 191.373
+  },
+  {
+   "verdes": [
+    30,
+    19,
+    35,
+    26
+   ],
+   "semillas": 10,
+   "retraso_total": 191.402
+  },
+  {
+   "verdes": [
+    30,
+    20,
+    35,
+    26
+   ],
+   "semillas": 10,
+   "retraso_total": 191.932
+  },
+  {
+   "verdes": [
+    30,
+    19,
+    34,
+    26
+   ],
+   "semillas": 10,
+   "retraso_total": 192.084
+  },
+  {
+   "verdes": [
+    32,
+    20,
+    35,
+    26
+   ],
+   "semillas": 10,
+   "retraso_total": 192.378
+  },
+  {
+   "verdes": [
+    31,
+    20,
+    35,
+    26
+   ],
+   "semillas": 30,
+   "retraso_total": 192.6943
+  },
+  {
+   "verdes": [
+    30,
+    19,
+    36,
+    26
+   ],
+   "semillas": 10,
+   "retraso_total": 193.38
+  },
+  {
+   "verdes": [
+    32,
+    20,
+    35,
+    30
+   ],
+   "semillas": 10,
+   "retraso_total": 193.577
+  },
+  {
+   "verdes": [
+    31,
+    20,
+    35,
+    26
+   ],
+   "semillas": 10,
+   "retraso_total": 193.823
+  },
+  {
+   "verdes": [
+    30,
+    20,
+    33,
+    26
+   ],
+   "semillas": 10,
+   "retraso_total": 194.449
+  },
+  {
+   "verdes": [
+    30,
+    19,
+    36,
+    25
+   ],
+   "semillas": 10,
+   "retraso_total": 194.5
+  },
+  {
+   "verdes": [
+    30,
+    19,
+    34,
+    25
+   ],
+   "semillas": 10,
+   "retraso_total": 194.944
+  },
+  {
+   "verdes": [
+    32,
+    20,
+    39,
+    26
+   ],
+   "semillas": 10,
+   "retraso_total": 195.149
+  },
+  {
+   "verdes": [
+    30,
+    19,
+    34,
+    26
+   ],
+   "semillas": 30,
+   "retraso_total": 195.1817
+  },
+  {
+   "verdes": [
+    36,
+    20,
+    35,
+    26
+   ],
+   "semillas": 10,
+   "retraso_total": 195.491
+  },
+  {
+   "verdes": [
+    30,
+    20,
+    33,
+    26
+   ],
+   "semillas": 30,
+   "retraso_total": 195.9787
+  },
+  {
+   "verdes": [
+    30,
+    20,
+    35,
+    26
+   ],
+   "semillas": 30,
+   "retraso_total": 196.1367
+  },
+  {
+   "verdes": [
+    30,
+    19,
+    35,
+    24
+   ],
+   "semillas": 10,
+   "retraso_total": 196.806
+  },
+  {
+   "verdes": [
+    36,
+    20,
+    35,
+    30
+   ],
+   "semillas": 10,
+   "retraso_total": 197.152
+  },
+  {
+   "verdes": [
+    30,
+    18,
+    35,
+    25
+   ],
+   "semillas": 10,
+   "retraso_total": 197.774
+  },
+  {
+   "verdes": [
+    29,
+    19,
+    35,
+    25
+   ],
+   "semillas": 10,
+   "retraso_total": 197.808
+  },
+  {
+   "verdes": [
+    30,
+    18,
+    35,
+    26
+   ],
+   "semillas": 10,
+   "retraso_total": 197.871
+  },
+  {
+   "verdes": [
+    32,
+    16,
+    35,
+    26
+   ],
+   "semillas": 10,
+   "retraso_total": 199.005
+  },
+  {
+   "verdes": [
+    30,
+    19,
+    36,
+    25
+   ],
+   "semillas": 30,
+   "retraso_total": 199.356
+  },
+  {
+   "verdes": [
+    30,
+    19,
+    35,
+    25
+   ],
+   "semillas": 30,
+   "retraso_total": 199.9613
+  },
+  {
+   "verdes": [
+    32,
+    20,
+    35,
+    30
+   ],
+   "semillas": 30,
+   "retraso_total": 199.9697
+  },
+  {
+   "verdes": [
+    30,
+    20,
+    37,
+    26
+   ],
+   "semillas": 10,
+   "retraso_total": 199.98
+  },
+  {
+   "verdes": [
+    30,
+    20,
+    35,
+    28
+   ],
+   "semillas": 10,
+   "retraso_total": 201.156
+  },
+  {
+   "verdes": [
+    30,
+    19,
+    36,
+    26
+   ],
+   "semillas": 30,
+   "retraso_total": 201.5693
+  },
+  {
+   "verdes": [
+    30,
+    20,
+    35,
+    24
+   ],
+   "semillas": 10,
+   "retraso_total": 201.681
+  },
+  {
+   "verdes": [
+    30,
+    19,
+    35,
+    26
+   ],
+   "semillas": 30,
+   "retraso_total": 201.8133
+  },
+  {
+   "verdes": [
+    32,
+    20,
+    39,
+    30
+   ],
+   "semillas": 10,
+   "retraso_total": 204.057
+  },
+  {
+   "verdes": [
+    29,
+    20,
+    35,
+    26
+   ],
+   "semillas": 10,
+   "retraso_total": 204.536
+  },
+  {
+   "verdes": [
+    32,
+    24,
+    35,
+    26
+   ],
+   "semillas": 10,
+   "retraso_total": 205.302
+  },
+  {
+   "verdes": [
+    30,
+    20,
+    35,
+    25
+   ],
+   "semillas": 10,
+   "retraso_total": 205.836
+  },
+  {
+   "verdes": [
+    31,
+    19,
+    35,
+    25
+   ],
+   "semillas": 10,
+   "retraso_total": 206.289
+  },
+  {
+   "verdes": [
+    30,
+    22,
+    35,
+    26
+   ],
+   "semillas": 10,
+   "retraso_total": 206.91
+  },
+  {
+   "verdes": [
+    32,
+    16,
+    35,
+    30
+   ],
+   "semillas": 10,
+   "retraso_total": 209.973
+  },
+  {
+   "verdes": [
+    32,
+    24,
+    35,
+    30
+   ],
+   "semillas": 10,
+   "retraso_total": 210.256
+  },
+  {
+   "verdes": [
+    40,
+    20,
+    35,
+    30
+   ],
+   "semillas": 10,
+   "retraso_total": 215.141
+  },
+  {
+   "verdes": [
+    32,
+    20,
+    43,
+    30
+   ],
+   "semillas": 10,
+   "retraso_total": 215.369
+  },
+  {
+   "verdes": [
+    32,
+    20,
+    31,
+    26
+   ],
+   "semillas": 10,
+   "retraso_total": 217.848
+  },
+  {
+   "verdes": [
+    32,
+    20,
+    35,
+    22
+   ],
+   "semillas": 10,
+   "retraso_total": 228.151
+  },
+  {
+   "verdes": [
+    28,
+    20,
+    35,
+    26
+   ],
+   "semillas": 10,
+   "retraso_total": 229.416
+  },
+  {
+   "verdes": [
+    32,
+    28,
+    35,
+    30
+   ],
+   "semillas": 10,
+   "retraso_total": 233.127
+  },
+  {
+   "verdes": [
+    32,
+    20,
+    31,
+    30
+   ],
+   "semillas": 10,
+   "retraso_total": 233.411
+  },
+  {
+   "verdes": [
+    32,
+    20,
+    35,
+    38
+   ],
+   "semillas": 10,
+   "retraso_total": 238.716
+  },
+  {
+   "verdes": [
+    28,
+    20,
+    35,
+    30
+   ],
+   "semillas": 10,
+   "retraso_total": 242.782
+  },
+  {
+   "verdes": [
+    32,
+    12,
+    35,
+    30
+   ],
+   "semillas": 10,
+   "retraso_total": 251.815
+  },
+  {
+   "verdes": [
+    40,
+    12,
+    35,
+    30
+   ],
+   "semillas": 10,
+   "retraso_total": 254.361
+  },
+  {
+   "verdes": [
+    32,
+    20,
+    27,
+    30
+   ],
+   "semillas": 10,
+   "retraso_total": 264.073
+  },
+  {
+   "verdes": [
+    45,
+    45,
+    45,
+    45
+   ],
+   "semillas": 10,
+   "retraso_total": 265.206
+  },
+  {
+   "verdes": [
+    30,
+    30,
+    30,
+    30
+   ],
+   "semillas": 10,
+   "retraso_total": 305.93
+  },
+  {
+   "verdes": [
+    32,
+    5,
+    35,
+    30
+   ],
+   "semillas": 10,
+   "retraso_total": 320.34
+  },
+  {
+   "verdes": [
+    24,
+    20,
+    35,
+    30
+   ],
+   "semillas": 10,
+   "retraso_total": 372.465
+  },
+  {
+   "verdes": [
+    20,
+    20,
+    20,
+    20
+   ],
+   "semillas": 10,
+   "retraso_total": 407.22
+  },
+  {
+   "verdes": [
+    10,
+    5,
+    10,
+    10
+   ],
+   "semillas": 10,
+   "retraso_total": 584.47
+  }
+ ]
+}

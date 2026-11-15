@@ -183,6 +183,7 @@ except ImportError:
 import comun
 import rl_corredor as rc
 import escenarios_plan2
+import escenarios_lima
 
 # ---------------- Escenarios ----------------
 # Vecinos de cada semaforo: por lado (oeste, este y en malla3 norte, sur) el vecino, el enlace
@@ -210,6 +211,7 @@ _FUENTES = {**escenarios_plan2.ESCENARIOS_RC, **rc.ESCENARIOS}
 ESCENARIOS = {esc: {**e, "vecinos": VECINOS[esc]} for esc, e in _FUENTES.items() if esc in VECINOS}
 ESCENARIOS["cruce"] = {"cfg": "cruce.sumocfg", "semaforos": {"semaforo_C": ["W_C", "E_C", "N_C", "S_C"]},
                        "enlaces": [], "flujos_corredor": None, "vecinos": VECINOS["cruce"]}
+ESCENARIOS.update(escenarios_lima.ESCENARIOS)       # caso Lima (13.11.2026): un cruce real con varias fases
 # Orden de las aproximaciones en SEMAFOROS: [avenida oeste, avenida este, norte, sur]
 LADOS = {esc: tuple(escenarios_plan2.LADOS.get(esc, ("oeste", "este"))) for esc in ESCENARIOS}
 for _esc, (_base, _, _) in escenarios_plan2.DERIVADOS.items():     # los lados de su red base
@@ -283,6 +285,10 @@ def preparar(escenario):
     aprox = [a for lista in e["semaforos"].values() for a in lista]
     lados = LADOS.get(escenario, ("oeste", "este"))
     n_id = max(N_ID, len(e["semaforos"]))
+    # Caso Lima (13.11.2026): un semaforo puede tener mas de dos fases verdes. El escenario lo declara con
+    # "fases"; sin esa clave son 2 y la observacion queda como siempre (bloque local de 12).
+    n_fases = e.get("fases", 2)
+    local = 10 + n_fases           # 4 colas + 4 moviles + fases + t_verde + puede_cambiar
     C.clear()
     C.update({
         "escenario": escenario, "cfg": e["cfg"], "net": net_file,
@@ -293,10 +299,11 @@ def preparar(escenario):
         "vmax": {a: net.getEdge(a).getSpeed() for a in aprox},
         "plazas": {l: comun.plazas_carril(net, l) for l in e["enlaces"]},
         "fase_av": {},          # se calcula con TraCI en el primer episodio
-        "lados": lados, "n_id": n_id, "dim_obs": 12 + n_id + 8 * len(lados),
+        "lados": lados, "n_id": n_id, "dim_obs": local + n_id + 8 * len(lados),
+        "n_fases": n_fases, "local": local,
         "ins_flujo": origen_flujos(e["cfg"], e["semaforos"]),
         # --obs-insercion (configurar_obs_insercion): apagada por defecto
-        "dim_base": 12 + n_id + 8 * len(lados), "obs_ins": False,
+        "dim_base": local + n_id + 8 * len(lados), "obs_ins": False,
         "ins_salida": salidas_flujos(e["cfg"]), "pend_arista": {},
         # plan3, Etapas 3 y 4: apagadas (las ponen main y configurar_desde_meta)
         "obs_cerca": 0.0, "n_cerca": 0, "msg_paso": False, "sin_forzadas": False, "paso_decision": PASO_CONTROL,
@@ -522,8 +529,8 @@ def nombres_features():
     """Nombre de cada posicion de la observacion (va al meta de la politica)."""
     ids = [f"id_{t.replace('semaforo_', '')}" for t in C["semaforos"]]
     ids += [f"id_libre{k}" for k in range(len(ids), C["n_id"])]
-    return (["cola_o", "cola_e", "cola_n", "cola_s", "movil_o", "movil_e", "movil_n", "movil_s",
-             "fase_0", "fase_1", "t_verde", "puede_cambiar"] + ids
+    return (["cola_o", "cola_e", "cola_n", "cola_s", "movil_o", "movil_e", "movil_n", "movil_s"]
+            + [f"fase_{k}" for k in range(C["n_fases"])] + ["t_verde", "puede_cambiar"] + ids
             + [f"{lado}_{f}" for lado in C["lados"]
                for f in ("presente", "verde_hacia_mi", "ambar", "t_fase", "outflow",
                          "cola_alimentadora", "cola_mi_salida", "edad")]
@@ -678,6 +685,24 @@ def minimo_verde(ag):
     return ag["verde_min"][ag["verdes"][ag["verde"]]]
 
 
+def duracion_transiciones(tls, verdes):
+    """{fase verde: segundos hasta que empieza el verde siguiente}: la suma de las fases intermedias del programa
+    activo. Con una sola fase intermedia es la duracion del ambar, como siempre; el caso Lima (13.11.2026) tiene
+    ademas un rojo total tras un estado, que SUMO recorre solo mientras el agente espera."""
+    activo = traci.trafficlight.getProgram(tls)
+    logicas = traci.trafficlight.getAllProgramLogics(tls)
+    fases = next((l for l in logicas if l.programID == activo), logicas[0]).phases
+    res = {}
+    for i in verdes:
+        k, total = (i + 1) % len(fases), 0
+        while k not in verdes:
+            total += max(1, int(fases[k].duration))
+            k = (k + 1) % len(fases)
+        assert total >= 1, f"{tls}: dos fases verdes seguidas sin transicion"
+        res[i] = total
+    return res
+
+
 def observar(tls, ag, lect, canal, t, con_vecinos):
     """Bloque local (0..11), id del semaforo (12..12+n_id-1) y una ranura de 8 por lado."""
     obs = np.zeros(C["dim_obs"], dtype=np.float32)
@@ -686,10 +711,11 @@ def observar(tls, ag, lect, canal, t, con_vecinos):
         h, v = leer(lect, a, HALT), leer(lect, a, VEH)
         obs[k] = min(1.0, h / C["cap"][a])
         obs[4 + k] = min(1.0, max(0, v - h) / C["cap"][a])
+    local = C["local"]                     # 12 con dos fases; 10 + fases en el caso Lima
     obs[8 + ag["verde"]] = 1.0
-    obs[10] = min(1.0, ag["t_verde"] / VERDE_MAX)
-    obs[11] = 1.0 if ag["t_verde"] >= minimo_verde(ag) else 0.0
-    obs[12 + C["indice"][tls]] = 1.0
+    obs[local - 2] = min(1.0, ag["t_verde"] / VERDE_MAX)
+    obs[local - 1] = 1.0 if ag["t_verde"] >= minimo_verde(ag) else 0.0
+    obs[local + C["indice"][tls]] = 1.0
     if C["obs_ins"]:
         # --obs-insercion: vehiculos que esperan para entrar por cada acceso, n / (n + plazas)
         for k, a in enumerate(aprox):
@@ -703,7 +729,7 @@ def observar(tls, ag, lect, canal, t, con_vecinos):
             if vec is None:
                 continue
             j, enlace_j_a_i, enlace_i_a_j = vec
-            base = 12 + C["n_id"] + 8 * r
+            base = local + C["n_id"] + 8 * r
             obs[base] = 1.0
             msg, edad = canal.leer(j, tls, t)
             if msg is None:
@@ -884,10 +910,17 @@ def correr_episodio(modo, politica, gui, delay, seed, tripinfo=None, serie=None,
     agentes = {}
     for tls, aprox in C["semaforos"].items():
         verdes, ambar, dur_ambar, verde_min = rc.fases_verdes(tls)
-        assert len(verdes) == 2, f"{tls}: {len(verdes)} fases verdes; la observacion asume 2"
+        assert len(verdes) == C["n_fases"], (f"{tls}: {len(verdes)} fases verdes; el escenario declara "
+                                             f"{C['n_fases']}")
         if tls not in C["fase_av"]:
-            C["fase_av"][tls] = fase_avenida(tls, aprox, verdes)
+            if C["n_fases"] == 2:
+                C["fase_av"][tls] = fase_avenida(tls, aprox, verdes)
+            else:
+                # con mas de dos fases no hay "fase de la avenida": solo vale para un cruce sin vecinos (caso Lima)
+                assert not any(C["vecinos"][tls].values()), f"{tls}: mas de dos fases y vecinos no esta soportado"
+                C["fase_av"][tls] = None
         agentes[tls] = {"verdes": verdes, "ambar": ambar, "dur_ambar": dur_ambar,
+                        "dur_trans": duracion_transiciones(tls, verdes),
                         "verde_min": verde_min, "verde": 0, "t_verde": 0, "ambar_restante": 0,
                         "pendiente": None, "cambio": 0.0, "fase_previa": None,
                         "r_acum": 0.0, "s_acum": 0.0, "ultima": None}
@@ -1041,7 +1074,7 @@ def correr_episodio(modo, politica, gui, delay, seed, tripinfo=None, serie=None,
                     f_actual = ag["verdes"][ag["verde"]]
                     traci.trafficlight.setPhase(tls, ag["ambar"][f_actual])
                     traci.trafficlight.setPhaseDuration(tls, ag["dur_ambar"][f_actual])
-                    ag["ambar_restante"] = ag["dur_ambar"][f_actual]
+                    ag["ambar_restante"] = ag["dur_trans"][f_actual]    # ambar y, si lo hay, rojo total
                     ag["cambio"] = 1.0
 
         traci.simulationStep()

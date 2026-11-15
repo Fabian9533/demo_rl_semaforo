@@ -1,0 +1,16 @@
+% Generado por lima/corredor/tablas_corredor.py a partir de lima/corredor/. No editar a mano.
+% Corredor de la Av. Benavides: que aportan los mensajes entre cruces vecinos. Retraso total (s/veh) en las
+% dos tandas sin mensajes y con ellos, y cambio con mensajes frente a sin ellos (%).
+% fuente: salidas/eval_t*_*.csv de cada nivel (entrenamientos citados; el brazo *_cortado es el modelo
+% completo evaluado con estudio_corredor.py evaluar --perdida 1); IC95 y p: publicada, vecinos_corregido_s42 frente a local_sinmsg_s2042: -0.45 [-0.72, -0.16] p=0.00053 y -0.42 [-0.68, -0.16] p=0.0014 | publicada, vecinos_completo_s42 frente a vecinos_completo_s42_cortado: -1.53 [-1.74, -1.31] p=6.4e-16 y -1.39 [-1.61, -1.17] p=1.2e-15 | alta, vecinos_corregido_s4042 frente a local_sinmsg_s2042: -0.94 [-1.49, -0.34] p=5.7e-07 y -0.98 [-1.52, -0.39] p=2.3e-06 | alta, vecinos_completo_s2042 frente a vecinos_completo_s2042_cortado: -2.52 [-3.03, -1.91] p=1.4e-14 y -2.57 [-2.92, -2.22] p=8.8e-16
+\begin{tabular}{>{\raggedright\arraybackslash}p{1.6cm}>{\raggedright\arraybackslash}p{5.2cm}>{\raggedright\arraybackslash}p{2.2cm}>{\raggedright\arraybackslash}p{2.2cm}>{\raggedright\arraybackslash}p{2.6cm}}
+\toprule
+Demanda & Comparación & Sin mensajes, tandas 1 y 2 (s/veh) & Con mensajes, tandas 1 y 2 (s/veh) & Cambio con mensajes, tandas 1 y 2 (\%) \\
+\midrule
+Publicada & Entrenar sin mensajes o con ellos (IPPO corregido) & 35.4 y 35.3 & 35.3 y 35.2 & $-0.4$ y $-0.4$ \\
+ & Cortar los mensajes al modelo completo ya entrenado & 32.4 y 32.4 & 31.9 y 31.9 & $-1.5$ y $-1.4$ \\
+\midrule
+Alta & Entrenar sin mensajes o con ellos (IPPO corregido) & 47.2 y 47.0 & 46.7 y 46.5 & $-0.9$ y $-1.0$ \\
+ & Cortar los mensajes al modelo completo ya entrenado & 43.6 y 43.4 & 42.5 y 42.3 & $-2.5$ y $-2.6$ \\
+\bottomrule
+\end{tabular}

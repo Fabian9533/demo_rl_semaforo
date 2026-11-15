@@ -34,3 +34,13 @@ TESIS/diagramas/previa/
 plan2/diag_corredor/eval/extras_*/tripinfo_*.xml
 plan2/diag_corredor/prueba/
 plan2/diag_corredor/eval3/extras_*/tripinfo_*.xml
+
+# Casos de Lima (13-15.11.2026): salidas pesadas que se regeneran (tripinfo de entrenamiento y validacion, temporales
+# de las evaluaciones y checkpoints intermedios). Las politicas evaluadas (politica_*.pt) y salidas/ si van.
+lima/**/tripinfo_*.xml
+lima/**/tmp/
+lima/**/checkpoints/
+plan3/curvas/tmp/
+
+# Archivo de parada de la cola del plan 2 (control local, no es un resultado)
+plan2/cola/fin

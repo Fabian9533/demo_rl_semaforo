@@ -1,0 +1,51 @@
+<additional>
+    <!-- Actuado ajustado del corredor (estudio_corredor.py): {'max-gap': 2.0, 'detector-gap': 2.0, 'esquema': 'doble del fijo', 'maximos': [(60, 36), (60, 28), (56, 42), (52, 46), (60, 32), (52, 46)], 'retraso_total_10': 36.393, 'retraso_total_30': 36.261} -->
+    <tlLogic id="semaforo_C1" type="actuated" programID="actuado_ajustado" offset="0">
+        <param key="max-gap" value="2.0"/>
+        <param key="detector-gap" value="2.0"/>
+        <phase duration="10" minDur="10" maxDur="60" state="rGGGGrrrrrGGG"/>
+        <phase duration="3" state="ryyyyrrrrryyy"/>
+        <phase duration="10" minDur="10" maxDur="36" state="GrrrrGGGGGrrr"/>
+        <phase duration="3" state="yrrrryyyyyrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C2" type="actuated" programID="actuado_ajustado" offset="0">
+        <param key="max-gap" value="2.0"/>
+        <param key="detector-gap" value="2.0"/>
+        <phase duration="10" minDur="10" maxDur="60" state="rrrrGGGrGGGG"/>
+        <phase duration="3" state="rrrryyyryyyy"/>
+        <phase duration="10" minDur="10" maxDur="28" state="GGGGrrrGrrrr"/>
+        <phase duration="3" state="yyyyrrryrrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C3" type="actuated" programID="actuado_ajustado" offset="0">
+        <param key="max-gap" value="2.0"/>
+        <param key="detector-gap" value="2.0"/>
+        <phase duration="10" minDur="10" maxDur="56" state="rGGGGrrrrGGG"/>
+        <phase duration="3" state="ryyyyrrrryyy"/>
+        <phase duration="10" minDur="10" maxDur="42" state="GrrrrGGGGrrr"/>
+        <phase duration="3" state="yrrrryyyyrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C4" type="actuated" programID="actuado_ajustado" offset="0">
+        <param key="max-gap" value="2.0"/>
+        <param key="detector-gap" value="2.0"/>
+        <phase duration="10" minDur="10" maxDur="52" state="rrrGGGGrrrGGG"/>
+        <phase duration="3" state="rrryyyyrrryyy"/>
+        <phase duration="10" minDur="10" maxDur="46" state="GGGrrrrGGGrrr"/>
+        <phase duration="3" state="yyyrrrryyyrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C5" type="actuated" programID="actuado_ajustado" offset="0">
+        <param key="max-gap" value="2.0"/>
+        <param key="detector-gap" value="2.0"/>
+        <phase duration="10" minDur="10" maxDur="60" state="rrrGGGrrrGGG"/>
+        <phase duration="3" state="rrryyyrrryyy"/>
+        <phase duration="10" minDur="10" maxDur="32" state="GGGrrrGGGrrr"/>
+        <phase duration="3" state="yyyrrryyyrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C6" type="actuated" programID="actuado_ajustado" offset="0">
+        <param key="max-gap" value="2.0"/>
+        <param key="detector-gap" value="2.0"/>
+        <phase duration="10" minDur="10" maxDur="52" state="rrrGGGrrrGGG"/>
+        <phase duration="3" state="rrryyyrrryyy"/>
+        <phase duration="10" minDur="10" maxDur="46" state="GGGrrrGGGrrr"/>
+        <phase duration="3" state="yyyrrryyyrrr"/>
+    </tlLogic>
+</additional>

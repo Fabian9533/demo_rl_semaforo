@@ -1,0 +1,12 @@
+<additional>
+    <!-- Plan actual del nudo, medido en el sitio el 13.11.2026 (programa.py) -->
+    <tlLogic id="semaforo_S1" type="static" programID="fijo" offset="0">
+        <phase duration="37" state="rrrrGGGrrrrrrrGGGGr"/>  <!-- Reducto de frente, los dos sentidos -->
+        <phase duration="3" state="rrrryyyrrrrrrryyyyr"/>  <!-- transicion -->
+        <phase duration="15" state="rrrrrrrGGrrrrrrrrrG"/>  <!-- Giros a la izquierda de Reducto -->
+        <phase duration="3" state="rrrrrrryyrrrrrrrrry"/>  <!-- transicion -->
+        <phase duration="34" state="rrrrrrrrrrrrrrrrrrr"/>  <!-- todo en rojo -->
+        <phase duration="37" state="GGGGrrrrrGGGGGrrrrr"/>  <!-- 28 de Julio desde el puente y Balboa -->
+        <phase duration="3" state="yyyyrrrrryyyyyrrrrr"/>  <!-- transicion -->
+    </tlLogic>
+</additional>

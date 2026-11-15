@@ -1,0 +1,15 @@
+<additional>
+    <!-- Actuado ajustado del caso Lima (estudio.py ajustar-actuado): {'max-gap': 2.0, 'detector-gap': 2.0, 'maximos': [60, 60, 60, 60], 'esquema': '60', 'retraso_total_10': 179.411, 'retraso_total_30': 179.03633333333335} -->
+    <tlLogic id="semaforo_S1" type="actuated" programID="actuado_ajustado" offset="0">
+        <param key="max-gap" value="2.0"/>
+        <param key="detector-gap" value="2.0"/>
+        <phase duration="10" minDur="10" maxDur="60" state="rrrrrGGGggrrrrrrGGGGr"/>  <!-- Reducto norte y sur -->
+        <phase duration="3" state="rrrrrGyyyyrrrrrryyyyr"/>
+        <phase duration="5" minDur="5" maxDur="60" state="rrrrrGrrrrrrrrrrrrrrG"/>  <!-- Giros de Reducto hacia el puente -->
+        <phase duration="3" state="rrrrryrrrrrrrrrrrrrry"/>
+        <phase duration="10" minDur="10" maxDur="60" state="GGgGGrrrrrrrrrrrrrrrr"/>  <!-- 28 de Julio desde el puente -->
+        <phase duration="3" state="yyyyyrrrrrrrrrrrrrrrr"/>
+        <phase duration="10" minDur="10" maxDur="60" state="rrrrrrrrrrGGGGGGrrrrr"/>  <!-- Balboa -->
+        <phase duration="3" state="rrrrrrrrrryyyyyyrrrrr"/>
+    </tlLogic>
+</additional>

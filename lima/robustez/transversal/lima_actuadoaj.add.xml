@@ -1,0 +1,14 @@
+<additional>
+    <!-- Actuado ajustado del caso Lima (estudio.py ajustar-actuado): por retraso, alcance 200 m, retraso minimo 3 s, maximos 60 -->
+    <tlLogic id="semaforo_S1" type="delay_based" programID="actuado_ajustado" offset="0">
+        <param key="detectorRange" value="200"/>
+        <param key="minTimeloss" value="3"/>
+        <phase duration="10" minDur="10" maxDur="60" state="rrrrGGGrrrrrrrGGGGr"/>  <!-- Reducto de frente, los dos sentidos -->
+        <phase duration="3" state="rrrryyyrrrrrrryyyyr"/>  <!-- transicion -->
+        <phase duration="10" minDur="10" maxDur="60" state="rrrrrrrGGrrrrrrrrrG"/>  <!-- Giros a la izquierda de Reducto -->
+        <phase duration="3" state="rrrrrrryyrrrrrrrrry"/>  <!-- transicion -->
+        <phase duration="34" state="rrrrrrrrrrrrrrrrrrr"/>  <!-- todo en rojo -->
+        <phase duration="10" minDur="10" maxDur="60" state="GGGGrrrrrGGGGGrrrrr"/>  <!-- 28 de Julio desde el puente y Balboa -->
+        <phase duration="3" state="yyyyrrrrryyyyyrrrrr"/>  <!-- transicion -->
+    </tlLogic>
+</additional>

@@ -86,22 +86,22 @@ La omisión no es menor (Capítulo~\ref{cap:resultados}). Solo IPPO con mensajes
 % tabla del actuado: P5 +21.8 frente al fijo, FALLA; fijo de P5 con desfases en ajedrez (0 y 23 s, capitulo4.tex, tab:plan2-fijo): conclusion 3 de
 % conclusiones.tex (plan2/barrido_malla3.csv)
 
-\noindent\textbf{Rigor experimental.} Falta análisis de significancia y de sensibilidad. Esta tesis separa las semillas de cada etapa. Cada aprendiz se entrena con tres semillas base; la política final de cada entrenamiento se elige con dos semillas de validación propias (999 y 1999), y la evaluación final usa treinta semillas (1001 a 1030), disjuntas de las anteriores y comunes a todos los controles. La sensibilidad al entrenamiento se mide evaluando las tres semillas base de cada aprendiz, no solo la que lo representa en cada caso. La sensibilidad a la medición se trata con un análisis de robustez que repite la comparación con otra medida del retraso y otro fijo de referencia (Sección~\ref{sec:robustez}).
+\noindent\textbf{Rigor experimental.} Falta análisis de significancia y de sensibilidad. Esta tesis separa las semillas de cada etapa. Cada aprendiz se entrena con tres semillas base; la política final de cada entrenamiento se elige con dos semillas de validación propias (999 y 1999), y la evaluación final usa treinta semillas (1001 a 1030), disjuntas de las anteriores y comunes a todos los controles. La sensibilidad al entrenamiento se mide evaluando las tres semillas base de cada aprendiz, no solo la que lo representa en cada caso. La sensibilidad a la medición se trata con un análisis de robustez que repite la comparación con otra medida del retraso y otro fijo de referencia (Sección~\ref{sec:robustez}), y con un segundo estudio, de reglas publicadas antes de entrenar y evaluación a ciegas, que usa llegadas aleatorias y dos tandas independientes de semillas (Sección~\ref{sec:segundo-estudio}).
 
 Frente al fijo y al actuado se reporta el cambio porcentual del retraso con su intervalo de confianza al 95\,\% por \textit{bootstrap} pareado por semilla (10\,000 remuestreos) y el valor $p$ de la prueba de Wilcoxon pareada. Una regla de veredicto fijada de antemano resume el resultado de cada modelo en cada caso (Sección~\ref{sec:plan2}).
 % fuente: plan2/ESPEC.md, secciones 3, 6 y 7; consolidar.py (delta_ic95 y p_wilcoxon)
 
 \noindent\textbf{Transferencia a Lima.} Las restricciones operativas de un cruce real ya forman parte del método en los seis casos: ámbar de 3~s en todos los escenarios, verde de 10 a 60~s para los aprendices y el actuado, un agente por semáforo y, en U4, mensajes entre semáforos vecinos.
 
-El cruce real sigue pendiente. La intersección de la Av.\ Paseo de la República con la Av.\ 28 de Julio se importó desde OpenStreetMap, pero en crudo: la red no se ha limpiado, su demanda es la aleatoria del asistente de importación y el caso no se ha evaluado. El procedimiento de importación y limpieza está en el Anexo~D, y el paso siguiente, en las Recomendaciones.
-% fuente: recomendaciones.tex ("Llevar el protocolo al cruce real de Lima"); ambar de 3 s y verde de 10 a 60 s:
-% Seccion sec:escenarios y Tabla tab:plan2-modelos (Capitulo III)
+La transferencia se probó en dos lugares de Miraflores: el nudo de la Av.\ Reducto con la Av.\ 28 de Julio, con su semáforo medido en el sitio, y un corredor de seis cruces en la Av.\ Benavides (Sección~\ref{sec:caso-lima}). La forma de las calles sale de OpenStreetMap y la demanda, de volúmenes publicados, no de aforos propios. Cómo se armó cada escenario está en el Anexo~D, y el paso siguiente, calibrarlos con datos de tráfico, en las Recomendaciones.
+% fuente: capitulo5.tex, sec:caso-lima; anexo_d_osm.tex; recomendaciones.tex (recomendacion 6); ambar de 3 s y
+% verde de 10 a 60 s: Seccion sec:escenarios y Tabla tab:plan2-modelos (Capitulo III)
 
 \section{Síntesis comparativa}
 
 La Tabla~\ref{tab:relacionados} resume los tres trabajos y los contrasta con esta tesis.
 
-\begin{table}[H]
+\begin{table}[!t]
 \setstretch{1}
 \centering
 \footnotesize
@@ -137,7 +137,7 @@ Esta tesis
   & SUMO
   & \makecell[l]{Fijo ajustado,\\actuado}
   & Q-learning, SARSA, Double DQN, IPPO (tres variantes), MAPPO
-  & Retraso de IPPO con mensajes: entre 3.6 y 23.3\,\% menor que el fijo ajustado en P1 a P4, empate en P5 y empate provisional en P6 (sin converger); menor que el actuado en los seis casos \\
+  & Con llegadas al azar: menos retraso en 3 de 6 casos ($-10.8$ y $-11.1$\,\% en conjunto). Con llegadas regulares, IPPO con mensajes: $-6.83$\,\%, y supera al actuado en los seis casos \\
 \bottomrule
 \end{tabularx}
 \caption[Síntesis de los trabajos relacionados]{Síntesis de los trabajos relacionados y de esta tesis. Cada resultado se expresa en la métrica de su trabajo: tiempo de espera (Uniandes, Trinity), tiempo de viaje (UAQ) o retraso por vehículo (esta tesis), por lo que las cifras no son comparables entre filas.}

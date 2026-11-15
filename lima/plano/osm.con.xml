@@ -1,0 +1,845 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- generated on 2026-11-13T14:55:18.072653-05:00 by Eclipse SUMO netconvert 1.25.0
+<netconvertConfiguration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/netconvertConfiguration.xsd">
+
+    <input>
+        <sumo-net-file value="borrador/lima_reducto.net.xml"/>
+    </input>
+
+    <output>
+        <plain-output-prefix value="plano/osm"/>
+        <output.street-names value="true"/>
+    </output>
+
+    <processing>
+        <geometry.min-radius.fix.railways value="false"/>
+        <geometry.avoid-overlap value="false"/>
+        <geometry.max-grade.fix value="false"/>
+        <offset.disable-normalization value="true"/>
+        <lefthand value="0"/>
+    </processing>
+
+    <junctions>
+        <no-turnarounds value="true"/>
+        <junctions.corner-detail value="5"/>
+        <junctions.limit-turn-speed value="5.50"/>
+        <rectangular-lane-cut value="0"/>
+    </junctions>
+
+    <pedestrian>
+        <walkingareas value="0"/>
+    </pedestrian>
+
+</netconvertConfiguration>
+-->
+
+<connections version="1.20" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/connections_file.xsd">
+    <connection from="-1098384939" to="653650077#14" fromLane="0" toLane="1"/>
+
+    <connection from="-1179664521" to="653650077#6" fromLane="0" toLane="1"/>
+
+    <connection from="-1179664522#0" to="-1179664522#1" fromLane="0" toLane="0"/>
+
+    <connection from="-1179664522#1" to="-1179664522#0" fromLane="0" toLane="0"/>
+    <connection from="-1179664522#1" to="-1179664521" fromLane="0" toLane="0"/>
+
+    <connection from="-120114605#1" to="156138281#2" fromLane="0" toLane="0"/>
+    <connection from="-120114605#1" to="-156138281#1" fromLane="0" toLane="0"/>
+
+    <connection from="-120114605#2" to="24316034#0" fromLane="0" toLane="0"/>
+    <connection from="-120114605#2" to="-120114605#1" fromLane="0" toLane="0"/>
+
+    <connection from="-1338100242" to="519480716#0" fromLane="0" toLane="0"/>
+    <connection from="-1338100242" to="-427240760#5" fromLane="0" toLane="0"/>
+    <connection from="-1338100242" to="519480715#0" fromLane="0" toLane="1"/>
+
+    <connection from="-1384662573" to="1384662574#1" fromLane="0" toLane="0"/>
+    <connection from="-1384662573" to="344160289#4" fromLane="0" toLane="1"/>
+
+    <connection from="-1384662574#1" to="344160289#4" fromLane="0" toLane="0"/>
+    <connection from="-1384662574#1" to="1384662573" fromLane="0" toLane="0"/>
+
+    <connection from="-14074512#2" to="519480713#4" fromLane="0" toLane="0"/>
+    <connection from="-14074512#2" to="-519480713#3" fromLane="0" toLane="0"/>
+
+    <connection from="-14074512#4" to="-435371893#2" fromLane="0" toLane="0"/>
+    <connection from="-14074512#4" to="-14074512#2" fromLane="0" toLane="0"/>
+    <connection from="-14074512#4" to="435371893#3" fromLane="0" toLane="1"/>
+
+    <connection from="-14074512#7" to="24315751#0" fromLane="0" toLane="0"/>
+    <connection from="-14074512#7" to="-14074512#4" fromLane="0" toLane="0"/>
+
+    <connection from="-14074512#8" to="769369468" fromLane="0" toLane="0"/>
+    <connection from="-14074512#8" to="-14074512#7" fromLane="0" toLane="0"/>
+    <connection from="-14074512#8" to="769369469#0" fromLane="0" toLane="0"/>
+
+    <connection from="-156138281#0"/>
+
+    <connection from="-156138281#1" to="436779615" fromLane="0" toLane="0"/>
+    <connection from="-156138281#1" to="-156138281#0" fromLane="0" toLane="0"/>
+
+    <connection from="-156138281#3" to="-156138281#1" fromLane="0" toLane="0"/>
+    <connection from="-156138281#3" to="120114605#0" fromLane="0" toLane="0"/>
+
+    <connection from="-24315745" to="24315744#1" fromLane="0" toLane="1"/>
+
+    <connection from="-24315749#2" to="430174882#1" fromLane="0" toLane="0"/>
+
+    <connection from="-24315770" to="24315769#1" fromLane="0" toLane="1"/>
+
+    <connection from="-24316034#1" to="-120114605#1" fromLane="0" toLane="0"/>
+    <connection from="-24316034#1" to="120114605#2" fromLane="0" toLane="0"/>
+
+    <connection from="-243364009" to="243364008#0" fromLane="0" toLane="0"/>
+
+    <connection from="-33752922#1" to="1102923968#0" fromLane="0" toLane="0"/>
+    <connection from="-33752922#1" to="1102923968#0" fromLane="1" toLane="1"/>
+    <connection from="-33752922#1" to="684055776#1" fromLane="1" toLane="1"/>
+
+    <connection from="-33752922#4" to="437650792#0" fromLane="0" toLane="0"/>
+    <connection from="-33752922#4" to="-33752922#1" fromLane="0" toLane="0"/>
+    <connection from="-33752922#4" to="-33752922#1" fromLane="1" toLane="1"/>
+    <connection from="-33752922#4" to="-156138281#3" fromLane="1" toLane="0"/>
+
+    <connection from="-427240760#3" to="344160289#0" fromLane="0" toLane="0"/>
+    <connection from="-427240760#3" to="344160289#0" fromLane="0" toLane="1"/>
+    <connection from="-427240760#3" to="653650077#12" fromLane="0" toLane="1"/>
+
+    <connection from="-427240760#5" to="12561540#2" fromLane="0" toLane="0"/>
+    <connection from="-427240760#5" to="-427240760#3" fromLane="0" toLane="0"/>
+
+    <connection from="-428018114#1" to="291058250#2" fromLane="0" toLane="0"/>
+
+    <connection from="-428018114#2" to="24315768#0" fromLane="0" toLane="0"/>
+    <connection from="-428018114#2" to="-428018114#1" fromLane="0" toLane="0"/>
+
+    <connection from="-428020410" to="437650792#4" fromLane="0" toLane="0"/>
+
+    <connection from="-435371893#0"/>
+
+    <connection from="-435371893#2" to="-435371893#0" fromLane="0" toLane="0"/>
+    <connection from="-435371893#2" to="24315751#2" fromLane="0" toLane="1"/>
+
+    <connection from="-435371893#4" to="14074512#3" fromLane="0" toLane="0"/>
+    <connection from="-435371893#4" to="-435371893#2" fromLane="0" toLane="0"/>
+    <connection from="-435371893#4" to="-14074512#2" fromLane="0" toLane="0"/>
+
+    <connection from="-437195694" to="202466064#3" fromLane="0" toLane="0"/>
+
+    <connection from="-519480713#1" to="1338100241" fromLane="0" toLane="0"/>
+    <connection from="-519480713#1" to="1338100241" fromLane="0" toLane="1"/>
+    <connection from="-519480713#1" to="-1338100242" fromLane="0" toLane="0"/>
+
+    <connection from="-519480713#3" to="291058250#0" fromLane="0" toLane="0"/>
+    <connection from="-519480713#3" to="-519480713#1" fromLane="0" toLane="0"/>
+    <connection from="-519480713#3" to="14074486#0" fromLane="0" toLane="1"/>
+    <connection from="-519480713#3" to="-435371893#4" fromLane="0" toLane="0"/>
+
+    <connection from="-519480713#4" to="-519480713#3" fromLane="0" toLane="0"/>
+    <connection from="-519480713#4" to="14074512#0" fromLane="0" toLane="0"/>
+
+    <connection from="-519480713#5" to="-519480713#4" fromLane="0" toLane="0"/>
+
+    <connection from="-519480713#6" to="-519480713#5" fromLane="0" toLane="0"/>
+
+    <connection from="-769369468" to="-14074512#7" fromLane="0" toLane="0"/>
+    <connection from="-769369468" to="769369469#0" fromLane="0" toLane="0"/>
+    <connection from="-769369468" to="14074512#8" fromLane="0" toLane="0"/>
+
+    <connection from="-769369469#1" to="14074512#8" fromLane="0" toLane="0"/>
+    <connection from="-769369469#1" to="769369468" fromLane="0" toLane="0"/>
+    <connection from="-769369469#1" to="-14074512#7" fromLane="0" toLane="0"/>
+
+    <connection from="1014180609#2" to="243364009" fromLane="0" toLane="0"/>
+    <connection from="1014180609#2" to="243364008#0" fromLane="0" toLane="0"/>
+    <connection from="1014180609#2" to="243364008#0" fromLane="1" toLane="1"/>
+
+    <connection from="1102923967#0" to="1148860366" fromLane="0" toLane="0"/>
+    <connection from="1102923967#0" to="1148860366" fromLane="1" toLane="1"/>
+    <connection from="1102923967#0" to="366716985#0" fromLane="1" toLane="1"/>
+
+    <connection from="1102923968#0" to="366716985#0" fromLane="0" toLane="0"/>
+    <connection from="1102923968#0" to="1102923968#1" fromLane="0" toLane="0"/>
+    <connection from="1102923968#0" to="1102923968#1" fromLane="1" toLane="1"/>
+
+    <connection from="1102923968#1" to="338233296#0" fromLane="0" toLane="0"/>
+    <connection from="1102923968#1" to="39441995" fromLane="0" toLane="0"/>
+    <connection from="1102923968#1" to="39441995" fromLane="1" toLane="1"/>
+
+    <connection from="1148860366" to="684055776#1" fromLane="0" toLane="0"/>
+    <connection from="1148860366" to="33752922#0" fromLane="0" toLane="0"/>
+    <connection from="1148860366" to="33752922#0" fromLane="1" toLane="1"/>
+
+    <connection from="1148860367" to="1148860366" fromLane="0" toLane="0"/>
+    <connection from="1148860367" to="366716985#0" fromLane="0" toLane="0"/>
+    <connection from="1148860367" to="366716985#0" fromLane="1" toLane="1"/>
+    <connection from="1148860367" to="1102923968#1" fromLane="1" toLane="1"/>
+
+    <connection from="1152454674#1" to="24315794#0" fromLane="0" toLane="0"/>
+    <connection from="1152454674#1" to="437195695#0" fromLane="0" toLane="0" disallow="pedestrian tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone"/>
+    <connection from="1152454674#1" to="437195695#0" fromLane="1" toLane="1"/>
+    <connection from="1152454674#1" to="39442007" fromLane="1" toLane="1"/>
+
+    <connection from="1179664522#0" to="-1179664521" fromLane="0" toLane="0"/>
+    <connection from="1179664522#0" to="1179664522#1" fromLane="0" toLane="0"/>
+
+    <connection from="1179664522#1" to="1179664522#0" fromLane="0" toLane="0"/>
+
+    <connection from="1179664523#0" to="1179664522#1" fromLane="0" toLane="0"/>
+    <connection from="1179664523#0" to="-1179664522#0" fromLane="0" toLane="0"/>
+
+    <connection from="120114605#0" to="120114605#2" fromLane="0" toLane="0"/>
+    <connection from="120114605#0" to="24316034#0" fromLane="0" toLane="0"/>
+
+    <connection from="120114605#2"/>
+
+    <connection from="12561540#0" to="427240760#4" fromLane="0" toLane="0"/>
+    <connection from="12561540#0" to="12561540#2" fromLane="0" toLane="0"/>
+    <connection from="12561540#0" to="12561540#2" fromLane="1" toLane="1"/>
+    <connection from="12561540#0" to="-427240760#3" fromLane="1" toLane="0"/>
+
+    <connection from="12561540#2" to="12561540#3" fromLane="0" toLane="0"/>
+    <connection from="12561540#2" to="12561540#3" fromLane="1" toLane="1"/>
+    <connection from="12561540#2" to="430180650#2" fromLane="1" toLane="1"/>
+
+    <connection from="12561540#3" to="291058250#5" fromLane="0" toLane="1"/>
+    <connection from="12561540#3" to="291058250#5" fromLane="1" toLane="2"/>
+
+    <connection from="1338100241" to="519480716#1" fromLane="0" toLane="0"/>
+    <connection from="1338100241" to="430180650#1" fromLane="0" toLane="0"/>
+    <connection from="1338100241" to="430180650#1" fromLane="1" toLane="1"/>
+
+    <connection from="1341367252" to="519480713#0" fromLane="0" toLane="0"/>
+
+    <connection from="1363209679-AddedOnRampEdge" to="1363209679" fromLane="1" toLane="0"/>
+    <connection from="1363209679-AddedOnRampEdge" to="1363209679" fromLane="2" toLane="1"/>
+    <connection from="1363209679-AddedOnRampEdge" to="1363209679" fromLane="3" toLane="2"/>
+
+    <connection from="1364169033" to="1363209679-AddedOnRampEdge" fromLane="0" toLane="1"/>
+    <connection from="1364169033" to="1363209679-AddedOnRampEdge" fromLane="1" toLane="2"/>
+    <connection from="1364169033" to="1363209679-AddedOnRampEdge" fromLane="2" toLane="3"/>
+
+    <connection from="1384662573"/>
+
+    <connection from="1384662574#1"/>
+
+    <connection from="14074486#0" to="14074486#3" fromLane="0" toLane="0"/>
+    <connection from="14074486#0" to="14074486#3" fromLane="1" toLane="1"/>
+    <connection from="14074486#0" to="519480715#2" fromLane="1" toLane="1"/>
+
+    <connection from="14074486#3" to="-24315749#2" fromLane="0" toLane="0"/>
+    <connection from="14074486#3" to="14074486#5" fromLane="0" toLane="0"/>
+    <connection from="14074486#3" to="14074486#5" fromLane="1" toLane="1"/>
+    <connection from="14074486#3" to="-769369469#1" fromLane="1" toLane="0"/>
+
+    <connection from="14074512#0" to="435371893#3" fromLane="0" toLane="0"/>
+    <connection from="14074512#0" to="14074512#3" fromLane="0" toLane="0"/>
+    <connection from="14074512#0" to="-435371893#2" fromLane="0" toLane="0"/>
+
+    <connection from="14074512#3" to="14074512#5" fromLane="0" toLane="0"/>
+    <connection from="14074512#3" to="24315751#0" fromLane="0" toLane="1"/>
+
+    <connection from="14074512#5" to="769369469#0" fromLane="0" toLane="0"/>
+    <connection from="14074512#5" to="14074512#8" fromLane="0" toLane="0"/>
+    <connection from="14074512#5" to="769369468" fromLane="0" toLane="0"/>
+
+    <connection from="14074512#8"/>
+
+    <connection from="14386726" to="1014180609#2" fromLane="0" toLane="0"/>
+    <connection from="14386726" to="1014180609#2" fromLane="1" toLane="1"/>
+
+    <connection from="14386816#0" to="37614650#0" fromLane="0" toLane="0"/>
+    <connection from="14386816#0" to="37614650#0" fromLane="0" toLane="1"/>
+    <connection from="14386816#0" to="14386816#2" fromLane="0" toLane="0"/>
+    <connection from="14386816#0" to="14386816#2" fromLane="1" toLane="1"/>
+
+    <connection from="156138281#0" to="156138281#1" fromLane="0" toLane="0"/>
+    <connection from="156138281#0" to="436779615" fromLane="0" toLane="1"/>
+
+    <connection from="156138281#1" to="120114605#0" fromLane="0" toLane="0"/>
+    <connection from="156138281#1" to="156138281#2" fromLane="0" toLane="0"/>
+
+    <connection from="156138281#2" to="33752922#2" fromLane="0" toLane="0"/>
+    <connection from="156138281#2" to="437650792#0" fromLane="0" toLane="0"/>
+    <connection from="156138281#2" to="437650792#0" fromLane="0" toLane="1"/>
+    <connection from="156138281#2" to="-33752922#1" fromLane="0" toLane="1"/>
+
+    <connection from="1571588122" to="24316013#3" fromLane="0" toLane="0"/>
+
+    <connection from="1573144947" to="11985865#1" fromLane="0" toLane="1"/>
+    <connection from="1573144947" to="11985865#1" fromLane="1" toLane="2"/>
+    <connection from="1573144947" to="11985865#1" fromLane="2" toLane="3"/>
+
+    <connection from="202466062" to="653645241#0" fromLane="0" toLane="2"/>
+
+    <connection from="202466064#0" to="202466064#1" fromLane="0" toLane="0"/>
+    <connection from="202466064#0" to="202466064#1" fromLane="1" toLane="1"/>
+    <connection from="202466064#0" to="211234588" fromLane="2" toLane="0"/>
+
+    <connection from="202466064#1" to="202466064#2" fromLane="0" toLane="0"/>
+    <connection from="202466064#1" to="202466064#2" fromLane="1" toLane="1"/>
+
+    <connection from="202466064#2" to="437195694" fromLane="0" toLane="0"/>
+    <connection from="202466064#2" to="202466064#3" fromLane="0" toLane="0"/>
+    <connection from="202466064#2" to="202466064#3" fromLane="1" toLane="1"/>
+
+    <connection from="202466064#3" to="1152454674#1" fromLane="0" toLane="0"/>
+    <connection from="202466064#3" to="1152454674#1" fromLane="1" toLane="1"/>
+
+    <connection from="211234588" to="1363209679-AddedOnRampEdge" fromLane="0" toLane="0"/>
+
+    <connection from="24315744#0" to="24315744#1" fromLane="0" toLane="0"/>
+    <connection from="24315744#0" to="24315744#1" fromLane="1" toLane="1"/>
+    <connection from="24315744#0" to="24315745" fromLane="1" toLane="0"/>
+
+    <connection from="24315744#1" to="430180650#9" fromLane="0" toLane="0"/>
+    <connection from="24315744#1" to="24315744#2" fromLane="0" toLane="0"/>
+    <connection from="24315744#1" to="24315744#2" fromLane="1" toLane="1"/>
+
+    <connection from="24315744#2" to="344160289#5" fromLane="0" toLane="0"/>
+    <connection from="24315744#2" to="24315744#3" fromLane="0" toLane="0"/>
+    <connection from="24315744#2" to="24315744#3" fromLane="1" toLane="1"/>
+
+    <connection from="24315745" to="430174880#3" fromLane="0" toLane="1"/>
+
+    <connection from="24315747" to="24315753#4" fromLane="0" toLane="0"/>
+
+    <connection from="24315749#0" to="14074486#5" fromLane="0" toLane="0"/>
+    <connection from="24315749#0" to="-769369469#1" fromLane="0" toLane="0"/>
+
+    <connection from="24315751#0" to="-435371893#0" fromLane="0" toLane="0"/>
+    <connection from="24315751#0" to="24315751#2" fromLane="0" toLane="0"/>
+    <connection from="24315751#0" to="24315751#2" fromLane="1" toLane="1"/>
+    <connection from="24315751#0" to="435371893#1" fromLane="1" toLane="1"/>
+
+    <connection from="24315751#2" to="24315751#3" fromLane="0" toLane="0"/>
+    <connection from="24315751#2" to="24315751#3" fromLane="1" toLane="1"/>
+    <connection from="24315751#2" to="435371891#1" fromLane="1" toLane="0"/>
+
+    <connection from="24315751#3" to="519480713#6" fromLane="0" toLane="0"/>
+    <connection from="24315751#3" to="-519480713#5" fromLane="1" toLane="0"/>
+
+    <connection from="24315753#0" to="24315744#0" fromLane="0" toLane="0"/>
+    <connection from="24315753#0" to="24315744#0" fromLane="0" toLane="1"/>
+    <connection from="24315753#0" to="24315753#2" fromLane="0" toLane="0"/>
+    <connection from="24315753#0" to="24315753#2" fromLane="1" toLane="1"/>
+
+    <connection from="24315753#2" to="24315753#4" fromLane="0" toLane="0"/>
+    <connection from="24315753#2" to="24315753#4" fromLane="1" toLane="1"/>
+
+    <connection from="24315753#4" to="653645241#0" fromLane="0" toLane="0"/>
+    <connection from="24315753#4" to="653645241#0" fromLane="1" toLane="1"/>
+
+    <connection from="24315755" to="202466064#0" fromLane="0" toLane="0"/>
+    <connection from="24315755" to="202466064#0" fromLane="1" toLane="1"/>
+    <connection from="24315755" to="202466064#0" fromLane="2" toLane="2"/>
+
+    <connection from="24315768#0" to="653650078#2" fromLane="0" toLane="0"/>
+    <connection from="24315768#0" to="653650078#2" fromLane="1" toLane="1"/>
+
+    <connection from="24315769#0" to="24315769#1" fromLane="0" toLane="0"/>
+    <connection from="24315769#0" to="24315769#1" fromLane="1" toLane="1"/>
+    <connection from="24315769#0" to="24315770" fromLane="1" toLane="0"/>
+
+    <connection from="24315769#1" to="342112931#1" fromLane="0" toLane="0"/>
+    <connection from="24315769#1" to="342112931#1" fromLane="1" toLane="1"/>
+
+    <connection from="24315770"/>
+
+    <connection from="24315794#0" to="365935498#0" fromLane="0" toLane="0"/>
+    <connection from="24315794#0" to="291058249" fromLane="0" toLane="0"/>
+    <connection from="24315794#0" to="291058249" fromLane="1" toLane="1"/>
+    <connection from="24315794#0" to="435836625" fromLane="2" toLane="0"/>
+    <connection from="24315794#0" to="243364007#0" fromLane="2" toLane="2"/>
+
+    <connection from="24315836#0" to="24315836#1" fromLane="0" toLane="0"/>
+    <connection from="24315836#0" to="24315836#1" fromLane="1" toLane="1"/>
+
+    <connection from="24315836#1" to="437650795#2" fromLane="0" toLane="0"/>
+    <connection from="24315836#1" to="24315836#2" fromLane="0" toLane="0"/>
+    <connection from="24315836#1" to="24315836#2" fromLane="1" toLane="1"/>
+
+    <connection from="24315836#2" to="24315836#3" fromLane="0" toLane="0"/>
+    <connection from="24315836#2" to="24315836#3" fromLane="1" toLane="1"/>
+    <connection from="24315836#2" to="437650796#5" fromLane="1" toLane="1"/>
+
+    <connection from="24316010" to="156138281#1" fromLane="0" toLane="0"/>
+    <connection from="24316010" to="436779615" fromLane="0" toLane="0"/>
+    <connection from="24316010" to="436779615" fromLane="1" toLane="1"/>
+    <connection from="24316010" to="-156138281#0" fromLane="1" toLane="0"/>
+
+    <connection from="24316013#0" to="437650795#8" fromLane="0" toLane="0"/>
+    <connection from="24316013#0" to="24316013#1" fromLane="0" toLane="0"/>
+
+    <connection from="24316013#1" to="24316013#2" fromLane="0" toLane="0"/>
+    <connection from="24316013#1" to="437650796#0" fromLane="0" toLane="1"/>
+    <connection from="24316013#1" to="437650792#2" fromLane="0" toLane="1"/>
+
+    <connection from="24316013#2" to="24316013#3" fromLane="0" toLane="0"/>
+
+    <connection from="24316032" to="366716986" fromLane="0" toLane="0"/>
+    <connection from="24316032" to="1148860367" fromLane="0" toLane="1"/>
+
+    <connection from="24316034#0"/>
+
+    <connection from="243364007#0" to="653650078#2" fromLane="0" toLane="0"/>
+    <connection from="243364007#0" to="653650078#2" fromLane="1" toLane="1"/>
+    <connection from="243364007#0" to="653650078#2" fromLane="2" toLane="2"/>
+
+    <connection from="243364008#0" to="653645246" fromLane="0" toLane="0"/>
+    <connection from="243364008#0" to="653645246" fromLane="1" toLane="1"/>
+    <connection from="243364008#0" to="394390119#0" fromLane="1" toLane="0"/>
+    <connection from="243364008#0" to="394390119#0" fromLane="1" toLane="1"/>
+
+    <connection from="243364009" to="437195695#2" fromLane="0" toLane="0"/>
+
+    <connection from="279058541" to="11985865#1" fromLane="0" toLane="0"/>
+
+    <connection from="291058249" to="653650077#0" fromLane="0" toLane="0"/>
+    <connection from="291058249" to="653650077#0" fromLane="1" toLane="1"/>
+
+    <connection from="291058250#0" to="428018114#0" fromLane="0" toLane="0"/>
+    <connection from="291058250#0" to="291058250#2" fromLane="0" toLane="0"/>
+    <connection from="291058250#0" to="291058250#2" fromLane="1" toLane="1"/>
+    <connection from="291058250#0" to="291058250#2" fromLane="2" toLane="2"/>
+
+    <connection from="291058250#2" to="291058250#5" fromLane="0" toLane="0"/>
+    <connection from="291058250#2" to="291058250#5" fromLane="1" toLane="1"/>
+    <connection from="291058250#2" to="291058250#5" fromLane="2" toLane="2"/>
+
+    <connection from="291058250#5" to="653645248" fromLane="0" toLane="0"/>
+    <connection from="291058250#5" to="653645248" fromLane="1" toLane="1"/>
+    <connection from="291058250#5" to="653645248" fromLane="2" toLane="2"/>
+    <connection from="291058250#5" to="366715629#0" fromLane="2" toLane="0"/>
+
+    <connection from="33232615#0" to="24316032" fromLane="0" toLane="0"/>
+    <connection from="33232615#0" to="33232615#2" fromLane="0" toLane="0"/>
+    <connection from="33232615#0" to="33232615#2" fromLane="1" toLane="1"/>
+
+    <connection from="33232615#2" to="1102923967#0" fromLane="0" toLane="0"/>
+    <connection from="33232615#2" to="338233296#0" fromLane="0" toLane="0" disallow="pedestrian tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone"/>
+    <connection from="33232615#2" to="338233296#0" fromLane="1" toLane="1"/>
+    <connection from="33232615#2" to="39441995" fromLane="1" toLane="1"/>
+
+    <connection from="33232793#0" to="33232793#1" fromLane="0" toLane="0"/>
+
+    <connection from="33232793#1" to="437650795#4" fromLane="0" toLane="0"/>
+    <connection from="33232793#1" to="33232793#3" fromLane="0" toLane="0"/>
+    <connection from="33232793#1" to="437650792#5" fromLane="0" toLane="1"/>
+
+    <connection from="33232793#3" to="33232793#5" fromLane="0" toLane="0"/>
+    <connection from="33232793#3" to="437650796#3" fromLane="0" toLane="1"/>
+
+    <connection from="33232882#0" to="437650796#1" fromLane="0" toLane="0"/>
+    <connection from="33232882#0" to="33232882#1" fromLane="0" toLane="0"/>
+    <connection from="33232882#0" to="33232882#1" fromLane="1" toLane="1"/>
+
+    <connection from="33232882#1" to="437650792#3" fromLane="0" toLane="0"/>
+    <connection from="33232882#1" to="33232882#2" fromLane="0" toLane="0"/>
+    <connection from="33232882#1" to="33232882#2" fromLane="1" toLane="1"/>
+
+    <connection from="33232882#2" to="33232882#3" fromLane="0" toLane="0"/>
+    <connection from="33232882#2" to="33232882#3" fromLane="1" toLane="1"/>
+    <connection from="33232882#2" to="437650795#7" fromLane="1" toLane="1"/>
+
+    <connection from="33232882#3" to="366716985#2" fromLane="0" toLane="0"/>
+    <connection from="33232882#3" to="33232882#4" fromLane="0" toLane="0"/>
+    <connection from="33232882#3" to="33232882#4" fromLane="1" toLane="1"/>
+
+    <connection from="33232882#4" to="338233296#2" fromLane="0" toLane="0"/>
+    <connection from="33232882#4" to="338233296#2" fromLane="1" toLane="1"/>
+
+    <connection from="337413860#0" to="37614651#3" fromLane="0" toLane="0"/>
+    <connection from="337413860#0" to="37614651#3" fromLane="1" toLane="1"/>
+
+    <connection from="33752922#0" to="-156138281#3" fromLane="0" toLane="0"/>
+    <connection from="33752922#0" to="33752922#2" fromLane="0" toLane="0"/>
+    <connection from="33752922#0" to="33752922#2" fromLane="1" toLane="1"/>
+    <connection from="33752922#0" to="437650792#0" fromLane="1" toLane="1"/>
+
+    <connection from="33752922#2"/>
+
+    <connection from="338233296#0" to="338233296#2" fromLane="0" toLane="0"/>
+    <connection from="338233296#0" to="338233296#2" fromLane="1" toLane="1"/>
+
+    <connection from="338233296#2" to="33232793#0" fromLane="0" toLane="0"/>
+    <connection from="338233296#2" to="511365267" fromLane="0" toLane="0"/>
+    <connection from="338233296#2" to="511365267" fromLane="1" toLane="1"/>
+    <connection from="338233296#2" to="279058541" fromLane="1" toLane="0"/>
+
+    <connection from="342112931#0" to="342112931#1" fromLane="0" toLane="0"/>
+    <connection from="342112931#0" to="342112931#1" fromLane="1" toLane="1"/>
+
+    <connection from="342112931#1" to="1014180609#2" fromLane="0" toLane="0"/>
+    <connection from="342112931#1" to="1014180609#2" fromLane="1" toLane="1"/>
+
+    <connection from="344160289#0" to="430174880#1" fromLane="0" toLane="0"/>
+    <connection from="344160289#0" to="344160289#3" fromLane="0" toLane="0"/>
+    <connection from="344160289#0" to="344160289#3" fromLane="1" toLane="1"/>
+
+    <connection from="344160289#3" to="1384662573" fromLane="0" toLane="0"/>
+    <connection from="344160289#3" to="1384662574#1" fromLane="0" toLane="0"/>
+    <connection from="344160289#3" to="344160289#4" fromLane="1" toLane="1"/>
+
+    <connection from="344160289#4" to="344160289#5" fromLane="0" toLane="0"/>
+    <connection from="344160289#4" to="344160289#5" fromLane="1" toLane="1"/>
+    <connection from="344160289#4" to="24315744#3" fromLane="1" toLane="1"/>
+
+    <connection from="344256563#0" to="437650796#5" fromLane="0" toLane="0"/>
+    <connection from="344256563#0" to="344256563#1" fromLane="0" toLane="0"/>
+    <connection from="344256563#0" to="344256563#1" fromLane="1" toLane="1"/>
+
+    <connection from="344256563#1" to="344256563#2" fromLane="0" toLane="0"/>
+    <connection from="344256563#1" to="344256563#2" fromLane="1" toLane="1"/>
+    <connection from="344256563#1" to="437650795#2" fromLane="1" toLane="1"/>
+
+    <connection from="344256563#2" to="344256563#3" fromLane="0" toLane="0"/>
+    <connection from="344256563#2" to="344256563#3" fromLane="1" toLane="1"/>
+
+    <connection from="35069335#1" to="1152454674#1" fromLane="0" toLane="0"/>
+
+    <connection from="365935498#0" to="35069335#1" fromLane="0" toLane="0"/>
+    <connection from="365935498#0" to="365935498#2" fromLane="0" toLane="0"/>
+    <connection from="365935498#0" to="365935498#2" fromLane="1" toLane="1"/>
+
+    <connection from="365935498#2" to="-437195694" fromLane="0" toLane="0"/>
+    <connection from="365935498#2" to="430178642" fromLane="0" toLane="0"/>
+    <connection from="365935498#2" to="430178642" fromLane="1" toLane="1"/>
+
+    <connection from="366715629#0" to="653650077#0" fromLane="0" toLane="1"/>
+
+    <connection from="366716985#0" to="24316013#0" fromLane="0" toLane="0"/>
+    <connection from="366716985#0" to="366716985#1" fromLane="0" toLane="0"/>
+    <connection from="366716985#0" to="366716985#1" fromLane="1" toLane="1"/>
+
+    <connection from="366716985#1" to="366716985#2" fromLane="0" toLane="0"/>
+    <connection from="366716985#1" to="366716985#2" fromLane="1" toLane="1"/>
+    <connection from="366716985#1" to="33232882#4" fromLane="1" toLane="1"/>
+
+    <connection from="366716985#2" to="33232793#1" fromLane="0" toLane="0"/>
+
+    <connection from="366716986" to="684055777#1" fromLane="0" toLane="0"/>
+
+    <connection from="37614650#0" to="-519480713#3" fromLane="0" toLane="0"/>
+    <connection from="37614650#0" to="14074512#0" fromLane="0" toLane="0"/>
+    <connection from="37614650#0" to="519480713#4" fromLane="1" toLane="0"/>
+
+    <connection from="37614651#0" to="37614651#3" fromLane="0" toLane="0"/>
+    <connection from="37614651#0" to="37614651#3" fromLane="1" toLane="1"/>
+
+    <connection from="37614651#3" to="-428018114#2" fromLane="0" toLane="0"/>
+    <connection from="37614651#3" to="14386816#0" fromLane="1" toLane="1"/>
+
+    <connection from="394390119#0" to="653645247" fromLane="0" toLane="0"/>
+    <connection from="394390119#0" to="365935498#0" fromLane="0" toLane="0"/>
+    <connection from="394390119#0" to="365935498#0" fromLane="1" toLane="1"/>
+    <connection from="394390119#0" to="291058249" fromLane="1" toLane="1"/>
+    <connection from="394390119#0" to="435836625" fromLane="1" toLane="1"/>
+    <connection from="394390119#0" to="243364007#0" fromLane="1" toLane="2"/>
+
+    <connection from="39441995" to="24315794#0" fromLane="0" toLane="0"/>
+    <connection from="39441995" to="24315794#0" fromLane="1" toLane="1"/>
+    <connection from="39441995" to="24315794#0" fromLane="1" toLane="2"/>
+    <connection from="39441995" to="437195695#0" fromLane="1" toLane="1"/>
+
+    <connection from="39442007" to="1102923967#0" fromLane="0" toLane="0"/>
+    <connection from="39442007" to="1102923967#0" fromLane="1" toLane="1"/>
+    <connection from="39442007" to="338233296#0" fromLane="1" toLane="1"/>
+
+    <connection from="427240760#0" to="427240760#4" fromLane="0" toLane="0"/>
+    <connection from="427240760#0" to="12561540#2" fromLane="0" toLane="1"/>
+
+    <connection from="427240760#4" to="519480715#0" fromLane="0" toLane="1"/>
+    <connection from="427240760#4" to="1341367252" fromLane="0" toLane="0"/>
+    <connection from="427240760#4" to="519480716#0" fromLane="0" toLane="1"/>
+
+    <connection from="428018114#0" to="428018114#2" fromLane="0" toLane="0"/>
+    <connection from="428018114#0" to="24315768#0" fromLane="0" toLane="1"/>
+
+    <connection from="428018114#2" to="14386816#0" fromLane="0" toLane="0"/>
+
+    <connection from="428020410" to="437650796#2" fromLane="0" toLane="1"/>
+
+    <connection from="430174880#0" to="430174880#1" fromLane="0" toLane="0"/>
+    <connection from="430174880#0" to="430174880#1" fromLane="1" toLane="1"/>
+    <connection from="430174880#0" to="344160289#3" fromLane="1" toLane="1"/>
+
+    <connection from="430174880#1" to="430174880#2" fromLane="0" toLane="0"/>
+    <connection from="430174880#1" to="430174880#2" fromLane="1" toLane="1"/>
+    <connection from="430174880#1" to="430180650#8" fromLane="1" toLane="1"/>
+
+    <connection from="430174880#2" to="430174880#3" fromLane="0" toLane="0"/>
+    <connection from="430174880#2" to="430174880#3" fromLane="1" toLane="1"/>
+    <connection from="430174880#2" to="-24315745" fromLane="1" toLane="0"/>
+
+    <connection from="430174880#3" to="430174880#4" fromLane="0" toLane="0"/>
+    <connection from="430174880#3" to="430174880#4" fromLane="1" toLane="1"/>
+    <connection from="430174880#3" to="862515543" fromLane="1" toLane="0"/>
+
+    <connection from="430174880#4" to="653645241#2" fromLane="0" toLane="0"/>
+    <connection from="430174880#4" to="653645241#2" fromLane="1" toLane="1"/>
+
+    <connection from="430174882#0" to="24315749#0" fromLane="0" toLane="0"/>
+    <connection from="430174882#0" to="430174882#1" fromLane="0" toLane="0"/>
+    <connection from="430174882#0" to="430174882#1" fromLane="1" toLane="1"/>
+
+    <connection from="430174882#1" to="519480715#0" fromLane="0" toLane="0"/>
+    <connection from="430174882#1" to="1341367252" fromLane="0" toLane="0"/>
+    <connection from="430174882#1" to="519480716#0" fromLane="0" toLane="0"/>
+    <connection from="430174882#1" to="519480716#0" fromLane="1" toLane="1"/>
+    <connection from="430174882#1" to="-427240760#5" fromLane="1" toLane="0"/>
+
+    <connection from="430178642" to="202466064#2" fromLane="0" toLane="0"/>
+    <connection from="430178642" to="202466064#2" fromLane="1" toLane="1"/>
+
+    <connection from="430180650#1" to="12561540#3" fromLane="0" toLane="0"/>
+    <connection from="430180650#1" to="430180650#2" fromLane="0" toLane="0"/>
+    <connection from="430180650#1" to="430180650#2" fromLane="1" toLane="1"/>
+
+    <connection from="430180650#2" to="430180650#5" fromLane="0" toLane="0"/>
+    <connection from="430180650#2" to="430180650#5" fromLane="1" toLane="1"/>
+    <connection from="430180650#2" to="653650077#9" fromLane="1" toLane="1"/>
+
+    <connection from="430180650#5" to="430174880#2" fromLane="0" toLane="0"/>
+    <connection from="430180650#5" to="430180650#8" fromLane="0" toLane="0"/>
+    <connection from="430180650#5" to="430180650#8" fromLane="1" toLane="1"/>
+
+    <connection from="430180650#8" to="430180650#9" fromLane="0" toLane="0"/>
+    <connection from="430180650#8" to="430180650#9" fromLane="1" toLane="1"/>
+    <connection from="430180650#8" to="24315744#2" fromLane="1" toLane="1"/>
+
+    <connection from="435327821#0"/>
+
+    <connection from="435371891#0" to="24315751#3" fromLane="0" toLane="0"/>
+    <connection from="435371891#0" to="435371891#1" fromLane="0" toLane="0"/>
+
+    <connection from="435371891#1" to="519480713#5" fromLane="0" toLane="0"/>
+    <connection from="435371891#1" to="-519480713#4" fromLane="0" toLane="0"/>
+
+    <connection from="435371893#0" to="24315751#2" fromLane="0" toLane="0"/>
+    <connection from="435371893#0" to="435371893#1" fromLane="0" toLane="0"/>
+    <connection from="435371893#0" to="435371893#1" fromLane="1" toLane="1"/>
+
+    <connection from="435371893#1" to="-14074512#2" fromLane="0" toLane="0"/>
+    <connection from="435371893#1" to="435371893#3" fromLane="0" toLane="0"/>
+    <connection from="435371893#1" to="435371893#3" fromLane="1" toLane="1"/>
+    <connection from="435371893#1" to="14074512#3" fromLane="1" toLane="0"/>
+
+    <connection from="435371893#3" to="519480713#3" fromLane="0" toLane="0"/>
+    <connection from="435371893#3" to="291058250#0" fromLane="0" toLane="0"/>
+    <connection from="435371893#3" to="291058250#0" fromLane="1" toLane="1"/>
+    <connection from="435371893#3" to="291058250#0" fromLane="1" toLane="2"/>
+    <connection from="435371893#3" to="-519480713#1" fromLane="1" toLane="0"/>
+    <connection from="435371893#3" to="14074486#0" fromLane="1" toLane="1"/>
+
+    <connection from="435836263#0" to="435836263#1" fromLane="0" toLane="0"/>
+    <connection from="435836263#0" to="435836263#1" fromLane="1" toLane="1"/>
+    <connection from="435836263#0" to="35069335#1" fromLane="1" toLane="0"/>
+
+    <connection from="435836263#1" to="291058249" fromLane="0" toLane="0"/>
+    <connection from="435836263#1" to="435836625" fromLane="0" toLane="0"/>
+    <connection from="435836263#1" to="243364007#0" fromLane="0" toLane="1"/>
+    <connection from="435836263#1" to="243364007#0" fromLane="1" toLane="2"/>
+    <connection from="435836263#1" to="653645247" fromLane="1" toLane="2"/>
+
+    <connection from="435836625" to="653650077#0" fromLane="0" toLane="0"/>
+    <connection from="435836625" to="653650077#0" fromLane="1" toLane="1"/>
+
+    <connection from="436779615" to="366716986" fromLane="0" toLane="0"/>
+    <connection from="436779615" to="1148860367" fromLane="0" toLane="0"/>
+    <connection from="436779615" to="1148860367" fromLane="1" toLane="1"/>
+
+    <connection from="437195694" to="430178642" fromLane="0" toLane="0"/>
+
+    <connection from="437195695#0" to="-243364009" fromLane="0" toLane="0"/>
+    <connection from="437195695#0" to="437195695#2" fromLane="0" toLane="0"/>
+    <connection from="437195695#0" to="437195695#2" fromLane="1" toLane="1"/>
+
+    <connection from="437195695#2" to="14386726" fromLane="0" toLane="0"/>
+    <connection from="437195695#2" to="14386726" fromLane="0" toLane="1"/>
+    <connection from="437195695#2" to="437195695#3" fromLane="0" toLane="0"/>
+    <connection from="437195695#2" to="437195695#3" fromLane="1" toLane="1"/>
+
+    <connection from="437195695#3" to="24315769#0" fromLane="0" toLane="0"/>
+    <connection from="437195695#3" to="24315769#0" fromLane="0" toLane="1"/>
+    <connection from="437195695#3" to="437195695#4" fromLane="0" toLane="0"/>
+    <connection from="437195695#3" to="437195695#4" fromLane="1" toLane="1"/>
+
+    <connection from="437650792#0" to="1571588122" fromLane="0" toLane="0"/>
+    <connection from="437650792#0" to="1571588122" fromLane="0" toLane="1"/>
+    <connection from="437650792#0" to="437650792#1" fromLane="0" toLane="0"/>
+    <connection from="437650792#0" to="437650792#1" fromLane="1" toLane="1"/>
+
+    <connection from="437650792#1" to="24316013#2" fromLane="0" toLane="0"/>
+    <connection from="437650792#1" to="437650796#0" fromLane="0" toLane="0"/>
+    <connection from="437650792#1" to="437650792#2" fromLane="0" toLane="0"/>
+    <connection from="437650792#1" to="437650792#2" fromLane="1" toLane="1"/>
+
+    <connection from="437650792#2" to="437650792#3" fromLane="0" toLane="0"/>
+    <connection from="437650792#2" to="437650792#3" fromLane="1" toLane="1"/>
+    <connection from="437650792#2" to="33232882#2" fromLane="1" toLane="1"/>
+
+    <connection from="437650792#3" to="428020410" fromLane="0" toLane="0"/>
+    <connection from="437650792#3" to="437650792#4" fromLane="0" toLane="0"/>
+    <connection from="437650792#3" to="437650792#4" fromLane="1" toLane="1"/>
+
+    <connection from="437650792#4" to="33232793#3" fromLane="0" toLane="0"/>
+    <connection from="437650792#4" to="437650792#5" fromLane="0" toLane="0"/>
+    <connection from="437650792#4" to="437650792#5" fromLane="1" toLane="1"/>
+    <connection from="437650792#4" to="437650795#4" fromLane="1" toLane="1"/>
+
+    <connection from="437650792#5" to="24315836#1" fromLane="0" toLane="0"/>
+    <connection from="437650792#5" to="344256563#3" fromLane="1" toLane="1"/>
+
+    <connection from="437650795#0" to="344256563#2" fromLane="0" toLane="0"/>
+    <connection from="437650795#0" to="437650795#2" fromLane="0" toLane="0"/>
+    <connection from="437650795#0" to="437650795#2" fromLane="1" toLane="1"/>
+    <connection from="437650795#0" to="24315836#2" fromLane="1" toLane="1"/>
+
+    <connection from="437650795#2" to="437650792#5" fromLane="0" toLane="0"/>
+    <connection from="437650795#2" to="437650795#4" fromLane="0" toLane="0"/>
+    <connection from="437650795#2" to="437650795#4" fromLane="1" toLane="1"/>
+    <connection from="437650795#2" to="33232793#3" fromLane="1" toLane="0"/>
+
+    <connection from="437650795#4" to="33232882#3" fromLane="0" toLane="0"/>
+    <connection from="437650795#4" to="437650795#7" fromLane="0" toLane="0"/>
+    <connection from="437650795#4" to="437650795#7" fromLane="1" toLane="1"/>
+
+    <connection from="437650795#7" to="437650795#8" fromLane="0" toLane="0"/>
+    <connection from="437650795#7" to="437650795#8" fromLane="1" toLane="1"/>
+    <connection from="437650795#7" to="24316013#1" fromLane="1" toLane="0"/>
+
+    <connection from="437650795#8" to="1102923968#0" fromLane="0" toLane="0"/>
+    <connection from="437650795#8" to="684055776#1" fromLane="0" toLane="0"/>
+    <connection from="437650795#8" to="684055776#1" fromLane="1" toLane="1"/>
+    <connection from="437650795#8" to="33752922#0" fromLane="1" toLane="1"/>
+
+    <connection from="437650796#0" to="437650796#1" fromLane="0" toLane="0"/>
+    <connection from="437650796#0" to="437650796#1" fromLane="1" toLane="1"/>
+    <connection from="437650796#0" to="33232882#1" fromLane="1" toLane="1"/>
+
+    <connection from="437650796#1" to="437650796#2" fromLane="0" toLane="0"/>
+    <connection from="437650796#1" to="437650796#2" fromLane="1" toLane="1"/>
+    <connection from="437650796#1" to="-428020410" fromLane="1" toLane="0"/>
+
+    <connection from="437650796#2" to="33232793#5" fromLane="0" toLane="0"/>
+    <connection from="437650796#2" to="437650796#3" fromLane="0" toLane="0"/>
+    <connection from="437650796#2" to="437650796#3" fromLane="1" toLane="1"/>
+
+    <connection from="437650796#3" to="24315836#3" fromLane="0" toLane="0"/>
+    <connection from="437650796#3" to="437650796#5" fromLane="0" toLane="0"/>
+    <connection from="437650796#3" to="437650796#5" fromLane="1" toLane="1"/>
+    <connection from="437650796#3" to="344256563#1" fromLane="1" toLane="1"/>
+
+    <connection from="519480713#0" to="14074486#0" fromLane="0" toLane="0"/>
+    <connection from="519480713#0" to="-435371893#4" fromLane="0" toLane="0"/>
+    <connection from="519480713#0" to="519480713#3" fromLane="0" toLane="0"/>
+    <connection from="519480713#0" to="291058250#0" fromLane="0" toLane="2"/>
+
+    <connection from="519480713#3" to="14074512#0" fromLane="0" toLane="0"/>
+    <connection from="519480713#3" to="519480713#4" fromLane="0" toLane="0"/>
+
+    <connection from="519480713#4" to="519480713#5" fromLane="0" toLane="0"/>
+
+    <connection from="519480713#5" to="519480713#6" fromLane="0" toLane="0"/>
+
+    <connection from="519480713#6"/>
+
+    <connection from="519480715#0" to="14074486#3" fromLane="0" toLane="0"/>
+    <connection from="519480715#0" to="519480715#2" fromLane="0" toLane="0"/>
+    <connection from="519480715#0" to="519480715#2" fromLane="1" toLane="1"/>
+
+    <connection from="519480715#2" to="14074512#5" fromLane="0" toLane="0"/>
+    <connection from="519480715#2" to="24315751#0" fromLane="0" toLane="0"/>
+    <connection from="519480715#2" to="24315751#0" fromLane="1" toLane="1"/>
+    <connection from="519480715#2" to="-14074512#4" fromLane="1" toLane="0"/>
+
+    <connection from="519480716#0" to="519480716#1" fromLane="0" toLane="0"/>
+    <connection from="519480716#0" to="519480716#1" fromLane="1" toLane="1"/>
+    <connection from="519480716#0" to="430180650#1" fromLane="1" toLane="1"/>
+
+    <connection from="519480716#1" to="428018114#0" fromLane="0" toLane="0"/>
+    <connection from="519480716#1" to="291058250#2" fromLane="1" toLane="2"/>
+
+    <connection from="653645241#0" to="653645241#2" fromLane="0" toLane="0"/>
+    <connection from="653645241#0" to="653645241#2" fromLane="1" toLane="1"/>
+    <connection from="653645241#0" to="653645241#2" fromLane="2" toLane="2"/>
+
+    <connection from="653645241#2" to="653645242#0" fromLane="0" toLane="0"/>
+    <connection from="653645241#2" to="653645242#0" fromLane="1" toLane="1"/>
+    <connection from="653645241#2" to="653645242#0" fromLane="2" toLane="2"/>
+    <connection from="653645241#2" to="435836263#0" fromLane="2" toLane="0"/>
+    <connection from="653645241#2" to="435836263#0" fromLane="2" toLane="1"/>
+
+    <connection from="653645242#0" to="291058249" fromLane="0" toLane="0"/>
+    <connection from="653645242#0" to="435836625" fromLane="0" toLane="0"/>
+    <connection from="653645242#0" to="243364007#0" fromLane="0" toLane="0" disallow="pedestrian tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone"/>
+    <connection from="653645242#0" to="243364007#0" fromLane="1" toLane="1"/>
+    <connection from="653645242#0" to="243364007#0" fromLane="2" toLane="2"/>
+    <connection from="653645242#0" to="653645247" fromLane="2" toLane="2" disallow="pedestrian tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone"/>
+    <connection from="653645242#0" to="365935498#0" fromLane="2" toLane="1" disallow="pedestrian tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone"/>
+
+    <connection from="653645246" to="653650083" fromLane="0" toLane="0"/>
+    <connection from="653645246" to="653650083" fromLane="1" toLane="1"/>
+
+    <connection from="653645247" to="437195695#0" fromLane="0" toLane="0"/>
+    <connection from="653645247" to="39442007" fromLane="1" toLane="0"/>
+    <connection from="653645247" to="39442007" fromLane="2" toLane="1"/>
+
+    <connection from="653645248" to="243364007#0" fromLane="0" toLane="0"/>
+    <connection from="653645248" to="653645247" fromLane="0" toLane="1"/>
+    <connection from="653645248" to="653645247" fromLane="1" toLane="2"/>
+    <connection from="653645248" to="365935498#0" fromLane="1" toLane="1"/>
+    <connection from="653645248" to="291058249" fromLane="2" toLane="1"/>
+    <connection from="653645248" to="435836625" fromLane="2" toLane="1"/>
+
+    <connection from="653650077#0" to="653650077#6" fromLane="0" toLane="0"/>
+    <connection from="653650077#0" to="653650077#6" fromLane="1" toLane="1"/>
+    <connection from="653650077#0" to="1179664523#0" fromLane="1" toLane="0"/>
+
+    <connection from="653650077#12" to="653650077#14" fromLane="0" toLane="0"/>
+    <connection from="653650077#12" to="653650077#14" fromLane="1" toLane="1"/>
+    <connection from="653650077#12" to="435327821#0" fromLane="1" toLane="0"/>
+
+    <connection from="653650077#6" to="430180650#5" fromLane="0" toLane="0"/>
+    <connection from="653650077#6" to="653650077#9" fromLane="0" toLane="0"/>
+    <connection from="653650077#6" to="653650077#9" fromLane="1" toLane="1"/>
+
+    <connection from="653650077#9" to="344160289#0" fromLane="0" toLane="0"/>
+    <connection from="653650077#9" to="653650077#12" fromLane="0" toLane="0"/>
+    <connection from="653650077#9" to="653650077#12" fromLane="1" toLane="1"/>
+    <connection from="653650077#9" to="427240760#0" fromLane="1" toLane="0"/>
+
+    <connection from="653650078#2" to="337413860#0" fromLane="0" toLane="0"/>
+    <connection from="653650078#2" to="337413860#0" fromLane="0" toLane="1"/>
+    <connection from="653650078#2" to="653650078#4" fromLane="0" toLane="0"/>
+    <connection from="653650078#2" to="653650078#4" fromLane="1" toLane="1"/>
+    <connection from="653650078#2" to="653650078#4" fromLane="2" toLane="2"/>
+
+    <connection from="653650083" to="653645247" fromLane="0" toLane="0"/>
+    <connection from="653650083" to="365935498#0" fromLane="0" toLane="0"/>
+    <connection from="653650083" to="365935498#0" fromLane="1" toLane="1"/>
+    <connection from="653650083" to="291058249" fromLane="1" toLane="1"/>
+    <connection from="653650083" to="435836625" fromLane="1" toLane="1"/>
+
+    <connection from="684055776#1" to="684055777#1" fromLane="0" toLane="0"/>
+    <connection from="684055776#1" to="684055777#1" fromLane="1" toLane="1"/>
+
+    <connection from="684055777#1" to="-156138281#1" fromLane="0" toLane="0"/>
+    <connection from="684055777#1" to="120114605#0" fromLane="0" toLane="0"/>
+    <connection from="684055777#1" to="156138281#2" fromLane="1" toLane="0"/>
+
+    <connection from="769369468"/>
+
+    <connection from="769369469#0" to="-24315749#2" fromLane="0" toLane="0"/>
+    <connection from="769369469#0" to="14074486#5" fromLane="0" toLane="1"/>
+
+    <connection from="862515542#1" to="862515542#2" fromLane="0" toLane="0"/>
+
+    <connection from="862515542#2" to="24315747" fromLane="0" toLane="0"/>
+    <connection from="862515542#2" to="862515542#1" fromLane="0" toLane="0"/>
+
+    <connection from="862515543" to="862515542#2" fromLane="0" toLane="0" visibility="9.00"/>
+
+</connections>

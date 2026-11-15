@@ -1,0 +1,12 @@
+<additional>
+    <!-- Actuado del caso Lima: control actuado de SUMO, verde maximo 60 s en cada estado -->
+    <tlLogic id="semaforo_S1" type="actuated" programID="actuado" offset="0">
+        <phase duration="10" minDur="10" maxDur="60" state="rrrrGGGrrrrrrrGGGGr"/>  <!-- Reducto de frente, los dos sentidos -->
+        <phase duration="3" state="rrrryyyrrrrrrryyyyr"/>  <!-- transicion -->
+        <phase duration="10" minDur="10" maxDur="60" state="rrrrrrrGGrrrrrrrrrG"/>  <!-- Giros a la izquierda de Reducto -->
+        <phase duration="3" state="rrrrrrryyrrrrrrrrry"/>  <!-- transicion -->
+        <phase duration="34" state="rrrrrrrrrrrrrrrrrrr"/>  <!-- todo en rojo -->
+        <phase duration="10" minDur="10" maxDur="60" state="GGGGrrrrrGGGGGrrrrr"/>  <!-- 28 de Julio desde el puente y Balboa -->
+        <phase duration="3" state="yyyyrrrrryyyyyrrrrr"/>  <!-- transicion -->
+    </tlLogic>
+</additional>

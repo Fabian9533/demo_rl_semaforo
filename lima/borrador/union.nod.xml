@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Caso Lima, borrador: el nudo de Av. Reducto, Av. 28 de Julio y Av. Vasco Nunez de Balboa son nueve nodos de
+     OpenStreetMap que netconvert no une solo ("6 incoming edges"). Se unen a mano en un solo cruce. -->
+<nodes>
+    <join nodes="10092527760 10092527761 10092527765 10092527767 4337293915 4337293916 4337295647 4337295648 5481252431"/>
+</nodes>

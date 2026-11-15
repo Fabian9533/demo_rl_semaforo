@@ -1,0 +1,16 @@
+% Generado por lima/tablas_lima.py a partir de lima/salidas/ y lima/alta/salidas/. No editar a mano.
+% Caso Lima: estados del semaforo del nudo, en su orden, con el verde (s) del plan actual, del fijo ajustado
+% al segundo de cada nivel de demanda y el verde minimo. Tras cada verde hay 3 s de ambar y, tras los giros,
+% 34 s con todo en rojo.
+% fuente: lima/programa.py (PLAN, TRANSICION, ROJO_TOTAL) y salidas/fijo_ajustado.json de cada nivel.
+\begin{tabular}{>{\raggedright\arraybackslash}p{4.3cm}>{\centering\arraybackslash}p{2.1cm}>{\centering\arraybackslash}p{2.1cm}>{\centering\arraybackslash}p{2.1cm}>{\centering\arraybackslash}p{2.1cm}}
+\toprule
+Estado (quién tiene verde) & Plan actual (s) & Fijo ajustado, demanda publicada (s) & Fijo ajustado, demanda alta (s) & Verde mínimo (s) \\
+\midrule
+Reducto de frente, los dos sentidos & 37 & 34 & 45 & 10 \\
+Giros a la izquierda de Reducto & 15 & 16 & 19 & 10 \\
+28 de Julio desde el puente y Balboa & 37 & 34 & 43 & 10 \\
+\midrule
+Ciclo, con el ámbar y el tiempo en rojo & 132 & 127 & 150 & 73 \\
+\bottomrule
+\end{tabular}
