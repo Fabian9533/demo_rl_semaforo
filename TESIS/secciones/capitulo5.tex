@@ -85,8 +85,7 @@ y~\ref{sec:referencias-fijas}), más un control:
     el verde mientras siguen llegando vehículos, entre 10 y 60~s. En el
     segundo estudio también se ajusta (actuado ajustado).
   \item El \emph{ciclo mínimo} es un plan fijo con los verdes mínimos,
-    de 10~s, y sin desfases. Si el modelo da lo mismo que él, la mejora
-    no es una coordinación aprendida.
+    de 10~s, y sin desfases. Si el modelo da el mismo retraso que él, la mejora no proviene de una coordinación aprendida.
 \end{itemize}
 % fuente: capitulo4.tex, sec:referencias-fijas y tab:plan2-fijo (barrido con las semillas 2001 a 2003) y
 % sec:programa-trivial; actuado: minDur 10 y maxDur 60; anexo_h_segundo_estudio.tex (caption de tab:plan3-referencias:
@@ -306,7 +305,7 @@ validación, no la del último episodio, y un entrenamiento se considera
 estable si en su último tercio la curva de validación ya no baja ni
 oscila más de un 5\,\% (Sección~\ref{sec:veredicto}). Una curva plana no
 indica que el modelo no aprenda: indica que llegó a su nivel antes de la
-primera validación, o que ya no encuentra cómo mejorar.
+primera validación, o que la política ya no mejora con más episodios.
 % fuente: capitulo3.tex, sec:protocolo (episodio de una hora con margen para vaciar la red, semilla base + k,
 % validacion con la politica congelada) y sec:veredicto (estabilidad en el ultimo tercio); demanda de P1:
 % tab:plan-resultados; con llegadas regulares la semilla cambia el speedFactor y la imperfeccion (sigma) de cada
@@ -318,14 +317,11 @@ episodio de IPPO con mensajes en cada caso, en el entrenamiento del que
 sale la versión evaluada, con el fijo ajustado y el actuado como
 referencia; debajo, la entropía de la política, que mide cuánto explora
 el modelo. En los seis casos el retraso baja en las primeras decenas de
-episodios, y la entropía cae de 0.68 a entre 0.03 y 0.17: el modelo deja
-de probar acciones al azar y fija su forma de controlar. En P1, P2 y P4
+episodios, y la entropía cae de 0.68 a entre 0.03 y 0.17: la política se vuelve casi determinista y la exploración se reduce. En P1, P2 y P4
 la media móvil termina por debajo del fijo ajustado, y en P3, a su
 altura. En P5 baja de 30 a 22~s por vehículo, pero no llega al fijo. En
 P6 baja de 102 a unos 43~s en los primeros 15 episodios y después oscila
-entre 38 y 45~s, sin estabilizarse. Durante el entrenamiento el modelo
-todavía explora; por eso su retraso suele quedar por encima del de la
-versión evaluada, que siempre elige la acción más probable.
+entre 38 y 45~s, sin estabilizarse. Durante el entrenamiento las acciones se muestrean de la política, lo que incluye exploración; por eso el retraso de entrenamiento suele ser mayor que el de la versión evaluada, que toma siempre la acción de mayor probabilidad.
 % fuente: images/fig_plan2_entrenamiento.pdf (curvas_entrenamiento.py, 15.11.2026): timeloss_prom y entropia_libre de
 % plan2/resultados_<esc>_ippo_vecinos_s<base>.csv del entrenamiento evaluado (base_publicada de plan2/veredicto.csv:
 % P1 4042, P2 2042, P3 4042, P4 42, P5 2042, P6 42); media de los episodios 1-10 y de los ultimos 10: P1 35.80 y
@@ -359,13 +355,11 @@ Figura~\ref{fig:plan2-convergencia} muestra esas series de validación.
 
 \noindent\textbf{Lo que muestran las curvas.} En P1 a P4, IPPO con
 mensajes y MAPPO llegan al nivel del fijo o por debajo en las primeras
-validaciones. En P5 lo tocan y luego se alejan por encima de él, y en P6
-las series oscilan mucho más. Q-learning queda por encima del fijo
+validaciones. En P5 alcanzan el nivel del fijo y después quedan por encima de él, y en P6 las series oscilan con mayor amplitud. Q-learning queda por encima del fijo
 durante todo el entrenamiento en P1, P3, P4 y P5. El entrenamiento no
 conserva su mejor versión: en P3, la versión evaluada de IPPO con
 mensajes es la del episodio 40, con 19.69~s frente a 21.58~s del fijo, y
-el mismo entrenamiento termina en 21.46~s. La validación es la que la
-recupera.
+el mismo entrenamiento termina en 21.46~s. La selección por validación conserva esa versión.
 % fuente: val_serie de los metas citados bajo la figura (plan2/politica_red_vecinos_s4042.json: minimo 19.69 en el
 % episodio 40 y final 21.46); plan2/fijo_validacion_2509.json
 
@@ -386,33 +380,30 @@ ellas por azar.
 mensajes y de MAPPO en P1 a P4 no indican que esos modelos no aprendan:
 llegan al nivel del fijo en las primeras validaciones y después no lo
 mejoran. En P3, ese nivel es el del ciclo mínimo
-(Sección~\ref{sec:esperado-obtenido}): el modelo aprende pronto a
-cambiar de fase apenas se cumple el verde mínimo y después no encuentra
-nada mejor.
+(Sección~\ref{sec:esperado-obtenido}): la política converge en las primeras validaciones a cambiar de fase apenas se cumple el verde mínimo, y los episodios siguientes no la mejoran.
 % fuente: fig_plan2_convergencia (plan2/grafico_convergencia.py); P3: version evaluada de ippo_vecinos igual al ciclo
 % minimo en 30/30 semillas (plan2/evaluacion_red.csv) y elegida en el episodio 40 (politica_red_vecinos_s4042.json)
 
 \subsection{Lo esperado frente a lo obtenido}
 \label{sec:esperado-obtenido}
 
-El primer estudio esperaba FUNCIONA en los seis casos, y se cumplió sin
-reparos en uno. Las comprobaciones que siguen se decidieron después del
+El primer estudio preveía FUNCIONA en los seis casos; la previsión se confirma sin salvedades en uno. Las comprobaciones que siguen se decidieron después del
 veredicto:
 \begin{itemize}
-  \item \textbf{P1: como se esperaba.} La mejora la ponen los mensajes:
+  \item \textbf{P1: se confirma.} La mejora la ponen los mensajes:
     sin ellos, el mismo modelo empata con el fijo ($-0.5$\,\%).
-  \item \textbf{P2: sí, con la métrica del primer estudio.} La ganancia
+  \item \textbf{P2: se confirma solo con la métrica del primer estudio.} La ganancia
     viene con más espera para entrar a la red, que ni el retraso ni la
     recompensa miden.
-  \item \textbf{P3: no; es el ciclo mínimo.} La versión evaluada da el mismo
+  \item \textbf{P3: no se confirma; es el ciclo mínimo.} La versión evaluada da el mismo
     retraso que el ciclo mínimo en las 30 semillas, y el barrido del
     fijo, que empezaba en 15~s, no lo había probado.
-  \item \textbf{P4: en parte.} La versión evaluada mejora poco
+  \item \textbf{P4: se confirma en parte.} La versión evaluada reduce el retraso
     ($-3.6$\,\%) y el ciclo mínimo baja más ($-7.0$\,\%).
-  \item \textbf{P5: no.} El fijo ya coordina la malla con desfases
+  \item \textbf{P5: no se confirma.} El fijo ya coordina la malla con desfases
     alternados, y la versión evaluada es el ciclo mínimo en 24 de las 30
     semillas.
-  \item \textbf{P6: no.} Se estabiliza uno de los tres entrenamientos, y
+  \item \textbf{P6: no se confirma.} Se estabiliza uno de los tres entrenamientos, y
     no el de la versión evaluada.
 \end{itemize}
 Las diferencias señalan dos debilidades de la medición del primer
@@ -467,17 +458,14 @@ evaluadas, sin reentrenar nada, y cambia dos cosas
 (Sección~\ref{sec:diseno-robustez}). La métrica es el retraso total, que
 suma la espera para entrar a la red. La referencia es el fijo ajustado
 desde 10~s: el ganador de un barrido que parte del verde mínimo y elige
-por retraso total (Tabla~\ref{tab:robustez-fijo}). Este paso se decidió
-después del veredicto, al ver que la versión evaluada de P3 era el ciclo
-mínimo; por eso no reemplaza ningún veredicto. La
+por retraso total (Tabla~\ref{tab:robustez-fijo}). Este paso se definió después del veredicto, tras comprobar que la versión evaluada de P3 coincidía con el ciclo mínimo; por eso no reemplaza ningún veredicto. La
 Tabla~\ref{tab:robustez-ippo} da el cambio de cada caso con las dos
 mediciones y lo que lo cambia.
 % fuente: capitulo3.tex, sec:diseno-robustez; anexo_f_robustez.tex, tab:robustez-fijo
 
 Con la medición más estricta, la ventaja clara frente al fijo queda solo
 en P1 ($-6.7$\,\%). En P3 queda una mejora mínima, que es la del ciclo
-mínimo; en P2, P4 y P5 el modelo pierde, y en P6 empata de forma
-provisional. Resumida en un número, la ventaja frente al fijo
+mínimo; en P2, P4 y P5 el modelo tiene más retraso que el fijo, y en P6 no se distingue de él, de forma provisional. Resumida en un número, la ventaja frente al fijo
 desaparece: $-0.03$\,\%, con un IC95 de $-0.56$ a $+0.53$\,\%. Frente
 al actuado se mantiene en los seis casos ($-11.45$\,\%). El detalle
 está en el Anexo~F. La Tabla~\ref{tab:robustez-numero-unico} da el
@@ -485,9 +473,7 @@ resumen en un número de todos los modelos con esta medición: ninguno
 supera al fijo ajustado desde 10~s, IPPO con mensajes es el único que
 lo iguala, y es también el de mayor ventaja frente al actuado.
 
-Con llegadas regulares, un fijo bien ajustado es casi óptimo. De ahí
-salen las dos preguntas del segundo estudio: si el modelo le gana a un
-fijo ajustado al segundo y si le gana cuando el tráfico no es regular
+Con llegadas regulares, un fijo bien ajustado es casi óptimo. De ello se derivan las dos preguntas del segundo estudio: si el modelo supera a un fijo ajustado al segundo y si lo supera cuando el tráfico no es regular
 (Sección~\ref{sec:segundo-estudio}).
 % fuente: plan2/robustez_veredicto.csv (ippo_vecinos; p_act < 0.001 en los seis casos);
 % plan2/robustez_sintesis_numero_unico.csv; anexo_f_robustez.tex
@@ -528,8 +514,7 @@ Ciclo mínimo & \makecell[c]{+87.58\\{}[+82.30, +92.43]} & -- & +54.78 & +74.70 
 
 Los casos de Lima aplican el método a dos lugares reales de Miraflores:
 un nudo, que es un solo cruce con su semáforo medido en el sitio, y un
-corredor de seis cruces en la Av.~Benavides. La geometría sale de
-OpenStreetMap y la demanda, de volúmenes publicados. Cada caso se
+corredor de seis cruces en la Av.~Benavides. La geometría proviene de OpenStreetMap y la demanda, de volúmenes publicados. Cada caso se
 evalúa con su demanda publicada y con una demanda un 20\,\% mayor, con
 el protocolo del segundo estudio (Sección~\ref{sec:diseno-segundo}):
 llegadas aleatorias, fijo ajustado al
@@ -548,7 +533,7 @@ Av.~28 de Julio sobre la Vía Expresa. Todas sus luces siguen un mismo
 programa: es un solo cruce, con un solo controlador. El Anexo~D detalla
 cómo se armó el escenario:
 \begin{itemize}
-  \item \textbf{Red.} La forma del nudo sale de OpenStreetMap; los
+  \item \textbf{Red.} La forma del nudo proviene de OpenStreetMap; los
     carriles y los giros, de la observación en el sitio.
   \item \textbf{Semáforo.} El plan que opera hoy se midió en el sitio,
     en la hora punta de la tarde: un ciclo de 132~s, con tres estados
@@ -618,16 +603,11 @@ el citado no (Tabla~\ref{tab:lima-entrenamientos}, en el Anexo~D).
     publicada, un 4.4 y un 4.5\,\% menos. La mejora es significativa y
     se repite en los tres entrenamientos, pero no llega al 5\,\% de la
     regla: el veredicto es MEJORA. Con la demanda alta, un 5.7 y un
-    6.6\,\% menos; como el modelo pierde contra el actuado ajustado, el
-    veredicto también es MEJORA. Es provisional, porque el
+    6.6\,\% menos; como el modelo tiene más retraso que el actuado ajustado, el veredicto también es MEJORA. Es provisional, porque el
     entrenamiento citado no se estabilizó. Los otros dos sí, y dan lo
     mismo (Tabla~\ref{tab:lima-entrenamientos}).
-  \item \textbf{Frente al actuado ajustado.} El modelo pierde: su
-    retraso es un 3.4 y un 3.6\,\% mayor con la demanda publicada, y un
-    4.3 y un 3.3\,\% mayor con la alta. El actuado que gana es la
-    variante que decide por el retraso de los vehículos (Anexo~D). En un
-    solo cruce, un actuado bien ajustado es el mejor de los cuatro
-    controles.
+  \item \textbf{Frente al actuado ajustado.} El retraso del modelo es un 3.4 y un 3.6\,\% mayor con la demanda publicada, y un
+    4.3 y un 3.3\,\% mayor con la alta. El actuado ajustado seleccionado es la variante que decide según el retraso de los vehículos (Anexo~D). En un solo cruce, el actuado ajustado es el control con menos retraso de los cuatro.
 \end{itemize}
 % fuente: lima/salidas/veredicto_completo_s42.md (publicada: -4.39 [-4.87, -3.91] y -4.51 [-4.95, -4.05] frente al
 % fijo, MEJORA en las dos tandas; +3.45 [+2.98, +3.93] y +3.62 [+3.18, +4.08] frente al actuado ajustado; -6.45 y
@@ -671,10 +651,7 @@ de frente recibe entre 10 y 40~s. Con la demanda alta alarga el ciclo a
 \noindent\textbf{Si el reparto de la demanda fuera otro.} El reparto
 entre calles es un supuesto. La Tabla~\ref{tab:lima-robustez} repite la
 evaluación con el mismo total repartido de otra forma, sin volver a
-ajustar ni a entrenar nada. Los planes fijos empeoran mucho: el plan
-actual pasa de 59 a entre 64 y 77~s por vehículo, y el fijo ajustado,
-hecho a la medida del reparto supuesto, a entre 77 y 88~s. El modelo y
-el actuado ajustado se quedan entre 52 y 56~s. La ventaja del modelo
+ajustar ni a entrenar nada. Los planes fijos aumentan su retraso: el plan actual pasa de 59 a entre 64 y 77~s por vehículo, y el fijo ajustado, que se ajustó para el reparto supuesto, a entre 77 y 88~s. El modelo y el actuado ajustado se mantienen entre 52 y 56~s. La ventaja del modelo
 frente al plan actual sube a un 16 y un 26\,\%; frente al actuado
 ajustado sigue un 3 y un 4\,\% por detrás, como con el reparto supuesto.
 % fuente: secciones/tablas/lima_robustez.tex (lima/tablas_lima.py): lima/robustez/reducto/ y
@@ -718,8 +695,7 @@ seis cruces con semáforo (Figura~\ref{fig:corredor-mapa}). Aquí hay un
 agente por cruce y los agentes vecinos se envían mensajes, como en el
 segundo estudio. El Anexo~D detalla cómo se armó el escenario:
 \begin{itemize}
-  \item \textbf{Red.} Las distancias, los carriles y los sentidos salen
-    de OpenStreetMap.
+  \item \textbf{Red.} Las distancias, los carriles y los sentidos provienen de OpenStreetMap.
   \item \textbf{Semáforos.} No se midieron. Cada cruce tiene dos estados
     con verde, uno para la avenida y otro para la transversal. En lugar
     del plan que opera hoy se usa un plan típico, que es un supuesto con
@@ -795,17 +771,12 @@ el Anexo~D).
 \begin{itemize}
   \item \textbf{Frente al fijo ajustado al segundo.} Un 8.8 y un
     8.9\,\% menos de retraso. La mejora pasa el 5\,\% de la regla en
-    las dos tandas y el modelo no pierde contra el actuado: el veredicto
-    es FUNCIONA. Es firme: los tres entrenamientos se estabilizaron y
-    dan casi lo mismo (Tabla~\ref{tab:corredor-entrenamientos}).
+    las dos tandas y el modelo no tiene más retraso que el actuado: el veredicto es FUNCIONA. Es firme: los tres entrenamientos se estabilizaron y sus cambios frente al fijo difieren en 0.3 puntos o menos en cada tanda (Tabla~\ref{tab:corredor-entrenamientos}).
   \item \textbf{Frente al actuado ajustado.} Un 8.1 y un 7.9\,\% menos.
-    En el nudo, con un solo cruce, el actuado ajustado le gana al
-    modelo; aquí, con seis cruces, pasa lo contrario.
+    En el nudo, de un solo cruce, el actuado ajustado tiene menos retraso que el modelo; en el corredor, de seis cruces, ocurre lo contrario.
   \item \textbf{Frente al plan típico.} Un 59\,\% menos: de 78 a 32~s
     por vehículo. El plan típico es un supuesto, con un ciclo largo y
-    sin coordinación entre cruces. La cifra mide lo que pierde un plan
-    así, no la mejora posible en el corredor real: el fijo ajustado, que
-    no aprende, ya recupera casi toda esa diferencia.
+    sin coordinación entre cruces. La cifra mide el costo de un plan de ese tipo, no la mejora alcanzable en el corredor real: el fijo ajustado, sin aprendizaje, ya reduce el retraso un 55\,\% frente a ese plan.
 \end{itemize}
 % fuente: lima/corredor/salidas/veredicto_vecinos_completo_s42.md (frente al fijo -8.81 [-9.11, -8.52] y -8.90
 % [-9.21, -8.59]; frente al actuado ajustado -8.06 [-8.34, -7.78] y -7.91 [-8.15, -7.65]; frente al plan tipico
@@ -837,8 +808,7 @@ estabilizaron.
 \label{fig:corredor-retraso}
 \end{figure}
 
-\noindent\textbf{Qué aportan los mensajes.} Una parte pequeña de la
-mejora (Tabla~\ref{tab:corredor-mensajes}):
+\noindent\textbf{Qué aportan los mensajes.} Entre 0.4 y 2.5 puntos de la mejora (Tabla~\ref{tab:corredor-mensajes}):
 \begin{itemize}
   \item \textbf{Entrenar con mensajes o sin ellos.} IPPO con mensajes
     corregido tiene un 0.4\,\% menos de retraso que el mismo modelo
@@ -853,9 +823,7 @@ mejora (Tabla~\ref{tab:corredor-mensajes}):
 Coincide con el segundo estudio: con llegadas aleatorias, los mensajes
 mejoraron al modelo en uno de seis casos (Sección~\ref{sec:piezas}). Lo
 que separa al modelo completo es el resto de sus piezas. IPPO con
-mensajes corregido, que no las tiene, queda en 35.2~s por vehículo con
-la demanda publicada, algo por detrás del fijo ajustado y del actuado
-ajustado. Con la alta queda en 46.7 y 46.5~s, por debajo de los dos.
+mensajes corregido, que no las tiene, queda en 35.2~s por vehículo con la demanda publicada: entre un 0.4 y un 0.7\,\% por encima del fijo ajustado y un 1.5\,\% por encima del actuado ajustado. Con la alta queda en 46.7 y 46.5~s, por debajo de los dos.
 % fuente: secciones/tablas/corredor_mensajes.tex (lima/corredor/tablas_corredor.py): vecinos_corregido_s42 frente a
 % local_sinmsg_s2042 (los citados: 35.28 frente a 35.43 y 35.17 frente a 35.32, -0.45 [-0.72, -0.16] y -0.42
 % [-0.68, -0.16]) y vecinos_completo_s42 frente a vecinos_completo_s42_cortado (31.94 frente a 32.43 y 31.90 frente
@@ -881,14 +849,10 @@ ajustado. Con la alta queda en 46.7 y 46.5~s, por debajo de los dos.
 
 \noindent\textbf{Qué hace el modelo.} Usa ciclos más cortos que el fijo
 ajustado: de 30 a 39~s de media, según el cruce, frente a los 46~s del
-fijo. A cada transversal le da poco más del verde mínimo, de 11 a 15~s,
+fijo. A cada transversal le asigna entre 11 y 15~s, cerca del verde mínimo de 10~s,
 y el resto a la avenida (Tabla~\ref{tab:corredor-planes}, en el
-Anexo~D). Al fijo no le conviene acortar tanto su ciclo: entre los
-planes fijos con ciclos de 32 a 44~s, el mejor que encontró la búsqueda
-tiene más retraso que el de 46~s. Al modelo sí, porque alarga el verde
-cuando llega un grupo grande de vehículos. Con la demanda alta pasa lo
-mismo: el fijo ajustado pasa a un ciclo de 62~s, y los planes fijos de
-ciclo corto quedan muy por detrás; el modelo usa ciclos de 31 a 44~s en
+Anexo~D). Para un plan fijo, un ciclo tan corto aumenta el retraso: el mejor plan fijo con ciclos de 32 a 44~s tiene más retraso que el de 46~s. El modelo sí puede usarlo, porque alarga el verde cuando llega un grupo grande de vehículos. Con la demanda alta pasa lo
+mismo: el fijo ajustado pasa a un ciclo de 62~s, y en el ajuste los planes fijos de ciclo corto tienen entre 78 y 104~s por vehículo, frente a 52 del de 62~s; el modelo usa ciclos de 31 a 44~s en
 cinco cruces y de 64~s en el último, el de la Av.~República de Panamá,
 el más cargado.
 % fuente: lima/corredor/salidas/verdes_modelo.json (verde medio de la avenida, de la transversal y ciclo medio de
@@ -906,8 +870,7 @@ total repartido de otra
 forma entre la avenida y las transversales, sin volver a ajustar ni a
 entrenar nada (Tabla~\ref{tab:corredor-robustez}, en el Anexo~D). El
 modelo sigue por debajo de las tres referencias; frente al actuado
-ajustado, entre un 6 y un 11\,\%. Con más carga en la avenida, el fijo
-ajustado, hecho a la medida del reparto supuesto, sube de 35 a 61~s por
+ajustado, entre un 6 y un 11\,\%. Con más carga en la avenida, el fijo ajustado, que se ajustó para el reparto supuesto, sube de 35 a 61~s por
 vehículo, y el modelo, de 32 a 37.
 % fuente: secciones/tablas/corredor_robustez.tex (lima/corredor/tablas_corredor.py): lima/corredor/robustez/avenida/
 % y robustez/transversal/, salidas/eval_t1_*.csv (100 semillas, 24001-24100): frente al actuado ajustado -10.80
@@ -943,15 +906,13 @@ aleatorias, y al final lo analiza.
 
 \subsection{Qué se midió y cómo aprendió el modelo}
 \label{sec:segundo-procedimiento}
-\noindent\textbf{Qué se midió.} El segundo estudio se decidió después del
-primero y tiene sus propias reglas, publicadas antes de entrenar
+\noindent\textbf{Qué se midió.} El segundo estudio se diseñó después del primero, con reglas propias publicadas antes de entrenar
 (Sección~\ref{sec:diseno-segundo} y Tabla~\ref{tab:plan3-cambia}):
 \begin{itemize}
   \item \textbf{Tráfico.} Los vehículos llegan al azar (proceso de
     Poisson), con la demanda media de cada caso.
   \item \textbf{Referencias.} El fijo ajustado al segundo y el actuado
-    se vuelven a ajustar en cada caso con esas llegadas. Una mejora solo
-    llega a FUNCIONA si el modelo no pierde contra el actuado ajustado.
+    se vuelven a ajustar en cada caso con esas llegadas. Una mejora solo llega a FUNCIONA si el modelo no tiene más retraso que el actuado ajustado.
     Hay otras ocho referencias al lado.
   \item \textbf{Modelo.} Se entrena con llegadas aleatorias. En cada
     caso se cita IPPO con mensajes corregido, salvo que una variante lo
@@ -971,8 +932,7 @@ Son 201 entrenamientos (44\,160 episodios) y 740 evaluaciones.
 \noindent\textbf{Dos correcciones del entrenamiento.} Un diagnóstico
 posterior al veredicto del primer estudio (Anexo~G) atribuye el plan largo y casi fijo que
 IPPO con mensajes aprende en P4, y la inestabilidad de P6, a dos rasgos
-del entrenamiento: el descuento contaba decisiones y no segundos, y cada
-semáforo exploraba por su cuenta. Con las dos correcciones, en P6 el
+del entrenamiento: el descuento contaba decisiones y no segundos, y cada semáforo exploraba de forma independiente. Con las dos correcciones, en P6 el
 modelo baja el retraso un 6.7\,\% frente al fijo ajustado (IC95 de
 $-9.8$ a $-3.7$\,\%), con semillas nuevas, y en P4 aprende el ciclo
 mínimo. El segundo estudio parte de ese modelo, IPPO con mensajes
@@ -992,8 +952,7 @@ modelo citado en cada caso, con llegadas aleatorias, junto al fijo
 ajustado al segundo y al actuado ajustado medidos en las mismas 16
 semillas de validación:
 \begin{itemize}
-  \item \textbf{P1 y P6.} La curva baja de las dos referencias en los
-    primeros 50 episodios y después baja poco. Los tres entrenamientos
+  \item \textbf{P1 y P6.} La curva baja de las dos referencias en los primeros 50 episodios y después se estabiliza. Los tres entrenamientos
     se estabilizan y terminan en el mismo nivel.
   \item \textbf{P2.} La curva queda bajo las dos referencias, que aquí
     tienen el mismo retraso, pero es irregular: vuelve a ellas cerca del
@@ -1079,8 +1038,7 @@ con una línea por lugar.
     alta. La red con rotonda no mejora con ninguna de las dos
     (Sección~\ref{sec:efecto-demanda}).
   \item \textbf{Con llegadas regulares} (panel b), el modelo empata con
-    el fijo ajustado al segundo en casi todos los casos: mejora un
-    2.8\,\% en P1 y pierde un 1.7\,\% en P3
+    el fijo ajustado al segundo en casi todos los casos: reduce el retraso un 2.8\,\% en P1 y lo aumenta un 1.7\,\% en P3
     (Sección~\ref{sec:donde-gana}).
 \end{itemize}
 % fuente: secciones/tablas/resultado_final.tex; veredicto3_celdas.csv (llegadas regulares: P1 -2.8 y -2.8 MEJORA, P3
@@ -1096,12 +1054,11 @@ con una línea por lugar.
   \item \textbf{P2: funciona, de forma provisional.} La reducción es de
     un 19.8 y un 20.2\,\%, pero el entrenamiento de la versión evaluada
     no se estabilizó.
-  \item \textbf{P3: falla por poco.} El modelo pierde un 1.6\,\% en las
-    dos tandas. Reproduce el ciclo mínimo: da su mismo retraso.
+  \item \textbf{P3: falla, por 1.6\,\%.} El modelo tiene un 1.6\,\% más de retraso en las dos tandas. Reproduce el ciclo mínimo: da su mismo retraso.
   \item \textbf{P4 y P5: empata.} El cambio no pasa de un 0.5\,\% en
     ninguna tanda.
 \end{itemize}
-En P3, P4 y P5 el modelo no le gana a una regla simple, que aplica el
+En P3, P4 y P5 el modelo no supera a una regla simple, que aplica el
 ciclo mínimo y alarga el verde de la avenida si hay cola, y el mejor
 fijo con verdes de 5 en 5~s lo iguala o lo supera. En esos casos no se
 afirma que el modelo aprendió algo que esa regla no hace.
@@ -1159,9 +1116,7 @@ actuado ajustado, a la regla simple ni al ciclo mínimo.
 
 \subsection{Análisis del resultado}
 \label{sec:donde-gana}
-\noindent\textbf{Por qué no gana en tres casos.} Lo que sigue es una
-lectura posterior al cierre, hecha con los datos del estudio; no cambia
-ningún veredicto. El modelo gana donde reaccionar al tráfico sirve. P1,
+\noindent\textbf{Por qué no supera al fijo en tres casos.} El análisis siguiente es posterior al cierre del estudio, con sus mismos datos, y no modifica ningún veredicto. El modelo supera al fijo en los casos en que reaccionar al tráfico reduce el retraso. P1,
 P2 y P6 son los mismos tres casos en que el actuado ajustado también
 mejora al fijo ajustado al segundo, entre un 1 y un 16\,\%, y el modelo
 lo mejora más (Figura~\ref{fig:plan3-retraso}). En P3, P4 y P5 ningún
@@ -1169,12 +1124,11 @@ control probado supera a ese fijo: la mejor de las otras nueve
 referencias solo lo iguala (Tabla~\ref{tab:plan3-margen}).
 
 En la red con rotonda, el fijo ajustado al segundo es el ciclo mínimo
-con un semáforo corrido 1~s en P3 y con dos en P4. En P3, ese segundo
-vale el 1.6\,\% que pierde el modelo. El modelo cambia de fase apenas se
+con un semáforo corrido 1~s en P3 y con dos en P4. En P3, ese segundo equivale al 1.6\,\% de retraso adicional del modelo. El modelo cambia de fase apenas se
 cumple el verde mínimo, como el ciclo mínimo, y decide cada 5~s, o cada
 2~s en el modelo completo: no puede dar un desfase de 1~s. Además, la
 rotonda, que no tiene semáforo, se satura desde 1.3 veces la demanda
-nominal, así que los semáforos de esa red nunca quedan exigidos. En la
+nominal, así que los semáforos de esa red no llegan a saturarse. En la
 malla con demanda nominal, el retraso casi no depende del control: el
 ciclo mínimo, el fijo entregado y la regla simple quedan a un 0.2\,\%
 del fijo ajustado al segundo.
@@ -1192,9 +1146,7 @@ del fijo ajustado al segundo.
 corredor, con seis cruces, el modelo supera al fijo y al actuado
 ajustados con las dos demandas. En el nudo, que es un solo cruce, el
 actuado ajustado baja el retraso del fijo ajustado entre un 8 y un
-10\,\%, y el modelo, entre un 4 y un 7\,\%. Sin vecinos con los que
-coordinarse, el modelo hace lo mismo que el actuado, reaccionar a la
-cola de cada acceso, y el actuado lo hace mejor
+10\,\%, y el modelo, entre un 4 y un 7\,\%. Sin vecinos con los que coordinarse, el modelo cumple la misma función que el actuado, adaptar el verde a la cola de cada acceso, y el actuado ajustado lo hace con menos retraso
 (Sección~\ref{sec:lima-nudo}).
 % fuente: secciones/tablas/lima_resultado.tex (nudo, actuado ajustado frente al fijo ajustado: 53.4/57.8 y 53.2/57.7,
 % -7.6 y -7.8 % con la demanda publicada; 63.3/70.1 y 63.0/69.6, -9.7 y -9.5 % con la alta; modelo -4.4 a -6.6 %)
@@ -1202,14 +1154,11 @@ cola de cada acceso, y el actuado lo hace mejor
 \noindent\textbf{Con llegadas regulares.} El segundo estudio evalúa
 también IPPO con mensajes corregido con llegadas regulares, con dos
 tandas de 30 semillas (panel b de la Figura~\ref{fig:resultado-final} y
-Tabla~\ref{tab:plan3-regulares}). Frente al fijo ajustado al segundo
-mejora un 2.8\,\% en P1, pierde un 1.7\,\% en P3 y empata en los demás
-casos, de forma provisional en P5. Resumido en un número, el cambio es
+Tabla~\ref{tab:plan3-regulares}). Frente al fijo ajustado al segundo reduce el retraso un 2.8\,\% en P1, lo aumenta un 1.7\,\% en P3 y no se distingue de él en los demás casos, de forma provisional en P5. Resumido en un número, el cambio es
 de $-0.4$\,\% en las dos tandas, con IC95 de [$-1.0$, $+0.1$] y
 [$-0.8$, $+0.1$]: el modelo empata con ese fijo. En P6, evaluado además
-con cada vehículo entrando por el carril que le conviene, pierde
-($+9.8$ y $+10.5$\,\%). Frente al actuado ajustado mejora en P2, empata
-en P4 y P6 y pierde en P1, P3 y P5. La ventaja frente al fijo es mayor
+con cada vehículo insertado en el carril de su ruta, tiene más retraso que el fijo
+($+9.8$ y $+10.5$\,\%). Frente al actuado ajustado, reduce el retraso en P2, no se distingue en P4 y P6 y lo aumenta en P1, P3 y P5. La ventaja frente al fijo es mayor
 con llegadas aleatorias que con regulares en P2 y en P6
 (Tabla~\ref{tab:plan3-hipotesis}).
 % fuente: plan3/salidas/veredicto3_celdas.csv (llegadas regulares: P1 MEJORA -2.8 y -2.8; P2 EMPATA; P3 FALLA +1.7 y
@@ -1225,10 +1174,7 @@ buses) y una demanda que sube y baja cada 10~min
 (Tabla~\ref{tab:plan3-sensibilidad}). El modelo es IPPO con mensajes
 corregido, entrenado con cada tráfico. En el corredor conserva la
 mejora frente al fijo: entre un 3 y un 4\,\% con la mezcla (MEJORA) y un
-12.1 y un 9.8\,\% con el perfil (FUNCIONA, provisional). Con la mezcla,
-sin embargo, pierde contra el actuado ajustado y no le gana a una regla
-reactiva, que alarga el verde mientras llegan vehículos. En la red sigue
-perdiendo, entre un 1 y un 2\,\%.
+12.1 y un 9.8\,\% con el perfil (FUNCIONA, provisional). Con la mezcla, sin embargo, tiene más retraso que el actuado ajustado y no supera a una regla reactiva, que alarga el verde mientras llegan vehículos. En la red mantiene un retraso entre un 1 y un 2\,\% mayor que el del fijo.
 % fuente: plan3/salidas/veredicto3_celdas.csv (corredor con la mezcla: -3.8 y -3.2, y -3.4 y -3.2 con arranque
 % lento, MEJORA; corredor con perfil: -12.1 y -9.8, PENDIENTE (FUNCIONA); red con la mezcla: +1.7 y +1.8, y +1.3 y
 % +1.2, FALLA; red con perfil: +1.0 y +1.1, FALLA); veredicto3.md, "Referencias al lado" (mezcla en el corredor:
@@ -1290,7 +1236,7 @@ La Tabla~\ref{tab:piezas} compara modelos que solo difieren en una
 pieza. Con llegadas regulares, los mensajes entre vecinos separan
 funcionar de fallar. Con llegadas aleatorias, la pieza que mejora en más
 casos es ver los vehículos cercanos, decidir cada 2~s no ayuda por sí
-solo, y en el corredor de Lima los mensajes aportan poco.
+solo, y en el corredor de Lima los mensajes reducen el retraso entre un 0.4 y un 1\,\%.
 
 % fuente: primer estudio, columna delta_geo de plan2/sintesis_numero_unico.csv (referencia fijo_2509), filas
 % ippo_local (+1.35), ippo_vecinos (-6.83), ql (+14.50), mappo (-4.94) y dqn (-1.55); lecturas: plan2/veredicto.csv
@@ -1325,7 +1271,7 @@ Decidir cada 2~s en lugar de cada 5~s & Ninguno de los 3 probados (P1, P2 y P6) 
 Modelo completo (ver los vehículos cercanos, 400 episodios, decidir cada 2~s y tres ajustes del entrenamiento) & 4 de 6: P1, P2, P4 y P6 (entre $-1.5$ y $-13.0$) & Es el que más mejora \\
 \midrule
 \multicolumn{3}{>{\raggedright\arraybackslash}p{13.9cm}}{\textit{Corredor de Lima, llegadas aleatorias: con mensajes frente a sin ellos, tandas 1 y 2 (\%)}} \\
-Mensajes entre vecinos & Con la demanda publicada, $-0.4$ y $-0.4$; con la alta, $-0.9$ y $-1.0$ (provisional) & Aportan poco \\
+Mensajes entre vecinos & Con la demanda publicada, $-0.4$ y $-0.4$; con la alta, $-0.9$ y $-1.0$ (provisional) & Reducen el retraso menos de un 1\,\% \\
 \bottomrule
 \end{tabular}
 \caption[Qué aporta cada pieza]{Qué aporta cada pieza del modelo. Arriba, el primer estudio: resumen en un número, sobre P1 a P6, de dos modelos que solo difieren en la pieza. En el medio, el segundo estudio: casos en que el modelo con la pieza tiene menos retraso total que sin ella, de forma significativa en las dos tandas; se compara con IPPO con mensajes corregido y, en la fila de los mensajes, con el mismo modelo sin ellos (Tabla~\ref{tab:plan3-hipotesis}). Abajo, el corredor de Lima (Tabla~\ref{tab:corredor-mensajes}). Un valor negativo es una mejora.}
@@ -1424,7 +1370,7 @@ Con la misma demanda total (1810, 2715 y 3620~veh/h), el resultado
 cambia de una red a otra, sin un orden que se repita; esa comparación no
 separa el efecto de la red del de la carga por calle. Además, hay
 indicios de que una política no se sostiene lejos de la demanda con que
-se entrenó: evaluada sin reentrenar, la de P1 solo gana con su demanda
+se entrenó: evaluada sin reentrenar, la de P1 solo supera al fijo con su propia demanda
 (Anexo~F, Figura~\ref{fig:plan2-demanda}). El retraso y el veredicto de
 cada nivel están en el repositorio del proyecto (Anexo~B).
 % fuente: plan2/demanda2/resumen_demanda2.csv y secciones/tablas/demanda2.tex. Corredor: cambio_fijo -5.6 (905), +5.4
@@ -1515,7 +1461,7 @@ aumenta el tiempo de viaje frente al plan real en dos redes
 \citep{Nguyen2025_TREX}, y ninguno de los nueve algoritmos multiagente
 de EPyMARL supera al plan real de un corredor de tres cruces
 \citep{Ault2022_EPyMARL}. Frente al actuado, la tesis también queda por
-debajo de la mediana publicada, que sale de solo cuatro obras.
+debajo de la mediana publicada, calculada con solo cuatro obras.
 % fuente: Anexo E (tab:trabajos-comparados: Genders y Razavi 2019, fijo ajustado por barrido y 32 semillas, tiempo
 % de viaje, -8.9 y -1.3 con DQN; T-REX, IPPO frente al plan real; EPyMARL, plan real del corredor de 3 cruces)
 
@@ -1535,8 +1481,7 @@ prueba (Sección~\ref{sec:plan2}).
 \suppressfloats[t]
 
 Esta sección responde la tercera pregunta de trabajo: ¿hasta dónde llega
-el resultado? El modelo gana donde reaccionar al tráfico sirve: con
-llegadas aleatorias, en el corredor y en la malla con demanda alta. No
+el resultado? El modelo supera al fijo donde reaccionar al tráfico reduce el retraso: con llegadas aleatorias, en el corredor y en la malla con demanda alta. No
 supera a un fijo bien ajustado con llegadas regulares, ni en la red con
 rotonda, ni en la malla con demanda nominal. En los dos casos de Lima
 baja el retraso frente al mejor fijo, pero en el nudo, que es un solo
@@ -1551,8 +1496,7 @@ aleatorias, frente a un fijo ajustado al segundo, con reglas publicadas
 antes de entrenar y evaluación a ciegas, el modelo baja el retraso total
 un 10.8 y un 11.1\,\% sobre los seis casos, y funciona en cinco de los
 diez casos evaluados, incluido el corredor de Lima con sus dos demandas.
-Las dos tandas de evaluación dan el mismo veredicto en todos. El
-corredor es el caso más sólido: el modelo funciona en él con las dos
+Las dos tandas de evaluación dan el mismo veredicto en todos. El corredor es el caso con resultados más consistentes: el modelo funciona en él con las dos
 demandas en el primer estudio, en el segundo (con la demanda alta, de
 forma provisional) y en Lima, que es donde coordinar semáforos a lo
 largo de una avenida tiene más sentido.
@@ -1604,17 +1548,12 @@ demandas (Sección~\ref{sec:lima-corredor}).
 % con los dos tipos de llegadas)
 
 \noindent\textbf{Dónde no, y por qué.} Con llegadas regulares, el modelo
-solo empata con un fijo bien ajustado, que es casi óptimo. En la red con
-rotonda no gana con ningún tipo de llegadas: el fijo es el ciclo mínimo
+solo empata con un fijo bien ajustado, que es casi óptimo. En la red con rotonda no supera al fijo con ningún tipo de llegadas: el fijo es el ciclo mínimo
 con un desfase de 1~s, que el modelo no puede dar, y la rotonda se
 satura antes de que los semáforos queden exigidos
 (Sección~\ref{sec:donde-gana}). En la malla con demanda nominal,
-el retraso casi no depende del control. En P3, P4 y P5 el modelo no le
-gana a una regla simple, así que no se afirma que aprendió una
-coordinación. En el nudo de Lima, que es un solo cruce, el modelo mejora
-al fijo pero pierde contra el actuado ajustado
-(Sección~\ref{sec:lima-nudo}): sin vecinos con los que coordinarse,
-reaccionar al tráfico es lo que el actuado ya hace.
+el retraso casi no depende del control. En P3, P4 y P5 el modelo no supera a una regla simple; por eso no se afirma que haya aprendido una coordinación. En el nudo de Lima, que es un solo cruce, el modelo reduce el retraso frente al fijo, pero tiene más retraso que el actuado ajustado
+(Sección~\ref{sec:lima-nudo}): sin vecinos con los que coordinarse, su ventaja se limita a reaccionar al tráfico, que es lo que hace el actuado.
 
 \phantomsection\label{sec:limites}
 \noindent\textbf{Lo que no se puede afirmar.} Los casos de Lima comparan
