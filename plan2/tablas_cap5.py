@@ -44,6 +44,9 @@ Cambios de la entrega 3 (23.10.2026), solo en los textos de los .tex (mismas cif
   y al pasarlo a 2 salian 4 celdas de la robustez distintas de las tablas por modelo (DQN en P1 20.93 en vez de
   20.94; Q-learning en P2 498.52 en vez de 498.53; Q-learning (colas) en P2 559.95 en vez de 559.94; SARSA en P3
   24.50 en vez de 24.51). En la version principal no cambia ninguna celda.
+  15.11.2026 (convencion de la tesis): un PENDIENTE por convergencia se escribe con su veredicto y una daga, en
+  la misma linea que el cambio (p. ej. +9.9 FAL con daga); el caption dice que la daga es un entrenamiento sin
+  estabilizar y remite a sec:veredicto. Ningun veredicto cambia.
 """
 import os
 import sys
@@ -88,7 +91,7 @@ def veredicto_corto(v):
         return "= vecinos", False
     if v.startswith("PENDIENTE (no convergi"):
         prov = v.split("provisional:")[1].strip(" )")
-        return f"PEN ({ABREV[prov]})", igual_ciclo
+        return ABREV[prov] + r"$^{\dagger}$", igual_ciclo     # 15.11.2026: la marca sin estabilizar
     if v.startswith("PENDIENTE (falta"):
         return "pendiente", False
     if v.startswith("PENDIENTE"):
@@ -108,14 +111,12 @@ def media_cruda(res_esc, modelo, r):
 
 
 def celda_modelo(r, v, igual_ciclo, retraso):
-    """Retraso, cambio frente al fijo y veredicto abreviado de un modelo en un caso. El PEN con su provisional va
-    en su propia linea (entrega 3: con todo en la segunda linea, la tabla se salia del margen) y la igualdad con el
-    ciclo minimo, en palabras debajo. retraso: la media sin redondear (media_cruda)."""
+    """Retraso, cambio frente al fijo y veredicto abreviado de un modelo en un caso, y la igualdad con el ciclo
+    minimo, en palabras debajo. Desde el 15.11.2026 un entrenamiento sin estabilizar lleva una daga (dagger)
+    junto al veredicto, en la misma linea (antes, el PEN con su provisional iba en una linea aparte).
+    retraso: la media sin redondear (media_cruda)."""
     lineas = [f"{retraso:.2f}"]
-    if v.startswith("PEN"):
-        lineas += [delta(r["delta_fijo"]), v]
-    else:
-        lineas.append(delta(r["delta_fijo"]) + " " + v)
+    lineas.append(delta(r["delta_fijo"]) + " " + v)
     if igual_ciclo:
         lineas += ["igual al", "ciclo mínimo"]
     return r"\makecell{" + r"\\".join(lineas) + "}"
@@ -216,8 +217,8 @@ def tabla_resumen(ver, res):
     que_igual = "retraso total" if vd.METRICA == "retraso_total_prom" else "retraso"
     largo = (inicio +
              r"y debajo $\Delta_f$ (\%) con el veredicto abreviado: FUN, funciona; MEJ, "
-             r"mejora; EMP, empata; FAL, falla; PEN, pendiente porque el entrenamiento de la versión "
-             r"evaluada no converge, con el veredicto provisional entre paréntesis. "
+             r"mejora; EMP, empata; FAL, falla; $^{\dagger}$, entrenamiento de la versión evaluada sin "
+             r"estabilizar (Sección~\ref{sec:veredicto}). "
              + ("" if vd.SIN_TRIVIAL or not hay_igual_ciclo else
                 r"Igual al ciclo mínimo: la política da el mismo " + que_igual + r" y la misma espera que el "
                 r"ciclo mínimo. ")

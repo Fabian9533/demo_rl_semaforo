@@ -12,8 +12,8 @@
 % espera o tiempo de viaje). Las claves estan en referencias.bib desde el 27.09.2026.
 
 Este anexo reúne los trabajos de control semafórico con los que la
-Sección~\ref{sec:comparacion-literatura} compara los resultados del plan
-de pruebas. La búsqueda se organizó en
+Sección~\ref{sec:comparacion-literatura} compara los resultados de la
+tesis. La búsqueda se organizó en
 cuatro frentes: bancos de prueba y revisiones, control de un cruce
 aislado o de un corredor, redes con varios agentes, y trabajos de
 América Latina junto con sistemas que operan en ciudades. De cada obra
@@ -611,10 +611,10 @@ Revisión de 160 artículos \citep{Noaeen2022_SLR}
   & retraso 20\,\%; viaje, espera y cola 12\,\% cada una \\
 \midrule
 Esta tesis
-  & tabulares: detenidos por aproximación en 4 niveles y fase verde; DQN, IPPO y MAPPO: vector de 31 componentes (53 en la malla de P5 y P6) con cola detenida y vehículos en movimiento por aproximación, fase, tiempo en verde, verde mínimo cumplido, identificador y mensajes de los vecinos (Tabla~\ref{tab:obs-u4})
-  & mantener o pasar a la siguiente fase verde, cada 5~s; verde de 10 a 60~s
+  & tabulares: detenidos por aproximación en 4 niveles y fase verde; DQN, IPPO y MAPPO: vector de 31 componentes (53 en la malla de P5 y P6) con cola detenida y vehículos en movimiento por aproximación, fase, tiempo en verde, verde mínimo cumplido, identificador y mensajes de los vecinos (Tabla~\ref{tab:obs-u4}); el modelo completo agrega los vehículos a menos de 75~m (49 y 73 componentes)
+  & mantener o pasar a la siguiente fase verde, cada 5~s (cada 2~s en el modelo completo); verde de 10 a 60~s
   & $-$(retraso $+$ 0.01 $\times$ espera), sumado por segundo desde la decisión anterior y dividido entre 5 (Ecuación~\ref{eq:recompensa-u4}); término de \textit{spillback} solo en IPPO con penalización de \textit{spillback}; colas en la ablación
-  & retraso por vehículo (\texttt{timeLoss}, primaria); espera detenida, colas, paradas y \textit{throughput}; en el análisis de robustez, retraso total con la espera para entrar a la red (Sección~\ref{sec:robustez}) \\
+  & retraso total por vehículo (primaria en la medición más estricta, en el segundo estudio y en Lima) y retraso (primaria en el primer estudio); espera detenida, colas, paradas y \textit{throughput} \\
 \bottomrule
 \end{tabular}
 \caption[Formulación de los trabajos con aprendizaje por refuerzo (continuación)]{Continuación de la Tabla~\ref{tab:trabajos-entradas}. La fila de la revisión da la frecuencia de cada elemento en los estudios que revisa, en porcentaje; la última fila describe esta tesis.}
@@ -624,6 +624,9 @@ Esta tesis
 % (preprint de engrXiv); fila de esta tesis: Capitulo III (sec:formulacion, sec:u4, Tabla tab:obs-u4 y sec:u3);
 % metrica primaria del resultado principal: timeloss_prom (plan2/ESPEC.md, veredicto del 25.09); retraso total solo
 % en la robustez (plan2/robustez_veredicto.csv).
+% Desde el 15.11.2026 la fila cubre tambien el segundo estudio y Lima: retraso total primario en
+% plan3/salidas/veredicto3.md y lima/REGISTRO.md; modelo completo: capitulo4.tex, sec:aprendices (observacion de 31 a
+% 49 componentes y de 53 a 73 en la malla, vehiculos a menos de 75 m; decide cada 2 s).
 
 La mejora reportada depende sobre todo de la referencia. Con una cifra
 por obra y por tipo de referencia, solo de trabajos con aprendizaje por

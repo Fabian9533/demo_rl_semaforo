@@ -166,13 +166,14 @@ Falló tres veces, y cada fallo cambió una decisión de diseño:
 % humo4_s42_retraso_hiper_prerregistrados.csv y humo5_s43_lr1e-3_mb64_ep10.csv: 24 = 3 minilotes x 8 epocas)
 
 Con los tres ajustes, la política congelada da $15.05 \pm 0.21$~s/veh
-en diez semillas de evaluación: un 35\,\% menos que el fijo, al nivel
-del actuado (15.46~s/veh). Es un cruce aislado y un solo
+en diez semillas de evaluación: un 35\,\% menos que el fijo y un
+2.6\,\% menos que el actuado (15.46~s/veh). Es un cruce aislado y un solo
 entrenamiento: la cifra no se compara con las de P1 a P6. Double DQN y
 MAPPO pasaron su prueba de humo al primer intento, sin cambiar ningún
 hiperparámetro. La fase exploratoria, de la que sale esta prueba, se
 resume en el Anexo~C.
-% fuente: evaluacion_cruce_resumen.csv (ippo_local 15.05, actuado 15.46, fijo 23.19; semillas 1001 a 1010);
+% fuente: evaluacion_cruce_resumen.csv (ippo_local 15.05, actuado 15.46, fijo 23.19; semillas 1001 a 1010; frente al
+% actuado, delta_pct_act -2.6 [-3.2, -2.0], como en el Anexo C);
 % humo/dqn_humo_cruce.csv y docstring de rl_mappo.py (pruebas de humo de Double DQN y MAPPO)
 
 \refstepcounter{anexoIapartado}

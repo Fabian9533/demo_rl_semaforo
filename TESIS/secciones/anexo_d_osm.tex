@@ -154,13 +154,15 @@ Al cargar el plan se tomaron cuatro decisiones:
 \begin{itemize}
   \item \textbf{Ámbar.} En el sitio no se registró ámbar. El simulador
     lo necesita para que los vehículos frenen, así que los últimos 3~s
-    de cada verde medido son ámbar y el ciclo sigue en 132~s.
+    de cada verde medido son ámbar: el plan actual queda con 37, 15 y
+    37~s de verde (Tabla~\ref{tab:lima-semaforo}) y el ciclo sigue en
+    132~s.
   \item \textbf{Dos segundos de diferencia.} Reducto de norte a sur y
     28 de Julio tienen 38~s de verde en el sitio; aquí van con los 40~s
     del movimiento con el que comparten estado.
   \item \textbf{Todo en rojo.} Los 34~s se conservan iguales en todos
     los controles. No se simulan peatones, pero si un control pudiera
-    quitar ese tiempo, ganaría solo por eso.
+    quitar ese tiempo, tendría menos retraso solo por eso.
   \item \textbf{Movimientos que se cruzan.} 28 de Julio y Balboa tienen
     verde a la vez, aunque algunos de sus movimientos se cruzan. En el
     sitio eso bloquea el nudo, pero el bloqueo se deshace. En SUMO, con
@@ -278,20 +280,22 @@ La Tabla~\ref{tab:lima-completa} da el retraso de todos los controles y
 el cambio del modelo frente a cada uno, con su intervalo de confianza.
 
 El actuado ajustado se buscó dos veces. La primera búsqueda probó 12
-combinaciones, con huecos entre vehículos de 2 a 4~s, y su ganador quedó
-en el borde de lo probado. Por eso se repitió con los pasos del segundo
-estudio, que prueban huecos desde 1~s y la variante que decide por el
-retraso. La tabla conserva el actuado de la primera búsqueda: frente a
-él, el modelo empataba con la demanda publicada y ganaba por un 1\,\%
-con la alta. Frente al definitivo, pierde. El veredicto se calcula con
-el definitivo.
+combinaciones, con huecos entre vehículos de 2 a 4~s, y su mejor
+combinación quedó en el borde de lo probado. Por eso se repitió con los
+pasos del segundo estudio, que prueban huecos desde 1~s y la variante
+que decide por el retraso. La tabla conserva el actuado de la primera
+búsqueda: frente a él, el modelo empataba con la demanda publicada y
+tenía un 0.5 y un 1.1\,\% menos de retraso con la alta (tandas 1 y 2);
+frente al definitivo, con el que se calcula el veredicto, tiene más
+retraso.
 
-El ganador de la segunda búsqueda también quedó en el borde: 200~m de
-alcance y 3~s de retraso mínimo, los dos valores más altos probados.
-Por eso se probó un paso más allá (400~m, 5~s y los dos a la vez). Con
-la demanda publicada nada mejoró. Con la alta ganó el retraso mínimo de
-5~s, por menos de 0.1~s por vehículo; ese valor vuelve a estar en el
-borde, y ahí se paró, como estaba previsto.
+La mejor combinación de la segunda búsqueda también quedó en el borde:
+200~m de alcance y 3~s de retraso mínimo, los dos valores más altos
+probados. Por eso se probó un paso más allá (400~m, 5~s y los dos a la
+vez). Con la demanda publicada nada mejoró. Con la alta, el mejor valor
+fue un retraso mínimo de 5~s, que baja el retraso total menos de 0.1~s
+por vehículo; ese valor vuelve a quedar en el borde, y la búsqueda
+terminó ahí, como estaba previsto en el registro.
 % fuente: lima/REGISTRO.md, "Comprobacion del borde del actuado ajustado" (14.11.2026, 15:55); lima/borde_actuado.py;
 % salidas/borde_actuado.json de lima/ y lima/alta/ (alta: 63.18 con 30 semillas frente a 63.26); el actuado anterior
 % de la demanda alta queda en la tabla como "antes de la comprobacion del borde" (eval_t*_actuadoajb.csv)
@@ -315,7 +319,9 @@ borde, y ahí se paró, como estaba previsto.
 El modelo se entrenó tres veces con cada demanda
 (Tabla~\ref{tab:lima-entrenamientos}); se cita el entrenamiento de
 validación mediana. Las curvas de aprendizaje están en el
-Capítulo~\ref{cap:resultados} (Figura~\ref{fig:lima-aprendizaje}).
+Capítulo~\ref{cap:resultados} (Figura~\ref{fig:lima-aprendizaje}). La
+Tabla~\ref{tab:lima-robustez} repite la evaluación con otro reparto del
+mismo total (Sección~\ref{sec:lima-nudo}).
 
 \begin{table}[!tbp]
 \setstretch{1}
@@ -329,6 +335,18 @@ Capítulo~\ref{cap:resultados} (Figura~\ref{fig:lima-aprendizaje}).
 % fuente: secciones/tablas/lima_entrenamientos.tex (lima/tablas_lima.py): politica_lima_vecinos_completo_s<base>.json
 % (ep_elegido y val_elegido), salidas/eval_t*_*.csv y la columna val_total de los CSV de entrenamiento de cada nivel
 
+% fuente: secciones/tablas/lima_robustez.tex (lima/tablas_lima.py): lima/robustez/reducto/ y lima/robustez/transversal/, salidas/eval_t1_*.csv (100 semillas, 24001-24100)
+% (tabla traida del Cap. V el 15.11.2026; registro de la prueba: lima/REGISTRO.md, "Prueba de robustez del reparto",
+% 22:10 del 13.11.2026, antes de correrla)
+\begin{table}[!tbp]
+\setstretch{1}
+\centering
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\input{secciones/tablas/lima_robustez}
+\caption[Caso Lima, el nudo: otro reparto de la demanda]{Caso Lima, el nudo: retraso total por vehículo (s/veh) con el mismo total de 4271~veh/h repartido de otra forma entre las entradas, y cambio del modelo frente a cada control. Ningún control se volvió a ajustar ni a entrenar. En la segunda fila, las dos entradas de Reducto llevan un 20\,\% más y las otras dos un 20\,\% menos, antes de reescalar al mismo total; en la tercera, al revés. 100 semillas.}
+\label{tab:lima-robustez}
+\end{table}
 
 % los flotantes del nudo se colocan antes de que empiece la parte del corredor
 \clearpage

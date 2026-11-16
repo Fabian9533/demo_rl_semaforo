@@ -1,4 +1,7 @@
 % Generado por veredicto.py a partir de plan2/. No editar a mano.
+% 15.11.2026: editadas a mano las 12 celdas sin estabilizar o sin datos, con la marca sin estabilizar (veredictos de
+% plan2/robustez_veredicto.csv); veredicto.py no se corre (plan3/PRERREGISTRO.md §16). Tambien a mano el caption:
+% "Robustez" pasa a "Medicion mas estricta" (el nombre del paso 2), como ya escribe veredicto.titulo_prefijo.
 \begin{table}[!tbp]
 \setstretch{1}
 \centering
@@ -10,16 +13,16 @@ Modelo & \makecell{P1\\Corredor\\nominal} & \makecell{P2\\Corredor\\alta} & \mak
 \midrule
 Actuado & EMPATA & FALLA & FALLA & FALLA & FALLA & FALLA \\
 Ciclo mínimo & FALLA & FALLA & MEJORA & EMPATA & EMPATA & FALLA \\
-Q-learning & FALLA & FALLA & FALLA & PENDIENTE & FALLA & FALLA \\
-SARSA & FALLA & FALLA & FALLA & FALLA & FALLA & PENDIENTE \\
-Q-learning (colas) & FALLA & PENDIENTE & FALLA & FALLA & PENDIENTE & PENDIENTE \\
-DQN & MEJORA & FALLA & FALLA & FALLA & PENDIENTE & PENDIENTE \\
+Q-learning & FALLA & FALLA & FALLA & FALLA$^{\dagger}$ & FALLA & FALLA \\
+SARSA & FALLA & FALLA & FALLA & FALLA & FALLA & FALLA$^{\dagger}$ \\
+Q-learning (colas) & FALLA & FALLA$^{\dagger}$ & FALLA & FALLA & sin datos & sin datos \\
+DQN & MEJORA & FALLA & FALLA & FALLA & FALLA$^{\dagger}$ & FALLA$^{\dagger}$ \\
 IPPO sin mensajes & EMPATA & MEJORA & FALLA & FALLA & FALLA & FALLA \\
-IPPO con mensajes & FUNCIONA & FALLA & \makecell{MEJORA,\\igual al\\ciclo mínimo} & FALLA & FALLA & PENDIENTE \\
-\makecell[l]{IPPO con\\penalización} & FUNCIONA & FALLA & \makecell{igual a IPPO\\con mensajes} & \makecell{igual a IPPO\\con mensajes} & \makecell{igual a IPPO\\con mensajes} & PENDIENTE \\
-MAPPO & FUNCIONA & FALLA & PENDIENTE & PENDIENTE & \makecell{EMPATA,\\igual al\\ciclo mínimo} & PENDIENTE \\
+IPPO con mensajes & FUNCIONA & FALLA & \makecell{MEJORA,\\igual al\\ciclo mínimo} & FALLA & FALLA & EMPATA$^{\dagger}$ \\
+\makecell[l]{IPPO con\\penalización} & FUNCIONA & FALLA & \makecell{igual a IPPO\\con mensajes} & \makecell{igual a IPPO\\con mensajes} & \makecell{igual a IPPO\\con mensajes} & EMPATA$^{\dagger}$ \\
+MAPPO & FUNCIONA & FALLA & EMPATA$^{\dagger}$ & FALLA$^{\dagger}$ & \makecell{EMPATA,\\igual al\\ciclo mínimo} & FALLA$^{\dagger}$ \\
 \bottomrule
 \end{tabular}
-\caption[Robustez: veredicto por caso y modelo]{Robustez. Veredicto de cada modelo en cada caso, con la regla de la Tabla~\ref{tab:veredictos}: retraso total (timeLoss más la espera para entrar a la red) de la versión evaluada frente al fijo ajustado desde 10~s y al actuado, semillas 1001 a 1030. IPPO con penalización: con penalización de \textit{spillback}; DQN: Double DQN. Igual a IPPO con mensajes: la penalización no se activa e IPPO con penalización lleva el veredicto de IPPO con mensajes. PENDIENTE: faltan datos o el entrenamiento de la versión evaluada no se estabilizó. El actuado y el ciclo mínimo (verdes mínimos, desfases en 0) se juzgan frente al fijo. Igual al ciclo mínimo: la política da el mismo retraso y la misma espera que el ciclo mínimo.}
+\caption[Medición más estricta: veredicto por caso y modelo]{Medición más estricta. Veredicto de cada modelo en cada caso, con la regla de la Tabla~\ref{tab:veredictos}: retraso total (el retraso más la espera para entrar a la red) de la versión evaluada frente al fijo ajustado desde 10~s y al actuado, semillas 1001 a 1030. IPPO con penalización: con penalización de \textit{spillback}; DQN: Double DQN. Igual a IPPO con mensajes: la penalización no se activa e IPPO con penalización lleva el veredicto de IPPO con mensajes. $^{\dagger}$: entrenamiento de la versión evaluada sin estabilizar. Sin datos: Q-learning (colas) no se entrenó en P5 ni en P6. El actuado y el ciclo mínimo (verdes mínimos, desfases en 0) se juzgan frente al fijo. Igual al ciclo mínimo: la política da el mismo retraso y la misma espera que el ciclo mínimo.}
 \label{tab:robustez-veredicto-matriz}
 \end{table}

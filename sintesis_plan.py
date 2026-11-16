@@ -8,6 +8,9 @@ Uso (desde demo_rl):  python sintesis_plan.py [--metrica retraso_total_prom] [--
   solo P1-P5 (sin tocar la tesis): primero veredicto.py y despues este script, los dos con las mismas opciones
     mas --casos P1-P5 --prefijo p1p5_ (o robustez_p1p5_) --tesis <otra carpeta>; sin el <prefijo>veredicto.csv
     el numero unico sale vacio
+  OJO (15.11.2026): la figura de la tesis TESIS/images/fig_plan2_mejora_caso la dibuja ahora figura_mejora_caso.py
+    (lineas que separan los casos y la marca "sin estabilizar"). Si se vuelve a correr la corrida principal, correr
+    despues python figura_mejora_caso.py, o la figura vuelve a la version anterior.
 
 Lee plan2/evaluacion_<esc>.csv (consolidar.py, una fila por brazo y semilla) y plan2/veredicto.csv
 (base publicada de cada modelo y caso). Calcula:
@@ -210,8 +213,9 @@ def etiqueta(nombre):
 
 
 def titulo(corto, largo):
-    """Titulos con el prefijo al inicio (p. ej. Robustez: ...), como en veredicto.py."""
-    t = PREFIJO.strip("_").replace("_", " ").capitalize()
+    """Titulos con el prefijo al inicio (p. ej. Medicion mas estricta: ...), como en veredicto.py."""
+    t = PREFIJO.strip("_")
+    t = "Medición más estricta" if t == "robustez" else t.replace("_", " ").capitalize()
     if not t:
         return corto, largo
     return f"{t}: {corto[0].lower()}{corto[1:]}", f"{t}. {largo}"

@@ -129,7 +129,7 @@ def dibujar_red(ax, net, W, titulo, rotulo_tls=True, flechas=True):
             for f in fracs:
                 mx, my = p[0] + (q[0] - p[0]) * f, p[1] + (q[1] - p[1]) * f
                 flecha(ax, (mx - ux * W * 0.9, my - uy * W * 0.9), (mx + ux * W * 0.9, my + uy * W * 0.9), TINTA2,
-                       escala=5.5, lw=0.8, z=3)
+                       escala=6.3, lw=0.9, z=3)
     for nodo in nodos:
         if es_cruce(nodo):
             h = carriles_en(nodo) * W + 0.15 * W
@@ -161,14 +161,14 @@ def dibujar_red(ax, net, W, titulo, rotulo_tls=True, flechas=True):
         ax.add_patch(Circle((x, y), W * 0.75, facecolor=VERDE, edgecolor=FONDO, lw=0.7, zorder=5))
         if rotulo_tls:
             h = carriles_en(nodo[0]) * W
-            ax.text(x + h + 0.4 * W, y + h + 0.4 * W, nid, fontsize=7.0, color=TINTA, zorder=6, ha="left", va="bottom")
+            ax.text(x + h + 0.4 * W, y + h + 0.4 * W, nid, fontsize=8.6, color=TINTA, zorder=6, ha="left", va="bottom")
     bbox = net.getBBoxXY()
     m = 3.0 * W
     ax.set_xlim(bbox[0][0] - m, bbox[1][0] + m)
     ax.set_ylim(bbox[0][1] - m, bbox[1][1] + m)
     ax.set_aspect("equal")
     ax.axis("off")
-    ax.set_title(titulo, fontsize=8.6, color=TINTA, loc="left", pad=3)
+    ax.set_title(titulo, fontsize=9.6, color=TINTA, loc="left", pad=3)
     return centro_anillo, radio_anillo
 
 
@@ -287,8 +287,8 @@ def dibujar_cruce(ax, net_f, add_f, nodo_id, radio, desde=None, frente=None):
 
 
 def figura_redes():
-    fig = plt.figure(figsize=(6.6, 6.7), facecolor=FONDO)
-    gs = fig.add_gridspec(2, 2, height_ratios=[1, 1.15], hspace=0.12, wspace=0.05)
+    fig = plt.figure(figsize=(6.6, 6.2), facecolor=FONDO)
+    gs = fig.add_gridspec(2, 2, height_ratios=[0.82, 1.15], hspace=0.10, wspace=0.05)
     ejes = [fig.add_subplot(gs[0, 0]), fig.add_subplot(gs[0, 1]), fig.add_subplot(gs[1, 0]), fig.add_subplot(gs[1, 1])]
     for ax, (esc, net_f, add_f, titulo) in zip(ejes[:3], REDES):
         net = sumolib.net.readNet(os.path.join(AQUI, net_f))
@@ -297,17 +297,18 @@ def figura_redes():
         W = lado * (0.019 if esc != "malla3" else 0.017)
         centro, radio = dibujar_red(ax, net, W, titulo)
         if centro:
-            ax.annotate("rotonda,\nsin semáforo", xy=(centro[0], centro[1] + radio + W), xytext=(centro[0], centro[1] + 7.5 * W),
-                        fontsize=7.0, color=TINTA2, ha="center", va="bottom",
+            ax.annotate("rotonda,\nsin semáforo", xy=(centro[0] - radio - W, centro[1] - radio - W),
+                        xytext=(centro[0] - 3.5 * W, centro[1] - 7.5 * W),
+                        fontsize=7.8, color=TINTA2, ha="right", va="top",
                         arrowprops=dict(arrowstyle="-", color=APAGADO, lw=0.7), zorder=6)
     dibujar_cruce(ejes[3], "corredor.net.xml", "corredor.add.xml", "C1", 26, desde="W_C1", frente="C2_C1")
-    ejes[3].set_title("Un cruce ampliado: los movimientos desde un acceso", fontsize=8.6, color=TINTA, loc="left", pad=3)
+    ejes[3].set_title("Un cruce ampliado: los movimientos desde un acceso", fontsize=9.6, color=TINTA, loc="left", pad=3)
     leyenda = [Line2D([], [], color=TINTA, lw=1.6, label="Recto: verde con prioridad"),
                Line2D([], [], color=AZUL, lw=1.6, label="A la derecha: verde con prioridad"),
                Line2D([], [], color=NARANJA, lw=1.6, ls=TRAZO_IZQ, label="A la izquierda: cede el paso"),
                Line2D([], [], marker="o", ls="", ms=6, mfc=VERDE, mec=FONDO, label="Semáforo"),
                Line2D([], [], marker=r"$\rightarrow$", ls="", ms=9, color=TINTA2, label="Sentido del carril")]
-    fig.legend(handles=leyenda, loc="lower center", ncol=2, fontsize=7.2, frameon=False, bbox_to_anchor=(0.5, -0.03),
+    fig.legend(handles=leyenda, loc="lower center", ncol=2, fontsize=8.6, frameon=False, bbox_to_anchor=(0.5, -0.03),
                handlelength=2.4, columnspacing=1.6, labelcolor=TINTA)
     salida = os.path.join(IMAGENES, "fig_redes.png")
     fig.savefig(salida, dpi=220, bbox_inches="tight", facecolor=FONDO)

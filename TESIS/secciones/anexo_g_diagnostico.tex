@@ -1,6 +1,6 @@
-\section*{Anexo G. Diagnóstico posterior del entrenamiento}
+\section*{Anexo G. Diagnósticos posteriores al primer estudio}
 \phantomsection
-\addcontentsline{toc}{subsection}{Anexo G. Diagnóstico posterior del entrenamiento}
+\addcontentsline{toc}{subsection}{Anexo G. Diagnósticos posteriores al primer estudio}
 \setcounter{table}{0}
 \renewcommand{\thetable}{G.\arabic{table}}
 \renewcommand{\theHtable}{G.\arabic{table}}
@@ -34,22 +34,6 @@ cambiando solo su entrenamiento; el segundo
 (Sección~\ref{sec:diag-corredor}), por qué en el corredor el resultado
 no sigue una tendencia con la demanda.
 
-\textbf{Respuesta corta.}
-\begin{itemize}
-  \item IPPO con mensajes aprendía un ciclo largo: casi fijo en P4 y
-    poco sincronizado en P6. La causa estaba en el entrenamiento: el
-    descuento contaba decisiones y no segundos, y cada semáforo
-    exploraba por su cuenta.
-  \item Con las dos cosas corregidas, el modelo baja el retraso un
-    6.7\,\% frente al fijo ajustado en P6, donde IPPO con mensajes
-    empataba. En P4 aprende el ciclo mínimo, que un fijo bien ajustado
-    iguala, y en P1 no empeora.
-  \item En el corredor, cada nivel de demanda tiene una causa distinta.
-    Con la medición más estricta, el modelo corregido tiene menos
-    retraso total que el fijo en cuatro de los cinco niveles. Sigue
-    fallando con 2715~veh/h ($+33.6$\,\%): ahí pesan mucho los giros a
-    la izquierda en calles de un carril, pero no lo explican todo.
-\end{itemize}
 % fuente: plan2/exploratorio_coord/conf_p6/salidas/juicio_conf_p6.txt (P6, 6001-6030: V2 -6.7 %; IPPO publicado
 % +1.3 %) y tanda1 y tanda2 (P4 y P1); plan2/diag_corredor/resultados.csv (V2 frente a fijo10, 1001-1030: -2.9, -2.3,
 % -7.4, +33.6 y -10.8) y pruebas3.txt (2715 sin giros a la izquierda)
@@ -197,7 +181,7 @@ Corregido, con dos añadidos & 19.73 & $-7.3$ [$-8.7$, $-6.0$] & $-0.6$ [$-1.5$,
 \begin{itemize}
   \item \textbf{P4: aprende el ciclo mínimo.} La versión evaluada del
     modelo corregido da el mismo resultado que el ciclo mínimo en las 30
-    semillas. No lo supera, y el criterio registrado pedía ganarle
+    semillas. No lo supera, y el criterio registrado pedía superarlo
     también a él: en la repetición, la variante con los dos añadidos
     queda a $+0.0$\,\% del ciclo mínimo (IC95 de $-0.3$ a $+0.4$\,\%).
     Frente al fijo ajustado desde 10~s del Anexo~F, esa variante empata
@@ -206,11 +190,11 @@ Corregido, con dos añadidos & 19.73 & $-7.3$ [$-8.7$, $-6.0$] & $-0.6$ [$-1.5$,
     fijo bien ajustado también logra.
   \item \textbf{P6: una mejora real.} El modelo corregido baja el
     retraso un 7.3\,\% frente al fijo ajustado en la primera prueba y un
-    6.7\,\% en la repetición, donde gana en 29 de las 30 semillas. En
-    esas semillas, IPPO con mensajes empata con el fijo ($+1.3$\,\%).
-    Con las 60 semillas el cambio es de $-7.0$\,\% (IC95 de $-9.0$ a
-    $-5.1$\,\%). Hasta entonces, ningún control le había ganado de forma
-    consistente al fijo ajustado de P6.
+    6.7\,\% en la repetición, donde tiene menos retraso en 29 de las 30
+    semillas. En esas semillas, IPPO con mensajes empata con el fijo
+    ($+1.3$\,\%). Con las 60 semillas el cambio es de $-7.0$\,\% (IC95
+    de $-9.0$ a $-5.1$\,\%). Hasta entonces, ningún control había
+    superado de forma consistente al fijo ajustado de P6.
   \item \textbf{P1: no empeora.} La variante con los dos añadidos queda
     en $-7.3$\,\% frente al fijo ajustado, e IPPO con mensajes, en
     $-6.7$\,\%. La diferencia entre los dos, $-0.6$\,\% con un límite
@@ -224,7 +208,7 @@ Corregido, con dos añadidos & 19.73 & $-7.3$ [$-8.7$, $-6.0$] & $-0.6$ [$-1.5$,
 % +1.3 %; 60 semillas: -7.0 % [-9.0, -5.1])
 
 Lo que el modelo corregido aprende en P6 no es el ciclo mínimo, que ahí
-se traba (184.39~s/veh), ni el fijo. Parte del ciclo mínimo y extiende
+bloquea la red (184.39~s/veh), ni el fijo. Parte del ciclo mínimo y extiende
 algunos verdes de avenida: el 72\,\% duran 10~s y el resto, entre 15 y
 35~s. Dos cruces vecinos están en la misma fase el 63.6\,\% de la hora,
 frente al 18.3\,\% de IPPO con mensajes. No se sabe a qué reacciona esa
@@ -325,9 +309,9 @@ semillas 1001 a 1030, las de esa curva, y se confirma con las 6001 a
   \item \textbf{1358~veh/h: el entrenamiento.} Hasta 1810~veh/h, IPPO
     con mensajes aplica casi el mismo plan en los tres niveles: 10~s de
     transversal, 20 o 25~s de avenida y un ciclo de 41~s. Aquí el fijo
-    es un ciclo corto, con 12~s de avenida: frente a él, el modelo gana
-    en la avenida (de 20.8 a 16.9~s por vehículo) y pierde en la
-    transversal (de 14.5 a 22.2~s). Con el entrenamiento corregido
+    es un ciclo corto, con 12~s de avenida: frente a él, el modelo
+    reduce el retraso de la avenida (de 20.8 a 16.9~s por vehículo) y
+    aumenta el de la transversal (de 14.5 a 22.2~s). Con el entrenamiento corregido
     cambia de fase 500 veces por corrida en vez de 373 (el fijo, 527),
     y su retraso baja de 19.10 a 17.68~s/veh (el fijo, 18.12).
   \item \textbf{1810~veh/h (P1): una mejora real.} Los desfases que
@@ -337,7 +321,7 @@ semillas 1001 a 1030, las de esa curva, y se confirma con las 6001 a
   \item \textbf{3620~veh/h (P2): la métrica.} La espera para entrar es
     de 282.0~s/veh con IPPO con mensajes y de 239.6 con el fijo. Al
     sumarla, el cambio pasa de $-23.3$ a $+1.6$\,\%. El modelo
-    corregido sí le gana al fijo ($-10.8$\,\%).
+    corregido sí supera al fijo ($-10.8$\,\%).
   \item \textbf{2715~veh/h: no se corrige.} La desventaja ya existía con
     el retraso y crece con el retraso total: la espera para entrar es
     de 18.4~s/veh con IPPO con mensajes y de 3.1 con el fijo. El
@@ -386,7 +370,7 @@ actuado.
 Para medir el peso de los giros se repitió el nivel con los giros de la
 segunda media hora a la derecha y el mismo volumen
 (Tabla~\ref{tab:diag-2715}). Sin volver a entrenar, el modelo corregido
-pasa de perder un 33.6\,\% a ganar un 6.9\,\% frente al mismo fijo. Pero
+pasa de $+33.6$ a $-6.9$\,\% frente al mismo fijo. Pero
 ese fijo no es el mejor sin los giros: su propio barrido elige otro
 programa, que baja el retraso total de 42.5 a 29.2~s/veh. Frente a ese
 fijo, el modelo corregido entrenado sin los giros queda un 1.3\,\% por
@@ -425,7 +409,7 @@ IPPO con mensajes corregido, entrenado sin los giros & -- & -- & 29.59 & $-30.4$
 Los giros, entonces, pesan mucho, pero no bastan para explicar el
 nivel: la desventaja baja de $+33.6$ a $+1.3$\,\% y no desaparece.
 Además, en P2 los mismos giros llevan más vehículos y el modelo
-corregido le gana al fijo. Los giros perjudican más a los controles que
+corregido supera al fijo. Los giros perjudican más a los controles que
 reaccionan al tráfico que al fijo: el actuado tiene el mayor retraso con
 ellos (151.4~s/veh) y el menor sin ellos (28.8). El mecanismo quedó
 medido solo en parte: mientras un vehículo espera dentro del cruce para

@@ -1,7 +1,7 @@
 """
 figura_lectura.py - Figura explicativa del Capitulo V (pedido del asesor, 13.11.2026): que son las llegadas regulares y
-las aleatorias, y como se lee un veredicto (FUNCIONA, MEJORA, EMPATA, FALLA y PENDIENTE). Es una ilustracion: no
-muestra resultados.
+las aleatorias, y como se lee un veredicto (FUNCIONA, MEJORA, EMPATA y FALLA, y la marca sin estabilizar). Es una
+ilustracion: no muestra resultados.
 
 Uso (desde demo_rl/):  python figura_lectura.py [--destino carpeta]
 Escribe TESIS/images/fig_lectura.pdf y .png.
@@ -45,9 +45,9 @@ def figura(destino):
     with plt.rc_context({"font.family": "DejaVu Sans", "pdf.fonttype": 42, "axes.edgecolor": tp.EJE,
                          "axes.labelcolor": tp.TINTA2, "xtick.color": tp.TINTA2, "ytick.color": tp.TINTA2}):
         # el panel (b) deja a su derecha el espacio de la regla en palabras: asi el ancho total es el de la pagina
-        fig = plt.figure(figsize=(7.0, 6.6), facecolor=tp.FONDO)
-        a = fig.add_axes([0.17, 0.70, 0.80, 0.22])
-        b = fig.add_axes([0.17, 0.08, 0.47, 0.48])
+        fig = plt.figure(figsize=(7.0, 5.5), facecolor=tp.FONDO)
+        a = fig.add_axes([0.17, 0.72, 0.80, 0.20])
+        b = fig.add_axes([0.17, 0.09, 0.47, 0.47])
         # (a) llegadas
         a.set_facecolor(tp.FONDO)
         for y, tiempos, nombre in ((1, regulares, "Regulares"), (0, aleatorias, "Aleatorias")):
@@ -79,19 +79,21 @@ def figura(destino):
         b.axvline(tp.UMBRAL, color=tp.APAGADO, lw=0.6, ls=(0, (3, 2)), zorder=2)
         casos = [  # (veredicto, cambio, IC95, regla en palabras)
             ("FUNCIONA", -9.0, (-10.4, -7.6), "baja el retraso un 5 % o más, con el\nIC95 entero bajo cero, y no "
-             "pierde\ncontra el actuado"),
+             "tiene más\nretraso que el actuado"),
             ("MEJORA", -2.8, (-3.9, -1.7), "IC95 entero bajo cero, pero la baja\nes menor del 5 % o el modelo "
-             "pierde\ncontra el actuado"),
+             "tiene más\nretraso que el actuado"),
             ("EMPATA", 0.4, (-1.1, 1.9), "el IC95 cruza el cero: no se\ndistingue del fijo"),
             ("FALLA", 2.9, (1.9, 3.9), "IC95 entero sobre cero: más\nretraso que el fijo"),
-            ("PENDIENTE", -7.0, (-8.6, -5.4), "el entrenamiento no se estabilizó:\nel veredicto (aquí, FUNCIONA) "
-             "es\nprovisional"),
+            ("FUNCIONA,\nsin estabilizar", -7.0, (-8.6, -5.4), "borde punteado: el entrenamiento no\nse "
+             "estabilizó; el veredicto se calcula\nigual (aquí, FUNCIONA)"),
         ]
         for k, (ver, x, ic, regla) in enumerate(casos):
             y = len(casos) - 1 - k
             b.plot(list(ic), [y, y], color=tp.TINTA2, lw=1.4, zorder=3, solid_capstyle="butt")
-            if ver == "PENDIENTE":
-                b.plot(x, y, "o", ms=8, mfc=tp.FONDO, mec=tp.VERDE_OSCURO, mew=1.8, zorder=5)
+            if ver.startswith("FUNCIONA,"):            # el color de su veredicto y el borde punteado
+                b.plot(x, y, "o", ms=8, mfc=tp.COLOR["FUNCIONA"], mec=tp.FONDO, mew=1.0, zorder=5)
+                b.scatter([x], [y], s=12.4 ** 2, marker="o", facecolors="none", edgecolors=tp.TINTA,
+                          linewidths=1.0, linestyle=(0, (1.2, 1.2)), zorder=5.5)
             else:
                 b.plot(x, y, "o", ms=8, mfc=tp.COLOR[ver], mec=tp.APAGADO if ver == "EMPATA" else tp.FONDO,
                        mew=1.0, zorder=5)

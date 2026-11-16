@@ -102,7 +102,7 @@ en un escenario de varios cruces (Tabla~\ref{tab:resumen-u4}). En el
 corredor baja el retraso un 6.2\,\% frente al fijo ajustado y un
 5.1\,\% frente al actuado; IPPO sin mensajes empata con el fijo
 ($+0.6$\,\%). En la red, IPPO con mensajes empata con el fijo
-($+0.5$\,\%) y queda un 2.2\,\% por detrás del actuado.
+($+0.5$\,\%) y tiene un 2.2\,\% más de retraso que el actuado.
 % fuente: evaluacion_corredor_resumen.csv y evaluacion_red_resumen.csv de demo_rl, timeloss_prom (corredor:
 % ippo_vecinos_s42 delta_pct -6.2 [-8.0, -4.6] y delta_pct_act -5.1 [-6.4, -3.9]; ippo_local_s2042 0.6 [-1.1, 2.2];
 % red: ippo_vecinos_s4042 0.5 [-0.3, 1.3], p 0.414, y delta_pct_act 2.2 [0.8, 3.5], p 0.0195)
@@ -110,9 +110,9 @@ corredor baja el retraso un 6.2\,\% frente al fijo ajustado y un
 \input{secciones/tablas/resumen_u4}
 
 Con el doble de demanda, las tres variantes quedan entre un 20 y un
-21\,\% por debajo del fijo y empatan con el actuado. El primer estudio
-mostró que, en ese caso (P2), parte de la mejora es cola desplazada
-fuera de la red: con el retraso total, IPPO con mensajes queda un
+21\,\% por debajo del fijo y empatan con el actuado. La medición más
+estricta mostró que, en ese caso (P2), parte de la mejora es cola
+desplazada fuera de la red: con el retraso total, IPPO con mensajes queda un
 1.6\,\% por encima del fijo (Sección~\ref{sec:robustez}).
 % fuente: evaluacion_corredor_alta_resumen.csv de demo_rl, timeloss_prom (delta_pct -20.7, -21.2 y -20.2; frente al
 % actuado -0.8 [-3.0, 1.6], -1.3 [-3.8, 1.4] y -0.2 [-3.2, 3.5]); plan2/robustez_veredicto.csv (P2, ippo_vecinos:
@@ -163,8 +163,8 @@ menos retraso en la validación (Sección~\ref{sec:protocolo}).
 
 \subsection*{Canal de mensajes imperfecto}
 
-Con latencia o pérdida de mensajes, IPPO con mensajes pierde la ventaja
-que tenía. Es la única prueba de la tesis con un canal imperfecto: en
+Con latencia o pérdida de mensajes, la ventaja de IPPO con mensajes
+desaparece. Es la única prueba de la tesis con un canal imperfecto: en
 todas las demás los mensajes llegan al instante y sin pérdida. La
 política, entrenada con el canal perfecto, se evaluó sin reentrenar con
 tres canales peores: latencia de 5~s, latencia de 5~s con un 30\,\% de
@@ -181,9 +181,9 @@ $+7.0$\,\%.
 
 \input{secciones/tablas/corredor_s1}
 
-En la red, con el segundo y el tercer canal el modelo queda un 4.2 y un
-10.4\,\% por detrás del fijo ajustado. Con el primero el retraso
-incluso baja, a 21.19~s/veh, pero con más cambios de fase y menos
+En la red, con el segundo y el tercer canal el modelo tiene un 4.2 y un
+10.4\,\% más de retraso que el fijo ajustado. Con el primero el retraso
+baja, a 21.19~s/veh, pero con más cambios de fase y menos
 progresión.
 % fuente: evaluacion_red_resumen.csv de demo_rl, brazos ippo_vecinos_L5p30, _L10p0 y _L5p0 (timeloss_prom:
 % delta_pct 4.2 [3.0, 5.5] y 10.4 [9.3, 11.4]; L5p0: media 21.186, delta_pct -2.7 [-3.9, -1.5])
@@ -196,7 +196,7 @@ extremo) que se detiene a lo sumo una vez baja de 0.985 a entre 0.54 y
 0.80 en la red, y de 0.95 a entre 0.65 y 0.85 en el corredor. La
 lectura es que el modelo usa el mensaje del vecino tal como llega: la
 edad del mensaje está en su observación (Tabla~\ref{tab:obs-u4}), pero
-en el entrenamiento nunca vio un mensaje viejo.
+en el entrenamiento todos los mensajes llegaron sin demora.
 % fuente: tablas/red_s1.tex y tablas/corredor_s1.tex, columna "Paso con <= 1 parada" (red: 0.985, 0.795, 0.705 y
 % 0.542; corredor: 0.952, 0.853, 0.774 y 0.646); vehiculos de paso: los que recorren la avenida de extremo a
 % extremo (capitulo3.tex, sec:u3); con el fijo ajustado, el actuado y Q-learning la fraccion del corredor es 0.91,

@@ -1,8 +1,8 @@
 \customchapter{ANEXOS}
 
-\section*{Anexo A. Tablas del primer estudio}
+\section*{Anexo A. Tablas del primer estudio (paso 1)}
 \phantomsection
-\addcontentsline{toc}{subsection}{Anexo A. Tablas del primer estudio}
+\addcontentsline{toc}{subsection}{Anexo A. Tablas del primer estudio (paso 1)}
 \setcounter{table}{0}
 \renewcommand{\thetable}{A.\arabic{table}}
 \renewcommand{\theHtable}{A.\arabic{table}}
@@ -33,9 +33,9 @@ en cada caso se lee, abreviado, en la Tabla~\ref{tab:plan2-resumen}.
 
 \noindent\textbf{Todos los modelos.} La Tabla~\ref{tab:plan2-resumen}
 da el retraso de cada modelo, su cambio frente al fijo ajustado y su
-veredicto. IPPO con mensajes funciona en P1, P2 y P3, mejora en P4,
-empata en P5 y queda pendiente en P6, con un empate provisional. Ningún
-otro modelo tiene un registro mejor. Resumido en un número
+veredicto. IPPO con mensajes funciona en P1, P2 y P3, mejora en P4 y
+empata en P5 y en P6; en P6, con el entrenamiento sin estabilizar.
+Ningún otro modelo obtiene mejores veredictos. Resumido en un número
 (Tabla~\ref{tab:plan2-numero-unico}), IPPO con mensajes baja el retraso
 un 6.83\,\% frente al fijo ajustado y un 14.35\,\% frente al actuado.
 La primera cifra depende sobre todo de P2: sin ese caso queda en
@@ -59,9 +59,12 @@ Profundos), el caso explica el 79.5\,\% y el modelo, el 7.4\,\%: el
 peso del modelo viene sobre todo de la distancia entre los aprendices
 tabulares y los de redes neuronales. El reparto describe esta muestra
 de casos y modelos y no es una prueba de hipótesis. Con la medición más
-estricta se invierte (Anexo~F).
+estricta (Anexo~F) el reparto se invierte: entre los mismos seis
+aprendices, el modelo explica el 55.5\,\% de la variación y el caso, el
+23.5\,\%.
 % fuente: plan2/sintesis_anova.csv (P1-P6: Todos 53.7/36.5/7.4/2.4; Profundos 79.5/7.4/10.0/3.1); reparto con la
-% medicion mas estricta: plan2/robustez_sintesis_anova.csv (P1-P6: caso 23.5, modelo 55.5)
+% medicion mas estricta: plan2/robustez_sintesis_anova.csv (P1-P6, fila Todos, los mismos seis aprendices: caso 23.5,
+% modelo 55.5, interaccion 14.9, base 6.1)
 % fuente de la tabla: python sintesis_plan.py --metrica timeloss_prom --fijo fijo_2509 --sin-trivial (desde demo_rl/)
 % -> plan2/sintesis_anova.csv
 \input{secciones/tablas/plan2_numero_unico}
@@ -89,14 +92,13 @@ el tercero lo iguala ($-0.1$\,\%). En P6 dan entre 37.54 y
 ($\pm 1.48$~s/veh), y el único que se estabiliza es el de mayor
 retraso.
 
-\noindent\textbf{Combinaciones sin veredicto firme.} Doce de las 48
-combinaciones de modelo y caso no tienen veredicto firme. En dos no
-hay datos: Q-learning con recompensa de colas no se entrenó en P5 ni en
-P6. En las otras diez, el entrenamiento de la versión evaluada no se
-estabilizó (Tabla~\ref{tab:plan2-pendientes}). Su veredicto es
-provisional y se declara como un límite del estudio. Ninguna se entrenó
-con más episodios, para no romper la igualdad de método entre casos
-(Sección~\ref{sec:veredicto}).
+\noindent\textbf{Entrenamientos sin estabilizar.} En diez de las 48
+combinaciones de modelo y caso, el entrenamiento de la versión evaluada
+no se estabilizó (Tabla~\ref{tab:plan2-pendientes}): su veredicto se
+calcula igual, con la evaluación completa, y lleva la marca ``sin
+estabilizar''. Ninguna se entrenó con más episodios, para no romper la
+igualdad de método entre casos (Sección~\ref{sec:veredicto}). En otras
+dos no hay datos: Q-learning (colas) no se entrenó en P5 ni en P6.
 
 % Las Tablas A.5 y A.6 van juntas, despues de sus dos parrafos, para que quepan en una misma pagina.
 \begin{table}[H]
@@ -118,7 +120,7 @@ P5 & 21.07 ($+1.1$) & 21.21 ($+1.8$) & 20.82 ($-0.1$) & 0.39 & 2042 \\
 P6 & 37.54 ($+2.2$)\rlap{\textsuperscript{a}} & 41.51 ($+13.0$) & 40.24 ($+9.6$)\rlap{\textsuperscript{a}} & 3.97 & 42 \\
 \bottomrule
 \end{tabular}
-\caption[Entrenamientos de IPPO con mensajes]{IPPO con mensajes: retraso de cada uno de los tres entrenamientos (s/veh, semillas de evaluación 1001 a 1030) y, entre paréntesis, cambio frente al fijo ajustado (\%). Rango: del mayor al menor retraso. Versión evaluada: semilla del entrenamiento mediano por validación. (a) No se estabilizó.}
+\caption[Entrenamientos de IPPO con mensajes]{IPPO con mensajes: retraso de cada uno de los tres entrenamientos (s/veh, semillas de evaluación 1001 a 1030) y, entre paréntesis, cambio frente al fijo ajustado (\%). Rango: del mayor al menor retraso. Versión evaluada: semilla del entrenamiento mediano por validación. (a) Entrenamiento sin estabilizar.}
 \label{tab:plan2-entrenamientos-ippo}
 \end{table}
 % fuente: TESIS/secciones/tablas/veredicto_bases.tex, tabla "Entrenamientos de IPPO con mensajes" (la escribe
@@ -134,7 +136,7 @@ P6 & 37.54 ($+2.2$)\rlap{\textsuperscript{a}} & 41.51 ($+13.0$) & 40.24 ($+9.6$)
 \setlength{\tabcolsep}{5pt}
 \begin{tabular}{llrrcl}
 \toprule
-Caso & Modelo & \makecell{Meseta\\(\%)} & \makecell{Estabilidad\\(\%)} & \makecell{Se\\estabilizan} & \makecell[l]{Veredicto\\provisional} \\
+Caso & Modelo & \makecell{Meseta\\(\%)} & \makecell{Estabilidad\\(\%)} & \makecell{Se\\estabilizan} & Veredicto \\
 \midrule
 P2 & Q-learning (colas) & $+5.5$ & 4.5 & 0 de 3 & FALLA \\
 P3 & MAPPO & $-6.1$ & 0.2 & 2 de 3 & FUNCIONA \\
@@ -148,7 +150,7 @@ P6 & IPPO con penalización & $-3.2$ & 6.8 & 0 de 3 & EMPATA \\
 P6 & MAPPO & $-7.3$ & 7.8 & 0 de 3 & FALLA \\
 \bottomrule
 \end{tabular}
-\caption[Combinaciones sin veredicto firme]{Combinaciones de modelo y caso en las que el entrenamiento de la versión evaluada no se estabilizó: la meseta queda fuera de $-5$ a $+5$\,\% o la estabilidad pasa del 5\,\% (Sección~\ref{sec:veredicto}). Se estabilizan: cuántos de los tres entrenamientos. DQN: Double DQN; los demás nombres, como en la Tabla~\ref{tab:plan2-resumen}.}
+\caption[Combinaciones con el entrenamiento sin estabilizar]{Combinaciones de modelo y caso en las que el entrenamiento de la versión evaluada no se estabilizó: la meseta queda fuera de $-5$ a $+5$\,\% o la estabilidad pasa del 5\,\% (Sección~\ref{sec:veredicto}). Se estabilizan: cuántos de los tres entrenamientos. DQN: Double DQN; los demás nombres, como en la Tabla~\ref{tab:plan2-resumen}.}
 \label{tab:plan2-pendientes}
 \end{table}
 % fuente: plan2/veredicto.csv, columnas plateau, estabilidad, convergen y veredicto de las 12 filas PENDIENTE entre
@@ -224,8 +226,8 @@ Programa & Unidad & Qué hace \\
 \texttt{plan2/\allowbreak preparar.py} & -- & copia a \texttt{plan2/} los archivos de cada escenario \\
 \texttt{plan2/\allowbreak generar\_trabajos.py} & -- & escribe la lista de comandos de cada caso y modelo \\
 \texttt{plan2/\allowbreak cola.py} & -- & ejecuta esa lista en paralelo, respetando sus dependencias \\
-\texttt{plan2/\allowbreak fijo\_2509.py} & -- & reúne en un brazo de referencia las evaluaciones del fijo ajustado del plan guardadas en el repositorio \\
-\texttt{plan2/\allowbreak tablas\_cap5.py} & -- & da formato a las tablas de resumen y de metas del Capítulo~\ref{cap:resultados} y a sus versiones del análisis de robustez \\
+\texttt{plan2/\allowbreak fijo\_2509.py} & -- & reúne como una referencia propia las evaluaciones del fijo ajustado del primer estudio guardadas en el repositorio \\
+\texttt{plan2/\allowbreak tablas\_cap5.py} & -- & da formato a las tablas de resumen y de metas del Capítulo~\ref{cap:resultados} y a sus versiones de la medición más estricta \\
 \texttt{graficar.py} y \texttt{plan2/\allowbreak grafico\_\allowbreak convergencia.py} & -- & dibujan las figuras \\
 \midrule
 \texttt{rl\_semaforo.py} & -- & agente único de la fase exploratoria (escenarios cruce y cruce2) \\
@@ -271,10 +273,11 @@ Programas & Qué hacen \\
 \texttt{plan3/p3\_promocion.py} y \texttt{plan3/veredicto3.py} & modelo citado de cada caso y veredicto del estudio: veredictos por tanda, hipótesis y resumen en un número, calculados una sola vez, al cierre \\
 \texttt{tablas\_plan3.py} & tablas y figuras del segundo estudio, a partir de las salidas del veredicto \\
 \texttt{curvas\_plan3.py} & curvas de aprendizaje del segundo estudio, con el fijo y el actuado ajustados medidos en las mismas semillas de validación \\
-\texttt{curvas\_entrenamiento.py} y \texttt{figura\_lectura.py} & figuras del Capítulo~\ref{cap:resultados}: la curva de aprendizaje por episodio del primer estudio, con la entropía de la política, y la figura de lectura de las llegadas y los veredictos \\
+\texttt{curvas\_entrenamiento.py}, \texttt{figura\_lectura.py} y \texttt{figura\_mejora\_caso.py} & figuras del Capítulo~\ref{cap:resultados}: la curva de aprendizaje por episodio del primer estudio, con la entropía de la política, la figura de lectura de las llegadas y los veredictos, y la del cambio por caso del primer estudio \\
+\texttt{costo/costo\_escala.py} & costo de cómputo medido (horas de entrenamiento y tiempo de una decisión) y estimación del costo en un cruce real del corredor de Benavides (Sección~\ref{sec:costo-escala}); solo lee archivos, no simula \\
 \bottomrule
 \end{tabular}
-\caption[Programas del segundo estudio]{Programas que añade el segundo estudio. Los de \texttt{plan3/} están en esa carpeta del repositorio; los demás, en su raíz.}
+\caption[Programas del segundo estudio]{Programas que añade el segundo estudio. Los de \texttt{plan3/} y \texttt{costo/} están en esas carpetas del repositorio; los demás, en su raíz.}
 \label{tab:programas-segundo}
 \end{table}
 % fuente: docstrings de cada programa (plan3/*.py, escenarios_plan3.py, con_escenarios.py y tablas_plan3.py);

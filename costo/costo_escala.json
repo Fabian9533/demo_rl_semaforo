@@ -1,0 +1,163 @@
+{
+ "computo": {
+  "segundo_estudio": {
+   "horas_proceso": 1002.43,
+   "horas_reloj_cola_ocupada": 84.55,
+   "trabajos_a_la_vez_max": 12
+  },
+  "benavides_publicada_h": {
+   "lima\\corredor\\resultados_benavides_ippo_vecinos_completo_s2042.csv": 4.63,
+   "lima\\corredor\\resultados_benavides_ippo_vecinos_completo_s4042.csv": 4.59,
+   "lima\\corredor\\resultados_benavides_ippo_vecinos_completo_s42.csv": 4.58
+  },
+  "benavides_alta_h": {
+   "lima\\corredor\\alta\\resultados_benavides_ippo_vecinos_completo_s2042.csv": 10.45,
+   "lima\\corredor\\alta\\resultados_benavides_ippo_vecinos_completo_s4042.csv": 10.49,
+   "lima\\corredor\\alta\\resultados_benavides_ippo_vecinos_completo_s42.csv": 10.57
+  },
+  "p6_episodios_h": {
+   "plan3\\resultados_poi_malla3_alta_ippo_vecinos_p3completopoi_s2042.csv": 6.53,
+   "plan3\\resultados_poi_malla3_alta_ippo_vecinos_p3completopoi_s4042.csv": 6.46,
+   "plan3\\resultados_poi_malla3_alta_ippo_vecinos_p3completopoi_s42.csv": 6.39
+  },
+  "p6_con_validacion_h": {
+   "2042": 15.6,
+   "4042": 15.48,
+   "42": 15.39
+  },
+  "decision": {
+   "politica": "lima\\corredor\\politica_benavides_vecinos_completo_s42.pt",
+   "us_por_decision": 47.3,
+   "paso_decision_s": 2,
+   "cpu_s_por_hora_y_semaforo": 0.085,
+   "parametros_actor": 7682,
+   "kb_actor_float32": 30.7,
+   "torch": "2.14.0+cpu"
+  }
+ },
+ "rentabilidad": {
+  "composicion_pct": {
+   "auto": 78.93,
+   "moto": 4.36,
+   "combi": 4.81,
+   "micro": 5.64,
+   "bus": 6.26
+  },
+  "soles_por_veh_hora": {
+   "solo_autos_y_motos": 8.87,
+   "con_transporte_publico": 31.53
+  },
+  "sensores_usd_por_cruce_anio": {
+   "espiras": 3040,
+   "video-radar": 7614,
+   "radar": 11499
+  },
+  "comparaciones": [
+   {
+    "nivel": "publicada",
+    "control": "vecinos_completo_s42",
+    "frente_a": "fijo",
+    "retraso_a": 31.94,
+    "retraso_b": 35.02,
+    "ahorro_s_por_veh": 3.09,
+    "veh_hora_anio": 3731,
+    "usd_por_cruce_anio": {
+     "solo_autos_y_motos": 1430,
+     "con_transporte_publico": 5083
+    }
+   },
+   {
+    "nivel": "publicada",
+    "control": "vecinos_completo_s42",
+    "frente_a": "actuadoaj",
+    "retraso_a": 31.94,
+    "retraso_b": 34.73,
+    "ahorro_s_por_veh": 2.8,
+    "veh_hora_anio": 3385,
+    "usd_por_cruce_anio": {
+     "solo_autos_y_motos": 1297,
+     "con_transporte_publico": 4612
+    }
+   },
+   {
+    "nivel": "publicada",
+    "control": "fijo",
+    "frente_a": "tipico",
+    "retraso_a": 35.02,
+    "retraso_b": 77.51,
+    "ahorro_s_por_veh": 42.49,
+    "veh_hora_anio": 51372,
+    "usd_por_cruce_anio": {
+     "solo_autos_y_motos": 19691,
+     "con_transporte_publico": 69998
+    }
+   },
+   {
+    "nivel": "alta",
+    "control": "vecinos_completo_s2042",
+    "frente_a": "fijo",
+    "retraso_a": 42.48,
+    "retraso_b": 53.01,
+    "ahorro_s_por_veh": 10.53,
+    "veh_hora_anio": 15275,
+    "usd_por_cruce_anio": {
+     "solo_autos_y_motos": 5855,
+     "con_transporte_publico": 20814
+    }
+   },
+   {
+    "nivel": "alta",
+    "control": "vecinos_completo_s2042",
+    "frente_a": "actuadoaj",
+    "retraso_a": 42.48,
+    "retraso_b": 47.4,
+    "ahorro_s_por_veh": 4.92,
+    "veh_hora_anio": 7145,
+    "usd_por_cruce_anio": {
+     "solo_autos_y_motos": 2739,
+     "con_transporte_publico": 9735
+    }
+   },
+   {
+    "nivel": "alta",
+    "control": "fijo",
+    "frente_a": "tipico",
+    "retraso_a": 53.01,
+    "retraso_b": 152.05,
+    "ahorro_s_por_veh": 99.04,
+    "veh_hora_anio": 143705,
+    "usd_por_cruce_anio": {
+     "solo_autos_y_motos": 55082,
+     "con_transporte_publico": 195809
+    }
+   }
+  ],
+  "supuestos": {
+   "horas_punta_anio": 500,
+   "vst_privado": 7.83,
+   "vst_publico": 6.5,
+   "ocupacion_auto": 1.38,
+   "ocupacion_moto": 1.0,
+   "ocupacion_publico": {
+    "combi": 10,
+    "micro": 20,
+    "bus": 30
+   },
+   "soles_por_dolar": 3.857,
+   "tasa": 0.08,
+   "anios": 10,
+   "tasa_odot": 0.03,
+   "reajuste_por_cruce": [
+    1110,
+    4500
+   ]
+  }
+ },
+ "separacion_benavides_m": [
+  162,
+  108,
+  296,
+  119,
+  543
+ ]
+}

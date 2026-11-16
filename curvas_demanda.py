@@ -5,6 +5,8 @@ Uso (desde demo_rl/):
   python curvas_demanda.py                   lee plan2/ y escribe el resumen, la tabla y la figura
   python curvas_demanda.py --veredicto DIR   usa el veredicto.py de la carpeta DIR (p. ej. una copia de la
                                              version commiteada) en lugar del de esta carpeta
+  python curvas_demanda.py --solo-figura     solo redibuja la figura desde plan2/demanda2/resumen_demanda2.csv,
+                                             sin recalcular y sin escribir el resumen ni la tabla
 
 Junta los 12 niveles de demanda nuevos (escenarios dem_<red>_t<veh/h> de escenarios_plan2.NIVELES_DEMANDA2:
 corredor 905, 1358 y 2715; red con rotonda 905, 1358, 1810, 2715 y 3620; malla 1810, 2715, 3620 y 6525 veh/h)
@@ -59,8 +61,8 @@ Verificacion (23.10.2026):
     fig:plan2-mejora-caso; los puntos de los niveles compartidos se desplazan hacia la derecha (corredor x1.07,
     malla x1.15), porque el desplazamiento anterior hacia la izquierda (corredor x0.92) dejaba el corredor de
     2715 veh/h a la izquierda de P4 (2580); el script avisa si algun punto queda fuera de orden. MEJORA va con
-    un marcador mas grande y un borde mas fino. El provisional de PENDIENTE no se ve en el marcador (el color
-    dice la red): esta en la tabla, y el pie de figura debe decirlo.
+    un marcador mas grande y un borde mas fino. Desde el 15.11.2026, un entrenamiento sin estabilizar
+    (PENDIENTE en el CSV) se dibuja con el relleno de su veredicto y un borde punteado.
   - Tabla: el comentario del .tex dice el entorno que necesita para caber en el ancho del texto.
 """
 import os
@@ -403,6 +405,21 @@ def escribir_csv(ruta, filas):
     print("Escrito", ruta)
 
 
+def filas_csv(plan2):
+    """Las filas que figura() necesita, leidas de demanda2/resumen_demanda2.csv (columnas red, vehiculos_hora,
+    caso_plan, cambio_fijo, ic_fijo y veredicto): para redibujar la figura sin recalcular (--solo-figura)."""
+    clave = {v: k for k, v in NOMBRE_RED.items()}          # "red con rotonda" -> "red"
+    filas = []
+    with open(os.path.join(plan2, "demanda2", "resumen_demanda2.csv"), encoding="utf-8", newline="") as f:
+        for r in csv.DictReader(f):
+            ic = [float(x) for x in re.findall(r"[-+]?\d+(?:\.\d+)?", r["ic_fijo"])]
+            filas.append({"red": clave[r["red"]], "vehiculos_hora": int(r["vehiculos_hora"]),
+                          "caso_plan": r["caso_plan"],
+                          "cambio_fijo": float(r["cambio_fijo"]) if r["cambio_fijo"] else None,
+                          "ic_fijo": tuple(ic) if len(ic) == 2 else None, "veredicto": r["veredicto"]})
+    return filas
+
+
 def tex_signo(x):
     """Cambio con signo y un decimal en modo matematico, como en la tabla de resultados: $-6.8$, $+1.8$."""
     return "--" if x is None else f"${x:+.1f}$"
@@ -566,7 +583,7 @@ def figura(filas, ruta):
                 ha="right", va="center", **rotulo)
         ax.text(x1 / 1.04, (UMBRAL + META) / 2 - 2.5,
                 f"Mejora clara, de {MENOS}5 %\no más negativo:\nFUNCIONA si es significativa\n"
-                "y no pierde contra el actuado", ha="right", va="center", **rotulo)
+                "y no tiene más retraso\nque el actuado", ha="right", va="center", **rotulo)
         ax.text(x1 / 1.04, META + 0.5, f"meta de la tesis: {MENOS}25 %", ha="right", va="bottom",
                 fontsize=7.4, color=TINTA2, zorder=2)
         for red in REDES:
@@ -585,16 +602,21 @@ def figura(filas, ruta):
                 ms = tam + (MAS_MEJORA if ver == "MEJORA" else 0)
                 # anillo del color de la banda: separa el marcador de las lineas que pasan cerca
                 ax.plot(x, y, forma, ms=ms + 2.6, mfc=banda(y), mec=banda(y), mew=0, zorder=4.6)
-                if ver == "PENDIENTE":
-                    ax.scatter([x], [y], s=(tam + 0.6) ** 2, marker=forma, facecolors=banda(y), edgecolors=color,
-                               linewidths=1.6, linestyle=(0, (1.3, 1.1)), zorder=5)
-                elif ver == "EMPATA":
+                ver, prov = palabra(f["veredicto"])
+                sin_estabilizar = ver == "PENDIENTE"
+                if sin_estabilizar:                        # se dibuja el veredicto y, alrededor, un anillo punteado
+                    ver = prov
+                    ms = tam + (MAS_MEJORA if ver == "MEJORA" else 0)
+                if ver == "EMPATA":
                     ax.plot(x, y, forma, ms=tam, mfc=FONDO, mec=color, mew=1.4, zorder=5)
                 elif ver == "MEJORA":
                     ax.plot(x, y, forma, ms=ms, fillstyle="bottom", mfc=color, markerfacecoloralt=FONDO,
                             mec=color, mew=BORDE_MEJORA, zorder=5)
                 else:                                      # FUNCIONA o FALLA: la banda dice cual
                     ax.plot(x, y, forma, ms=tam, mfc=color, mec=color, mew=1.0, zorder=5)
+                if sin_estabilizar:
+                    ax.scatter([x], [y], s=(ms + 4.4) ** 2, marker=forma, facecolors="none", edgecolors=TINTA,
+                               linewidths=1.0, linestyle=(0, (1.2, 1.2)), zorder=5.5)
                 if f["caso_plan"]:
                     dx, dy, lado = ROTULO.get(f["caso_plan"], (0, 9, "center"))
                     ax.annotate(f["caso_plan"], (x, y), xytext=(dx, dy), textcoords="offset points", ha=lado,
@@ -627,17 +649,18 @@ def figura(filas, ruta):
             Line2D([], [], marker="o", fillstyle="bottom", mfc=TINTA2, markerfacecoloralt=FONDO, mec=TINTA2,
                    mew=BORDE_MEJORA, label="MEJORA", **dict(punto, ms=punto["ms"] + MAS_MEJORA)),
             Line2D([], [], marker="o", mfc=FONDO, mec=TINTA2, mew=1.4, label="EMPATA", **punto),
-            # el provisional no se ve en el marcador (el color dice la red): esta en la tabla, y el pie de figura lo
-            # dice (en la leyenda, una segunda linea la haria crecer hasta el cuadrado de red 1358)
-            ax.scatter([], [], s=7.6 ** 2, marker="o", facecolors=FONDO, edgecolors=TINTA2, linewidths=1.5,
-                       linestyle=(0, (1.3, 1.1)), label="PENDIENTE (no se estabilizó)"),
+            # entrenamiento sin estabilizar (PENDIENTE en el CSV): el relleno de su veredicto y un borde punteado
+            ax.scatter([], [], s=9.6 ** 2, marker="o", facecolors="none", edgecolors=TINTA, linewidths=1.0,
+                       linestyle=(0, (1.2, 1.2)), label="Borde punteado: entrenamiento\nsin estabilizar"),
             Line2D([], [], marker="|", ms=10, mew=1.1, color=TINTA2, ls="", label="IC95 %")]
         comun = dict(fontsize=7.4, title_fontsize=7.6, handletextpad=0.5, alignment="left", labelcolor=TINTA)
         # la de dentro va con add_artist (queda recortada a los ejes, y no cuenta para bbox_inches="tight") y la
-        # de arriba es la leyenda principal de los ejes, para que el recorte del PNG y del PDF la incluya
-        sobre_meta = (META + 1.2 - y0) / (y1 - y0)
+        # de arriba es la leyenda principal de los ejes, para que el recorte del PNG y del PDF la incluya.
+        # 15.11.2026: la marca sin estabilizar ocupa dos lineas; la leyenda baja a 0.4 puntos de la meta y junta
+        # sus filas para que su borde de arriba no toque el rotulo P3 ni el cuadrado de red 1358
+        sobre_meta = (META + 0.4 - y0) / (y1 - y0)
         ley1 = ax.legend(handles=por_veredicto, ncol=1, loc="lower left", bbox_to_anchor=(0.008, sobre_meta),
-                         title="Veredicto: relleno del marcador", handlelength=1.4, labelspacing=0.35,
+                         title="Veredicto: relleno del marcador", handlelength=1.4, labelspacing=0.22,
                          frameon=True, facecolor=FONDO, edgecolor="#e1e0d9", framealpha=1.0, fancybox=False,
                          borderaxespad=0.0, **comun)
         ley1.get_frame().set_linewidth(0.6)
@@ -675,7 +698,12 @@ def main():
     ap.add_argument("--plan2", default=os.path.join(DIR, "plan2"))
     ap.add_argument("--tesis", default=os.path.join(DIR, "TESIS"))
     ap.add_argument("--veredicto", default=DIR, help="carpeta del veredicto.py que se usa (por defecto, esta)")
+    ap.add_argument("--solo-figura", action="store_true",
+                    help="solo redibuja la figura desde plan2/demanda2/resumen_demanda2.csv, sin recalcular")
     args = ap.parse_args()
+    if args.solo_figura:
+        figura(filas_csv(os.path.abspath(args.plan2)), os.path.join(args.tesis, "images", "fig_demanda_bandas.png"))
+        return
     vd = cargar("veredicto", os.path.join(os.path.abspath(args.veredicto), "veredicto.py"))
     vd.configurar(metrica=METRICA)     # la referencia queda en el brazo "fijo": el fijo ajustado de cada nivel
     plan2 = os.path.abspath(args.plan2)

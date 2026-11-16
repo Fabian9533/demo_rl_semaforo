@@ -115,7 +115,7 @@ def main(ruta_json=None):
     for k, (caso, esc, titulo) in enumerate(CASOS):
         ax = ejes[k]
         ax.set_facecolor(FONDO)
-        ax.axvspan(200 * 2 / 3, 200, color=TERCIO, zorder=0, lw=0)
+        ax.axvspan(140, 200, color=TERCIO, zorder=0, lw=0)          # las siete ultimas validaciones (140 a 200)
         todos = []
         if f"{esc}_999" in fijo and f"{esc}_1999" in fijo:
             ref = (fijo[f"{esc}_999"] + fijo[f"{esc}_1999"]) / 2
@@ -128,8 +128,7 @@ def main(ruta_json=None):
                 continue
             xs, ys, ep_pub, val_pub = s
             todos += ys
-            # marcador hueco: el entrenamiento de la version evaluada no se estabilizo (como el PENDIENTE de la
-            # figura de cambio por caso); relleno: se estabilizo
+            # marcador hueco: el entrenamiento de la version evaluada no se estabilizo; relleno: se estabilizo
             estable = fila["convergio"] == "si"
             ax.plot(xs, ys, color=color, lw=1.6, zorder=3, solid_capstyle="round", solid_joinstyle="round")
             if estable:
@@ -138,7 +137,7 @@ def main(ruta_json=None):
                 ax.plot(xs, ys, marca, ms=3.8, mfc=FONDO, mec=color, mew=1.0, ls="", zorder=4)
             if ep_pub is not None and val_pub is not None:
                 ax.plot([ep_pub], [val_pub], marca, ms=8.5, mfc=color if estable else FONDO, mec=TINTA, mew=1.2,
-                        zorder=5)
+                        zorder=5, clip_on=False)          # en el episodio 200 no se corta contra el borde
         bajo, alto = min(todos), max(todos)
         margen = (alto - bajo) * 0.08 or 1
         ax.set_ylim(bajo - margen, alto + margen)
@@ -158,7 +157,7 @@ def main(ruta_json=None):
                 Line2D([], [], color=TINTA2, lw=0, marker="o", ms=8.5, mfc=TINTA2, mec=TINTA, mew=1.2,
                        label="versión evaluada: marcador grande"),
                 Line2D([], [], color=TINTA2, lw=0, marker="o", ms=6, mfc=FONDO, mec=TINTA2, mew=1.0,
-                       label="hueco: el entrenamiento no se estabilizó"),
+                       label="hueco: entrenamiento sin estabilizar"),
                 Patch(facecolor=TERCIO, edgecolor="none", label="último tercio: se mide si se estabiliza")]
     fig.legend(handles=manijas, loc="lower center", ncol=2, frameon=False, fontsize=9, handlelength=2.6,
                columnspacing=1.4, labelcolor=TINTA, bbox_to_anchor=(0.5, 0.0))

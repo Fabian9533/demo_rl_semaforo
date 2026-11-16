@@ -5,11 +5,11 @@
 
 Este capítulo define los conceptos con que la tesis responde su pregunta: si un control de
 semáforos que aprende por refuerzo y recibe información de sus vecinos reduce el retraso frente a
-un plan de tiempo fijo bien ajustado. Incluye solo la teoría que usa el método
-(Capítulo~\ref{cap:metodologia}): el simulador, el control semafórico con sus dos controles de
-referencia y las métricas; el aprendizaje por refuerzo y sus algoritmos, con más detalle en PPO y
-en su extensión a varios agentes, que son la base de IPPO con mensajes, el modelo que la tesis
-pone a prueba; y los conceptos estadísticos de la evaluación.
+un plan de tiempo fijo bien ajustado. Solo incluye la teoría que usa el método
+(Capítulo~\ref{cap:metodologia}), en tres bloques: el tráfico (el simulador, el control semafórico
+con sus dos controles de referencia y las métricas); el aprendizaje por refuerzo, con los
+algoritmos de menor a mayor complejidad, hasta PPO y su extensión a varios agentes, base de IPPO
+con mensajes, el modelo que la tesis pone a prueba; y la estadística de la evaluación.
 
 \section{Simulación microscópica de tráfico}
 \label{sec:teoria-simulacion}
@@ -28,8 +28,8 @@ vehículo, del que salen casi todas las métricas (Sección~\ref{sec:teoria-metr
 La conducción sigue un modelo de seguimiento vehicular con componentes aleatorias: la imperfección
 del conductor, que controla el parámetro $\sigma$, y un factor de velocidad individual. La semilla
 de la simulación fija esos sorteos y, con llegadas aleatorias, también el instante en que llega
-cada vehículo. Con la misma semilla y el mismo control, dos corridas son idénticas; por eso la
-semilla es la unidad de réplica de los experimentos (Sección~\ref{sec:evaluacion}).
+cada vehículo. Con la misma semilla y el mismo control, dos corridas son idénticas; por eso cada
+réplica de un experimento se define por su semilla (Sección~\ref{sec:evaluacion}).
 % TODO(reestructura): citar la documentacion de SUMO del modelo de seguimiento por defecto (Krauss, sigma,
 % speedFactor) y de las llegadas con period="exp(...)"; no se pudo verificar que TraCI_Whitepaper los describa.
 
@@ -41,13 +41,15 @@ semáforo.
 \section{Control semafórico}
 \label{sec:teoria-control}
 
-Esta sección define los términos con que se describe el plan de un semáforo y presenta los dos
-controles de referencia contra los que se mide cualquier mejora: el de tiempo fijo y el actuado.
+Esta sección define los términos con que se describe el plan de un semáforo, los dos controles de
+referencia contra los que se mide cualquier mejora (el de tiempo fijo y el actuado) y lo que
+ocurre entre semáforos vecinos: la coordinación y el \textit{spillback}.
 
-Una fase es el intervalo en que un conjunto de movimientos compatibles recibe verde a la vez;
-termina con un ámbar. El programa es la secuencia de fases con sus duraciones, y el ciclo, el
-tiempo que tarda en recorrerla. El desfase es el retraso del inicio del ciclo de un semáforo
-respecto de una referencia común \citep{HCM2000_or_2010}. El verde mínimo es el tiempo que una
+Los vehículos llegan a un cruce por sus aproximaciones (o accesos). Una fase es el intervalo en
+que un conjunto de movimientos compatibles recibe verde a la vez; termina con un ámbar. El
+programa es la secuencia de fases con sus duraciones, y el ciclo, el tiempo que tarda en
+recorrerla. El desfase es el tiempo entre el inicio del ciclo de un semáforo y una referencia
+común \citep{HCM2000_or_2010}. El verde mínimo es el tiempo que una
 fase debe durar antes de poder cambiar, y el verde máximo, el tiempo tras el cual el cambio se
 fuerza \citep{HCM2000_or_2010,SUMO_TLS_Actuated}.
 % TODO(reestructura): verificar en el HCM 2010 la seccion que define fase, ciclo, reparto, desfase, verde minimo y
@@ -60,20 +62,22 @@ entre semáforos cercanos, los desfases \citep{HCM2000_or_2010}. Comparar con un
 sobrestima la mejora de cualquier alternativa; por eso la tesis compara contra un fijo ajustado
 para cada caso.
 
-El control actuado conserva las fases, pero adapta cada verde a lo que miden los detectores:
-prolonga la fase mientras siguen llegando vehículos y pasa a la siguiente cuando detecta un hueco,
-siempre entre el verde mínimo y el máximo. Reacciona a la demanda del momento, sin aprender ni
-anticipar. SUMO lo incluye de forma nativa \citep{SUMO_TLS_Actuated}.
+El control actuado conserva las fases, pero adapta cada verde a lo que miden los detectores,
+siempre entre el verde mínimo y el máximo: en su forma básica prolonga la fase mientras siguen
+llegando vehículos y pasa a la siguiente cuando detecta un hueco; en la variante por retraso, la
+prolonga mientras algún vehículo que se acerca con verde acumula retraso. Reacciona a la demanda
+del momento, sin aprender ni anticipar. SUMO incluye las dos de forma nativa
+\citep{SUMO_TLS_Actuated}.
 
 Los semáforos de una avenida se coordinan cuando comparten el ciclo y sus desfases favorecen el
 paso de los pelotones de vehículos. En la onda verde, el desfase entre dos semáforos sucesivos es
 igual al tiempo de viaje entre ellos: un pelotón que sale en verde del primero encuentra verde en
-el siguiente \citep{HCM2000_or_2010}. Por eso un fijo con buenos desfases es una referencia
-exigente para un agente que decide con información local.
+el siguiente \citep{HCM2000_or_2010}. Por eso un plan fijo con desfases ajustados es una
+referencia exigente para un agente que decide con información local.
 
-El \textit{spillback} ocurre cuando la cola de un tramo entre dos semáforos lo llena y bloquea la
-intersección aguas arriba, que ya no puede despachar aunque tenga verde
-\citep{FHWA_Timing_Manual_Chapter3,HCM2000_or_2010}.
+El \textit{spillback} ocurre cuando la cola de un enlace, el tramo de vía entre dos semáforos
+vecinos, lo llena y bloquea el cruce aguas arriba, que ya no puede despachar aunque tenga verde
+\citep{Koonce2008_TSTM,HCM2000_or_2010}.
 % TODO(reestructura): progresion en los dos sentidos y desfases alternados de medio ciclo ("en ajedrez"): falta una
 % fuente (capitulo de coordinacion del manual de la FHWA o el HCM).
 
@@ -92,10 +96,9 @@ calculan igual para todos los controles, con las mismas salidas de SUMO.
 Métrica & Qué mide \\
 \midrule
 Retraso (s/veh) & tiempo de viaje menos el que tomaría el mismo recorrido a la velocidad deseada,
-  sin otros vehículos ni semáforos; se cuenta desde que el vehículo entra a la red
-  (\texttt{timeLoss} en SUMO) \\
+  sin otros vehículos ni semáforos; se cuenta desde que el vehículo entra a la red \\
 Espera para entrar (s/veh) & tiempo que el vehículo espera fuera de la red por falta de espacio en
-  la vía de entrada (\texttt{departDelay} en SUMO) \\
+  la vía de entrada \\
 Retraso total (s/veh) & retraso más espera para entrar, incluida la de los vehículos que no
   llegaron a entrar (Ecuación~\ref{eq:retraso-total}) \\
 Espera detenida (s/veh) & segundos con velocidad de a lo sumo 0.1~m/s \\
@@ -116,22 +119,23 @@ Cola promedio y máxima (veh) & vehículos detenidos en las aproximaciones con s
 La métrica principal es el retraso, que incluye frenadas, detenciones y aceleraciones. La espera
 detenida es solo una parte de él: un control puede reducirla y aumentar las paradas sin mejorar el
 retraso. Retraso, colas y paradas son medidas habituales en la evaluación de controles de tráfico
-\citep{FHWA_Toolbox_Definitions,FHWA_Timing_Manual_Chapter3}. El \textit{throughput} solo
+\citep{FHWA_Toolbox_Definitions,Koonce2008_TSTM}. El \textit{throughput} solo
 distingue entre controles cuando la demanda supera la capacidad.
 
 Cuando la cola llega al borde de la red, los vehículos que siguen llegando esperan fuera, y esa
 espera no figura en el retraso. Un control puede entonces bajar el retraso dejando que la cola
 crezca fuera de la red. El retraso total suma las dos partes:
 \begin{equation}
-  D = \frac{\sum_{v \in V} \bigl(l_v + e_v\bigr) + W\, e_W}{|V| + W},
+  D = \frac{\sum_{v \in \mathcal{V}} \bigl(l_v + e_v\bigr) + W\, e_W}{|\mathcal{V}| + W},
   \label{eq:retraso-total}
 \end{equation}
-donde $V$ es el conjunto de vehículos con registro; $l_v$, el retraso del vehículo $v$, y $e_v$,
+donde $\mathcal{V}$ es el conjunto de vehículos con registro; $l_v$, el retraso del vehículo $v$, y $e_v$,
 su espera para entrar. $W$ es el número de vehículos que al cerrar la simulación seguían esperando
 entrar, que no tienen registro, y $e_W$, la espera media que llevaban; como seguirían esperando,
 $W\,e_W$ es una cota inferior. Si ningún vehículo espera para entrar, $D$ coincide con el retraso
 medio. El primer estudio de la tesis compara los controles por el retraso; la medición más
-estricta y el segundo estudio, por el retraso total (Capítulo~\ref{cap:metodologia}).
+estricta, el segundo estudio y los casos de Lima, por el retraso total
+(Capítulo~\ref{cap:metodologia}).
 
 \section{Aprendizaje por refuerzo}
 \label{sec:rl}
@@ -147,8 +151,9 @@ acción actuales, no de la historia anterior. En un semáforo, el estado resume 
 agente, la acción decide si se mantiene el verde o se pasa a la fase siguiente y la recompensa
 penaliza la congestión.
 
-\noindent\textbf{Retorno, descuento y episodio.} El agente busca maximizar la recompensa
-acumulada, que se mide con el retorno descontado
+\noindent\textbf{Retorno, descuento y episodio.} Un episodio es una corrida completa del entorno,
+hasta un estado terminal. El agente busca maximizar la recompensa acumulada, que se mide con el
+retorno descontado
 \begin{equation}
   G_t = r_{t+1} + \gamma\, r_{t+2} + \gamma^2 r_{t+3} + \cdots = \sum_{k=0}^{T-t-1} \gamma^k\, r_{t+k+1},
   \label{eq:retorno}
@@ -162,8 +167,8 @@ tiempo que pasa entre ellas; la tesis usa las dos formas (Sección~\ref{sec:mode
 % TODO(reestructura): verificar que SuttonBarto2018 (sec. 17.2) trate los procesos semi-markovianos; si no,
 % citar Sutton, Precup y Singh (1999), que no esta en referencias.bib.
 
-Un episodio es una corrida completa del entorno, hasta un estado terminal. Si se corta antes por
-un tope de duración, queda truncado: el último estado no es terminal y su valor futuro no es cero.
+Si un episodio se corta antes por un tope de duración, queda truncado: el último estado no es
+terminal y su valor futuro no es cero.
 
 \noindent\textbf{Política y funciones de valor.} Una política $\pi$ puede ser determinista, una
 acción por estado, o estocástica, una probabilidad $\pi(a \mid s)$ de elegir $a$ en $s$. El valor
@@ -205,7 +210,7 @@ objetivo usa la mejor acción de $s'$, sea cual sea la que se ejecute después, 
 puede explorar y aprender igualmente el valor de la política voraz \citep{SuttonBarto2018}.
 
 SARSA es la versión \textit{on-policy}: el objetivo usa el valor de la acción $a'$ que el agente
-toma de verdad en $s'$, elegida con la misma política $\varepsilon$-greedy con que actúa
+ejecuta en $s'$, elegida con la misma política $\varepsilon$-greedy con que actúa
 \citep{SuttonBarto2018}:
 \begin{equation}
   Q(s,a) \leftarrow Q(s,a) + \alpha \bigl[r + \gamma\, Q(s',a') - Q(s,a)\bigr].
@@ -237,8 +242,8 @@ $(s, a, r, s')$, y la red se actualiza con minilotes muestreados al azar de ella
 de parámetros $\theta^-$, es una copia de la red en línea, la que decide y se entrena, y solo se
 actualiza cada cierto número de pasos; con ella se calcula el objetivo
 $y = r + \gamma \max_{a'} Q(s',a';\theta^-)$, que así no se desplaza con cada cambio de $\theta$.
-La red en línea se entrena para acercar $Q(s,a;\theta)$ a $y$, con una pérdida cuadrática para los
-errores pequeños y lineal para los grandes \citep{Mnih2015_DQN}, la pérdida de Huber.
+La red en línea se entrena para acercar $Q(s,a;\theta)$ a $y$ con la pérdida de Huber, cuadrática
+para los errores pequeños y lineal para los grandes \citep{Mnih2015_DQN}.
 % TODO(reestructura): citar la perdida de Huber (Huber, 1964) o la documentacion de smooth_l1_loss de PyTorch
 % (rl_dqn.py usa F.smooth_l1_loss); no esta en referencias.bib.
 
@@ -262,8 +267,8 @@ Sección~\ref{sec:marl} lo extiende a varios semáforos.
 
 \noindent\textbf{Actor y crítico.} Los métodos de gradiente de política representan la política
 directamente, $\pi_\theta(a \mid s)$, y ajustan sus parámetros $\theta$ en la dirección que
-aumenta el retorno esperado \citep{SuttonBarto2018}. Esa dirección se estima con la ventaja de
-cada acción tomada, $A^\pi(s,a) = Q^\pi(s,a) - V^\pi(s)$, que mide cuánto mejor es $a$ que el
+aumenta el retorno esperado \citep{SuttonBarto2018}. Esa dirección se estima con la función de
+ventaja de cada acción tomada, $A^\pi(s,a) = Q^\pi(s,a) - V^\pi(s)$, que mide cuánto mejor es $a$ que el
 comportamiento medio de la política en $s$: el ajuste sube la probabilidad de las acciones con
 ventaja positiva y baja la de las otras \citep{Schulman2017_PPO}.
 
@@ -283,9 +288,8 @@ donde $\delta_t$ es el error de diferencia temporal calculado con el crítico, $
 de la trayectoria, $\gamma$ el descuento y $\lambda \in [0,1]$ el parámetro que decide cuánto
 pesan los pasos lejanos. Con $\lambda = 0$ la ventaja es el error de un paso, que se apoya por
 completo en el crítico; con $\lambda = 1$ es el retorno observado hasta el final menos el valor
-estimado de $s_t$ \citep{Schulman2017_PPO,SuttonBarto2018}. Si la trayectoria acaba en un estado
-terminal, su valor es cero; si se trunca, el último término usa el valor que estima el crítico. En
-esta forma, el descuento se aplica una vez por paso, sea cual sea su duración.
+estimado de $s_t$ \citep{Schulman2017_PPO,SuttonBarto2018}. En esta forma, el descuento se aplica
+una vez por paso, sea cual sea su duración.
 % TODO(reestructura): citar GAE (Schulman, Moritz, Levine, Jordan y Abbeel, 2016) para el compromiso entre sesgo
 % y varianza que regula lambda; no esta en referencias.bib.
 
@@ -308,8 +312,8 @@ la dirección que lo mejoraría, el término deja de crecer y no hay incentivo p
 la política anterior \citep{Schulman2017_PPO}.
 
 El objetivo completo suma a ese término dos más, cada uno con su coeficiente: el error cuadrático
-del crítico frente al retorno estimado, que se resta, y un bono por la entropía de la distribución
-de acciones, que favorece políticas menos concentradas y mantiene la exploración
+del crítico frente al retorno estimado, que se resta, y la entropía de la distribución de
+acciones, que se suma y favorece políticas menos concentradas, lo que mantiene la exploración
 \citep{Schulman2017_PPO}. El algoritmo alterna dos etapas: recoge trayectorias con la política
 vigente y calcula sus ventajas; luego maximiza el objetivo durante varias épocas sobre minilotes
 de ese lote.
@@ -356,7 +360,7 @@ entrenar, y en ejecución cada agente decide con su actor y su observación, com
 
 \noindent\textbf{Mensajes entre vecinos.} Otra vía de coordinación es la comunicación explícita:
 cada agente recibe mensajes de sus vecinos y los incorpora a su observación. La política sigue
-siendo descentralizada, pero ve información que sus propios detectores no pueden medir. Es la vía
+siendo descentralizada, pero recibe información que los detectores de su cruce no miden. Es la vía
 de IPPO con mensajes (Sección~\ref{sec:u4}).
 % TODO(reestructura): citar una referencia de RL multiagente con comunicacion entre agentes; Yu2021_MAPPO no la
 % trata y no hay otra en referencias.bib.
@@ -378,8 +382,10 @@ eligió.
 La política del último episodio no es necesariamente la mejor. Por eso se guardan copias de los
 parámetros a intervalos regulares, se valida cada una con la política congelada y se elige la de
 mejor valor de validación. Como el resultado depende también de la semilla del propio
-entrenamiento, cada modelo se entrena varias veces. La serie de validación dice además si un
-entrenamiento se estabilizó (Sección~\ref{sec:veredicto}).
+entrenamiento, cada modelo se entrena varias veces. La serie de validación, que el
+Capítulo~\ref{cap:resultados} muestra en sus curvas de aprendizaje, indica además si el
+entrenamiento convergió, es decir, si se estabilizó; si no, el veredicto se calcula igual y lleva
+la marca \emph{sin estabilizar} (Sección~\ref{sec:veredicto}).
 % TODO(reestructura): citar una fuente de seleccion de modelo por validacion o parada temprana y (opcional) otra
 % de la variabilidad entre semillas de entrenamiento en RL profundo; no estan en referencias.bib.
 
@@ -405,6 +411,3 @@ media geométrica de los cocientes entre su retraso y el de la referencia
 (Ecuación~\ref{eq:media-geometrica}). El promedio aritmético de los retrasos dejaría dominar al
 caso de más retraso, y el de los cocientes puede ordenar dos modelos de forma distinta según la
 referencia elegida; la media geométrica evita las dos cosas \citep{Fleming1986_MediaGeometrica}.
-Un análisis de varianza reparte además la variación del resultado entre el caso, el modelo, su
-interacción y las réplicas; la fracción de cada fuente es su eta cuadrado ($\eta^2$), una medida
-del tamaño del efecto \citep{Olejnik2003_Eta}.

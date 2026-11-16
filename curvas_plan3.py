@@ -128,7 +128,7 @@ def figura(datos, refs):
                     if evaluada:
                         estable = f["convergio"] == "sí"
                         ax.plot(int(f["ep_elegido"]), float(f["val_elegido"]), "o", ms=7.5, zorder=6,
-                                mfc=azul if estable else tp.FONDO, mec=tp.TINTA, mew=1.2)
+                                mfc=azul if estable else tp.FONDO, mec=tp.TINTA, mew=1.2, clip_on=False)
                 ax.axvspan(inicio_tercio, ultimo, color=tp.EJE, alpha=0.25, lw=0, zorder=0)
                 for ref, estilo in (("fijo", "-"), ("actuadoaj", (0, (4, 2.5)))):
                     v = refs[c][ref]
@@ -152,7 +152,7 @@ def figura(datos, refs):
                    Line2D([], [], color=azul, lw=0.7, alpha=0.6, label="Los otros entrenamientos"),
                    Line2D([], [], marker="o", ls="", ms=7, mfc=azul, mec=tp.TINTA, label="Versión evaluada"),
                    Line2D([], [], marker="o", ls="", ms=7, mfc=tp.FONDO, mec=tp.TINTA,
-                          label="Versión evaluada, sin estabilizarse"),
+                          label="Hueco: entrenamiento sin estabilizar"),
                    Line2D([], [], color=gris, lw=1.0, label="Fijo ajustado al segundo, mismas semillas"),
                    Line2D([], [], color=gris, lw=1.0, ls=(0, (4, 2.5)), label="Actuado ajustado, mismas semillas")]
         fig.legend(handles=leyenda, ncol=2, loc="upper center", bbox_to_anchor=(0.5, 1.0), frameon=False,

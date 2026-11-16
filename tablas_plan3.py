@@ -39,7 +39,7 @@ MODELO = {"modelo completo": "Modelo completo", "IPPO con mensajes corregido": "
 REFERENCIAS = ["actuado ajustado", "actuado por defecto", "fijo entregado", "fijo de verdes de 5 en 5",
                "fijo por franja", "regla simple", "regla reactiva", "Max-Pressure", "ciclo mínimo"]
 NOMBRE_REF = {"actuado ajustado": "Actuado ajustado", "actuado por defecto": "Actuado por defecto",
-              "fijo entregado": "Fijo entregado", "fijo de verdes de 5 en 5": "Fijo de verdes de 5 en 5",
+              "fijo entregado": "Fijo ajustado desde 10~s", "fijo de verdes de 5 en 5": "Fijo de verdes de 5 en 5",
               "fijo por franja": "Fijo por franja", "regla simple": "Regla simple",
               "regla reactiva": "Regla reactiva", "Max-Pressure": "Max-Pressure", "ciclo mínimo": "Ciclo mínimo"}
 CANDIDATOS = [("p3completopoimed", "Modelo completo"), ("p3obspoimed", "Observación nueva"),
@@ -81,9 +81,9 @@ def intervalo(texto, dec=1):
 
 
 def etiqueta(texto):
-    """Etiqueta del veredicto con el motivo abreviado: PENDIENTE (provisional: X)."""
+    """Etiqueta del veredicto con la marca sin estabilizar: X (sin estabilizar)."""
     m = re.match(r"PENDIENTE \(no convergió; provisional: (\w+)\)", texto)
-    return f"PENDIENTE (provisional: {m.group(1)})" if m else texto
+    return f"{m.group(1)} (sin estabilizar)" if m else texto
 
 
 def repite(fila):
@@ -222,7 +222,7 @@ def tabla_referencias_cifras(celdas, comp):
               "'actuado ajustado' y 'fijo entregado', metrica retraso_total_prom, columna cambio).",
               "Entorno: \\setstretch{1}, \\footnotesize y \\setlength{\\tabcolsep}{3pt}."],
              tabular(f"{IZQ}{{5.6cm}}{IZQ}{{3.6cm}}{IZQ}{{3.6cm}}",
-                     ["Caso", "Frente al actuado ajustado (\\%)", "Frente al fijo entregado (\\%)"], filas))
+                     ["Caso", "Frente al actuado ajustado (\\%)", "Frente al fijo ajustado desde 10~s (\\%)"], filas))
 
 
 def tabla_margen(celdas, comp):
@@ -370,7 +370,7 @@ def figura(celdas):
         por_etiqueta = [Line2D([], [], marker="o", mfc=COLOR[v], mec=APAGADO if v == "EMPATA" else FONDO, label=v, **p)
                         for v in ("FUNCIONA", "MEJORA", "EMPATA", "FALLA")]
         por_etiqueta.append(Line2D([], [], marker="o", mfc=FONDO, mec=TINTA2, mew=1.6, **p,
-                                   label="PENDIENTE: hueco, con el borde\ndel color de su veredicto provisional"))
+                                   label="Hueco: entrenamiento sin estabilizar\n(borde del color de su veredicto)"))
         por_llegadas = [Line2D([], [], marker="s", mfc=TINTA2, mec=FONDO, label="Llegadas regulares", **p),
                         Line2D([], [], marker="o", mfc=TINTA2, mec=FONDO, label="Llegadas aleatorias", **p),
                         Line2D([], [], marker="|", ms=11, mew=1.3, color=TINTA2, ls="", label="IC95 %")]

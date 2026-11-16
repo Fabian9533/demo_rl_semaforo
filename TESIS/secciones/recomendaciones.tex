@@ -1,6 +1,4 @@
-\chapter*{\center \Large RECOMENDACIONES}
-\addcontentsline{toc}{section}{\bfseries RECOMENDACIONES}
-\markboth{RECOMENDACIONES}{RECOMENDACIONES}
+\customchapter{RECOMENDACIONES}
 % Reduccion del 09.11.2026 (notas/plan_reduccion_2026-11-09.md): de quince recomendaciones a seis, ordenadas por
 % utilidad, cada una con la evidencia que la motiva. Salen las que el segundo estudio ya resolvio (validar con mas
 % semillas, llevar la correccion del entrenamiento a los seis casos, dar un veredicto firme a la malla con demanda alta,
@@ -8,8 +6,10 @@
 % observacion, calibracion de la demanda alta, combinaciones pendientes, costo de P7, termino de spillback, recompensa
 % con la cola de fuera). La version anterior queda en el tag entregado-2026-10-25.
 
-Las siete recomendaciones van ordenadas por utilidad, cada una con la
-evidencia que la motiva.
+Cada recomendación sale de un hallazgo del
+Capítulo~\ref{cap:resultados}: las tres primeras, sobre cómo evaluar; la
+cuarta, sobre dónde usar el modelo, y las cuatro últimas, sobre lo que
+conviene probar después.
 
 \noindent\textbf{1. Comparar siempre con un plan fijo ajustado con
 cuidado y con el actuado ajustado.} La referencia decide el tamaño de la
@@ -17,10 +17,10 @@ mejora. En el primer estudio, el resumen en un número pasó de $-6.83$ a
 $-0.03$\,\% al ajustar mejor el fijo y contar la espera para entrar a la
 red, y la mejora en la red con rotonda resultó ser la de un ciclo mínimo
 que el ajuste no había probado (Sección~\ref{sec:robustez}). Con
-llegadas regulares, el modelo supera al actuado por defecto en los seis
-casos y pierde contra el ajustado en tres. Conviene ajustar el fijo, al
-segundo, y también el actuado, para cada caso y cada tráfico, y evaluar
-siempre el ciclo mínimo.
+llegadas regulares, el modelo tiene menos retraso que el actuado por
+defecto en los seis casos y más que el actuado ajustado en tres.
+Conviene ajustar el fijo al segundo y también el actuado, para cada caso
+y cada tráfico, y evaluar siempre el ciclo mínimo.
 % fuente: plan2/sintesis_numero_unico.csv (ippo_vecinos -6.83) y plan2/robustez_sintesis_numero_unico.csv (-0.03
 % [-0.56, 0.53]); P3 del primer estudio igual al ciclo minimo en 30 de 30 semillas (plan2/parciales/
 % eval_red_trivial.csv y eval_red_ippo_vecinos_s4042.csv); actuado por defecto: plan2/veredicto.csv (ippo_vecinos,
@@ -30,42 +30,60 @@ siempre el ciclo mínimo.
 \noindent\textbf{2. Evaluar con llegadas aleatorias, con el retraso
 total y con dos tandas de semillas.} Con llegadas regulares, un fijo
 bien ajustado es casi óptimo y el modelo empata con él ($-0.4$\,\%); con
-llegadas aleatorias gana en tres de los seis casos. Un retraso que no
-cuenta la espera para entrar a la red premia al control que deja la cola
-afuera: en el corredor con demanda alta, una reducción del 23.3\,\% se
-volvió un aumento del 1.6\,\% al contarla. Y dos tandas independientes
-permiten citar solo lo que se repite: aquí coincidieron en los 19 casos
-evaluados.
+llegadas aleatorias lo supera en tres de los seis casos. Un retraso que
+no cuenta la espera para entrar a la red favorece al control que deja la
+cola fuera de la red: en el corredor con demanda alta, una reducción del
+23.3\,\% se volvió un aumento del 1.6\,\% al contarla. Y dos tandas
+independientes permiten citar solo lo que se repite: aquí coincidieron
+en los 19 casos del segundo estudio y en los cuatro de Lima.
 % fuente: plan3/salidas/veredicto3.md (llegadas regulares -0.4 % en las dos tandas; H5 pasa en 3 de 6; 19 casos con
-% el mismo veredicto en las dos tandas); plan2/veredicto.csv (P2 ippo_vecinos -23.3) y plan2/robustez_veredicto.csv
-% (P2 +1.6 en retraso total; espera para entrar de 239.6 a 282.0 s/veh)
+% el mismo veredicto en las dos tandas); Lima: secciones/tablas/resultado_final.tex y capitulo5.tex,
+% sec:resultado-casos (el mismo veredicto en las dos tandas en los cuatro casos); plan2/veredicto.csv (P2
+% ippo_vecinos -23.3) y plan2/robustez_veredicto.csv (P2 +1.6 en retraso total; espera para entrar de 239.6 a
+% 282.0 s/veh)
 
 \noindent\textbf{3. Probar un reparto de la demanda que cambie de una
-simulación a otra.} En los dos estudios, cada calle recibe siempre la
-misma parte de la demanda (Sección~\ref{sec:escenarios}): es la
-condición más favorable para el fijo, que se ajusta conociendo ese
-reparto. Conviene sortear el reparto en cada simulación, con el mismo
-total, ajustar el fijo y el actuado al reparto promedio y entrenar el
-modelo con repartos distintos, empezando por P1, P3 y P5: en P3 y P5
-ningún control supera hoy al fijo.
+simulación a otra.} En los dos estudios y en Lima, cada calle recibe
+siempre la misma parte de la demanda (Sección~\ref{sec:escenarios}): es
+la condición más favorable para el fijo, que se ajusta conociendo ese
+reparto. En el nudo de Lima, otro reparto del mismo total, sin volver a
+ajustar, sube el retraso del fijo ajustado al segundo de 58 a entre 77 y
+88~s por vehículo, y el del modelo queda entre 54 y 56
+(Sección~\ref{sec:lima-nudo}).
+% fuente: secciones/tablas/lima_robustez.tex (lima/robustez/: fijo ajustado 57.82 con el reparto supuesto, 88.01 y
+% 76.59 con los otros dos; modelo 55.28, 56.26 y 53.66)
+Conviene sortear el reparto en cada simulación, con el mismo total,
+ajustar el fijo y el actuado al reparto promedio y entrenar el modelo
+con repartos distintos, empezando por P1, donde el modelo funciona, y
+por P3 y P5, donde ningún control supera al fijo.
 % fuente: sec:escenarios ("El reparto entre calles es fijo"); P3 y P5: plan3/salidas/veredicto3.md, tabla de margen
 % (ninguna de las otras referencias supera al fijo ajustado al segundo en P3, P4 y P5; Tabla tab:plan3-margen)
 
 \noindent\textbf{4. Usar el control aprendido donde reaccionar al
-tráfico da margen.} El modelo gana en el corredor y en la malla con
-demanda alta, entre un 16 y un 27\,\%, y no en la red con rotonda ni
-en la malla con demanda nominal. Una prueba barata antes de entrenar es
-comparar el actuado ajustado con el fijo ajustado: donde el actuado no
-mejoró al fijo, el modelo tampoco (Tabla~\ref{tab:plan3-margen}), y
-basta un buen plan fijo.
+tráfico da margen.} El modelo supera al fijo ajustado al segundo en el
+corredor y en la malla con demanda alta, entre un 16 y un 27\,\%, y ahí
+también al actuado ajustado; no lo supera en la red con rotonda ni en la
+malla con demanda nominal, y en el nudo de Lima, un solo cruce, el
+actuado ajustado tiene menos retraso que el modelo. Una prueba de bajo
+costo antes de entrenar es comparar el actuado ajustado con el fijo
+ajustado al segundo: donde el actuado no mejoró al fijo, el modelo
+tampoco (Tabla~\ref{tab:plan3-margen}), y basta un buen plan fijo. Con
+lo medido, el orden es reajustar primero los planes fijos, usar el
+actuado donde mejora al fijo y reservar el modelo para los corredores y
+las mallas con demanda alta donde, en simulación, supere también al
+actuado ajustado. Conviene empezar donde ya haya detectores y enlaces
+(Sección~\ref{sec:costo-escala}).
 % fuente: plan3/salidas/veredicto3_celdas.csv (P1 -16.3 y -17.1; P2 -19.8 y -20.2; P6 -25.7 y -26.9) y
 % veredicto3_comparaciones.csv (tanda 1, actuado ajustado frente al fijo ajustado al segundo: P1 -13.5, P2 -1.0 y P6
-% -16.0; en P3, P4 y P5 la mejor de las otras referencias iguala al fijo: tablas/plan3_margen.tex)
+% -16.0; en P3, P4 y P5 la mejor de las otras referencias iguala al fijo: tablas/plan3_margen.tex); nudo de Lima:
+% secciones/tablas/resultado_final.tex (+3.4 y +3.6, y +4.3 y +3.3 frente al actuado ajustado); el orden de uso
+% cerraba antes la Seccion sec:costo-escala del Cap. V (detectores y enlaces: Tabla tab:costo-calle)
 
 \noindent\textbf{5. Dar al agente una acción de desfase o un reloj de
 decisión más fino.} En la red con rotonda, el mejor plan fijo es el
-ciclo mínimo con uno o dos semáforos corridos 1~s, y ese segundo vale un
-1.6\,\% del retraso (Anexo~H). El modelo decide cada 5~s (el modelo
+ciclo mínimo con uno o dos semáforos corridos 1~s, y en P3 ese segundo
+equivale al 1.6\,\% de retraso que el modelo tiene de más
+(Sección~\ref{sec:donde-gana}). El modelo decide cada 5~s (el modelo
 completo, cada 2~s) y no puede producir ese desfase. Decidir cada 2~s no
 mejoró en ninguno de los tres casos probados: conviene probar primero
 una acción que fije el desfase con los vecinos y, después, decidir cada
@@ -78,24 +96,36 @@ segundo.
 Los dos casos de Lima usan la geometría real y un total de vehículos
 publicado, pero el reparto de esa demanda entre calles es un supuesto y,
 en el corredor, también lo son los semáforos de hoy
-(Sección~\ref{sec:caso-lima}). Falta contar los vehículos por movimiento
-en la hora punta, medir los semáforos del corredor y comprobar la
-simulación con tiempos de viaje medidos. El reparto es el dato que más
-pesa: en el nudo, con el mismo total repartido de otra forma, el fijo
-ajustado pasa de 58 a entre 77 y 88~s por vehículo, y el modelo se queda
-entre 54 y 56. En el nudo falta además incluir los dos semáforos del
-puente, cuya cola bloquea a veces el paso por la Av.~Reducto.
-% fuente: anexo_d_osm.tex ("lo que el escenario no reproduce", del nudo y del corredor); secciones/tablas/
-% lima_robustez.tex (lima/robustez/: fijo ajustado 57.82 con el reparto supuesto, 88.01 y 76.59 con los otros dos;
-% modelo 55.28, 56.26 y 53.66)
+(Sección~\ref{sec:caso-lima}). Conviene contar los vehículos por
+movimiento en la hora punta, medir los semáforos del corredor, incluir
+en el nudo los dos semáforos del puente, cuya cola bloquea a veces el
+paso por la Av.~Reducto, y comprobar la simulación con tiempos de viaje
+medidos.
+% fuente: anexo_d_osm.tex ("lo que el escenario no reproduce", del nudo y del corredor); el efecto del reparto, con
+% su fuente, pasa a la recomendacion 3
 
 \noindent\textbf{7. Entrenar y evaluar con un canal de mensajes
 imperfecto.} Los modelos se entrenaron con mensajes instantáneos y sin
 pérdida. Con latencia o pérdida, en la fase exploratoria el modelo
 quedó entre un 1.7 y un 7.0\,\% por encima del actuado en el corredor
-(Anexo~C): nunca había visto un mensaje viejo. Como la edad del mensaje
-ya está en la observación, conviene entrenar con latencia y pérdida
-aleatorias.
+(Anexo~C), porque no se había entrenado con mensajes atrasados. Como la
+edad del mensaje ya está en la observación, conviene entrenar con
+latencia y pérdida aleatorias.
 % fuente: fase exploratoria, evaluacion_corredor_resumen.csv (brazos ippo_vecinos_L5p0, L5p30 y L10p0 frente al
 % actuado: +1.7, +5.4 y +7.0 %; anexo_c_exploratoria.tex); edad del mensaje en la observacion: capitulo3.tex,
 % tab:obs-u4
+
+\noindent\textbf{8. Probar el modelo con lo que mide un detector común.}
+El modelo observa los vehículos de todo el acceso, hasta unos 590~m en
+las entradas del corredor de Benavides y 1~km en el nudo, y ningún
+detector común da esa observación (Sección~\ref{sec:costo-escala}).
+Conviene evaluarlo con la observación recortada a una zona de 75 a
+200~m junto a la línea de parada, y sin mensajes. Hay indicios de que la
+mejora se conservaría: con llegadas aleatorias, ver los vehículos
+cercanos es la pieza que mejora al modelo en más casos, y en Benavides,
+sin mensajes, el modelo sigue entre un 7.5 y un 18\,\% por debajo del
+fijo ajustado al segundo. Si se conserva, el modelo podría operar con
+los mismos detectores que el actuado y sin enlaces entre cruces.
+% fuente: capitulo5.tex, sec:costo-escala y tab:piezas (ver los vehiculos cercanos: 3 de 6 casos); "Que aportan
+% los mensajes" (canal cortado frente al fijo: -7.39 y -7.62 con la demanda publicada, -17.79 y -17.78 con la alta);
+% actuado ajustado: lima/**/salidas/actuado_ajustado.json (zona de 100 a 200 m en tres de los cuatro casos de Lima)

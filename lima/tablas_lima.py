@@ -310,7 +310,7 @@ def figura_retraso(datos):
         fig, ejes = plt.subplots(1, len(datos), figsize=(3.6 * len(datos), 3.4), facecolor=tp.FONDO, squeeze=False)
         for ax, (n, d) in zip(ejes[0], datos.items()):
             brazos = [b for b in PRINCIPALES if b in d["medias"][1]] + [d["modelo"]]
-            nombres = [{"actual": "Plan\nactual", "fijo": "Fijo\najustado", "actuadoaj": "Actuado\najustado"}.get(b, "Modelo\ncompleto")
+            nombres = [{"actual": "Plan\nactual", "fijo": "Fijo ajustado\nal segundo", "actuadoaj": "Actuado\najustado"}.get(b, "Modelo\ncompleto")
                        for b in brazos]
             valores = [d["medias"][1][b] for b in brazos]
             limpiar(ax)
@@ -350,16 +350,19 @@ def figura_aprendizaje(datos):
                 if base == d["elegido"]:
                     ax.plot(xs, ys, color=AZUL, lw=2.0, zorder=4, solid_joinstyle="round")
                     k = ys.index(min(ys))                   # la version evaluada: la de menor retraso en la validacion
-                    ax.plot(xs[k], ys[k], "o", ms=6.5, mfc=AZUL, mec=tp.FONDO, mew=1.4, zorder=5)
-                    ax.annotate("versión evaluada", (xs[k], ys[k]), xytext=(0, -7), textcoords="offset points",
-                                ha="center", va="top", fontsize=7.0, color=tp.TINTA2)
+                    estable = convergio(carpeta, base)[0]   # hueco si su entrenamiento no se estabilizo
+                    ax.plot(xs[k], ys[k], "o", ms=6.5, mfc=AZUL if estable else tp.FONDO,
+                            mec=tp.FONDO if estable else AZUL, mew=1.4 if estable else 1.8, zorder=5)
+                    ax.annotate("versión evaluada" + ("" if estable else ",\nsin estabilizar"), (xs[k], ys[k]),
+                                xytext=(0, -7), textcoords="offset points", ha="center", va="top", fontsize=7.0,
+                                color=tp.TINTA2)
                 else:
                     ax.plot(xs, ys, color=AZUL_CLARO, lw=1.2, zorder=3, solid_joinstyle="round")
             for brazo in ("actual", "fijo", "actuadoaj"):
                 if brazo in referencias:
                     todos.append(referencias[brazo])
                     ax.axhline(referencias[brazo], color=GRIS, lw=1.0, zorder=2)
-                    ax.annotate(f"{NOMBRE[brazo].replace(' al segundo', '')}: {referencias[brazo]:.1f}",
+                    ax.annotate(NOMBRE[brazo].replace(" al segundo", "\nal segundo") + f": {referencias[brazo]:.1f}",
                                 (ultimo, referencias[brazo]), xytext=(5, 0), textcoords="offset points", ha="left",
                                 va="center", fontsize=7.2, color=tp.TINTA2, annotation_clip=False)
             ax.set_xlim(0, ultimo)
@@ -369,7 +372,7 @@ def figura_aprendizaje(datos):
             ax.set_ylabel("Retraso total en la\nvalidación (s por vehículo)", fontsize=8.0, linespacing=1.35)
             ax.set_title(f"Demanda {NIVELES[n][0].lower()}: {d['veh']:.0f} veh/h", fontsize=8.4, color=tp.TINTA2, loc="left")
         ejes[-1, 0].set_xlabel("Episodio de entrenamiento", fontsize=8.2)
-        leyenda = [Line2D([], [], color=AZUL, lw=2.0, label="Entrenamiento citado"),
+        leyenda = [Line2D([], [], color=AZUL, lw=2.0, label="Entrenamiento de la versión evaluada"),
                    Line2D([], [], color=AZUL_CLARO, lw=1.2, label="Los otros dos entrenamientos"),
                    Line2D([], [], color=GRIS, lw=1.0, label="Referencias, en las mismas semillas")]
         fig.legend(handles=leyenda, ncol=3, loc="upper center", bbox_to_anchor=(0.5, 1.0), frameon=False, fontsize=7.6,
@@ -395,7 +398,7 @@ def figura_ciclo(datos):
         for ax, (n, d) in zip(ejes[:, 0], datos.items()):
             carpeta = NIVELES[n][1]
             filas = [("Plan actual", [v for _, v, _ in programa.PLAN]),
-                     ("Fijo ajustado", leer_json(carpeta, "fijo_ajustado.json")["ganador"]),
+                     ("Fijo ajustado\nal segundo", leer_json(carpeta, "fijo_ajustado.json")["ganador"]),
                      ("Modelo completo\n(promedio)", leer_json(carpeta, "verdes_modelo.json")["verdes"])]
             ax.set_facecolor(tp.FONDO)
             for y, (rotulo, verdes) in zip((2, 1, 0), filas):

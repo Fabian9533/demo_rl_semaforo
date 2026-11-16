@@ -218,8 +218,10 @@ def etiqueta(nombre):
 
 
 def titulo_prefijo():
-    """Robustez para el prefijo robustez_ (va al inicio de los titulos); vacio sin prefijo."""
-    return PREFIJO.strip("_").replace("_", " ").capitalize()
+    """Medicion mas estricta para el prefijo robustez_ (el nombre del paso 2 en la tesis desde el 15.11.2026; va al
+    inicio de los titulos); vacio sin prefijo."""
+    t = PREFIJO.strip("_")
+    return "Medición más estricta" if t == "robustez" else t.replace("_", " ").capitalize()
 
 
 def nombre_retraso():

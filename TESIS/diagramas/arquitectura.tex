@@ -12,23 +12,23 @@
 \unidad{ext}
 \useasboundingbox (0,0) rectangle (15,-13.0);
 
-% ================================================================ camino previsto (OSM)
+% ================================================================ casos de Lima (OSM)
 % inner ysep 1.5pt: el pie queda en y -0.45, a 1 mm del marco de U1
-\node[proceso, previsto, minimum height=0pt, inner ysep=1.5pt, anchor=north west] (osm) at (0.02,-0.02)
-  {\textbf{Cruce real de Lima (OSM)}: importación cruda, no usada en P1--P5 (Anexo~D)};
+\node[proceso=u1, minimum height=0pt, inner ysep=1.5pt, anchor=north west] (osm) at (0.02,-0.02)
+  {\textbf{Casos de Lima}: red desde OpenStreetMap y demanda publicada (Anexo~D)};
 
 % ================================================================ U1
-% El titulo se corre a la derecha para dejar pasar la flecha punteada de OSM hacia Red vial.
+% El titulo se corre a la derecha para dejar pasar la flecha de OSM hacia Red vial.
 \node[titulo=u1] (tU1) at (0.46,-0.62) {U1 · Preprocesamiento};
 \node[semillas, anchor=east] (s_tuneo) at (14.88,-0.87)
-  {ajuste: 2001--2003 (calibración de $f$ y barrido del fijo)};
+  {ajuste: 2001--2003 (demanda alta y barrido del fijo)};
 % los cuatro con el mismo alto (1.5 cm, el natural del nodo archivo) y el mismo ancho (3.54 cm),
 % separados 0.2 cm. El bisel del nodo archivo suma 2 x 2.2 mm al ancho, asi que tab lleva
 % text width 2.87 cm (su linea mas larga, "enlaces y vecinos" en negrita, mide 2.56 cm).
 \node[proceso=u1, text width=3.2cm, minimum width=3.52cm, minimum height=1.477cm, anchor=north west] (red) at (0.12,-1.16)
   {\nodo{Red vial}{\texttt{.nod.xml}, \texttt{.edg.xml}\\ \texttt{netconvert} $\to$ \texttt{.net.xml}}};
 \node[proceso=u1, text width=3.2cm, minimum width=3.52cm, minimum height=1.477cm, anchor=north west] (dem) at (3.86,-1.16)
-  {\nodo{Demanda}{\texttt{<flow>} $\to$ \texttt{.rou.xml}\\ escalada en P2 y P4}};
+  {\nodo{Demanda}{\texttt{<flow>} $\to$ \texttt{.rou.xml}\\ escalada en P2, P4 y P6}};
 \node[proceso=u1, text width=3.2cm, minimum width=3.52cm, minimum height=1.477cm, anchor=north west] (ref) at (7.60,-1.16)
   {\nodo{Programas\\ de referencia}{fijo: \texttt{barrer\_fijo.py}\\ actuado: \texttt{comun.py}}};
 \node[archivo=u1, text width=2.87cm, anchor=north west] (tab) at (11.34,-1.16)
@@ -83,7 +83,7 @@
 
 % ================================================================ resultados
 \node[iniciofin=ext, text width=5.9cm] (res) at (11.495,-11.136)
-  {\nodo{Resultados}{Cap.~V y Anexo~A: matriz caso $\times$ modelo;\\ tablas por modelo y por entrenamiento}};
+  {\nodo{Resultados}{Cap.~V y Anexos A, D y H:\\ veredicto por caso y modelo}};
 
 % ================================================================ fondos de las unidades
 \begin{scope}[on background layer]
@@ -94,9 +94,9 @@
 \end{scope}
 
 % ================================================================ flechas
-% camino previsto, no usado: OSM -> Red vial
+% casos de Lima: OSM -> Red vial
 % (x 0.34: la punta cae entera sobre el tramo recto del borde, no sobre la esquina redondeada)
-\draw[no usado] (osm.south -| 0.34,0) -- (red.north -| 0.34,0);
+\draw[flujo] (osm.south -| 0.34,0) -- (red.north -| 0.34,0);
 % I1: colector bajo red, demanda y programas de referencia -> SUMO + TraCI
 \draw[interfaz, -] (red.south) -- (red.south |- 0,-2.9) -- (ref.south |- 0,-2.9) -- (ref.south);
 \draw[interfaz, -] (dem.south) -- (dem.south |- 0,-2.9);
@@ -138,6 +138,6 @@
 % ================================================================ leyenda
 \draw[black!30, line width=0.4pt] (0,-11.83) -- (15,-11.83);
 \leyenda{(0.1,-12.17)}{proceso, archivo, iniciofin, entorno, semillas}
-\leyenda{(0.1,-12.77)}{flujo, interfaz, repeticion, previsto}
+\leyenda{(0.1,-12.77)}{flujo, interfaz, repeticion}
 \end{tikzpicture}
 \end{document}

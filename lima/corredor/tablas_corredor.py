@@ -239,7 +239,7 @@ def tabla_mensajes(datos):
         if filas:
             filas.append("\\midrule")
         primera = NIVELES[n][0]
-        pares = [("Entrenar sin mensajes o con ellos (IPPO corregido)", brazo("sinmsg", d["citado"]["sinmsg"]),
+        pares = [("Entrenar sin mensajes o con ellos (IPPO con mensajes corregido)", brazo("sinmsg", d["citado"]["sinmsg"]),
                   brazo("corregido", d["citado"]["corregido"])),
                  ("Cortar los mensajes al modelo completo ya entrenado", d["modelo"] + "_cortado", d["modelo"])]
         for rotulo, sin, con in pares:
@@ -364,10 +364,10 @@ def tabla_robustez(d):
 
 
 def etiqueta_citable(etiquetas, estable):
-    """La etiqueta que se cita: la que se repite en las dos tandas (si no se repite, EMPATA); PENDIENTE con el
-    provisional si el entrenamiento citado no se estabilizo."""
+    """La etiqueta que se cita: la que se repite en las dos tandas (si no se repite, EMPATA), con la marca
+    "(sin estabilizar)" si el entrenamiento citado no se estabilizo."""
     e = etiquetas[1] if etiquetas[1] == etiquetas[2] else "EMPATA"
-    return e if estable else f"PENDIENTE (provisional: {e})"
+    return e if estable else f"{e} (sin estabilizar)"
 
 
 def tabla_resumen(datos, bases_nudo):
@@ -405,7 +405,7 @@ def tabla_resumen(datos, bases_nudo):
     escribir("lima_resumen.tex",
              ["Casos de Lima: cambio del retraso total con el modelo completo frente a cada referencia, en las tandas 1 y",
               "2 (%), y veredicto frente al fijo ajustado al segundo (regla de la tesis; la etiqueta se repite en las dos",
-              "tandas; PENDIENTE = el entrenamiento citado no se estabilizo y la etiqueta es provisional).",
+              "tandas; (sin estabilizar) = el entrenamiento citado no se estabilizo).",
               "fuente: lima/salidas/ y lima/alta/salidas/ (nudo, entrenamientos citados: "
               + ", ".join(f"{n} {b}" for n, b in bases_nudo.items()) + "); lima/corredor/salidas/ y lima/corredor/alta/"
               "salidas/ (corredor, entrenamientos citados: "
@@ -474,7 +474,7 @@ def figura_retraso(datos):
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
-    corto = {"tipico": "Plan\ntípico", "fijo": "Fijo\najustado", "actuadoaj": "Actuado\najustado"}
+    corto = {"tipico": "Plan\ntípico", "fijo": "Fijo ajustado\nal segundo", "actuadoaj": "Actuado\najustado"}
     with plt.rc_context(tl.estilo()):
         fig, ejes = plt.subplots(1, len(datos), figsize=(3.6 * len(datos), 3.4), facecolor=tp.FONDO, squeeze=False)
         for ax, (n, d) in zip(ejes[0], datos.items()):
@@ -528,10 +528,10 @@ def figura_aprendizaje(datos):
             arriba = max(("fijo", "actuadoaj"), key=lambda r: referencias.get(r, 0))
             for ref in ("fijo", "actuadoaj"):
                 if ref in referencias:
-                    ax.annotate(f"{NOMBRE[ref].replace(' al segundo', '')}: {referencias[ref]:.1f}",
-                                (ultimo, referencias[ref]), xytext=(5, 5 if ref == arriba else -5),
-                                textcoords="offset points", ha="left", va="center", fontsize=7.2, color=tp.TINTA2,
-                                annotation_clip=False)
+                    ax.annotate(NOMBRE[ref].replace(" al segundo", "\nal segundo") + f": {referencias[ref]:.1f}",
+                                (ultimo, referencias[ref]), xytext=(5, 2 if ref == arriba else -2),
+                                textcoords="offset points", ha="left", va="bottom" if ref == arriba else "top",
+                                fontsize=7.2, color=tp.TINTA2, linespacing=1.15, annotation_clip=False)
             ax.set_xlim(0, ultimo)
             # eje vertical acercado: las diferencias son de pocos segundos y con el eje desde cero no se verian
             margen = (max(todos) - min(todos)) * 0.12
@@ -655,9 +655,9 @@ def fusion(tandas):
 
 
 def palabra(citable):
-    """('FUNCIONA', False), o ('FUNCIONA', True) si el veredicto es PENDIENTE (provisional: FUNCIONA)."""
-    if citable.startswith("PENDIENTE"):
-        return citable.split(": ")[-1].rstrip(")"), True
+    """('FUNCIONA', False), o ('FUNCIONA', True) si el veredicto lleva la marca (sin estabilizar)."""
+    if citable.endswith(" (sin estabilizar)"):
+        return citable[:-len(" (sin estabilizar)")], True
     return citable, False
 
 
@@ -683,16 +683,16 @@ def figura_final(casos):
         ms = tam + (1.2 if ver == "MEJORA" else 0)
         # anillo del color de la banda: separa el marcador de las lineas que pasan cerca
         ax.plot(x, y, forma, ms=ms + 2.6, mfc=banda(y), mec=banda(y), mew=0, zorder=4.6)
-        if pendiente:
-            ax.scatter([x], [y], s=(tam + 0.6) ** 2, marker=forma, facecolors=banda(y), edgecolors=color,
-                       linewidths=1.6, linestyle=(0, (1.3, 1.1)), zorder=5)
-        elif ver == "EMPATA":
+        if ver == "EMPATA":
             ax.plot(x, y, forma, ms=tam, mfc=tp.FONDO, mec=color, mew=1.4, zorder=5)
         elif ver == "MEJORA":
             ax.plot(x, y, forma, ms=ms, fillstyle="bottom", mfc=color, markerfacecoloralt=tp.FONDO, mec=color,
                     mew=0.5, zorder=5)
         else:                                          # FUNCIONA o FALLA: la banda dice cual
             ax.plot(x, y, forma, ms=tam, mfc=color, mec=color, mew=1.0, zorder=5)
+        if pendiente:                                  # entrenamiento sin estabilizar: anillo punteado alrededor
+            ax.scatter([x], [y], s=(ms + 4.4) ** 2, marker=forma, facecolors="none", edgecolors=tp.TINTA,
+                       linewidths=1.0, linestyle=(0, (1.2, 1.2)), zorder=5.5)
 
     def panel(ax, clave, y0, y1, titulo):
         ax.set_facecolor(tp.FONDO)
@@ -710,7 +710,7 @@ def figura_final(casos):
             ax.axhline(tp.META, color=tp.TINTA2, lw=0.9, ls=(0, (1, 2.2)), zorder=2)
             ax.text(x0 * 1.03, tp.META + 0.5, f"meta de la tesis: {menos}25 %", ha="left", va="bottom", **rot)
             ax.text(x0 * 1.03, y0 + 0.6, f"Mejora clara, de {menos}5 % o más negativo: FUNCIONA si es significativa\n"
-                    "y el modelo no pierde contra el actuado ajustado", ha="left", va="bottom", **rot)
+                    "y el modelo no tiene más retraso que el actuado ajustado", ha="left", va="bottom", **rot)
         for lugar, (_, color, _, _) in LUGARES.items():
             serie = sorted((c for c in casos if c["red"] == lugar and c[clave] is not None), key=lambda c: c["veh"])
             if not serie:
@@ -726,6 +726,14 @@ def figura_final(casos):
                     dx, dy, lado = ROTULO[clave][c["caso"]]
                     ax.annotate(c["caso"], (x, y), xytext=(dx, dy), textcoords="offset points", ha=lado,
                                 va="center", fontsize=7.6, color=tp.TINTA, fontweight="bold", zorder=6)
+                elif clave == "tandas" and c is serie[0]:    # Lima: el nombre junto a su demanda publicada
+                    ax.annotate({"nudo": "Nudo", "benavides": "Benavides"}[lugar], (x, y), xytext=(-9, 0),
+                                textcoords="offset points", ha="right", va="center", fontsize=7.6, color=tp.TINTA,
+                                fontweight="bold", zorder=6)
+                elif clave == "tandas":                      # y "alta" junto a la demanda alta (el punto del nudo
+                    ax.annotate("alta", (x, y), xytext=(9, 0),   # cae sobre la linea de la malla)
+                                textcoords="offset points", ha="left", va="center", fontsize=7.2, color=tp.TINTA,
+                                zorder=6)
         ax.set_xlim(x0, x1)
         ax.xaxis.set_major_locator(FixedLocator([2000, 3000, 4000, 6000, 8000, 10000]))
         ax.xaxis.set_minor_locator(NullLocator())
@@ -744,7 +752,8 @@ def figura_final(casos):
         fig, (arriba, abajo) = plt.subplots(2, 1, figsize=(7.0, 7.1), facecolor=tp.FONDO,
                                             gridspec_kw={"height_ratios": [2.1, 1.0], "hspace": 0.3})
         panel(arriba, "tandas", -32.0, 6.0, "(a) Llegadas aleatorias: los seis casos del segundo estudio y los de Lima")
-        panel(abajo, "regulares", -7.0, 5.0, "(b) Llegadas regulares: los seis casos del segundo estudio")
+        panel(abajo, "regulares", -7.0, 5.0,
+              "(b) Llegadas regulares: IPPO con mensajes corregido en los seis casos del segundo estudio")
         abajo.set_xlabel("Demanda total (veh/h, escala logarítmica)", fontsize=7.8)
         p = dict(ls="", ms=7.0)
         por_lugar = [Line2D([], [], marker=forma, mfc=color, mec=color, color=color, lw=1.4, ms=tam, label=nombre)
@@ -754,8 +763,8 @@ def figura_final(casos):
             Line2D([], [], marker="o", fillstyle="bottom", mfc=tp.TINTA2, markerfacecoloralt=tp.FONDO, mec=tp.TINTA2,
                    mew=0.5, label="MEJORA", **dict(p, ms=8.2)),
             Line2D([], [], marker="o", mfc=tp.FONDO, mec=tp.TINTA2, mew=1.4, label="EMPATA", **p),
-            arriba.scatter([], [], s=7.6 ** 2, marker="o", facecolors=tp.FONDO, edgecolors=tp.TINTA2, linewidths=1.5,
-                           linestyle=(0, (1.3, 1.1)), label="PENDIENTE (no se estabilizó)"),
+            arriba.scatter([], [], s=9.6 ** 2, marker="o", facecolors="none", edgecolors=tp.TINTA, linewidths=1.0,
+                           linestyle=(0, (1.2, 1.2)), label="Borde punteado: entrenamiento sin estabilizar"),
             Line2D([], [], marker="|", ms=10, mew=1.1, color=tp.TINTA2, ls="",
                    label="Barra: de un extremo a otro de los IC95 de las dos tandas")]
         comun = dict(fontsize=7.2, title_fontsize=7.4, handletextpad=0.5, alignment="left", labelcolor=tp.TINTA,

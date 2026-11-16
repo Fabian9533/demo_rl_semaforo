@@ -1,6 +1,6 @@
-\section*{Anexo F. Análisis de robustez}
+\section*{Anexo F. Medición más estricta (paso 2)}
 \phantomsection
-\addcontentsline{toc}{subsection}{Anexo F. Análisis de robustez}
+\addcontentsline{toc}{subsection}{Anexo F. Medición más estricta (paso 2)}
 \setcounter{table}{0}
 \renewcommand{\thetable}{F.\arabic{table}}
 \renewcommand{\theHtable}{F.\arabic{table}}
@@ -21,27 +21,19 @@
 % etiqueta despues de los titulos con asterisco; tablas y figuras llevan su etiqueta despues del caption y numeran
 % F.n.
 
-Este anexo da el detalle del análisis de robustez, que la
-Sección~\ref{sec:robustez} resume. Repite el primer estudio con una
-medición más estricta, sin volver a entrenar ningún modelo, para saber
-cuánto del resultado depende de cómo se mide. Se decidió después del
+Este anexo da el detalle de la medición más estricta, el paso 2, que la
+Sección~\ref{sec:robustez} resume. Repite la evaluación del primer
+estudio, sin volver a entrenar ningún modelo, para saber cuánto del
+resultado depende de cómo se mide. Se decidió después del
 veredicto del primer estudio y no lo reemplaza.
 
-\textbf{Respuesta corta.} Con la medición más estricta, la ventaja de
-IPPO con mensajes frente al fijo casi desaparece: resumida en un número,
-pasa de $-6.83$ a $-0.03$\,\%, con un IC95 de $-0.56$ a $+0.53$\,\%.
-Frente al actuado se mantiene ($-11.45$\,\%; en el primer estudio,
-$-14.35$\,\%). Frente al fijo, la mejora clara queda solo en P1. Con
-llegadas regulares, un fijo bien ajustado es casi óptimo.
 % fuente: plan2/sintesis_numero_unico.csv (ippo_vecinos: -6.83 frente al fijo_2509 y -14.35 frente al actuado) y
 % plan2/robustez_sintesis_numero_unico.csv (-0.03 [-0.56, 0.53] y -11.45); plan2/robustez_veredicto.csv (P1 -6.7 %,
 % FUNCIONA)
 
 \textbf{Cómo se lee.} Primero va qué cambia en la medición; después, el
 fijo ajustado desde 10~s (Tabla~\ref{tab:robustez-fijo}), el veredicto
-por caso y modelo (Tabla~\ref{tab:robustez-veredicto-matriz}), el
-resumen en un número (Tabla~\ref{tab:robustez-numero-unico}, en el
-Capítulo~\ref{cap:resultados}), las
+por caso y modelo (Tabla~\ref{tab:robustez-veredicto-matriz}), las
 comprobaciones y un barrido de la demanda del corredor
 (Tabla~\ref{tab:plan2-demanda} y Figura~\ref{fig:plan2-demanda}). Un
 cambio negativo es menos retraso que la referencia.
@@ -64,8 +56,8 @@ La medición más estricta cambia tres cosas del primer estudio:
     (2001 a 2003).
   \item \textbf{Hay un control nuevo, el ciclo mínimo}
     (Sección~\ref{sec:programa-trivial}): 10~s en cada verde y ningún
-    desfase, un ciclo de 26~s. Dice si un modelo gana solo por cambiar
-    de fase en cuanto puede. Se juzga frente al fijo, como el actuado.
+    desfase, un ciclo de 26~s. Dice si un modelo mejora al fijo solo por
+    cambiar de fase en cuanto puede. Se juzga frente al fijo, como el actuado.
     La versión evaluada que da su mismo retraso total y su misma espera
     detenida se marca ``igual al ciclo mínimo''; la marca no cambia su
     veredicto.
@@ -124,7 +116,7 @@ P5 & 10 / 10 & 26 & todos en 0  & 21.23 (0.10)   & 25 / 15, ciclo de 46 \\
 P6 & 15 / 10 & 31 & todos en 0  & 82.63 (0.40)   & el mismo \\
 \bottomrule
 \end{tabular}
-\caption[Robustez: fijo ajustado desde 10~s por caso]{Fijo ajustado desde 10~s de cada caso: el programa fijo de menor retraso total (Ecuación~\ref{eq:retraso-total}) en un barrido que parte del verde mínimo de 10~s, con las semillas de ajuste 2001 a 2003. Ciclo: los dos verdes más dos ámbares de 3~s. Desfases: del primer cruce al último. Retraso total: media y, entre paréntesis, desviación estándar sobre las tres semillas. Última columna: los verdes y el ciclo del fijo ajustado del primer estudio (Tabla~\ref{tab:plan2-fijo}) cuando es otro programa.}
+\caption[Medición más estricta: fijo ajustado desde 10~s por caso]{Fijo ajustado desde 10~s de cada caso: el programa fijo de menor retraso total (Ecuación~\ref{eq:retraso-total}) en un barrido que parte del verde mínimo de 10~s, con las semillas de ajuste 2001 a 2003. Ciclo: los dos verdes más dos ámbares de 3~s. Desfases: del primer cruce al último. Retraso total: media y, entre paréntesis, desviación estándar sobre las tres semillas. Última columna: los verdes y el ciclo del fijo ajustado del primer estudio (Tabla~\ref{tab:plan2-fijo}) cuando es otro programa.}
 \label{tab:robustez-fijo}
 \end{table}
 
@@ -187,8 +179,8 @@ dos mediciones están en la Tabla~\ref{tab:robustez-ippo}:
     $p$ sería 0.070 y el veredicto, EMPATA.
   \item \textbf{P6: no cambia.} El fijo es el mismo y la espera para
     entrar, de unos 45.5~s/veh, es casi igual con el fijo, el actuado y
-    los modelos. IPPO con mensajes queda en $+1.1$\,\%, un EMPATA
-    provisional.
+    los modelos. IPPO con mensajes queda en $+1.1$\,\%: EMPATA, con el
+    entrenamiento sin estabilizar.
 \end{itemize}
 % fuente: plan2/robustez_veredicto.csv (delta_fijo, p_fijo y veredicto por caso y modelo: P1 ippo_vecinos -6.7, mappo
 % -7.0, ippo_spill -5.1; P2 ippo_vecinos +1.6, actuado +13.0, ippo_local -1.7 con p 0.001; P3 ippo_vecinos -0.5 con p
@@ -203,28 +195,17 @@ dos mediciones están en la Tabla~\ref{tab:robustez-ippo}:
 % repartidos, 0.0702)
 
 Frente al actuado, IPPO con mensajes conserva la ventaja en los seis
-casos, entre un 3.5\,\% en P4 y un 23.9\,\% en P6. El ciclo mínimo falla
-por mucho en P1, P2 y P6 ($+390.3$, $+167.7$ y $+236.7$\,\%), mejora
-apenas al fijo en P3 ($-0.5$\,\%) y empata en P4 y P5.
+casos, entre un 3.5\,\% en P4 y un 23.9\,\% en P6. El ciclo mínimo
+recibe FALLA en P1, P2 y P6, con mucho más retraso que el fijo
+($+390.3$, $+167.7$ y $+236.7$\,\%), mejora apenas al fijo en P3
+($-0.5$\,\%) y empata en P4 y P5.
 % fuente: plan2/robustez_veredicto.csv (delta_act de ippo_vecinos: -5.7, -10.1, -7.6, -3.5, -16.1 y -23.9; fila
 % trivial, delta_fijo: +390.3, +167.7, -0.5, -1.0, 0.0 y +236.7). La figura images/fig_robustez_mejora_caso.png
 % (cambio de IPPO con mensajes y MAPPO con las dos mediciones, escrita por "python sintesis_plan.py --prefijo
 % robustez_") ya no se incluye: sus valores de IPPO con mensajes estan en la Tabla tab:robustez-ippo del Cap. V
 
-\subsection*{Resumen en un número}
-
-La Tabla~\ref{tab:robustez-numero-unico}, en el
-Capítulo~\ref{cap:resultados}, repite el resumen en un número
-del primer estudio (Tabla~\ref{tab:plan2-numero-unico}) con la medición
-más estricta. Sobre los seis casos, IPPO con mensajes queda en
-$-0.03$\,\% frente al fijo ajustado desde 10~s, con un IC95 de $-0.56$
-a $+0.53$\,\% que incluye el cero, y en $-11.45$\,\% frente al actuado
-(de $-11.95$ a $-10.95$\,\%). En el primer estudio eran $-6.83$ y
-$-14.35$\,\%. MAPPO queda en $+0.85$ y $-10.67$\,\%. Sin P1, IPPO con
-mensajes pasa a $+1.36$\,\% frente al fijo. El reparto de la variación
-también cambia: con todos los modelos que aprenden, el modelo explica el
-55.5\,\% y el caso el 23.5\,\%, al revés que en el primer estudio (36.5
-y 53.7\,\%, Tabla~\ref{tab:plan2-anova}).
+% Resumen en un numero con la medicion mas estricta: va en el Cap. V (tab:robustez-numero-unico) y el reparto de la
+% variacion, en el Anexo A (15.11.2026). Cifras:
 % fuente: python sintesis_plan.py --prefijo robustez_ -> plan2/robustez_sintesis_numero_unico.csv (ippo_vecinos -0.03
 % [-0.56, 0.53] y -11.45 [-11.95, -10.95], sin_P1 1.36; mappo 0.85 y -10.67) y plan2/robustez_sintesis_anova.csv
 % (todos los aprendices: caso 23.5, modelo 55.5, interaccion 14.9, base 6.1); primer estudio:
@@ -280,21 +261,24 @@ en SUMO, \textit{timeLoss}.
 \end{figure}
 
 \begin{itemize}
-  \item \textbf{La política de P1 solo gana con su demanda.} Con
-    $\times$1.0 baja el retraso un 6.8\,\%. Con $\times$0.5 y
-    $\times$0.75 pierde un 3.9 y un 3.6\,\%: el fijo de esos niveles es
-    un ciclo corto sin desfases, que la política no alcanza.
-  \item \textbf{La política de P2 no sirve con poca demanda.} Gana en
-    retraso con $\times$1.75 a $\times$2.25 y con el perfil variable,
-    entre un 16.6 y un 23.3\,\%, y pierde entre un 58.1 y un 71.5\,\%
+  \item \textbf{La política de P1 solo mejora al fijo con su propia
+    demanda.} Con $\times$1.0 baja el retraso un 6.8\,\%. Con
+    $\times$0.5 y $\times$0.75 tiene un 3.9 y un 3.6\,\% más de
+    retraso: el fijo de esos niveles es un ciclo corto sin desfases, que
+    la política no alcanza.
+  \item \textbf{La política de P2 no sirve con poca demanda.} Reduce el
+    retraso entre un 16.6 y un 23.3\,\% con $\times$1.75 a $\times$2.25
+    y con el perfil variable, y lo aumenta entre un 58.1 y un 71.5\,\%
     con $\times$0.5 a $\times$1.0.
-  \item \textbf{Con el retraso total, la ganancia con demanda alta baja
-    o se vuelve pérdida.} Con $\times$1.75, $\times$2.0 y $\times$2.25,
-    la política de P2 pasa a $-3.6$, $+1.6$ y $+10.0$\,\%. Con el perfil
-    variable pierden todos los controles, entre un 20.6 y un 46.4\,\%.
-    Es la misma cola fuera de la red que en P2.
-  \item \textbf{Entre $\times$1.25 y $\times$1.5 pierden todos menos el
-    fijo de cada nivel:} entre un 45.0 y un 146.1\,\% en retraso. La
+  \item \textbf{Con el retraso total, la mejora con demanda alta se
+    reduce o pasa a ser más retraso.} Con $\times$1.75, $\times$2.0 y
+    $\times$2.25, la política de P2 pasa a $-3.6$, $+1.6$ y
+    $+10.0$\,\%. Con el perfil variable, todos los controles tienen
+    entre un 20.6 y un 46.4\,\% más de retraso que el fijo. Es la misma
+    cola fuera de la red que en P2.
+  \item \textbf{Entre $\times$1.25 y $\times$1.5, todos los controles
+    tienen más retraso que el fijo de cada nivel:} entre un 45.0 y un
+    146.1\,\% en retraso. La
     explicación probable son los giros a la izquierda sin prioridad en
     calles de un carril, que detienen a los que vienen detrás
     (Figura~\ref{fig:giro-izquierda}). El Anexo~G mide su peso en el
