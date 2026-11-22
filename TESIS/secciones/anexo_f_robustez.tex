@@ -21,11 +21,12 @@
 % etiqueta despues de los titulos con asterisco; tablas y figuras llevan su etiqueta despues del caption y numeran
 % F.n.
 
-Este anexo da el detalle de la medición más estricta, el paso 2, que la
-Sección~\ref{sec:robustez} resume. Repite la evaluación del primer
-estudio, sin volver a entrenar ningún modelo, para saber cuánto del
-resultado depende de cómo se mide. Se decidió después del
-veredicto del primer estudio y no lo reemplaza.
+Este anexo responde cuánto del resultado del primer estudio depende de
+cómo se mide. Da el detalle de la medición más estricta, el paso 2, que
+la Sección~\ref{sec:robustez} resume y la
+Sección~\ref{sec:diseno-robustez} define: la misma evaluación, sin
+volver a entrenar ningún modelo, con otra métrica y otra referencia. Es
+posterior al veredicto del primer estudio y no lo reemplaza.
 
 % fuente: plan2/sintesis_numero_unico.csv (ippo_vecinos: -6.83 frente al fijo_2509 y -14.35 frente al actuado) y
 % plan2/robustez_sintesis_numero_unico.csv (-0.03 [-0.56, 0.53] y -11.45); plan2/robustez_veredicto.csv (P1 -6.7 %,
@@ -36,7 +37,9 @@ fijo ajustado desde 10~s (Tabla~\ref{tab:robustez-fijo}), el veredicto
 por caso y modelo (Tabla~\ref{tab:robustez-veredicto-matriz}), las
 comprobaciones y un barrido de la demanda del corredor
 (Tabla~\ref{tab:plan2-demanda} y Figura~\ref{fig:plan2-demanda}). Un
-cambio negativo es menos retraso que la referencia.
+cambio negativo es menos retraso que la referencia. Los programas son
+los del primer estudio (Tabla~\ref{tab:programas}), y la ejecución, con
+su costo, está en el apartado~\ref{sec:remedicion}.
 
 \subsection*{Qué cambia en la medición}
 
@@ -46,9 +49,7 @@ La medición más estricta cambia tres cosas del primer estudio:
     (Ecuación~\ref{eq:retraso-total}), que suma al retraso la espera
     para entrar a la red y cuenta a los vehículos que no llegan a
     entrar. En P2, con el fijo ajustado, esa espera es mayor que el
-    propio retraso: 239.6 frente a 154.7~s/veh. Los controles que
-    reaccionan al tráfico bajan el retraso en parte con cola que queda
-    fuera de la red.
+    propio retraso: 239.6 frente a 154.7~s/veh.
   \item \textbf{La referencia es el fijo ajustado desde 10~s.} El
     barrido del primer estudio partía de 12~s de verde en la avenida en
     P1 y de 15~s en P2 a P5. El nuevo parte del verde mínimo del modelo,
@@ -57,10 +58,10 @@ La medición más estricta cambia tres cosas del primer estudio:
   \item \textbf{Hay un control nuevo, el ciclo mínimo}
     (Sección~\ref{sec:programa-trivial}): 10~s en cada verde y ningún
     desfase, un ciclo de 26~s. Dice si un modelo mejora al fijo solo por
-    cambiar de fase en cuanto puede. Se juzga frente al fijo, como el actuado.
-    La versión evaluada que da su mismo retraso total y su misma espera
-    detenida se marca ``igual al ciclo mínimo''; la marca no cambia su
-    veredicto.
+    cambiar de fase en cuanto puede, y se juzga frente al fijo, como el
+    actuado. Una versión evaluada con su mismo retraso total y su misma
+    espera detenida se marca ``igual al ciclo mínimo''; la marca no
+    cambia su veredicto.
 \end{itemize}
 % fuente: plan2/evaluacion_corredor_alta_resumen.csv (fijo: retraso_insercion_prom 239.5657, timeloss_prom
 % 154.7013); rejillas del primer barrido: comentarios de plan2/<esc>.add.xml en el commit 37f9680 (corredor: avenida
@@ -68,13 +69,12 @@ La medición más estricta cambia tres cosas del primer estudio:
 % plan2/<esc>_trivial.add.xml (10/3/10/3, desfases en cero); marca: veredicto.py (igual_a sobre la metrica y
 % espera_prom, con una diferencia de a lo sumo IGUAL = 0.0005 s/veh en cada una)
 
-Lo demás es igual que en el primer estudio: las versiones evaluadas, las
-semillas de evaluación (1001 a 1030), la estadística pareada y la regla
-de veredicto. No se entrena nada. Partir de 10~s se decidió después de
-ver que la versión evaluada de IPPO con mensajes en P3 daba el mismo
-resultado que el ciclo mínimo, que el primer barrido no incluía: su
-regla ampliaba los valores probados solo si el ganador quedaba en el
-borde, y ninguno quedó ahí.
+Lo demás es igual que en el primer estudio: las versiones evaluadas,
+sin reentrenar, las semillas de evaluación (1001 a 1030), la
+estadística pareada y la regla de veredicto. El barrido del primer
+estudio no incluía el ciclo mínimo: su regla amplía los valores
+probados solo si el ganador queda en el borde, y en P1 a P5 ninguno
+quedó ahí.
 % fuente: plan2/cola/estado.json (trabajos v21_* de P1 a P5: 5 barridos y 132 evaluaciones, de ellas 117 de
 % politicas, tres entrenamientos por modelo y caso); P6: sus evaluaciones corrieron con el codigo que ya registra el
 % retraso total
@@ -85,13 +85,13 @@ borde, y ninguno quedó ahí.
 \subsection*{El fijo ajustado desde 10~s}
 
 La Tabla~\ref{tab:robustez-fijo} da el programa ganador de cada caso. En
-P1, P2 y P6 es el del primer estudio; en P6 no hubo un barrido nuevo,
-porque el del primer estudio ya llegaba a 10~s y su ganador es también
-el de menor retraso total. En P3, P4 y P5 cambia: el primer barrido
-había elegido un ciclo de 46~s, y al partir de 10~s gana un ciclo de
-26~s, con 10~s de verde en cada fase. El retraso tiene al menos dos
-óptimos locales: ese ciclo corto y el de 46~s con los cruces coordinados
-en onda verde. El primer barrido había quedado en el segundo. En P5 el
+P1, P2 y P6 es el del primer estudio; en P6 el barrido no se repite,
+porque el del primer estudio ya llega a 10~s y su ganador es también
+el de menor retraso total. En P3, P4 y P5 cambia: el barrido del primer
+estudio elige un ciclo de 46~s, y el que parte de 10~s, uno de 26~s,
+con 10~s de verde en cada fase. El retraso tiene al menos dos óptimos
+locales, ese ciclo corto y el de 46~s con los cruces coordinados en
+onda verde, y el barrido del primer estudio elige el segundo. En P5 el
 ganador no usa desfases: es el mismo programa que el ciclo mínimo.
 
 % fuente: plan2/barrido_<esc>.csv del barrido desde 10 s (fila de menor retraso_total_prom; columnas verde,
@@ -151,9 +151,8 @@ La lectura de cada caso sigue a IPPO con mensajes, cuyas cifras con las
 dos mediciones están en la Tabla~\ref{tab:robustez-ippo}:
 \begin{itemize}
   \item \textbf{P1: no cambia.} El fijo es el mismo y la espera para
-    entrar es de 0.37~s/veh con el fijo, el actuado y el modelo. IPPO
-    con mensajes queda en $-6.7$\,\% ($-6.8$\,\% en el primer estudio),
-    y reciben FUNCIONA los mismos tres modelos.
+    entrar es de 0.37~s/veh con el fijo, el actuado y el modelo; reciben
+    FUNCIONA los mismos tres modelos.
   \item \textbf{P2: cambia la métrica.} El fijo es el mismo. IPPO con
     mensajes tiene un 23.3\,\% menos de retraso que el fijo, pero la
     espera para entrar sube de 239.6~s/veh con el fijo a 282.0 con el
@@ -179,8 +178,7 @@ dos mediciones están en la Tabla~\ref{tab:robustez-ippo}:
     $p$ sería 0.070 y el veredicto, EMPATA.
   \item \textbf{P6: no cambia.} El fijo es el mismo y la espera para
     entrar, de unos 45.5~s/veh, es casi igual con el fijo, el actuado y
-    los modelos. IPPO con mensajes queda en $+1.1$\,\%: EMPATA, con el
-    entrenamiento sin estabilizar.
+    los modelos.
 \end{itemize}
 % fuente: plan2/robustez_veredicto.csv (delta_fijo, p_fijo y veredicto por caso y modelo: P1 ippo_vecinos -6.7, mappo
 % -7.0, ippo_spill -5.1; P2 ippo_vecinos +1.6, actuado +13.0, ippo_local -1.7 con p 0.001; P3 ippo_vecinos -0.5 con p
@@ -194,9 +192,7 @@ dos mediciones están en la Tabla~\ref{tab:robustez-ippo}:
 % ippo_vecinos_s2042 igual en 24 de 30); p5_wilcoxon_ceros.txt de la misma auditoria (Wilcoxon 0.0277; con los ceros
 % repartidos, 0.0702)
 
-Frente al actuado, IPPO con mensajes conserva la ventaja en los seis
-casos, entre un 3.5\,\% en P4 y un 23.9\,\% en P6. El ciclo mínimo
-recibe FALLA en P1, P2 y P6, con mucho más retraso que el fijo
+El ciclo mínimo recibe FALLA en P1, P2 y P6, con mucho más retraso que el fijo
 ($+390.3$, $+167.7$ y $+236.7$\,\%), mejora apenas al fijo en P3
 ($-0.5$\,\%) y empata en P4 y P5.
 % fuente: plan2/robustez_veredicto.csv (delta_act de ippo_vecinos: -5.7, -10.1, -7.6, -3.5, -16.1 y -23.9; fila
@@ -237,12 +233,13 @@ lo mide el segundo estudio (Sección~\ref{sec:segundo-estudio}).
 \subsection*{Barrido de demanda en el corredor, sin reentrenar}
 
 Este barrido mide hasta dónde se sostiene una política fuera de la
-demanda con que se entrenó (Sección~\ref{sec:analisis-complementarios}).
-En la red de P1, con toda la demanda multiplicada por un factor de 0.5 a
-2.25 o con un perfil que cambia dentro de la hora, se evalúan sin
-reentrenar las versiones evaluadas de IPPO con mensajes de P1 y de P2,
-el actuado y el plan fijo de P1 sin volver a ajustar. La referencia de
-cada nivel es un fijo ajustado desde 10~s para ese nivel. La
+demanda con que se entrenó (Sección~\ref{sec:analisis-complementarios};
+ejecución en el apartado~\ref{sec:p6-demanda}). En la red de P1, con
+toda la demanda multiplicada por un factor de 0.5 a 2.25 o con un
+perfil que cambia dentro de la hora, se evalúan sin reentrenar las
+versiones evaluadas de IPPO con mensajes de P1 y de P2, el actuado y el
+plan fijo de P1 sin volver a ajustar, frente a un fijo ajustado desde
+10~s para cada nivel. La
 Tabla~\ref{tab:plan2-demanda} y la Figura~\ref{fig:plan2-demanda} dan el
 cambio con las dos métricas; en ellas el retraso aparece con su nombre
 en SUMO, \textit{timeLoss}.

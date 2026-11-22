@@ -1,16 +1,18 @@
-% Generado por lima/corredor/tablas_corredor.py a partir de lima/corredor/. No editar a mano.
+% Generado por corredor_estudio2/demo_rl/lima/corredor/tablas_corredor.py a partir de esa carpeta (estudio 2 del corredor). No editar a mano.
 % Corredor de la Av. Benavides: que aportan los mensajes entre cruces vecinos. Retraso total (s/veh) en las
 % dos tandas sin mensajes y con ellos, y cambio con mensajes frente a sin ellos (%).
 % fuente: salidas/eval_t*_*.csv de cada nivel (entrenamientos citados; el brazo *_cortado es el modelo
-% completo evaluado con estudio_corredor.py evaluar --perdida 1); IC95 y p: publicada, vecinos_corregido_s42 frente a local_sinmsg_s2042: -0.45 [-0.72, -0.16] p=0.00053 y -0.42 [-0.68, -0.16] p=0.0014 | publicada, vecinos_completo_s42 frente a vecinos_completo_s42_cortado: -1.53 [-1.74, -1.31] p=6.4e-16 y -1.39 [-1.61, -1.17] p=1.2e-15 | alta, vecinos_corregido_s4042 frente a local_sinmsg_s2042: -0.94 [-1.49, -0.34] p=5.7e-07 y -0.98 [-1.52, -0.39] p=2.3e-06 | alta, vecinos_completo_s2042 frente a vecinos_completo_s2042_cortado: -2.52 [-3.03, -1.91] p=1.4e-14 y -2.57 [-2.92, -2.22] p=8.8e-16
+% completo evaluado con estudio_corredor.py evaluar --perdida 1); IC95 y p: publicada, vecinos_corregido_s42 frente a local_sinmsg_s4042: -4.76 [-5.05, -4.47] p=3.9e-18 y -4.77 [-5.08, -4.47] p=3.9e-18 | publicada, vecinos_completo_s42 frente a vecinos_completo_s42_cortado: -4.43 [-4.71, -4.16] p=3.9e-18 y -4.24 [-4.51, -3.96] p=3.9e-18 | alta, vecinos_corregido_s42 frente a local_sinmsg_s2042: -12.44 [-13.16, -11.71] p=3.9e-18 y -13.18 [-14.25, -12.03] p=3.1e-17 | alta, vecinos_completo_s4042 frente a vecinos_completo_s4042_cortado: -8.45 [-9.04, -7.87] p=3.9e-18 y -7.89 [-8.40, -7.39] p=3.9e-18
 \begin{tabular}{>{\raggedright\arraybackslash}p{1.6cm}>{\raggedright\arraybackslash}p{5.2cm}>{\raggedright\arraybackslash}p{2.2cm}>{\raggedright\arraybackslash}p{2.2cm}>{\raggedright\arraybackslash}p{2.6cm}}
 \toprule
 Demanda & Comparación & Sin mensajes, tandas 1 y 2 (s/veh) & Con mensajes, tandas 1 y 2 (s/veh) & Cambio con mensajes, tandas 1 y 2 (\%) \\
 \midrule
-Publicada & Entrenar sin mensajes o con ellos (IPPO con mensajes corregido) & 35.4 y 35.3 & 35.3 y 35.2 & $-0.4$ y $-0.4$ \\
- & Cortar los mensajes al modelo completo ya entrenado & 32.4 y 32.4 & 31.9 y 31.9 & $-1.5$ y $-1.4$ \\
+Publicada & Entrenar sin mensajes o con ellos (IPPO con mensajes corregido) & 45.3 y 45.2 & 43.1 y 43.1 & $-4.8$ y $-4.8$ \\
+\cmidrule[0.25pt]{2-5}
+ & Cortar los mensajes al modelo completo ya entrenado & 41.6 y 41.4 & 39.7 y 39.7 & $-4.4$ y $-4.2$ \\
 \midrule
-Alta & Entrenar sin mensajes o con ellos (IPPO con mensajes corregido) & 47.2 y 47.0 & 46.7 y 46.5 & $-0.9$ y $-1.0$ \\
- & Cortar los mensajes al modelo completo ya entrenado & 43.6 y 43.4 & 42.5 y 42.3 & $-2.5$ y $-2.6$ \\
+Alta & Entrenar sin mensajes o con ellos (IPPO con mensajes corregido) & 77.4 y 77.8 & 67.7 y 67.5 & $-12.4$ y $-13.2$ \\
+\cmidrule[0.25pt]{2-5}
+ & Cortar los mensajes al modelo completo ya entrenado & 61.2 y 60.7 & 56.0 y 55.9 & $-8.4$ y $-7.9$ \\
 \bottomrule
 \end{tabular}

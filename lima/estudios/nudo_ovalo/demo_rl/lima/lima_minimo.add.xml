@@ -1,0 +1,12 @@
+<additional>
+    <!-- Ciclo minimo del caso Lima: cada verde en su minimo -->
+    <tlLogic id="semaforo_S1" type="static" programID="minimo" offset="0">
+        <phase duration="10" state="GGGooGGoogGGGGggooGGGggggrrrrrrrGGGrrGGrrgggGGGGooGGGGggg"/>  <!-- Reducto de frente, los dos sentidos -->
+        <phase duration="3" state="GGGooGGoogGGGGggooGGGggggrrrrrrryyyrryyrrgggGGGGooGGGGggg"/>  <!-- transicion -->
+        <phase duration="10" state="GooggGoggoooooGGggoooGGGGrrrrrrrrrrGGrrGGGGGooooggooooGGG"/>  <!-- Giros a la izquierda de Reducto -->
+        <phase duration="3" state="GooggGoggoooooGGggoooGGGGrrrrrrrrrryyrryyGGGooooggooooGGG"/>  <!-- transicion -->
+        <phase duration="34" state="oooOOooOOoooooooOOooooooorrrrrrrrrrrrrrrroooooooOOooooooo"/>  <!-- todo en rojo -->
+        <phase duration="10" state="GGGooGGoogGGGGogooGGGooooGGGGGGGrrrrrrrrroooGGGGooGGGGoog"/>  <!-- 28 de Julio desde el puente y Balboa -->
+        <phase duration="3" state="GGGooGGoogGGGGogooGGGooooyyyyyyyrrrrrrrrroooGGGGooGGGGoog"/>  <!-- transicion -->
+    </tlLogic>
+</additional>

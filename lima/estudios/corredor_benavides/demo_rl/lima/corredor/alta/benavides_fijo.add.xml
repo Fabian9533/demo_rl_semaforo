@@ -1,0 +1,39 @@
+<additional>
+    <!-- Fijo ajustado al segundo del corredor (estudio_corredor.py): ciclo 84 s, transversales [24, 33, 29, 27, 27, 31], desfases [0, 1, 0, 41, 43, 4] -->
+    <tlLogic id="semaforo_C1" type="static" programID="fijo_ajustado" offset="0">
+        <phase duration="54" state="rGGGrrrrrGGG"/>
+        <phase duration="3" state="ryyyrrrrryyy"/>
+        <phase duration="24" state="GrrrGGGGGrrr"/>
+        <phase duration="3" state="yrrryyyyyrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C2" type="static" programID="fijo_ajustado" offset="1">
+        <phase duration="45" state="rrrrGGGrGGGG"/>
+        <phase duration="3" state="rrrryyyryyyy"/>
+        <phase duration="33" state="GGGGrrrGrrrr"/>
+        <phase duration="3" state="yyyyrrryrrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C3" type="static" programID="fijo_ajustado" offset="0">
+        <phase duration="49" state="rGGGGrrrrGGG"/>
+        <phase duration="3" state="ryyyyrrrryyy"/>
+        <phase duration="29" state="GrrrrGGGGrrr"/>
+        <phase duration="3" state="yrrrryyyyrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C4" type="static" programID="fijo_ajustado" offset="41">
+        <phase duration="51" state="rrrGGGGrrrGGG"/>
+        <phase duration="3" state="rrryyyyrrryyy"/>
+        <phase duration="27" state="GGGrrrrGGGrrr"/>
+        <phase duration="3" state="yyyrrrryyyrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C5" type="static" programID="fijo_ajustado" offset="43">
+        <phase duration="51" state="rrGGGrGG"/>
+        <phase duration="3" state="rryyyryy"/>
+        <phase duration="27" state="GGrrrGrr"/>
+        <phase duration="3" state="yyrrryrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C6" type="static" programID="fijo_ajustado" offset="4">
+        <phase duration="47" state="rrrGGGrrrGGG"/>
+        <phase duration="3" state="rrryyyrrryyy"/>
+        <phase duration="31" state="GGGrrrGGGrrr"/>
+        <phase duration="3" state="yyyrrryyyrrr"/>
+    </tlLogic>
+</additional>

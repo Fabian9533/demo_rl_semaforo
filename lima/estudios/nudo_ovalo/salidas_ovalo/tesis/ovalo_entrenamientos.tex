@@ -1,0 +1,25 @@
+% Generado por tablas_ovalo.py (nudo_ovalo_estudio2) a partir de demo_rl/lima/ y demo_rl/lima/alta/. No editar a mano.
+% Nudo en el ovalo: los tres entrenamientos de cada modelo en cada nivel de demanda. Episodio de la version
+% evaluada (menor retraso total en la validacion, 21001-21008), ese retraso, retraso total en las dos tandas,
+% cambio frente al fijo ajustado y si el entrenamiento se estabilizo (regla de la tesis). El citado es el
+% de validacion mediana. fuente: politica_lima_vecinos_<etiqueta>_s<base>.json, salidas/eval_t*_*.csv y la
+% columna val_total de resultados_lima_ippo_vecinos_<etiqueta>_s<base>.csv; publicada libre 42: plateau -2.47 %, estabilidad 1.91 %; publicada libre 2042: plateau -0.55 %, estabilidad 2.48 %; publicada libre 4042: plateau -2.31 %, estabilidad 0.00 %; publicada completo 42: plateau -0.18 %, estabilidad 0.24 %; publicada completo 2042: plateau -5.13 %, estabilidad 0.00 %; publicada completo 4042: plateau -0.56 %, estabilidad 0.01 %; alta libre 42: plateau -7.63 %, estabilidad 0.00 %; alta libre 2042: plateau +7.07 %, estabilidad 1.54 %; alta libre 4042: plateau -4.27 %, estabilidad 0.00 %; alta completo 42: plateau -2.25 %, estabilidad 0.12 %; alta completo 2042: plateau +1.53 %, estabilidad 2.27 %; alta completo 4042: plateau +2.20 %, estabilidad 3.69 %
+\begin{tabular}{>{\raggedright\arraybackslash}p{1.4cm}>{\raggedright\arraybackslash}p{2.0cm}>{\raggedright\arraybackslash}p{1.5cm}>{\raggedright\arraybackslash}p{1.5cm}>{\raggedright\arraybackslash}p{1.7cm}>{\raggedright\arraybackslash}p{2.0cm}>{\raggedright\arraybackslash}p{1.9cm}>{\raggedright\arraybackslash}p{1.5cm}}
+\toprule
+Demanda & Modelo & Base & Episodio de la versión evaluada & Retraso en la validación (s/veh) & Retraso en la evaluación, tandas 1 y 2 (s/veh) & Cambio frente al fijo ajustado (\%) & ¿Se estabilizó? \\
+\midrule
+Publicada & Modelo de orden libre & 42 (citado) & 160 & 80.8 & 81.2 y 81.4 & $-3.4$ y $-3.6$ & sí \\
+ & Modelo de orden libre & 2042 & 80 & 79.3 & 79.4 y 79.2 & $-5.7$ y $-6.2$ & sí \\
+ & Modelo de orden libre & 4042 & 240 & 82.2 & 82.9 y 83.8 & $-1.4$ y $-0.8$ & sí \\
+ & Modelo de orden fijo & 42 & 40 & 76.2 & 75.7 y 75.9 & $-10.0$ y $-10.1$ & sí \\
+ & Modelo de orden fijo & 2042 (citado) & 380 & 76.6 & 76.4 y 76.6 & $-9.2$ y $-9.4$ & no \\
+ & Modelo de orden fijo & 4042 & 300 & 76.6 & 76.9 y 77.2 & $-8.6$ y $-8.6$ & sí \\
+\midrule
+Alta & Modelo de orden libre & 42 & 400 & 186.0 & 195.7 y 189.2 & $+46.6$ y $+48.3$ & no \\
+ & Modelo de orden libre & 2042 (citado) & 280 & 189.2 & 206.9 y 197.8 & $+55.0$ y $+55.1$ & no \\
+ & Modelo de orden libre & 4042 & 380 & 203.0 & 214.4 y 205.1 & $+60.6$ y $+60.8$ & sí \\
+ & Modelo de orden fijo & 42 & 360 & 128.7 & 133.5 y 129.1 & $0.0$ y $+1.2$ & sí \\
+ & Modelo de orden fijo & 2042 & 80 & 126.6 & 135.3 y 132.0 & $+1.4$ y $+3.5$ & sí \\
+ & Modelo de orden fijo & 4042 (citado) & 120 & 128.0 & 136.8 y 131.6 & $+2.5$ y $+3.2$ & sí \\
+\bottomrule
+\end{tabular}

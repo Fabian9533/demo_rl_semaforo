@@ -32,11 +32,17 @@
 
 \frontmatter
 
-\department{Departamento Académico de Ingeniería}
-\degree{Bachiller en Ingeniería}
+%% Asesoria del 20.11.2026: la portada imprime "CARRERA DE \deptname" y el campo traia "Departamento Académico de
+%% Ingeniería"; Fabian pidio su carrera. Va en mayusculas, como el resto de esa linea.
+\department{CIENCIA DE LA COMPUTACIÓN}
+%% Asesoria del 20.11.2026: el "\ " del final evita que la portada imprima "Ingenieríaen": la plantilla escribe
+%% "\degreename  en \majorname" y TeX se come los espacios que siguen a \degreename (tesisutec.cls no se toca).
+\degree{Bachiller en Ingeniería\ }
 \major{Ciencia de la Computación}
 
-\title{Optimización del tráfico urbano en Lima con semáforos inteligentes mediante Aprendizaje por Refuerzo (RL) y simulación en SUMO}
+%% Asesoria del 20.11.2026: el profesor pidio anteponer "Modelos de" para que el titulo diga que el trabajo es
+%% computacional.
+\title{Modelos de optimización del tráfico urbano en Lima con semáforos inteligentes mediante Aprendizaje por Refuerzo (RL) y simulación en SUMO}
 
 \author{Fabian Martín Alvarado Vargas \orcid{0000-0000-0000-0000} \\ Neftalí Calixto Rojas \orcid{0000-0000-0000-0000}}
 \supervisor{José Antonio Fiestas Iquira \orcid{0000-0000-0000-0000}}

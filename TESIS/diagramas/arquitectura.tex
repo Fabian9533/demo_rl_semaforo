@@ -1,6 +1,9 @@
 % arquitectura.tex - Arquitectura modular del metodo (fig:arquitectura, Cap. III, sec:vision-general).
 % Especificacion: seccion 3.1. Se compila con  python construir.py arquitectura  y queda en
 % ../images/diag_arquitectura.pdf (15 cm de ancho, escala 1).
+% 20.11.2026: se agrega abajo el modulo "Validacion con la realidad (casos de Lima)" (pedido del
+% asesor): recibe de U3 y entrega a Resultados; para hacerle lugar solo baja la leyenda (13.0 ->
+% 14.4 cm de alto). Las demas cajas y las etiquetas I1 a I8 no cambian.
 \documentclass[10pt,border=0pt]{standalone}
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
@@ -10,7 +13,7 @@
 \begin{document}
 \begin{tikzpicture}[diagrama]
 \unidad{ext}
-\useasboundingbox (0,0) rectangle (15,-13.0);
+\useasboundingbox (0,0) rectangle (15,-14.40);
 
 % ================================================================ casos de Lima (OSM)
 % inner ysep 1.5pt: el pie queda en y -0.45, a 1 mm del marco de U1
@@ -47,7 +50,7 @@
 \node[proceso=u3, text width=4.65cm, anchor=north west] (con) at (0.37,-8.90)
   {\nodo{\texttt{consolidar.py}}{media e IC95\,\%; $\Delta$ frente\\ al fijo y al actuado}};
 \node[proceso=u3, text width=4.65cm, anchor=north west] (ver) at (0.37,-10.371)
-  {\nodo{\texttt{veredicto.py}}{versión evaluada, convergencia\\ y regla}};
+  {\nodo{\texttt{veredicto.py}}{versión evaluada, estabilidad\\ y regla}};
 
 % ================================================================ barra de los aprendices
 % draw=extb, fill=extf (ajuste local, reportado): el mismo gris que los puertos puerto=ext de
@@ -85,12 +88,26 @@
 \node[iniciofin=ext, text width=5.9cm] (res) at (11.495,-11.136)
   {\nodo{Resultados}{Cap.~V y Anexos A, D y H:\\ veredicto por caso y modelo}};
 
+% ================================================================ validacion con la realidad
+% Modulo adicional, en gris (ext) porque no es una unidad: en los casos de Lima se comparan, con
+% las mismas semillas y el mismo retraso total de U3, el plan que opera hoy (medido en el sitio;
+% en el corredor, un plan tipico), el fijo ajustado al segundo y el modelo. El veredicto se
+% decide frente al fijo ajustado al segundo; frente al plan actual se informa el cambio con su
+% IC95 (va en el pie). Banda a todo el ancho, como U1: titulo en dos lineas a la izquierda (mide
+% 4.39 cm) y el nodo a la derecha; la flecha que baja de U3 (x 4.55) entra por el hueco entre
+% los dos. Su borde superior queda 0.32 cm bajo Resultados (pie en y -11.70).
+\node[titulo=ext] (tVal) at (0.06,-12.04) {Validación con la realidad\\ (casos de Lima)};
+\node[proceso=ext, text width=10.05cm, anchor=north west] (valid) at (4.62,-12.10)
+  {\textbf{Tres controles}: plan actual o típico · fijo ajustado al segundo · modelo;\\
+   mismas semillas y retraso total};
+
 % ================================================================ fondos de las unidades
 \begin{scope}[on background layer]
   \node[grupo=u1, fit={(0.02,-0.58) (14.98,-2.76)}] {};
   \node[grupo=u3, fit={(0.02,-3.48) (5.39,-11.56)}] {};
   \node[grupo=u2, fit={(8.06,-3.48) (14.98,-6.98)}] {};
   \node[grupo=u4, fit={(8.06,-7.28) (14.98,-10.36)}] {};
+  \node[grupo=ext, fit={(0.02,-12.02) (14.98,-12.96)}] (gVal) {};
 \end{scope}
 
 % ================================================================ flechas
@@ -122,6 +139,12 @@
 % I8: veredicto.py -> Resultados
 \draw[interfaz] (ver.east |- res.west) -- (res.west);
 \node[etiqueta sin fondo, anchor=north] at (6.55,-11.176) {\itfn{8}};
+% validacion con la realidad: de U3 (bajo veredicto.py) al modulo y del modulo a Resultados.
+% Flujo continuo y sin numero: no es una interfaz del catalogo I1-I8. La que entra termina en el
+% borde del modulo (x 4.55, en el hueco entre el titulo y el nodo; si llegara al nodo, la punta
+% quedaria montada sobre el borde de la banda, 0.8 mm mas arriba); la que sale parte del nodo.
+\draw[flujo] (4.55,0 |- ver.south) -- (4.55,0 |- gVal.north);
+\draw[flujo] (res.south |- valid.north) -- (res.south);
 % flujos internos de U3 (sin numero)
 \draw[flujo] (sumo.south -| 1.5,0) -- (med.north -| 1.5,0);
 \draw[flujo] (med.south -| 1.5,0) -- node[etiqueta sin fondo, right=1mm] {una fila por semilla} (eva.north -| 1.5,0);
@@ -136,8 +159,9 @@
 \node[etiqueta sin fondo, anchor=east] at (14.37,-6.44) {\itf{5} (DQN)};
 
 % ================================================================ leyenda
-\draw[black!30, line width=0.4pt] (0,-11.83) -- (15,-11.83);
-\leyenda{(0.1,-12.17)}{proceso, archivo, iniciofin, entorno, semillas}
-\leyenda{(0.1,-12.77)}{flujo, interfaz, repeticion}
+% (bajo el modulo de validacion: raya 0.27 cm bajo su borde, como antes bajo U3)
+\draw[black!30, line width=0.4pt] (0,-13.23) -- (15,-13.23);
+\leyenda{(0.1,-13.57)}{proceso, archivo, iniciofin, entorno, semillas}
+\leyenda{(0.1,-14.17)}{flujo, interfaz, repeticion}
 \end{tikzpicture}
 \end{document}

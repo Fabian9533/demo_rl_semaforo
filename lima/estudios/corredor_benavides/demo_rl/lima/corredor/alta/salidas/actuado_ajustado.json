@@ -1,0 +1,253 @@
+{
+ "ganador": {
+  "tipo": "actuado",
+  "max-gap": 1.25,
+  "detector-gap": 2.0,
+  "jam-threshold": 30,
+  "esquema": "60",
+  "coordinado": "fin fijo",
+  "retraso_total_10": 62.221,
+  "retraso_total_30": 61.04033333333333,
+  "maximos": [
+   [
+    60,
+    60
+   ],
+   [
+    60,
+    60
+   ],
+   [
+    60,
+    60
+   ],
+   [
+    60,
+    60
+   ],
+   [
+    60,
+    60
+   ],
+   [
+    60,
+    60
+   ]
+  ]
+ },
+ "actuado_por_defecto_30": 134.86666666666667,
+ "procedimiento": "pasos del segundo estudio en cadena (hueco, detector, umbral de atasco y verde maximo), variante por retraso y los tres mejores con 30 semillas; con las dos variantes coordinadas del segundo estudio sobre el fijo ajustado",
+ "fijo": {
+  "ciclo": 84,
+  "transversal": [
+   24,
+   33,
+   29,
+   27,
+   27,
+   31
+  ],
+  "desfases": [
+   0,
+   1,
+   0,
+   41,
+   43,
+   4
+  ]
+ },
+ "candidatos": [
+  {
+   "tipo": "actuado",
+   "max-gap": 1.25,
+   "detector-gap": 2.0,
+   "jam-threshold": 30,
+   "esquema": "60",
+   "coordinado": "fin fijo",
+   "retraso_total_10": 62.221,
+   "retraso_total_30": 61.04033333333333
+  },
+  {
+   "tipo": "actuado",
+   "max-gap": 1.25,
+   "detector-gap": 2.0,
+   "jam-threshold": 30,
+   "esquema": "60",
+   "coordinado": "avenida",
+   "retraso_total_10": 67.629,
+   "retraso_total_30": 65.58733333333333
+  },
+  {
+   "tipo": "actuado",
+   "max-gap": 1.25,
+   "detector-gap": 2.0,
+   "jam-threshold": 30,
+   "esquema": "60",
+   "retraso_total_10": 70.117,
+   "retraso_total_30": 68.81266666666667
+  },
+  {
+   "tipo": "actuado",
+   "max-gap": 1.25,
+   "detector-gap": 2.0,
+   "jam-threshold": 30,
+   "esquema": "doble del fijo",
+   "retraso_total_10": 70.117
+  },
+  {
+   "tipo": "actuado",
+   "max-gap": 1.25,
+   "detector-gap": 2.0,
+   "jam-threshold": -1,
+   "esquema": "60",
+   "retraso_total_10": 70.303
+  },
+  {
+   "tipo": "actuado",
+   "max-gap": 1.25,
+   "detector-gap": 2.0,
+   "jam-threshold": 10,
+   "esquema": "60",
+   "retraso_total_10": 70.506
+  },
+  {
+   "tipo": "actuado",
+   "max-gap": 1.5,
+   "detector-gap": 2.0,
+   "jam-threshold": -1,
+   "esquema": "60",
+   "retraso_total_10": 71.002
+  },
+  {
+   "tipo": "actuado",
+   "max-gap": 1.25,
+   "detector-gap": 4.0,
+   "jam-threshold": -1,
+   "esquema": "60",
+   "retraso_total_10": 75.536
+  },
+  {
+   "tipo": "actuado",
+   "max-gap": 1.25,
+   "detector-gap": 3.0,
+   "jam-threshold": -1,
+   "esquema": "60",
+   "retraso_total_10": 75.643
+  },
+  {
+   "tipo": "actuado",
+   "max-gap": 1.0,
+   "detector-gap": 2.0,
+   "jam-threshold": -1,
+   "esquema": "60",
+   "retraso_total_10": 76.017
+  },
+  {
+   "tipo": "retraso",
+   "detectorRange": 200,
+   "minTimeLoss": 3,
+   "esquema": "60",
+   "retraso_total_10": 76.402
+  },
+  {
+   "tipo": "actuado",
+   "max-gap": 2.0,
+   "detector-gap": 2.0,
+   "jam-threshold": -1,
+   "esquema": "60",
+   "retraso_total_10": 77.113
+  },
+  {
+   "tipo": "actuado",
+   "max-gap": 1.25,
+   "detector-gap": 1.0,
+   "jam-threshold": -1,
+   "esquema": "60",
+   "retraso_total_10": 77.166
+  },
+  {
+   "tipo": "actuado",
+   "max-gap": 1.25,
+   "detector-gap": 2.0,
+   "jam-threshold": 30,
+   "esquema": "45/35",
+   "retraso_total_10": 77.827
+  },
+  {
+   "tipo": "retraso",
+   "detectorRange": 100,
+   "minTimeLoss": 1,
+   "esquema": "60",
+   "retraso_total_10": 83.393
+  },
+  {
+   "tipo": "actuado",
+   "max-gap": 1.25,
+   "detector-gap": 2.0,
+   "jam-threshold": 30,
+   "esquema": "35/25",
+   "retraso_total_10": 84.735
+  },
+  {
+   "tipo": "retraso",
+   "detectorRange": 100,
+   "minTimeLoss": 3,
+   "esquema": "60",
+   "retraso_total_10": 92.395
+  },
+  {
+   "tipo": "actuado",
+   "max-gap": 1.25,
+   "detector-gap": 2.0,
+   "jam-threshold": 30,
+   "esquema": "30/20",
+   "retraso_total_10": 96.11
+  },
+  {
+   "tipo": "actuado",
+   "max-gap": 0.75,
+   "detector-gap": 2.0,
+   "jam-threshold": -1,
+   "esquema": "60",
+   "retraso_total_10": 96.923
+  },
+  {
+   "tipo": "retraso",
+   "detectorRange": 200,
+   "minTimeLoss": 1,
+   "esquema": "60",
+   "retraso_total_10": 100.884
+  },
+  {
+   "tipo": "retraso",
+   "detectorRange": 50,
+   "minTimeLoss": 1,
+   "esquema": "60",
+   "retraso_total_10": 120.068
+  },
+  {
+   "tipo": "actuado",
+   "max-gap": 3.0,
+   "detector-gap": 2.0,
+   "jam-threshold": -1,
+   "esquema": "60",
+   "retraso_total_10": 141.498,
+   "retraso_total_30": 134.86666666666667
+  },
+  {
+   "tipo": "actuado",
+   "max-gap": 4.0,
+   "detector-gap": 2.0,
+   "jam-threshold": -1,
+   "esquema": "60",
+   "retraso_total_10": 165.095
+  },
+  {
+   "tipo": "retraso",
+   "detectorRange": 50,
+   "minTimeLoss": 3,
+   "esquema": "60",
+   "retraso_total_10": 207.653
+  }
+ ]
+}

@@ -1,0 +1,54 @@
+Demanda publicada, semilla 21001, segundos 1800 a 2160 del episodio
+Modelo de orden fijo: 81 verdes en la hora; pasos de un estado a otro: Reducto de frente -> Giros de Reducto 27, Giros de Reducto -> 28 de Julio y Balboa 27, 28 de Julio y Balboa -> Reducto de frente 26
+   verde de Reducto de frente: 27 veces, medio 33.0 s
+   verde de Giros de Reducto: 27 veces, medio 15.3 s
+   verde de 28 de Julio y Balboa: 27 veces, medio 41.0 s
+   completo  1761- 1803 ( 42 s) 28 de Julio y Balboa [cortado por la ventana]
+   completo  1803- 1806 (  3 s) ambar
+   completo  1806- 1832 ( 26 s) Reducto de frente
+   completo  1832- 1835 (  3 s) ambar
+   completo  1835- 1855 ( 20 s) Giros de Reducto
+   completo  1855- 1858 (  3 s) ambar
+   completo  1858- 1892 ( 34 s) todo en rojo
+   completo  1892- 1920 ( 28 s) 28 de Julio y Balboa
+   completo  1920- 1923 (  3 s) ambar
+   completo  1923- 1949 ( 26 s) Reducto de frente
+   completo  1949- 1952 (  3 s) ambar
+   completo  1952- 1966 ( 14 s) Giros de Reducto
+   completo  1966- 1969 (  3 s) ambar
+   completo  1969- 2003 ( 34 s) todo en rojo
+   completo  2003- 2033 ( 30 s) 28 de Julio y Balboa
+   completo  2033- 2036 (  3 s) ambar
+   completo  2036- 2074 ( 38 s) Reducto de frente
+   completo  2074- 2077 (  3 s) ambar
+   completo  2077- 2087 ( 10 s) Giros de Reducto
+   completo  2087- 2090 (  3 s) ambar
+   completo  2090- 2124 ( 34 s) todo en rojo
+   completo  2124- 2168 ( 44 s) 28 de Julio y Balboa [cortado por la ventana]
+Modelo de orden libre: 90 verdes en la hora; pasos de un estado a otro: Reducto de frente -> Giros de Reducto 22, Reducto de frente -> 28 de Julio y Balboa 21 (fuera del orden del plan), Giros de Reducto -> Reducto de frente 21 (fuera del orden del plan), Giros de Reducto -> 28 de Julio y Balboa 2, 28 de Julio y Balboa -> Reducto de frente 22, 28 de Julio y Balboa -> Giros de Reducto 1 (fuera del orden del plan)
+   verde de Reducto de frente: 44 veces, medio 21.0 s
+   verde de Giros de Reducto: 23 veces, medio 18.5 s
+   verde de 28 de Julio y Balboa: 23 veces, medio 49.6 s
+   libre     1780- 1812 ( 32 s) Reducto de frente [cortado por la ventana]
+   libre     1812- 1815 (  3 s) ambar
+   libre     1815- 1841 ( 26 s) Giros de Reducto
+   libre     1841- 1844 (  3 s) ambar
+   libre     1844- 1854 ( 10 s) Reducto de frente
+   libre     1854- 1857 (  3 s) ambar
+   libre     1857- 1891 ( 34 s) todo en rojo
+   libre     1891- 1941 ( 50 s) 28 de Julio y Balboa
+   libre     1941- 1944 (  3 s) ambar
+   libre     1944- 1970 ( 26 s) Reducto de frente
+   libre     1970- 1973 (  3 s) ambar
+   libre     1973- 1989 ( 16 s) Giros de Reducto
+   libre     1989- 1992 (  3 s) ambar
+   libre     1992- 2002 ( 10 s) Reducto de frente
+   libre     2002- 2005 (  3 s) ambar
+   libre     2005- 2039 ( 34 s) todo en rojo
+   libre     2039- 2081 ( 42 s) 28 de Julio y Balboa
+   libre     2081- 2084 (  3 s) ambar
+   libre     2084- 2110 ( 26 s) Reducto de frente
+   libre     2110- 2113 (  3 s) ambar
+   libre     2113- 2125 ( 12 s) Giros de Reducto
+   libre     2125- 2128 (  3 s) ambar
+   libre     2128- 2162 ( 34 s) todo en rojo [cortado por la ventana]

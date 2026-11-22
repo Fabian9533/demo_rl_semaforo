@@ -1,0 +1,39 @@
+<additional>
+    <!-- Plan tipico SUPUESTO del corredor (corredor.py): ciclo 140 s, transversal 43 s, sin desfases -->
+    <tlLogic id="semaforo_C1" type="static" programID="tipico" offset="0">
+        <phase duration="91" state="rGGGrrrrrGGG"/>
+        <phase duration="3" state="ryyyrrrrryyy"/>
+        <phase duration="43" state="GrrrGGGGGrrr"/>
+        <phase duration="3" state="yrrryyyyyrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C2" type="static" programID="tipico" offset="0">
+        <phase duration="91" state="rrrrGGGrGGGG"/>
+        <phase duration="3" state="rrrryyyryyyy"/>
+        <phase duration="43" state="GGGGrrrGrrrr"/>
+        <phase duration="3" state="yyyyrrryrrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C3" type="static" programID="tipico" offset="0">
+        <phase duration="91" state="rGGGGrrrrGGG"/>
+        <phase duration="3" state="ryyyyrrrryyy"/>
+        <phase duration="43" state="GrrrrGGGGrrr"/>
+        <phase duration="3" state="yrrrryyyyrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C4" type="static" programID="tipico" offset="0">
+        <phase duration="91" state="rrrGGGGrrrGGG"/>
+        <phase duration="3" state="rrryyyyrrryyy"/>
+        <phase duration="43" state="GGGrrrrGGGrrr"/>
+        <phase duration="3" state="yyyrrrryyyrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C5" type="static" programID="tipico" offset="0">
+        <phase duration="91" state="rrGGGrGG"/>
+        <phase duration="3" state="rryyyryy"/>
+        <phase duration="43" state="GGrrrGrr"/>
+        <phase duration="3" state="yyrrryrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C6" type="static" programID="tipico" offset="0">
+        <phase duration="91" state="rrrGGGrrrGGG"/>
+        <phase duration="3" state="rrryyyrrryyy"/>
+        <phase duration="43" state="GGGrrrGGGrrr"/>
+        <phase duration="3" state="yyyrrryyyrrr"/>
+    </tlLogic>
+</additional>

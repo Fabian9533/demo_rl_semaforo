@@ -1,0 +1,62 @@
+<routes>
+    <!-- Demanda del caso Lima. Fuente: total publicado (4271 veh/h) repartido por carriles y verde del plan actual; giros supuestos; reparto entre entradas cambiado (RN=1.2,RS=1.2,J=0.8,B=0.8) con el mismo total; factor 1.0; vehiculos: mezcla de Lima del segundo estudio (JICA 2013 y flota ATU 2021). Generado por demanda.py -->
+    <vTypeDistribution id="auto">
+        <vType id="lima_auto" accel="2.6" decel="4.5" length="5" sigma="0.5" minGap="2.5" maxSpeed="13.89"  probability="0.789283"/>
+        <vType id="lima_moto" vClass="motorcycle" accel="6" decel="10" length="2.2" sigma="0.5" minGap="2.5" maxSpeed="13.89"  probability="0.043643"/>
+        <vType id="lima_combi" vClass="bus" accel="2" decel="4.5" length="6" sigma="0.5" minGap="2.5" maxSpeed="13.89"  probability="0.048078"/>
+        <vType id="lima_micro" vClass="bus" accel="1.5" decel="4" length="8" sigma="0.5" minGap="2.5" maxSpeed="13.89"  probability="0.056413"/>
+        <vType id="lima_bus" vClass="bus" accel="1.2" decel="4" length="12" sigma="0.5" minGap="2.5" maxSpeed="13.89"  probability="0.062584"/>
+    </vTypeDistribution>
+    <flow id="p1_B_J" type="auto" from="B_S1" to="S1_J" begin="0" end="900" period="exp(0.157435)" departLane="best"/>
+    <flow id="p1_B_L" type="auto" from="B_S1" to="S1_L" begin="0" end="900" period="exp(0.011245)" departLane="best"/>
+    <flow id="p1_B_RN" type="auto" from="B_S1" to="S1_RN" begin="0" end="900" period="exp(0.011245)" departLane="best"/>
+    <flow id="p1_B_RS" type="auto" from="B_S1" to="S1_RS" begin="0" end="900" period="exp(0.044982)" departLane="best"/>
+    <flow id="p1_J_L" type="auto" from="J_S1" to="S1_L" begin="0" end="900" period="exp(0.160247)" departLane="best"/>
+    <flow id="p1_J_RN" type="auto" from="J_S1" to="S1_RN" begin="0" end="900" period="exp(0.032049)" departLane="best"/>
+    <flow id="p1_J_RS" type="auto" from="J_S1" to="S1_RS" begin="0" end="900" period="exp(0.021366)" departLane="best"/>
+    <flow id="p1_RN_J" type="auto" from="RN_S1" to="S1_J" begin="0" end="900" period="exp(0.101209)" departLane="best"/>
+    <flow id="p1_RN_L" type="auto" from="RN_S1" to="S1_L" begin="0" end="900" period="exp(0.032049)" departLane="best"/>
+    <flow id="p1_RN_RS" type="auto" from="RN_S1" to="S1_RS" begin="0" end="900" period="exp(0.288444)" departLane="best"/>
+    <flow id="p1_RS_J" type="auto" from="RS_S1" to="S1_J" begin="0" end="900" period="exp(0.044982)" departLane="best"/>
+    <flow id="p1_RS_L" type="auto" from="RS_S1" to="S1_L" begin="0" end="900" period="exp(0.101209)" departLane="best"/>
+    <flow id="p1_RS_RN" type="auto" from="RS_S1" to="S1_RN" begin="0" end="900" period="exp(0.179926)" departLane="best"/>
+    <flow id="p2_B_J" type="auto" from="B_S1" to="S1_J" begin="900" end="1800" period="exp(0.157435)" departLane="best"/>
+    <flow id="p2_B_L" type="auto" from="B_S1" to="S1_L" begin="900" end="1800" period="exp(0.011245)" departLane="best"/>
+    <flow id="p2_B_RN" type="auto" from="B_S1" to="S1_RN" begin="900" end="1800" period="exp(0.011245)" departLane="best"/>
+    <flow id="p2_B_RS" type="auto" from="B_S1" to="S1_RS" begin="900" end="1800" period="exp(0.044982)" departLane="best"/>
+    <flow id="p2_J_L" type="auto" from="J_S1" to="S1_L" begin="900" end="1800" period="exp(0.160247)" departLane="best"/>
+    <flow id="p2_J_RN" type="auto" from="J_S1" to="S1_RN" begin="900" end="1800" period="exp(0.032049)" departLane="best"/>
+    <flow id="p2_J_RS" type="auto" from="J_S1" to="S1_RS" begin="900" end="1800" period="exp(0.021366)" departLane="best"/>
+    <flow id="p2_RN_J" type="auto" from="RN_S1" to="S1_J" begin="900" end="1800" period="exp(0.101209)" departLane="best"/>
+    <flow id="p2_RN_L" type="auto" from="RN_S1" to="S1_L" begin="900" end="1800" period="exp(0.032049)" departLane="best"/>
+    <flow id="p2_RN_RS" type="auto" from="RN_S1" to="S1_RS" begin="900" end="1800" period="exp(0.288444)" departLane="best"/>
+    <flow id="p2_RS_J" type="auto" from="RS_S1" to="S1_J" begin="900" end="1800" period="exp(0.044982)" departLane="best"/>
+    <flow id="p2_RS_L" type="auto" from="RS_S1" to="S1_L" begin="900" end="1800" period="exp(0.101209)" departLane="best"/>
+    <flow id="p2_RS_RN" type="auto" from="RS_S1" to="S1_RN" begin="900" end="1800" period="exp(0.179926)" departLane="best"/>
+    <flow id="p3_B_J" type="auto" from="B_S1" to="S1_J" begin="1800" end="2700" period="exp(0.157435)" departLane="best"/>
+    <flow id="p3_B_L" type="auto" from="B_S1" to="S1_L" begin="1800" end="2700" period="exp(0.011245)" departLane="best"/>
+    <flow id="p3_B_RN" type="auto" from="B_S1" to="S1_RN" begin="1800" end="2700" period="exp(0.011245)" departLane="best"/>
+    <flow id="p3_B_RS" type="auto" from="B_S1" to="S1_RS" begin="1800" end="2700" period="exp(0.044982)" departLane="best"/>
+    <flow id="p3_J_L" type="auto" from="J_S1" to="S1_L" begin="1800" end="2700" period="exp(0.160247)" departLane="best"/>
+    <flow id="p3_J_RN" type="auto" from="J_S1" to="S1_RN" begin="1800" end="2700" period="exp(0.032049)" departLane="best"/>
+    <flow id="p3_J_RS" type="auto" from="J_S1" to="S1_RS" begin="1800" end="2700" period="exp(0.021366)" departLane="best"/>
+    <flow id="p3_RN_J" type="auto" from="RN_S1" to="S1_J" begin="1800" end="2700" period="exp(0.101209)" departLane="best"/>
+    <flow id="p3_RN_L" type="auto" from="RN_S1" to="S1_L" begin="1800" end="2700" period="exp(0.032049)" departLane="best"/>
+    <flow id="p3_RN_RS" type="auto" from="RN_S1" to="S1_RS" begin="1800" end="2700" period="exp(0.288444)" departLane="best"/>
+    <flow id="p3_RS_J" type="auto" from="RS_S1" to="S1_J" begin="1800" end="2700" period="exp(0.044982)" departLane="best"/>
+    <flow id="p3_RS_L" type="auto" from="RS_S1" to="S1_L" begin="1800" end="2700" period="exp(0.101209)" departLane="best"/>
+    <flow id="p3_RS_RN" type="auto" from="RS_S1" to="S1_RN" begin="1800" end="2700" period="exp(0.179926)" departLane="best"/>
+    <flow id="p4_B_J" type="auto" from="B_S1" to="S1_J" begin="2700" end="3600" period="exp(0.157435)" departLane="best"/>
+    <flow id="p4_B_L" type="auto" from="B_S1" to="S1_L" begin="2700" end="3600" period="exp(0.011245)" departLane="best"/>
+    <flow id="p4_B_RN" type="auto" from="B_S1" to="S1_RN" begin="2700" end="3600" period="exp(0.011245)" departLane="best"/>
+    <flow id="p4_B_RS" type="auto" from="B_S1" to="S1_RS" begin="2700" end="3600" period="exp(0.044982)" departLane="best"/>
+    <flow id="p4_J_L" type="auto" from="J_S1" to="S1_L" begin="2700" end="3600" period="exp(0.160247)" departLane="best"/>
+    <flow id="p4_J_RN" type="auto" from="J_S1" to="S1_RN" begin="2700" end="3600" period="exp(0.032049)" departLane="best"/>
+    <flow id="p4_J_RS" type="auto" from="J_S1" to="S1_RS" begin="2700" end="3600" period="exp(0.021366)" departLane="best"/>
+    <flow id="p4_RN_J" type="auto" from="RN_S1" to="S1_J" begin="2700" end="3600" period="exp(0.101209)" departLane="best"/>
+    <flow id="p4_RN_L" type="auto" from="RN_S1" to="S1_L" begin="2700" end="3600" period="exp(0.032049)" departLane="best"/>
+    <flow id="p4_RN_RS" type="auto" from="RN_S1" to="S1_RS" begin="2700" end="3600" period="exp(0.288444)" departLane="best"/>
+    <flow id="p4_RS_J" type="auto" from="RS_S1" to="S1_J" begin="2700" end="3600" period="exp(0.044982)" departLane="best"/>
+    <flow id="p4_RS_L" type="auto" from="RS_S1" to="S1_L" begin="2700" end="3600" period="exp(0.101209)" departLane="best"/>
+    <flow id="p4_RS_RN" type="auto" from="RS_S1" to="S1_RN" begin="2700" end="3600" period="exp(0.179926)" departLane="best"/>
+</routes>

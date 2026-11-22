@@ -8,46 +8,76 @@
 \renewcommand{\thetable}{D.\arabic{table}}
 \renewcommand{\theHtable}{D.\arabic{table}}
 
-Este anexo cuenta cómo se construyeron los dos escenarios de Lima de la
-Sección~\ref{sec:caso-lima}: primero el nudo de la Av.~Reducto con la
-Av.~28 de Julio y después el corredor de la Av.~Benavides. En los dos,
-la forma de las calles sale de OpenStreetMap (OSM) y la demanda, de un
-total publicado. En el nudo, los carriles, los giros y el semáforo salen
-de la observación en el sitio; en el corredor, los semáforos son un
-supuesto. Cada parte termina con sus simplificaciones y sus tablas
-completas.
+Este anexo describe, para replicarlos, los dos escenarios de Lima de la
+Sección~\ref{sec:caso-lima}, el nudo de la Av.~Reducto con la Av.~28 de
+Julio (el Óvalo Vasco) y el corredor de la Av.~Benavides, y reúne sus
+resultados completos. En los dos, la forma de las calles sale
+de OpenStreetMap (OSM) y la demanda, de un total publicado. En el nudo,
+las distancias entre sus cuatro esquinas salen de medidas en Google
+Maps, y los carriles, los giros y el semáforo, de la observación en el
+sitio; en el corredor, como plan actual se usa un plan típico de Lima.
+Cada caso da, en
+orden, el lugar, la red, el semáforo y las referencias ajustadas, la
+demanda, lo que el escenario no reproduce y los resultados completos.
+
+Los dos casos siguen el protocolo del segundo estudio, con los cambios
+de la Sección~\ref{sec:diseno-segundo}. Sus programas están en la
+Tabla~\ref{tab:programas-lima} (Anexo~B), con SUMO 1.25.0 y
+Python 3.14. Cada uso tiene sus semillas: ajuste de las referencias,
+2001 a 2010 por candidato y 2001 a 2030 para desempatar los diez
+mejores planes fijos y los tres mejores actuados; entrenamiento, bases 42, 2042 y 4042; validación, 21001 a
+21008 en el nudo y 21001 a 21004 en el corredor; evaluación, 22001 a
+22100 en la tanda~1 y 23001 a 23100 en la tanda~2; prueba con otro
+reparto de la demanda, 24001 a 24100.
+% fuente: nudo_ovalo_estudio2/demo_rl/lima/estudio.py (docstring, "Semillas (ninguna se repite entre usos ...)";
+% AJUSTE = 2001-2010, DESEMPATE = 2001-2030, VALIDACION = 21001-21008, TANDAS = 22001-22100 y 23001-23100);
+% corredor_estudio2/demo_rl/lima/corredor/estudio_corredor.py (docstring: "ajuste 2001-2010 y 2001-2030; validacion
+% 21001-21004; evaluacion 22001-22100 y 23001-23100"); prueba de robustez: nudo_ovalo_estudio2/evaluar_ovalo.py
+% (SEMILLAS_ROBUSTEZ = 24001-24100) y secciones/tablas/corredor_robustez.tex (24001-24100); bases: lima/entrenar.sh,
+% lima/corredor/entrenar.sh y nudo_ovalo_estudio2/entrenar.sh (42, 2042 y 4042; episodio k = base + k); SUMO 1.25.0
+% y Python 3.14: anexos.tex, Anexo B
 
 \subsection*{El nudo: el lugar}
 
 El nudo está en Miraflores, junto al puente de la Av.~28 de Julio sobre
 la Vía Expresa (12°07'45''~S, 77°01'25''~O), y es conocido por su
-congestión \citep{Pereyra2025_Reducto}. Tiene cuatro entradas y cuatro
-salidas. Cada entrada tiene sus luces, y los giros a la izquierda de
-Reducto, las suyas; todas siguen un mismo programa, así que el nudo es
-un solo cruce con un solo controlador:
+congestión \citep{Pereyra2025_Reducto}. Es un óvalo, el Óvalo Vasco:
+cuatro calzadas de un sentido rodean una isla y se cruzan en cuatro
+esquinas, que aquí se nombran por su posición (NO, NE, SO y SE). Tiene
+cuatro entradas y cuatro salidas (Figura~\ref{fig:lima-nudo}, en el
+Capítulo~\ref{cap:resultados}):
 \begin{itemize}
   \item \textbf{Av.~Reducto.} Dos calzadas, una hacia el sur y otra
-    hacia el norte. La que viene del norte llega con cuatro carriles: el
-    izquierdo es solo para girar a la izquierda, hacia el puente. La que
-    viene del sur es de tres carriles y, antes del cruce, se ensancha
-    con dos carriles más, solo para girar a la izquierda, hacia la
+    hacia el norte. La que viene del norte trae tres carriles y, antes
+    del semáforo, se abre con dos más, solo para girar a la izquierda,
+    hacia el puente. La que viene del sur trae dos y se abre a cuatro
+    poco antes del semáforo: los dos de la izquierda solo giran hacia la
     Av.~Larco.
   \item \textbf{Av.~28 de Julio.} Llega desde el puente con tres
-    carriles, cruza toda la Av.~Reducto y sigue, en un solo sentido y
-    con dos carriles, hacia la Av.~Larco.
+    carriles, cruza el óvalo y sigue, en un solo sentido y con dos
+    carriles, hacia la Av.~Larco.
   \item \textbf{Av.~Vasco Núñez de Balboa.} Entra al nudo en un solo
-    sentido, con tres carriles.
+    sentido, con tres carriles, y sigue hacia el puente. Desde su carril
+    izquierdo también se gira hacia la Av.~Larco, por un ramal propio.
 \end{itemize}
-% fuente: descripcion de campo de Fabian Alvarado (lima.pdf y mensajes del 13.11.2026); coordenadas: las del punto
-% que dio el autor (-12.129167, -77.023778); El Comercio, 25.06.2025 ("La interseccion del caos en Miraflores")
+Un mismo semáforo detiene a las cuatro entradas, con luces propias para
+los giros a la izquierda de Reducto. Dentro del óvalo no hay semáforo,
+y en la hora punta hay vehículos que esperan adentro.
+% fuente: descripcion de campo de Fabian Alvarado (lima.pdf y mensajes del 13.11.2026), sus capturas de Google Maps y
+% Street View (revision_ovalo_2026-11-17/ y carriles_reducto_2026-11-18/capturas_fabian/) y los carriles que
+% confirmo en el sitio (lima/REGISTRO.md, enmienda del 18.11.2026, 23:45, "La red: que cambio"); coordenadas: las del
+% punto que dio el autor (-12.129167, -77.023778); El Comercio, 25.06.2025 ("La interseccion del caos en Miraflores")
 
 \subsection*{El nudo: importación desde OpenStreetMap}
 
-La cartografía se descargó de OSM en un recorte de unos 870 por 780~m
-alrededor del nudo y se convirtió a una red de SUMO con
-\texttt{netconvert}. Una importación anterior de la misma zona, hecha
-con el asistente \texttt{osmWebWizard}, se muestra en la
-Figura~\ref{fig:osm-lima-cruda}.
+La cartografía es un recorte de OSM de unos 870 por 780~m alrededor del
+nudo, guardado en el repositorio como
+\texttt{lima/osm/\allowbreak lima\_reducto.osm.xml}, y se convirtió a
+una red de SUMO con \texttt{netconvert}.
+% archivo de OSM: demo_rl/lima/osm/lima_reducto.osm.xml (versionado en el repositorio; lo escribe lima/bajar_osm.py)
+La Figura~\ref{fig:osm-lima-cruda} muestra una
+importación automática de la misma zona, con el asistente
+\texttt{osmWebWizard} y sin limpiar.
 
 \begin{figure}[!tbp]
   \centering
@@ -58,25 +88,37 @@ Figura~\ref{fig:osm-lima-cruda}.
 
 La importación automática no se puede usar tal cual, por tres razones:
 \begin{itemize}
-  \item \textbf{El nudo queda partido.} En OSM son nueve nodos, uno por
-    cada cruce entre calzadas. \texttt{netconvert} no los une por sí
-    solo y no les pone semáforo.
-  \item \textbf{Los carriles no coinciden.} OSM da tres carriles a la
-    Av.~Reducto desde el norte y dos desde el sur; en el sitio son
-    cuatro y cinco.
-  \item \textbf{Faltan los giros y el semáforo.} OSM no dice qué
-    carriles son solo de giro ni qué estados tiene el semáforo.
+  \item \textbf{El óvalo queda suelto.} En OSM son nueve nodos, uno por
+    cada cruce entre calzadas, y \texttt{netconvert} no les pone un
+    semáforo común.
+  \item \textbf{Las esquinas se pisan.} La geometría de OSM deja entre
+    2.2 y 3.8~m de media calzada donde sus propios carriles piden de 3.2
+    a 4.8~m.
+  \item \textbf{Faltan carriles, giros y el semáforo.} OSM da tres
+    carriles a la Av.~Reducto desde el norte y dos desde el sur, con los
+    carriles de giro a la izquierda como calzadas aparte, y no dice qué
+    estados tiene el semáforo.
 \end{itemize}
 % fuente: demo_rl/lima/bajar_osm.py (caja -77.0278, -12.1327, -77.0198, -12.1257), borrador/union.nod.xml (los nueve
-% nodos unidos) y la salida de netconvert ("Not joining junctions ... (6 incoming edges)"); carriles de OSM:
-% aristas 653645242#0 (3) y 653650083 (2) de borrador/lima_reducto.net.xml
+% nodos) y la salida de netconvert ("Not joining junctions ... (6 incoming edges)"); esquinas que se pisan:
+% nudo_ovalo_estudio2/demo_rl/lima/ovalo/armar_ovalo.py (cabecera, "con las esquinas de OSM tal cual ... las esquinas
+% se pisan"); carriles de OSM: aristas 653645242#0 (3) y 653650083 (2) de borrador/lima_reducto.net.xml; giros de
+% Reducto en calzadas aparte: vias 435836263 y 394390119 de OSM
 
 \subsection*{El nudo: la red}
 
-De OSM se tomó solo la geometría: la posición del nudo y el trazado de
-cada calle. Los carriles y los movimientos permitidos son los observados
-(Tabla~\ref{tab:lima-entradas}). La Figura~\ref{fig:lima-nudo} muestra
-la red y a dónde puede ir cada entrada: son 12 movimientos.
+De OSM se tomaron la posición del óvalo, el trazado de cada calle
+afuera y el lugar donde los ramales de giro de Reducto cruzan los lados
+del óvalo, a la misma distancia de su esquina que en OSM. Las cuatro
+esquinas se pusieron a las distancias medidas en Google Maps: de centro
+a centro, 18.4~m en el lado norte, 24.4 en el oeste, 19.9 en el este y
+15.7 en el sur. Cada carril mide 3.2~m de ancho, y la isla es lo que
+queda entre las cuatro calzadas. Los carriles y los movimientos
+permitidos son los observados (Tabla~\ref{tab:lima-entradas}): 15
+carriles de entrada y 13 movimientos, cada uno con un solo camino por el
+óvalo. La Figura~\ref{fig:lima-nudo}, en el Capítulo~\ref{cap:resultados},
+muestra la red armada.
+% la figura del mapa (fig:lima-nudo) pasó al Cap. V, sec:lima-nudo, el 20.11.2026, a pedido de Fabian Alvarado
 
 \begin{table}[!tbp]
 \setstretch{1}
@@ -86,51 +128,90 @@ la red y a dónde puede ir cada entrada: son 12 movimientos.
 \toprule
 Entrada & Carriles & A dónde puede ir \\
 \midrule
-Reducto, desde el norte & 4 & De frente, hacia Reducto sur (tres carriles; el derecho también gira hacia Larco). El carril izquierdo solo gira hacia el puente. \\
-Reducto, desde el sur & 5 & De frente, hacia Reducto norte (dos carriles). El carril derecho solo gira hacia el puente y los dos izquierdos solo giran hacia Larco. \\
+Reducto, desde el norte & 5 & De frente, hacia Reducto sur (los tres carriles de la derecha; el derecho también gira hacia Larco). Los dos carriles de la izquierda solo giran hacia el puente. \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
+Reducto, desde el sur & 4 & De frente, hacia Reducto norte (los dos carriles de la derecha; el derecho también gira hacia el puente). Los dos carriles de la izquierda solo giran hacia Larco. \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 28 de Julio, desde el puente & 3 & De frente, hacia Larco (dos carriles; el derecho también gira hacia Reducto norte). El carril izquierdo solo gira hacia Reducto sur. \\
-Balboa & 3 & De frente, hacia el puente (los tres carriles). El derecho también gira hacia Reducto sur y el izquierdo también sube hacia Reducto norte. \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
+Balboa & 3 & De frente, hacia el puente (los tres carriles). El derecho también gira hacia Reducto sur, y el izquierdo, hacia Reducto norte y, por su ramal, hacia Larco. \\
 \bottomrule
 \end{tabular}
-\caption[Caso Lima, el nudo: entradas]{Caso Lima, el nudo: entradas, carriles en la línea de parada y movimientos permitidos. Las salidas tienen dos carriles hacia Larco, dos hacia Reducto norte, tres hacia Reducto sur y tres hacia el puente.}
+\caption[Caso Lima, el nudo: entradas]{Caso Lima, el nudo: entradas, carriles en la línea de parada y movimientos permitidos, 13 en total. Las salidas tienen dos carriles hacia Larco, dos hacia Reducto norte, tres hacia Reducto sur y tres hacia el puente.}
 \label{tab:lima-entradas}
 \end{table}
-% fuente: demo_rl/lima/armar_red.py (ARISTAS y MOVIMIENTOS): carriles y giros de la descripcion de campo de Fabian
-% Alvarado (lima.pdf y mensajes del 13.11.2026); carriles de la salida hacia Reducto sur, de OSM
+% fuente: nudo_ovalo_estudio2/demo_rl/lima/ovalo/armar_ovalo.py (DISPOSICION: carril por carril, confirmada en el sitio
+% por Fabian Alvarado) y nudo_ovalo_estudio2/LEEME.md, "A donde va cada carril, leido de la red armada"; distancias
+% de esquina a esquina: lima/REGISTRO.md, enmienda del 18.11.2026, 23:45 (norte 18.44 m, oeste 24.43 m, este 19.92 m
+% y sur 15.74 m); geometria "medida" de armar_ovalo.py (leer_medida: esquinas de medidas/medidas_google.json, giradas a
+% la cuadricula UTM y centradas en el centroide de las esquinas de OSM; cruces de los ramales a la misma distancia de
+% su esquina que en OSM, RAMALES = "distancia", un supuesto; "la isla es el cuadrilatero que dejan los cuatro ejes con
+% calzadas de ANCHO m por carril"); ancho de carril: armar_ovalo.py (ANCHO = 3.2); 13 movimientos y un camino cada uno:
+% nudo_ovalo_estudio2/pruebas/correccion_carriles/CIERRE.md, seccion 3.1
 
-\begin{figure}[!tbp]
-  \centering
-  \includegraphics[width=0.82\textwidth]{fig_lima_nudo.png}
-  \caption[Caso Lima: el nudo en la red de SUMO]{Caso Lima: el nudo en la red de SUMO, con el norte arriba. Cada línea gris es un carril; las líneas de color unen cada entrada con las salidas a las que puede ir.}
-  \label{fig:lima-nudo}
-\end{figure}
-% fuente: demo_rl/lima/dibujar_red.py --tesis, que lee lima.net.xml
+Un solo semáforo, con un solo controlador, maneja diez nodos: las cuatro
+líneas de parada de afuera, las cuatro esquinas y las dos uniones donde
+los ramales de giro se juntan con su salida. Solo las líneas de parada
+de afuera tienen luz roja. Adentro, el programa dice quién tiene
+prioridad en cada estado, con tres reglas
+(Figura~\ref{fig:lima-estados}):
+\begin{itemize}
+  \item \textbf{Cede el que cruza.} El que gira y cruza el otro flujo,
+    que tiene verde a la vez, cede el paso en su segunda esquina y espera
+    adentro: 28 de Julio hacia Reducto sur cede a Balboa en la esquina
+    SO, y Balboa hacia Reducto norte cede a 28 de Julio en la NE.
+  \item \textbf{Ceda el paso en la unión.} Balboa hacia Larco va por su
+    ramal y, al juntarse con la salida hacia Larco, cede el paso a todos
+    los que van hacia ella.
+  \item \textbf{Sale primero quien quedó adentro.} Al cambiar el estado,
+    los vehículos del verde anterior que quedaron dentro del óvalo salen
+    primero, y lo que entra les cede el paso.
+\end{itemize}
+% fuente: lima/REGISTRO.md, enmienda del 18.11.2026, 11:03 ("La red": un solo semaforo en los 10 nodos; "cede" y
+% "sale primero") y la de las 23:45 (simplificaciones 5 y 6: Balboa hacia Larco, ceda el paso en la union);
+% nudo_ovalo_estudio2/LEEME.md, "El semaforo" (quien cede, donde y desde cuando); nudo_ovalo_estudio2/demo_rl/lima/ovalo/
+% red/resumen_estudio.txt (57 enlaces en 10 nodos: 4 lineas de parada de afuera, 4 esquinas y 2 uniones)
 
-La red tiene tres simplificaciones:
+La red tiene cinco simplificaciones:
 \begin{itemize}
   \item \textbf{Entradas de 1~km.} Cada entrada conserva el trazado real
     de sus últimos 300~m y sigue en recta hasta completar 1~km. Así la
-    cola cabe dentro de la red: se mide entera y el modelo la ve. En una
-    prueba previa con entradas de 300~m, la cola quedaba fuera de la red
-    y el modelo dejaba sin servir uno de los estados del semáforo.
-  \item \textbf{Carriles de giro completos.} Los dos carriles de giro a
-    la izquierda desde el sur, que en el sitio son un ensanche corto,
-    aquí tienen el largo de la entrada.
-  \item \textbf{Sin cruces dentro del nudo.} Un vehículo que pasa la
-    línea de parada aparece en su carril de salida: no se simula su
-    trayectoria dentro del nudo. La razón está en el apartado del
-    semáforo.
+    cola cabe dentro de la red: se mide entera y el modelo la ve.
+  \item \textbf{Carriles de giro completos.} Los carriles de giro a la
+    izquierda de Reducto, que en el sitio son un ensanche corto, aquí
+    tienen el largo de la entrada: la red le da a Reducto más lugar para
+    la cola del que tiene. Es igual para todos los controles.
+  \item \textbf{Un movimiento menos por carril.} Desde el sur, el giro a
+    la derecha hacia el puente sale solo del carril derecho, y el carril
+    del medio de Balboa va solo de frente; en el sitio también se gira
+    desde el carril de al lado. No hay vuelta en U.
+  \item \textbf{Esquinas a 20~km/h o más.} Con las esquinas cortadas en
+    el borde de la calzada que cruzan, \texttt{netconvert} da a cinco
+    giros de adentro entre 10 y 15~km/h; se suben a 20~km/h, la
+    velocidad de una esquina urbana de unos 5.6~m de radio, sin cambiar
+    ninguna forma ni ningún largo.
+  \item \textbf{Bloqueos de un cruce, hasta 10~s.} En todas las
+    corridas, de todos los controles, los vehículos dejan de respetar a
+    uno que lleva más de 10~s detenido bloqueando un cruce (opción
+    \texttt{-{}-ignore-junction-blocker} de SUMO). Los teletransportes
+    por atasco están apagados, como en los demás casos.
 \end{itemize}
-% fuente: demo_rl/lima/armar_red.py (LARGO_ENTRADA = 1000, TRAZADO_ENTRADA = 300 y la opcion --no-internal-links de
-% netconvert); prueba previa: demo_rl/lima/piloto/ (entrenamientos ens2l y lg2, base 7, datos provisionales: con
-% 300 m la politica daba siempre el minimo al estado de giros y quedaban 127 s/veh de espera para entrar)
+% fuente: lima/REGISTRO.md, "Decidido antes" (13.11.2026: entradas de 1 km; prueba con entradas de 300 m en
+% lima/piloto/), enmienda del 18.11.2026, 11:03 ("Esquinas" y "Trabas") y la de las 23:45 ("Simplificaciones
+% declaradas", 1 a 4); nudo_ovalo_estudio2/demo_rl/lima/ovalo/red/resumen_estudio.txt, seccion 2 (cinco giros subidos
+% de 2.89, 3.03, 3.24, 4.20 y 3.14 m/s a 5.56 m/s); nudo_ovalo_estudio2/demo_rl/lima/lima.sumocfg (time-to-teleport -1,
+% ignore-junction-blocker 10)
 
 \subsection*{El nudo: el semáforo}
 
-El plan que opera hoy se midió en el sitio el viernes 13 de noviembre de
-2026, en la hora punta de la tarde. El ciclo dura 132~s y tiene tres
-estados con verde y un tramo con todo en rojo
-(Tabla~\ref{tab:lima-semaforo}):
+El plan que opera hoy, el plan actual, se midió en el sitio con
+cronómetros, en la hora punta de la tarde
+(Sección~\ref{sec:validacion-realidad}). El ciclo dura 132~s y tiene
+tres estados con verde, que son las fases del plan, y un tramo con todo
+en rojo
+(Tabla~\ref{tab:lima-semaforo} y Figura~\ref{fig:lima-estados}):
+% con cronometros: capitulo3.tex, sec:validacion-realidad (Fabian Alvarado, 20.11.2026: tiempos y orden de las luces
+% medidos en el sitio con cronometros)
 \begin{itemize}
   \item \textbf{Reducto de frente}, en los dos sentidos a la vez: 40~s.
   \item \textbf{Giros a la izquierda de Reducto}, también los dos a la
@@ -143,56 +224,76 @@ estados con verde y un tramo con todo en rojo
 \setstretch{1}
 \centering
 \footnotesize
-\input{secciones/tablas/lima_semaforo}
+\input{secciones/tablas/ovalo_semaforo}
 \caption[Caso Lima, el nudo: estados del semáforo]{Caso Lima, el nudo: estados del semáforo, en su orden, con el verde del plan actual, el del fijo ajustado al segundo de cada demanda y el verde mínimo que puede dar cualquier control. Tras cada verde hay 3~s de ámbar y, tras los giros a la izquierda, 34~s con todo en rojo; esos tiempos son iguales en todos los controles.}
 \label{tab:lima-semaforo}
 \end{table}
-% fuente: secciones/tablas/lima_semaforo.tex (lima/tablas_lima.py): lima/programa.py (PLAN, TRANSICION y ROJO_TOTAL)
-% y salidas/fijo_ajustado.json de lima/ y lima/alta/; medicion de Fabian Alvarado del 13.11.2026
+% fuente: secciones/tablas/ovalo_semaforo.tex (nudo_ovalo_estudio2/tablas_ovalo.py): lima/programa.py (PLAN,
+% TRANSICION y ROJO_TOTAL) y salidas/fijo_ajustado.json de nudo_ovalo_estudio2/demo_rl/lima/ y de alta/ (ganadores
+% [36, 16, 44], 83.87 s/veh con 30 semillas, y [60, 25, 77], 128.85); medicion de Fabian Alvarado del 13.11.2026
 
-Al cargar el plan se tomaron cuatro decisiones:
+El plan se llevó al simulador con cuatro decisiones:
 \begin{itemize}
   \item \textbf{Ámbar.} En el sitio no se registró ámbar. El simulador
     lo necesita para que los vehículos frenen, así que los últimos 3~s
     de cada verde medido son ámbar: el plan actual queda con 37, 15 y
     37~s de verde (Tabla~\ref{tab:lima-semaforo}) y el ciclo sigue en
     132~s.
-  \item \textbf{Dos segundos de diferencia.} Reducto de norte a sur y
-    28 de Julio tienen 38~s de verde en el sitio; aquí van con los 40~s
-    del movimiento con el que comparten estado.
-  \item \textbf{Todo en rojo.} Los 34~s se conservan iguales en todos
-    los controles. No se simulan peatones, pero si un control pudiera
-    quitar ese tiempo, tendría menos retraso solo por eso.
-  \item \textbf{Movimientos que se cruzan.} 28 de Julio y Balboa tienen
-    verde a la vez, aunque algunos de sus movimientos se cruzan. En el
-    sitio eso bloquea el nudo, pero el bloqueo se deshace. En SUMO, con
-    sus reglas de ceder el paso, no se deshacía: esos movimientos
-    quedaban detenidos más de 15~minutos y un vehículo dentro del nudo
-    bloqueaba a Reducto durante todo un verde. Por eso no se simulan los
-    cruces dentro del nudo, y el giro de Balboa hacia Larco, que entra al
-    mismo carril que 28 de Julio, queda fuera del modelo.
+  \item \textbf{Un verde por estado.} Reducto de norte a sur y 28 de
+    Julio tienen 38~s de verde en el sitio; aquí van con los 40~s del
+    movimiento con el que comparten estado.
+  \item \textbf{Todo en rojo.} Los 34~s son iguales en todos los
+    controles: no se simulan peatones, y un control que quitara ese
+    tiempo tendría menos retraso solo por eso. En ese tramo salen los
+    vehículos que quedaron dentro del óvalo.
+  \item \textbf{Las luces dentro del óvalo.} Las de cada nodo salen de
+    una regla sobre la red: en cada estado, cada movimiento con verde
+    tiene prioridad, salvo donde debe ceder según las tres reglas del
+    apartado anterior. Solo se escribió a mano quién cede y dónde.
 \end{itemize}
-% fuente: lima/programa.py (cabecera) y lima/REGISTRO.md; pruebas con el plan actual y las semillas 424301-424303
-% antes de ajustar referencias o entrenar: con tramos internos, Balboa hacia Larco 1417 s/veh, Balboa hacia Reducto
-% norte 1147 y 28 de Julio hacia Reducto sur 863; sin tramos internos y sin el giro hacia Larco, todos los
-% movimientos entre 48 y 136 s/veh
+% fuente: lima/programa.py (cabecera) y lima/REGISTRO.md; nudo_ovalo_estudio2/LEEME.md, "El semaforo" (las luces se
+% deducen de la red con lima/ovalo/plan_ovalo.py; lo unico escrito a mano es quien cede); en el todo rojo salen los
+% de adentro: respuesta de Fabian Alvarado del 17.11.2026 y figura de los estados (leyenda "Todo en rojo")
 
-Las dos referencias ajustadas se buscan como en el segundo estudio
-(Sección~\ref{sec:referencias-fijas}), con semillas que no se usan para
-nada más:
+% fuente: images/fig_ovalo_estados.pdf, de carriles_reducto_2026-11-18/validacion2/ (dibujar_estados.py, que descifra
+% el plan de nudo_ovalo_estudio2/demo_rl/lima/lima.add.xml, sha256 140a3ccb..., sobre la red d41d816a...); en el verde 3,
+% dos carriles de adentro sin su punta gris (defecto menor del dibujo: validacion/INFORME.md)
+\begin{figure}[!tbp]
+  \centering
+  \includegraphics[width=\textwidth]{fig_ovalo_estados.pdf}
+  \caption[Caso Lima, el nudo: los estados del semáforo en el óvalo]{Caso Lima, el nudo: qué movimientos tienen verde en cada estado del plan actual y dónde cede cada uno dentro del óvalo, con el ciclo de 132~s abajo a la derecha. La figura marca dónde la red hace ceder a cada giro y cuántos autos caben ahí; en la simulación, los que giran del puente hacia Reducto sur esperan casi siempre antes de la primera esquina o en el lado norte.}
+  \label{fig:lima-estados}
+\end{figure}
+
+Las dos referencias ajustadas se buscan con el procedimiento de la
+Sección~\ref{sec:referencias-fijas} y las semillas de ajuste:
 \begin{itemize}
   \item \textbf{Fijo ajustado al segundo.} Los tres verdes que dan
-    menos retraso total, afinados hasta 1~s
-    (Tabla~\ref{tab:lima-semaforo}).
+    menos retraso total, afinados hasta 1~s, con verdes de 10 a 120~s
+    (Tabla~\ref{tab:lima-semaforo}). Con la demanda publicada resulta un
+    ciclo de 139~s. Con la alta, uno de 205~s, que da 77~s de verde a 28
+    de Julio y Balboa: más que los 60~s que pueden dar el actuado, el
+    modelo y su variante.
   \item \textbf{Actuado ajustado.} El control actuado de SUMO, con sus
     parámetros ajustados uno por uno, y la variante que decide por el
-    retraso de los vehículos. No hay variantes coordinadas, porque es
-    un solo cruce.
+    retraso de los vehículos. No hay variantes coordinadas, porque hay
+    un solo controlador. Con las dos demandas gana la variante por
+    retraso, con 100~m de alcance del detector. Con la publicada, su
+    retraso mínimo, el que debe acumular un vehículo para prolongar el
+    verde, es de 3~s, y sus verdes máximos son de 60, 32 y 60~s, el doble
+    de los del fijo ajustado al segundo con un tope de 60~s; con la alta,
+    5~s y 60~s en los tres estados (resultados completos, más abajo).
 \end{itemize}
+% fuente (parametros elegidos): nudo_ovalo_estudio2/demo_rl/lima/salidas/actuado_ajustado.json (ganador: tipo retraso,
+% detectorRange 100, minTimeLoss 3, esquema "doble del fijo", maximos [60, 32, 60]; 76.03 s/veh con 30 semillas) y
+% alta/salidas/actuado_ajustado.json (ganador tras la comprobacion del borde: tipo retraso, detectorRange 100,
+% minTimeLoss 5, esquema 60, maximos [60, 60, 60]; 138.90); tope de 60 s: lima/estudio.py (VERDE_MAX = 60)
 % fuente: lima/estudio.py (ajustar_fijo: descenso por coordenadas con pasos de 8, 4, 2 y 1 s, 10 semillas por
-% candidato, 2001-2010, y los diez mejores con 30, 2001-2030; buscar_actuado: pasos en cadena de hueco maximo (1 a
-% 4 s), distancia del detector (1 a 4 s), umbral de atasco y verde maximo, y la variante delay_based; los tres
-% mejores con 30 semillas); lima/REGISTRO.md, "Enmienda del actuado ajustado" (14.11.2026)
+% candidato, 2001-2010, y los diez mejores con 30, 2001-2030; VERDE_MAX_FIJO = 120; buscar_actuado: pasos en cadena de
+% hueco maximo (1 a 4 s), distancia del detector (1 a 4 s), umbral de atasco y verde maximo, y la variante
+% delay_based; los tres mejores con 30 semillas); lima/REGISTRO.md, "Enmienda del actuado ajustado" (14.11.2026) y
+% enmienda del 18.11.2026, 11:03 ("Controles"); salidas/fijo_ajustado.json y actuado_ajustado.json de
+% nudo_ovalo_estudio2/demo_rl/lima/ y de alta/
 
 \subsection*{El nudo: la demanda}
 
@@ -203,55 +304,81 @@ corresponde a más de un 20\,\% por encima de la capacidad
 \citep{Miraflores2017_PMU}. Ese total se repartió así:
 \begin{itemize}
   \item \textbf{Entre grupos de movimientos}, en proporción a los
-    carriles y al verde que el plan actual le da a cada uno. Es el
-    supuesto más favorable para el plan actual: con él, todos los
-    grupos quedan igual de cargados.
-  \item \textbf{Dentro de cada grupo}, con lo que se estimó en el sitio
-    (de cada diez vehículos de Balboa, uno sube hacia Reducto norte; de
-    cada diez que vienen del puente, dos giran hacia Reducto sur) y, el
-    resto, con supuestos.
+    carriles y al verde que el plan actual le da a cada uno: Reducto
+    desde el norte de frente, 3 carriles por 38~s, y su giro, 2 por 18;
+    Reducto desde el sur de frente, 2 por 40, y su giro, 2 por 18; 28 de
+    Julio, 3 por 38, y Balboa, 3 por 40. Es el supuesto más favorable
+    para el plan actual: con él, todos los grupos quedan igual de
+    cargados.
+  \item \textbf{Dentro de cada grupo}, con lo observado en el sitio y
+    supuestos. De Balboa, la mayor parte sigue hacia el puente (un
+    70\,\%), después hacia Reducto sur (20\,\%), y pocos giran hacia
+    Larco o suben hacia Reducto norte (5\,\% cada uno). De lo que viene
+    del puente, un 10\,\% gira hacia Reducto sur, cerca de lo que cabe
+    esperando dentro del óvalo, unos tres autos por ciclo, y un
+    15\,\% sube hacia Reducto norte. De Reducto de frente, un 10\,\% de
+    lo que viene del norte gira hacia Larco, y un 20\,\% de lo que viene
+    del sur, hacia el puente.
 \end{itemize}
 La Tabla~\ref{tab:lima-demanda} da el resultado. Los vehículos llegan al
 azar, con la misma demanda media durante toda la hora, y son una mezcla
-como la de Lima (autos, motos, combis, microbuses y buses), la misma del
-segundo estudio. La demanda alta es la misma multiplicada por 1.2
-(5125~veh/h).
+como la de Lima (autos, motos, combis, microbuses y buses), la misma de
+la prueba de sensibilidad del segundo estudio (Tabla~\ref{tab:plan3-mezcla}, Anexo~H), en vehículos reales por hora. La demanda
+alta es la misma multiplicada por 1.2 (5125~veh/h).
 
 \begin{table}[!tbp]
 \setstretch{1}
 \centering
 \footnotesize
-\input{secciones/tablas/lima_demanda}
-\caption[Caso Lima, el nudo: demanda por entrada y destino]{Caso Lima, el nudo: demanda publicada en la hora punta de la tarde (veh/h), por entrada y destino. El total es el publicado; el reparto es un supuesto.}
+\input{secciones/tablas/ovalo_demanda}
+\caption[Caso Lima, el nudo: demanda por entrada y destino]{Caso Lima, el nudo: demanda publicada en la hora punta de la tarde (veh/h), por entrada y destino. El total es el publicado; el reparto es un supuesto. Por redondeo, las sumas pueden diferir en 1.}
 \label{tab:lima-demanda}
 \end{table}
-% fuente: secciones/tablas/lima_demanda.tex (lima/tablas_lima.py), que lee lima/demanda.py (TOTAL_PUBLICADO, GRUPOS y
-% DESTINOS); total: Plan de Movilidad Urbana de Miraflores 2017-2020, pag. 30 (cuadro de intersecciones criticas:
-% "28 de Julio / Reducto 4,271", nivel de servicio E, nivel de saturacion H; "nivel de saturacion H" = "mas de 20%
-% por encima de su capacidad") y pag. 31 (periodo PM; fuente P.U.D. Miraflores); estimaciones en el sitio: Fabian
-% Alvarado, 13.11.2026
+% fuente: secciones/tablas/ovalo_demanda.tex (a mano, de nudo_ovalo_estudio2/demo_rl/lima/lima.rou.xml), que sigue la
+% regla de lima/demanda.py (GRUPOS; DESTINOS_28_DE_JULIO 75/15/10 a Larco, Reducto norte y Reducto sur;
+% DESTINOS_BALBOA 70/20/5/5 al puente, Reducto sur, Reducto norte y Larco; fijadas con lo que dijo Fabian Alvarado:
+% lima/REGISTRO.md, enmienda del 18.11.2026, 23:45, "La demanda"); total: Plan de Movilidad Urbana de Miraflores
+% 2017-2020, pag. 30 (cuadro de intersecciones criticas: "28 de Julio / Reducto 4,271", nivel de servicio E, nivel de
+% saturacion H; "nivel de saturacion H" = "mas de 20% por encima de su capacidad") y pag. 31 (periodo PM; fuente
+% P.U.D. Miraflores); el giro del puente hacia Reducto sur pide 3.6 vehiculos por ciclo con el plan actual (97.4 veh/h
+% en 27.3 ciclos por hora); unos 3 esperando adentro: foto de Fabian Alvarado
+% (carriles_reducto_2026-11-18/capturas_fabian/28_espera_dentro_del_ovalo.png)
 
 No se encontró un conteo publicado por avenida. El reparto es
 compatible con los volúmenes que el mismo plan publica para los cruces
-vecinos: lo que entra por Balboa (982~veh/h) es un tercio del total del
+vecinos: lo que entra por Balboa (1025~veh/h) es un tercio del total del
 cruce de la Av.~Armendáriz con la Av.~Vasco Núñez de Balboa (2956), y lo
-que sale hacia Larco (994) es algo menos de la mitad del total del cruce
+que sale hacia Larco (1186) es algo más de la mitad del total del cruce
 de la Av.~28 de Julio con la Av.~La Paz (2209).
 % fuente: Plan de Movilidad Urbana de Miraflores 2017-2020, pag. 31 (Armendariz / Vasco Nunez 2,956 PM; 28 de Julio /
-% La Paz 2,209 AM); lima/demanda.py (Balboa 982; hacia Larco: 606 + 93 + 295 = 994)
+% La Paz 2,209 AM); secciones/tablas/ovalo_demanda.tex (Balboa 1025; hacia Larco 1186)
 
 \subsection*{El nudo: comprobación}
 
-Con la demanda publicada, el plan actual da en la simulación un retraso
-total de 59~s por vehículo. Corresponde al nivel de servicio E, de 55 a
-80~s por vehículo \citep{HCM2000_or_2010}, que es el publicado para el
-cruce. No es una calibración: no hay tiempos de viaje medidos con que
-comparar, y en la simulación el nudo queda cerca de su capacidad, no por
-encima de ella como lo califica el plan.
-% fuente: lima/salidas/eval_t1_actual.csv y eval_t2_actual.csv (59.09 y 58.73 s/veh, 100 semillas cada una);
-% nivel de servicio E = demora de 55 a 80 s por vehiculo (escala del Highway Capacity Manual para cruces con
-% semaforo); pruebas con planes fijos y la semilla 424301: con verdes de 25, 10 y 25 s el retraso sube a 77 s/veh y
-% con 20, 10 y 20 s, a 201
+Se comprueba cómo se compara el escenario con lo publicado y si corre
+sin trabas. Con la demanda publicada, el plan
+actual da en la simulación un retraso total de 99.5 y 100.6~s por
+vehículo en las dos tandas de evaluación: más que los 80~s que separan
+el nivel de servicio E, el publicado para el cruce, del F
+\citep{HCM2000_or_2010}. La simulación no reproduce el nivel publicado,
+así que el retraso simulado del nudo no se compara con él. No es una
+calibración: no hay tiempos de viaje medidos con que comparar. Con la
+demanda publicada, 28 de Julio de frente y Balboa quedan al 97\,\% de lo
+que el plan actual deja pasar; con la alta, 11 de los 13 movimientos
+atienden menos de lo que piden.
+
+En las corridas de prueba del plan actual, 20 por demanda con semillas
+que no son del estudio, ninguna se trabó, todos los vehículos
+terminaron su viaje y ninguno pasó más de 107~s dentro del óvalo. Hubo
+4 choques por alcance en las 40 corridas, de un bus o una combi contra
+un auto casi detenido antes de una esquina de Reducto; SUMO los
+resuelve retirando al vehículo que choca.
+% fuente: nudo_ovalo_estudio2/salidas_ovalo/veredicto_ovalo.md (plan actual, tandas 1 y 2: 99.46 y 100.64
+% s/veh, 100 semillas cada una; 0 vehiculos sin terminar); nivel de servicio E = demora de 55 a 80 s por vehiculo
+% (escala del Highway Capacity Manual para cruces con semaforo); lima/REGISTRO.md, enmienda del 18.11.2026, 23:45
+% ("El plan actual en la red corregida" y "Limites declarados", (c) y "Ademas": 28 de Julio de frente y Balboa al 97 %,
+% 11 de 13 movimientos con la alta) y nudo_ovalo_estudio2/pruebas/correccion_carriles/CIERRE.md, 3.4 a 3.6 (humo de
+% 20 semillas por demanda, 424301-424320: 0 trabas, 0 sin terminar, el que mas estuvo adentro 107 s, 4 choques)
 
 \subsection*{El nudo: lo que el escenario no reproduce}
 
@@ -260,93 +387,277 @@ encima de ella como lo califica el plan.
     los vehículos que entran hacia el puente llega a veces hasta el nudo
     y no deja avanzar a los que suben por Reducto. Los dos semáforos del
     puente, a unos 80 y 145~m, no están en la red.
-  \item \textbf{Los cruces dentro del nudo.} En el sitio, los que giran
-    de 28 de Julio hacia Reducto sur esperan a mitad del nudo a que
-    pasen los de Balboa y, cuando Reducto pasa a verde, se cruzan con
-    los que bajan por Reducto.
+  \item \textbf{La espera encima de un cruce.} En el sitio, el interior
+    del óvalo es una explanada sin carriles pintados, y los que giran
+    del puente hacia Reducto sur esperan donde caben, uno al lado del
+    otro o encima de un cruce mientras el otro flujo tiene rojo. En el
+    simulador nadie espera encima de un cruce, y en el lado norte de la
+    isla quedan 4.6~m libres entre sus esquinas, menos que un auto: esos
+    vehículos esperan en fila, casi siempre antes de la primera esquina.
+    Con el plan actual pasan unos 2.5 por verde, frente a unos tres que
+    esperan a la vez en el sitio, y el giro atiende un 74\,\% de lo que
+    pide. Pesa igual para todos los controles.
+  \item \textbf{Dos giros sin contar.} La demanda de 28 de Julio hacia
+    Reducto sur y de Balboa hacia Reducto norte, que cruzan el otro
+    flujo dentro del óvalo, es un supuesto. Con el plan actual, los
+    tres giros que esperan adentro, esos dos y Balboa hacia Larco, son
+    el 4.6\,\% de los vehículos y llevan el 19\,\% del retraso.
   \item \textbf{Los peatones.}
   \item \textbf{La variación de la demanda} dentro de la hora y de un
     día a otro.
 \end{itemize}
 Por eso el retraso simulado es una referencia para comparar controles
 entre sí, y no una predicción del retraso real del nudo.
-% fuente: observacion de campo de Fabian Alvarado (13.11.2026; los cruces dentro del nudo, mensaje del 15.11.2026) y
-% lima/REGISTRO.md, "Limites conocidos de antemano";
-% distancias a los semaforos del puente: centros de los cruces en borrador/lima_reducto.net.xml
+% fuente: observacion de campo de Fabian Alvarado (13.11.2026) y lima/REGISTRO.md, "Limites conocidos de antemano";
+% distancias a los semaforos del puente: centros de los cruces en borrador/lima_reducto.net.xml; espera encima de un
+% cruce: lima/REGISTRO.md, enmienda del 18.11.2026, 23:45, "Limites declarados", (a) (humo del plan actual, 20
+% semillas: pide 97.4 veh/h y atiende 69.3, el 74 %; 2.5 por verde; el interior del ovalo es una explanada sin
+% carriles pintados; fotos de Fabian Alvarado en carriles_reducto_2026-11-18/capturas_fabian/) y
+% nudo_ovalo_estudio2/pruebas/correccion_carriles/CIERRE.md, 3.3 y 3.7 (lado norte de 4.62 m; 2.54 por verde); tres
+% giros que esperan adentro: nudo_ovalo_estudio2/LEEME.md, "Problemas abiertos y limites", 4 (4.6 % de los vehiculos y
+% 19.2 % del retraso con la publicada)
 
 \subsection*{El nudo: resultados completos}
 
-La Tabla~\ref{tab:lima-completa} da el retraso de todos los controles y
-el cambio del modelo frente a cada uno, con su intervalo de confianza.
+La Tabla~\ref{tab:lima-completa} da todos los controles, con el IC95 de
+cada cambio. Las dos referencias secundarias, el actuado por defecto y
+el ciclo mínimo, no atienden la demanda: dejan cientos de vehículos sin
+entrar o sin terminar su viaje a los 6000~s de cada corrida, y su
+retraso cuenta solo hasta ese corte.
 
-El actuado ajustado se buscó dos veces. La primera búsqueda probó 12
-combinaciones, con huecos entre vehículos de 2 a 4~s, y su mejor
-combinación quedó en el borde de lo probado. Por eso se repitió con los
-pasos del segundo estudio, que prueban huecos desde 1~s y la variante
-que decide por el retraso. La tabla conserva el actuado de la primera
-búsqueda: frente a él, el modelo empataba con la demanda publicada y
-tenía un 0.5 y un 1.1\,\% menos de retraso con la alta (tandas 1 y 2);
-frente al definitivo, con el que se calcula el veredicto, tiene más
-retraso.
+\noindent\textbf{El borde de la búsqueda del actuado ajustado.} La
+búsqueda sigue los pasos del segundo estudio, que prueban huecos desde
+1~s y la variante que decide por el retraso, y termina con un paso más
+allá de cada parámetro que queda en el borde de lo probado: un paso que
+el registro del caso fijó antes de correrlo y que solo puede hacer más
+exigente la referencia. Con la publicada, el retraso mínimo del
+ganador, 3~s, es el más alto probado, y el paso siguiente, 5~s, no
+mejora. Con la alta gana el de 5~s, que queda otra vez en el borde, y no
+se prueba otro paso. La tabla incluye el actuado ajustado de antes de la
+comprobación del borde: en las dos tandas tiene algo menos de retraso
+que el elegido (140.7 y 136.7~s por vehículo, frente a 143.2 y 142.7), porque
+la comprobación elige con las semillas de ajuste. Con la demanda alta,
+el modelo tiene menos retraso que los dos.
+% fuente: nudo_ovalo_estudio2/salidas_ovalo/veredicto_ovalo.md (vehiculos sin
+% terminar o sin entrar a los 6000 s, media por semilla, tandas 1 y 2: actuado por defecto 359.1 y 352.4 con la
+% publicada y 770.8 y 759.1 con la alta; ciclo minimo 516.3 y 501.1, y 1215.5 y 1208.8; en las 100 semillas de cada
+% tanda; los demas controles y los modelos, 0); salidas/actuado_ajustado.json y borde_actuado.json de
+% nudo_ovalo_estudio2/demo_rl/lima/ (variante por retraso, 100 m y 3 s, 76.03 s/veh con 30 semillas; con 5 s, 78.36
+% con 10 semillas: no cambia) y de alta/ (antes, 100 m y 3 s, 139.69 con 30 semillas; con 5 s, 138.90: cambia y queda
+% en el borde); lima/REGISTRO.md, "Comprobacion del borde del actuado ajustado" (14.11.2026, 15:55) y enmienda del
+% 18.11.2026, 11:03 ("Controles": la regla del borde escrita de forma general); en las tandas de la alta, el actuado de
+% antes de la comprobacion (actuadoajb) 140.69 y 136.72 s/veh frente a 143.22 y 142.70 del elegido; el modelo completo
+% (completo_s4042) frente a el: -2.79 [-4.24, -1.33] y -3.72 [-5.76, -1.90] (secciones/tablas/ovalo_completa_fijo.tex)
 
-La mejor combinación de la segunda búsqueda también quedó en el borde:
-200~m de alcance y 3~s de retraso mínimo, los dos valores más altos
-probados. Por eso se probó un paso más allá (400~m, 5~s y los dos a la
-vez). Con la demanda publicada nada mejoró. Con la alta, el mejor valor
-fue un retraso mínimo de 5~s, que baja el retraso total menos de 0.1~s
-por vehículo; ese valor vuelve a quedar en el borde, y la búsqueda
-terminó ahí, como estaba previsto en el registro.
-% fuente: lima/REGISTRO.md, "Comprobacion del borde del actuado ajustado" (14.11.2026, 15:55); lima/borde_actuado.py;
-% salidas/borde_actuado.json de lima/ y lima/alta/ (alta: 63.18 con 30 semillas frente a 63.26); el actuado anterior
-% de la demanda alta queda en la tabla como "antes de la comprobacion del borde" (eval_t*_actuadoajb.csv)
-% fuente: lima/REGISTRO.md, "Enmienda del actuado ajustado" (14.11.2026, 04:05); salidas/
-% actuado_ajustado_rejilla12.json y actuado_ajustado.json de lima/ y lima/alta/; filas "Actuado ajustado, primera
-% busqueda" de la tabla (eval_t*_actuadoaj12.csv): +0.16 y +0.33 % con la demanda publicada, -0.50 y -1.07 % con la
-% alta (salidas/veredicto_completo_s42_rejilla12.md de cada nivel)
-
+% fuente: secciones/tablas/ovalo_completa_fijo.tex (tesis_ovalo_2026-11-19/figuras/tablas_nudo_fijo.py), que lee
+% salidas/eval_t1_*.csv y eval_t2_*.csv de nudo_ovalo_estudio2/demo_rl/lima/ y de alta/
 \begin{table}[!tbp]
 \setstretch{1}
 \centering
 \footnotesize
 \setlength{\tabcolsep}{3pt}
-\input{secciones/tablas/lima_completa}
-\caption[Caso Lima, el nudo: todos los controles]{Caso Lima, el nudo: retraso total por vehículo de cada control en las dos tandas de evaluación, de 100 semillas cada una, y cambio del modelo completo frente a cada control (\%), con su IC95 y el valor $p$ de la prueba de Wilcoxon pareada. Un cambio negativo es menos retraso con el modelo.}
+\input{secciones/tablas/ovalo_completa_fijo}
+\caption[Caso Lima, el nudo: todos los controles]{Caso Lima, el nudo: retraso total por vehículo de cada control, de la variante de orden libre y del modelo de orden fijo en las dos tandas de evaluación, de 100 semillas cada una, y cambio del modelo frente a cada uno (\%), con su IC95 y el valor $p$ de la prueba de Wilcoxon pareada. Un cambio negativo es menos retraso con el modelo.}
 \label{tab:lima-completa}
 \end{table}
-% fuente: secciones/tablas/lima_completa.tex (lima/tablas_lima.py), que lee lima/salidas/eval_t1_*.csv y eval_t2_*.csv
-% y los de lima/alta/salidas/
 
-El modelo se entrenó tres veces con cada demanda
-(Tabla~\ref{tab:lima-entrenamientos}); se cita el entrenamiento de
-validación mediana. Las curvas de aprendizaje están en el
-Capítulo~\ref{cap:resultados} (Figura~\ref{fig:lima-aprendizaje}). La
-Tabla~\ref{tab:lima-robustez} repite la evaluación con otro reparto del
-mismo total (Sección~\ref{sec:lima-nudo}).
+El modelo y su variante se entrenaron tres veces con cada demanda
+(Tabla~\ref{tab:lima-entrenamientos}); de cada uno se cita el
+entrenamiento de validación mediana. Sus curvas de aprendizaje, con su
+lectura y su estabilidad, están en el Capítulo~\ref{cap:resultados}
+(Figura~\ref{fig:lima-aprendizaje}). Con la demanda publicada, el
+entrenamiento del modelo de orden fijo con la base 42, que sí se
+estabilizó, también recibe FUNCIONA: tiene un 10.0 y un 10.1\,\% menos
+de retraso que el fijo ajustado al segundo y un 0.95 y un 0.72\,\% menos
+que el actuado ajustado ($p = 0.022$ y $0.031$).
+% fuente: tesis_ovalo_2026-11-19/figuras/salida/entrenamientos_nudo.txt (publicada completo 42, tandas 1 y 2: frente al
+% fijo -10.04 [-11.06, -9.06] y -10.09 [-10.85, -9.35]; frente al actuado ajustado -0.95 [-1.63, -0.25] p=0.022 y -0.72
+% [-1.42, -0.01] p=0.031)
+% las curvas (fig:lima-aprendizaje) y su lectura pasaron al Cap. V, sec:lima-nudo, el 20.11.2026, a pedido de Fabian
+% Alvarado; estabilidad: secciones/tablas/ovalo_entrenamientos_fijo.tex (publicada completo 2042 sin estabilizar,
+% tendencia -5.13 %, y libre 42 estabilizado; alta completo 4042 estabilizado y libre 2042 sin estabilizar, +7.07 %)
 
+% fuente: secciones/tablas/ovalo_entrenamientos_fijo.tex (tesis_ovalo_2026-11-19/figuras/tablas_nudo_fijo.py: la tabla
+% de nudo_ovalo_estudio2/tablas_ovalo.py con el modelo de orden fijo primero): politica_lima_vecinos_<etiqueta>_s<base>.json
+% (ep_elegido y val_elegido), salidas/eval_t*_*.csv y la columna val_total de los CSV de entrenamiento de cada nivel
 \begin{table}[!tbp]
 \setstretch{1}
 \centering
 \footnotesize
-\setlength{\tabcolsep}{3pt}
-\input{secciones/tablas/lima_entrenamientos}
-\caption[Caso Lima, el nudo: los tres entrenamientos del modelo]{Caso Lima, el nudo: los tres entrenamientos del modelo completo con cada nivel de demanda. La versión evaluada de cada uno es la de menor retraso total en las ocho semillas de validación; el entrenamiento citado es el de validación mediana entre los tres. La última columna aplica la regla de estabilidad de la Tabla~\ref{tab:veredictos}.}
+\setlength{\tabcolsep}{2.5pt}
+\input{secciones/tablas/ovalo_entrenamientos_fijo}
+\caption[Caso Lima, el nudo: los entrenamientos]{Caso Lima, el nudo: los tres entrenamientos del modelo de orden fijo y de la variante de orden libre con cada nivel de demanda. La versión evaluada de cada uno es la de menor retraso total en las ocho semillas de validación; el entrenamiento citado es el de validación mediana entre los tres. La última columna aplica la regla de estabilidad de la Tabla~\ref{tab:veredictos}.}
 \label{tab:lima-entrenamientos}
 \end{table}
-% fuente: secciones/tablas/lima_entrenamientos.tex (lima/tablas_lima.py): politica_lima_vecinos_completo_s<base>.json
-% (ep_elegido y val_elegido), salidas/eval_t*_*.csv y la columna val_total de los CSV de entrenamiento de cada nivel
 
-% fuente: secciones/tablas/lima_robustez.tex (lima/tablas_lima.py): lima/robustez/reducto/ y lima/robustez/transversal/, salidas/eval_t1_*.csv (100 semillas, 24001-24100)
-% (tabla traida del Cap. V el 15.11.2026; registro de la prueba: lima/REGISTRO.md, "Prueba de robustez del reparto",
-% 22:10 del 13.11.2026, antes de correrla)
+\subsection*{El nudo: la variante de orden libre}
+
+La variante de orden libre es el modelo completo con una acción más
+amplia: en cada decisión mantiene el verde o pasa a cualquiera de los
+otros dos estados. Ve, además, los vehículos detenidos en cada estado y
+el tiempo que cada uno lleva en rojo: su observación tiene 56
+componentes, frente a las 50 del modelo. Se registró antes de entrenar como
+el modelo citado del nudo, con la misma regla de veredicto frente al
+fijo ajustado al segundo, y se comparó también con el modelo de orden
+fijo.
+% observacion: dim_obs 56 en politica_lima_vecinos_libre_s<base>.json y 50 en politica_lima_vecinos_completo_s<base>.json
+% (nudo_ovalo_estudio2/demo_rl/lima/); lima/REGISTRO.md: "la primera capa pasa de 50 a 56 entradas"
+
+Como las luces dentro del óvalo dependen de quién quedó adentro, su
+programa tiene un verde por cada estado y estado anterior: lo que sale
+conserva la prioridad de su propio verde y lo que entra le cede el paso.
+En el orden del plan, sus luces son las del plan actual. Conserva las
+reglas del plan: 3~s de ámbar en cada cambio, los 34~s con todo en rojo
+siempre antes de 28 de Julio y Balboa, venga de donde venga, y verdes de
+10 a 60~s. Además, ningún estado con vehículos esperando pasa más de
+163~s en rojo, lo más que permite el orden del plan con verdes de 60~s.
+
+Ese programa tiene un defecto conocido, sin corregir. En el paso de 28
+de Julio y Balboa directamente a los giros de Reducto, que el plan no
+tiene, la regla de salida solo recuerda el estado anterior: los que
+esperaban adentro para girar no salen durante ese verde ni durante el
+siguiente, hasta el tramo con todo en rojo. En una prueba con una regla
+fija que recorre los seis pasos posibles, con semillas que no son del
+estudio, hubo 20 detenciones de 60 a 70~s dentro del óvalo en 4
+corridas, todas después de ese paso; con el plan actual, ninguna. La
+variante usa ese paso una vez en la hora de la
+Figura~\ref{fig:lima-secuencia} con la demanda publicada y ninguna con
+la alta. La corrección, que en ese paso salgan primero los de adentro,
+queda como trabajo futuro.
+% fuente: lima/REGISTRO.md, "Prueba adicional del nudo: el modelo elige el estado que sigue" (17.11.2026, 17:25:
+% acciones, ambar, rojo total, verdes de 10 a 60 s, tope de 163 s = 2 x 60 + 3 x 3 + 34, observacion de 56 entradas
+% frente a 50), enmienda del 18.11.2026, 11:03 ("Modelos": el de orden libre es el modelo citado del nudo; un verde por
+% estado y estado anterior; "lo que sale conserva la letra de su propio verde y lo que entra le cede el paso";
+% "Comparaciones y veredicto", (1) y (2)) y la de las 23:45 ("Limite conocido del programa del orden libre, que no se
+% corrige"); prueba de la regla de seis pasos en la red del estudio: carriles_reducto_2026-11-18/verificacion/luces/
+% INFORME.md, seccion 5 (semillas 424301 y 424302, las dos demandas: 20 detenciones de 60 a 70 s, todas tras el paso de
+% 28 de Julio y Balboa a los giros; con el plan actual, 0); uso en la semilla 21001: fig_ovalo_secuencia_publicada.txt
+% ("28 de Julio y Balboa -> Giros de Reducto 1") y fig_ovalo_secuencia_alta.txt (ese paso no aparece)
+
+\noindent\textbf{Resultado.} Frente al fijo ajustado al segundo
+(Sección~\ref{sec:lima-nudo}), la variante recibe MEJORA con la demanda
+publicada: el IC95 queda entero bajo cero, pero no llega al 5\,\% de la
+regla y tiene un 6.3 y un 6.4\,\% más de retraso que el actuado
+ajustado. Con la alta recibe FALLA, con el entrenamiento sin
+estabilizar. Frente al modelo de orden fijo tiene un 6.3\,\% más de
+retraso con la demanda publicada y un 51.3 y un 50.3\,\% más con la
+alta, más que la variación entre entrenamientos
+(Tabla~\ref{tab:lima-orden}). Frente al plan actual baja el retraso un
+18.3 y un 19.1\,\% con la demanda publicada, y un 23.6 y un 25.5\,\% con
+la alta. Con otro reparto de la demanda tiene entre un 22 y un 61\,\%
+menos de retraso que los dos planes fijos, y entre un 4 y un 13\,\% más
+que el actuado ajustado y que el modelo (Tabla~\ref{tab:lima-robustez}).
+% fuente: nudo_ovalo_estudio2/salidas_ovalo/veredicto_ovalo.md (publicada: libre_s42 frente al fijo -3.43 [-4.56, -2.38]
+% y -3.64 [-4.64, -2.65], frente al actuado ajustado +6.33 [+5.45, +7.22] y +6.40 [+5.46, +7.37]: MEJORA en las dos
+% tandas; frente al de orden fijo, completo_s2042, +6.32 [+5.41, +7.22] y +6.31 [+5.41, +7.19]; media de los tres libres
+% menos la de los tres de orden fijo +4.84 y +4.91 s/veh, rango mayor 3.57 y 4.52; frente al plan actual -18.33 y
+% -19.14; alta: libre_s2042 frente al fijo +55.02 [+51.81, +58.18] y +55.11 [+52.17, +57.98], FALLA, sin estabilizar,
+% tendencia +7.07 %; frente al de orden fijo, completo_s4042, +51.31 y +50.27; medias +70.49 y +66.46 s/veh, rango
+% mayor 18.70 y 15.94; frente al plan actual -23.60 y -25.49) y "Prueba de robustez del reparto" (libre_s42: mas carga
+% en Reducto, 72.05 frente a plan actual 91.85 (-21.56 %), fijo 97.21 (-25.88 %), actuado ajustado 69.28 (+4.00 %) y
+% modelo de orden fijo 68.06 (+5.86 %); mas carga en 28 de Julio y Balboa, 102.82 frente a 263.24 (-60.94 %), 158.79
+% (-35.25 %), 90.73 (+13.32 %) y 91.13 (+12.83 %))
+
+% fuente: secciones/tablas/ovalo_orden.tex (nudo_ovalo_estudio2/tablas_ovalo.py): salidas/eval_t*_libre_s*.csv y
+% eval_t*_completo_s*.csv; regla de lectura: lima/REGISTRO.md, enmienda del 18.11.2026, 11:03, comparacion (2), y
+% "Correccion de los programas de evaluacion del ovalo" (11:33: la diferencia tiene que ir en el sentido de la
+% etiqueta)
 \begin{table}[!tbp]
 \setstretch{1}
 \centering
 \footnotesize
 \setlength{\tabcolsep}{3pt}
-\input{secciones/tablas/lima_robustez}
-\caption[Caso Lima, el nudo: otro reparto de la demanda]{Caso Lima, el nudo: retraso total por vehículo (s/veh) con el mismo total de 4271~veh/h repartido de otra forma entre las entradas, y cambio del modelo frente a cada control. Ningún control se volvió a ajustar ni a entrenar. En la segunda fila, las dos entradas de Reducto llevan un 20\,\% más y las otras dos un 20\,\% menos, antes de reescalar al mismo total; en la tercera, al revés. 100 semillas.}
-\label{tab:lima-robustez}
+\resizebox{\textwidth}{!}{\input{secciones/tablas/ovalo_orden}}
+\caption[Caso Lima, el nudo: la variante de orden libre frente al modelo]{Caso Lima, el nudo: la variante de orden libre frente al modelo de orden fijo, en la misma red. Retraso total de los entrenamientos citados en las dos tandas, cambio de la variante frente al modelo, con su IC95 y el valor $p$ de la prueba de Wilcoxon pareada, y media por semilla de los tres entrenamientos de cada uno, con el rango entre ellos entre paréntesis. Si la diferencia entre las dos medias no supera el mayor rango en las dos tandas, la diferencia no se distingue de la variación entre entrenamientos.}
+\label{tab:lima-orden}
 \end{table}
+
+\noindent\textbf{Qué hace.} La Figura~\ref{fig:lima-secuencia} da seis
+minutos de luces del modelo y de la variante con una misma semilla de
+validación. El modelo recorre los estados en el orden del plan; la
+variante repite una secuencia que el plan no tiene. Con la demanda
+publicada da casi siempre dos verdes a Reducto de frente por cada tramo
+con todo en rojo: Reducto de frente, giros, Reducto de frente durante
+10~s, todo en rojo, y 28 de Julio con Balboa. Con la alta intercala dos
+veces los giros, con 10~s cada vez: Reducto de frente, giros, Reducto de
+frente, giros, todo en rojo, y 28 de Julio con Balboa. En la hora de esa
+semilla da 44 y 42 verdes a Reducto de frente, frente a 27 y 22 del
+modelo.
+% fuente: figuras/salida/fig_ovalo_secuencia_publicada.txt y fig_ovalo_secuencia_alta.txt de tesis_ovalo_2026-11-19
+% (secuencia_ovalo_tesis.py: figura_secuencia.dibujar de nudo_ovalo_estudio2 sobre las mismas trazas, con los mismos
+% tramos que salidas_ovalo/fig_ovalo_secuencia_*.txt; semilla de validacion 21001, entrenamientos citados): publicada,
+% variante 90 verdes en la hora (Reducto de frente 44), pasos giros -> Reducto de frente 21; modelo 81 verdes (27, 27 y
+% 27); alta, variante 103 verdes (Reducto de frente 42; giros 40, 10.0 s), pasos Reducto de frente -> giros 40 y giros
+% -> Reducto de frente 20; modelo 65 verdes (22, 22 y 21)
+
+% fuente: figuras/salida/fig_ovalo_secuencia_publicada.pdf y fig_ovalo_secuencia_alta.pdf de tesis_ovalo_2026-11-19
+% (secuencia_ovalo_tesis.py), copiadas a images/
+\begin{figure}[!tbp]
+\centering
+\subfigure[Demanda publicada.]{\includegraphics[width=\textwidth]{fig_ovalo_secuencia_publicada.pdf}}
+\subfigure[Demanda alta.]{\includegraphics[width=\textwidth]{fig_ovalo_secuencia_alta.pdf}}
+\caption[Caso Lima, el nudo: la secuencia de luces]{Caso Lima, el nudo: secuencia de luces del modelo de orden fijo y de la variante de orden libre entre los minutos 30 y 36 de la hora punta, con la semilla de validación 21001 y el entrenamiento citado de cada uno. Cada tramo es un verde, con su color según el estado y sus segundos encima, el ámbar de 3~s o los 34~s con todo en rojo; los tramos de los bordes siguen fuera de la ventana.}
+\label{fig:lima-secuencia}
+\end{figure}
+
+\noindent\textbf{Por qué no ayudó.} Un análisis aparte, posterior a la
+evaluación y sin efecto en ningún veredicto, ubica la diferencia con
+semillas de prueba que no son del estudio. Con
+la demanda alta, la variante cambia de fase entre 121 y 128 veces por
+episodio, frente a 76 a 79 del modelo, y da a los giros a la izquierda
+de Reducto 40 verdes de 10~s por hora, frente a 22 de unos 20~s, con
+casi el mismo verde total. Como cada verde empieza con vehículos
+detenidos que arrancan, uno de 10~s deja pasar unos 7 vehículos de
+Reducto norte hacia el puente, y uno de 20 a 29~s, unos 18. La variante
+atiende un 13 a 16\,\% menos de esos dos giros, y sus colas crecen
+durante toda la hora: a los 60~minutos esperan 70 y 65 vehículos,
+frente a 15 y 20. Esos dos giros explican el 69\,\% de la diferencia de
+retraso. Con la demanda publicada, la diferencia viene del giro del
+puente hacia Reducto sur,
+que pasa unos 2.7 vehículos por cada verde de 28 de Julio y Balboa: la
+variante da 23.5 de esos verdes por hora, y el modelo, 27.5. Con 20~s de
+verde mínimo para los giros, sin reentrenar, el retraso de la variante
+con la alta sube un 21\,\%: lo que pesa es cuántas veces cambia de fase.
+El análisis no encontró un error de programa: ningún estado pasó el
+tope de rojo y, medida con la propia recompensa del entrenamiento, la
+variante también queda por detrás del modelo, en 15 de 16 corridas.
+% fuente: revision_orden_libre_2026-11-19/ANALISIS.md (comprobacion aparte del 19.11.2026, sobre copias y sin tocar
+% nudo_ovalo_estudio2; no es parte del estudio registrado): seccion 2 (las 200 semillas de las dos tandas: cambios de
+% luz por episodio, orden fijo 76 a 79 y libre 121 a 128 con la alta); seccion 3b (diag_cuello.py, 4 semillas de
+% prueba 424331-424334: giros de Reducto con la alta, 22 verdes y 430 s frente a 40 verdes de 10-11 s y 398 s;
+% vehiculos por verde de Reducto norte hacia el puente 18.4 en verdes de 20-29 s, 13.5 en 12-19 s y 7.1 en 10-11 s;
+% atendidos 338 frente a 283 y 346 frente a 301 (-16.3 y -13.0 %); esperando al minuto 60, 15 y 20 frente a 70 y 65;
+% con la publicada, el giro del puente a Reducto sur pasa 2.7 por verde de 28 de Julio y Balboa, 27.5 frente a 23.5
+% verdes por hora); seccion 3 (8 semillas de prueba 424331-424338: con la alta, los giros izquierdos de Reducto suman
+% +26.29 y +19.99 de +66.93 s/veh, el 69 %); seccion 3c (diag_minimo.py y min_giro.py, 8 semillas de prueba: verde
+% minimo de 20 s, alta, libre 194.4 -> 236.0 s/veh, +21.4 %); seccion 4 (tope de rojo sin excesos; con la recompensa
+% de entrenamiento, el libre peor en 7 de 8 semillas con la publicada y 8 de 8 con la alta)
+
+Es el mecanismo que describen Wang et al.\ \citep{Wang2022_SwitchingLoss}:
+como cada cambio de fase pierde tiempo, con más demanda conviene cambiar
+menos, y un control que no cuenta esa pérdida cambia demasiado y deja
+crecer las colas. Las revisiones de aprendizaje por refuerzo advierten
+el mismo riesgo: cambiar de fase con demasiada frecuencia reduce el verde
+efectivo \citep{Wei2019_Survey}. En simulaciones con transiciones de 3 a
+5~s, elegir la fase da, en cambio, mejores resultados que seguir un
+orden \citep{Ibrokhimov2022_BiasedPressure}; en el óvalo, cada cambio
+cuesta 3~s de ámbar y, antes de 28 de Julio y Balboa, 34~s con todo en
+rojo. Además, IPPO es inestable y necesita muchos más episodios que
+otros métodos para converger \citep{Ault2021_RESCO}. El resultado vale
+para esta red del óvalo y esta forma de elegir el orden: no dice que en
+el cruce real elegir el orden de los estados no pueda reducir el
+retraso.
+% fuente: revision_orden_libre_2026-11-19/literatura.md, seccion (c), solo lo marcado como citable: Wang, Yin, Feng y
+% Liu 2022, TR-C 140:103670 ("the phase switching frequency should decrease with the increase of the traffic demand";
+% el max-pressure sin perdida por cambio "could lead to very frequent switching so that the traffic demand cannot be
+% served and the queue built up quickly"), verificado en el manuscrito aceptado (par.nsf.gov), p. 2; Wei et al. 2019,
+% arXiv:1904.08117, sec. 4.2.2 ("flickering ... the effective green time ... might be reduced"); Ibrokhimov et al.
+% 2022, Sensors 22(7):2818 (el no ciclico supera al ciclico en todas las configuraciones, con 3 s de ambar); RESCO
+% (Ault y Sharon 2021): "IPPO demonstrates significant instability" y "require much more training episodes to converge
+% (about 1,400 as opposed to 100 by IDQN and MPLight)". No se escribe que la literatura muestre peor rendimiento del
+% orden libre en saturacion: no hay fuente (literatura.md, "No citar"). Lo que no se puede afirmar:
+% diagnostico_orden_ovalo_2026-11-18/DIAGNOSTICO.md, seccion 11 (sin citar sus mediciones, hechas con los carriles de
+% antes)
 
 % los flotantes del nudo se colocan antes de que empiece la parte del corredor
 \clearpage
@@ -356,8 +667,9 @@ mismo total (Sección~\ref{sec:lima-nudo}).
 El corredor es el tramo de 1.2~km de la Av.~Alfredo Benavides que va de
 la Av.~José Larco a la Av.~República de Panamá, en Miraflores, unos
 450~m al norte del nudo. Cruza por un puente la Vía Expresa y tiene seis
-cruces con semáforo (Figura~\ref{fig:corredor-mapa}, en el
-Capítulo~\ref{cap:resultados}, y Tabla~\ref{tab:corredor-cruces}). Por
+cruces con semáforo (Figuras~\ref{fig:corredor-mapa}
+y~\ref{fig:corredor-satelite}, en el Capítulo~\ref{cap:resultados}, y
+Tabla~\ref{tab:corredor-cruces}). Por
 la avenida pasan unas 20 rutas de transporte público
 \citep{Miraflores2017_PMU}.
 % fuente: lima/corredor/corredor.py (CRUCES: de 0 a 1228 m); distancia al nudo: latitud de la avenida (-12.1250)
@@ -376,67 +688,104 @@ la avenida pasan unas 20 rutas de transporte público
 \caption[Caso Lima, el corredor: los seis cruces]{Caso Lima, el corredor: los seis cruces con semáforo, de oeste a este. Los carriles y los sentidos salen de OpenStreetMap. Las dos últimas columnas comparan lo que entra a cada cruce en el escenario con el volumen publicado para la hora punta de la mañana.}
 \label{tab:corredor-cruces}
 \end{table}
-% fuente: secciones/tablas/corredor_cruces.tex (lima/corredor/tablas_corredor.py): corredor.py (CRUCES, CARRILES_AV,
-% TRANSVERSAL, PUBLICADO, totales_por_cruce); Plan de Movilidad Urbana de Miraflores 2017-2020, pag. 31 (Larco /
-% Benavides 3,390 AM; Paseo Republica / Benavides 3,778 AM; Benavides / Rep. Panama 4,358 AM)
+% fuente: secciones/tablas/corredor_cruces.tex (corredor_estudio2/demo_rl/lima/corredor/tablas_corredor.py):
+% corredor.py (CRUCES, SOLO_NORTE, CARRILES_AV, TRANSVERSAL, PUBLICADO, totales_por_cruce); Plan de Movilidad Urbana
+% de Miraflores 2017-2020, pag. 31 (Larco / Benavides 3,390 AM; Paseo Republica / Benavides 3,778 AM; Benavides /
+% Rep. Panama 4,358 AM)
 
 De OSM se tomaron la posición de cada cruce, los carriles de la avenida
-y los carriles y el sentido de cada transversal. La red tiene cinco
-simplificaciones:
+y los carriles y el sentido de cada transversal
+(Tabla~\ref{tab:corredor-cruces}). La Av.~Casimiro Ulloa
+llega a la avenida solo desde el norte: ese cruce es en T. La red tiene
+cinco simplificaciones:
 \begin{itemize}
   \item \textbf{La avenida, recta.} La avenida se dibuja recta y las
     transversales, perpendiculares: se conservan las distancias y los
     carriles, no la forma.
   \item \textbf{Un solo cruce en el puente.} Las dos vías auxiliares de
-    la Vía Expresa (Av.~Paseo de la República), separadas unos 55~m, se
-    tratan como un solo cruce.
+    la Vía Expresa (Av.~Paseo de la República), separadas unos 62~m, se
+    tratan como un solo cruce, de doble sentido. En la calle son dos
+    cruces de un solo sentido, y el tramo de la avenida entre ellos,
+    sobre el puente, puede llenarse.
   \item \textbf{Solo los cruces con semáforo.} Las calles menores que
     llegan a la avenida sin semáforo no están en la red.
   \item \textbf{Giros.} Desde la avenida se puede seguir de frente o
     girar a la derecha. Desde una transversal, seguir de frente, girar a
-    la derecha y, si es de un solo sentido, también a la izquierda.
+    la derecha y, si es de un solo sentido, también a la izquierda; desde
+    Casimiro Ulloa, girar a la derecha o a la izquierda. Según
+    OSM, en la calle se puede girar a la izquierda desde la avenida en
+    cinco de los seis cruces. Sin esos giros, ningún movimiento con verde
+    tiene que ceder el paso a otro.
   \item \textbf{Entradas de 600~m.} Cada entrada a la red mide 600~m,
     para que la cola quepa dentro y se mida entera, como en el nudo.
 \end{itemize}
-% fuente: lima/corredor/corredor.py (cabecera, armar: conexiones; ENTRADA = 600); calles sin semaforo en OSM entre
-% Larco y Republica de Panama: Grimaldo del Solar, Ramon Ribeyro, Juan de la Fuente, Julian Arias Araguez y
-% Francisco de Paula Ugarriza
+% fuente: corredor_estudio2/demo_rl/lima/corredor/corredor.py (cabecera, armar: conexiones, SOLO_NORTE; ENTRADA =
+% 600); calles sin semaforo en OSM entre Larco y Republica de Panama: Grimaldo del Solar, Ramon Ribeyro, Juan de la
+% Fuente, Julian Arias Araguez y Francisco de Paula Ugarriza; cruce en T y carriles al oeste de Larco: OSM del
+% corredor bajado el 19.11.2026 (revision_corredor_2026-11-19/red_demanda/osm_descarga/benavides_corredor.osm.xml:
+% todas las vias de Casimiro Ulloa quedan al norte de la avenida; Benavides al oeste de Larco, vias 406007422 y
+% 279893831, lanes=2); giros a la izquierda en la calle y los dos cruces de Paseo de la Republica:
+% revision_corredor_2026-11-19/red_demanda/INFORME.md, puntos 1.3 y 1.4 (solo Larco prohibe la izquierda desde la
+% avenida, restriccion 6085098; cruces de Paseo a 545.9 y 608.0 m de Larco, 62.1 m entre si; en la vista de mapa de
+% Google, 61.2 m entre los ejes de las dos laterales: tesis_ovalo_2026-11-19/figuras/satelite_corredor.py; el texto
+% decia "unos 55 m" hasta el 20.11.2026); en los seis cruces de la red ningun par
+% de movimientos con verde esta en conflicto: lima/REGISTRO.md, enmienda del 19.11.2026, 17:35 (estudio 2 del
+% corredor; copia en corredor_estudio2/enmienda_registro_corredor.md)
 
 \subsection*{El corredor: los semáforos}
 
-Los semáforos del corredor no se midieron. Cada cruce tiene dos estados
+Cada cruce tiene dos estados
 con verde, uno para la avenida y otro para la transversal, y 3~s de
-ámbar tras cada uno. Todos los controles usan esos dos estados: cambia
-cuánto dura cada verde y, en los planes fijos, el desfase entre cruces.
-El verde mínimo es de 10~s.
+ámbar tras cada uno, sin todo rojo. Todos los controles usan esos dos
+estados: cambia cuánto dura cada verde y, en los planes fijos, el
+desfase entre cruces.
+
+Cada verde dura al menos lo que necesita un peatón que empieza a cruzar
+con él para llegar al otro lado antes de que termine el ámbar: 3.2~s
+para empezar a cruzar y el ancho de la calle a 1.2~m/s, los valores del
+Highway Capacity Manual \citep{TRB2000_HCM}, menos los 3~s de ámbar, y
+nunca menos de 10~s. Con el verde de la transversal se cruza la avenida,
+y con el de la avenida, la transversal. El ancho sale de OSM: 3.3~m por
+carril, más el separador de la avenida. Así, el verde de la transversal
+dura al menos de 17 a 20~s, según el cruce, y el de la avenida, de 10 a
+12~s. Estos mínimos valen para todos los controles, incluido el modelo.
 \begin{itemize}
-  \item \textbf{Plan típico.} Hace el papel del plan que opera hoy, pero
-    es un supuesto de los autores, con tiempos del orden de los medidos
-    en el nudo: verdes de 30 a 50~s y rojos de 90 a 120~s. Da a cada
-    transversal 43~s de verde y 97~s de rojo, con un ciclo de 140~s,
-    igual en los seis cruces y sin coordinación entre ellos. La avenida
-    recibe los 91~s restantes.
+  \item \textbf{Plan típico.} Como plan actual se usa un plan típico de
+    Lima, con verdes de 30 a 50~s y rojos de 90 a 120~s, del orden de los
+    medidos en el nudo. Da a cada transversal 43~s de verde y 97~s de
+    rojo, con un ciclo de 140~s, igual en los seis cruces y sin
+    coordinación entre ellos. La avenida recibe los 91~s restantes.
   \item \textbf{Fijo ajustado al segundo.} Se busca como en el nudo, con
     más incógnitas: el ciclo, común a los seis cruces, el verde de la
     transversal de cada cruce y el desfase de cada cruce respecto del
-    primero. La búsqueda parte del plan típico y de ciclos de 32 a 90~s,
-    con y sin onda verde, y afina cada tiempo hasta 1~s. La
-    Tabla~\ref{tab:corredor-planes} da el plan que resulta.
+    primero. La búsqueda parte del plan típico y de ciclos de 40 a
+    100~s, con y sin onda verde (en un sentido o en los dos), y afina
+    cada tiempo hasta 1~s. La Tabla~\ref{tab:corredor-planes} da el plan
+    que resulta.
   \item \textbf{Actuado ajustado.} El control actuado de SUMO en cada
     cruce, con sus parámetros ajustados como en el segundo estudio
     (Sección~\ref{sec:referencias-fijas}), incluidas sus dos variantes
-    coordinadas, que siguen el ciclo y los desfases del fijo ajustado.
+    coordinadas, que siguen el ciclo y los desfases del fijo ajustado al
+    segundo.
 \end{itemize}
-% fuente: lima/corredor/corredor.py (PLAN_TIPICO, AMBAR, VERDE_MIN, estados, escribir_programa) y
-% estudio_corredor.py (ajustar_fijo: partidas con el plan tipico y ciclos de 50, 60, 70 y 90 s con verdes iguales,
-% y de 32, 36, 40, 44 y 48 s con el verde repartido segun la carga de cada cruce (reparto_por_carga), sin desfases
-% y con onda verde a 12 m/s en cada sentido; descenso por coordenadas con pasos de 8, 4, 2 y 1 s; 10 semillas por
-% candidato, 2001-2010, y los diez mejores con 30, 2001-2030; ajustar_actuado: estudio.buscar_actuado, pasos en
-% cadena de hueco maximo, distancia del detector, umbral de atasco y verde maximo, variante por retraso y las dos
-% variantes coordinadas de plan3/actuado.py; los tres mejores con 30 semillas); lima/REGISTRO.md, enmiendas del
-% 14.11.2026 (actuado ajustado, 04:05 y 05:40; fijo ajustado del corredor, 05:50); rango del
-% plan tipico: indicacion de Fabian Alvarado del 13.11.2026; en el nudo se midieron verdes de 38 a 40 s y rojos
-% de 90 a 94 s
+% fuente: corredor_estudio2/demo_rl/lima/corredor/corredor.py (PLAN_TIPICO, AMBAR, VERDE_MIN, estados,
+% escribir_programa; verdes minimos de los peatones: ANCHO_PEATON, PEATON_INICIO = 3.2 s, PEATON_VEL = 1.2 m/s,
+% verde_peaton y VERDE_MIN_PEATON: avenida / transversal 10/17 s en Larco, 10/18 en Alcanfores, 10/20 en La Paz,
+% 12/19 en Paseo de la Republica, 12/18 en Casimiro Ulloa y 12/17 en Republica de Panama; anchos de 3.3 m por
+% carril mas el separador central, de OSM; en Larco, el lado este; en Paseo, el cruce oeste del puente; el modelo:
+% escenarios_lima.py, verde_min_tls, y rl_ippo.py); Highway Capacity Manual 2000, cap. 16, ecuacion 16-2 (3.2 s
+% para empezar a cruzar y 1.2 m/s; el termino por numero de peatones no se usa); estudio_corredor.py (ajustar_fijo:
+% partidas con el plan tipico y, en ciclos de 40, 44, 48, 52, 56, 60, 66, 72, 80, 90 y 100 s, el reparto de Webster
+% con los minimos de los peatones, sin desfases y con onda verde a 12 m/s hacia el este, hacia el oeste y en los dos
+% sentidos; se afinan las tres mejores partidas de ciclos distintos con descenso por coordenadas, pasos de 8, 4, 2 y
+% 1 s; 10 semillas por candidato, 2001-2010, y los diez mejores con 30, 2001-2030; ajustar_actuado:
+% estudio.buscar_actuado, pasos en cadena de hueco maximo (de 0.75 a 4 s), distancia del detector, umbral de atasco
+% y verde maximo (60 s, el doble del fijo, 30/20, 35/25 y 45/35 s), variante por retraso y las dos variantes
+% coordinadas de plan3/actuado.py; los tres mejores con 30 semillas); lima/REGISTRO.md, enmienda del 19.11.2026,
+% 17:35 (estudio 2 del corredor; copia en corredor_estudio2/enmienda_registro_corredor.md), que reemplaza para el
+% corredor la red, la demanda, los verdes minimos y las partidas de las enmiendas del 14.11.2026; rango del plan
+% tipico: indicacion de Fabian Alvarado del 13.11.2026; en el nudo se midieron verdes de 38 a 40 s y rojos de 90 a
+% 94 s
 
 \begin{table}[!tbp]
 \setstretch{1}
@@ -444,12 +793,12 @@ El verde mínimo es de 10~s.
 \footnotesize
 \setlength{\tabcolsep}{3pt}
 \input{secciones/tablas/corredor_planes}
-\caption[Caso Lima, el corredor: el fijo ajustado y lo que hace el modelo]{Caso Lima, el corredor: el fijo ajustado al segundo (verde de la avenida, verde de la transversal y desfase de cada cruce respecto del primero) y, al lado, el verde medio que da el modelo completo en cada cruce y su ciclo medio. El plan típico da 91~s a la avenida y 43~s a la transversal en todos los cruces, con un ciclo de 140~s.}
+\caption[Caso Lima, el corredor: el fijo ajustado al segundo y lo que hace el modelo]{Caso Lima, el corredor: el fijo ajustado al segundo (verde de la avenida, verde de la transversal y desfase de cada cruce respecto del primero) y, al lado, el verde medio que da el modelo completo en cada cruce y su ciclo medio. El plan típico da 91~s a la avenida y 43~s a la transversal en todos los cruces, con un ciclo de 140~s.}
 \label{tab:corredor-planes}
 \end{table}
-% fuente: secciones/tablas/corredor_planes.tex (lima/corredor/tablas_corredor.py): salidas/fijo_ajustado.json y
-% salidas/verdes_modelo.json de lima/corredor/ y lima/corredor/alta/ (del modelo, el entrenamiento citado en las
-% semillas de validacion 21001-21004)
+% fuente: secciones/tablas/corredor_planes.tex (corredor_estudio2/demo_rl/lima/corredor/tablas_corredor.py):
+% salidas/fijo_ajustado.json y salidas/verdes_modelo.json de corredor_estudio2/demo_rl/lima/corredor/ y alta/ (del
+% modelo, el entrenamiento citado en las semillas de validacion 21001-21004)
 
 \subsection*{El corredor: la demanda}
 
@@ -467,69 +816,84 @@ para reproducir esos tres totales:
   \item \textbf{Giros.} En cada cruce donde se puede, gira a la derecha
     un 5\,\% de lo que entró por ese extremo de la avenida. De cada
     transversal, un 15\,\% gira a la derecha y, si es de un solo
-    sentido, otro 15\,\% a la izquierda.
+    sentido, otro 15\,\% a la izquierda. De Casimiro Ulloa, la mitad
+    gira a la derecha y la otra mitad a la izquierda.
 \end{itemize}
-Con eso entran a la red 8706~veh/h, y lo que entra a cada uno de los
-tres cruces queda a menos de un 2\,\% del volumen publicado. Los
+Con eso entran a la red 7654~veh/h, y lo que entra a cada uno de los
+tres cruces coincide con el volumen publicado, a menos de 1~veh/h. Los
 vehículos llegan al azar, con la misma demanda media durante toda la
-hora, y son la mezcla de Lima del segundo estudio. La demanda alta es la
-misma multiplicada por 1.2 (10\,447~veh/h), como en el nudo.
-% fuente: lima/corredor/corredor.py (AVENIDA, TRANSVERSAL, SALE_DE_LA_AVENIDA, GIRA_DE_TRANSVERSAL, flujos,
-% totales_por_cruce: C1 3364 frente a 3390, C4 3852 frente a 3778, C6 4388 frente a 4358; total 8706);
-% Plan de Movilidad Urbana de Miraflores 2017-2020, pag. 31 (los tres en el periodo AM). El cuadro de la pag. 30
-% del mismo plan da 3,805 para Benavides / Larco; se uso el de la pag. 31, que es el de volumenes por periodo.
-% lima/REGISTRO.md, "Corredor: segundo nivel de demanda" (14.11.2026, 03:00)
+hora, y son la misma mezcla de Lima del nudo. La demanda alta es la
+misma multiplicada por 1.2 (9185~veh/h), como en el nudo.
+% fuente: corredor_estudio2/demo_rl/lima/corredor/corredor.py (AVENIDA, TRANSVERSAL, IZQUIERDA_T = 0.5,
+% SALE_DE_LA_AVENIDA, GIRA_DE_TRANSVERSAL, flujos: total 7654; totales_por_cruce: C1 3390.5 frente a 3390, C4
+% 3778.8 frente a 3778, C6 4357.9 frente a 4358); Plan de Movilidad Urbana de Miraflores 2017-2020, pag. 31 (los
+% tres en el periodo AM). El cuadro de la pag. 30 del mismo plan da 3,805 para Benavides / Larco; se uso el de la
+% pag. 31, que es el de volumenes por periodo. lima/REGISTRO.md, "Corredor: segundo nivel de demanda" (14.11.2026,
+% 03:00) y enmienda del 19.11.2026, 17:35 (Larco 934, Paseo de la Republica 612 y Republica de Panama 898 veh/h por
+% sentido, elegidos para llegar al total publicado; Casimiro Ulloa 500, la mitad hacia cada lado, supuesto)
 
 \subsection*{El corredor: lo que el escenario no reproduce}
 
 \begin{itemize}
-  \item \textbf{Los semáforos reales.} El plan típico es un supuesto: no
-    se conocen los tiempos, los estados ni la coordinación que hoy
+  \item \textbf{Los semáforos reales.} El plan típico hace su papel: no
+    se midieron los tiempos, los estados ni la coordinación que hoy
     tienen esos seis cruces.
+    % Asesoria del 20.11.2026: Fabian pidio tratar el plan tipico como el plan actual, sin repetir que es un supuesto.
+    % Se dejo esta sola linea factual, en el anexo, para que la tesis no afirme que se midio.
   \item \textbf{El reparto de la demanda.} Solo el total de tres cruces
     es un dato; el reparto entre calles y entre giros es un supuesto.
-  \item \textbf{Los giros a la izquierda desde la avenida}, los
-    paraderos, los peatones y las calles sin semáforo.
+  \item \textbf{Los peatones.} No se simulan; solo se respeta el verde
+    que necesitan para cruzar.
+  \item \textbf{Los giros a la izquierda desde la avenida, el todo
+    rojo}, los paraderos y las calles sin semáforo.
   \item \textbf{La variación de la demanda} dentro de la hora y de un
     día a otro.
 \end{itemize}
-Por eso, también aquí, el retraso simulado sirve para comparar controles
+Como en el nudo, el retraso simulado sirve para comparar controles
 entre sí y no para predecir el retraso real del corredor.
-% fuente: lima/REGISTRO.md, "Segundo caso: corredor de la Av. Benavides", limite conocido
+% fuente: lima/REGISTRO.md, "Segundo caso: corredor de la Av. Benavides", limite conocido, y enmienda del
+% 19.11.2026, 17:35 (verdes minimos de los peatones; sin todo rojo, como antes)
 
 \subsection*{El corredor: resultados completos}
 
-La Tabla~\ref{tab:corredor-completa} da el retraso de todos los
-controles y el cambio del modelo frente a cada uno, con su intervalo de
-confianza.
-
-Las dos referencias ajustadas se buscaron dos veces, porque la primera
-búsqueda dejaba una referencia débil:
+La Tabla~\ref{tab:corredor-completa} da todos los controles, con el
+IC95 de cada cambio. Las dos referencias ajustadas salen de una sola
+búsqueda para cada demanda, terminada antes de evaluar el modelo en las
+tandas:
 \begin{itemize}
-  \item \textbf{Fijo ajustado.} La primera búsqueda partió de ciclos de
-    50~s o más y terminó en un ciclo de 55~s. Como el modelo usa ciclos
-    de 30 a 39~s, se añadieron partidas con ciclos de 32 a 48~s. El
-    mejor plan pasó a tener un ciclo de 46~s, con un 2\,\% menos de
-    retraso.
-  \item \textbf{Actuado ajustado.} Como en el nudo, la primera búsqueda
-    probó 12 combinaciones y su ganador quedó en el borde de lo probado.
-    Se repitió con los pasos del segundo estudio. Ganó el actuado sin
-    coordinar, con un hueco de 1~s entre vehículos; las dos variantes
-    coordinadas dieron entre un 4 y un 6\,\% más de retraso. Como 1~s
-    es el hueco más corto probado, se probó también 0.5~s, y no mejoró.
+  \item \textbf{Fijo ajustado al segundo.} Gana un ciclo de 52~s con la
+    demanda publicada y de 84~s con la alta, con un desfase propio en
+    cada cruce (Tabla~\ref{tab:corredor-planes}). El verde de cada
+    transversal queda en el mínimo de los peatones o 1~s por encima con
+    la publicada, y por encima de ese mínimo, de 24 a 33~s, con la alta.
+  \item \textbf{Actuado ajustado.} Con las dos demandas gana la misma de
+    las dos variantes coordinadas: sigue el ciclo y los desfases del
+    fijo ajustado al segundo, la avenida termina siempre cuando termina
+    en el plan fijo, y la transversal puede cortar antes si no llegan
+    vehículos. Con la publicada sostiene el verde mientras los vehículos
+    llegan con menos de 1.5~s entre uno y otro, con el detector a 2~s de
+    recorrido de la línea de parada, sin umbral de atasco y con verdes
+    máximos de 45~s en la avenida y 35~s en la transversal; con la alta,
+    con 1.25~s, el detector a 2~s, un umbral de atasco de 30~s y verdes
+    máximos de 60~s. Sin coordinar, el mejor actuado tiene un 13\,\% más
+    de retraso con cada demanda.
 \end{itemize}
-La tabla conserva las referencias de la primera búsqueda. Frente a
-ellas, el modelo bajaba el retraso un 11\,\% (fijo) y un 12\,\%
-(actuado); frente a las definitivas, un 9 y un 8\,\%. El veredicto se
-calcula con las definitivas.
-% fuente: lima/REGISTRO.md, enmiendas del 14.11.2026 (actuado ajustado, 04:05; variantes coordinadas, 05:40; fijo
-% ajustado del corredor, 05:50); salidas/fijo_ajustado_primera.json (ciclo 55 s, 35.74 s/veh con 30 semillas) y
-% fijo_ajustado.json (ciclo 46 s, 34.92); salidas/actuado_ajustado.json (ganador: hueco 1 s, detector 2 s, umbral de
-% atasco 10 s, verde maximo 60 s, 34.82 s/veh con 30 semillas; con 10 semillas, sin coordinar 34.87, coordinado con
-% el fijo 37.10 y con fin fijo 36.37) y actuado_ajustado_rejilla12.json; filas "primera busqueda" de la tabla
-% (eval_t*_fijo55.csv: -10.93 y -10.99 %; eval_t*_actuadoaj12.csv: -11.77 y -11.46 %); comprobacion del borde
-% (REGISTRO.md, 14.11.2026, 15:55; salidas/borde_actuado.json): hueco 0.5 s 36.33 y variante por retraso con 0.5 s
-% 34.92, frente a 34.87 del ganador, con 10 semillas
+% fuente (alta): corredor_estudio2/demo_rl/lima/corredor/alta/salidas/fijo_ajustado.json (ciclo 84 s, transversales
+% [24, 33, 29, 27, 27, 31], desfases [0, 1, 0, 41, 43, 4], 60.63 s/veh con 30 semillas, 682 planes evaluados) y
+% actuado_ajustado.json (ganador: actuado de SUMO, max-gap 1.25 s, detector-gap 2.0 s, umbral de atasco 30 s, verdes
+% maximos de 60 s, variante coordinada "fin fijo"; 61.04 s/veh con 30 semillas; el mejor sin coordinar, 68.81, +12.7 %;
+% la otra variante coordinada, 65.59; el actuado por defecto, 134.87); logs/referencias_alta.log
+% fuente: corredor_estudio2/demo_rl/lima/corredor/salidas/fijo_ajustado.json (ciclo 52 s, transversales [17, 18,
+% 20, 20, 18, 18], desfases [0, 27, 26, 0, 51, 0], 41.09 s/veh con 30 semillas, 441 planes evaluados; minimos de
+% los peatones de la transversal, corredor.VERDE_MIN_PEATON: 17, 18, 20, 19, 18 y 17 s) y actuado_ajustado.json
+% (ganador: actuado de SUMO, max-gap 1.5 s, detector-gap 2.0 s, sin umbral de atasco, verdes maximos de 45 s en la
+% avenida y 35 s en la transversal, variante coordinada "fin fijo" de plan3/actuado.py: la avenida termina en su fin
+% del plan fijo y la transversal no pasa del suyo; 40.96 s/veh con 30 semillas; el mejor sin coordinar, 46.30 con
+% 30, +13.0 %; la otra variante coordinada, 44.91; el actuado por defecto, 52.29); logs/referencias_publicada.log
+% (partidas y descensos); lima/REGISTRO.md, enmienda del 19.11.2026, 17:35 (copia en
+% corredor_estudio2/enmienda_registro_corredor.md); busqueda terminada antes de las tandas del modelo:
+% corredor_estudio2/evaluar_nivel.sh (paso 1: espera las tandas de las referencias; paso 2: las del modelo), como en
+% capitulo3.tex, sec:diseno-segundo
 
 \begin{table}[!tbp]
 \setstretch{1}
@@ -540,36 +904,40 @@ calcula con las definitivas.
 \caption[Caso Lima, el corredor: todos los controles]{Caso Lima, el corredor: retraso total por vehículo de cada control en las dos tandas de evaluación, de 100 semillas cada una, y cambio del modelo completo frente a cada control (\%), con su IC95 y el valor $p$ de la prueba de Wilcoxon pareada. Un cambio negativo es menos retraso con el modelo.}
 \label{tab:corredor-completa}
 \end{table}
-% fuente: secciones/tablas/corredor_completa.tex (lima/corredor/tablas_corredor.py), que lee
-% lima/corredor/salidas/eval_t1_*.csv y eval_t2_*.csv
+% fuente: secciones/tablas/corredor_completa.tex (corredor_estudio2/demo_rl/lima/corredor/tablas_corredor.py), que lee
+% salidas/eval_t1_*.csv y eval_t2_*.csv de corredor_estudio2/demo_rl/lima/corredor/ y alta/
 
 Se entrenaron tres modelos, tres veces cada uno
 (Tabla~\ref{tab:corredor-entrenamientos}); de cada modelo se cita el
-entrenamiento de validación mediana. Con la demanda publicada se
-estabilizaron los nueve entrenamientos; con la alta, los tres del modelo
-completo y dos de los otros seis. Las curvas de aprendizaje están en el
-Capítulo~\ref{cap:resultados} (Figura~\ref{fig:corredor-aprendizaje}).
-% fuente: salidas/val_referencias.json (fijo 34.59 y actuado ajustado 34.02 s/veh en las semillas de validacion);
-% val_elegido de los modelos de 200 episodios: de 34.2 a 34.5; del modelo completo: de 31.2 a 31.3
+entrenamiento de validación mediana. Sus curvas de aprendizaje, con su
+lectura y su estabilidad, están en el Capítulo~\ref{cap:resultados}
+(Figura~\ref{fig:corredor-aprendizaje}).
+% fuente: corredor_estudio2/demo_rl/lima/corredor/salidas/val_referencias.json (fijo 40.81 y actuado ajustado 40.43
+% s/veh en las semillas de validacion); val_elegido de los modelos de 200 episodios: IPPO con mensajes corregido de
+% 42.4 a 42.5, IPPO sin mensajes corregido de 43.9 a 44.3; del modelo completo, de 38.9 a 39.2; alta:
+% alta/salidas/val_referencias.json (fijo 57.77 y actuado ajustado 58.66); modelo completo de 53.0 a 54.0, IPPO con
+% mensajes corregido de 61.6 a 69.8, IPPO sin mensajes corregido de 65.7 a 77.2; estabilidad:
+% secciones/tablas/corredor_entrenamientos.tex (veredicto.convergencia sobre val_total: con la alta, los tres del
+% modelo completo y dos de IPPO sin mensajes corregido; ninguno de IPPO con mensajes corregido)
 
 \begin{table}[!tbp]
 \setstretch{1}
 \centering
 \footnotesize
 \setlength{\tabcolsep}{3pt}
+\setlength{\belowrulesep}{0.4ex}% 19 filas con linea entre ellas: asi cabe en la pagina
 \input{secciones/tablas/corredor_entrenamientos}
 \caption[Caso Lima, el corredor: los entrenamientos de los tres modelos]{Caso Lima, el corredor: los tres entrenamientos de cada modelo. La versión evaluada de cada uno es la de menor retraso total en las cuatro semillas de validación; el entrenamiento citado es el de validación mediana entre los tres. La última columna aplica la regla de estabilidad de la Tabla~\ref{tab:veredictos}.}
 \label{tab:corredor-entrenamientos}
 \end{table}
-% fuente: secciones/tablas/corredor_entrenamientos.tex (lima/corredor/tablas_corredor.py):
+% fuente: secciones/tablas/corredor_entrenamientos.tex (corredor_estudio2/demo_rl/lima/corredor/tablas_corredor.py):
 % politica_benavides_<modelo>_s<base>.json (ep_elegido y val_elegido), salidas/eval_t*_*.csv y la columna val_total
-% de resultados_benavides_ippo_<modelo>_s<base>.csv
+% de resultados_benavides_ippo_<modelo>_s<base>.csv, de cada nivel
 
 
 La Tabla~\ref{tab:corredor-robustez} repite la evaluación con el mismo
-total repartido de otra forma, sin volver a ajustar ni a entrenar nada.
-El modelo conserva su ventaja frente a las tres referencias en los dos
-repartos.
+total repartido de otra forma; su lectura está en la
+Sección~\ref{sec:lima-corredor}.
 
 \begin{table}[!tbp]
 \setstretch{1}
@@ -577,12 +945,14 @@ repartos.
 \footnotesize
 \setlength{\tabcolsep}{3pt}
 \input{secciones/tablas/corredor_robustez}
-\caption[Caso Lima, el corredor: otro reparto de la demanda]{Caso Lima, el corredor: retraso total por vehículo (s/veh) con el mismo total de 8706~veh/h repartido de otra forma entre la avenida y las transversales, y cambio del modelo frente a cada control. Ningún control se volvió a ajustar ni a entrenar. En la segunda fila, lo que entra por los dos extremos de la avenida lleva un 20\,\% más y lo de las transversales un 20\,\% menos, antes de reescalar al mismo total; en la tercera, al revés. 100 semillas.}
+\caption[Caso Lima, el corredor: otro reparto de la demanda]{Caso Lima, el corredor: retraso total por vehículo (s/veh) con el mismo total de 7654~veh/h repartido de otra forma entre la avenida y las transversales, y cambio del modelo frente a cada control. Ningún control se volvió a ajustar ni a entrenar. En la segunda fila, lo que entra por los dos extremos de la avenida lleva un 20\,\% más y lo de las transversales un 20\,\% menos, antes de reescalar al mismo total; en la tercera, al revés. 100 semillas.}
 \label{tab:corredor-robustez}
 \end{table}
-% fuente: secciones/tablas/corredor_robustez.tex (lima/corredor/tablas_corredor.py): lima/corredor/robustez/avenida/
-% y robustez/transversal/, salidas/eval_t1_*.csv (semillas 24001-24100); lima/REGISTRO.md, "Corredor: prueba de
-% robustez del reparto" (14.11.2026, 03:25, antes de correrla)
+% fuente: secciones/tablas/corredor_robustez.tex (corredor_estudio2/demo_rl/lima/corredor/tablas_corredor.py):
+% corredor_estudio2/demo_rl/lima/corredor/robustez/avenida/ y robustez/transversal/, salidas/eval_t1_*.csv (semillas
+% 24001-24100; frente al fijo -4.22 y -14.34 %, frente al actuado ajustado -2.89 y -13.85 %, frente al plan tipico
+% -26.60 y -53.39 %); lima/REGISTRO.md, "Corredor: prueba de robustez del reparto" (14.11.2026, 03:25, antes de
+% correrla), que el estudio 2 repite con su red y su demanda (enmienda del 19.11.2026, 17:35)
 
 % los flotantes del Anexo D se colocan antes de que empiece el Anexo E
 \clearpage

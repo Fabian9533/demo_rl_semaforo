@@ -5,13 +5,19 @@
 % el primer estudio y la medicion mas estricta son los pasos previos. La version anterior (15 paginas, seis
 % conclusiones numeradas) queda en el tag entregado-2026-10-25.
 
+Las conclusiones siguen el orden de la introducción: la respuesta a la
+pregunta (si el modelo reduce el retraso), las metas y cada objetivo, la
+validez de los modelos y el alcance (hasta dónde llega). De qué depende
+el resultado se concluye con los objetivos U2 y U4 y con los límites de
+los modelos.
+
 \noindent\textbf{Respuesta.} La tesis preguntó si un control de
 semáforos que aprende con aprendizaje por refuerzo y recibe información
 de sus semáforos vecinos reduce el retraso por vehículo frente a un plan
 de tiempo fijo bien ajustado, sin quedar por detrás del control actuado.
 La respuesta es sí donde reaccionar al tráfico reduce el retraso.
 
-Con tráfico que llega al azar, y frente a un plan fijo ajustado al
+Con llegadas aleatorias, y frente a un plan fijo ajustado al
 segundo para cada caso, el modelo supera al fijo en tres de los seis
 casos: el corredor con sus dos demandas y la malla con demanda alta. En
 esos tres baja el retraso total entre un 16 y un 27\,\% y supera también
@@ -24,46 +30,52 @@ $-11.1$\,\% en la otra (Sección~\ref{sec:resultado-casos}).
 % veredicto3_celdas.csv (modelo citado, llegadas aleatorias: P1 -16.3 y -17.1; P2 -19.8 y -20.2, provisional; P6 -25.7
 % y -26.9; P3 +1.6 y +1.6; P4 -0.5 y 0.0; P5 +0.2 y +0.3)
 
-\noindent\textbf{Cómo se llegó a la respuesta.} Tras una fase
-exploratoria que fijó el método (Anexo~C), el primer estudio, con
-llegadas regulares, dio un resumen en un número de $-6.83$\,\% frente al
-fijo ajustado y de $-14.35$\,\% frente al actuado. Con una medición más
-estricta, la ventaja frente al fijo desapareció ($-0.03$\,\%) y frente
-al actuado se mantuvo. Un diagnóstico encontró después dos defectos del
-entrenamiento, que se corrigieron (Anexo~G). El segundo estudio, el paso
-más exigente, confirmó con llegadas regulares que un plan fijo bien
-ajustado es casi óptimo (el modelo empata con él, $-0.4$\,\%) y dio con
-llegadas aleatorias la respuesta anterior.
+Los dos casos de Lima se construyeron en Miraflores con la geometría
+real y con volúmenes publicados. En el corredor de seis cruces de la
+Av.~Benavides, el modelo baja el retraso total un 4\,\% frente al fijo ajustado al segundo y un
+3\,\% frente al actuado ajustado; con una demanda un 20\,\% mayor, un
+8\,\% frente a los dos. Esa ventaja viene de los mensajes entre cruces.
+En el nudo de la Av.~Reducto con la Av.~28 de Julio, el
+Óvalo Vasco, donde un solo controlador maneja cuatro cruces, el modelo
+baja el retraso un 9\,\% frente al fijo ajustado al segundo con la
+demanda publicada, con el mismo retraso que el actuado ajustado y el
+entrenamiento sin estabilizar, y tiene un 3\,\% más con la demanda alta,
+en la que el fijo usa verdes de 77~s que el modelo no puede dar. Frente
+al plan actual, medido en el sitio, lo baja un 23 a 24\,\% con la
+demanda publicada y un 50\,\% con la alta, y si la demanda se reparte de
+otra forma entre las calles, un 30 y un 43\,\% frente al fijo ajustado
+al segundo. Una variante que además elige el orden de los estados del
+semáforo, la que el protocolo citó, no ayudó en este cruce: MEJORA con
+la demanda publicada y FALLA con la alta
+(Tablas~\ref{tab:resultado-final} y~\ref{tab:lima-resultado}).
+% fuente: corredor_estudio2/demo_rl/lima/corredor/salidas/veredicto_vecinos_completo_s42.md (-3.67 y -3.78 frente al
+% fijo; -3.20 y -3.33 frente al actuado ajustado; MEJORA) y alta/salidas/veredicto_vecinos_completo_s4042.md (-7.71 y
+% -7.59 frente al fijo; -8.01 y -7.61 frente al actuado ajustado; FUNCIONA); canal cortado: capitulo5.tex, "Que
+% aportan los mensajes" (sin mensajes, +0.79 y +0.47 % frente al fijo con la publicada, +0.80 y +0.32 % con la alta); nudo: nudo_ovalo_estudio2/salidas_ovalo/veredicto_ovalo.md (modelo completo, de orden fijo: frente al fijo
+% -9.17 y -9.36, frente al actuado ajustado +0.01 y +0.09, sin diferencia significativa, FUNCIONA, provisional:
+% completo_s2042 sin estabilizar; con la alta, +2.45 y +3.22 frente al fijo, FALLA; frente al plan actual -23.18,
+% -23.93, -49.51 y -50.42; fijo ajustado de la alta [60, 25, 77]; verde maximo del modelo, 60 s; la variante de orden
+% libre citada por el registro: MEJORA, -3.43 y -3.64, y FALLA, +55.02 y +55.11); otro reparto:
+% secciones/tablas/ovalo_robustez_fijo.tex (-29.98 y -42.61 frente al fijo)
+
+\noindent\textbf{Los pasos que la sostienen.} La respuesta sale de tres
+pasos de exigencia creciente. En el primer estudio, con llegadas
+regulares, el resumen en un número es de $-6.83$\,\% frente al fijo
+ajustado y de $-14.35$\,\% frente al actuado. Con la medición más
+estricta, sin reentrenar, la ventaja frente al fijo desaparece
+($-0.03$\,\%) y frente al actuado se mantiene. El segundo estudio, el
+paso más exigente y con el entrenamiento corregido (Anexo~G), confirma
+con llegadas regulares que un plan fijo bien ajustado es casi óptimo (el
+modelo empata con él, $-0.4$\,\%) y da con llegadas aleatorias la
+respuesta anterior.
 % fuente: plan2/sintesis_numero_unico.csv (ippo_vecinos, P1-P6: -6.83 [-7.53, -6.12] frente al fijo ajustado y -14.35
 % [-15.08, -13.64] frente al actuado); plan2/robustez_sintesis_numero_unico.csv (-0.03 [-0.56, 0.53] frente al fijo
 % ajustado desde 10 s y -11.45 frente al actuado); plan3/salidas/veredicto3.md (llegadas regulares, IPPO con mensajes
 % corregido frente al fijo ajustado al segundo: -0.4 % [-1.0, 0.1] y -0.4 % [-0.8, 0.1])
 
-Después de los dos estudios, el método se llevó a dos lugares de
-Miraflores, en Lima, construidos con la geometría real y con volúmenes
-publicados. En un corredor de seis cruces de la Av.~Benavides, el modelo
-baja el retraso total un 9\,\% frente al fijo ajustado al segundo y un
-8\,\% frente al actuado ajustado; con una demanda un 20\,\% mayor, un 20 y
-un 10\,\%. En el nudo de la Av.~Reducto con la
-Av.~28 de Julio, que es un solo cruce, lo baja entre un 4 y un 7\,\%
-frente al fijo y, con la demanda publicada, un 6\,\% frente al plan que
-opera hoy, medido en el sitio; pero tiene entre un 3 y un 4\,\% más de
-retraso que el actuado ajustado (Tabla~\ref{tab:resultado-final}).
-% fuente: secciones/tablas/lima_resumen.tex; lima/corredor/salidas/veredicto_vecinos_completo_s42.md (-8.81 y
-% -8.90 frente al fijo; -8.06 y -7.91 frente al actuado ajustado); lima/corredor/alta/salidas/
-% veredicto_vecinos_completo_s2042.md (-19.86 y -19.90; -10.39 y -10.63); lima/salidas/ y lima/alta/salidas/
-% veredicto_completo_s42.md (frente al fijo -4.39 y -4.51, y -5.73 y -6.57; frente al plan actual -6.45 y -6.19;
-% frente al actuado ajustado +3.45 y +3.62, y +4.34 y +3.29)
-
-\noindent\textbf{Cumplimiento de los objetivos.} Cada uno, con la medida
-que lo sostiene:
+\noindent\textbf{Cumplimiento de las metas y los objetivos.} Cada uno,
+en el orden de la introducción, con la medida que lo sostiene:
 \begin{itemize}
-  \item \textbf{Objetivo general: cumplido en parte.} El modelo se
-    diseñó, se entrenó y se validó en SUMO, y reduce el retraso en tres
-    de los seis casos sintéticos y en los dos casos de Lima. Los casos
-    de Lima usan la geometría real y volúmenes publicados, pero su
-    demanda es en parte un supuesto y no se calibraron con datos de
-    tráfico.
   \item \textbf{Metas cuantificables: la de retraso se alcanza en un
     caso.} La reducción del 25 al 40\,\% se alcanza en la malla con
     demanda alta ($-25.7$ y $-26.9$\,\%), pero no en el conjunto de los
@@ -72,17 +84,24 @@ que lo sostiene:
     \textit{throughput}, en ningún caso (Tabla~\ref{tab:metas}).
 % fuente: plan3/salidas/veredicto3_celdas.csv (P6, llegadas aleatorias: -25.7 [-28.4, -23.0] y -26.9 [-30.8, -23.5];
 % es el unico caso que llega a -25 %; numero unico -10.8 y -11.1); primer estudio: plan2/veredicto.csv (ippo_vecinos;
-% el mas cercano es P2, -23.3); casos de Lima: secciones/tablas/resultado_final.tex (el mayor es el del corredor con
-% la demanda alta, -19.9 y -19.9)
+% el mas cercano es P2, -23.3); casos de Lima: secciones/tablas/resultado_final.tex (el mayor es el del nudo con la
+% demanda publicada, -9.2 y -9.4; el corredor, -3.7 y -3.8 con la publicada y -7.7 y -7.6 con la alta)
 % fuente: tablas/plan2_metas.tex (primer estudio; cola promedio: se cumple en P3 y P5, -41.3 y -29.0 %, donde el
 % ciclo minimo da -41.3 y -34.7 %; throughput: entre -0.5 y +0.2 %)
+  \item \textbf{Objetivo general: cumplido en parte.} El modelo se
+    diseñó, se entrenó y se validó en SUMO, y reduce el retraso en tres
+    de los seis casos sintéticos, en el corredor de Lima con sus dos
+    demandas y en el nudo con la demanda publicada. Los casos de Lima no
+    se calibraron con datos de tráfico, y su demanda es en parte un
+    supuesto.
   \item \textbf{U1, datos y escenarios: cumplido en parte.} Se
     construyeron en SUMO seis escenarios sintéticos y dos casos de Lima,
     con sus referencias ajustadas. En los sintéticos la demanda es
-    declarada. En los de Lima, la red sale de OpenStreetMap, el total de
-    vehículos, de volúmenes publicados, y el semáforo del nudo se midió
-    en el sitio; el reparto de la demanda y los semáforos del corredor
-    son supuestos (Anexo~D).
+    declarada. En los de Lima, la red sale de OpenStreetMap y, en el
+    nudo, de medidas en Google Maps y de los carriles observados en el
+    sitio; el total de vehículos, de volúmenes publicados, y el semáforo
+    del nudo se midió en el sitio. El reparto de la demanda es un
+    supuesto, y en el corredor se usa un plan típico (Anexo~D).
   \item \textbf{U2, aprendizaje por refuerzo: cumplido.} Se programaron
     desde cero la formulación y cinco algoritmos: Q-learning, SARSA,
     Double DQN, IPPO y MAPPO. Q-learning y SARSA fallan en todos los
@@ -108,20 +127,25 @@ que lo sostiene:
   \item \textbf{U4, coordinación entre semáforos: cumplido en parte.}
     El aporte de los mensajes se midió con el mismo modelo sin ellos.
     Con llegadas regulares separan funcionar de fallar, salvo en el
-    corredor con demanda alta; con llegadas aleatorias solo mejoran al
-    modelo en la malla con demanda alta ($-5.2$ y $-5.3$\,\%), y en el
-    corredor de Lima reducen el retraso un 0.4\,\% con la demanda
-    publicada y un 1\,\% con la alta (con los dos entrenamientos sin
-    estabilizar); quitárselos al modelo completo ya entrenado lo sube
-    entre un 1.5 y un 2.5\,\%. La penalización de \textit{spillback} y el
+    corredor con demanda alta; con llegadas aleatorias, en el segundo
+    estudio solo mejoran al modelo en la malla con demanda alta ($-5.2$
+    y $-5.3$\,\%). En el corredor de Lima, quitárselos al modelo
+    completo ya entrenado le hace perder su ventaja frente al fijo, con
+    las dos demandas, y entrenar con ellos baja el retraso un 4.8\,\%
+    con la demanda publicada y entre un 12 y un 13\,\% con la alta (con
+    los entrenamientos con mensajes sin estabilizar).
+    La penalización de \textit{spillback} y el
     crítico central no añaden mejora. El efecto a nivel de corredor se
     mide con el retraso total de los dos corredores, el sintético y el de
     Benavides.
 % fuente: plan2/veredicto.csv (ippo_local: EMPATA en P1, FUNCIONA en P2 y FALLA en P3 a P6; ippo_spill y mappo no
 % mejoran a ippo_vecinos); plan3/salidas/veredicto3_hipotesis.csv (H7, con mensajes frente a sin mensajes, llegadas
-% aleatorias: pasa en 1 de 6, P6 -5.23 y -5.33); corredor de Lima: secciones/tablas/corredor_mensajes.tex (entrenar
-% con mensajes frente a sin ellos: -0.45 y -0.42 con la demanda publicada, -0.94 y -0.98 con la alta, provisional;
-% canal cortado: -1.53 y -1.39, -2.52 y -2.57; capitulo5.tex, "Que aportan los mensajes"); metricas de corredor
+% aleatorias: pasa en 1 de 6, P6 -5.23 y -5.33); corredor de Lima, demanda publicada:
+% corredor_estudio2/demo_rl/lima/corredor/salidas/veredicto_vecinos_completo_s42.md (IPPO con mensajes corregido frente
+% a IPPO sin mensajes corregido: -4.76 y -4.77; el modelo completo frente a su canal cortado: -4.43 y -4.24; con el
+% canal cortado queda +0.79 y +0.47 frente al fijo); alta: alta/salidas/veredicto_vecinos_completo_s4042.md (-12.44 y
+% -13.18; canal cortado, -8.45 y -7.89, y +0.80 y +0.32 frente al fijo; los tres entrenamientos de IPPO con mensajes
+% corregido sin estabilizar); capitulo5.tex, "Que aportan los mensajes"; metricas de corredor
 % registradas y sin analizar: capitulo5.tex, sec:limites
   \item \textbf{Reproducibilidad: cumplido.} Se aplicaron semillas
     separadas, política congelada, intervalos de confianza y pruebas
@@ -134,7 +158,7 @@ comprobaciones:
 \begin{itemize}
   \item \textbf{Los resultados se reproducen.} El entrenamiento es
     determinista: repetir una corrida da el mismo resultado, dígito a
-    dígito. Y dos tandas independientes de semillas dan el mismo
+    dígito. Además, dos tandas independientes de semillas dan el mismo
     veredicto en los 19 casos del segundo estudio y en los cuatro de
     Lima.
   \item \textbf{La mayoría de los entrenamientos se estabiliza.} En el
@@ -142,16 +166,14 @@ comprobaciones:
     mensajes corregido y del modelo completo con llegadas aleatorias. Si
     el de la versión evaluada no se estabiliza, el veredicto se calcula
     igual, con la evaluación completa, y lleva la marca \emph{sin estabilizar}:
-    en el resultado final, P2 y el nudo de Lima con demanda alta. En el
+    en el resultado central, P2 y el nudo de Lima con la demanda
+    publicada. En el
     primer estudio llevan esa marca 10 de las 48 combinaciones de modelo
     y caso, y en otras 2 no hay datos.
-  \item \textbf{Las mejoras aparentes se detectaron.} En el primer
-    estudio, la mejora en la red con rotonda con demanda nominal era la
-    del ciclo mínimo, que el ajuste del fijo no había probado, y la del
-    corredor con demanda alta venía con más espera para entrar a la red.
-    En el nudo de Lima, el empate inicial con el actuado ajustado venía
-    de una búsqueda corta de sus parámetros: con la búsqueda completa, el
-    actuado ajustado tiene menos retraso que el modelo (Anexo~D).
+  \item \textbf{Las mejoras aparentes se identifican.} En el primer
+    estudio, la mejora en la red con rotonda con demanda nominal es la
+    del ciclo mínimo, que el barrido del fijo no incluía, y la del
+    corredor con demanda alta viene con más espera para entrar a la red.
   \item \textbf{Dos defectos del entrenamiento se corrigieron, y su
     efecto se midió.} El descuento contaba decisiones y no segundos, y
     cada semáforo exploraba por su cuenta. Corregidos, en la malla con
@@ -191,16 +213,18 @@ Tienen tres límites:
 % observacion: capitulo4.tex, sec:aprendices (componentes 22 y 30 de tab:obs-u4; rl_ippo.py, --obs-cercana)
 
 \noindent\textbf{Alcance y límites.} El modelo supera al fijo donde
-reaccionar al tráfico reduce el retraso, es decir, en los casos en que
-el actuado ajustado también lo mejora. En el corredor sintético, en la
-malla con demanda alta y en el corredor de Lima supera además al actuado
-ajustado; en el nudo de Lima, que es un solo cruce, no. En la red con
+reaccionar al tráfico reduce el retraso: en el segundo estudio, en los
+casos en que el actuado ajustado también lo mejora. En la red con
 rotonda y en la malla con demanda nominal ningún control probado supera
 al fijo ajustado al segundo (Sección~\ref{sec:donde-gana}), y con
 llegadas regulares el modelo solo lo mejora, un 2.8\,\%, en el corredor
-con demanda nominal. El cómputo no limita su uso: en un cruce real, el
-costo está en la medición, la comunicación y el ajuste
-(Sección~\ref{sec:costo-escala}).
+con demanda nominal. En el corredor de Lima, el actuado ajustado queda
+casi igual que el fijo, y aun así el modelo supera a los dos, gracias a
+los mensajes entre cruces. En el nudo, con un solo controlador y la
+demanda alta, ni el modelo ni el actuado ajustado superan al fijo, que
+usa verdes más largos que los que ellos pueden dar. El cómputo no
+limita su uso: en un cruce real, el costo está en la medición, la
+comunicación y el ajuste (Sección~\ref{sec:costo-escala}).
 % fuente: plan3/salidas/veredicto3_comparaciones.csv (modelo citado frente al actuado ajustado, tandas 1 y 2: P1 -3.3
 % y -3.8; P2 -19.0 y -19.5; P6 -11.5 y -12.9); veredicto3.md, H0 (en 3 de 6 casos, P1, P2 y P6, algun control que
 % reacciona mejora al fijo ajustado al segundo)
@@ -208,20 +232,28 @@ costo está en la medición, la comunicación y el ajuste
 % iguala al fijo; desfases de 1 s en plan3/poi_red_r10f.add.xml y poi_red_alta_r10f.add.xml; P5: ciclo minimo, fijo
 % entregado y regla simple a menos de un 0.2 % del fijo ajustado al segundo); rotonda: tabla por factor en la cabecera
 % de plan2/red_alta.rou.xml (se satura desde 1.3); llegadas regulares: plan3/salidas/veredicto3_celdas.csv (P1 MEJORA,
-% -2.8 y -2.8; los demas EMPATA, FALLA o PENDIENTE); Lima frente al actuado ajustado: secciones/tablas/
-% resultado_final.tex (corredor -8.1 y -7.9, y -10.4 y -10.6; nudo +3.4 y +3.6, y +4.3 y +3.3) y capitulo5.tex,
-% sec:donde-gana ("Los casos de Lima siguen el mismo patron"); costo: capitulo5.tex, sec:costo-escala ("Costo de
-% computo" y Tabla tab:costo-calle)
+% -2.8 y -2.8; los demas EMPATA, FALLA o PENDIENTE); Lima frente al actuado ajustado: corredor, -3.20 y -3.33 con la
+% publicada y -8.01 y -7.61 con la alta (corredor_estudio2/demo_rl/lima/corredor/salidas/veredicto_vecinos_completo_
+% s42.md y alta/salidas/veredicto_vecinos_completo_s4042.md); el actuado ajustado del corredor frente al fijo: -0.49 y
+% -0.47 con la publicada, +0.32 y +0.02 con la alta; el modelo sin mensajes pierde su ventaja (capitulo5.tex, "Que
+% aportan los mensajes"); secciones/tablas/resultado_final.tex (nudo, modelo completo, 0.0 y +0.1 con la publicada, sin
+% diferencia significativa: +0.01 [-0.82, +0.86] y +0.09 [-0.60, +0.78]) y capitulo5.tex, sec:donde-gana ("Los casos de
+% Lima"); el actuado ajustado mejora al fijo en el nudo con la publicada (-9.2 y -9.4 %) y no con la alta (+7.3 y
+% +11.9 %), y el modelo tampoco (+2.45 y +3.22 %); fijo ajustado de la alta [60, 25, 77], verde maximo de 60 s;
+% costo: capitulo5.tex, sec:costo-escala ("Costo de computo" y Tabla tab:costo-calle)
 
 No se puede afirmar que los casos de Lima predigan el retraso real: su
-demanda es en parte un supuesto, en el corredor no se midieron los
-semáforos y ningún caso se comprobó con tiempos de viaje medidos
+demanda es en parte un supuesto, el corredor usa un plan típico y no
+simula peatones, y ningún caso se comprobó con tiempos de viaje medidos
 (Sección~\ref{sec:caso-lima}). Tampoco que un modelo funcione con otra
 demanda, porque cada uno se entrenó y se evaluó con la de su caso, ni
 que lo aprendido donde no supera al fijo sea una coordinación: ahí el
 modelo no supera a una regla simple, el ciclo mínimo con más verde para
-la avenida si hay cola.
-% fuente: casos de Lima: capitulo5.tex, sec:caso-lima y sec:limites, y anexo_d_osm.tex ("lo que el escenario no
+la avenida si hay cola. En el nudo, el resultado vale para esta red del
+óvalo, con la demanda de dos giros supuesta y la espera dentro del óvalo
+simplificada.
+% fuente: nudo: capitulo5.tex, sec:lima-nudo ("Limites del caso");
+% casos de Lima: capitulo5.tex, sec:caso-lima y sec:limites, y anexo_d_osm.tex ("lo que el escenario no
 % reproduce", del nudo y del corredor); plan3/salidas/veredicto3_celdas.csv (P3: igual_ciclo_minimo = si) y
 % veredicto3.md, "Lecturas obligadas" (P3, P4 y P5: no le gana a la regla simple); canal: introduccion.tex, "No
 % incluido"; demanda: la politica unica por red salio del segundo estudio (enmienda 2)

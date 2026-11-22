@@ -5,8 +5,8 @@
 
 Este capítulo define los conceptos con que la tesis responde su pregunta: si un control de
 semáforos que aprende por refuerzo y recibe información de sus vecinos reduce el retraso frente a
-un plan de tiempo fijo bien ajustado. Solo incluye la teoría que usa el método
-(Capítulo~\ref{cap:metodologia}), en tres bloques: el tráfico (el simulador, el control semafórico
+un plan de tiempo fijo bien ajustado. Solo incluye la teoría que usan el diseño del proyecto y el
+marco metodológico (Capítulos~\ref{cap:metodologia} y~\ref{cap:implementacion}), en tres bloques: el tráfico (el simulador, el control semafórico
 con sus dos controles de referencia y las métricas); el aprendizaje por refuerzo, con los
 algoritmos de menor a mayor complejidad, hasta PPO y su extensión a varios agentes, base de IPPO
 con mensajes, el modelo que la tesis pone a prueba; y la estadística de la evaluación.
@@ -97,14 +97,20 @@ Métrica & Qué mide \\
 \midrule
 Retraso (s/veh) & tiempo de viaje menos el que tomaría el mismo recorrido a la velocidad deseada,
   sin otros vehículos ni semáforos; se cuenta desde que el vehículo entra a la red \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 Espera para entrar (s/veh) & tiempo que el vehículo espera fuera de la red por falta de espacio en
   la vía de entrada \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 Retraso total (s/veh) & retraso más espera para entrar, incluida la de los vehículos que no
   llegaron a entrar (Ecuación~\ref{eq:retraso-total}) \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 Espera detenida (s/veh) & segundos con velocidad de a lo sumo 0.1~m/s \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 Paradas (por vehículo) & veces que la velocidad baja de 0.1~m/s \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 Cola promedio y máxima (veh) & vehículos detenidos en las aproximaciones con semáforo: media por
   segundo y máximo \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 \textit{Throughput} (veh) & vehículos que completan su recorrido dentro de la hora simulada \\
 \bottomrule
 \end{tabular}
@@ -113,10 +119,15 @@ Cola promedio y máxima (veh) & vehículos detenidos en las aproximaciones con s
 \end{table}
 % fuente: capitulo2 y modulo U3 del capitulo4 originales (7bd8685); comun.py (leer_tripinfo: retraso_total_prom,
 % retraso_insercion_prom, no_insertados; args_estadisticas)
-% TODO(reestructura): citar la documentacion de las salidas tripinfo (timeLoss, departDelay, waitingTime,
-% waitingCount) y statistic-output (waiting, departDelayWaiting) de SUMO.
+% TODO(reestructura): citar la documentacion de la salida statistic-output (waiting, departDelayWaiting) de SUMO. La de
+% tripinfo (timeLoss, departDelay, waitingTime) se cita desde el 20.11.2026: SUMO_TripInfo, en el parrafo siguiente.
 
-La métrica principal es el retraso, que incluye frenadas, detenciones y aceleraciones. La espera
+La métrica principal es el retraso. No es solo la espera en rojo: SUMO cuenta como retraso todo el
+tiempo en que el vehículo va más lento que su velocidad deseada \citep{SUMO_TripInfo}. Eso pasa
+cuando está detenido en rojo o en una cola, cuando frena y acelera, cuando va detrás de un vehículo
+más lento, cuando frena para girar o para cambiar de carril, cuando espera un hueco para cruzar, y en
+las pequeñas frenadas al azar con que SUMO simula la imperfección del conductor
+($\sigma = 0.5$ en todos los vehículos de la tesis). La espera
 detenida es solo una parte de él: un control puede reducirla y aumentar las paradas sin mejorar el
 retraso. Retraso, colas y paradas son medidas habituales en la evaluación de controles de tráfico
 \citep{FHWA_Toolbox_Definitions,Koonce2008_TSTM}. El \textit{throughput} solo
@@ -133,9 +144,7 @@ donde $\mathcal{V}$ es el conjunto de vehículos con registro; $l_v$, el retraso
 su espera para entrar. $W$ es el número de vehículos que al cerrar la simulación seguían esperando
 entrar, que no tienen registro, y $e_W$, la espera media que llevaban; como seguirían esperando,
 $W\,e_W$ es una cota inferior. Si ningún vehículo espera para entrar, $D$ coincide con el retraso
-medio. El primer estudio de la tesis compara los controles por el retraso; la medición más
-estricta, el segundo estudio y los casos de Lima, por el retraso total
-(Capítulo~\ref{cap:metodologia}).
+medio. Qué métrica usa cada paso de la evaluación lo define la Sección~\ref{sec:u3}.
 
 \section{Aprendizaje por refuerzo}
 \label{sec:rl}
@@ -226,7 +235,8 @@ política elige entre valores apenas actualizados.
 \section{Aproximación de funciones: DQN y Double DQN}
 \label{sec:dqn}
 
-DQN es el comparador de la tesis que aprende valores con una red neuronal en lugar de una tabla.
+Double DQN, una variante de DQN, es el comparador de la tesis que aprende valores con una red
+neuronal en lugar de una tabla.
 Cuando el estado es continuo o demasiado grande para una tabla, el valor se representa con una
 función $Q(s,a;\theta)$ con muchos menos parámetros $\theta$ que estados hay. Un cambio en
 $\theta$ modifica a la vez el valor de muchos estados, lo que permite generalizar entre estados
@@ -255,8 +265,8 @@ acción del estado siguiente y la red objetivo la valora,
   y = r + \gamma\, Q\bigl(s',\, \arg\max_{a'} Q(s',a';\theta);\ \theta^-\bigr).
   \label{eq:double-dqn}
 \end{equation}
-Si $s'$ es terminal, $y = r$. El DQN de la tesis es un Double DQN.
-% TODO(reestructura): citar Double DQN (van Hasselt, Guez y Silver, 2016); no esta en referencias.bib.
+Si $s'$ es terminal, $y = r$. La tesis usa Double DQN \citep{vanHasselt2016_DoubleDQN}, que las tablas de
+resultados abrevian DQN.
 
 \section{Métodos de gradiente de política: actor-crítico y PPO}
 \label{sec:ppo}
@@ -327,11 +337,8 @@ entre vecinos) y MAPPO, que sirve de comparación.
 
 \noindent\textbf{Observación parcial.} Ningún agente ve el estado de toda la red, $s$: lo que ve
 cada semáforo $i$ (sus colas, su fase y los mensajes de sus vecinos) es una observación local
-$o_i$, y con ella decide, $\pi_\theta(a_i \mid o_i)$. Yu et al. formalizan el caso cooperativo, en
-que la transición depende de las acciones de todos y todos reciben la misma recompensa, como un
-proceso de decisión de Markov descentralizado y parcialmente observable (Dec-POMDP)
-\citep{Yu2021_MAPPO}. En la tesis cada agente recibe una recompensa local
-(Sección~\ref{sec:formulacion}), así que el problema no es exactamente ese.
+$o_i$, y con ella decide, $\pi_\theta(a_i \mid o_i)$; su recompensa también es local
+(Sección~\ref{sec:formulacion}).
 % TODO(reestructura): citar una fuente que formalice el caso con recompensas individuales por agente (juego
 % estocastico parcialmente observable); no esta en referencias.bib.
 
@@ -384,8 +391,7 @@ parámetros a intervalos regulares, se valida cada una con la política congelad
 mejor valor de validación. Como el resultado depende también de la semilla del propio
 entrenamiento, cada modelo se entrena varias veces. La serie de validación, que el
 Capítulo~\ref{cap:resultados} muestra en sus curvas de aprendizaje, indica además si el
-entrenamiento convergió, es decir, si se estabilizó; si no, el veredicto se calcula igual y lleva
-la marca \emph{sin estabilizar} (Sección~\ref{sec:veredicto}).
+entrenamiento se estabilizó (criterio en la Sección~\ref{sec:veredicto}).
 % TODO(reestructura): citar una fuente de seleccion de modelo por validacion o parada temprana y (opcional) otra
 % de la variabilidad entre semillas de entrenamiento en RL profundo; no estan en referencias.bib.
 

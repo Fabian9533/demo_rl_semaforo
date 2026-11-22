@@ -1,0 +1,30 @@
+Demanda del nudo en el Ovalo Vasco: flujos por movimiento (veh/h), leidos de ovalo/entrada/rutas_estudio/
+(regenerar_demanda.py). Regla: el total publicado de 4271 veh/h repartido en proporcion a carriles por
+segundos de verde medidos de cada grupo (lima/demanda.py, GRUPOS) y, dentro de cada grupo, por destino.
+
+Grupos (carriles x verde medido): RN_frente 3 x 38 = 114; RN_izquierda 2 x 18 = 36; RS_frente 2 x 40 = 80; RS_izquierda 2 x 18 = 36; J 3 x 38 = 114; B 3 x 40 = 120; suma 500
+Destinos: RN_frente: Reducto sur 0.90, Larco 0.10; RN_izquierda: el puente 1.00; RS_frente: Reducto norte 0.80, el puente 0.20; RS_izquierda: Larco 1.00; J: Larco 0.75, Reducto norte 0.15, Reducto sur 0.10; B: el puente 0.70, Reducto sur 0.20, Reducto norte 0.05, Larco 0.05
+
+Entrada        Hacia                       publicada                   alta       robustez/reducto   robustez/transversal
+Reducto norte  Reducto sur                     876.4                 1051.7                 1038.4                  710.2
+Reducto norte  Larco                            97.4                  116.9                  115.4                   78.9
+Reducto norte  el puente                       307.5                  369.0                  364.4                  249.2
+Reducto sur    Reducto norte                   546.7                  656.0                  647.7                  443.0
+Reducto sur    el puente                       136.7                  164.0                  161.9                  110.8
+Reducto sur    Larco                           307.5                  369.0                  364.4                  249.2
+28 de Julio    Larco                           730.3                  876.4                  576.9                  887.8
+28 de Julio    Reducto norte                   146.1                  175.3                  115.4                  177.6
+28 de Julio    Reducto sur                      97.4                  116.9                   76.9                  118.4
+Balboa         el puente                       717.5                  861.0                  566.8                  872.2
+Balboa         Reducto sur                     205.0                  246.0                  161.9                  249.2
+Balboa         Reducto norte                    51.3                   61.5                   40.5                   62.3
+Balboa         Larco                            51.3                   61.5                   40.5                   62.3
+Entra por      Reducto norte                  1281.3                 1537.6                 1518.1                 1038.3
+Entra por      Reducto sur                     990.9                 1189.0                 1174.0                  803.0
+Entra por      28 de Julio                     973.8                 1168.5                  769.2                 1183.7
+Entra por      Balboa                         1025.0                 1230.0                  809.7                 1246.0
+Sale hacia     Larco                          1186.5                 1423.8                 1097.1                 1278.2
+Sale hacia     el puente                      1161.7                 1394.1                 1093.1                 1232.2
+Sale hacia     Reducto norte                   744.0                  892.8                  803.6                  682.9
+Sale hacia     Reducto sur                    1178.8                 1414.6                 1277.3                 1077.8
+Todo el nudo                                 4271.00                5125.20                4271.00                4271.00

@@ -1,6 +1,11 @@
 DEMO: semaforos adaptativos con Q-learning sobre SUMO (TraCI)
 =============================================================
 
+Version final de la tesis: TESIS/ (main.tex; se compila con python TESIS/compilar.py).
+Codigo, huellas, politicas y salidas de los dos casos de Lima: lima/estudios/LEEME.md.
+Programas de las tablas y figuras de Lima en la tesis: figuras/LEEME.md.
+Lo que sigue es la nota de la primera etapa (prueba de concepto sobre cruces sinteticos).
+
 Cuatro escenarios sinteticos, del mas simple al mas complejo:
 
   cruce      Prueba 1: cruce N-S / E-O, 1 carril por sentido, 2 fases verdes.

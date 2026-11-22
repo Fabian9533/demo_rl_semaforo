@@ -7,14 +7,18 @@
 \renewcommand{\thetable}{A.\arabic{table}}
 \renewcommand{\theHtable}{A.\arabic{table}}
 
-Este anexo reúne las tablas con las que se comprueba el resultado del
-primer estudio, el plan de pruebas
-(Sección~\ref{sec:resultado-principal}). Todas siguen su protocolo
-(Sección~\ref{sec:protocolo}): tres entrenamientos de 200 episodios por
-modelo y caso, versión evaluada elegida por validación y evaluación con
-las semillas 1001 a 1030, las mismas para todos los controles. La
-métrica es el retraso y la referencia, el fijo ajustado de cada caso.
-Un cambio negativo es menos retraso que la referencia.
+Este anexo reúne las tablas que respaldan el resultado del primer
+estudio, el plan de pruebas (Sección~\ref{sec:resultado-principal}).
+Todas siguen su protocolo (Sección~\ref{sec:protocolo}): tres
+entrenamientos de 200 episodios por modelo y caso, versión evaluada
+elegida por validación y evaluación con las semillas 1001 a 1030, las
+mismas para todos los controles. La métrica es el retraso y la
+referencia, el fijo ajustado de cada caso. Un cambio negativo es menos
+retraso que la referencia. Las tablas salen de los programas del primer
+estudio (Tabla~\ref{tab:programas-pasos}) con esa configuración: las
+opciones \texttt{-{}-metrica timeloss\_prom -{}-fijo fijo\_2509
+-{}-sin-trivial} de \texttt{veredicto.py}, \texttt{sintesis\_plan.py} y
+\texttt{plan2/\allowbreak tablas\_cap5.py}.
 % fuente: plan2/veredicto.csv de la corrida principal (python veredicto.py --metrica timeloss_prom
 % --fijo fijo_2509 --sin-trivial), igual a plan2/veredicto_congelado_0355.csv en las 45 celdas de P1-P5 y en
 % todas las columnas; brazo fijo_2509: plan2/fijo_2509.py; P6: cabecera de plan2/malla3_alta.add.xml
@@ -23,7 +27,8 @@ Un cambio negativo es menos retraso que la referencia.
 
 Las tablas de veredicto de los demás modelos y las de sus
 entrenamientos no se imprimen: están en el repositorio del proyecto
-(Anexo~B), en la carpeta \texttt{plan2/}. El veredicto de cada modelo
+(Anexo~B), en \texttt{plan2/\allowbreak veredicto.md} y
+\texttt{plan2/\allowbreak veredicto.csv}. El veredicto de cada modelo
 en cada caso se lee, abreviado, en la Tabla~\ref{tab:plan2-resumen}.
 % fuente: plan2/veredicto.csv y plan2/veredicto.md (matriz y una tabla por modelo, con intervalos, valores p y
 % cambio frente al actuado); los tres entrenamientos de cada modelo y caso: plan2/evaluacion_<esc>_resumen.csv y
@@ -33,13 +38,10 @@ en cada caso se lee, abreviado, en la Tabla~\ref{tab:plan2-resumen}.
 
 \noindent\textbf{Todos los modelos.} La Tabla~\ref{tab:plan2-resumen}
 da el retraso de cada modelo, su cambio frente al fijo ajustado y su
-veredicto. IPPO con mensajes funciona en P1, P2 y P3, mejora en P4 y
-empata en P5 y en P6; en P6, con el entrenamiento sin estabilizar.
-Ningún otro modelo obtiene mejores veredictos. Resumido en un número
-(Tabla~\ref{tab:plan2-numero-unico}), IPPO con mensajes baja el retraso
-un 6.83\,\% frente al fijo ajustado y un 14.35\,\% frente al actuado.
-La primera cifra depende sobre todo de P2: sin ese caso queda en
-$-3.14$\,\%.
+veredicto, y la Tabla~\ref{tab:plan2-numero-unico}, el resumen en un
+número de cada modelo, con los seis casos y dejando fuera uno a la vez.
+Ningún modelo obtiene mejores veredictos que IPPO con mensajes; su
+lectura está en la Sección~\ref{sec:resultado-principal}.
 % fuente: plan2/veredicto.csv (columna veredicto); plan2/sintesis_numero_unico.csv (ippo_vecinos frente a
 % fijo_2509 y al actuado: delta_geo -6.83 [-7.53, -6.12] y -14.35 [-15.08, -13.64]; sin_P2 -3.14)
 % fuente de las tablas: plan2/tablas_cap5.py y sintesis_plan.py, con --metrica timeloss_prom --fijo fijo_2509
@@ -72,33 +74,29 @@ aprendices, el modelo explica el 55.5\,\% de la variación y el caso, el
 
 \noindent\textbf{IPPO con mensajes.} La
 Tabla~\ref{tab:veredicto-ippo-vecinos} da su veredicto con los
-intervalos y los valores~$p$. Frente al actuado, su retraso es menor en
-los seis casos. En P5 el intervalo del cambio frente al fijo no toca el
-cero, pero la prueba de Wilcoxon no muestra diferencia ($p = 0.523$) y
-la regla exige las dos cosas: el veredicto es EMPATA. La columna Conv.
-indica si el entrenamiento de la versión evaluada convergió, es decir,
-si se estabilizó (Sección~\ref{sec:veredicto}), y cuántos de los tres
-lo hicieron.
+intervalos y los valores~$p$; la lectura de cada caso, incluido el
+EMPATA de P5, está en la Sección~\ref{sec:resultado-principal}. La
+columna Conv. indica si el entrenamiento de la versión evaluada se
+estabilizó (Sección~\ref{sec:veredicto}), y
+cuántos de los tres lo hicieron.
 % fuente: plan2/veredicto.csv, filas ippo_vecinos (delta_act -5.8, -4.4, -7.8, -3.6, -16.4 y -41.0, con p_act
 % < 0.001; P5: ic_fijo [0.4, 3.4], p_fijo 0.523; convergen 3/3, 2/3, 3/3, 3/3, 3/3 y 1/3)
 \input{secciones/tablas/veredicto_ippo_vecinos}
 
 La Tabla~\ref{tab:plan2-entrenamientos-ippo} da el retraso de cada
-uno de sus tres entrenamientos. La versión evaluada sale del mediano de
-los tres según la validación, sin mirar las semillas de evaluación. En
-P3, dos entrenamientos quedan un 7.8 y un 8.8\,\% por debajo del fijo y
-el tercero lo iguala ($-0.1$\,\%). En P6 dan entre 37.54 y
-41.51~s/veh, un rango mayor que el IC95 de la versión evaluada
+uno de sus tres entrenamientos. La versión evaluada se elige por
+validación, sin mirar las semillas de evaluación. En P6 el rango entre
+los tres, 3.97~s/veh, es mayor que el IC95 de la versión evaluada
 ($\pm 1.48$~s/veh), y el único que se estabiliza es el de mayor
 retraso.
 
-\noindent\textbf{Entrenamientos sin estabilizar.} En diez de las 48
-combinaciones de modelo y caso, el entrenamiento de la versión evaluada
-no se estabilizó (Tabla~\ref{tab:plan2-pendientes}): su veredicto se
-calcula igual, con la evaluación completa, y lleva la marca ``sin
-estabilizar''. Ninguna se entrenó con más episodios, para no romper la
-igualdad de método entre casos (Sección~\ref{sec:veredicto}). En otras
-dos no hay datos: Q-learning (colas) no se entrenó en P5 ni en P6.
+\noindent\textbf{Entrenamientos sin estabilizar.} La
+Tabla~\ref{tab:plan2-pendientes} da las diez combinaciones de modelo y
+caso, de 48, en que el entrenamiento de la versión evaluada no se
+estabilizó: su veredicto se calcula igual, con la evaluación completa,
+y lleva la marca ``sin estabilizar'' (Sección~\ref{sec:veredicto}). En
+otras dos no hay datos: Q-learning (colas) no se entrenó en P5 ni en
+P6.
 
 % Las Tablas A.5 y A.6 van juntas, despues de sus dos parrafos, para que quepan en una misma pagina.
 \begin{table}[H]
@@ -169,68 +167,109 @@ P6 & MAPPO & $-7.3$ & 7.8 & 0 de 3 & FALLA \\
 
 La Tabla~\ref{tab:programas} lista los programas propios del proyecto,
 con la unidad del método a la que pertenece cada uno y lo que hace; la
-Tabla~\ref{tab:programas-segundo}, los que añade el segundo estudio, y
-la Tabla~\ref{tab:programas-lima}, los de los casos de Lima. Con ellos
-se obtuvieron los resultados del
-Capítulo~\ref{cap:resultados} y de los anexos (SUMO 1.25.0, Python
-3.14). El código completo, con sus comentarios y sus salidas en
-español, está en el repositorio del proyecto,
-\url{https://github.com/Fabian9533/demo_rl_semaforo}.
+Tabla~\ref{tab:programas-segundo}, los que añade el segundo estudio; la
+Tabla~\ref{tab:programas-lima}, los de los casos de Lima, y la
+Tabla~\ref{tab:programas-pasos}, al final de este anexo, los de cada
+actividad del flujo, en el orden en que se ejecutan. Con ellos se obtuvieron
+los resultados del Capítulo~\ref{cap:resultados} y de los anexos (SUMO
+1.25.0, Python 3.14; versiones en la Tabla~\ref{tab:hw}). El código
+completo, con sus comentarios y sus salidas en español, está en el
+repositorio del proyecto,
+\url{https://github.com/Fabian9533/demo_rl_semaforo}. El de los casos de
+Lima está en \texttt{lima/estudios/} tal como corrió, con las huellas
+sha256 de su código y sus datos, las políticas evaluadas, las salidas y
+los pasos para repetirlo (\texttt{lima/estudios/LEEME.md}); los programas
+de sus tablas y figuras, en \texttt{figuras/}.
 % PENDIENTE: hash del commit final (Fabian aun no hace push). Cuando exista, agregarlo a la frase anterior:
 % "..., en el commit <hash>".
 
 \begin{sloppypar}
-El código del diagnóstico del entrenamiento (Anexo~G) no está en las
-tablas. Está en la carpeta \texttt{plan2/exploratorio\_coord/} del
-repositorio. Su subcarpeta \texttt{codigo/} guarda las dos variantes de
-\texttt{rl\_ippo.py} que usa el diagnóstico:
-\texttt{rl\_ippo\_smdp\_crn.py}, con el descuento por segundo y la
-exploración común, y \texttt{rl\_ippo\_norm\_smdp\_crn\_triv.py}, que
-añade la observación normalizada y el arranque en el ciclo mínimo. Cada
-una va con su diferencia frente a \texttt{rl\_ippo.py}, que es el único
-archivo que cambian. La carpeta reúne además el registro previo con su
-huella sha256, las desviaciones, las versiones evaluadas, los CSV por
-semilla y \texttt{verificar\_hechos.py}, que recalcula sus cifras con
-la misma estadística pareada del primer estudio.
+El código de los dos diagnósticos del Anexo~G no está en las tablas.
+El del entrenamiento está en la carpeta
+\texttt{plan2/exploratorio\_coord/} del repositorio. Su subcarpeta
+\texttt{codigo/} guarda las dos variantes de \texttt{rl\_ippo.py} que
+usa el diagnóstico: \texttt{rl\_ippo\_smdp\_crn.py}, con el descuento
+por segundo y la exploración común, y
+\texttt{rl\_ippo\_norm\_smdp\_crn\_triv.py}, que añade la observación
+normalizada y el arranque en el ciclo mínimo. Cada una va con su
+diferencia frente a \texttt{rl\_ippo.py}, que es el único archivo que
+cambian. La carpeta reúne además el registro previo con su huella
+sha256, las desviaciones, las versiones evaluadas, los CSV por semilla
+y \texttt{verificar\_hechos.py}, que recalcula sus cifras con la misma
+estadística pareada del primer estudio. El de la curva del corredor
+está en \texttt{plan2/\allowbreak diag\_corredor/}, con su registro
+previo: \texttt{analisis.py} y \texttt{analisis3.py} responden sus
+hipótesis y escriben sus tablas, \texttt{figura\_resumen.py} dibuja su
+figura, y \texttt{descomposicion.py}, \texttt{comportamiento.py},
+\texttt{periodos.py}, \texttt{bloqueo.py},
+\texttt{bloqueo\_niveles.py}, \texttt{giros\_liberacion.py} y
+\texttt{sumo\_chequeos.py} miden el mecanismo sin cambiar ningún
+veredicto.
 \end{sloppypar}
 % Este parrafo va antes de la Tabla B.1 para que la tabla, que ocupa casi una pagina, no deje en blanco la primera
 % pagina del anexo.
+% fuente (revision final, 22.11.2026, dato del revisor de los anexos E-H): git ls-files plan2/diag_corredor (PRERREGISTRO.md,
+% analisis.py, analisis3.py, figura_resumen.py, descomposicion.py, comportamiento.py, periodos.py, bloqueo.py,
+% bloqueo_niveles.py, giros_liberacion.py, sumo_chequeos.py, prueba_ins.py y compuerta/comparar_csv.py) y sus docstrings:
+% analisis.py y analisis3.py responden el registro y escriben tablas/diag_corredor.tex, diag_pruebas.tex y diag_2715.tex;
+% figura_resumen.py dibuja images/fig_diag_resumen.pdf (fig:diag-corredor); los demas son "analisis posterior al
+% veredicto ... no cambia ningun veredicto" o solo leen (descomposicion.py, giros_liberacion.py); prueba_ins.py es la
+% prueba de la correccion INS y no se nombra
 
 \begin{table}[H]
 \setstretch{1}
 \centering
 \footnotesize
 \setlength{\tabcolsep}{3pt}
+% Sin \extrarowheight: con 24 filas, la separacion de 3 pt la hace mas alta que la pagina (revision final del 22.11.2026)
 \begin{tabular}{>{\raggedright\arraybackslash}p{3.6cm}>{\raggedright\arraybackslash}p{1.6cm}>{\raggedright\arraybackslash}p{9.1cm}}
 \toprule
 Programa & Unidad & Qué hace \\
 \midrule
 \texttt{build\_net.bat} & U1 & regenera las redes con \texttt{netconvert} a partir de los archivos de nodos y vías \\
+\specialrule{0.25pt}{0pt}{0pt}
 \texttt{escenarios\_plan2.py} & U1 & registra los escenarios nuevos del plan (red\_alta, malla3, malla3\_alta y los del barrido de demanda), con las aproximaciones, los enlaces y los vecinos de cada semáforo \\
+\specialrule{0.25pt}{0pt}{0pt}
 \texttt{calibrar\_demanda.py} & U1 & elige el factor de demanda alta de P6 \\
+\specialrule{0.25pt}{0pt}{0pt}
 \texttt{barrer\_fijo.py} & U1 & barre los verdes y los desfases del programa fijo de cada caso y deja instalado el ganador, el fijo ajustado \\
+\specialrule{0.25pt}{0pt}{0pt}
 \texttt{comun.py} & U1 y U3 & funciones comunes: métricas del \texttt{tripinfo}, programas actuado y de ciclo mínimo, y archivos CSV \\
 \midrule
 \texttt{rl\_corredor.py} & U2 y U3 & Q-learning y SARSA, con un agente tabular independiente por semáforo \\
+\specialrule{0.25pt}{0pt}{0pt}
 \texttt{rl\_ippo.py} & U2, U3 y U4 & IPPO sin mensajes, con mensajes y con penalización de \textit{spillback}; corre también el episodio de DQN y de MAPPO \\
+\specialrule{0.25pt}{0pt}{0pt}
 \texttt{rl\_dqn.py} & U2 & Double DQN con pesos compartidos entre los semáforos \\
+\specialrule{0.25pt}{0pt}{0pt}
 \texttt{rl\_mappo.py} & U4 & MAPPO: la red del actor de IPPO con un crítico centralizado \\
 \midrule
 \texttt{evaluar.py} & U3 & evalúa cada control y cada política congelada, con una simulación por semilla \\
+\specialrule{0.25pt}{0pt}{0pt}
 \texttt{consolidar.py} & U3 & junta las evaluaciones de un escenario y hace la estadística pareada por semilla frente al fijo y al actuado \\
-\texttt{veredicto.py} & U3 & aplica la regla de veredicto del plan y escribe las tablas de veredicto \\
+\specialrule{0.25pt}{0pt}{0pt}
+\texttt{veredicto.py} & U3 & elige la versión evaluada, aplica la regla de veredicto del plan y escribe sus tablas \\
+\specialrule{0.25pt}{0pt}{0pt}
 \texttt{sintesis\_plan.py} & U3 & resumen en un número y descomposición de la variación, fuera del veredicto \\
+\specialrule{0.25pt}{0pt}{0pt}
 \texttt{barrido\_demanda.py} & U3 & barrido de demanda en el corredor, fuera del veredicto; con \texttt{preparar2} prepara los niveles de demanda adicionales \\
+\specialrule{0.25pt}{0pt}{0pt}
 \texttt{curvas\_demanda.py} & U3 & veredictos, tabla y figura de los niveles adicionales \\
 \midrule
 \texttt{plan2/\allowbreak preparar.py} & -- & copia a \texttt{plan2/} los archivos de cada escenario \\
+\specialrule{0.25pt}{0pt}{0pt}
 \texttt{plan2/\allowbreak generar\_trabajos.py} & -- & escribe la lista de comandos de cada caso y modelo \\
+\specialrule{0.25pt}{0pt}{0pt}
 \texttt{plan2/\allowbreak cola.py} & -- & ejecuta esa lista en paralelo, respetando sus dependencias \\
+\specialrule{0.25pt}{0pt}{0pt}
 \texttt{plan2/\allowbreak fijo\_2509.py} & -- & reúne como una referencia propia las evaluaciones del fijo ajustado del primer estudio guardadas en el repositorio \\
+\specialrule{0.25pt}{0pt}{0pt}
 \texttt{plan2/\allowbreak tablas\_cap5.py} & -- & da formato a las tablas de resumen y de metas del Capítulo~\ref{cap:resultados} y a sus versiones de la medición más estricta \\
+\specialrule{0.25pt}{0pt}{0pt}
 \texttt{graficar.py} y \texttt{plan2/\allowbreak grafico\_\allowbreak convergencia.py} & -- & dibujan las figuras \\
 \midrule
 \texttt{rl\_semaforo.py} & -- & agente único de la fase exploratoria (escenarios cruce y cruce2) \\
+\specialrule{0.25pt}{0pt}{0pt}
 \texttt{tablas\_tex.py} & -- & genera las tablas de la fase exploratoria \\
 \bottomrule
 \end{tabular}
@@ -243,7 +282,8 @@ resultados (penúltimo bloque) o de la fase exploratoria (último bloque, Anexo~
 % correr_episodio, que mide colas y retornos); curvas_demanda.py (docstring: junta los 12 niveles nuevos con P1-P6,
 % aplica la regla de veredicto.py y escribe plan2/demanda2/resumen_demanda2.csv, tablas/demanda2.tex e
 % images/fig_demanda_bandas.pdf); barrido_demanda.py, modo preparar2 (docstring: escribe dem_<base>_t<veh/h>.rou.xml,
-% .sumocfg y .add.xml con la demanda de la red base escalada).
+% .sumocfg y .add.xml con la demanda de la red base escalada); version evaluada: veredicto.base_mediana (revision final,
+% 22.11.2026; la fila de veredicto.py sigue en dos lineas).
 % CUIDADO al agregar filas: la tabla mide 580.2 pt y \textheight es 615.4 pt (medido con tesisutec.cls; cada linea de
 % fila mide 12 pt): solo caben dos lineas mas. Por eso los programas del segundo estudio van en otra tabla.
 
@@ -266,14 +306,23 @@ cifras del estudio (Anexo~H).
 Programas & Qué hacen \\
 \midrule
 \texttt{plan3/PRERREGISTRO.md} & registro previo: los casos, las semillas, las referencias, la regla de veredicto y las hipótesis del estudio, publicados antes de entrenar \\
-\texttt{escenarios\_plan3.py} y \texttt{plan3/demanda\_estocastica.py} & escenarios del estudio: llegadas aleatorias con la misma demanda media, mezcla de vehículos de Lima y perfil de demanda de 10~min \\
-\texttt{plan3/barrer\_fino.py}, \texttt{plan3/actuado.py}, \texttt{plan3/franja.py} y \texttt{plan3/reglas.py} & ajuste de las referencias en cada caso y con cada tipo de llegadas: el fijo ajustado al segundo, el actuado ajustado y las demás (fijo por franja, reglas y Max-Pressure) \\
-\texttt{plan3/generar\_trabajos3.py} y \texttt{plan3/cola.py} & lista de los entrenamientos y las evaluaciones del estudio, y cola que los ejecuta en paralelo \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
+\texttt{escenarios\_plan3.py}, \texttt{plan3/demanda\_estocastica.py} y \texttt{con\_escenarios.py} & escenarios del estudio: llegadas aleatorias con la misma demanda media, mezcla de vehículos de Lima y perfil de demanda de 10~min; \texttt{con\_escenarios.py} los registra solo dentro del proceso que los usa \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
+\texttt{plan3/barrer\_fino.py}, \texttt{plan3/actuado.py}, \texttt{plan3/franja.py}, \texttt{plan3/reglas.py} y \texttt{plan3/p3\_congelar.py} & ajuste de las referencias en cada caso y con cada tipo de llegadas: el fijo ajustado al segundo, el actuado ajustado y las demás (fijo por franja, reglas y Max-Pressure). Los planes y parámetros elegidos, con las variantes probadas, quedan en \texttt{plan3/\allowbreak barridos/}, y \texttt{p3\_congelar.py} guarda la huella de cada uno antes de evaluar \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
+\texttt{plan3/generar\_trabajos3.py}, \texttt{plan3/cola.py} y \texttt{plan3/protecciones.py} & lista de los entrenamientos y las evaluaciones del estudio, cola que los ejecuta en paralelo y controles que, entre otras cosas, rechazan un trabajo con una semilla fuera de su uso registrado \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 \texttt{plan3/evaluar3.py} & evaluación a ciegas: evalúa un control en un caso y una tanda de semillas, y guarda el resultado sin mostrar ninguna métrica \\
-\texttt{plan3/p3\_promocion.py} y \texttt{plan3/veredicto3.py} & modelo citado de cada caso y veredicto del estudio: veredictos por tanda, hipótesis y resumen en un número, calculados una sola vez, al cierre \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
+\texttt{plan3/p3\_elegir.py}, \texttt{plan3/p3\_promocion.py} y \texttt{plan3/veredicto3.py} & versión evaluada de cada modelo (el entrenamiento mediano por validación), modelo citado de cada caso y veredicto del estudio: veredictos por tanda, hipótesis y resumen en un número, calculados una sola vez, al cierre \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 \texttt{tablas\_plan3.py} & tablas y figuras del segundo estudio, a partir de las salidas del veredicto \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 \texttt{curvas\_plan3.py} & curvas de aprendizaje del segundo estudio, con el fijo y el actuado ajustados medidos en las mismas semillas de validación \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 \texttt{curvas\_entrenamiento.py}, \texttt{figura\_lectura.py} y \texttt{figura\_mejora\_caso.py} & figuras del Capítulo~\ref{cap:resultados}: la curva de aprendizaje por episodio del primer estudio, con la entropía de la política, la figura de lectura de las llegadas y los veredictos, y la del cambio por caso del primer estudio \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 \texttt{costo/costo\_escala.py} & costo de cómputo medido (horas de entrenamiento y tiempo de una decisión) y estimación del costo en un cruce real del corredor de Benavides (Sección~\ref{sec:costo-escala}); solo lee archivos, no simula \\
 \bottomrule
 \end{tabular}
@@ -285,13 +334,21 @@ Programas & Qué hacen \\
 % plan3/generar_trabajos3.py (OP_COMPLETO: opciones de rl_ippo.py del modelo completo; --v2: IPPO con mensajes
 % corregido); plan3/PRERREGISTRO.md (secciones 3 a 8, 12 y 14); plan3/doc/enmienda_1.md y enmienda_2.md,
 % plan3/referencias_congeladas.json y plan3/salidas/ (veredicto3.md y sus CSV)
+% Revision final (22.11.2026): filas ampliadas con programas que estan en git en main @53bdb48: con_escenarios.py
+% (docstring: registra escenarios_plan3.ESTOCASTICOS solo dentro de su proceso), plan3/p3_congelar.py (escribe
+% referencias_congeladas.json con el sha256 de cada referencia), plan3/protecciones.py (capa 1: "toda semilla dentro del
+% bloque del uso declarado del trabajo y nunca en las prohibidas") y plan3/p3_elegir.py (modo mediana: "la base mediana
+% por val_elegido"); hueco G5 del lector externo: plan3/barridos/<esc>/actuado_aj.json y fijo_fino.json, en git (campos
+% variante, variantes_probadas, semillas y sha256; 30 escenarios con actuado_aj.json)
 
 Los casos de Lima (Sección~\ref{sec:caso-lima}) entrenan el modelo
-completo con el mismo \texttt{rl\_ippo.py}, que para el nudo se amplió:
-ahora admite semáforos con más de dos estados con verde y con tramos en
-que todo está en rojo. En los casos anteriores da los mismos resultados
-que antes, dígito a dígito. Los demás programas están en la carpeta
-\texttt{lima/} (Tabla~\ref{tab:programas-lima}).
+completo con una versión de \texttt{rl\_ippo.py} propia de cada caso. La
+del nudo admite semáforos con más de dos estados con verde y con tramos
+en que todo está en rojo, y, con una opción, la variante de orden libre,
+cuyo programa tiene un verde por cada estado y estado anterior; la del
+corredor, un verde mínimo propio de cada semáforo y estado, el de los
+peatones (Anexo~D). Sus programas están en la
+Tabla~\ref{tab:programas-lima}.
 
 \begin{table}[H]
 \setstretch{1}
@@ -303,22 +360,93 @@ que antes, dígito a dígito. Los demás programas están en la carpeta
 Programas & Qué hacen \\
 \midrule
 \texttt{lima/REGISTRO.md} & reglas de los dos casos, escritas antes de ajustar las referencias, de entrenar y de evaluar \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 \texttt{escenarios\_lima.py} & registra los dos escenarios: el nudo, con un semáforo de tres estados con verde, y el corredor, con seis cruces y los vecinos de cada uno \\
-\texttt{lima/armar\_red.py}, \texttt{lima/programa.py} y \texttt{lima/demanda.py} & el nudo: la red, con la geometría de OpenStreetMap y los carriles observados; el plan del semáforo medido en el sitio, y la demanda \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
+\texttt{lima/ovalo/armar\_ovalo.py}, \texttt{lima/programa.py} y \texttt{lima/demanda.py} & el nudo: la red del óvalo, con la geometría de OpenStreetMap, las distancias medidas en Google Maps y los carriles observados; el plan del semáforo medido en el sitio, y la demanda \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
+\texttt{lima/ovalo/plan\_ovalo.py} y \texttt{lima/programa\_ovalo.py} & el nudo: las luces de cada estado en los diez nodos del óvalo, deducidas de la red, y los programas de todos los controles, incluido el de la variante de orden libre \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 \texttt{lima/estudio.py} & el nudo: ajusta el fijo y el actuado, evalúa todos los controles en las dos tandas y aplica la regla de veredicto \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
+\texttt{evaluar\_ovalo.py}, \texttt{tablas\_ovalo.py} y \texttt{figura\_secuencia.py} & el nudo: las dos tandas del modelo y de su variante, la prueba de robustez y los veredictos de las cuatro comparaciones; sus tablas y figuras, y la secuencia de luces de cada uno \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 \texttt{lima/corredor/corredor.py} y \texttt{lima/corredor/\allowbreak estudio\_corredor.py} & lo mismo para el corredor de la Av.~Benavides: la red, el plan típico y la demanda; el ajuste de las referencias, la evaluación y el veredicto \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 \texttt{lima/borde\_actuado.py} & comprobación del borde de la búsqueda del actuado ajustado: prueba un paso más allá de cada parámetro que quedó en el borde \\
-\texttt{lima/tablas\_lima.py}, \texttt{lima/dibujar\_red.py} y \texttt{lima/corredor/\allowbreak tablas\_corredor.py} & tablas y figuras de los dos casos, y la tabla y la figura del resultado final, que los junta con el segundo estudio \\
-\texttt{lima/ver\_en\_sumo.py} & abre la ventana de SUMO con un caso de Lima y dos o más controles lado a lado, con los mismos vehículos; solo para mirar \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
+\texttt{lima/tablas\_lima.py} y \texttt{lima/corredor/\allowbreak tablas\_corredor.py} & funciones comunes de las tablas y figuras de los dos casos; tablas y figuras del corredor, y la tabla y la figura del resultado central, que los junta con el segundo estudio \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
+\texttt{lima/ver\_en\_sumo.py} y \texttt{ver\_ovalo.py} & abren la ventana de SUMO con un caso de Lima y dos o más controles lado a lado, con los mismos vehículos; solo para mirar \\
 \bottomrule
 \end{tabular}
-\caption[Programas de los casos de Lima]{Programas que añaden los casos de Lima. Están en la carpeta \texttt{lima/} del repositorio, salvo \texttt{escenarios\_lima.py}, que está en su raíz.}
+\caption[Programas de los casos de Lima]{Programas que añaden los casos de Lima. Cada caso guarda la versión con que corrió en su carpeta de \texttt{lima/estudios/}: las rutas de la tabla, en su \texttt{demo\_rl/}, y los programas del nudo sin carpeta, en su raíz. \texttt{lima/ver\_en\_sumo.py} está en \texttt{lima/}.}
 \label{tab:programas-lima}
 \end{table}
-% fuente: docstrings de cada programa (lima/*.py, lima/corredor/*.py y escenarios_lima.py); rl_ippo.py
+% Codigo de Lima en el repositorio (22.11.2026): lima/estudios/nudo_ovalo/ y lima/estudios/corredor_benavides/ son las
+% copias de trabajo nudo_ovalo_estudio2/ y corredor_estudio2/ sin checkpoints, tripinfo, logs ni pruebas (huellas: 73 de
+% 73 y 62 de 63, tablas_corredor.py editado despues del lanzamiento; lima/estudios/LEEME.md); figuras/ son los
+% programas de tesis_ovalo_2026-11-19/figuras/ con rutas relativas (figuras/LEEME.md)
+% fuente: docstrings de cada programa (lima/*.py, lima/corredor/*.py y escenarios_lima.py; nudo_ovalo_estudio2/*.py y
+% nudo_ovalo_estudio2/demo_rl/lima/ovalo/*.py); rl_ippo.py
 % (duracion_transiciones: ambar y rojo total entre dos verdes; C["n_fases"]); comprobacion de que no cambia los
 % casos anteriores: corredor, base 7, 3 episodios con las opciones del modelo completo, CSV y politica identicos
 % antes y despues del cambio (13.11.2026)
+% Revision final (22.11.2026): verde minimo por semaforo y estado del corredor: corredor_estudio2/demo_rl/rl_ippo.py
+% (C["verde_min_tls"], que declara corredor_estudio2/demo_rl/escenarios_lima.py) y lima/REGISTRO.md del corredor
+% ("el modelo, que no puede cambiar de estado antes del minimo del suyo"). OJO: hay tres rl_ippo.py distintos: el del
+% repositorio (sha256 5bd8d48a...), el del nudo (nudo_ovalo_estudio2/demo_rl/, c61b706c..., con --orden-libre y sin
+% verde_min_tls) y el del corredor (corredor_estudio2/demo_rl/, bf6cdda9..., con verde_min_tls y sin --orden-libre); se
+% guardaron los dos, cada uno en la carpeta de su caso en lima/estudios/. La igualdad digito a digito con los casos
+% anteriores se comprobo solo en pruebas cortas (base 7, 2 o 3 episodios); por eso el texto no la afirma
+
+% Revision final (22.11.2026): orden de los programas por actividad del flujo (las cajas "Actividad 1" a "Actividad 6"
+% de diagramas/flujo.tex), pedido de los autores (replicabilidad). Medicion mas estricta: barrer_fijo.py (METRICA_BARRIDO
+% = "retraso_total_prom" por omision; MALLAS desde 10 s) y --prefijo robustez_ en los docstrings de veredicto.py,
+% sintesis_plan.py y plan2/tablas_cap5.py. Cada
+% fila sale de los docstrings y lanzadores: plan2/generar_trabajos.py y plan2/cola.py; plan3/generar_trabajos3.py,
+% plan3/cola.py y plan3/protecciones.py; nudo_ovalo_estudio2/entrenar.sh, referencias.sh (estudio.py ajustar-fijo y
+% ajustar-actuado, borde_actuado.py ovalo, estudio.py validar-referencias) y evaluar_ovalo.py (referencias, modelos,
+% robustez y veredicto; version citada con veredicto.base_mediana); corredor_estudio2/lanzar.sh y evaluar_nivel.sh
+% (estudio_corredor.py ajustar-fijo, ajustar-actuado, validar-referencias, evaluar y veredicto; el entrenamiento citado lo
+% elige citado.py, la base con la validacion mediana); escenarios_plan3.py con con_escenarios.py (plan3/README.md, regla 4)
+La Tabla~\ref{tab:programas-pasos} ordena esos programas por actividad
+del flujo (Figura~\ref{fig:flujo}). Un resultado se repite corriendo
+sus actividades en ese orden, con las semillas de la
+Sección~\ref{sec:reproducibilidad}. La medición más estricta usa los
+programas del primer estudio con otra configuración:
+\texttt{barrer\_fijo.py} con su rejilla desde 10~s y su criterio por
+omisión, el retraso total, y \texttt{veredicto.py},
+\texttt{sintesis\_plan.py} y \texttt{plan2/\allowbreak tablas\_cap5.py}
+con la opción \texttt{-{}-prefijo robustez\_}.
+
+\begin{table}[H]
+\setstretch{1}
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{>{\raggedright\arraybackslash}p{2.2cm}>{\raggedright\arraybackslash}p{3.9cm}>{\raggedright\arraybackslash}p{3.9cm}>{\raggedright\arraybackslash}p{3.9cm}}
+\toprule
+Actividad del flujo & Primer estudio & Segundo estudio & Casos de Lima \\
+\midrule
+Lanzar las actividades &\texttt{plan2/\allowbreak generar\_trabajos.py} escribe la lista de trabajos y \texttt{plan2/\allowbreak cola.py} la ejecuta & \texttt{plan3/\allowbreak generar\_trabajos3.py} y \texttt{plan3/\allowbreak cola.py}; \texttt{plan3/\allowbreak protecciones.py} revisa cada trabajo & lanzadores de cada caso (nudo: \texttt{entrenar.sh} y \texttt{referencias.sh}; corredor: \texttt{lanzar.sh}), que comprueban antes la huella de cada archivo de código y de datos \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
+1. Construir el escenario & \texttt{build\_net.bat}, \texttt{escenarios\_plan2.py} y \texttt{plan2/\allowbreak preparar.py}; \texttt{calibrar\_demanda.py} en P6 & \texttt{escenarios\_plan3.py} y \texttt{plan3/\allowbreak demanda\_estocastica.py}, con \texttt{con\_escenarios.py} & \texttt{escenarios\_lima.py}; nudo: \texttt{lima/\allowbreak ovalo/\allowbreak armar\_ovalo.py}, \texttt{lima/\allowbreak demanda.py}, \texttt{lima/\allowbreak programa.py}, \texttt{lima/\allowbreak ovalo/\allowbreak plan\_ovalo.py} y \texttt{lima/\allowbreak programa\_ovalo.py}; corredor: \texttt{lima/\allowbreak corredor/\allowbreak corredor.py} \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
+2. Ajustar las referencias & \texttt{barrer\_fijo.py}; el actuado y el ciclo mínimo, con \texttt{comun.py} & \texttt{plan3/\allowbreak barrer\_fino.py}, \texttt{plan3/\allowbreak actuado.py}, \texttt{plan3/\allowbreak franja.py} y \texttt{plan3/\allowbreak reglas.py}; \texttt{plan3/\allowbreak p3\_congelar.py} las congela & nudo: \texttt{lima/\allowbreak estudio.py} y \texttt{lima/\allowbreak borde\_actuado.py}; corredor: \texttt{lima/\allowbreak corredor/\allowbreak estudio\_corredor.py} \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
+3. Entrenar & \texttt{rl\_corredor.py}, \texttt{rl\_ippo.py}, \texttt{rl\_dqn.py} y \texttt{rl\_mappo.py} & \texttt{rl\_ippo.py}, con las opciones de cada modelo & \texttt{rl\_ippo.py}, con las opciones del modelo completo \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
+4. Elegir la versión evaluada & \texttt{veredicto.py} & \texttt{plan3/\allowbreak p3\_elegir.py}; el modelo citado, \texttt{plan3/\allowbreak p3\_promocion.py} & la regla de \texttt{veredicto.py}: en el nudo, en \texttt{evaluar\_ovalo.py}; en el corredor, en su lanzador \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
+5. Evaluar & \texttt{evaluar.py} y \texttt{consolidar.py}; \texttt{plan2/\allowbreak fijo\_2509.py} reúne las del fijo ajustado & \texttt{plan3/\allowbreak evaluar3.py}, a ciegas & nudo: \texttt{evaluar\_ovalo.py}; corredor: \texttt{lima/\allowbreak corredor/\allowbreak estudio\_corredor.py} \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
+6. Decidir & \texttt{veredicto.py}; tablas con \texttt{sintesis\_plan.py} y \texttt{plan2/\allowbreak tablas\_cap5.py} & \texttt{plan3/\allowbreak veredicto3.py}; tablas con \texttt{tablas\_plan3.py} & nudo: \texttt{evaluar\_ovalo.py}; corredor: \texttt{lima/\allowbreak corredor/\allowbreak estudio\_corredor.py}; tablas y figuras con \texttt{tablas\_ovalo.py}, \texttt{lima/\allowbreak corredor/\allowbreak tablas\_corredor.py} y \texttt{figuras/} \\
+\bottomrule
+\end{tabular}
+\caption[Programas de cada actividad del flujo]{Programas de cada actividad del flujo de la Figura~\ref{fig:flujo}, en el orden en que se ejecutan, en cada estudio. Lo que hace cada programa está en las Tablas~\ref{tab:programas} a~\ref{tab:programas-lima}; las semillas de cada actividad, en la Sección~\ref{sec:reproducibilidad}.}
+\label{tab:programas-pasos}
+\end{table}
 
 \input{secciones/anexo_c_exploratoria}
 \input{secciones/anexo_d_osm}
@@ -331,3 +459,5 @@ Programas & Qué hacen \\
 % Reduccion del 09.11.2026: lo que sale del Capitulo IV (calibracion, prueba de humo, spillback inactivo, medicion mas
 % estricta en la implementacion y P6)
 \input{secciones/anexo_i_implementacion}
+% Asesoria del 20.11.2026: anexo de etica que pidio el profesor (rubrica de acreditacion)
+\input{secciones/anexo_j_etica}

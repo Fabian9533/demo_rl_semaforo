@@ -1,0 +1,108 @@
+% flujo.tex - Diagrama de flujo general del metodo: los pasos, en orden, para ejecutar un caso,
+% desde la entrada hasta el veredicto (Cap. IV, Marco metodologico). Compilar con:
+%   python construir.py flujo      -> ../images/diag_flujo.pdf (15 cm de ancho, escala 1)
+% Color = unidad que hace el paso, como en la arquitectura: U1 (azul) construye el escenario y
+% ajusta las referencias; U2 (naranja) entrena y valida (los modelos de U4 siguen el mismo ciclo);
+% U3 (verde) elige la version evaluada, evalua y decide; inicio y fin en gris (fuera de las
+% unidades). Las vueltas de los dos bucles van con la flecha gruesa de repeticion y cada rombo
+% dice su condicion.
+\documentclass[10pt,border=0pt]{standalone}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish]{babel}
+\usepackage{tikz}
+\input{estilo_diagramas}
+\begin{document}
+\begin{tikzpicture}[diagrama]
+\unidad{ext}
+% ajuste local (como en u2): flush center centra las lineas sin estirar los espacios
+\tikzset{base nodo/.append style={align=flush center}}
+% alto: la fila de la leyenda queda en y -14.48 (fin.south - 0.55); 0.23 cm por debajo, el borde
+\useasboundingbox (0,0) rectangle (15,-14.71);
+
+% ---------------------------------------------------------------- guias
+% X = eje del flujo; xa = carril de la vuelta "siguiente episodio"; xb = carril de la vuelta
+% "otro entrenamiento"; W = ancho de texto de los pasos; g = separacion entre pasos
+\def\X{7.3}
+\def\xa{1.15}
+\def\xb{0.45}
+\def\W{10.6cm}
+\def\g{0.32}
+
+% ---------------------------------------------------------------- nodos del eje
+\node[iniciofin=ext, anchor=north] (ini) at (\X,-0.02)
+  {\textbf{Inicio}: un caso de estudio (red y demanda)};
+\node[proceso=u1, text width=\W, anchor=north] (p1) at ([yshift=-\g cm]ini.south)
+  {\nodo{Actividad 1. Construir el escenario en SUMO}{red, demanda y programas de semáforos}};
+\node[proceso=u1, text width=\W, anchor=north] (p2) at ([yshift=-\g cm]p1.south)
+  {\nodo{Actividad 2. Ajustar las referencias con las semillas de ajuste}{fijo ajustado al segundo
+   (barrido de verdes y desfases) y actuado ajustado}};
+\node[proceso=u2, text width=\W, anchor=north] (p3) at ([yshift=-0.62cm]p2.south)
+  {\nodo{Actividad 3. Entrenar el modelo con TraCI}{cada episodio es una hora de tráfico simulado}};
+\node[decision=u2, anchor=north] (val) at ([yshift=-\g cm]p3.south) {¿Toca validar?};
+\node[decision=u2, anchor=north] (quedan) at ([yshift=-0.55cm]val.south) {¿Quedan episodios?};
+\node[decision=u2, anchor=north] (faltan) at ([yshift=-0.42cm]quedan.south)
+  {¿Faltan\\ entrenamientos?};
+\node[proceso=u3, text width=\W, anchor=north] (p4) at ([yshift=-\g cm]faltan.south)
+  {\nodo{Actividad 4. Elegir la versión evaluada}{en cada entrenamiento, la versión con menor retraso
+   total en validación;\\ entre los entrenamientos, el mediano}};
+\node[proceso=u3, text width=\W, anchor=north] (p5) at ([yshift=-\g cm]p4.south)
+  {\nodo{Actividad 5. Evaluar en dos tandas}{con semillas de evaluación no usadas antes, las mismas
+   en todos los controles}};
+\node[proceso=u3, text width=\W, anchor=north] (p6) at ([yshift=-\g cm]p5.south)
+  {\nodo{Actividad 6. Decidir}{regla de veredicto en cada tanda; se cita el veredicto que se repite
+   en las dos}};
+\node[iniciofin=ext, anchor=north] (fin) at ([yshift=-\g cm]p6.south)
+  {\textbf{Fin}: veredicto del caso};
+
+% ---------------------------------------------------------------- rama de la validacion y notas
+\node[proceso=u2, text width=4.75cm, anchor=west] (guardar) at ([xshift=0.75cm]val.east)
+  {\nodo{Validar y guardar una versión}{con las semillas de validación}};
+\node[nota, align=right, anchor=east] (n_val) at ([xshift=-0.15cm]val.west)
+  {cada 10 episodios; cada 20\\ en el modelo completo de Lima};
+\node[nota, anchor=west] (n_quedan) at ([xshift=0.15cm]quedan.east)
+  {200 por entrenamiento;\\ 400 en el modelo completo};
+\node[nota, anchor=west] (n_faltan) at ([xshift=0.15cm]faltan.east)
+  {3 por modelo (5 en IPPO con\\ mensajes corregido), cada uno\\ con otra semilla base};
+
+% ---------------------------------------------------------------- flechas del eje
+\coordinate (union_ent) at ($(p2.south)!0.5!(p3.north)$);
+\coordinate (union_val) at ([yshift=-0.30cm]val.south);
+\draw[flujo] (ini) -- (p1);
+\draw[flujo] (p1) -- (p2);
+\draw[flujo] (p2) -- (p3);
+\draw[flujo] (p3) -- (val);
+% los "no" van a la izquierda del eje: a la derecha llega la vuelta de la validacion
+\draw[flujo] (val.south) -- (quedan.north);
+\node[etiqueta sin fondo, anchor=east] at ([xshift=-0.08cm, yshift=-0.15cm]val.south) {no};
+\draw[flujo] (quedan.south) -- node[etiqueta sin fondo, left] {no} (faltan.north);
+\draw[flujo] (faltan.south) -- node[etiqueta sin fondo, left] {no} (p4.north);
+\draw[flujo] (p4) -- (p5);
+\draw[flujo] (p5) -- (p6);
+\draw[flujo] (p6) -- (fin);
+
+% ---------------------------------------------------------------- validacion: si -> guardar -> union
+\draw[flujo] (val.east) -- node[etiqueta sin fondo, above] {sí} (guardar.west);
+\draw[flujo, -] (guardar.south) -- (guardar.south |- union_val) -- (union_val);
+
+% ---------------------------------------------------------------- bucles
+% siguiente episodio: de "Quedan episodios" (si) a Paso 3
+\draw[repeticion] (quedan.west) -- (\xa,0 |- quedan.west) -- (\xa,0 |- p3.west) -- (p3.west);
+\node[etiqueta sin fondo, anchor=south] at ($(quedan.west)!0.5!(\xa,0 |- quedan.west)+(0,0.04)$)
+  {sí: siguiente episodio};
+% otro entrenamiento: de "Faltan entrenamientos" (si) a la entrada de Paso 3
+\draw[repeticion, -] (faltan.west) -- (\xb,0 |- faltan.west) -- (\xb,0 |- union_ent)
+  -- ([xshift=-0.3pt]union_ent);
+\node[etiqueta sin fondo, anchor=south] at ($(faltan.west)!0.5!(\xb,0 |- faltan.west)+(0,0.04)$)
+  {sí: otro entrenamiento};
+
+% ---------------------------------------------------------------- leyenda
+\coordinate (L0) at (0.1,0);
+\draw[black!30, line width=0.4pt] ($(0,0 |- fin.south)+(0,-0.25)$) -- ($(15,0 |- fin.south)+(0,-0.25)$);
+\leyenda{($(L0 |- fin.south)+(0,-0.55)$)}{proceso, decision, iniciofin, flujo, repeticion}
+
+% control: pie del nodo Fin (fija el alto) y borde derecho de la caja de la validacion
+\path let \p1 = (fin.south), \p2 = (guardar.east) in
+  \pgfextra{\typeout{COTA finS=\y1\space guardarE=\x2}};
+\end{tikzpicture}
+\end{document}

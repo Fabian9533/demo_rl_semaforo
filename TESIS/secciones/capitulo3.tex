@@ -1,5 +1,9 @@
-\chapter{MARCO METODOLÓGICO}
+\chapter{DISEÑO DE PROYECTO}
 \label{cap:metodologia}
+% Asesoria del 20.11.2026: el profesor pidio cambiar solo los nombres. Este capitulo (antes "Marco metodologico") pasa
+% a ser el diseno del proyecto, con el diagrama de diseno; el Capitulo IV (antes "Implementacion") pasa a ser el marco
+% metodologico, con los pasos y sus pseudocodigos. Las etiquetas cap:metodologia y cap:implementacion se conservan
+% para no romper referencias; el numero de cada capitulo no cambia.
 % Reduccion del 09.11.2026 (notas/plan_reduccion_2026-11-09.md): el capitulo describe el diseno final en siete
 % secciones. La evaluacion se presenta como dos estudios (sec:diseno-segundo, con tab:plan3-cambia, que viene del
 % Anexo H). La version anterior completa esta en el tag entregado-2026-10-25.
@@ -7,29 +11,28 @@
 % sec:diseno-segundo ("Los pasos de la evaluacion") recibe la medicion mas estricta y el diagnostico en ese orden.
 % La marca PENDIENTE de los registros se imprime como "sin estabilizar" (sec:veredicto la nombra una sola vez).
 
-Este capítulo describe el método con que se responde la pregunta de la
-tesis: si un control de semáforos que aprende con aprendizaje por
+Este capítulo presenta el diseño del proyecto con que se responde la
+pregunta de la tesis: si un control de semáforos que aprende con aprendizaje por
 refuerzo y recibe información de sus semáforos vecinos reduce el
 retraso por vehículo frente a un plan de tiempo fijo bien ajustado, sin
 quedar por detrás del control actuado. Se entrena un agente por
-semáforo sobre el simulador SUMO y el control se compara con esas dos
-referencias en seis casos sintéticos, construidos sobre tres redes, en una
-evaluación de exigencia creciente: parte de una fase exploratoria
-(Anexo~C) y termina en el segundo estudio, con llegadas aleatorias, un
-plan fijo ajustado al segundo y reglas publicadas antes de entrenar.
-Las reglas de ese estudio se aplican después a dos casos de Lima.
+semáforo sobre el simulador SUMO, y el control se compara con esas dos
+referencias en seis casos sintéticos, construidos sobre tres redes, con
+una evaluación en tres pasos de exigencia creciente, y en dos casos de
+Lima.
 
-Las Secciones~\ref{sec:vision-general} a~\ref{sec:u3} dicen qué se
-construyó, y la Sección~\ref{sec:plan2}, cómo se evalúa. Los conceptos
-se definen en el Capítulo~\ref{cap:teoria}; la implementación está en
-el Capítulo~\ref{cap:implementacion} y los resultados, en el
-Capítulo~\ref{cap:resultados}.
+Las Secciones~\ref{sec:vision-general} a~\ref{sec:u3} definen qué se
+construye, y la Sección~\ref{sec:plan2}, cómo se evalúa y cómo se
+valida con la realidad en los casos de Lima. Los conceptos están en el
+Capítulo~\ref{cap:teoria}; las actividades que ejecutan el diseño, con
+sus pseudocódigos, en el Capítulo~\ref{cap:implementacion}, y los
+resultados, en el Capítulo~\ref{cap:resultados}.
 
 
-\section{Visión general del método}
+\section{Visión general del diseño}
 \label{sec:vision-general}
 
-El método tiene cuatro unidades (Figura~\ref{fig:arquitectura} y
+El diseño tiene cuatro unidades (Figura~\ref{fig:arquitectura} y
 Tabla~\ref{tab:pipeline}). U1 construye los escenarios de simulación:
 la red, la demanda y los controles de referencia. U2 formula el control
 de cada semáforo como un problema de aprendizaje por refuerzo y entrena
@@ -38,17 +41,24 @@ un agente por semáforo sobre SUMO, a través de la interfaz TraCI
 salidas y aplica la regla que decide si un modelo funciona. U4 añade la
 coordinación: mensajes entre semáforos vecinos. Los agentes no
 modifican la red ni las rutas: solo deciden cuándo cambia cada
-semáforo.
+semáforo. Los casos de Lima agregan un módulo de validación con la
+realidad, que compara el modelo con el plan que opera hoy y con el fijo
+ajustado al segundo, un plan fijo afinado con pasos de 1~s
+(Secciones~\ref{sec:modelos} y~\ref{sec:validacion-realidad}). Los
+programas de cada unidad están en el Anexo~B, y el equipo y las
+versiones del software, en la Tabla~\ref{tab:hw}.
 
 \begin{figure}[H]
 \setstretch{1}
 \centering
-\includegraphics[width=0.88\textwidth]{diag_arquitectura.pdf}
-\caption[Arquitectura modular del método]{Arquitectura modular del método. Cada recuadro de color
+\includegraphics[width=\textwidth]{diag_arquitectura.pdf}
+\caption[Arquitectura modular del diseño]{Arquitectura modular del diseño. Cada recuadro de color
 es una unidad. SUMO con TraCI es el entorno de U3: sobre él entrenan los aprendices y se evalúan
 todos los controles. Las flechas discontinuas son lo que intercambian las unidades (I1 a I8).
-Marcas: T, tabulares; D, DQN; P, IPPO y MAPPO. Los nombres en letra de máquina son programas
-(Anexo~B), y las semillas, las del primer estudio.}
+Marcas: T, tabulares; D, Double DQN; P, IPPO y MAPPO. Los nombres en letra de máquina son programas
+(Anexo~B), y las semillas, las del primer estudio. Abajo, en gris, el módulo de validación con la
+realidad de los casos de Lima (Sección~\ref{sec:validacion-realidad}): con las mismas semillas y el
+mismo retraso total, el modelo se compara con el plan actual y con el fijo ajustado al segundo.}
 \label{fig:arquitectura}
 \end{figure}
 % fuente: TESIS/diagramas/arquitectura.tex (python construir.py arquitectura)
@@ -63,12 +73,15 @@ Marcas: T, tabulares; D, DQN; P, IPPO y MAPPO. Los nombres en letra de máquina 
 Unidad & Qué hace & Qué recibe & Qué entrega \\
 \midrule
 U1. Preprocesa\-miento & Construye cada escenario & La geometría de la red y los flujos & La red, la demanda, los controles de referencia y los vecinos de cada semáforo \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 U2. Aprendizaje por refuerzo & Entrena un agente por semáforo & El escenario y las semillas & Una versión guardada por entrenamiento \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 U3. Simulación y medición & Simula, mide y aplica la regla de veredicto & Las salidas de SUMO y las versiones guardadas & Las métricas, el cambio frente a cada referencia y el veredicto \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 U4. Coordinación distribuida & Añade los mensajes entre vecinos & El escenario, con los vecinos de cada semáforo & Lo mismo que U2 \\
 \bottomrule
 \end{tabular}
-\caption[Unidades del método]{Unidades del método: qué hace cada una, qué recibe y qué entrega.
+\caption[Unidades del diseño]{Unidades del diseño: qué hace cada una, qué recibe y qué entrega.
 Sus programas se listan en el Anexo~B.}
 \label{tab:pipeline}
 \end{table}
@@ -78,14 +91,16 @@ Sus programas se listan en el Anexo~B.}
 \section{Escenarios y casos}
 \label{sec:escenarios}
 
-La evaluación usa seis casos: tres redes, cada una con una demanda
-nominal y una demanda alta (Tabla~\ref{tab:plan2-casos}). Las redes van
-de la más simple a la más compleja (Figura~\ref{fig:redes}): un
-corredor de dos semáforos, una red de tres semáforos con una rotonda
-sin semáforo y una malla de nueve. Su construcción está en la
-Sección~\ref{sec:construccion}. Son casos sintéticos; los dos casos de
-Lima, construidos con la geometría de OpenStreetMap y volúmenes publicados,
-se describen en la Sección~\ref{sec:diseno-segundo} y en el Anexo~D.
+Esta sección define los escenarios sintéticos: las redes, la demanda,
+la forma de las llegadas y el vehículo. La evaluación usa seis casos:
+tres redes, cada una con una demanda nominal y una demanda alta
+(Tabla~\ref{tab:plan2-casos}). Las redes van de la más simple a la más
+compleja (Figura~\ref{fig:redes}): un corredor de dos semáforos, una red
+de tres semáforos con una rotonda sin semáforo y una malla de nueve. Su
+construcción en SUMO está en la Sección~\ref{sec:construccion}. Los dos
+casos de Lima, construidos con la geometría de OpenStreetMap y volúmenes
+publicados, se describen en la Sección~\ref{sec:diseno-segundo} y en el
+Anexo~D.
 
 % fuente: TESIS/images/fig_redes.pdf, generada por plan2/figuras_redes.py desde plan2/corredor.net.xml, red.net.xml y
 % malla3.net.xml (posicion de los cruces, aristas, numero y orden de carriles, conexiones r/s/l) y el programa fijo de
@@ -129,12 +144,11 @@ de la transversal.
 la base de cada red (Tabla~\ref{tab:demanda-flujos}). La demanda alta
 multiplica cada flujo por un factor fijado antes de entrenar: el menor
 con el que, con el actuado, las colas llenan el tramo entre dos
-semáforos. Es 2.0 en el corredor y en la malla. En la red con rotonda
-ese criterio daría 2.5, pero la rotonda, sin semáforo, se satura desde
-1.3, y se toma 1.2 (Sección~\ref{sec:calibracion};
-Tablas~\ref{tab:red-alta-factor} y~\ref{tab:malla3-alta-factor}, en el
-Anexo~I). Los flujos se declararon al construir los escenarios y no
-salen de aforos de Lima.
+semáforos, 2.0 en el corredor y en la malla; en la red con rotonda se
+toma 1.2, porque desde 1.3 se satura la rotonda, que no tiene semáforo
+(Sección~\ref{sec:calibracion}; Tablas~\ref{tab:red-alta-factor}
+y~\ref{tab:malla3-alta-factor}, en el Anexo~I). Los flujos son
+declarados: no salen de aforos de Lima.
 % fuente: plan2/veredicto.csv (demanda_veh_h: 1810, 3620, 2150, 2580, 4350, 8700); capitulo4.tex, sec:calibracion
 % (criterio: menor f de los candidatos con spillback en al menos 2 de las 3 semillas 2001-2003 bajo el actuado;
 % P2: 1.3 en ninguna, 1.5 en una y 2.0 en las tres; P4: el criterio da 2.5 y los ramales de la rotonda se llenan
@@ -158,12 +172,17 @@ salen de aforos de Lima.
 Tipo de flujo (veh/h, primera media hora) & Corredor (P1) & Red con rotonda (P3) & Malla $3 \times 3$ (P5) \\
 \midrule
 Avenida, sentido dominante & $1 \times 600 = 600$ & $1 \times 650 = 650$ & $3 \times 600 = 1800$ \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 Avenida, sentido contrario & $1 \times 250 = 250$ & $1 \times 250 = 250$ & $3 \times 250 = 750$ \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 Calles transversales & $4 \times 180 = 720$ & $6 \times 150 = 900$ & $6 \times 180 = 1080$ \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 Calle de la rotonda & --- & $150 + 80 = 230$ & --- \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 Giros entre avenida y transversal & $4 \times 60 = 240$ & $2 \times 60 = 120$ & $12 \times 60 = 720$ \\
 \midrule
 \textbf{Total} & \textbf{1810} & \textbf{2150} & \textbf{4350} \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 Caso con demanda alta & P2: $\times 2.0 = 3620$ & P4: $\times 1.2 = 2580$ & P6: $\times 2.0 = 8700$ \\
 \bottomrule
 \end{tabular}
@@ -175,13 +194,12 @@ Caso con demanda alta & P2: $\times 2.0 = 3620$ & P4: $\times 1.2 = 2580$ & P6: 
 
 \noindent\textbf{Cuántos vehículos entran y por dónde.} La demanda de un
 caso es el total de vehículos por hora que entran a toda la red, no lo
-que pasa por cada calle. En P1, por ejemplo, entran 1810 vehículos en
-la hora, repartidos entre las seis entradas del corredor según los
-flujos de la Tabla~\ref{tab:demanda-flujos}: 485 por cada extremo de
-la avenida (330 en su media hora cargada y 155 en la otra) y 210 por
-cada una de las cuatro entradas de las calles transversales. Pasada la
-hora, la simulación sigue hasta que sale el último vehículo, con un
-tope de 6000~s (Sección~\ref{sec:protocolo}).
+que pasa por cada calle. En P1 entran 1810 en la hora: 485 por cada
+extremo de la avenida (330 en su media hora cargada y 155 en la otra) y
+210 por cada una de las cuatro entradas transversales
+(Tabla~\ref{tab:demanda-flujos}). Pasada la hora, la simulación sigue
+hasta que sale el último vehículo, con un tope de 6000~s
+(Sección~\ref{sec:protocolo}).
 % fuente: flujos de plan2/corredor.rou.xml y plan3/poi_corredor.rou.xml (mismas tasas). Entrada oeste (W_C1):
 % p1_W_E 600 + p1_W_S2 60 veh/h en la primera media hora (330 vehiculos) y p2_W_E 250 + p2_W_N1 60 en la segunda
 % (155); la entrada este (E_C2), al reves. Cada entrada transversal: 180 veh/h en las dos mitades y un giro de 60 en
@@ -226,8 +244,8 @@ carril, detiene mientras tanto a los que vienen detrás
 \end{figure}
 
 \noindent\textbf{Llegadas regulares y llegadas aleatorias.} La demanda
-de un caso puede llegar de dos formas, con la misma demanda media. Lo
-que cambia de una simulación a otra depende de la forma:
+puede llegar de dos formas, con la misma media, y de la forma depende lo
+que cambia de una simulación a otra:
 \begin{itemize}
   \item \textbf{Llegadas regulares.} Los vehículos de cada flujo entran
     a intervalos iguales. En todas las simulaciones de P1 entran los
@@ -237,9 +255,7 @@ que cambia de una simulación a otra depende de la forma:
     instante sorteado (proceso de Poisson). Lo que más cambia es el
     tráfico de un minuto a otro: el flujo principal de la avenida de P1
     trae en promedio 10 vehículos por minuto, pero en 9 de cada 10
-    minutos llegan entre 5 y 15. El total varía poco: en las 200
-    simulaciones de evaluación de P1 entraron entre 1690 y 1932
-    vehículos, 1800 en promedio.
+    minutos llegan entre 5 y 15.
 \end{itemize}
 Con una misma semilla, todos los controles reciben las mismas
 llegadas. El primer estudio usa llegadas regulares; el segundo, las
@@ -255,32 +271,32 @@ dos, y los casos de Lima, las aleatorias.
 llegadas, cada calle recibe la misma parte de la demanda en todas las
 simulaciones de un caso: lo aleatorio es cuándo llega cada vehículo, no
 por dónde entra. Se supone que cada caso representa una hora típica de
-un cruce, cuyo reparto se repite de un día a otro. Es el supuesto con
-que se programan los planes fijos reales: un plan por franja horaria,
-como la punta de la mañana, el valle y la punta de la tarde, calculado
-con datos de periodos representativos \citep{Koonce2008_TSTM}. Por eso
-el fijo se ajusta con el reparto de su caso, la condición más favorable
-para un plan fijo. Si el reparto cambiara de una simulación a otra, el
-fijo solo podría ajustarse al promedio, y los controles que reaccionan
-tendrían más margen. Los casos sintéticos no varían el reparto; en los
-dos casos de Lima se evaluó además un reparto distinto del supuesto,
-sin reajustar ningún control (Sección~\ref{sec:caso-lima}).
+un cruce, cuyo reparto se repite de un día a otro, que es el supuesto
+con que se programan los planes fijos reales: un plan por franja
+horaria (punta de la mañana, valle, punta de la tarde), calculado con
+datos de periodos representativos \citep{Koonce2008_TSTM}. Por eso el
+fijo se ajusta con el reparto de su caso, la condición más favorable
+para él; si el reparto cambiara entre simulaciones, solo podría
+ajustarse al promedio, y los controles que reaccionan tendrían más
+margen. Los casos sintéticos no varían el reparto; en los dos casos de
+Lima se evaluó además un reparto distinto del supuesto, sin reajustar
+ningún control (Sección~\ref{sec:caso-lima}).
 % fuente: Koonce2008_TSTM, cap. 6: seccion 6.5 "Transition Logic" (el horario por franja define planes de punta de
 % la manana, valle y punta de la tarde) y 6.6.2 "Cycle Length Selection" (el ciclo se elige con datos de periodos
 % representativos). Lo escrito aqui responde a la revision del 10.11.2026. Reparto distinto en Lima (revision del
-% 15.11.2026): secciones/tablas/lima_robustez.tex y corredor_robustez.tex (lima/robustez/ y lima/corredor/robustez/;
-% ningun control se volvio a ajustar ni a entrenar)
+% 15.11.2026): secciones/tablas/ovalo_robustez_fijo.tex y corredor_robustez.tex (nudo_ovalo_estudio2/demo_rl/lima/robustez/ y
+% lima/corredor/robustez/; ningun control se volvio a ajustar ni a entrenar)
 
 %----------------------------------------------------------------------
 
 \section{Formulación como problema de aprendizaje por refuerzo}
 \label{sec:formulacion}
 
-Cada semáforo es un agente que, cada 5~s, decide si mantiene su verde o
-pasa a la fase siguiente, y recibe como recompensa el retraso de sus
-aproximaciones con signo negativo. Así el control queda planteado como
-un problema de decisión de Markov (Sección~\ref{sec:rl})
-\citep{SuttonBarto2018}. La formulación es la misma para todos los
+Esta sección plantea el control como un problema de decisión de Markov
+(Sección~\ref{sec:rl}) \citep{SuttonBarto2018}: cada semáforo es un
+agente que decide si mantiene su verde o pasa a la fase siguiente y
+recibe como recompensa el retraso de sus aproximaciones con signo
+negativo. La formulación es la misma para todos los
 aprendices; cambian la representación del estado, la forma de imponer
 los límites de verde y, en dos modelos, la recompensa.
 
@@ -288,20 +304,21 @@ los límites de verde y, en dos modelos, la recompensa.
 por semáforo, con su estado y su recompensa locales
 (Sección~\ref{sec:marl}). Los tabulares tienen una tabla $Q$ por
 semáforo; los de redes neuronales comparten los parámetros, pero cada
-uno decide con su propia observación.
-
-Cada agente decide cada 5~s, contados desde el inicio de su verde, y no
-decide en ámbar (Sección~\ref{sec:bucle}). Tiene dos acciones: mantener
-la fase verde ($a = 0$) o pasar a la siguiente ($a = 1$), con un ámbar
-de 3~s. No elige una fase arbitraria ni una duración: solo cuándo
-termina el verde en curso. El modelo completo del segundo estudio
-(Sección~\ref{sec:modelos}) decide cada 2~s.
+uno decide con su propia observación. Cada agente decide cada 5~s,
+contados desde el inicio de su verde, y no decide en ámbar
+(Sección~\ref{sec:bucle}); el modelo completo
+(Sección~\ref{sec:modelos}) decide cada 2~s. Tiene dos acciones:
+mantener la fase verde ($a = 0$) o pasar a la siguiente ($a = 1$), con
+un ámbar de 3~s. No elige una fase arbitraria ni una duración: solo
+cuándo termina el verde en curso.
 
 El verde dura entre 10 y 60~s, como en el control actuado. En los
 aprendices con redes neuronales los límites se imponen con una máscara:
 antes de los 10~s solo es válido mantener, y a los 60~s, solo cambiar.
 En los tabulares se aplican después de elegir: un cambio pedido antes
-de los 10~s no se ejecuta, y a los 60~s se fuerza.
+de los 10~s no se ejecuta, y a los 60~s se fuerza. En los casos de Lima,
+las fases y sus verdes mínimos son las de cada lugar; en el nudo, cada
+fase es uno de los tres estados con verde del plan medido (Anexo~D).
 % fuente: rl_corredor.py, correr_episodio (a = elegir(...); cambiar = (a == 1 and t_verde >= minimo) or
 % t_verde >= VERDE_MAX); rl_ippo.mascara
 
@@ -312,7 +329,7 @@ a un nivel $b_j \in \{0, 1, 2, 3\}$: ninguno, de 1 a 3, de 4 a 8, o más
 de 8. Con $\phi$, la fase verde activa, el estado es
 $s = (b_O, b_E, b_N, b_S, \phi)$, y hay $4^4 \times 2 = 512$ estados.
 Esta discretización hace viable la tabla $Q$ y, a la vez, limita al
-método tabular (Sección~\ref{sec:tabular}). DQN, IPPO y MAPPO usan un
+método tabular (Sección~\ref{sec:tabular}). Double DQN, IPPO y MAPPO usan un
 vector continuo con las colas, los vehículos en movimiento, la fase, el
 tiempo en verde y, según el modelo, los mensajes de los vecinos
 (Tabla~\ref{tab:obs-u4}).
@@ -349,25 +366,28 @@ carril (38; 37 en la malla).
 El primer término cuenta vehículos-equivalentes retrasados: uno
 detenido cuenta 1 y uno que avanza a media velocidad, 0.5. Así
 aproxima, segundo a segundo, el retraso que mide SUMO. La suma se
-divide entre 5, la duración de un intervalo de mantener; uno de cambiar
-dura 8~s (3~s de ámbar y 5~s de verde).
+divide entre 5, la duración de un intervalo de mantener cuando se
+decide cada 5~s (uno de cambiar dura 8~s: 3~s de ámbar y 5~s de verde).
+El divisor es 5 también en el modelo completo, que decide cada 2~s: la
+recompensa queda en las mismas unidades con cualquier reloj de
+decisión.
+% fuente (revision final): rl_ippo.py, recompensa_agente (r = r_acum / PASO_CONTROL, con PASO_CONTROL = 5 de
+% rl_corredor.py) y ayuda de --paso-decision ("La recompensa y el descuento de V2 siguen en unidades de 5 s
+% (PASO_CONTROL)"); la misma linea en nudo_ovalo_estudio2/demo_rl/rl_ippo.py y corredor_estudio2/demo_rl/rl_ippo.py
 
-Se eligió el retraso, y no el conteo de vehículos detenidos, porque ese
-conteo no ve las colas que avanzan a paso lento, como las que se forman
-cuando el verde cambia muy seguido. En la prueba de humo, una corrida
-corta en un cruce aislado antes de entrenar en los casos, con el conteo
-la política derivaba hacia cambiar de fase, y con el retraso la deriva
-desapareció (Anexo~I).
+La recompensa usa el retraso, y no el conteo de vehículos detenidos,
+porque ese conteo no ve las colas que avanzan a paso lento, como las que
+se forman cuando el verde cambia muy seguido: en la prueba de humo, una
+corrida corta en un cruce aislado previa a los casos, la política
+entrenada con el conteo derivaba hacia cambiar de fase (Anexo~I).
 % fuente: docstring de rl_ippo.retraso_base ("El conteo de detenidos de U2 no ve a los que avanzan a paso lento");
 % el detalle de la prueba esta en el Anexo I (sec:humo)
 
 La recompensa tiene un límite: igual que el retraso, solo ve a los
 vehículos que ya entraron a la red (Sección~\ref{sec:u3}), así que una
 política puede mejorar la recompensa y el retraso dejando crecer la
-cola fuera de la red. Por eso la medición más estricta y el segundo
-estudio juzgan con el retraso total (Ecuación~\ref{eq:retraso-total}),
-y el segundo elige con él la versión evaluada
-(Sección~\ref{sec:protocolo}).
+cola fuera de la red. Por eso, desde la medición más estricta, la
+evaluación juzga con el retraso total (Ecuación~\ref{eq:retraso-total}).
 % Revision del 15.11.2026: las cifras de P2 (-23.3 % de retraso, espera para entrar de 239.6 a 282.0 s/veh y +1.6 %
 % de retraso total) salieron de aqui; se citan en sec:robustez y en el Anexo F.
 % fuente: scratchpad/escritura/hechos_v21.md (P2 corredor_alta, ippo_vecinos_s2042: d_f en timeLoss -23.3 %
@@ -375,7 +395,7 @@ y el segundo elige con él la versión evaluada
 % plan2/robustez_veredicto.csv; comun.leer_tripinfo (docstring de retraso_insercion_prom: "con la arista de entrada
 % llena, SUMO lo retiene fuera y ese tiempo no entra en timeLoss"); plan3/PRERREGISTRO.md, secciones 4 y 6
 
-La recompensa de colas de la ablación viene de la fase exploratoria
+La recompensa de colas de la ablación es la de la fase exploratoria
 (Anexo~C) y se lee en el instante de la decisión:
 \begin{equation}
   r_i = -\Bigl(w_1 \sum_{j \in \mathcal{J}_i} h_j + w_2 \sum_{j \in \mathcal{J}_i} e_j\Bigr),
@@ -391,27 +411,61 @@ espera desempata.
 \section{Coordinación entre semáforos}
 \label{sec:u4}
 
-La coordinación se consigue con mensajes entre semáforos vecinos, sin
-un controlador central: cada semáforo publica su estado, y cada agente
-decide con su propia observación, que incluye lo que le informan. La
-motivación viene de la fase exploratoria (Anexo~C): agentes tabulares
-sin comunicación tuvieron más retraso que un plan fijo coordinado. El
-algoritmo es IPPO \citep{Schulman2017_PPO,Yu2021_MAPPO}: un agente PPO
-por semáforo, con una red neuronal compartida por todos
+La coordinación es distribuida: cada semáforo es un agente que decide
+por su cuenta, con lo que ve en sus accesos y lo que le informan sus
+vecinos, sin un controlador central que mande sobre todos; la fase
+exploratoria motiva los mensajes (Anexo~C). El algoritmo es IPPO
+\citep{Schulman2017_PPO,Yu2021_MAPPO}:
+un agente PPO por semáforo, con una red neuronal compartida por todos
 (Secciones~\ref{sec:ppo} y~\ref{sec:marl}).
+% Asesoria del 20.11.2026: el profesor pregunto que es "coordinacion distribuida"; se define aqui en una linea y en la
+% introduccion, donde aparece por primera vez
 
-\noindent\textbf{Vecinos y mensajes.} Dos semáforos son vecinos cuando
-comparten un tramo de vía: en el
-corredor, C1 y C2; en la red con rotonda, C1 con C2 y C2 con C3 (la
-rotonda no participa); en la malla, cada semáforo tiene de dos a cuatro
-vecinos. Cada 5~s, cada semáforo publica a cada vecino cinco datos que
+\noindent\textbf{Agentes y vecinos.} Hay un agente por semáforo, así
+que su número cambia con el caso, y cada uno se comunica solo con sus
+vecinos: los semáforos con los que comparte un tramo de vía
+(Tabla~\ref{tab:agentes}).
+
+% fuente: escenarios_plan2.py (VECINOS de corredor y red; malla3(): vecinos al norte, sur, este y oeste en la
+% cuadricula, None en el borde) y rl_ippo.VECINOS; nudo_ovalo_estudio2/demo_rl/escenarios_lima.py ("lima": un solo
+% semaforo, semaforo_S1, sin vecinos) y corredor_estudio2/demo_rl/escenarios_lima.py ("benavides": seis semaforos, con
+% vecino al oeste salvo el primero y al este salvo el ultimo). Tabla agregada en la asesoria del 20.11.2026: el
+% profesor pidio que se vea cuantos agentes hay en cada caso y con quien se comunica cada uno
+\begin{table}[H]
+\setstretch{1}
+\centering
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{>{\raggedright\arraybackslash}p{4.5cm}c>{\raggedright\arraybackslash}p{7.8cm}}
+\toprule
+Caso & Agentes & Con quién se comunica cada agente \\
+\midrule
+Corredor (P1 y P2) & 2 & C1 con C2 \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
+Red con rotonda (P3 y P4) & 3 & C1 con C2, y C2 con C3; la rotonda no tiene semáforo \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
+Malla $3 \times 3$ (P5 y P6) & 9 & con los semáforos de al lado en su fila y en su columna: 2 en las esquinas, 3 en los bordes y 4 en el centro \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
+Nudo de Lima & 1 & con nadie: un solo controlador maneja las cuatro entradas del óvalo \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
+Corredor de Benavides & 6 & con el cruce de al lado hacia el oeste y hacia el este; los de los extremos, con uno \\
+\bottomrule
+\end{tabular}
+\caption[Agentes y vecinos de cada caso]{Agentes de cada caso, uno por semáforo, y con quién intercambia mensajes cada uno. Dos semáforos son vecinos cuando comparten un tramo de vía.}
+\label{tab:agentes}
+\end{table}
+
+\noindent\textbf{Mensajes.} Cada 5~s, cada semáforo publica a cada
+vecino cinco datos que
 un controlador real podría transmitir: la fase en curso (avenida,
 transversal o ámbar), el tiempo que lleva en ella, los vehículos
 presentes en la aproximación que descarga hacia el vecino, la cola
 detenida en esa aproximación y la cola detenida en el enlace que va del
 emisor al receptor. El receptor conserva el último mensaje y su edad.
 Hay dos relojes: los mensajes salen cada 5~s de reloj global, y cada
-agente decide cada 5~s de su propio verde.
+agente decide cada 5~s de su propio verde
+(Algoritmo~\ref{alg:episodio}); en el modelo completo, los mensajes
+salen cada segundo (Sección~\ref{sec:aprendices}).
 % fuente: rl_ippo.py (mensaje: cola_salida = max_halting del enlace emisor->receptor; con_vecinos = variante !=
 % "local": sin mensajes en local)
 
@@ -426,7 +480,7 @@ de 12, un identificador del semáforo y una ranura de 8 por lado
 dos lados, oeste y este: 31 componentes. En la malla el identificador
 tiene nueve posiciones y hay cuatro ranuras: 53. Las colas se dividen
 por la capacidad de la aproximación, y la cola del enlace, por sus
-plazas: 38 por carril en P1 a P4 y 37 en la malla.
+plazas por carril.
 % fuente: rl_ippo.py (preparar: dim_obs = 12 + n_id + 8 * lados, n_id = max(3, semaforos); observar);
 % comun.plazas_carril ("En los enlaces de 285.6 m son 38"); en malla3, 279 m entre lineas de detencion, 37 plazas
 
@@ -460,7 +514,7 @@ Vecino este & 24--31 & igual que 16--23 \\
 \bottomrule
 \end{tabular}
 \caption[Observación de cada agente]{Observación de cada agente con dos lados, la de P1 a P4 (31
-componentes). La usan IPPO, DQN y MAPPO.}
+componentes). La usan IPPO, Double DQN y MAPPO.}
 \label{tab:obs-u4}
 \end{table}
 
@@ -479,10 +533,9 @@ la anterior:
     cola del enlace hacia cada vecino supera la mitad de sus plazas por
     carril.
 \end{itemize}
-DQN y MAPPO usan la observación de IPPO con mensajes. El modelo
-completo del segundo estudio la amplía con los vehículos a menos de
-75~m de la línea de parada, la espera del primero y si un giro a la
-izquierda bloquea el carril (Anexo~H).
+Double DQN y MAPPO usan la observación de IPPO con mensajes, y el modelo
+completo, una ampliada con los vehículos cercanos a la línea de parada
+(Secciones~\ref{sec:modelos} y~\ref{sec:aprendices}).
 % fuente: plan3/PRERREGISTRO.md, seccion 12 (observacion nueva, 75 m); anexo_h_segundo_estudio.tex (modelo completo)
 
 %----------------------------------------------------------------------
@@ -491,7 +544,9 @@ izquierda bloquea el carril (Anexo~H).
 \label{sec:modelos}
 
 Se comparan tres controles que no aprenden y diez modelos que aprenden
-(Tabla~\ref{tab:plan2-modelos}). El central es IPPO con mensajes; el
+(Tabla~\ref{tab:plan2-modelos}); el segundo estudio agrega variantes de
+un solo cambio para sus hipótesis, y los casos de Lima, dos variantes
+más (Sección~\ref{sec:diseno-segundo}). El central es IPPO con mensajes; el
 segundo estudio cita sus dos variantes, IPPO con mensajes corregido y
 el modelo completo, y los casos de Lima, el modelo completo. Los
 demás sirven de referencia o difieren de otro en un solo elemento, de
@@ -513,21 +568,31 @@ Modelo & Qué es & Qué aporta su comparación \\
 \midrule
 \multicolumn{3}{l}{\textit{Controles que no aprenden}} \\
 Fijo ajustado & Plan de tiempo fijo elegido por barrido en cada caso & Referencia que decide el veredicto \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 Actuado & Control actuado de SUMO, con verde de 10 a 60~s & Referencia que ya reacciona al tráfico \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 Ciclo mínimo & Plan fijo con cada verde en 10~s y sin desfases & Control de cordura \\
 \midrule
 \multicolumn{3}{l}{\textit{Aprendices del primer estudio}} \\
 Q-learning & Tabular, con una tabla por semáforo & Base de los métodos tabulares \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 SARSA & Tabular, con otra regla de actualización & Esa regla, frente a Q-learning \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 Q-learning (colas) & Q-learning con la recompensa de colas; solo en P1 a P4 & La recompensa, frente a Q-learning \\
-DQN & Double DQN con una red compartida y la observación con mensajes & Un método de valor frente a uno de política, IPPO con mensajes \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
+Double DQN & Red $Q$ compartida por los semáforos, con la observación con mensajes & Un método de valor frente a uno de política, IPPO con mensajes \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 IPPO sin mensajes & Un agente PPO por semáforo con la misma red neuronal, sin información de los vecinos & El algoritmo y el estado continuo, frente a Q-learning \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 IPPO con mensajes & Lo mismo, con los mensajes de los vecinos & Los mensajes, frente a IPPO sin mensajes \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 IPPO con penalización de \textit{spillback} & IPPO con mensajes y el término de \textit{spillback} en la recompensa & Ese término, frente a IPPO con mensajes \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 MAPPO & IPPO con mensajes con un crítico centralizado & Ese crítico, frente a IPPO con mensajes \\
 \midrule
 \multicolumn{3}{l}{\textit{Modelos del segundo estudio}} \\
 IPPO con mensajes corregido & IPPO con mensajes con dos correcciones del entrenamiento & Las dos correcciones, frente a IPPO con mensajes \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 Modelo completo & IPPO con mensajes corregido con cuatro cambios más & Esos cambios juntos, frente a IPPO con mensajes corregido \\
 \bottomrule
 \end{tabular}
@@ -535,45 +600,50 @@ Modelo completo & IPPO con mensajes corregido con cuatro cambios más & Esos cam
 \label{tab:plan2-modelos}
 \end{table}
 
-\noindent\textbf{Referencias.} El fijo ajustado sale de un barrido de
-verdes y desfases en cada caso. El actuado es el de SUMO
+\noindent\textbf{Referencias.} El \emph{fijo ajustado} sale de un
+barrido de verdes y desfases en cada caso. El actuado es el de SUMO
 \citep{SUMO_TLS_Actuated}, con las fases del fijo y los límites de
 verde de los aprendices (Secciones~\ref{sec:teoria-control}
-y~\ref{sec:referencias-fijas}). En el segundo estudio las dos se
-vuelven a ajustar (Sección~\ref{sec:diseno-segundo}).
+y~\ref{sec:referencias-fijas}). En el segundo estudio y en los casos de
+Lima, las dos se vuelven a ajustar en cada caso: el \emph{fijo ajustado
+al segundo} afina sus tiempos hasta pasos de 1~s, sin que el plan cambie
+durante la simulación, y el \emph{actuado ajustado} es el actuado, o una
+de sus variantes, con los parámetros de menor retraso total
+(Secciones~\ref{sec:diseno-segundo} y~\ref{sec:referencias-segundo}).
 % fuente: comun.archivo_actuado (fases del programa estatico de la red, minDur 10, maxDur 60, offset="0")
 
-El ciclo mínimo no es una referencia que superar, sino un control de
-cordura. Da a cada fase el verde mínimo, 10~s, sin desfases: equivale a
-cambiar de fase en cuanto se permite, en todos los semáforos a la vez.
-Un aprendiz que se reduce a esa regla no aprendió a coordinar, aunque
-tenga menos retraso que el fijo. Se agregó en la medición más estricta
-(Sección~\ref{sec:diseno-robustez}) y no interviene en el veredicto del
-primer estudio (Sección~\ref{sec:programa-trivial}).
+El \emph{ciclo mínimo} no es una referencia que superar, sino un
+control de cordura. Da a cada fase el verde mínimo, 10~s, sin desfases:
+equivale a cambiar de fase en cuanto se permite, en todos los semáforos
+a la vez. Un aprendiz que se reduce a esa regla no aprendió a coordinar,
+aunque tenga menos retraso que el fijo. Se evalúa desde la medición más
+estricta (Sección~\ref{sec:diseno-robustez}) y no interviene en el
+veredicto del primer estudio (Sección~\ref{sec:programa-trivial}).
 % fuente: comun.archivo_trivial (programa fijo del caso con cada verde en verde_min, 10 s; offset="0");
 % plan2/<esc>_trivial.add.xml de los seis casos: solo fases de 10 s y de 3 s; veredicto.REFERENCIAS
 
 \noindent\textbf{Aprendices del primer estudio.} Q-learning y SARSA
-\citep{SuttonBarto2018} usan el estado tabular; DQN
+\citep{SuttonBarto2018} usan el estado tabular; Double DQN
 \citep{Mnih2015_DQN}, IPPO y MAPPO \citep{Yu2021_MAPPO}, una red
 neuronal, que generaliza entre estados parecidos
-(Sección~\ref{sec:dqn}). Todos se programaron sin bibliotecas de
-aprendizaje por refuerzo, con hiperparámetros fijados antes de entrenar
-en los casos (Sección~\ref{sec:aprendices},
-Tabla~\ref{tab:plan2-hiper}).
+(Sección~\ref{sec:dqn}). Sus hiperparámetros se fijaron antes de
+entrenar en los casos (Tabla~\ref{tab:plan2-hiper}); su implementación
+está en la Sección~\ref{sec:aprendices}, y el entrenamiento de IPPO con
+mensajes, paso a paso, en el Algoritmo~\ref{alg:ippo}.
 
-\noindent\textbf{Modelos del segundo estudio.} IPPO con mensajes
-corregido cambia dos puntos del entrenamiento de IPPO con mensajes, y
+\noindent\textbf{Modelos del segundo estudio.} \emph{IPPO con mensajes
+corregido} cambia dos puntos del entrenamiento de IPPO con mensajes, y
 nada más. Primero, el descuento cuenta los segundos que pasan entre dos
-decisiones: antes, mantener (5~s) y cambiar (8~s, con el ámbar) pesaban
-igual, y el costo de un verde largo quedaba subestimado. Segundo, los
-semáforos exploran a la vez: al entrenar, los que deciden en el mismo
-segundo usan el mismo número aleatorio, de modo que se desvían juntos y
-no rompen el ciclo común. Las dos correcciones salen de un diagnóstico
-posterior al primer estudio (Anexo~G). El modelo completo agrega cuatro
-cambios: ve los vehículos cercanos a la línea de parada, usa tres
-ajustes del entrenamiento, entrena 400 episodios en lugar de 200 y
-decide cada 2~s en lugar de cada 5~s (Anexo~H).
+decisiones: en IPPO con mensajes, mantener (5~s) y cambiar (8~s, con el
+ámbar) pesan igual, y el costo de un verde largo queda subestimado.
+Segundo, los semáforos exploran a la vez: al entrenar, los que deciden
+en el mismo segundo usan el mismo número aleatorio, de modo que se
+desvían juntos y no rompen el ciclo común. Las dos correcciones salen
+del diagnóstico del entrenamiento (Anexo~G). El \emph{modelo completo}
+agrega cuatro cambios a IPPO con mensajes corregido: ve los vehículos
+cercanos a la línea de parada, usa tres ajustes del entrenamiento,
+entrena 400 episodios en lugar de 200 y decide cada 2~s en lugar de
+cada 5~s (Sección~\ref{sec:aprendices} y Anexo~H).
 % fuente: anexo_g_diagnostico.tex, "Las dos correcciones" (descuento por segundo: intervalos de 5 y 8 s; exploracion
 % comun: un solo numero aleatorio por segundo para todos los semaforos que deciden); plan3/PRERREGISTRO.md,
 % secciones 0 y 12 (modelo base y modelo completo)
@@ -598,15 +668,12 @@ antes de los 3600~s. Los promedios incluyen a los que no habían
 terminado al cerrar la simulación.
 % fuente: rl_corredor.py (--tripinfo-output.write-unfinished true); comun.leer_tripinfo
 
-\noindent\textbf{Retraso total.} SUMO cuenta el retraso desde que el
-vehículo entra a la red. Si la vía de entrada está llena, lo retiene
-fuera, y ese tiempo queda aparte, como su espera para entrar
-(\texttt{departDelay}). Los vehículos que al cerrar todavía esperan
-entrar no tienen registro de viaje; su número y su espera media salen
-del resumen de estadísticas de SUMO. Con las dos salidas se calcula el
-retraso total (Ecuación~\ref{eq:retraso-total}). De quien no llegó a
-entrar solo se cuenta la espera que llevaba al cerrar, así que el
-retraso total es una cota inferior.
+\noindent\textbf{Retraso total.} Si la vía de entrada está llena, SUMO
+retiene fuera al vehículo y registra ese tiempo aparte, como su espera
+para entrar (\texttt{departDelay}). Los vehículos que al cerrar todavía
+esperan entrar no tienen registro de viaje; su número y su espera media
+salen del resumen de estadísticas de SUMO. Con las dos salidas se
+calcula el retraso total (Ecuación~\ref{eq:retraso-total}).
 % fuente: comun.leer_tripinfo (retraso_total_prom, retraso_insercion_prom, no_insertados: atributo waiting
 % de <vehicles> y departDelayWaiting de <vehicleTripStatistics>); comun.args_estadisticas y
 % comun.ruta_estadisticas, usados en rl_corredor.py, rl_ippo.py y barrer_fijo.py
@@ -623,20 +690,18 @@ detenidos. Hay \textit{spillback} cuando algún carril tiene detenidos
 al menos el 90\,\% de sus plazas (34 de 38 en P1 a P4 y 33 de 37 en la
 malla). Con ese umbral se calibra la demanda alta. Se cuentan además
 los vehículos que no terminaron su viaje y los que no llegaron a
-entrar. Con la demanda nominal y los controles de referencia son cero:
-estas medidas y el \textit{throughput} solo distinguen entre controles
-con la demanda alta.
+entrar. Con la demanda nominal y los controles de referencia son cero,
+así que solo distinguen entre controles con la demanda alta.
 % fuente: comun.py (UMBRAL_SPILLBACK = 0.9, umbral_carril = int(0.9 * plazas): 34 de 38 y 33 de 37,
 % MedidorEnlaces; leer_tripinfo: no_terminados y no_insertados)
 
 \noindent\textbf{Medidas de diagnóstico.} Dos medidas se registran en
-cada corrida y no intervienen en ningún veredicto. La recompensa
-acumulada se suma cada segundo con cualquier control: indica si el
-modelo maximizó su recompensa, no si controla mejor el tráfico. En los
-escenarios de varios cruces se registran además el tiempo de viaje, el
-retraso y la progresión (la fracción que se detiene a lo sumo una vez)
-de los vehículos que recorren la avenida de extremo a extremo; el
-análisis de resultados no los usa.
+cada corrida, pero no intervienen en ningún veredicto ni en el análisis
+de resultados: la recompensa acumulada, que indica si el modelo maximizó
+su recompensa y no si controla mejor el tráfico, y, en los escenarios de
+varios cruces, el tiempo de viaje, el retraso y la progresión (la
+fracción que se detiene a lo sumo una vez) de los vehículos que recorren
+la avenida de extremo a extremo.
 % fuente: rl_ippo.py y rl_corredor.py (correr_episodio: ret_retraso, ret_colas, ret_spill); plan2/ESPEC.md
 % seccion 5; comun.leer_tripinfo (metricas de los flujos de extremo a extremo)
 
@@ -646,18 +711,16 @@ análisis de resultados no los usa.
 \label{sec:plan}
 \label{sec:plan2}
 
-La evaluación hace la misma pregunta en seis casos, en tres pasos de
-exigencia creciente, y se hizo en el orden de la
-Tabla~\ref{tab:diseno-pasos}. La precede una fase exploratoria, que
-fijó el método (Anexo~C). El primer estudio, el plan de pruebas,
-compara todos los modelos con llegadas regulares. La medición más
-estricta vuelve a juzgar esos modelos, sin reentrenar, con el retraso
-total y un plan fijo mejor ajustado. Un diagnóstico del entrenamiento
-corrige después dos rasgos de IPPO con mensajes. El segundo estudio
-repite la pregunta con llegadas aleatorias, frente a un fijo ajustado
-al segundo y a un actuado ajustado, y sus reglas se aplican después a
-dos casos de Lima. El resultado central reúne el segundo estudio y
-Lima. Todos los pasos usan la misma regla de veredicto.
+Esta sección define cómo se responde la pregunta. La evaluación la
+plantea en seis casos y en tres pasos de exigencia creciente, y la lleva
+a dos casos de Lima (Tabla~\ref{tab:diseno-pasos}); el resultado central
+reúne el tercer paso y Lima. Las Secciones~\ref{sec:plan-casos}
+a~\ref{sec:validacion-realidad} definen los casos, los pasos y la
+validación con la realidad, y las Secciones~\ref{sec:protocolo}
+a~\ref{sec:veredicto}, lo común a todos los pasos: el protocolo y las
+semillas, la estadística y la regla de veredicto. La
+Sección~\ref{sec:analisis-complementarios} reúne los análisis que no
+cambian ningún veredicto.
 
 % fuente: notas/plan_reduccion_2026-11-09.md, seccion 3 (los tres pasos); primer estudio: sec:protocolo; medicion mas
 % estricta: anexo_f_robustez.tex; segundo estudio: plan3/PRERREGISTRO.md, secciones 4 y 5; etapas (revision del
@@ -670,17 +733,22 @@ Lima. Todos los pasos usan la misma regla de veredicto.
 \setlength{\tabcolsep}{3pt}
 \begin{tabular}{>{\raggedright\arraybackslash}p{2.5cm}>{\raggedright\arraybackslash}p{5.3cm}>{\raggedright\arraybackslash}p{3.6cm}>{\raggedright\arraybackslash}p{2.4cm}}
 \toprule
-Etapa & Qué se hizo & Por qué & Dónde \\
+Etapa & Qué evalúa & Para qué & Dónde \\
 \midrule
-Fase exploratoria & Q-learning e IPPO en cinco escenarios pequeños; fijo de verdes iguales y después ajustado; retraso; 10 semillas & Fijar el método & Anexo~C \\
+Fase exploratoria & Q-learning e IPPO en cinco escenarios pequeños; fijo de verdes iguales y fijo ajustado; retraso; 10 semillas & Fijar el método & Anexo~C \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 Paso 1. Primer estudio (el plan de pruebas) & Ocho aprendices en los seis casos (siete en la malla); llegadas regulares; fijo ajustado (barrido de 5 en 5~s) y actuado; retraso; 30 semillas & Responder la pregunta con una regla fijada de antemano & Sección~\ref{sec:resultado-principal} y Anexo~A \\
-Paso 2. Medición más estricta & Las mismas versiones evaluadas, sin reentrenar; fijo ajustado desde 10~s y ciclo mínimo; retraso total & El barrido no probaba ciclos cortos y el retraso no contaba la espera para entrar & Sección~\ref{sec:robustez} y Anexo~F \\
-Entre los pasos 2 y 3 & Diagnóstico del entrenamiento de IPPO con mensajes y doce niveles de demanda más, con llegadas regulares & Por qué el modelo no coordinaba en P4 y P6 y cómo cambia el resultado con la demanda & Anexo~G y Sección~\ref{sec:efecto-demanda} \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
+Paso 2. Medición más estricta & Las mismas versiones evaluadas, sin reentrenar; fijo ajustado desde 10~s y ciclo mínimo; retraso total & Probar los ciclos cortos y contar la espera para entrar, que el paso 1 no mide & Sección~\ref{sec:robustez} y Anexo~F \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
+Entre los pasos 2 y 3 & Diagnóstico del entrenamiento de IPPO con mensajes y doce niveles de demanda más, con llegadas regulares & Explicar por qué el modelo no coordina en P4 y P6 y medir cómo cambia el resultado con la demanda & Anexo~G y Sección~\ref{sec:efecto-demanda} \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 Paso 3. Segundo estudio & Llegadas aleatorias y regulares; fijo ajustado al segundo y actuado ajustado; retraso total; reglas publicadas antes de entrenar y dos tandas a ciegas & Ver si el resultado se sostiene con tráfico al azar y frente a un fijo más exigente & Sección~\ref{sec:resultado-central} y Anexo~H \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 Casos de Lima & El nudo y el corredor de Miraflores, con las reglas del paso 3; además, el plan que opera hoy en el nudo y un plan típico en el corredor & Llevar el método a dos lugares reales & Sección~\ref{sec:caso-lima} y Anexo~D \\
 \bottomrule
 \end{tabular}
-\caption[Etapas del trabajo]{Etapas del trabajo, en el orden en que se hicieron: la fase exploratoria, los tres pasos de la evaluación, de menor a mayor exigencia, lo que se hizo entre el segundo y el tercero, y los casos de Lima.}
+\caption[Etapas de la evaluación]{Etapas de la evaluación: la fase exploratoria, los tres pasos, de menor a mayor exigencia, el diagnóstico y los niveles de demanda entre el segundo y el tercero, y los casos de Lima.}
 \label{tab:diseno-pasos}
 \end{table}
 
@@ -710,8 +778,11 @@ y qué se puede concluir de ella.
 Comparación & Qué cambia & Qué se puede concluir \\
 \midrule
 Dentro de cada par (P1 con P2, P3 con P4 y P5 con P6) & Solo la demanda & El efecto de la demanda en esa red; una tendencia solo se ve con los niveles adicionales (Sección~\ref{sec:plan-demanda}) \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 Entre pares (corredor, red con rotonda y malla) & A la vez la red, los semáforos, las calles, los carriles y la demanda & Si el modelo sigue funcionando en una red más compleja; el efecto no se puede atribuir a un solo parámetro (en particular, a los carriles) \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 Entre redes con la misma demanda total (1810, 2715 y 3620~veh/h, en los niveles adicionales) & La red, los semáforos, las calles, los carriles y la carga por calle & Si el resultado cambia de una red a otra, sin separar esos efectos \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 Entre dos modelos, en un mismo caso & El elemento en que difieren (Tabla~\ref{tab:plan2-modelos}) & El aporte de ese elemento \\
 \bottomrule
 \end{tabular}
@@ -722,22 +793,27 @@ Entre dos modelos, en un mismo caso & El elemento en que difieren (Tabla~\ref{ta
 \subsection{Los pasos de la evaluación}
 \label{sec:diseno-segundo}
 
-El primer estudio (paso 1) compara los modelos de la
-Tabla~\ref{tab:plan2-modelos} con el fijo ajustado y con el actuado en
-los seis casos, con llegadas regulares y con el retraso como métrica.
+Esta subsección define cada paso de la evaluación y los casos de Lima:
+qué comparan, con qué referencias y con qué métrica. Lo que sigue al
+primer estudio, desde la medición más estricta hasta los análisis
+complementarios, se definió después de su veredicto y no cambia ninguno
+de sus veredictos; el segundo estudio y los casos de Lima fijaron sus
+propias reglas antes de entrenar.
+
+\noindent\textbf{Primer estudio.} Es el paso 1: compara los modelos de
+la Tabla~\ref{tab:plan2-modelos} con el fijo ajustado y con el actuado
+en los seis casos, con llegadas regulares y con el retraso como métrica.
 
 \phantomsection\label{sec:diseno-robustez}
 \noindent\textbf{Medición más estricta.} Es el paso 2. Vuelve a juzgar
-a los modelos del primer estudio, sin reentrenar, con el retraso total,
-con el fijo ajustado desde 10~s (un barrido que parte del verde mínimo
-y elige por retraso total) y con el ciclo mínimo como control. Se
-decidió después del veredicto del primer estudio por dos hallazgos: en
-P2, parte de la mejora del retraso se debía a cola desplazada fuera de
-la red (Sección~\ref{sec:u3}), y en P3 la versión evaluada de IPPO con
-mensajes era el ciclo mínimo, que el barrido del primer estudio no
-incluía. El nuevo barrido elige un ciclo de 26~s en P3, P4 y P5. No
-reemplaza ningún veredicto del primer estudio
-(Sección~\ref{sec:robustez} y Anexo~F).
+las versiones evaluadas del primer estudio (Sección~\ref{sec:protocolo}),
+sin reentrenar, con el retraso total, con el \emph{fijo ajustado desde
+10~s} (un barrido que parte del verde mínimo y elige por retraso total)
+y con el ciclo mínimo como control.
+Mide lo que el primer estudio deja fuera: la espera para entrar a la
+red, que el retraso no cuenta (Sección~\ref{sec:u3}), y los ciclos más
+cortos que su barrido no prueba (Sección~\ref{sec:robustez} y
+Anexo~F).
 % fuente: plan2/robustez_veredicto.csv (casos P1 a P6); comentario de MALLAS en barrer_fijo.py (barrido desde 10 s,
 % decidido al ver que la version evaluada de IPPO con mensajes en P3 era el ciclo minimo); anexo_f_robustez.tex,
 % "Fijo ajustado desde 10 s" (ganadores desde 10 s: P1 20/10, P2 25/15, P3 a P5 10/10, P6 15/10); fijo del primer
@@ -746,19 +822,22 @@ reemplaza ningún veredicto del primer estudio
 % el parrafo viene de "Analisis complementarios"; la cola desplazada en P2 es la de sec:robustez (espera para entrar de
 % 239.6 a 282.0 s/veh)
 
-\noindent\textbf{Diagnóstico del entrenamiento.} Antes del segundo
-estudio, un diagnóstico estudia por qué IPPO con mensajes no mejoraba
-la coordinación en P4 y P6, y si eso se corrige cambiando solo su
-entrenamiento. De él salen las dos correcciones de IPPO con mensajes
-corregido (Sección~\ref{sec:modelos} y Anexo~G).
+\noindent\textbf{Diagnóstico del entrenamiento.} Entre los pasos 2 y 3,
+un diagnóstico busca por qué IPPO con mensajes no mejora la coordinación
+en P4 y P6, y si eso se corrige cambiando solo su entrenamiento. De él
+salen las dos correcciones de IPPO con mensajes corregido
+(Sección~\ref{sec:modelos}); su protocolo y sus semillas están en el
+Anexo~G.
 % fuente: plan2/exploratorio_coord/PRERREGISTRO.md (secciones 2 y 7) y LEEME.md; anexo_g_diagnostico.tex
 
-El segundo estudio (paso 3) responde lo que los pasos 1 y 2 no
-permitían afirmar: que el resultado se sostenga con llegadas aleatorias
-y frente a un plan fijo ajustado con más cuidado. Se decidió después
-del veredicto del primero y no cambia ninguno de sus resultados. La
-Tabla~\ref{tab:plan3-cambia} compara los dos estudios; la red, la
-demanda, la recompensa y el algoritmo son los mismos.
+\noindent\textbf{Segundo estudio.} Es el paso 3: prueba lo que los pasos
+1 y 2 no permiten afirmar, que el resultado se sostenga con llegadas
+aleatorias y frente a un plan fijo ajustado con más cuidado. La
+Tabla~\ref{tab:plan3-cambia} compara los dos estudios; la
+red, la demanda, la recompensa y el algoritmo son los mismos. La
+evaluación se hace en dos \emph{tandas}, dos juegos independientes de
+semillas de evaluación (Sección~\ref{sec:evaluacion}), y solo se cita el
+veredicto que se repite en las dos (Sección~\ref{sec:veredicto}).
 
 \begin{table}[H]
 \setstretch{1}
@@ -767,20 +846,28 @@ demanda, la recompensa y el algoritmo son los mismos.
 \setlength{\tabcolsep}{3pt}
 \begin{tabular}{>{\raggedright\arraybackslash}p{2.6cm}>{\raggedright\arraybackslash}p{4.6cm}>{\raggedright\arraybackslash}p{6.4cm}}
 \toprule
-Rasgo & Primer estudio (plan de pruebas) & Segundo estudio \\
+Rasgo & Primer estudio & Segundo estudio \\
 \midrule
 Llegadas & A intervalos regulares & Regulares y aleatorias (proceso de Poisson con la misma demanda media) \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 Referencia & Fijo ajustado con un barrido de 5 en 5~s & Fijo ajustado al segundo: se vuelve a ajustar en cada caso y para cada tipo de llegadas, con pasos de 1~s. El actuado, también ajustado, decide si una mejora llega a FUNCIONA \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 Métrica & Retraso & Retraso total (Ecuación~\ref{eq:retraso-total}), que suma la espera para entrar a la red \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 Modelo & Ocho aprendices; el central es IPPO con mensajes & IPPO con mensajes corregido, y variantes suyas \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 Entrenamientos & 3 por modelo & 5 de IPPO con mensajes corregido y 3 de cada variante \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 Versión evaluada & Elegida con 2 semillas de validación & Elegida con 16 semillas de validación, por retraso total \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 Evaluación & 30 semillas & Dos tandas independientes: 30 semillas cada una con llegadas regulares y 100 con aleatorias \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 Veredicto & Regla de la Sección~\ref{sec:veredicto} & La misma regla en cada tanda; se cita solo el veredicto que se repite en las dos \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 Resguardos & Regla fijada de antemano & Reglas publicadas antes de entrenar, evaluación a ciegas y referencias fijadas antes de evaluar \\
 \bottomrule
 \end{tabular}
-\caption[Qué cambia del primer estudio al segundo]{Qué cambia del primer estudio (el plan de pruebas) al segundo.}
+\caption[Qué cambia del primer estudio al segundo]{Qué cambia del primer estudio al segundo.}
 \label{tab:plan3-cambia}
 \end{table}
 % fuente: plan3/PRERREGISTRO.md §3 (semillas y tandas), §4 (metrica), §5 (referencias), §6 (version evaluada) y §7
@@ -788,27 +875,29 @@ Resguardos & Regla fijada de antemano & Reglas publicadas antes de entrenar, eva
 % 1999, evaluacion 1001-1030, barrido del fijo de 5 en 5 s). La tabla viene del Anexo H (09.11.2026)
 
 \noindent\textbf{Resguardos.} Además del fijo ajustado al segundo y del
-actuado ajustado, se evalúan al lado otras ocho referencias, entre
-ellas el fijo ajustado desde 10~s y el ciclo mínimo
-(Tabla~\ref{tab:plan3-referencias}), todas ajustadas solo con semillas
-de ajuste (Sección~\ref{sec:referencias-fijas}). Los casos, los
+actuado ajustado, se evalúan al lado otras ocho referencias: el actuado
+por defecto, el fijo ajustado desde 10~s, el fijo de verdes de 5 en
+5~s, un fijo por franja, una regla simple, una regla reactiva,
+Max-Pressure \citep{Varaiya2013_MaxPressure} y el ciclo mínimo
+(Tabla~\ref{tab:plan3-referencias}); las que se ajustan usan solo
+semillas de ajuste (Sección~\ref{sec:referencias-fijas}). Los casos, los
 modelos, las referencias, las semillas, la regla de veredicto, las
 hipótesis y lo que se esperaba se publicaron antes de entrenar, y
 ningún criterio se cambió después de ver resultados; el registro previo
 y sus dos enmiendas, que reducen el alcance y son anteriores a la
-evaluación, están en el Anexo~H. La evaluación se hace dos veces, con semillas distintas, y
-solo se cita el veredicto que se repite en las dos. Los resultados de
-las tandas se guardaron sin abrir hasta el cierre, y el veredicto lo
-calculó un programa, una sola vez. Junto al veredicto se informa en
-cuántos entrenamientos del modelo el cambio va en el mismo sentido.
+evaluación, están en el Anexo~H. La evaluación es a ciegas: los
+resultados de las tandas se guardaron sin abrir hasta el cierre, y el
+veredicto lo calculó un programa, una sola vez. Junto al veredicto se
+informa en cuántos entrenamientos del modelo el cambio va en el mismo
+sentido.
 % fuente: anexo_h_segundo_estudio.tex, "Que es y cuando se decidio" y "Que cambia frente al plan de pruebas";
 % plan3/PRERREGISTRO.md, secciones 0, 5 (referencias y su papel), 7 (veredicto por tanda, veredicto citable y
 % sentido entre entrenamientos) y 14 (a ciegas)
 
-\noindent\textbf{Modelo citado.} En cada caso se cita IPPO con mensajes
-corregido, salvo que una variante registrada lo supere por al menos un
-1\,\% en una validación aparte, de 16 semillas que no se usan para nada
-más (Tabla~\ref{tab:plan3-promocion}). El veredicto de IPPO con
+\noindent\textbf{Modelo citado.} El \emph{modelo citado} de cada caso es
+IPPO con mensajes corregido, salvo que una variante registrada lo supere
+por al menos un 1\,\% en una validación aparte, de 16 semillas que no se
+usan para nada más (Tabla~\ref{tab:plan3-promocion}). El veredicto de IPPO con
 mensajes corregido se informa siempre; con llegadas regulares solo se
 evalúa ese modelo.
 % fuente: plan3/PRERREGISTRO.md, secciones 0 y 12 (regla de promocion, semillas 15009-15024);
@@ -826,44 +915,92 @@ baja cada 10 minutos (Tabla~\ref{tab:plan3-sensibilidad}).
 % seccion 8. La entrada por el mejor carril de los escenarios con llegadas aleatorias (PRERREGISTRO.md, seccion 4)
 % se describe en capitulo4.tex, "Demanda y tipo de llegadas", y su efecto en P6, en el Anexo H
 
-\noindent\textbf{Casos de Lima.} Después de los dos estudios, el método
-se lleva a dos lugares reales de Miraflores, en Lima: el nudo de la
-Av.~Reducto con la Av.~28 de Julio, que es un solo cruce, y un corredor
-de seis cruces en la Av.~Benavides. Se evalúan con las reglas del
-segundo estudio: llegadas aleatorias, el retraso total, el fijo
-ajustado al segundo y el actuado ajustado como referencias, dos tandas
-de 100 semillas y reglas escritas antes de entrenar. Cambian cuatro
-cosas:
+\noindent\textbf{Casos de Lima.} El método se lleva a dos lugares
+reales de Miraflores, en Lima: el nudo de la Av.~Reducto con la
+Av.~28 de Julio, el Óvalo Vasco, cuyos cuatro cruces maneja un solo
+controlador, y un corredor de seis cruces en la Av.~Benavides. Se
+evalúan con las reglas del segundo estudio: llegadas aleatorias, el
+retraso total, el fijo ajustado al segundo y el actuado ajustado como
+referencias, dos tandas de 100 semillas y reglas escritas antes de
+entrenar. Cambian cuatro cosas:
 \begin{itemize}
-  \item \textbf{El modelo.} Se entrena el modelo completo, tres veces
-    por caso y demanda, y se cita el entrenamiento de validación
-    mediana; el modelo completo se valida cada 20 episodios, con 8
-    semillas en el nudo y 4 en el corredor. En el nudo actúa sin
-    vecinos ni mensajes. En el corredor se entrenan además IPPO con
-    mensajes corregido y el mismo modelo sin mensajes (IPPO sin mensajes
-    corregido), para medir qué aportan los mensajes.
+  \item \textbf{El modelo.} Se entrena el modelo completo tres veces
+    por caso y demanda, con validación cada 20 episodios (8 semillas en
+    el nudo y 4 en el corredor); la versión evaluada sale, como en los
+    dos estudios, del entrenamiento de validación mediana. En el nudo actúa sin
+    vecinos ni mensajes, y se entrena además una variante que también
+    elige el orden de los estados, registrada como el modelo citado del
+    caso (Sección~\ref{sec:lima-nudo}). El resultado central usa en el
+    nudo el modelo completo, como en el corredor, y da al lado el
+    veredicto de la variante citada (Sección~\ref{sec:resultado-casos}).
+    En el corredor se entrenan
+    además IPPO con mensajes corregido y el mismo modelo sin mensajes
+    (IPPO sin mensajes corregido), para medir qué aportan los mensajes.
   \item \textbf{La demanda.} Sale de volúmenes publicados, no de flujos
     declarados, con la mezcla de vehículos de Lima, y cada caso se
     evalúa además con una demanda un 20\,\% mayor.
-  \item \textbf{Una referencia más.} El plan que opera hoy, medido en
-    el sitio, en el nudo, y un plan típico supuesto en el corredor.
-  \item \textbf{La evaluación no fue a ciegas.} Además, las referencias
-    ajustadas se revisaron después de conocer los primeros resultados:
-    el actuado ajustado de los dos casos y el fijo ajustado al segundo
-    del corredor se buscaron otra vez en un espacio más amplio, porque
-    la primera búsqueda dejaba una referencia débil, y al final se
-    comprobó un paso más allá de cada borde del espacio buscado. Cada
-    cambio se anotó antes de correrlo y solo podía hacer más exigente
-    la referencia.
+  \item \textbf{Una referencia más.} El plan actual de cada lugar, con
+    el que el modelo se valida con la realidad
+    (Sección~\ref{sec:validacion-realidad}).
+  \item \textbf{La evaluación no fue a ciegas.} Las referencias
+    ajustadas se fijaron antes de evaluar el modelo en las tandas; su
+    búsqueda está en el Anexo~D.
+    % Revision final (pedido del coordinador, punto T4 del lector): el detalle (comprobacion del borde del actuado en
+    % el nudo, una sola busqueda por demanda en el corredor) queda en el Anexo D. Nudo: borde_actuado.json de
+    % nudo_ovalo_estudio2/demo_rl/lima/salidas/ (19.11.2026 01:26) y de alta/salidas/ (05:55), antes del fin de los
+    % entrenamientos (03:53-04:28 y 05:59-07:25, logs/) y por tanto de las tandas de los modelos (LEEME.md, "Lanzadores")
+    % fuente: lima/REGISTRO.md, comprobacion del borde del actuado ajustado (14.11.2026, 15:55); corredor:
+    % corredor_estudio2/evaluar_nivel.sh (paso 1: espera las tandas de las referencias; paso 2: las tandas del modelo) y
+    % lima/REGISTRO.md, enmienda del 19.11.2026, 17:35 (copia en corredor_estudio2/enmienda_registro_corredor.md)
 \end{itemize}
-Los escenarios se describen en el Anexo~D y los resultados, en la
+Los escenarios, con su red, su semáforo, su demanda y sus semillas, se
+describen en el Anexo~D, y los resultados, en la
 Sección~\ref{sec:caso-lima}.
 % fuente: lima/REGISTRO.md (reglas del 13.11.2026, 19:30; segundo nivel de demanda, 19:40; corredor, 22:40; segundo
 % nivel del corredor, 14.11.2026, 03:00; enmiendas del actuado ajustado, 14.11.2026, 04:05 y 05:40, y del fijo
 % ajustado del corredor, 05:50; comprobacion del borde del actuado ajustado, 15:55); lima/entrenar.sh y lima/corredor/entrenar.sh (modelo completo, bases 42,
 % 2042 y 4042); lima/demanda.py y lima/corredor/corredor.py (mezcla de vehiculos de plan3/demanda_estocastica.py);
 % validacion: lima/entrenar.sh y lima/corredor/entrenar.sh, --eval-cada 20, semillas 21001-21008 y 21001-21004; en el
-% corredor, tambien IPPO con mensajes corregido y sin mensajes (etiquetas corregido y sinmsg, 200 episodios, cada 10)
+% corredor, tambien IPPO con mensajes corregido y sin mensajes (etiquetas corregido y sinmsg, 200 episodios, cada 10).
+% Nudo en la red del Ovalo Vasco: lima/REGISTRO.md, enmiendas del 18.11.2026, 11:03 ("Controles": las referencias se
+% ajustan en esa red con su procedimiento y la comprobacion del borde; "Modelos": el de orden libre es el citado y el
+% completo se evalua al lado) y 23:45 (red y demanda); nudo_ovalo_estudio2/entrenar.sh (libre y completo, bases 42, 2042
+% y 4042, 400 episodios, validacion cada 20 en 21001-21008)
+
+\subsection{Validación con la realidad}
+\label{sec:validacion-realidad}
+% Asesoria del 20.11.2026: el profesor pidio que la comparacion de tres instancias de los casos de Lima aparezca en el
+% diseno como metodo de validacion, con nombre y lugar propio, y como modulo del diagrama (Figura fig:arquitectura).
+% Fabian Alvarado (20.11.2026): los tiempos y la coordinacion del nudo se midieron en el sitio con cronometros, anotando
+% que luces se prenden a la vez y en que orden; la demanda se encontro publicada, no se contaron vehiculos. Fuentes:
+% lima/programa.py (PLAN: medicion del 13.11.2026 en la punta de la tarde) y lima/REGISTRO.md ("frente al plan actual:
+% el cambio, sin etiqueta"); plan tipico del corredor: corredor_estudio2/demo_rl/lima/corredor/corredor.py (PLAN_TIPICO)
+% y anexo_d_osm.tex; sin tiempos de viaje medidos: anexo_d_osm.tex, "El nudo: comprobacion"
+
+En los casos de Lima, la validación con la realidad mide cuánto bajaría
+el retraso si el modelo reemplazara lo que opera hoy. Para eso compara
+tres instancias en la misma red, con las mismas semillas y con el mismo
+retraso total:
+\begin{itemize}
+  \item \textbf{Plan actual.} Es como funciona hoy el semáforo. En el
+    nudo, sus tiempos se midieron en el sitio con cronómetros, en la hora
+    punta de la tarde: la duración del verde y del rojo de cada entrada,
+    y qué luces se prenden a la vez y en qué orden. En el corredor se usa
+    un plan típico de Lima, con tiempos como los medidos en el nudo.
+  \item \textbf{Fijo ajustado al segundo.} Es el mejor plan fijo para la
+    demanda del caso: el que daría un estudio de ingeniería de tránsito
+    que la conoce (Sección~\ref{sec:referencias-fijas}).
+  \item \textbf{Modelo.} Es el modelo completo, entrenado en ese lugar.
+\end{itemize}
+Se comparan con la estadística de la Sección~\ref{sec:estadistica}.
+Frente al plan actual se informa el cambio del modelo con su IC95, sin
+veredicto: esa cifra es la validación. El veredicto se decide, como en el segundo estudio, frente
+al fijo ajustado al segundo y al actuado ajustado, con la regla de la
+Sección~\ref{sec:veredicto}. La red sale de OpenStreetMap (en el nudo,
+con medidas tomadas en Google Maps) y la demanda, de un volumen
+publicado: no se contaron vehículos en el sitio. Por eso lo que se
+valida es la mejora frente a la operación real en la red simulada; no
+hay tiempos de viaje medidos con que calibrar el simulador (Anexo~D).
 
 \subsection{Protocolo y semillas}
 \label{sec:protocolo}
@@ -877,24 +1014,28 @@ Sección~\ref{sec:evaluacion}).
 entrena tres veces, con semillas base distintas (IPPO con mensajes
 corregido, cinco), durante 200 episodios (400 en el modelo completo);
 un episodio es una hora de demanda más el vaciado de la red, hasta un
-máximo de 6000~s. Cada 10 episodios se congela la política, se corre
-con las semillas de validación y se guarda una copia. La versión
+máximo de 6000~s. Cada 10 episodios, y en el último, se congela la
+política, se corre con las semillas de validación y se guarda una
+copia. La versión
 guardada de un entrenamiento es la copia con menor retraso medio en las
 semillas de validación (retraso total desde el segundo estudio), no la
 del último episodio. Entre los entrenamientos de un modelo en un caso se
-toma el mediano por ese valor: su versión guardada es la versión
-evaluada, la que representa al modelo en ese caso.
+toma el mediano por ese valor: su versión guardada es la \emph{versión
+evaluada}, la que representa al modelo en ese caso.
 % fuente: plan2/ESPEC.md seccion 3 (checkpoint, politica publicada, base publicada); veredicto.py (base_mediana);
 % plan3/PRERREGISTRO.md, seccion 6 (16 semillas, retraso total; la 3.a de 5 o la 2.a de 3); cuantos entrenamientos
 % y con que se valida en cada estudio: Tabla tab:plan3-cambia
 
-\noindent\textbf{Ajuste y evaluación.} El fijo ajustado del primer
-estudio es, en cada caso, el plan de menor retraso medio en las
-semillas de ajuste, entre los de un barrido de verdes y desfases
+\noindent\textbf{Ajuste y evaluación.} Las referencias se ajustan solo
+con las semillas de ajuste: el fijo ajustado del primer estudio es, en
+cada caso, el plan de menor retraso medio en esas semillas
 (Sección~\ref{sec:referencias-fijas}, Tabla~\ref{tab:plan2-fijo}).
 Todos los controles se evalúan con las mismas semillas, y los modelos,
 con la política congelada; se evalúan todos los entrenamientos de cada
-modelo, no solo el de la versión evaluada.
+modelo, no solo el de la versión evaluada. La medición más estricta y
+los niveles de demanda adicionales usan las semillas del primer estudio
+(Anexo~F y Sección~\ref{sec:plan-demanda}); las de los casos de Lima
+están al comienzo del Anexo~D.
 % fuente: plan2/ESPEC.md seccion 3 (barrido del fijo con las semillas de ajuste; evaluacion de las tres bases);
 % barrer_fijo.py; plan3/PRERREGISTRO.md, secciones 5 y 7
 
@@ -911,9 +1052,13 @@ modelo, no solo el de la versión evaluada.
 Uso & Primer estudio & Segundo estudio \\
 \midrule
 Ajustar las referencias & 2001 a 2003 (también para calibrar la demanda alta) & 2001 a 2030 \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 Entrenar (el episodio $k$ usa la base más $k$) & Bases 42, 2042 y 4042 & Las mismas; en IPPO con mensajes corregido, también 14042 y 16042 \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 Validar y elegir la versión evaluada & 999 y 1999 & 16 semillas: 999, 1999, 2999, 3999, 4999, 7999, 8999, 9999 y 15001 a 15008 \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 Elegir el modelo citado & --- & 15009 a 15024 \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 Evaluar & 1001 a 1030 & Tanda 1: 7001 a 7100 con llegadas aleatorias y 8001 a 8030 con regulares. Tanda 2: 10001 a 10100 y 13001 a 13030 \\
 \bottomrule
 \end{tabular}
@@ -941,12 +1086,15 @@ El intervalo de confianza al 95\,\% de $\Delta$ (IC95) se obtiene por
 remuestrean con reemplazo 10\,000 veces, con los mismos índices para
 los dos controles, y el intervalo va del percentil 2.5 al 97.5. El
 valor $p$ es el de la prueba de Wilcoxon de rangos con signo sobre las
-diferencias por semilla \citep{Wilcoxon1945_Rangos}.
+diferencias por semilla \citep{Wilcoxon1945_Rangos}. La prueba es
+bilateral y descarta las diferencias nulas (si todas lo son, $p = 1$), y
+el \textit{bootstrap} usa un generador con semilla fija, de modo que el
+IC95 se repite igual al volver a calcularlo.
 % fuente: consolidar.py (docstring y funciones ic95, comparar: default_rng(0), integers con reemplazo,
 % percentiles 2.5 y 97.5, stats.wilcoxon sobre las diferencias); plan3/PRERREGISTRO.md, seccion 7 (la misma
 % comparacion en el segundo estudio)
 
-Para resumir un modelo en todos los casos se usa la media geométrica,
+El \emph{resumen en un número} de un modelo es la media geométrica,
 sobre los casos, del cociente entre su retraso y el de la referencia,
 expresada como cambio porcentual \citep{Fleming1986_MediaGeometrica}:
 \begin{equation}
@@ -968,7 +1116,7 @@ tanda.
 % seccion 7 ("Numero unico") y seccion 10 (cuantas semillas: 30 por tanda con llegadas regulares y 100 con
 % aleatorias, por la variacion de la diferencia pareada entre semillas)
 
-\subsection{Regla de veredicto y convergencia}
+\subsection{Regla de veredicto}
 \label{sec:veredicto}
 
 Cada modelo recibe en cada caso un veredicto, que resume en una palabra
@@ -991,30 +1139,40 @@ IC95 de $\Delta_a$ queda entero por encima de cero, con $p < 0.05$. La
 regla se fijó antes de correr el primer estudio y es la misma en los
 tres pasos y en los casos de Lima; cambian la métrica y las referencias
 (desde el segundo estudio, el fijo ajustado al segundo y el actuado
-ajustado). El umbral del 5\,\% es un criterio fijado de antemano para
-separar una mejora pequeña de una clara; la meta de la tesis, una
-reducción del 25\,\%, se contrasta aparte (Tabla~\ref{tab:metas}).
+ajustado). En el segundo estudio y en los casos de Lima se aplica en
+cada tanda, y se cita el veredicto que se repite en las dos; si no
+coinciden, se cita el más prudente: MEJORA si una da FUNCIONA y la otra
+MEJORA; EMPATA si una mejora o falla y la otra empata, y ninguno si una
+mejora y la otra falla. El umbral del 5\,\% es un criterio fijado de
+antemano para separar una mejora pequeña de una clara; la meta de la
+tesis, una reducción de entre un 25 y un 40\,\%, se contrasta aparte
+(Tabla~\ref{tab:metas}). El Algoritmo~\ref{alg:veredicto} da el cálculo
+paso a paso, con las dos tandas.
+% Revision final: la combinacion de las dos tandas se copia de capitulo4.tex, sec:evaluacion-veredicto, para que la
+% regla quede completa en un solo lugar. fuente: plan3/PRERREGISTRO.md §7, "Etiqueta citable"; meta de 25 a 40 %:
+% introduccion.tex, "Metas cuantificables", y Tabla tab:metas
 % fuente: plan2/ESPEC.md seccion 7; veredicto.py; plan3/PRERREGISTRO.md, seccion 7 (la regla sin cambios, frente
 % al fijo ajustado al segundo y con el actuado ajustado)
 % TODO(reestructura): fundamentar con una fuente de diseño experimental el umbral del 5 % (veredicto y convergencia) y la exigencia conjunta de intervalo bootstrap y p de Wilcoxon; hoy solo consta como regla prefijada en plan2/ESPEC.md seccion 7.
 
-\noindent\textbf{Convergencia.} Se mide sobre la serie de validación
-del entrenamiento de la versión evaluada, en su último tercio. La
-meseta es la pendiente de la recta ajustada a ese tramo, expresada como
-el cambio porcentual que acumularía en un tercio más de entrenamiento.
-La estabilidad es la distancia porcentual entre la media de las tres
-últimas validaciones y el mínimo de la media móvil de tres. El
-entrenamiento converge, es decir, se estabiliza, si la meseta queda
-entre $-5$ y $+5$\,\% y la estabilidad no pasa del 5\,\%; se informa
-también cuántos entrenamientos del modelo se estabilizan. El veredicto
-se calcula siempre igual, con la evaluación completa. Si el
-entrenamiento de la versión evaluada no se estabiliza, el veredicto
-lleva la marca \emph{sin estabilizar}, por ejemplo, FUNCIONA (sin
-estabilizar): el modelo se evaluó completo, pero con más episodios su
-versión evaluada podría cambiar. En las reglas escritas antes de los
-dos estudios, esta marca se llama PENDIENTE. Si falta un dato, la celda
-dice \emph{sin datos}. No se agregan episodios: extender solo los casos
-que no se estabilizan rompería la igualdad de método.
+\noindent\textbf{Cuándo se estabiliza un entrenamiento.} Se mide sobre
+la serie de validación del entrenamiento de la versión evaluada, en su
+último tercio. La meseta es la pendiente de la recta ajustada a ese
+tramo, expresada como el cambio porcentual que acumularía en un tercio
+más de entrenamiento. La estabilidad es la distancia porcentual entre la
+media de las tres últimas validaciones y el mínimo de la media móvil de
+tres. El entrenamiento se estabiliza si la meseta queda entre $-5$ y
+$+5$\,\% y la estabilidad no pasa del 5\,\%; se informa también cuántos
+entrenamientos del modelo se estabilizan. Si el de la versión evaluada
+no se estabiliza, el veredicto se calcula igual, con la evaluación
+completa, y lleva la marca \emph{sin estabilizar}, por ejemplo, FUNCIONA
+(sin estabilizar): con más episodios, la versión evaluada podría
+cambiar. Si falta un dato, la celda dice \emph{sin datos}. No se agregan
+episodios: extender solo los casos que no se estabilizan rompería la
+igualdad de método.
+% Revision final (pedido del coordinador): sale la frase impresa "En las reglas escritas antes de los dos estudios,
+% esta marca se llama PENDIENTE"; el registro previo (plan2/ESPEC.md y plan3/PRERREGISTRO.md) usa PENDIENTE para la
+% marca sin estabilizar. Propuesta: si se quiere conservar la equivalencia, una linea en el Anexo H.
 % fuente: veredicto.py (tercio_final: ceil(n/3), minimo 3 puntos; convergencia); plan2/ESPEC.md seccion 7;
 % plan3/PRERREGISTRO.md, seccion 6 (el mismo calculo sobre la media de las 16 semillas; no se agregan episodios)
 
@@ -1022,8 +1180,8 @@ que no se estabilizan rompería la igualdad de método.
 \label{sec:analisis-complementarios}
 
 La evaluación se completa con dos grupos de análisis con llegadas
-regulares, decididos después del veredicto del primer estudio, que no
-cambian ningún veredicto.
+regulares, que no cambian ningún veredicto
+(Sección~\ref{sec:diseno-segundo}).
 % Revision del 15.11.2026: la medicion mas estricta (sec:diseno-robustez) y el diagnostico del entrenamiento pasaron a
 % sec:diseno-segundo, en el orden de la Tabla tab:diseno-pasos
 

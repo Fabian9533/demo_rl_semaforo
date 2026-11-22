@@ -1,0 +1,22 @@
+% Escrita a mano (borrador del 19.11.2026) con el formato de lima_demanda.tex de tablas_lima.py, que no tiene version
+% para la red del ovalo. Nudo en el Ovalo Vasco: demanda publicada (veh/h, media de la hora) por entrada y destino;
+% la demanda alta es esta multiplicada por 1.2. fuente: nudo_ovalo_estudio2/demo_rl/lima/lima.rou.xml (suma de las
+% tasas exp() de los cuatro cuartos de hora de cada flujo: Reducto norte 97.38, 307.51 y 876.41; Reducto sur 307.51,
+% 136.67 y 546.69; 28 de Julio 730.34, 146.07 y 97.38; Balboa 51.25, 717.53, 51.25 y 205.01; total 4271.0) y
+% nudo_ovalo_estudio2/demo_rl/lima/ovalo/entrada/rutas_estudio/flujos.txt (la misma tabla con un decimal); regla:
+% lima/demanda.py (GRUPOS, DESTINOS_28_DE_JULIO y DESTINOS_BALBOA). Enteros redondeados: las sumas pueden diferir en 1.
+\begin{tabular}{>{\raggedright\arraybackslash}p{4.2cm}>{\raggedleft\arraybackslash}p{1.7cm}>{\raggedleft\arraybackslash}p{1.7cm}>{\raggedleft\arraybackslash}p{1.7cm}>{\raggedleft\arraybackslash}p{1.7cm}r}
+\toprule
+Entrada & Hacia Larco & Hacia el puente & Hacia Reducto norte & Hacia Reducto sur & Total \\
+\midrule
+Reducto, desde el norte & 97 & 308 & --- & 876 & 1281 \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
+Reducto, desde el sur & 308 & 137 & 547 & --- & 991 \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
+28 de Julio, desde el puente & 730 & --- & 146 & 97 & 974 \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
+Balboa & 51 & 718 & 51 & 205 & 1025 \\
+\midrule
+Todo el nudo & 1186 & 1162 & 744 & 1179 & 4271 \\
+\bottomrule
+\end{tabular}

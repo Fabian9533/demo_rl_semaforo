@@ -11,31 +11,32 @@
 % indica su ficha; los porcentajes estan pasados a la convencion de la tesis (negativo = menos retraso,
 % espera o tiempo de viaje). Las claves estan en referencias.bib desde el 27.09.2026.
 
-Este anexo reúne los trabajos de control semafórico con los que la
-Sección~\ref{sec:comparacion-literatura} compara los resultados de la
-tesis. La búsqueda se organizó en
-cuatro frentes: bancos de prueba y revisiones, control de un cruce
-aislado o de un corredor, redes con varios agentes, y trabajos de
-América Latina junto con sistemas que operan en ciudades. De cada obra
-se registraron la red, el simulador, la demanda, el algoritmo, las
-entradas y salidas del agente, la referencia contra la que se mide, si
-esa referencia estaba ajustada y las cifras con su métrica. Cada cifra
-se releyó en la fuente, en el texto completo cuando estuvo disponible.
-Cuando un trabajo reporta varios escenarios, la mediana se recalculó
-con sus tablas. En once obras la relectura corrigió algún dato, como
-los autores, la sede, la métrica o la referencia de una cifra. Una
-investigación publicada como tesis y como artículos cuenta como una sola
-obra: las cifras de MARLIN-ATSC salen de la tesis
-\citep{ElTantawy2012_Tesis}, cuyos capítulos se publicaron también por
-separado \citep{ElTantawy2012_ITSC,ElTantawy2014_Parametros,ElTantawy2013_MARLIN}.
+Este anexo responde cuánto mejoran otros trabajos de control semafórico
+y frente a qué referencia. Reúne las obras con las que la
+Sección~\ref{sec:comparacion-literatura} compara la tesis, y de sus
+tablas salen las medianas de la Tabla~\ref{tab:comparacion-referencia}.
+La búsqueda cubrió cuatro frentes: bancos de prueba y revisiones,
+control de un cruce aislado o de un corredor, redes con varios agentes,
+y trabajos de América Latina junto con sistemas que operan en ciudades.
+De cada obra se registraron la red, el simulador, la demanda, el
+algoritmo, las entradas y salidas del agente, la referencia y su ajuste,
+y las cifras con su métrica. Cada cifra se releyó en la fuente, en el texto completo cuando
+estuvo disponible, y si un trabajo reporta varios escenarios, la mediana
+se recalculó con sus tablas. Una investigación publicada como tesis y
+como artículos cuenta como una sola obra: las cifras de MARLIN-ATSC
+salen de la tesis \citep{ElTantawy2012_Tesis}, cuyos capítulos se
+publicaron también por separado
+\citep{ElTantawy2012_ITSC,ElTantawy2014_Parametros,ElTantawy2013_MARLIN}.
+Las fichas de las obras están en el repositorio del proyecto (Anexo~B),
+en \texttt{literatura/\allowbreak fichas\_trabajos.json}.
 
-Así se reunieron 54 obras. Quedaron fuera cuatro cuya cifra solo pudo
-leerse en el resumen o en una fuente secundaria, entre ellas un
-Q-learning para un cruce aislado \citep{Abdulhai2003_QLearning} y la
-tesis de la UAQ revisada en el Capítulo~\ref{cap:estado-arte}
-\citep{UAQ2024}, cuyo capítulo de resultados no estuvo accesible.
-También quedó fuera un trabajo que mide el aprendizaje multiagente en un
-simulador propio muy simplificado y contra un fijo de 5~s de verde
+Se reunieron 54 obras. Se excluyen cuatro cuya cifra solo puede leerse
+en el resumen o en una fuente secundaria, entre ellas un Q-learning para
+un cruce aislado \citep{Abdulhai2003_QLearning} y la tesis de la UAQ
+revisada en el Capítulo~\ref{cap:estado-arte} \citep{UAQ2024}, cuyo
+capítulo de resultados no estuvo accesible. Se excluye también un
+trabajo que mide el aprendizaje multiagente en un simulador propio muy
+simplificado y contra un fijo de 5~s de verde
 \citep{Mahato2025_MARLvsFijo}. Tampoco se usa el 73\,\% de mejora frente
 a tiempo fijo que RESCO \citep{Ault2021_RESCO} atribuye a Mousavi et al.: en la fuente, esa
 cifra es la reducción de la cola frente a otra red neuronal
@@ -52,19 +53,20 @@ cronológico dentro de cada una.
 % Yau2017_Survey y Greguric2020_Review. Obras con alguna ficha 'corregido': RESCO, LibSignal, Lioris,
 % MARLIN-ATSC, Liang, Trinity, SURTRAC, Vivacity, SCOOT, FHWA (2008) y la ola verde de Lima.
 
-Todas las cifras se expresan como cambio porcentual frente a la
-referencia, con la convención de esta tesis: un valor negativo indica
-menos retraso, espera o tiempo de viaje que la referencia, aunque el
-trabajo original reporte la misma mejora como un porcentaje positivo.
-Las cifras solo son comparables entre filas con la misma métrica. El
-tiempo de viaje incluye el recorrido a velocidad libre, que ningún
-control puede acortar, y por eso diluye el porcentaje. La espera
-detenida es solo una parte del retraso y por eso infla el porcentaje. En los resultados de
+\textbf{Cómo se lee.} Todas las cifras se expresan como cambio
+porcentual frente a la referencia, con la convención de esta tesis: un
+valor negativo indica menos retraso, espera o tiempo de viaje que la
+referencia, aunque el trabajo original reporte la misma mejora como un
+porcentaje positivo. Las cifras solo son comparables entre filas con la
+misma métrica. El tiempo de viaje incluye el recorrido a velocidad
+libre, que ningún control puede acortar, y por eso diluye el
+porcentaje; la espera detenida es solo una parte del retraso, y por eso
+infla el porcentaje. En los resultados de
 X-Light, el mismo IPPO reduce el tiempo de viaje un 18.9\,\% y el
 retraso un 40.4\,\% en la misma malla y frente al mismo fijo
-\citep{Jiang2024_XLight}; en el piloto de
-SURTRAC, el tiempo de viaje baja un 25.8\,\% y la espera un 40.6\,\%
-\citep{Smith2013_Surtrac}. La métrica puede incluso invertir el signo:
+\citep{Jiang2024_XLight}; en el piloto de SURTRAC, el tiempo de viaje
+baja un 25.8\,\% y la espera un 40.6\,\% \citep{Smith2013_Surtrac}. La
+métrica puede incluso invertir el signo:
 en la misma malla y frente a Greedy, FMA2C reduce un 90.5\,\% el retraso
 medido en el cruce y aumenta un 10.8\,\% el retraso del viaje
 \citep{Ma2020_FMA2C}.
@@ -100,42 +102,42 @@ Lioris et al. (2014) \citep{Lioris2014_MaxPressure} & 13, real & .Q & Max-Pressu
   & fijo ajustado (LP)
   & viaje
   & $-$23.6 \\
-\addlinespace[2pt]
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 Genders y Razavi (2019) \citep{Genders2019_Framework} & 2, sintética & SUMO & DQN, DDPG
   & fijo ajustado\newline fijo ajustado\newline Webster adaptativo\newline Max-Pressure
   & viaje\newline viaje\newline viaje\newline viaje
   & $-$8.9\newline $-$1.3 DQN\newline $+$1.4\newline $+$22.0 \\
-\addlinespace[2pt]
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 LIT (2019) \citep{Zheng2019_LIT} & 1 (12 cruces) y redes de 4 a 16, reales & SUMO & LIT (DQN)
   & fijo sin ajustar\newline Webster\newline fijo sin ajustar\newline Webster
   & viaje\newline viaje\newline viaje\newline viaje
   & $-$55.5\newline $-$34.0\newline $-$65.8 redes\newline $-$37.6 redes \\
-\addlinespace[2pt]
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 RESCO (2021) \citep{Ault2021_RESCO} & 1 a 21, reales; mallas de 16, sintéticas & SUMO & IDQN, IPPO, MPLight, FMA2C
   & plan real\newline Max-Pressure\newline Greedy\newline otro RL (IDQN)
   & retraso\newline retraso\newline retraso\newline retraso
   & sin cifra\newline $-$11\newline $-$20\newline $-$2.1 IPPO \\
-\addlinespace[2pt]
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 Cabrejas-Egea et al. (2021) \citep{CabrejasEgea2021_Comercial} & 1 (dos geometrías), sintética & Vissim & DDQN, DDDQN, A2C
   & fijo no declarado\newline MOVA (actuado)\newline MOVA (actuado)\newline MOVA (actuado)\newline SURTRAC
   & retraso\newline retraso\newline retraso\newline retraso\newline retraso
   & $-$85.2\newline $-$21.7\newline $-$48.0\newline $-$56.9\newline $-$26.6 \\
-\addlinespace[2pt]
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 Efficient Pressure (2021) \citep{Wu2021_EfficientMP} & 12 y 16, reales & CityFlow & Efficient-CoLight (DQN)
   & fijo no declarado\newline Max-Pressure
   & viaje\newline viaje
   & $-$38.2\newline $-$3.7 \\
-\addlinespace[2pt]
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 Advanced-XLight (2022) \citep{Zhang2022_AdvancedMP} & 12 a 192, reales & CityFlow & Advanced-CoLight (DQN)
   & fijo no declarado\newline Max-Pressure
   & viaje\newline viaje
   & $-$38.6\newline $-$8.6 \\
-\addlinespace[2pt]
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 LibSignal (2024) \citep{Mei2024_LibSignal} & 1 a 16 en SUMO (196 en CityFlow), reales y sintéticas & SUMO y CityFlow & IDQN, IPPO, CoLight, MPLight y otros
   & fijo sin ajustar\newline Max-Pressure\newline Max-Pressure
   & viaje\newline viaje\newline viaje
   & $-$55.1\newline $-$5.7\newline $+$18.5 IPPO \\
-\addlinespace[2pt]
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 T-REX (2025) \citep{Nguyen2025_TREX} & 3 a 21, reales; malla de 16, sintética & SUMO & IDQN, IPPO, MPLight, FMA2C
   & plan real\newline plan real\newline fijo sin ajustar\newline Max-Pressure
   & viaje\newline viaje\newline viaje\newline viaje
@@ -164,47 +166,47 @@ MARLIN-ATSC (2012) \citep{ElTantawy2012_Tesis} & 1, 5 y 59, reales & Paramics & 
   & Webster, 1 cruce\newline actuado, 1 cruce\newline Webster, 5 cruces\newline actuado, 5 cruces\newline plan real, 59 cruces
   & retraso\newline retraso\newline retraso\newline retraso\newline retraso
   & $-$35.5\newline $-$25.1\newline $-$21.4\newline $-$18.7\newline $-$37.6 \\
-\addlinespace[2pt]
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 Genders y Razavi (2016) \citep{Genders2016_DQTSC} & 1, sintética & SUMO & DQN (CNN)
   & otro RL
   & retraso
   & $-$82.4 \\
-\addlinespace[2pt]
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 Gao et al. (2017) \citep{Gao2017_DQN} & 1, sintética & SUMO & DQN
   & fijo no declarado\newline LQF
   & retraso\newline retraso
   & $-$86 máx.\newline $-$47 máx. \\
-\addlinespace[2pt]
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 Mousavi et al. (2017) \citep{Mousavi2017_PGDQN} & 1, sintética & SUMO & gradiente de política y DQN (CNN)
   & fijo sin ajustar\newline otro RL
   & retraso\newline retraso
   & sin cifra\newline $-$72.8 \\
-\addlinespace[2pt]
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 IntelliLight (2018) \citep{Wei2018_IntelliLight} & 1 (sintética y 24 reales, una a una) & SUMO & DQN
   & fijo ajustado\newline SOTL
   & viaje\newline viaje
   & $-$40.3\newline $-$22.1 \\
-\addlinespace[2pt]
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 FRAP (2019) \citep{Zheng2019_FRAP} & 1 (18 cruces con demanda real) & SUMO & FRAP (DQN)
   & fijo ajustado\newline Webster
   & viaje\newline viaje
   & $-$64.1\newline $-$58.1 \\
-\addlinespace[2pt]
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 Liang et al. (2019) \citep{Liang2019_3DQN} & 1, sintética & SUMO & 3DQN
   & fijo sin ajustar
   & espera
   & $-$25.7 \\
-\addlinespace[2pt]
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 PressLight (2019) \citep{Wei2019_PressLight} & 3 a 16, reales; 6 a 20, sintéticas & CityFlow & DQN con presión
   & fijo sin ajustar\newline onda verde\newline Max-Pressure
   & viaje\newline viaje\newline viaje
   & $-$52.1\newline $-$50.6\newline $-$42.3 \\
-\addlinespace[2pt]
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 Wang et al. (2019) \citep{Wang2019_EventData3DQN} & 1, sintética & SUMO & 3DQN
   & Webster\newline actuado
   & retraso\newline retraso
   & $-$21.2\newline $-$10.1 \\
-\addlinespace[2pt]
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 Ault et al. (2020) \citep{Ault2020_Interpretable} & 1, real & SUMO & DQN regulable, PPO
   & actuado\newline actuado, demanda alta
   & retraso\newline retraso
@@ -230,42 +232,42 @@ S2R2L (2019) \citep{Guo2019_S2R2L} & 16, sintética & SUMO & DQN descentralizado
   & Max-Pressure\newline Max-Pressure con verde máximo ajustado
   & retraso\newline retraso
   & $-$34.6\newline $-$19.9 \\
-\addlinespace[2pt]
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 CoLight (2019) \citep{Wei2019_CoLight} & 12 a 196, reales; 36, sintética & CityFlow & DQN con atención
   & fijo sin ajustar\newline Max-Pressure
   & viaje\newline viaje
   & $-$25.2\newline $-$12.7 \\
-\addlinespace[2pt]
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 MA2C (2020) \citep{Chu2020_MA2C} & 30, real; 25, sintética & SUMO & MA2C
   & Greedy\newline otro RL (IA2C)\newline Greedy
   & retraso\newline retraso\newline retraso en el cruce
   & $-$20.8\newline $-$30.9\newline $-$64.1 \\
-\addlinespace[2pt]
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 MPLight (2020) \citep{Chen2020_MPLight} & 2510, real; 16, sintética & CityFlow & DQN con presión
   & fijo sin ajustar\newline Max-Pressure
   & viaje\newline viaje
   & $-$47.5\newline $-$14.4 \\
-\addlinespace[2pt]
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 FMA2C (2020) \citep{Ma2020_FMA2C} & 30, real; 16, sintética & SUMO & MA2C jerárquico
   & Greedy\newline Greedy\newline otro RL (MA2C)\newline Greedy
   & retraso\newline retraso\newline retraso\newline retraso en el cruce
   & $-$6.3 Mónaco\newline $+$10.8 malla\newline $-$55.7\newline $-$90.5 malla \\
-\addlinespace[2pt]
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 AttendLight (2020) \citep{Oroojlooy2020_AttendLight} & 1 (112 cruces), reales y sintéticas & CityFlow & atención y gradiente de política
   & fijo sin ajustar\newline Max-Pressure
   & viaje\newline viaje
   & $-$46\newline $-$39 \\
-\addlinespace[2pt]
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 EPyMARL en RESCO (2022) \citep{Ault2022_EPyMARL} & 3 a 21, reales & SUMO & nueve MARL (IPPO, MAPPO, QMIX y otros)
   & plan real, corredor de 3 cruces
   & retraso
   & ninguno lo supera \\
-\addlinespace[2pt]
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 X-Light (2024) \citep{Jiang2024_XLight} & 8 a 25, reales y sintéticas & SUMO & PPO con \textit{transformer}
   & fijo sin ajustar\newline fijo sin ajustar
   & viaje\newline viaje
   & $-$28.8\newline $-$27.0 IPPO \\
-\addlinespace[2pt]
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 CoSLight (2024) \citep{Ruan2024_CoSLight} & 8 a 29, reales y sintéticas & SUMO & selección de colaboradores
   & fijo sin ajustar\newline Max-Pressure\newline Max-Pressure\newline fijo sin ajustar, red de Nanshan
   & viaje\newline viaje\newline viaje\newline viaje
@@ -292,67 +294,67 @@ SCOOT (1999) \citep{DETR1999_SCOOT} & varias ciudades, reales & campo & SCOOT, s
   & fijo actualizado\newline fijo típico\newline actuado aislado
   & retraso\newline retraso\newline retraso
   & $-$12\newline $-$20\newline $-$23 \\
-\addlinespace[2pt]
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 FHWA (2008) \citep{Koonce2008_TSTM} & síntesis de EE.~UU. & -- & tiempos actualizados, sin RL
   & operación actual (proyección)
   & retraso
   & $-$15 a $-$40 \\
-\addlinespace[2pt]
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 SURTRAC (2013) \citep{Smith2013_Surtrac} & 9, real & campo & planificación en línea, sin RL
   & actuado coordinado\newline actuado coordinado
   & viaje\newline espera
   & $-$25.8\newline $-$40.6 \\
-\addlinespace[2pt]
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 Higuera (2016) \citep{Higuera2016_Uniandes} & 6, real (Bogotá) & SUMO & Q-learning coordinado
   & plan real
   & espera
   & $-$62.5 \\
-\addlinespace[2pt]
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 ASCT, FHWA (2017) \citep{FHWA2017_EDC1ASCT} & síntesis de EE.~UU. & -- & control adaptativo, sin RL
   & temporización existente
   & viaje
   & $\leq -10$ \\
-\addlinespace[2pt]
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 City Brain (2018) \citep{Alibaba2018_CityBrain} & un distrito, real & campo & IA sin detallar
   & situación previa
   & velocidad
   & $+$15 \\
-\addlinespace[2pt]
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 Ola verde de Lima (2019) \citep{Sovero2019_OlaVerde} & siete avenidas, real (Lima) & campo & onda verde por franja horaria, sin RL
   & situación previa (cifra municipal)
   & viaje
   & $-$10 \\
-\addlinespace[2pt]
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 Borges et al. (2021) \citep{Borges2021_Brasilia} & 2, real & Vissim & \textit{deep Q-learning}
   & plan real
   & retraso
   & $-$28.4 \\
-\addlinespace[2pt]
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 Montoya (2021) \citep{Montoya2021_PUCP} & 10, real (Lima) & SUMO & algoritmo genético, sin RL
   & plan real\newline onda verde manual
   & espera\newline espera
   & $-$84.7\newline $-$78.6 \\
-\addlinespace[2pt]
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 Vivacity (2021) \citep{Velasco2021_Vivacity} & 5, real & campo & RL sin detallar
   & incumbente\newline actuado (simulación)
   & viaje\newline espera
   & $-$30\newline $-$45 \\
-\addlinespace[2pt]
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 Trinity (2022) \citep{Chakrabarti2022} & 1 y 2, sintéticas & SUMO & DQN, A2C, PPO
   & fijo sin ajustar
   & espera
   & sin cifra \\
-\addlinespace[2pt]
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 Uniandes (2023) \citep{Chavez2023} & 4, sintética & SUMO & Q-learning, SARSA, DQN, PPO
   & fijo sin ajustar\newline fijo sin ajustar
   & espera\newline espera
   & $-$63.5\newline $-$35.8 Q-learning \\
-\addlinespace[2pt]
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 Tarquino (2023) \citep{Tarquino2023_Lima} & 7 (5 con semáforo), real (Lima) & Aimsun & actuado con detectores, sin RL
   & plan real\newline plan real
   & retraso\newline viaje
   & $-$35.4\newline $-$21.2 \\
-\addlinespace[2pt]
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 Green Light (2023) \citep{Google2023_GreenLight} & más de 100 ciudades, reales & campo & IA que recomienda planes
   & plan real
   & paradas
@@ -389,67 +391,67 @@ SUMO-RL (2019) \citep{Alegre2019_SUMORL}
   & siguiente fase verde, con ámbar
   & cambio de la espera acumulada
   & no reporta \\
-\addlinespace[2pt]
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 Genders y Razavi (2019) \citep{Genders2019_Framework}
   & densidad y cola por carril, fase
   & siguiente fase (DQN) o duración del verde (DDPG)
   & $-$retraso de los vehículos del cruce
   & viaje, cola, retraso \\
-\addlinespace[2pt]
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 LIT (2019) \citep{Zheng2019_LIT}
   & vehículos por carril, fase
   & mantener o cambiar
   & $-$suma de colas
   & viaje \\
-\addlinespace[2pt]
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 RESCO (2021) \citep{Ault2021_RESCO}
   & por carril en 200~m: cola, vehículos que se acercan, espera, velocidad, llegadas y salidas (cada algoritmo usa una parte)
   & combinación de fases compatibles cada 10~s
   & $-$espera (IDQN, IPPO), $-$presión (MPLight), de vecindario (FMA2C)
   & retraso, viaje, espera, cola \\
-\addlinespace[2pt]
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 Cabrejas-Egea et al. (2021) \citep{CabrejasEgea2021_Comercial}
   & cola por carril (m), etapa
   & etapa a activar
   & $-$suma de colas
   & retraso, cola \\
-\addlinespace[2pt]
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 Efficient Pressure (2021) \citep{Wu2021_EfficientMP}
   & fase, presión eficiente
   & siguiente fase, de 15~s
   & $-$presión o $-$cola
   & viaje \\
-\addlinespace[2pt]
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 Advanced-XLight (2022) \citep{Zhang2022_AdvancedMP}
   & fase, presión eficiente y vehículos en marcha en el rango efectivo
   & siguiente fase, mínimo 15~s
   & $-$presión o $-$cola
   & viaje \\
-\addlinespace[2pt]
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 LibSignal (2024) \citep{Mei2024_LibSignal}
   & vehículos por carril y fase; presión y fase (MPLight)
   & siguiente fase, acíclica
   & vehículos en espera, espera (IPPO) o presión
   & viaje, cola, retraso, \textit{throughput} \\
-\addlinespace[2pt]
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 T-REX (2025) \citep{Nguyen2025_TREX}
   & por carril: fase, vehículos que se acercan, detenidos, espera y velocidad; presión (MPLight)
   & fase compatible, de 10~s
   & reducción del retraso acumulado; $-$presión (MPLight)
   & viaje, retraso, espera, cola, robustez \\
-\addlinespace[2pt]
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 MARLIN-ATSC (2012) \citep{ElTantawy2012_Tesis}
   & colas y llegadas por fase; acciones de los vecinos en el modo coordinado
   & siguiente fase, en secuencia variable
   & reducción del retraso acumulado
   & retraso, \textit{throughput}, paradas, cola, viaje, CO$_2$ \\
-\addlinespace[2pt]
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 Genders y Razavi (2016) \citep{Genders2016_DQTSC}
   & presencia y velocidad por celda (imagen), fase
   & una de 4 fases
   & cambio del retraso acumulado
   & \textit{throughput}, cola, viaje, retraso \\
-\addlinespace[2pt]
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 Gao et al. (2017) \citep{Gao2017_DQN}
   & posición y velocidad por celdas de 8~m, fase
   & verde O--E o N--S durante 10~s
@@ -475,67 +477,67 @@ Mousavi et al. (2017) \citep{Mousavi2017_PGDQN}
   & verde N--S o E--O
   & cambio del retraso acumulado
   & retraso, cola \\
-\addlinespace[2pt]
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 IntelliLight (2018) \citep{Wei2018_IntelliLight}
   & por carril: cola, vehículos y espera; imagen de posiciones; fase actual y siguiente
   & mantener o cambiar
   & suma ponderada de cola, retraso, espera, cambios, vehículos que pasan y viaje
   & viaje, cola, índice de retraso \\
-\addlinespace[2pt]
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 FRAP (2019) \citep{Zheng2019_FRAP}
   & vehículos por movimiento, fase
   & fase del siguiente intervalo (8)
   & $-$cola media por movimiento
   & viaje \\
-\addlinespace[2pt]
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 Liang et al. (2019) \citep{Liang2019_3DQN}
   & posición y velocidad en 60 $\times$ 60 celdas
   & $\pm$5~s a una fase del ciclo siguiente
   & cambio de la espera acumulada entre ciclos
   & espera \\
-\addlinespace[2pt]
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 PressLight (2019) \citep{Wei2019_PressLight}
   & fase, vehículos en los carriles de salida y por tramo en los de entrada
   & una de 4 fases, acíclica
   & $-$presión
   & viaje \\
-\addlinespace[2pt]
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 Wang et al. (2019) \citep{Wang2019_EventData3DQN}
   & ocupación de detectores de lazo en ventanas de 60~s, estado de las señales
   & una de 4 fases, acíclica
   & vehículos que entran menos espera ponderada
   & retraso, \textit{throughput}, cola, velocidad, paradas \\
-\addlinespace[2pt]
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 Ault et al. (2020) \citep{Ault2020_Interpretable}
   & señal actual; por carril: vehículos que se acercan, espera, detenidos y velocidad
   & par de fases compatibles, mínimo 3~s
   & reducción del retraso acumulado
   & retraso \\
-\addlinespace[2pt]
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 S2R2L (2019) \citep{Guo2019_S2R2L}
   & ocupación y cola por carril, etapa, fracción de verde transcurrida; las de los vecinos
   & etapa cada 5~s, verde de 10 a 60~s
   & cambio de la espera acumulada, ponderada con la de los vecinos
   & retraso, cola, combustible \\
-\addlinespace[2pt]
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 CoLight (2019) \citep{Wei2019_CoLight}
   & fase, vehículos por carril; atención sobre los vecinos
   & fase del siguiente intervalo
   & $-$suma de colas
   & viaje \\
-\addlinespace[2pt]
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 MA2C (2020) \citep{Chu2020_MA2C}
   & vehículos a menos de 50~m y espera del primero, por carril; estados y políticas de los vecinos
   & fase cada 5~s
   & $-$(cola + espera), con la de los vecinos descontada
   & cola, retraso en el cruce y en el viaje, velocidad \\
-\addlinespace[2pt]
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 MPLight (2020) \citep{Chen2020_MPLight}
   & fase, presión de 12 movimientos
   & una de 8 fases cada 10~s
   & $-$presión
   & viaje, \textit{throughput} \\
-\addlinespace[2pt]
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 FMA2C (2020) \citep{Ma2020_FMA2C}
   & vehículos que llegan y espera por carril; flujo por dirección en el nivel regional
   & una de 5 fases; meta de flujo regional
@@ -561,49 +563,49 @@ AttendLight (2020) \citep{Oroojlooy2020_AttendLight}
   & fase, verde mínimo 10~s
   & $-$presión
   & viaje \\
-\addlinespace[2pt]
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 EPyMARL en RESCO (2022) \citep{Ault2022_EPyMARL}
   & el de RESCO
   & fases compatibles
   & $-$espera en 200~m, común a todos
   & retraso \\
-\addlinespace[2pt]
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 X-Light (2024) \citep{Jiang2024_XLight}
   & cola, fase, ocupación, flujo y detenidos
   & una de 8 fases cada 15~s
   & suma ponderada de cola, espera, retraso y presión
   & viaje, retraso \\
-\addlinespace[2pt]
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 CoSLight (2024) \citep{Ruan2024_CoSLight}
   & por movimiento: vehículos, cola, fase y flujo; datos de los colaboradores
   & fase cada 15~s
   & común a todos los cruces
   & viaje, retraso \\
-\addlinespace[2pt]
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 Higuera (2016) \citep{Higuera2016_Uniandes}
   & hora del día, fase, cola máxima y espera por acceso; las del vecino (Q-BR)
   & una de 2 fases, verde mínimo 20 o 14~s
   & $-$suma de cuadrados de cola y espera
   & cola, espera, velocidad, viaje, CO$_2$ \\
-\addlinespace[2pt]
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 Borges et al. (2021) \citep{Borges2021_Brasilia}
   & flujo, velocidad y tiempo de cada sensor
   & verde o rojo por cruce cada 10~s, mínimo 30~s
   & flujo de cada cruce y entre los dos
   & retraso, velocidad, viaje, cola \\
-\addlinespace[2pt]
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 Trinity (2022) \citep{Chakrabarti2022}
   & fase; por carril, espera y densidad de detenidos
   & fase en cada paso
   & $-$espera
   & espera \\
-\addlinespace[2pt]
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 Uniandes (2023) \citep{Chavez2023}
   & fase, verde mínimo cumplido, densidad y cola por carril
   & una de 4 fases verdes
   & cambio del retraso acumulado
   & ``eficiencia'' frente al fijo \\
-\addlinespace[2pt]
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 Revisión de 160 artículos \citep{Noaeen2022_SLR}
   & cola 38\,\%, fase 11\,\%, vehículos 10\,\%, posición 6\,\%, velocidad 6\,\%
   & por fase 62\,\%, por ciclo 32\,\%
@@ -628,25 +630,28 @@ Esta tesis
 % plan3/salidas/veredicto3.md y lima/REGISTRO.md; modelo completo: capitulo4.tex, sec:aprendices (observacion de 31 a
 % 49 componentes y de 53 a 73 en la malla, vehiculos a menos de 75 m; decide cada 2 s).
 
-La mejora reportada depende sobre todo de la referencia. Con una cifra
-por obra y por tipo de referencia, solo de trabajos con aprendizaje por
-refuerzo, sin informes de fabricantes y solo en retraso, espera o
-tiempo de viaje, la mediana es de $-46.0$\,\% frente a un fijo sin
-ajustar o no declarado (15 obras), de $-35.7$\,\% frente a un fijo
-ajustado, un plan de Webster o el plan real (10 obras), de $-20.7$\,\%
-frente al actuado (4 obras) y de $-15.5$\,\% frente a Max-Pressure u
-otra heurística adaptativa (17 obras). Buena parte de la distancia
-entre la primera categoría y la última la cubre una heurística sin
-entrenamiento: frente al mismo fijo sin ajustar o no declarado, Max-Pressure ya reduce
-el tiempo de viaje un 35.8\,\% en un trabajo \citep{Wu2021_EfficientMP}
-y un 48.5\,\% en otro \citep{Mei2024_LibSignal}. Las cifras más bajas
-aparecen donde la referencia está mejor ajustada. Frente a un fijo de
-verde uniforme ajustado por barrido y evaluado con 32 semillas, el mejor
-aprendiz reduce el tiempo de viaje un 8.9\,\%
-\citep{Genders2019_Framework}. Frente al plan real, IPPO aumenta el
-tiempo de viaje en el corredor de Colonia y en la región de Ingolstadt
-\citep{Nguyen2025_TREX}, y ningún algoritmo de EPyMARL supera al
-plan en el corredor de tres cruces \citep{Ault2022_EPyMARL}.
+\textbf{Medianas por tipo de referencia.} La mejora reportada depende
+sobre todo de la referencia. Las medianas de la
+Tabla~\ref{tab:comparacion-referencia} se calculan con las
+Tablas~\ref{tab:trabajos-comparados} a~\ref{tab:trabajos-comparados-4}
+y estas reglas: solo obras con aprendizaje por refuerzo y sin informes
+de fabricantes (quedan fuera Vivacity, City Brain y Green Light); solo
+cifras de retraso, espera o tiempo de viaje, sin las de retraso en el
+cruce ni las que comparan con otro RL; si una obra da varios aprendices
+frente a la misma referencia, la cifra del mejor, y una cifra por obra
+y por tipo de referencia, la mediana de sus líneas de ese tipo. Frente
+a una heurística se toma Max-Pressure si la obra lo compara en ese
+escenario y, si no, Greedy, LQF, SOTL o SURTRAC, en su versión ajustada
+cuando la obra la ajusta. Buena parte de la distancia entre la mediana
+frente a un fijo sin ajustar o no declarado y la mediana frente a una
+heurística la cubre una heurística sin entrenamiento: frente al mismo
+fijo, Max-Pressure ya reduce el tiempo de viaje un 35.8\,\% en un
+trabajo \citep{Wu2021_EfficientMP} y un 48.5\,\% en otro
+\citep{Mei2024_LibSignal}. Las cifras más bajas aparecen donde la
+referencia está mejor ajustada (Sección~\ref{sec:comparacion-literatura});
+en T-REX, por ejemplo, IPPO aumenta el tiempo de viaje frente al plan
+real en el corredor de Colonia y en la región de Ingolstadt
+\citep{Nguyen2025_TREX}.
 % fuente de las medianas: calculadas para este anexo sobre las fichas (literatura/gen.py y
 % literatura/build.py, 27.09.2026; se rehacen a mano con esta lista). Reglas: solo obras con RL y sin informes de
 % fabricante (fuera Vivacity, Green Light y City Brain); una cifra por obra y por tipo de referencia, que es

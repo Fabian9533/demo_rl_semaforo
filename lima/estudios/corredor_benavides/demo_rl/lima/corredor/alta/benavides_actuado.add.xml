@@ -1,0 +1,39 @@
+<additional>
+    <!-- Actuado del corredor: control actuado de SUMO, verdes desde el minimo de los peatones hasta 60 s -->
+    <tlLogic id="semaforo_C1" type="actuated" programID="actuado" offset="0">
+        <phase duration="10" minDur="10" maxDur="60" state="rGGGrrrrrGGG"/>
+        <phase duration="3" state="ryyyrrrrryyy"/>
+        <phase duration="17" minDur="17" maxDur="60" state="GrrrGGGGGrrr"/>
+        <phase duration="3" state="yrrryyyyyrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C2" type="actuated" programID="actuado" offset="0">
+        <phase duration="10" minDur="10" maxDur="60" state="rrrrGGGrGGGG"/>
+        <phase duration="3" state="rrrryyyryyyy"/>
+        <phase duration="18" minDur="18" maxDur="60" state="GGGGrrrGrrrr"/>
+        <phase duration="3" state="yyyyrrryrrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C3" type="actuated" programID="actuado" offset="0">
+        <phase duration="10" minDur="10" maxDur="60" state="rGGGGrrrrGGG"/>
+        <phase duration="3" state="ryyyyrrrryyy"/>
+        <phase duration="20" minDur="20" maxDur="60" state="GrrrrGGGGrrr"/>
+        <phase duration="3" state="yrrrryyyyrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C4" type="actuated" programID="actuado" offset="0">
+        <phase duration="12" minDur="12" maxDur="60" state="rrrGGGGrrrGGG"/>
+        <phase duration="3" state="rrryyyyrrryyy"/>
+        <phase duration="19" minDur="19" maxDur="60" state="GGGrrrrGGGrrr"/>
+        <phase duration="3" state="yyyrrrryyyrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C5" type="actuated" programID="actuado" offset="0">
+        <phase duration="12" minDur="12" maxDur="60" state="rrGGGrGG"/>
+        <phase duration="3" state="rryyyryy"/>
+        <phase duration="18" minDur="18" maxDur="60" state="GGrrrGrr"/>
+        <phase duration="3" state="yyrrryrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C6" type="actuated" programID="actuado" offset="0">
+        <phase duration="12" minDur="12" maxDur="60" state="rrrGGGrrrGGG"/>
+        <phase duration="3" state="rrryyyrrryyy"/>
+        <phase duration="17" minDur="17" maxDur="60" state="GGGrrrGGGrrr"/>
+        <phase duration="3" state="yyyrrryyyrrr"/>
+    </tlLogic>
+</additional>

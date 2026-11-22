@@ -1,0 +1,16 @@
+% Generado por tesis_ovalo_2026-11-19/figuras/tablas_nudo_fijo.py (las funciones de tablas_ovalo.py y estudio.comparar), a partir de nudo_ovalo_estudio2/demo_rl/lima/. No editar a mano.
+% Nudo en el ovalo, prueba de robustez del reparto: retraso total (s/veh) de cada control y de los dos modelos
+% con el mismo total (4271 veh/h) repartido de otra forma entre las entradas, sin reajustar ni reentrenar, y
+% cambio del modelo de orden fijo frente a cada control (%). 100 semillas (24001-24100); la primera fila es la
+% tanda 1. fuente: lima/robustez/<variante>/salidas/eval_t1_*.csv; IC95 y p: tanda 1: actual -23.18 [-25.21, -21.26] p=3.9e-18; fijo -9.17 [-10.27, -8.13] p=7.3e-18; actuadoaj +0.01 [-0.82, +0.86] p=0.89; libre_s42 -5.94 [-6.74, -5.13] p=1.2e-16 | reducto: actual -25.90 [-27.50, -24.28] p=3.9e-18; fijo -29.98 [-31.77, -28.22] p=3.9e-18; actuadoaj -1.75 [-2.39, -1.08] p=5e-06; libre_s42 -5.53 [-6.30, -4.76] p=1.9e-16 | transversal: actual -65.38 [-66.21, -64.54] p=3.9e-18; fijo -42.61 [-44.14, -41.10] p=3.9e-18; actuadoaj +0.44 [-0.48, +1.37] p=0.25; libre_s42 -11.37 [-12.77, -10.01] p=4.1e-18
+\begin{tabular}{>{\raggedright\arraybackslash}p{2.3cm}>{\raggedleft\arraybackslash}p{1.33cm}>{\raggedleft\arraybackslash}p{1.33cm}>{\raggedleft\arraybackslash}p{1.33cm}>{\raggedleft\arraybackslash}p{1.33cm}>{\raggedleft\arraybackslash}p{1.33cm}>{\raggedleft\arraybackslash}p{1.33cm}>{\raggedleft\arraybackslash}p{1.33cm}>{\raggedleft\arraybackslash}p{1.33cm}}
+\toprule
+Reparto de la demanda & Plan actual & Fijo ajustado & Actuado ajustado & Variante de orden libre & Modelo de orden fijo & Frente al plan actual (\%) & Frente al fijo (\%) & Frente al actuado (\%) \\
+\midrule
+El supuesto (tanda 1) & 99.5 & 84.1 & 76.4 & 81.2 & 76.4 & $-23.2$ & $-9.2$ & $0.0$ \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
+Más carga en Reducto & 91.9 & 97.2 & 69.3 & 72.0 & 68.1 & $-25.9$ & $-30.0$ & $-1.8$ \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
+Más carga en 28 de Julio y Balboa & 263.2 & 158.8 & 90.7 & 102.8 & 91.1 & $-65.4$ & $-42.6$ & $+0.4$ \\
+\bottomrule
+\end{tabular}

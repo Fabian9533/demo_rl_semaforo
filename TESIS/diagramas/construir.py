@@ -20,7 +20,7 @@ from pypdf import PdfReader
 AQUI = os.path.dirname(os.path.abspath(__file__))
 IMAGENES = os.path.join(AQUI, "..", "images")
 PREVIA = os.path.join(AQUI, "previa")
-DIAGRAMAS = ["arquitectura", "u1", "u2", "u3", "u4"]
+DIAGRAMAS = ["arquitectura", "u1", "u2", "u3", "u4", "flujo"]
 ANCHO_TEXTO_CM = 15.0
 
 

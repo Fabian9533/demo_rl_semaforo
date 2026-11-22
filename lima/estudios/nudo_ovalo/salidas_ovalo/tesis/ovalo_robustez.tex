@@ -1,0 +1,14 @@
+% Generado por tablas_ovalo.py (nudo_ovalo_estudio2) a partir de demo_rl/lima/ y demo_rl/lima/alta/. No editar a mano.
+% Nudo en el ovalo, prueba de robustez del reparto: retraso total (s/veh) de cada control con el mismo total
+% (4271 veh/h) repartido de otra forma entre las entradas, sin reajustar ni reentrenar, y cambio del modelo
+% de orden libre frente a cada control (%). 100 semillas (24001-24100); la primera fila es la tanda 1.
+% fuente: lima/robustez/<variante>/salidas/eval_t1_*.csv; IC95 y p: tanda 1: actual -18.33 [-20.56, -16.22] p=3.9e-18; fijo -3.43 [-4.56, -2.38] p=5.7e-08; actuadoaj +6.33 [+5.45, +7.22] p=4.1e-17; completo_s2042 +6.32 [+5.41, +7.22] p=1.2e-16 | reducto: actual -21.56 [-23.24, -19.87] p=3.9e-18; fijo -25.88 [-27.81, -23.97] p=3.9e-18; actuadoaj +4.00 [+3.06, +4.98] p=2.2e-11; completo_s2042 +5.86 [+5.00, +6.73] p=1.9e-16 | transversal: actual -60.94 [-61.93, -59.92] p=3.9e-18; fijo -35.25 [-37.07, -33.40] p=3.9e-18; actuadoaj +13.32 [+11.67, +15.06] p=5.8e-18; completo_s2042 +12.83 [+11.12, +14.64] p=4.1e-18
+\begin{tabular}{>{\raggedright\arraybackslash}p{2.4cm}>{\raggedleft\arraybackslash}p{1.25cm}>{\raggedleft\arraybackslash}p{1.25cm}>{\raggedleft\arraybackslash}p{1.25cm}>{\raggedleft\arraybackslash}p{1.25cm}>{\raggedleft\arraybackslash}p{1.25cm}>{\raggedleft\arraybackslash}p{1.25cm}>{\raggedleft\arraybackslash}p{1.25cm}>{\raggedleft\arraybackslash}p{1.25cm}>{\raggedleft\arraybackslash}p{1.25cm}}
+\toprule
+Reparto de la demanda & Plan actual & Fijo ajustado & Actuado ajustado & Orden fijo & Orden libre & Frente al plan actual (\%) & Frente al fijo (\%) & Frente al actuado (\%) & Frente al orden fijo (\%) \\
+\midrule
+El supuesto (tanda 1) & 99.5 & 84.1 & 76.4 & 76.4 & 81.2 & $-18.3$ & $-3.4$ & $+6.3$ & $+6.3$ \\
+Más carga en Reducto & 91.9 & 97.2 & 69.3 & 68.1 & 72.0 & $-21.6$ & $-25.9$ & $+4.0$ & $+5.9$ \\
+Más carga en 28 de Julio y Balboa & 263.2 & 158.8 & 90.7 & 91.1 & 102.8 & $-60.9$ & $-35.2$ & $+13.3$ & $+12.8$ \\
+\bottomrule
+\end{tabular}

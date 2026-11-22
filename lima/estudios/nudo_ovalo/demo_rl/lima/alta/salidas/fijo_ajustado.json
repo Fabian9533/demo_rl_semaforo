@@ -1,0 +1,681 @@
+{
+ "ganador": [
+  60,
+  25,
+  77
+ ],
+ "retraso_total_30": 128.851,
+ "minimos": [
+  10,
+  10,
+  10
+ ],
+ "plan_actual": [
+  37,
+  15,
+  37
+ ],
+ "transicion": 3,
+ "rojo_total": {
+  "1": 34
+ },
+ "tiempo_fijo": 43,
+ "semillas_ajuste": [
+  2001,
+  2010
+ ],
+ "semillas_desempate": [
+  2001,
+  2030
+ ],
+ "candidatos": [
+  {
+   "verdes": [
+    60,
+    25,
+    77
+   ],
+   "semillas": 30,
+   "retraso_total": 128.851
+  },
+  {
+   "verdes": [
+    61,
+    25,
+    77
+   ],
+   "semillas": 30,
+   "retraso_total": 128.8697
+  },
+  {
+   "verdes": [
+    59,
+    25,
+    77
+   ],
+   "semillas": 30,
+   "retraso_total": 129.0143
+  },
+  {
+   "verdes": [
+    60,
+    25,
+    76
+   ],
+   "semillas": 30,
+   "retraso_total": 129.499
+  },
+  {
+   "verdes": [
+    60,
+    25,
+    77
+   ],
+   "semillas": 10,
+   "retraso_total": 129.643
+  },
+  {
+   "verdes": [
+    61,
+    27,
+    77
+   ],
+   "semillas": 30,
+   "retraso_total": 129.789
+  },
+  {
+   "verdes": [
+    60,
+    26,
+    77
+   ],
+   "semillas": 30,
+   "retraso_total": 129.8787
+  },
+  {
+   "verdes": [
+    59,
+    25,
+    75
+   ],
+   "semillas": 30,
+   "retraso_total": 130.3213
+  },
+  {
+   "verdes": [
+    59,
+    25,
+    77
+   ],
+   "semillas": 10,
+   "retraso_total": 130.407
+  },
+  {
+   "verdes": [
+    59,
+    25,
+    79
+   ],
+   "semillas": 30,
+   "retraso_total": 130.6537
+  },
+  {
+   "verdes": [
+    61,
+    25,
+    77
+   ],
+   "semillas": 10,
+   "retraso_total": 130.682
+  },
+  {
+   "verdes": [
+    60,
+    25,
+    78
+   ],
+   "semillas": 30,
+   "retraso_total": 130.8853
+  },
+  {
+   "verdes": [
+    61,
+    27,
+    81
+   ],
+   "semillas": 30,
+   "retraso_total": 131.8007
+  },
+  {
+   "verdes": [
+    59,
+    25,
+    79
+   ],
+   "semillas": 10,
+   "retraso_total": 132.154
+  },
+  {
+   "verdes": [
+    60,
+    26,
+    77
+   ],
+   "semillas": 10,
+   "retraso_total": 133.207
+  },
+  {
+   "verdes": [
+    60,
+    25,
+    76
+   ],
+   "semillas": 10,
+   "retraso_total": 133.252
+  },
+  {
+   "verdes": [
+    60,
+    25,
+    78
+   ],
+   "semillas": 10,
+   "retraso_total": 133.953
+  },
+  {
+   "verdes": [
+    61,
+    27,
+    77
+   ],
+   "semillas": 10,
+   "retraso_total": 134.675
+  },
+  {
+   "verdes": [
+    59,
+    25,
+    75
+   ],
+   "semillas": 10,
+   "retraso_total": 135.398
+  },
+  {
+   "verdes": [
+    61,
+    27,
+    81
+   ],
+   "semillas": 10,
+   "retraso_total": 135.569
+  },
+  {
+   "verdes": [
+    61,
+    25,
+    75
+   ],
+   "semillas": 10,
+   "retraso_total": 136.182
+  },
+  {
+   "verdes": [
+    60,
+    24,
+    77
+   ],
+   "semillas": 10,
+   "retraso_total": 136.323
+  },
+  {
+   "verdes": [
+    61,
+    27,
+    73
+   ],
+   "semillas": 10,
+   "retraso_total": 136.487
+  },
+  {
+   "verdes": [
+    63,
+    27,
+    77
+   ],
+   "semillas": 10,
+   "retraso_total": 136.519
+  },
+  {
+   "verdes": [
+    61,
+    25,
+    79
+   ],
+   "semillas": 10,
+   "retraso_total": 136.668
+  },
+  {
+   "verdes": [
+    61,
+    23,
+    77
+   ],
+   "semillas": 10,
+   "retraso_total": 136.935
+  },
+  {
+   "verdes": [
+    59,
+    27,
+    77
+   ],
+   "semillas": 10,
+   "retraso_total": 137.129
+  },
+  {
+   "verdes": [
+    58,
+    25,
+    77
+   ],
+   "semillas": 10,
+   "retraso_total": 137.16
+  },
+  {
+   "verdes": [
+    65,
+    27,
+    77
+   ],
+   "semillas": 10,
+   "retraso_total": 137.273
+  },
+  {
+   "verdes": [
+    59,
+    23,
+    77
+   ],
+   "semillas": 10,
+   "retraso_total": 138.467
+  },
+  {
+   "verdes": [
+    57,
+    23,
+    77
+   ],
+   "semillas": 10,
+   "retraso_total": 139.979
+  },
+  {
+   "verdes": [
+    61,
+    31,
+    77
+   ],
+   "semillas": 10,
+   "retraso_total": 140.328
+  },
+  {
+   "verdes": [
+    57,
+    25,
+    77
+   ],
+   "semillas": 10,
+   "retraso_total": 141.032
+  },
+  {
+   "verdes": [
+    61,
+    23,
+    69
+   ],
+   "semillas": 10,
+   "retraso_total": 142.801
+  },
+  {
+   "verdes": [
+    53,
+    23,
+    69
+   ],
+   "semillas": 10,
+   "retraso_total": 143.17
+  },
+  {
+   "verdes": [
+    65,
+    23,
+    77
+   ],
+   "semillas": 10,
+   "retraso_total": 144.096
+  },
+  {
+   "verdes": [
+    57,
+    27,
+    77
+   ],
+   "semillas": 10,
+   "retraso_total": 145.413
+  },
+  {
+   "verdes": [
+    53,
+    23,
+    61
+   ],
+   "semillas": 10,
+   "retraso_total": 145.545
+  },
+  {
+   "verdes": [
+    61,
+    23,
+    85
+   ],
+   "semillas": 10,
+   "retraso_total": 145.663
+  },
+  {
+   "verdes": [
+    69,
+    23,
+    77
+   ],
+   "semillas": 10,
+   "retraso_total": 151.985
+  },
+  {
+   "verdes": [
+    61,
+    31,
+    69
+   ],
+   "semillas": 10,
+   "retraso_total": 156.28
+  },
+  {
+   "verdes": [
+    53,
+    23,
+    77
+   ],
+   "semillas": 10,
+   "retraso_total": 156.635
+  },
+  {
+   "verdes": [
+    61,
+    23,
+    61
+   ],
+   "semillas": 10,
+   "retraso_total": 163.643
+  },
+  {
+   "verdes": [
+    53,
+    31,
+    61
+   ],
+   "semillas": 10,
+   "retraso_total": 183.962
+  },
+  {
+   "verdes": [
+    53,
+    23,
+    53
+   ],
+   "semillas": 10,
+   "retraso_total": 184.242
+  },
+  {
+   "verdes": [
+    61,
+    19,
+    77
+   ],
+   "semillas": 10,
+   "retraso_total": 186.656
+  },
+  {
+   "verdes": [
+    45,
+    23,
+    61
+   ],
+   "semillas": 10,
+   "retraso_total": 196.157
+  },
+  {
+   "verdes": [
+    45,
+    23,
+    53
+   ],
+   "semillas": 10,
+   "retraso_total": 196.178
+  },
+  {
+   "verdes": [
+    45,
+    15,
+    53
+   ],
+   "semillas": 10,
+   "retraso_total": 207.681
+  },
+  {
+   "verdes": [
+    45,
+    23,
+    69
+   ],
+   "semillas": 10,
+   "retraso_total": 213.436
+  },
+  {
+   "verdes": [
+    53,
+    15,
+    61
+   ],
+   "semillas": 10,
+   "retraso_total": 227.385
+  },
+  {
+   "verdes": [
+    45,
+    15,
+    45
+   ],
+   "semillas": 10,
+   "retraso_total": 229.14
+  },
+  {
+   "verdes": [
+    53,
+    15,
+    53
+   ],
+   "semillas": 10,
+   "retraso_total": 233.012
+  },
+  {
+   "verdes": [
+    45,
+    23,
+    45
+   ],
+   "semillas": 10,
+   "retraso_total": 235.971
+  },
+  {
+   "verdes": [
+    37,
+    15,
+    45
+   ],
+   "semillas": 10,
+   "retraso_total": 251.373
+  },
+  {
+   "verdes": [
+    61,
+    15,
+    69
+   ],
+   "semillas": 10,
+   "retraso_total": 264.685
+  },
+  {
+   "verdes": [
+    37,
+    15,
+    53
+   ],
+   "semillas": 10,
+   "retraso_total": 267.474
+  },
+  {
+   "verdes": [
+    37,
+    15,
+    37
+   ],
+   "semillas": 10,
+   "retraso_total": 278.994
+  },
+  {
+   "verdes": [
+    61,
+    15,
+    77
+   ],
+   "semillas": 10,
+   "retraso_total": 281.15
+  },
+  {
+   "verdes": [
+    45,
+    15,
+    37
+   ],
+   "semillas": 10,
+   "retraso_total": 311.075
+  },
+  {
+   "verdes": [
+    37,
+    23,
+    61
+   ],
+   "semillas": 10,
+   "retraso_total": 341.694
+  },
+  {
+   "verdes": [
+    45,
+    10,
+    53
+   ],
+   "semillas": 10,
+   "retraso_total": 348.605
+  },
+  {
+   "verdes": [
+    45,
+    10,
+    45
+   ],
+   "semillas": 10,
+   "retraso_total": 358.306
+  },
+  {
+   "verdes": [
+    37,
+    10,
+    37
+   ],
+   "semillas": 10,
+   "retraso_total": 361.125
+  },
+  {
+   "verdes": [
+    37,
+    23,
+    37
+   ],
+   "semillas": 10,
+   "retraso_total": 363.952
+  },
+  {
+   "verdes": [
+    37,
+    15,
+    29
+   ],
+   "semillas": 10,
+   "retraso_total": 392.407
+  },
+  {
+   "verdes": [
+    29,
+    15,
+    45
+   ],
+   "semillas": 10,
+   "retraso_total": 397.703
+  },
+  {
+   "verdes": [
+    29,
+    15,
+    37
+   ],
+   "semillas": 10,
+   "retraso_total": 405.856
+  },
+  {
+   "verdes": [
+    45,
+    45,
+    45
+   ],
+   "semillas": 10,
+   "retraso_total": 456.721
+  },
+  {
+   "verdes": [
+    30,
+    30,
+    30
+   ],
+   "semillas": 10,
+   "retraso_total": 681.52
+  },
+  {
+   "verdes": [
+    20,
+    20,
+    20
+   ],
+   "semillas": 10,
+   "retraso_total": 1015.565
+  },
+  {
+   "verdes": [
+    10,
+    10,
+    10
+   ],
+   "semillas": 10,
+   "retraso_total": 1763.961
+  }
+ ]
+}

@@ -1,0 +1,76 @@
+Red ovalo_estudio.net.xml (armar_ovalo.py; escala de la isla (no se usa: geometria medida); semaforo E1: no)
+
+1. Aristas de afuera (las del estudio): carriles y largo de carril (m)
+   RN_S1  5 carriles, 13.89 m/s; largo  1026.52 a  1026.52 (estudio  1026.52; diferencia  0.00)
+   RS_S1  4 carriles, 13.89 m/s; largo  1014.75 a  1014.75 (estudio  1014.75; diferencia  0.00)
+   B_S1   3 carriles, 13.89 m/s; largo  1019.89 a  1019.89 (estudio  1019.89; diferencia  0.00)
+   J_S1   3 carriles, 13.89 m/s; largo  1021.64 a  1021.64 (estudio  1021.64; diferencia  0.00)
+   S1_L   2 carriles, 13.89 m/s; largo   202.95 a   202.95 (estudio   202.94; diferencia  0.01)
+   S1_RN  2 carriles, 13.89 m/s; largo   205.58 a   205.58 (estudio   205.58; diferencia  0.00)
+   S1_RS  3 carriles, 13.89 m/s; largo   200.91 a   200.91 (estudio   200.91; diferencia  0.00)
+   S1_J   3 carriles, 13.89 m/s; largo   200.17 a   200.17 (estudio   200.18; diferencia  0.01)
+
+2. Aristas de adentro: carriles, largo de carril (m) y vehiculos de 7.5 m que caben detenidos por carril
+   J_NE    P_J -> NE   3 carriles (OSM 3); largo  13.4 a  13.4; caben 1 por carril; 28 de Julio desde su linea de parada hasta NE
+   RN_NO  P_RN -> NO   3 carriles (OSM 3); largo  12.4 a  12.4; caben 1 por carril; Reducto desde el norte, calzada principal, hasta NO
+   RN_NE  P_RN -> NE   2 carriles (OSM 2); largo  18.0 a  18.0; caben 2 por carril; ramal del giro izquierdo de Reducto norte hasta NE: 2 carril(es), los que giran hacia el puente en DISPOSICION
+   RS_SE  P_RS -> SE   2 carriles (OSM 2); largo  19.5 a  19.5; caben 2 por carril; Reducto desde el sur, calzada principal, hasta SE: los carriles de frente y derecha de DISPOSICION
+   RS_SO  P_RS -> SO   2 carriles (OSM 2); largo  21.4 a  21.4; caben 2 por carril; ramal del giro izquierdo de Reducto sur hasta SO: 2 carril(es), los que giran hacia Larco en DISPOSICION
+   B_SO    P_B -> SO   3 carriles (OSM 3); largo  18.0 a  18.0; caben 2 por carril; Balboa desde su linea de parada hasta SO
+   NE_NO    NE -> NO   3 carriles (OSM 3); largo   4.6 a   4.6; caben 0 por carril; lado norte del ovalo: 28 de Julio hacia Larco
+   NO_SO    NO -> SO   3 carriles (OSM 2 y 3); largo   5.3 a   5.3; caben 0 por carril; lado oeste: Reducto hacia el sur. OSM: 2 carriles de NO al ramal y 3 del ramal a SO; aqui 3 en todo el lado para que Reducto de frente pase con sus 3 carriles
+   SO_SE    SO -> SE   3 carriles (OSM 3); largo   5.6 a   5.6; caben 0 por carril; lado sur: Balboa hacia el puente
+   SE_NE    SE -> NE   2 carriles (OSM 2); largo   4.1 a   4.1; caben 0 por carril; lado este: Reducto hacia el norte
+   NO_ML    NO -> ML   2 carriles (OSM 2); largo   9.7 a   9.7; caben 1 por carril; salida hacia Larco desde NO hasta la union con el ramal de Reducto sur
+   SE_MJ    SE -> MJ   3 carriles (OSM 3); largo   6.2 a   6.2; caben 0 por carril; salida hacia el puente desde SE hasta la union con el ramal de Reducto norte
+   NE_MJ    NE -> MJ   2 carriles (OSM 2); largo   9.9 a   9.9; caben 1 por carril; ramal de Reducto norte despues de cruzar el ovalo (2 carril(es), como RN_NE)
+   SO_ML    SO -> ML   2 carriles (OSM 1 y 2); largo  16.4 a  16.4; caben 2 por carril; ramal de Reducto sur despues de cruzar el ovalo. OSM: 1 carril entre los dos cruces y 2 despues; aqui 2, como RS_SO, en todo el tramo
+   B_ML    P_B -> ML   1 carriles (OSM 1); largo  45.2 a  45.2; caben 6 por carril; giro de Balboa hacia Larco: tramo propio de la linea de parada de Balboa a la union ML, por el oeste, sin cruzar los lados del ovalo (OSM, via 366715629)
+
+3. Recorrido de cada movimiento dentro del nudo: desde la linea de parada de afuera hasta el comienzo de su salida (m; carril del medio de los que usa)
+   RN>RS  RN_NO NO_SO                      49.4 m
+   RN>L   RN_NO NO_ML                      31.8 m
+   RN>J   RN_NE NE_MJ                      54.8 m
+   RS>RN  RS_SE SE_NE                      52.0 m
+   RS>J   RS_SE SE_MJ                      35.5 m
+   RS>L   RS_SO SO_ML                      68.0 m
+   B>J   B_SO SO_SE SE_MJ                 55.1 m
+   B>RS  B_SO                             20.2 m
+   B>RN  B_SO SO_SE SE_NE                 60.2 m
+   B>L   B_ML                             51.6 m
+   J>L   J_NE NE_NO NO_ML                 57.3 m
+   J>RN  J_NE                             22.3 m
+   J>RS  J_NE NE_NO NO_SO                 55.3 m
+
+4. Avisos de netconvert:
+   Success.
+   (armar_ovalo.py) 5 tramos internos llevados a 5.56 m/s; cesiones agregadas a la matriz de las esquinas: 74 (0 las pide solo el orden libre)
+5. Geometria del interior: medida, ramales 'distancia', 3.2 m por carril adentro, convergencia UTM -0.425 grados. Distancia (m) de cada punto a su nodo de OSM: NO 1.5, NE 4.3, SO 2.6, SE 3.4, XN 3.7, XE 3.7, XS 3.2, XO 1.8
+   Distancias entre esquinas (m): NO-NE 18.44, NO-SO 24.43, NE-SE 19.92, SO-SE 15.74
+   Ramales: XN a 4.65 m de NE, XE a 6.52 m de NE, XS a 3.50 m de SO, XO a 8.96 m de SO
+6. Carriles de cada entrada (DISPOSICION) y su camino carril a carril hasta la salida: 13 movimientos, 57 conexiones (enlaces de semaforo_S1)
+   RN_S1 (5 carriles; el 0 es el de la derecha)
+      RN_S1_0 -> Reducto sur    RN_S1_0 -> RN_NO_0 -> NO_SO_0 -> S1_RS_0
+      RN_S1_0 -> Larco          RN_S1_0 -> RN_NO_0 -> NO_ML_0 -> S1_L_0
+      RN_S1_1 -> Reducto sur    RN_S1_1 -> RN_NO_1 -> NO_SO_1 -> S1_RS_1
+      RN_S1_2 -> Reducto sur    RN_S1_2 -> RN_NO_2 -> NO_SO_2 -> S1_RS_2
+      RN_S1_3 -> el puente      RN_S1_3 -> RN_NE_0 -> NE_MJ_0 -> S1_J_1
+      RN_S1_4 -> el puente      RN_S1_4 -> RN_NE_1 -> NE_MJ_1 -> S1_J_2
+   RS_S1 (4 carriles; el 0 es el de la derecha)
+      RS_S1_0 -> Reducto norte  RS_S1_0 -> RS_SE_0 -> SE_NE_0 -> S1_RN_0
+      RS_S1_0 -> el puente      RS_S1_0 -> RS_SE_0 -> SE_MJ_0 -> S1_J_0
+      RS_S1_1 -> Reducto norte  RS_S1_1 -> RS_SE_1 -> SE_NE_1 -> S1_RN_1
+      RS_S1_2 -> Larco          RS_S1_2 -> RS_SO_0 -> SO_ML_0 -> S1_L_0
+      RS_S1_3 -> Larco          RS_S1_3 -> RS_SO_1 -> SO_ML_1 -> S1_L_1
+   B_S1 (3 carriles; el 0 es el de la derecha)
+      B_S1_0 -> el puente      B_S1_0 -> B_SO_0 -> SO_SE_0 -> SE_MJ_0 -> S1_J_0
+      B_S1_0 -> Reducto sur    B_S1_0 -> B_SO_0 -> S1_RS_0
+      B_S1_1 -> el puente      B_S1_1 -> B_SO_1 -> SO_SE_1 -> SE_MJ_1 -> S1_J_1
+      B_S1_2 -> el puente      B_S1_2 -> B_SO_2 -> SO_SE_2 -> SE_MJ_2 -> S1_J_2
+      B_S1_2 -> Reducto norte  B_S1_2 -> B_SO_2 -> SO_SE_2 -> SE_NE_1 -> S1_RN_1
+      B_S1_2 -> Larco          B_S1_2 -> B_ML_0 -> S1_L_1
+   J_S1 (3 carriles; el 0 es el de la derecha)
+      J_S1_0 -> Larco          J_S1_0 -> J_NE_0 -> NE_NO_0 -> NO_ML_0 -> S1_L_0
+      J_S1_0 -> Reducto norte  J_S1_0 -> J_NE_0 -> S1_RN_0
+      J_S1_1 -> Larco          J_S1_1 -> J_NE_1 -> NE_NO_1 -> NO_ML_1 -> S1_L_1
+      J_S1_2 -> Reducto sur    J_S1_2 -> J_NE_2 -> NE_NO_2 -> NO_SO_2 -> S1_RS_2

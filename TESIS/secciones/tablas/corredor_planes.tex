@@ -1,27 +1,39 @@
-% Generado por lima/corredor/tablas_corredor.py a partir de lima/corredor/. No editar a mano.
+% Generado por corredor_estudio2/demo_rl/lima/corredor/tablas_corredor.py a partir de esa carpeta (estudio 2 del corredor). No editar a mano.
 % Corredor de la Av. Benavides: el fijo ajustado al segundo (verde de la avenida, verde de la transversal y
 % desfase de cada cruce, con un ciclo comun) y el verde medio que da el modelo completo en cada cruce, con su
 % ciclo medio. El plan tipico da 91 s a la avenida y
 % 43 s a la transversal en todos los cruces, con ciclo de 140 s y sin desfases.
-% fuente: salidas/fijo_ajustado.json y salidas/verdes_modelo.json de cada nivel (estudio_corredor.py); publicada: ciclo 46, transversales [15, 11, 18, 18, 13, 18], desfases [0, 22, 26, 3, 43, 44]; alta: ciclo 62, transversales [25, 21, 25, 25, 18, 25], desfases [0, 48, 44, 15, 13, 30]
+% fuente: salidas/fijo_ajustado.json y salidas/verdes_modelo.json de cada nivel (estudio_corredor.py); publicada: ciclo 52, transversales [17, 18, 20, 20, 18, 18], desfases [0, 27, 26, 0, 51, 0]; alta: ciclo 84, transversales [24, 33, 29, 27, 27, 31], desfases [0, 1, 0, 41, 43, 4]
 \begin{tabular}{>{\raggedright\arraybackslash}p{2.0cm}>{\raggedright\arraybackslash}p{3.1cm}>{\raggedleft\arraybackslash}p{1.3cm}>{\raggedleft\arraybackslash}p{1.3cm}>{\raggedleft\arraybackslash}p{1.3cm}>{\raggedleft\arraybackslash}p{1.3cm}>{\raggedleft\arraybackslash}p{1.3cm}>{\raggedleft\arraybackslash}p{1.3cm}}
 \toprule
 Demanda & Cruce con & Fijo: avenida (s) & Fijo: transversal (s) & Fijo: desfase (s) & Modelo: avenida (s) & Modelo: transversal (s) & Modelo: ciclo (s) \\
 \midrule
-Publicada & Av.~José Larco & 25 & 15 & 0 & 13.3 & 10.8 & 30.1 \\
- & Calle Alcanfores & 29 & 11 & 22 & 16.9 & 10.6 & 33.5 \\
- & Av.~La Paz & 22 & 18 & 26 & 15.6 & 11.2 & 32.7 \\
- & Av.~Paseo de la República & 22 & 18 & 3 & 16.8 & 11.9 & 34.7 \\
- & Av.~Casimiro Ulloa & 27 & 13 & 43 & 19.3 & 11.2 & 36.4 \\
- & Av.~República de Panamá & 22 & 18 & 44 & 18.1 & 15.3 & 39.4 \\
- & Los seis cruces & \multicolumn{3}{r}{ciclo común de 46~s} & \multicolumn{3}{r}{ciclo medio de 34~s} \\
+Publicada & Av.~José Larco & 29 & 17 & 0 & 28.0 & 19.1 & 52.6 \\
+\cmidrule[0.25pt]{2-8}
+ & Calle Alcanfores & 28 & 18 & 27 & 31.8 & 18.5 & 56.0 \\
+\cmidrule[0.25pt]{2-8}
+ & Av.~La Paz & 26 & 20 & 26 & 28.5 & 20.5 & 55.1 \\
+\cmidrule[0.25pt]{2-8}
+ & Av.~Paseo de la República & 26 & 20 & 0 & 28.1 & 20.9 & 54.4 \\
+\cmidrule[0.25pt]{2-8}
+ & Av.~Casimiro Ulloa & 28 & 18 & 51 & 30.6 & 19.0 & 54.9 \\
+\cmidrule[0.25pt]{2-8}
+ & Av.~República de Panamá & 28 & 18 & 0 & 25.1 & 18.8 & 49.9 \\
+\cmidrule[0.25pt]{2-8}
+ & Los seis cruces & \multicolumn{3}{r}{ciclo común de 52~s} & \multicolumn{3}{r}{ciclo medio de 54~s} \\
 \midrule
-Alta & Av.~José Larco & 31 & 25 & 0 & 13.8 & 11.3 & 31.1 \\
- & Calle Alcanfores & 35 & 21 & 48 & 19.8 & 10.5 & 36.3 \\
- & Av.~La Paz & 31 & 25 & 44 & 20.3 & 12.7 & 39.0 \\
- & Av.~Paseo de la República & 31 & 25 & 15 & 22.9 & 14.8 & 43.5 \\
- & Av.~Casimiro Ulloa & 38 & 18 & 13 & 25.7 & 12.6 & 44.2 \\
- & Av.~República de Panamá & 31 & 25 & 30 & 32.0 & 26.2 & 64.2 \\
- & Los seis cruces & \multicolumn{3}{r}{ciclo común de 62~s} & \multicolumn{3}{r}{ciclo medio de 43~s} \\
+Alta & Av.~José Larco & 54 & 24 & 0 & 33.7 & 17.7 & 57.3 \\
+\cmidrule[0.25pt]{2-8}
+ & Calle Alcanfores & 45 & 33 & 1 & 32.5 & 18.0 & 56.5 \\
+\cmidrule[0.25pt]{2-8}
+ & Av.~La Paz & 49 & 29 & 0 & 30.3 & 20.2 & 56.6 \\
+\cmidrule[0.25pt]{2-8}
+ & Av.~Paseo de la República & 51 & 27 & 41 & 30.8 & 19.3 & 56.1 \\
+\cmidrule[0.25pt]{2-8}
+ & Av.~Casimiro Ulloa & 51 & 27 & 43 & 32.8 & 18.1 & 56.9 \\
+\cmidrule[0.25pt]{2-8}
+ & Av.~República de Panamá & 47 & 31 & 4 & 36.2 & 24.8 & 66.9 \\
+\cmidrule[0.25pt]{2-8}
+ & Los seis cruces & \multicolumn{3}{r}{ciclo común de 84~s} & \multicolumn{3}{r}{ciclo medio de 58~s} \\
 \bottomrule
 \end{tabular}

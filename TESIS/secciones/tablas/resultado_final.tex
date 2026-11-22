@@ -1,4 +1,8 @@
-% Generado por lima/corredor/tablas_corredor.py a partir de lima/corredor/. No editar a mano.
+% Filas del nudo: tesis_ovalo_2026-11-19/figuras/resultado_final_ovalo.py, con el modelo completo (modelo de orden fijo)
+% del estudio del nudo en la red del Ovalo Vasco, como en los demas casos (nudo_ovalo_estudio2/salidas_ovalo/
+% veredicto_ovalo.json, comparacion (3): completo_s2042 con la publicada y completo_s4042 con la alta). El registro cito
+% la variante de orden libre (MEJORA y FALLA); va en la nota de la tabla. El resto, sin cambios, de tablas_corredor.py.
+% Generado por corredor_estudio2/demo_rl/lima/corredor/tablas_corredor.py a partir de esa carpeta (estudio 2 del corredor). No editar a mano.
 % Resultado final: todos los casos con llegadas aleatorias, de menor a mayor demanda (los seis del segundo
 % estudio y los dos de Lima con sus dos demandas). Retraso total por vehiculo con el fijo ajustado al
 % segundo y con el modelo en la tanda 1; cambio del modelo frente al fijo ajustado al segundo y frente al
@@ -12,15 +16,23 @@
 Caso & Red y demanda & Veh/h & Fijo ajustado al segundo (s/veh) & Modelo (s/veh) & Frente al fijo, tandas 1 y 2 (\%) & Frente al actuado ajustado, tandas 1 y 2 (\%) & Veredicto \\
 \midrule
 P1 & Corredor, nominal & 1810 & 29.2 & 24.4 & $-16.3$ y $-17.1$ & $-3.3$ y $-3.8$ & FUNCIONA \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 P3 & Red con rotonda, nominal & 2150 & 22.7 & 23.1 & $+1.6$ y $+1.6$ & $+1.6$ y $+1.6$ & FALLA \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 P4 & Red con rotonda, alta & 2580 & 28.7 & 28.5 & $-0.5$ y $0.0$ & $-0.5$ y $0.0$ & EMPATA \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 P2 & Corredor, alta & 3620 & 458.4 & 367.8 & $-19.8$ y $-20.2$ & $-19.0$ y $-19.5$ & FUNCIONA (sin estabilizar) \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 P5 & Malla, nominal & 4350 & 22.5 & 22.5 & $+0.2$ y $+0.3$ & $0.0$ y $+0.3$ & EMPATA \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 P6 & Malla, alta & 8700 & 51.3 & 38.1 & $-25.7$ y $-26.9$ & $-11.5$ y $-12.9$ & FUNCIONA \\
 \midrule
-Lima & Nudo, publicada & 4271 & 57.8 & 55.3 & $-4.4$ y $-4.5$ & $+3.4$ y $+3.6$ & MEJORA \\
- & Nudo, alta & 5125 & 70.1 & 66.0 & $-5.7$ y $-6.6$ & $+4.3$ y $+3.3$ & MEJORA (sin estabilizar) \\
- & Corredor Benavides, publicada & 8706 & 35.0 & 31.9 & $-8.8$ y $-8.9$ & $-8.1$ y $-7.9$ & FUNCIONA \\
- & Corredor Benavides, alta & 10\,447 & 53.0 & 42.5 & $-19.9$ y $-19.9$ & $-10.4$ y $-10.6$ & FUNCIONA \\
+Lima & Nudo, publicada & 4271 & 84.1 & 76.4 & $-9.2$ y $-9.4$ & $0.0$ y $+0.1$ & FUNCIONA (sin estabilizar) \\
+\cmidrule[0.25pt]{2-8}
+ & Nudo, alta & 5125 & 133.5 & 136.8 & $+2.5$ y $+3.2$ & $-4.5$ y $-7.8$ & FALLA \\
+\cmidrule[0.25pt]{2-8}
+ & Corredor Benavides, publicada & 7654 & 41.3 & 39.7 & $-3.7$ y $-3.8$ & $-3.2$ y $-3.3$ & MEJORA \\
+\cmidrule[0.25pt]{2-8}
+ & Corredor Benavides, alta & 9185 & 60.7 & 56.0 & $-7.7$ y $-7.6$ & $-8.0$ y $-7.6$ & FUNCIONA \\
 \bottomrule
 \end{tabular}

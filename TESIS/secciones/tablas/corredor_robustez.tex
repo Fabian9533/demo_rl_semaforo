@@ -1,15 +1,17 @@
-% Generado por lima/corredor/tablas_corredor.py a partir de lima/corredor/. No editar a mano.
+% Generado por corredor_estudio2/demo_rl/lima/corredor/tablas_corredor.py a partir de esa carpeta (estudio 2 del corredor). No editar a mano.
 % Corredor de la Av. Benavides, prueba de robustez del reparto: retraso total (s/veh) de cada control con el
-% mismo total (8706 veh/h) repartido de otra forma entre la avenida y las transversales, sin reajustar ni
+% mismo total (7654 veh/h) repartido de otra forma entre la avenida y las transversales, sin reajustar ni
 % reentrenar, y cambio del modelo frente a cada control (%). 100 semillas (24001-24100); la primera fila es
 % la tanda 1 del caso.
-% fuente: lima/corredor/robustez/<variante>/salidas/eval_t1_*.csv; IC95 y p: corredor: tipico -58.80 [-59.44, -58.15] p=3.9e-18; fijo -8.81 [-9.11, -8.52] p=3.9e-18; actuadoaj -8.06 [-8.34, -7.78] p=3.9e-18 | avenida: tipico -43.72 [-43.96, -43.46] p=3.9e-18; fijo -38.78 [-40.46, -37.04] p=3.9e-18; actuadoaj -10.80 [-11.17, -10.42] p=3.9e-18 | transversal: tipico -73.32 [-73.90, -72.73] p=3.9e-18; fijo -17.78 [-18.52, -17.15] p=3.9e-18; actuadoaj -6.10 [-6.37, -5.83] p=3.9e-18
+% fuente: lima/corredor/robustez/<variante>/salidas/eval_t1_*.csv; IC95 y p: corredor: tipico -41.57 [-41.79, -41.36] p=3.9e-18; fijo -3.67 [-4.00, -3.36] p=4e-18; actuadoaj -3.20 [-3.52, -2.89] p=5.9e-18 | avenida: tipico -26.60 [-27.17, -26.04] p=3.9e-18; fijo -4.22 [-4.76, -3.71] p=4.3e-18; actuadoaj -2.89 [-3.37, -2.44] p=1.5e-17 | transversal: tipico -53.39 [-54.12, -52.68] p=3.9e-18; fijo -14.34 [-15.53, -13.23] p=3.9e-18; actuadoaj -13.85 [-15.02, -12.74] p=3.9e-18
 \begin{tabular}{>{\raggedright\arraybackslash}p{2.6cm}>{\raggedleft\arraybackslash}p{1.45cm}>{\raggedleft\arraybackslash}p{1.45cm}>{\raggedleft\arraybackslash}p{1.45cm}>{\raggedleft\arraybackslash}p{1.45cm}>{\raggedleft\arraybackslash}p{1.45cm}>{\raggedleft\arraybackslash}p{1.45cm}>{\raggedleft\arraybackslash}p{1.45cm}}
 \toprule
 Reparto de la demanda & Plan típico & Fijo ajustado & Actuado ajustado & Modelo completo & Frente al plan típico (\%) & Frente al fijo (\%) & Frente al actuado (\%) \\
 \midrule
-El supuesto (tanda 1) & 77.5 & 35.0 & 34.7 & 31.9 & $-58.8$ & $-8.8$ & $-8.1$ \\
-Más carga en la avenida & 66.4 & 61.1 & 41.9 & 37.4 & $-43.7$ & $-38.8$ & $-10.8$ \\
-Más carga en las transversales & 105.8 & 34.3 & 30.1 & 28.2 & $-73.3$ & $-17.8$ & $-6.1$ \\
+El supuesto (tanda 1) & 68.0 & 41.3 & 41.0 & 39.7 & $-41.6$ & $-3.7$ & $-3.2$ \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
+Más carga en la avenida & 90.6 & 69.5 & 68.5 & 66.5 & $-26.6$ & $-4.2$ & $-2.9$ \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
+Más carga en las transversales & 74.9 & 40.7 & 40.5 & 34.9 & $-53.4$ & $-14.3$ & $-13.9$ \\
 \bottomrule
 \end{tabular}

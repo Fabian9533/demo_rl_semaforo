@@ -1,0 +1,153 @@
+{
+ "ganador": {
+  "tipo": "retraso",
+  "detectorRange": 100,
+  "minTimeLoss": 3,
+  "esquema": "doble del fijo",
+  "retraso_total_10": 76.769,
+  "retraso_total_30": 76.025,
+  "maximos": [
+   60,
+   32,
+   60
+  ]
+ },
+ "actuado_por_defecto_30": 881.005,
+ "procedimiento": "pasos del segundo estudio en cadena (hueco, detector, umbral de atasco y verde maximo), variante por retraso y los tres mejores con 30 semillas",
+ "candidatos": [
+  {
+   "tipo": "retraso",
+   "detectorRange": 100,
+   "minTimeLoss": 3,
+   "esquema": "doble del fijo",
+   "retraso_total_10": 76.769,
+   "retraso_total_30": 76.025
+  },
+  {
+   "tipo": "retraso",
+   "detectorRange": 200,
+   "minTimeLoss": 3,
+   "esquema": "doble del fijo",
+   "retraso_total_10": 77.062,
+   "retraso_total_30": 76.43933333333334
+  },
+  {
+   "tipo": "retraso",
+   "detectorRange": 100,
+   "minTimeLoss": 1,
+   "esquema": "doble del fijo",
+   "retraso_total_10": 77.45100000000001,
+   "retraso_total_30": 76.83666666666667
+  },
+  {
+   "tipo": "retraso",
+   "detectorRange": 50,
+   "minTimeLoss": 1,
+   "esquema": "doble del fijo",
+   "retraso_total_10": 77.943
+  },
+  {
+   "tipo": "retraso",
+   "detectorRange": 200,
+   "minTimeLoss": 1,
+   "esquema": "doble del fijo",
+   "retraso_total_10": 78.579
+  },
+  {
+   "tipo": "actuado",
+   "max-gap": 1.0,
+   "detector-gap": 3.0,
+   "jam-threshold": 30,
+   "esquema": "doble del fijo",
+   "retraso_total_10": 81.509
+  },
+  {
+   "tipo": "actuado",
+   "max-gap": 1.0,
+   "detector-gap": 3.0,
+   "jam-threshold": 30,
+   "esquema": "60",
+   "retraso_total_10": 81.74
+  },
+  {
+   "tipo": "actuado",
+   "max-gap": 1.0,
+   "detector-gap": 3.0,
+   "jam-threshold": 10,
+   "esquema": "60",
+   "retraso_total_10": 82.269
+  },
+  {
+   "tipo": "retraso",
+   "detectorRange": 50,
+   "minTimeLoss": 3,
+   "esquema": "doble del fijo",
+   "retraso_total_10": 161.923
+  },
+  {
+   "tipo": "actuado",
+   "max-gap": 1.0,
+   "detector-gap": 3.0,
+   "jam-threshold": -1,
+   "esquema": "60",
+   "retraso_total_10": 825.836
+  },
+  {
+   "tipo": "actuado",
+   "max-gap": 1.0,
+   "detector-gap": 4.0,
+   "jam-threshold": -1,
+   "esquema": "60",
+   "retraso_total_10": 834.71
+  },
+  {
+   "tipo": "actuado",
+   "max-gap": 1.0,
+   "detector-gap": 1.0,
+   "jam-threshold": -1,
+   "esquema": "60",
+   "retraso_total_10": 848.466
+  },
+  {
+   "tipo": "actuado",
+   "max-gap": 1.0,
+   "detector-gap": 2.0,
+   "jam-threshold": -1,
+   "esquema": "60",
+   "retraso_total_10": 852.707
+  },
+  {
+   "tipo": "actuado",
+   "max-gap": 2.0,
+   "detector-gap": 2.0,
+   "jam-threshold": -1,
+   "esquema": "60",
+   "retraso_total_10": 856.892
+  },
+  {
+   "tipo": "actuado",
+   "max-gap": 1.5,
+   "detector-gap": 2.0,
+   "jam-threshold": -1,
+   "esquema": "60",
+   "retraso_total_10": 857.078
+  },
+  {
+   "tipo": "actuado",
+   "max-gap": 3.0,
+   "detector-gap": 2.0,
+   "jam-threshold": -1,
+   "esquema": "60",
+   "retraso_total_10": 886.227,
+   "retraso_total_30": 881.005
+  },
+  {
+   "tipo": "actuado",
+   "max-gap": 4.0,
+   "detector-gap": 2.0,
+   "jam-threshold": -1,
+   "esquema": "60",
+   "retraso_total_10": 916.264
+  }
+ ]
+}

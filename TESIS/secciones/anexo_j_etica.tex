@@ -1,0 +1,183 @@
+\section*{Anexo J. Consideraciones éticas}
+\phantomsection
+\addcontentsline{toc}{subsection}{Anexo J. Consideraciones éticas}
+\label{anexo:etica}
+\setcounter{table}{0}
+\renewcommand{\thetable}{J.\arabic{table}}
+\renewcommand{\theHtable}{J.\arabic{table}}
+% Asesoria del 20.11.2026 y anuncio de Canvas de la Direccion de Computacion (lo paso Fabian Alvarado el 20.11.2026):
+% "Anexo de Consideraciones Eticas" en la entrega final de PFC2, que mide dos competencias. COM4_4.2: emitir juicios
+% informados, argumentados y justos con base en principios eticos, el bien comun y el desarrollo sostenible (emite un
+% juicio logico orientado al bien comun a partir del analisis de una situacion etica problematica; aplica principios
+% eticos -responsabilidad, justicia, sostenibilidad, seguridad- en el analisis). CS4.4.1: reconocer sus
+% responsabilidades profesionales con base en principios legales y eticos (las identifica segun normas -proteccion de
+% datos, propiedad intelectual, privacidad-; evalua el impacto de sus decisiones sobre las personas, las organizaciones
+% y la sociedad). "En caso no aplique, pongan el comentario respectivo."
+
+Este anexo desarrolla, para este proyecto, las dos competencias que pide
+la Dirección de Computación: COM4\_4.2, emitir juicios éticos
+informados y orientados al bien común, y CS4.4.1, reconocer las
+responsabilidades profesionales con base en principios legales y
+éticos. En resumen: el proyecto no trató datos de personas, y su
+cuestión ética principal está en el uso de sus resultados, porque un
+control aprendido en simulación no debe llegar a un semáforo real como
+si su mejora estuviera probada en la calle.
+
+\subsection*{Un juicio ético sobre el uso de los resultados (COM4\_4.2)}
+
+\noindent\textbf{La situación.} Con los resultados del
+Capítulo~\ref{cap:resultados}, una municipalidad podría proponer
+instalar el modelo en el Óvalo Vasco: en la simulación, baja el retraso
+un 23 a 24\,\% frente al plan actual, el que opera hoy
+(Tabla~\ref{tab:lima-resultado}). La decisión afectaría a miles de
+personas por hora que no participan en ella, y la propia tesis da cuatro
+razones de cautela:
+\begin{itemize}
+  \item \textbf{La mayor parte de la mejora no viene del aprendizaje.}
+    En la misma simulación, con la demanda publicada, el fijo ajustado
+    al segundo, un plan fijo sin detectores, baja el retraso un 15 a
+    16\,\% frente al plan actual, y el actuado ajustado iguala al modelo.
+    Con la demanda alta, el fijo ajustado al segundo supera al modelo.
+  \item \textbf{La mejora es de una simulación.} La demanda es en parte
+    un supuesto, no se simulan peatones y ningún caso se comprobó con
+    tiempos de viaje medidos.
+  \item \textbf{El modelo necesita ver todo el acceso,} cerca de 1~km en
+    el nudo. En la calle eso pide un detector de video o de radar
+    (Sección~\ref{sec:costo-escala}), y el video capta placas y rostros.
+  \item \textbf{La recompensa cuenta vehículos, no personas.} Un bus con
+    30 pasajeros pesa en ella lo mismo que un auto con uno.
+\end{itemize}
+% fuente: secciones/tablas/ovalo_resultado_fijo.tex (Tabla tab:lima-resultado): demanda publicada, plan actual 99.5 y
+% 100.6 s/veh, fijo ajustado al segundo 84.1 y 84.5 (-15.5 y -16.0 %), actuado ajustado 76.4 y 76.5, modelo de orden
+% fijo 76.4 y 76.6 (frente al plan actual, -23.2 y -23.9 %); demanda alta, fijo 133.5 y 127.5 frente al modelo 136.8 y
+% 131.6 (+2.5 y +3.2 %); limites: conclusiones.tex ("No se puede afirmar que los casos de Lima predigan el retraso
+% real"); acceso observado: capitulo5.tex, sec:costo-escala ("unos 590 m en las entradas del corredor y 1 km en el
+% nudo"; detectores de video y radar en la estimacion de costo); recompensa: capitulo3.tex, eq:recompensa-u4 (suma
+% sobre vehiculos)
+
+\noindent\textbf{El juicio.} No se debe recomendar instalar el modelo tal
+como sale de esta tesis. Con la evidencia disponible, lo que sirve al bien
+común es reajustar primero el plan fijo del nudo con conteos actuales:
+da la mayor parte de la mejora, no expone a nadie a un control que no se
+probó en la calle, no necesita cámaras y es una práctica conocida de la
+ingeniería de tránsito. El modelo se justificaría después, como un
+piloto de estudio, donde aporte lo que los controles comunes no dan
+---en esta tesis, el corredor de Benavides, gracias a los mensajes entre
+cruces (Sección~\ref{sec:lima-corredor})---, y con cuatro condiciones:
+\begin{enumerate}
+  \item \textbf{Seguridad.} El control conserva los estados del
+    semáforo, el ámbar, el todo en rojo y los verdes mínimos de los
+    peatones, y ante cualquier falla vuelve solo al plan fijo.
+  \item \textbf{Justicia.} Se mide el retraso de cada entrada y por
+    persona, y la espera de los peatones, y se fija de antemano cuánto
+    puede empeorar como máximo cada entrada.
+  \item \textbf{Privacidad.} Si se usan cámaras, el equipo se queda
+    solo con conteos y velocidades, sin guardar imágenes.
+  \item \textbf{Honestidad.} El piloto se compara con el plan fijo
+    reajustado, no solo con el plan actual, y su resultado se publica
+    aunque sea desfavorable.
+\end{enumerate}
+
+\noindent\textbf{Los principios en el análisis.} La
+Tabla~\ref{tab:etica-principios} muestra qué pide cada principio en esta
+situación, qué hace ya la tesis y qué faltaría para llevar el control a
+la calle.
+
+\begin{table}[!htbp]
+\setstretch{1}
+\centering
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{>{\raggedright\arraybackslash}p{2.5cm}>{\raggedright\arraybackslash}p{3.0cm}>{\raggedright\arraybackslash}p{5.0cm}>{\raggedright\arraybackslash}p{3.9cm}}
+\toprule
+Principio & Qué pide aquí & Qué hace la tesis & Qué falta para la calle \\
+\midrule
+Responsabilidad y honestidad & No prometer más de lo que la evidencia muestra & Compara con referencias fuertes, el fijo ajustado al segundo y el actuado ajustado, no solo con el plan actual; escribe sus reglas antes de entrenar, evalúa dos veces e informa también los veredictos EMPATA y FALLA (Sección~\ref{sec:diseno-segundo}); declara sus límites & Medir el efecto en la calle, con conteos y tiempos de viaje \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
+Seguridad & Que ningún control dé verde a movimientos que chocan ni quite tiempo a los peatones & El modelo no elige qué luces prender: solo decide si mantiene el verde o pasa al estado siguiente, con ámbar y con verdes mínimo y máximo (Sección~\ref{sec:formulacion}). El todo en rojo del nudo y los verdes mínimos de los peatones del corredor son iguales en todos los controles & Una revisión de seguridad, que SUMO no hace (tampoco simula peatones), y la vuelta automática al plan fijo \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
+Justicia & Repartir la espera con equidad entre calles y entre personas & Con el orden de los estados fijo y un verde máximo, ninguna entrada se queda sin verde más de un ciclo; el retraso total cuenta también a los que esperan para entrar a la red (Sección~\ref{sec:plan-resultados}) & Medir por entrada y por persona, y a los peatones: la recompensa cuenta vehículos \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
+Sostenibilidad & Que el beneficio no traiga más autos ni más gasto & Entrenar toma horas en un computador de escritorio sin GPU, y el modelo se compara con controles que no necesitan detectores & Medir las emisiones, que la tesis no analiza (Tabla~\ref{tab:metas}), y vigilar si la calle atrae más autos \\
+\bottomrule
+\end{tabular}
+\caption[Consideraciones éticas: los principios en el uso de los resultados]{Los principios éticos aplicados a la situación de este anexo: qué pide cada uno, qué hace ya la tesis y qué faltaría para llevar el control a un semáforo real.}
+\label{tab:etica-principios}
+\end{table}
+% fuente: comparacion con referencias fuertes, reglas antes de entrenar y dos evaluaciones: capitulo3.tex,
+% sec:diseno-segundo, y capitulo5.tex, sec:caso-lima ("reglas escritas antes de entrenar"); accion de los agentes
+% (mantener o pasar a la fase siguiente, ambar de 3 s, verde de 10 a 60 s): capitulo3.tex, sec:formulacion; todo en
+% rojo del nudo igual en todos los controles: anexo_d_osm.tex ("Todo en rojo"); verdes minimos de los peatones en el
+% corredor, "Vale para todos los controles": capitulo5.tex, sec:lima-corredor; espera para entrar a la red en el
+% retraso total: capitulo5.tex, sec:plan-resultados; computo: capitulo5.tex, sec:costo-escala; emisiones: Tabla
+% tab:metas ("una meta de emisiones de CO2, que se retiro porque esa metrica no se uso en el analisis")
+
+\subsection*{Responsabilidades profesionales e impacto (CS4.4.1)}
+
+\noindent\textbf{Responsabilidades según normas y principios.} La
+Tabla~\ref{tab:etica-normas} reúne las normas que tocan a este proyecto
+como trabajo de ciencia de la computación y cómo se cumplen. Donde una
+norma no aplica a lo hecho, se dice, y se indica cuándo aplicaría.
+
+\begin{table}[!htbp]
+\setstretch{1}
+\centering
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{>{\raggedright\arraybackslash}p{2.2cm}>{\raggedright\arraybackslash}p{4.0cm}>{\raggedright\arraybackslash}p{8.2cm}}
+\toprule
+Ámbito & Norma o principio & En este proyecto \\
+\midrule
+Protección de datos personales y privacidad & Ley N.\textsuperscript{o}~29733 \citep{Peru2011_Ley29733} y su reglamento \citep{MINJUSDH2024_Reglamento}; con cámaras, la directiva de videovigilancia \citep{ANPD2020_Videovigilancia}; principio 1.6 de la ACM \citep{ACM2018_Code} & \textbf{No aplica a lo hecho:} no se trataron datos de personas. Los vehículos son simulados; la demanda sale de volúmenes publicados; la red, de OpenStreetMap y de Google Maps, y en el sitio se midieron con cronómetro los tiempos del semáforo. \textbf{Aplicaría al instalar el modelo:} si se observa con video, el equipo debe quedarse solo con conteos y velocidades, sin guardar imágenes, y la entidad que lo opere responde por esos datos. \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
+Propiedad intelectual & Decreto Legislativo N.\textsuperscript{o}~822, Ley sobre el Derecho de Autor \citep{Peru1996_DL822}; las licencias de los datos y del software; principio 1.5 de la ACM & Se cita cada fuente: métodos, datos y volúmenes publicados. Los datos de OpenStreetMap tienen licencia ODbL 1.0: piden reconocer la fuente, lo que se hace en la Sección~\ref{sec:caso-lima}, y que las redes derivadas de ellos, publicadas en el repositorio del proyecto, se compartan con la misma licencia \citep{OSM_Copyright}. Google permite mostrar sus imágenes en un impreso con la atribución junto a la imagen y sin alterarla \citep{Google_GeoGuidelines}: la llevan las leyendas de las dos figuras satelitales, que solo se anotaron. SUMO (licencia EPL-2.0) y las bibliotecas de Python (licencias libres) se usaron sin modificarlas. Los algoritmos se programaron a partir de sus artículos, que se citan. \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
+Ética profesional & Código de Ética y Conducta Profesional de la ACM \citep{ACM2018_Code} & Principios 1.2, evitar el daño; 1.3, ser honesto; 1.4, ser justo; 2.5, evaluar el sistema y sus riesgos de forma completa, y 3.7, cuidar en especial los sistemas que pasan a ser infraestructura de la sociedad, como los semáforos. Se aplican en el juicio anterior y en la Tabla~\ref{tab:etica-impacto}. \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
+Normas de tránsito & Manual de Dispositivos de Control de Tránsito Automotor \citep{MTC2024_Manual} & Un control instalado tendría que cumplirlo y contar con la autorización de la autoridad que administra esos semáforos. La tesis no lo verifica: solo compara controles en simulación. \\
+\bottomrule
+\end{tabular}
+\caption[Consideraciones éticas: responsabilidades según normas y principios]{Responsabilidades profesionales del proyecto según normas legales y principios éticos, y cómo se atienden. Donde una norma no aplica a lo hecho, se indica cuándo aplicaría.}
+\label{tab:etica-normas}
+\end{table}
+% fuente: datos usados: capitulo3.tex, sec:validacion-realidad (tiempos del nudo medidos con cronometros; demanda
+% publicada, sin aforos), conclusiones.tex (red de OpenStreetMap y medidas en Google Maps); Ley 29733 (2011) y su
+% reglamento, D.S. 016-2024-JUS (publicado el 30.11.2024, deroga el D.S. 003-2013-JUS); directiva aprobada por la
+% R.D. 02-2020-JUS/DGTAIPD; ODbL: openstreetmap.org/copyright (atribucion y "share-alike" de las bases de datos
+% derivadas); repositorio publico: anexos.tex, tab:programas; Google: Geo Guidelines (atribucion a Google y a sus
+% proveedores de datos junto a la imagen; anotar si, alterar o quitar la atribucion no); SUMO 1.25.0, EPL-2.0 (con
+% GPL-2.0 o posterior como licencia secundaria); NumPy, SciPy, Matplotlib y PyTorch: licencias libres tipo BSD o PSF;
+% algoritmos programados sin bibliotecas de aprendizaje por refuerzo: introduccion.tex ("Aporte propio"); manual del
+% MTC aprobado por la R.D. 26-2024-MTC/18 (16.10.2024), que deroga la R.D. 16-2016-MTC/14
+
+\noindent\textbf{Impacto de las decisiones.} La
+Tabla~\ref{tab:etica-impacto} evalúa el impacto de las decisiones del
+proyecto sobre las personas, las organizaciones y la sociedad.
+
+\begin{table}[!htbp]
+\setstretch{1}
+\centering
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{>{\raggedright\arraybackslash}p{2.4cm}>{\raggedright\arraybackslash}p{2.8cm}>{\raggedright\arraybackslash}p{4.6cm}>{\raggedright\arraybackslash}p{4.6cm}}
+\toprule
+ & Beneficio posible & Riesgo & Qué decidió el proyecto \\
+\midrule
+Personas: conductores, pasajeros, peatones y vecinos & Menos espera en la hora punta & Que la mejora media oculte una entrada o a peatones que esperan más; un control que no se probó en la calle & Mantener los estados, el ámbar, el todo en rojo y los verdes de los peatones en todos los controles, y dar el retraso con su intervalo de confianza y sus límites \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
+Organizaciones: municipalidades, operadores de semáforos y la universidad & Comparar controles antes de invertir & Pagar detectores por una mejora que un plan fijo reajustado ya da: en el corredor, con la demanda publicada, el tiempo ahorrado frente al fijo vale menos que el detector más barato (Sección~\ref{sec:costo-escala}) & Comparar con el fijo ajustado al segundo y con el actuado ajustado, y estimar el costo y el beneficio \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
+Sociedad: la ciudad y el ambiente & Menos congestión y, quizá, menos emisiones & Más autos atraídos por calles más fluidas; un bien público manejado por decisiones automáticas, sin un responsable claro; menos peso para cada pasajero de bus que para quien va en auto & No afirmar lo que no se midió (emisiones, peatones, la calle real) y describir los programas, las reglas y los datos de cada caso (Anexos~D, H e~I) para que otros los revisen \\
+\bottomrule
+\end{tabular}
+\caption[Consideraciones éticas: impacto de las decisiones del proyecto]{Impacto de las decisiones del proyecto sobre las personas, las organizaciones y la sociedad: el beneficio posible, el riesgo y lo que decidió el proyecto.}
+\label{tab:etica-impacto}
+\end{table}
+% fuente: costo y beneficio del corredor: capitulo5.tex, sec:costo-escala ("Frente al fijo, que no necesita
+% detectores, el valor ahorrado con la demanda publicada no cubre ni las espiras, el detector mas barato");
+% intervalos de confianza: capitulo3.tex, sec:estadistica
+
+\noindent\textbf{Lo que no aplica.} El proyecto no tuvo participantes
+humanos: no hubo encuestas, entrevistas ni pruebas con personas, por lo
+que no requirió consentimiento informado. Tampoco trató datos
+personales (Tabla~\ref{tab:etica-normas}).

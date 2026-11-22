@@ -1,33 +1,49 @@
-% Generado por lima/corredor/tablas_corredor.py a partir de lima/corredor/. No editar a mano.
+% Generado por corredor_estudio2/demo_rl/lima/corredor/tablas_corredor.py a partir de esa carpeta (estudio 2 del corredor). No editar a mano.
 % Corredor de la Av. Benavides: los tres entrenamientos de cada modelo en cada nivel de demanda. Episodio de
 % la version evaluada (menor retraso total en la validacion, semillas 21001-21004), ese retraso, retraso
 % total en las dos tandas de evaluacion, cambio frente al fijo ajustado al segundo y si el entrenamiento se
 % estabilizo (regla de la tesis: en el ultimo tercio de las validaciones, tendencia y estabilidad dentro del
 % 5 %). El citado de cada modelo es el de validacion mediana.
 % fuente: politica_benavides_<modelo>_s<base>.json (ep_elegido, val_elegido), salidas/eval_t*_*.csv y la
-% columna val_total de resultados_benavides_ippo_<modelo>_s<base>.csv; publicada completo 42: plateau -0.04 %, estabilidad 0.27 %; publicada completo 2042: plateau -0.49 %, estabilidad 0.17 %; publicada completo 4042: plateau +0.04 %, estabilidad 0.01 %; publicada corregido 42: plateau -0.12 %, estabilidad 0.39 %; publicada corregido 2042: plateau -0.62 %, estabilidad 0.11 %; publicada corregido 4042: plateau -0.77 %, estabilidad 0.00 %; publicada sinmsg 42: plateau +0.92 %, estabilidad 0.71 %; publicada sinmsg 2042: plateau -0.77 %, estabilidad 0.00 %; publicada sinmsg 4042: plateau +0.02 %, estabilidad 0.21 %; alta completo 42: plateau +1.93 %, estabilidad 1.45 %; alta completo 2042: plateau -4.98 %, estabilidad 0.53 %; alta completo 4042: plateau +3.69 %, estabilidad 3.00 %; alta corregido 42: plateau -5.77 %, estabilidad 0.76 %; alta corregido 2042: plateau -1.69 %, estabilidad 0.60 %; alta corregido 4042: plateau -11.60 %, estabilidad 0.00 %; alta sinmsg 42: plateau +7.87 %, estabilidad 5.18 %; alta sinmsg 2042: plateau -6.80 %, estabilidad 0.00 %; alta sinmsg 4042: plateau -1.89 %, estabilidad 1.32 %
+% columna val_total de resultados_benavides_ippo_<modelo>_s<base>.csv; publicada completo 42: plateau +0.09 %, estabilidad 0.01 %; publicada completo 2042: plateau -0.49 %, estabilidad 0.00 %; publicada completo 4042: plateau +1.18 %, estabilidad 1.01 %; publicada corregido 42: plateau -0.08 %, estabilidad 0.35 %; publicada corregido 2042: plateau -0.23 %, estabilidad 0.44 %; publicada corregido 4042: plateau -3.79 %, estabilidad 0.00 %; publicada sinmsg 42: plateau +0.99 %, estabilidad 0.61 %; publicada sinmsg 2042: plateau +0.40 %, estabilidad 0.47 %; publicada sinmsg 4042: plateau -0.66 %, estabilidad 0.00 %; alta completo 42: plateau -2.10 %, estabilidad 0.00 %; alta completo 2042: plateau +0.24 %, estabilidad 1.04 %; alta completo 4042: plateau -0.29 %, estabilidad 1.21 %; alta corregido 42: plateau -13.53 %, estabilidad 0.00 %; alta corregido 2042: plateau -14.30 %, estabilidad 0.00 %; alta corregido 4042: plateau -11.22 %, estabilidad 0.00 %; alta sinmsg 42: plateau +5.67 %, estabilidad 3.46 %; alta sinmsg 2042: plateau +4.13 %, estabilidad 2.76 %; alta sinmsg 4042: plateau +0.04 %, estabilidad 1.47 %
 \begin{tabular}{>{\raggedright\arraybackslash}p{1.55cm}>{\raggedright\arraybackslash}p{2.2cm}>{\raggedright\arraybackslash}p{1.4cm}>{\raggedright\arraybackslash}p{1.3cm}>{\raggedright\arraybackslash}p{1.5cm}>{\raggedright\arraybackslash}p{1.9cm}>{\raggedright\arraybackslash}p{2.05cm}>{\raggedright\arraybackslash}p{1.3cm}}
 \toprule
 Demanda & Modelo & Base & Episodio de la versión evaluada & Retraso en la validación (s/veh) & Retraso en la evaluación, tandas 1 y 2 (s/veh) & Cambio frente al fijo ajustado (\%) & ¿Se estabilizó? \\
 \midrule
-Publicada & Modelo completo & 42 (citado) & 340 & 31.3 & 31.9 y 31.9 & $-8.8$ y $-8.9$ & sí \\
- &  & 2042 & 380 & 31.2 & 32.0 y 31.9 & $-8.7$ y $-9.0$ & sí \\
- &  & 4042 & 180 & 31.3 & 32.0 y 32.0 & $-8.5$ y $-8.8$ & sí \\
- & IPPO con mensajes corregido & 42 (citado) & 160 & 34.4 & 35.3 y 35.2 & $+0.7$ y $+0.4$ & sí \\
- &  & 2042 & 160 & 34.5 & 35.4 y 35.3 & $+0.9$ y $+0.9$ & sí \\
- &  & 4042 & 200 & 34.2 & 35.1 y 34.9 & $+0.2$ y $-0.3$ & sí \\
- & IPPO sin mensajes corregido & 42 & 170 & 34.5 & 35.6 y 35.4 & $+1.6$ y $+1.2$ & sí \\
- &  & 2042 (citado) & 180 & 34.4 & 35.4 y 35.3 & $+1.2$ y $+0.8$ & sí \\
- &  & 4042 & 160 & 34.3 & 35.2 y 35.2 & $+0.4$ y $+0.4$ & sí \\
+Publicada & Modelo completo & 42 (citado) & 380 & 39.1 & 39.7 y 39.7 & $-3.7$ y $-3.8$ & sí \\
+\cmidrule[0.25pt]{2-8}
+ &  & 2042 & 400 & 39.2 & 39.5 y 39.3 & $-4.3$ y $-4.6$ & sí \\
+\cmidrule[0.25pt]{2-8}
+ &  & 4042 & 320 & 38.9 & 39.6 y 39.6 & $-3.9$ y $-4.0$ & sí \\
+\cmidrule[0.25pt]{2-8}
+ & IPPO con mensajes corregido & 42 (citado) & 200 & 42.5 & 43.1 y 43.1 & $+4.5$ y $+4.4$ & sí \\
+\cmidrule[0.25pt]{2-8}
+ &  & 2042 & 170 & 42.5 & --- & --- & sí \\
+\cmidrule[0.25pt]{2-8}
+ &  & 4042 & 180 & 42.4 & --- & --- & sí \\
+\cmidrule[0.25pt]{2-8}
+ & IPPO sin mensajes corregido & 42 & 100 & 43.9 & --- & --- & sí \\
+\cmidrule[0.25pt]{2-8}
+ &  & 2042 & 190 & 44.3 & --- & --- & sí \\
+\cmidrule[0.25pt]{2-8}
+ &  & 4042 (citado) & 30 & 44.2 & 45.3 y 45.2 & $+9.7$ y $+9.6$ & sí \\
 \midrule
-Alta & Modelo completo & 42 & 340 & 41.1 & 42.1 y 41.9 & $-20.7$ y $-20.7$ & sí \\
- &  & 2042 (citado) & 260 & 41.2 & 42.5 y 42.3 & $-19.9$ y $-19.9$ & sí \\
- &  & 4042 & 260 & 41.4 & 42.2 y 42.0 & $-20.5$ y $-20.5$ & sí \\
- & IPPO con mensajes corregido & 42 & 160 & 46.6 & 47.4 y 47.1 & $-10.6$ y $-10.8$ & no \\
- &  & 2042 & 160 & 45.4 & 46.4 y 46.1 & $-12.5$ y $-12.7$ & sí \\
- &  & 4042 (citado) & 190 & 45.6 & 46.7 y 46.5 & $-11.9$ y $-12.0$ & no \\
- & IPPO sin mensajes corregido & 42 & 160 & 47.0 & 48.2 y 47.7 & $-9.2$ y $-9.7$ & no \\
- &  & 2042 (citado) & 190 & 46.2 & 47.2 y 47.0 & $-11.0$ y $-11.1$ & no \\
- &  & 4042 & 120 & 45.5 & 46.5 y 46.6 & $-12.3$ y $-11.8$ & sí \\
+Alta & Modelo completo & 42 & 400 & 54.0 & 57.0 y 57.6 & $-6.1$ y $-4.8$ & sí \\
+\cmidrule[0.25pt]{2-8}
+ &  & 2042 & 160 & 53.0 & 54.1 y 54.1 & $-10.8$ y $-10.6$ & sí \\
+\cmidrule[0.25pt]{2-8}
+ &  & 4042 (citado) & 360 & 53.1 & 56.0 y 55.9 & $-7.7$ y $-7.6$ & sí \\
+\cmidrule[0.25pt]{2-8}
+ & IPPO con mensajes corregido & 42 (citado) & 200 & 63.7 & 67.7 y 67.5 & $+11.6$ y $+11.7$ & no \\
+\cmidrule[0.25pt]{2-8}
+ &  & 2042 & 190 & 61.6 & --- & --- & no \\
+\cmidrule[0.25pt]{2-8}
+ &  & 4042 & 120 & 69.8 & --- & --- & no \\
+\cmidrule[0.25pt]{2-8}
+ & IPPO sin mensajes corregido & 42 & 150 & 65.7 & --- & --- & no \\
+\cmidrule[0.25pt]{2-8}
+ &  & 2042 (citado) & 40 & 74.6 & 77.4 y 77.8 & $+27.4$ y $+28.6$ & sí \\
+\cmidrule[0.25pt]{2-8}
+ &  & 4042 & 50 & 77.2 & --- & --- & sí \\
 \bottomrule
 \end{tabular}

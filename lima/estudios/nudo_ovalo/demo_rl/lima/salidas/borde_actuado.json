@@ -1,0 +1,38 @@
+{
+ "ganador_anterior": {
+  "tipo": "retraso",
+  "detectorRange": 100,
+  "minTimeLoss": 3,
+  "esquema": "doble del fijo",
+  "retraso_total_10": 76.769,
+  "retraso_total_30": 76.025,
+  "maximos": [
+   60,
+   32,
+   60
+  ]
+ },
+ "variantes": [
+  {
+   "tipo": "retraso",
+   "detectorRange": 100,
+   "minTimeLoss": 5,
+   "esquema": "doble del fijo",
+   "retraso_total_10": 78.36
+  }
+ ],
+ "cambia": false,
+ "ganador": {
+  "tipo": "retraso",
+  "detectorRange": 100,
+  "minTimeLoss": 3,
+  "esquema": "doble del fijo",
+  "retraso_total_10": 76.769,
+  "retraso_total_30": 76.025,
+  "maximos": [
+   60,
+   32,
+   60
+  ]
+ }
+}

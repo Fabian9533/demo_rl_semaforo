@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Generado por armar_ovalo.py. No editar a mano. -->
+<connections>
+    <connection from="RN_S1" to="RN_NO" fromLane="0" toLane="0" contPos="0"/>
+    <connection from="RN_S1" to="RN_NO" fromLane="1" toLane="1" contPos="0"/>
+    <connection from="RN_S1" to="RN_NO" fromLane="2" toLane="2" contPos="0"/>
+    <connection from="RN_S1" to="RN_NE" fromLane="3" toLane="0" contPos="0"/>
+    <connection from="RN_S1" to="RN_NE" fromLane="4" toLane="1" contPos="0"/>
+    <connection from="RS_S1" to="RS_SE" fromLane="0" toLane="0" contPos="0"/>
+    <connection from="RS_S1" to="RS_SE" fromLane="1" toLane="1" contPos="0"/>
+    <connection from="RS_S1" to="RS_SO" fromLane="2" toLane="0" contPos="0"/>
+    <connection from="RS_S1" to="RS_SO" fromLane="3" toLane="1" contPos="0"/>
+    <connection from="B_S1" to="B_SO" fromLane="0" toLane="0" contPos="0"/>
+    <connection from="B_S1" to="B_SO" fromLane="1" toLane="1" contPos="0"/>
+    <connection from="B_S1" to="B_SO" fromLane="2" toLane="2" contPos="0"/>
+    <connection from="B_S1" to="B_ML" fromLane="2" toLane="0" contPos="0"/>
+    <connection from="J_S1" to="J_NE" fromLane="0" toLane="0" contPos="0"/>
+    <connection from="J_S1" to="J_NE" fromLane="1" toLane="1" contPos="0"/>
+    <connection from="J_S1" to="J_NE" fromLane="2" toLane="2" contPos="0"/>
+    <connection from="J_NE" to="S1_RN" fromLane="0" toLane="0" contPos="0" visibility="25"/>
+    <connection from="J_NE" to="NE_NO" fromLane="0" toLane="0" contPos="0" visibility="25"/>
+    <connection from="J_NE" to="NE_NO" fromLane="1" toLane="1" contPos="0" visibility="25"/>
+    <connection from="J_NE" to="NE_NO" fromLane="2" toLane="2" contPos="0" visibility="25"/>
+    <connection from="SE_NE" to="S1_RN" fromLane="0" toLane="0" contPos="0" visibility="25"/>
+    <connection from="SE_NE" to="S1_RN" fromLane="1" toLane="1" contPos="0" visibility="25"/>
+    <connection from="RN_NE" to="NE_MJ" fromLane="0" toLane="0" contPos="0" visibility="25"/>
+    <connection from="RN_NE" to="NE_MJ" fromLane="1" toLane="1" contPos="0" visibility="25"/>
+    <connection from="NE_NO" to="NO_ML" fromLane="0" toLane="0" contPos="0" visibility="25"/>
+    <connection from="NE_NO" to="NO_ML" fromLane="1" toLane="1" contPos="0" visibility="25"/>
+    <connection from="NE_NO" to="NO_SO" fromLane="2" toLane="2" contPos="0" visibility="25" speed="5.56"/>
+    <connection from="RN_NO" to="NO_ML" fromLane="0" toLane="0" contPos="0" visibility="25" speed="5.56"/>
+    <connection from="RN_NO" to="NO_SO" fromLane="0" toLane="0" contPos="0" visibility="25"/>
+    <connection from="RN_NO" to="NO_SO" fromLane="1" toLane="1" contPos="0" visibility="25"/>
+    <connection from="RN_NO" to="NO_SO" fromLane="2" toLane="2" contPos="0" visibility="25"/>
+    <connection from="NO_SO" to="S1_RS" fromLane="0" toLane="0" contPos="0" visibility="25"/>
+    <connection from="NO_SO" to="S1_RS" fromLane="1" toLane="1" contPos="0" visibility="25"/>
+    <connection from="NO_SO" to="S1_RS" fromLane="2" toLane="2" contPos="0" visibility="25"/>
+    <connection from="B_SO" to="S1_RS" fromLane="0" toLane="0" contPos="0" visibility="25" speed="5.56"/>
+    <connection from="B_SO" to="SO_SE" fromLane="0" toLane="0" contPos="0" visibility="25"/>
+    <connection from="B_SO" to="SO_SE" fromLane="1" toLane="1" contPos="0" visibility="25"/>
+    <connection from="B_SO" to="SO_SE" fromLane="2" toLane="2" contPos="0" visibility="25"/>
+    <connection from="RS_SO" to="SO_ML" fromLane="0" toLane="0" contPos="0" visibility="25"/>
+    <connection from="RS_SO" to="SO_ML" fromLane="1" toLane="1" contPos="0" visibility="25"/>
+    <connection from="SO_SE" to="SE_MJ" fromLane="0" toLane="0" contPos="0" visibility="25"/>
+    <connection from="SO_SE" to="SE_MJ" fromLane="1" toLane="1" contPos="0" visibility="25"/>
+    <connection from="SO_SE" to="SE_MJ" fromLane="2" toLane="2" contPos="0" visibility="25"/>
+    <connection from="SO_SE" to="SE_NE" fromLane="2" toLane="1" contPos="0" visibility="25" speed="5.56"/>
+    <connection from="RS_SE" to="SE_MJ" fromLane="0" toLane="0" contPos="0" visibility="25" speed="5.56"/>
+    <connection from="RS_SE" to="SE_NE" fromLane="0" toLane="0" contPos="0" visibility="25"/>
+    <connection from="RS_SE" to="SE_NE" fromLane="1" toLane="1" contPos="0" visibility="25"/>
+    <connection from="SE_MJ" to="S1_J" fromLane="0" toLane="0" contPos="0" visibility="25"/>
+    <connection from="SE_MJ" to="S1_J" fromLane="1" toLane="1" contPos="0" visibility="25"/>
+    <connection from="SE_MJ" to="S1_J" fromLane="2" toLane="2" contPos="0" visibility="25"/>
+    <connection from="NE_MJ" to="S1_J" fromLane="0" toLane="1" contPos="0" visibility="25"/>
+    <connection from="NE_MJ" to="S1_J" fromLane="1" toLane="2" contPos="0" visibility="25"/>
+    <connection from="NO_ML" to="S1_L" fromLane="0" toLane="0" contPos="0" visibility="25"/>
+    <connection from="NO_ML" to="S1_L" fromLane="1" toLane="1" contPos="0" visibility="25"/>
+    <connection from="SO_ML" to="S1_L" fromLane="0" toLane="0" contPos="0" visibility="25"/>
+    <connection from="SO_ML" to="S1_L" fromLane="1" toLane="1" contPos="0" visibility="25"/>
+    <connection from="B_ML" to="S1_L" fromLane="0" toLane="1" contPos="0" visibility="25"/>
+</connections>

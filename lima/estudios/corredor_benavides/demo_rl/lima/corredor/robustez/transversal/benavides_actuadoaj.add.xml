@@ -1,0 +1,57 @@
+<additional>
+    <!-- Actuado ajustado del corredor (estudio_corredor.py): hueco 1.5 s, detector 2.0 s, umbral de atasco -1, maximos 45/35, coordinado con el fijo y fin fijo -->
+    <tlLogic id="semaforo_C1" type="actuated" programID="actuado_ajustado" offset="32">
+        <param key="max-gap" value="1.5"/>
+        <param key="coordinated" value="true"/>
+        <param key="cycleTime" value="52"/>
+        <phase duration="29" minDur="10" maxDur="52" state="rGGGrrrrrGGG" earliestEnd="49" latestEnd="49"/>
+        <phase duration="3" state="ryyyrrrrryyy"/>
+        <phase duration="17" minDur="17" maxDur="35" state="GrrrGGGGGrrr" latestEnd="17"/>
+        <phase duration="3" state="yrrryyyyyrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C2" type="actuated" programID="actuado_ajustado" offset="6">
+        <param key="max-gap" value="1.5"/>
+        <param key="coordinated" value="true"/>
+        <param key="cycleTime" value="52"/>
+        <phase duration="28" minDur="10" maxDur="52" state="rrrrGGGrGGGG" earliestEnd="49" latestEnd="49"/>
+        <phase duration="3" state="rrrryyyryyyy"/>
+        <phase duration="18" minDur="18" maxDur="35" state="GGGGrrrGrrrr" latestEnd="18"/>
+        <phase duration="3" state="yyyyrrryrrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C3" type="actuated" programID="actuado_ajustado" offset="3">
+        <param key="max-gap" value="1.5"/>
+        <param key="coordinated" value="true"/>
+        <param key="cycleTime" value="52"/>
+        <phase duration="26" minDur="10" maxDur="52" state="rGGGGrrrrGGG" earliestEnd="49" latestEnd="49"/>
+        <phase duration="3" state="ryyyyrrrryyy"/>
+        <phase duration="20" minDur="20" maxDur="35" state="GrrrrGGGGrrr" latestEnd="20"/>
+        <phase duration="3" state="yrrrryyyyrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C4" type="actuated" programID="actuado_ajustado" offset="29">
+        <param key="max-gap" value="1.5"/>
+        <param key="coordinated" value="true"/>
+        <param key="cycleTime" value="52"/>
+        <phase duration="26" minDur="12" maxDur="52" state="rrrGGGGrrrGGG" earliestEnd="49" latestEnd="49"/>
+        <phase duration="3" state="rrryyyyrrryyy"/>
+        <phase duration="20" minDur="19" maxDur="35" state="GGGrrrrGGGrrr" latestEnd="20"/>
+        <phase duration="3" state="yyyrrrryyyrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C5" type="actuated" programID="actuado_ajustado" offset="30">
+        <param key="max-gap" value="1.5"/>
+        <param key="coordinated" value="true"/>
+        <param key="cycleTime" value="52"/>
+        <phase duration="28" minDur="12" maxDur="52" state="rrGGGrGG" earliestEnd="49" latestEnd="49"/>
+        <phase duration="3" state="rryyyryy"/>
+        <phase duration="18" minDur="18" maxDur="35" state="GGrrrGrr" latestEnd="18"/>
+        <phase duration="3" state="yyrrryrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C6" type="actuated" programID="actuado_ajustado" offset="31">
+        <param key="max-gap" value="1.5"/>
+        <param key="coordinated" value="true"/>
+        <param key="cycleTime" value="52"/>
+        <phase duration="28" minDur="12" maxDur="52" state="rrrGGGrrrGGG" earliestEnd="49" latestEnd="49"/>
+        <phase duration="3" state="rrryyyrrryyy"/>
+        <phase duration="18" minDur="17" maxDur="35" state="GGGrrrGGGrrr" latestEnd="18"/>
+        <phase duration="3" state="yyyrrryyyrrr"/>
+    </tlLogic>
+</additional>

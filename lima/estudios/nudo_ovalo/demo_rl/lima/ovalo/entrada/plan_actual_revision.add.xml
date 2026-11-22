@@ -1,0 +1,12 @@
+<additional>
+    <!-- Plan actual del nudo, medido en el sitio el 13.11.2026 en el Ovalo Vasco (programa_ovalo.py, interno=cede); mismas duraciones y parametros que entrada/publicada/lima.add.xml: Plan actual del nudo, medido en el sitio el 13.11.2026 (programa.py) -->
+    <tlLogic id="semaforo_S1" type="static" programID="fijo" offset="0">
+        <phase duration="37" state="GGGoGGooGGGGggoGGGggggrrrrrrGGGrGGGrrgggGGGGooGGGGggg"/>  <!-- Reducto de frente, los dos sentidos -->
+        <phase duration="3" state="GGGoGGooGGGGggoGGGggggrrrrrryyyryyyrrgggGGGGooGGGGggg"/>  <!-- transicion -->
+        <phase duration="15" state="GoogGoggooooGGgoooGGGGrrrrrrrrrGrrrGGGGGooooggooooGGG"/>  <!-- Giros a la izquierda de Reducto -->
+        <phase duration="3" state="GoogGoggooooGGgoooGGGGrrrrrrrrryrrryyGGGooooggooooGGG"/>  <!-- transicion -->
+        <phase duration="34" state="oooOooOOooooooOooooooorrrrrrrrrrrrrrroooooooOOooooooo"/>  <!-- todo en rojo -->
+        <phase duration="37" state="GGGoGGooGGGGogoGGGooooGGGGGGrrrrrrrrroooGGGGooGGGGoog"/>  <!-- 28 de Julio desde el puente y Balboa -->
+        <phase duration="3" state="GGGoGGooGGGGogoGGGooooyyyyyyrrrrrrrrroooGGGGooGGGGoog"/>  <!-- transicion -->
+    </tlLogic>
+</additional>

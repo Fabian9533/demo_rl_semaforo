@@ -1,0 +1,12 @@
+<additional>
+    <!-- Plan actual del nudo, medido en el sitio el 13.11.2026, en el Ovalo Vasco (programa_ovalo.py) -->
+    <tlLogic id="semaforo_S1" type="static" programID="fijo" offset="0">
+        <phase duration="37" state="GGGooGGoogGGGGggooGGGggggrrrrrrrGGGrrGGrrgggGGGGooGGGGggg"/>  <!-- Reducto de frente, los dos sentidos -->
+        <phase duration="3" state="GGGooGGoogGGGGggooGGGggggrrrrrrryyyrryyrrgggGGGGooGGGGggg"/>  <!-- transicion -->
+        <phase duration="15" state="GooggGoggoooooGGggoooGGGGrrrrrrrrrrGGrrGGGGGooooggooooGGG"/>  <!-- Giros a la izquierda de Reducto -->
+        <phase duration="3" state="GooggGoggoooooGGggoooGGGGrrrrrrrrrryyrryyGGGooooggooooGGG"/>  <!-- transicion -->
+        <phase duration="34" state="oooOOooOOoooooooOOooooooorrrrrrrrrrrrrrrroooooooOOooooooo"/>  <!-- todo en rojo -->
+        <phase duration="37" state="GGGooGGoogGGGGogooGGGooooGGGGGGGrrrrrrrrroooGGGGooGGGGoog"/>  <!-- 28 de Julio desde el puente y Balboa -->
+        <phase duration="3" state="GGGooGGoogGGGGogooGGGooooyyyyyyyrrrrrrrrroooGGGGooGGGGoog"/>  <!-- transicion -->
+    </tlLogic>
+</additional>

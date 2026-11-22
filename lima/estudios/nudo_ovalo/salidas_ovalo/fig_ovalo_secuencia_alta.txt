@@ -1,0 +1,47 @@
+Demanda alta, semilla 21001, segundos 1800 a 2160 del episodio
+Modelo de orden fijo: 65 verdes en la hora; pasos de un estado a otro: Reducto de frente -> Giros de Reducto 22, Giros de Reducto -> 28 de Julio y Balboa 21, 28 de Julio y Balboa -> Reducto de frente 21
+   verde de Reducto de frente: 22 veces, medio 45.5 s
+   verde de Giros de Reducto: 22 veces, medio 19.8 s
+   verde de 28 de Julio y Balboa: 21 veces, medio 56.8 s
+   completo  1784- 1802 ( 18 s) Giros de Reducto [cortado por la ventana]
+   completo  1802- 1805 (  3 s) ambar
+   completo  1805- 1839 ( 34 s) todo en rojo
+   completo  1839- 1897 ( 58 s) 28 de Julio y Balboa
+   completo  1897- 1900 (  3 s) ambar
+   completo  1900- 1956 ( 56 s) Reducto de frente
+   completo  1956- 1959 (  3 s) ambar
+   completo  1959- 1983 ( 24 s) Giros de Reducto
+   completo  1983- 1986 (  3 s) ambar
+   completo  1986- 2020 ( 34 s) todo en rojo
+   completo  2020- 2080 ( 60 s) 28 de Julio y Balboa
+   completo  2080- 2083 (  3 s) ambar
+   completo  2083- 2141 ( 58 s) Reducto de frente
+   completo  2141- 2144 (  3 s) ambar
+   completo  2144- 2164 ( 20 s) Giros de Reducto [cortado por la ventana]
+Modelo de orden libre: 103 verdes en la hora; pasos de un estado a otro: Reducto de frente -> Giros de Reducto 40, Reducto de frente -> 28 de Julio y Balboa 2 (fuera del orden del plan), Giros de Reducto -> Reducto de frente 20 (fuera del orden del plan), Giros de Reducto -> 28 de Julio y Balboa 19, 28 de Julio y Balboa -> Reducto de frente 21
+   verde de Reducto de frente: 42 veces, medio 23.1 s
+   verde de Giros de Reducto: 40 veces, medio 10.0 s
+   verde de 28 de Julio y Balboa: 21 veces, medio 54.8 s
+   libre     1779- 1813 ( 34 s) todo en rojo [cortado por la ventana]
+   libre     1813- 1865 ( 52 s) 28 de Julio y Balboa
+   libre     1865- 1868 (  3 s) ambar
+   libre     1868- 1878 ( 10 s) Reducto de frente
+   libre     1878- 1881 (  3 s) ambar
+   libre     1881- 1891 ( 10 s) Giros de Reducto
+   libre     1891- 1894 (  3 s) ambar
+   libre     1894- 1936 ( 42 s) Reducto de frente
+   libre     1936- 1939 (  3 s) ambar
+   libre     1939- 1949 ( 10 s) Giros de Reducto
+   libre     1949- 1952 (  3 s) ambar
+   libre     1952- 1986 ( 34 s) todo en rojo
+   libre     1986- 2044 ( 58 s) 28 de Julio y Balboa
+   libre     2044- 2047 (  3 s) ambar
+   libre     2047- 2057 ( 10 s) Reducto de frente
+   libre     2057- 2060 (  3 s) ambar
+   libre     2060- 2070 ( 10 s) Giros de Reducto
+   libre     2070- 2073 (  3 s) ambar
+   libre     2073- 2111 ( 38 s) Reducto de frente
+   libre     2111- 2114 (  3 s) ambar
+   libre     2114- 2124 ( 10 s) Giros de Reducto
+   libre     2124- 2127 (  3 s) ambar
+   libre     2127- 2161 ( 34 s) todo en rojo [cortado por la ventana]

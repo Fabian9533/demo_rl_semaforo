@@ -1,0 +1,113 @@
+Red del estudio del nudo en el Ovalo Vasco (lima/lima.net.xml = lima/ovalo/red/ovalo_estudio.net.xml)
+
+1. Lados del ovalo: de esquina a esquina (medidas de Fabian en Google Maps) y lugar libre para esperar (largo de carril entre los bordes de sus esquinas; autos de 5 m con 2.5 m entre ellos)
+   norte (28 de Julio hacia Larco)    NO-NE 18.44 m; libre  4.6 m; 3 carriles; caben 0 por carril
+   oeste (Reducto hacia el sur)       NO-SO 24.43 m; libre  5.3 m; 3 carriles; caben 1 por carril
+   sur (Balboa hacia el puente)       SO-SE 15.74 m; libre  5.6 m; 3 carriles; caben 1 por carril
+   este (Reducto hacia el norte)      NE-SE 19.92 m; libre  4.1 m; 2 carriles; caben 0 por carril
+   Antes de la primera esquina: 28 de Julio (J_NE) 13.4 m, Balboa (B_SO) 18.0 m
+   Ramales de giro: RN_NE 2 x 18.0 m, NE_MJ 2 x 9.9 m, RS_SO 2 x 21.4 m, SO_ML 2 x 16.4 m, B_ML 1 x 45.2 m
+
+2. Velocidad de los giros: red/ovalo_estudio.giros.txt (antes y despues, con su largo). Subidos a 5.56 m/s:
+   NO    NE_NO_2 -> NO_SO_2           l    :NO_2_0               1.14          1.14      2.89        5.56  <- subido
+   NO    RN_NO_0 -> NO_ML_0           r    :NO_3_0               1.67          1.67      3.03        5.56  <- subido
+   SE    RS_SE_0 -> SE_MJ_0           r    :SE_0_0               1.69          1.69      3.24        5.56  <- subido
+   SE    SO_SE_2 -> SE_NE_1           l    :SE_6_0               2.96          2.96      4.20        5.56  <- subido
+   SO    B_SO_0 -> S1_RS_0            r    :SO_2_0               1.57          1.57      3.14        5.56  <- subido
+   Tramos internos: 57; con la velocidad subida: 5; mas lentos que 5.56 m/s despues: 0
+
+3. Semaforo semaforo_S1: 57 enlaces en 10 nodos (4 lineas de parada de afuera, 4 esquinas y 2 uniones). Letras en las 7 fases del plan (verde, ambar y todo rojo) y 12 fases del programa del orden libre (lima/lima_libre.json).
+   G/g verde con o sin prioridad, y ambar, r rojo, O/o apagada con o sin prioridad
+   1 2 3 4 5 6 7  <- fases del plan: 1 Reducto de frente, los dos sentidos, 2 transicion, 3 Giros a la izquierda de Reducto, 4 transicion, 5 todo en rojo, 6 28 de Julio desde el puente y Balboa, 7 transicion
+   G G G G o G G   0 MJ   SE_MJ_0  -> S1_J_0   B>J, RS>J
+   G G o o o G G   1 MJ   SE_MJ_1  -> S1_J_1   B>J
+   G G o o o G G   2 MJ   SE_MJ_2  -> S1_J_2   B>J
+   o o g g O o o   3 MJ   NE_MJ_0  -> S1_J_1   RN>J
+   o o g g O o o   4 MJ   NE_MJ_1  -> S1_J_2   RN>J
+   G G G G o G G   5 ML   NO_ML_0  -> S1_L_0   J>L, RN>L
+   G G o o o G G   6 ML   NO_ML_1  -> S1_L_1   J>L
+   o o g g O o o   7 ML   SO_ML_0  -> S1_L_0   RS>L
+   o o g g O o o   8 ML   SO_ML_1  -> S1_L_1   RS>L
+   g g o o o g g   9 ML   B_ML_0   -> S1_L_1   B>L
+   G G o o o G G  10 NE   J_NE_0   -> S1_RN_0  J>RN
+   G G o o o G G  11 NE   J_NE_0   -> NE_NO_0  J>L
+   G G o o o G G  12 NE   J_NE_1   -> NE_NO_1  J>L
+   G G o o o G G  13 NE   J_NE_2   -> NE_NO_2  J>RS
+   g g G G o o o  14 NE   SE_NE_0  -> S1_RN_0  RS>RN
+   g g G G o g g  15 NE   SE_NE_1  -> S1_RN_1  B>RN, RS>RN
+   o o g g O o o  16 NE   RN_NE_0  -> NE_MJ_0  RN>J
+   o o g g O o o  17 NE   RN_NE_1  -> NE_MJ_1  RN>J
+   G G o o o G G  18 NO   NE_NO_0  -> NO_ML_0  J>L
+   G G o o o G G  19 NO   NE_NO_1  -> NO_ML_1  J>L
+   G G o o o G G  20 NO   NE_NO_2  -> NO_SO_2  J>RS
+   g g G G o o o  21 NO   RN_NO_0  -> NO_ML_0  RN>L
+   g g G G o o o  22 NO   RN_NO_0  -> NO_SO_0  RN>RS
+   g g G G o o o  23 NO   RN_NO_1  -> NO_SO_1  RN>RS
+   g g G G o o o  24 NO   RN_NO_2  -> NO_SO_2  RN>RS
+   r r r r r G y  25 P_B  B_S1_0   -> B_SO_0   B>J, B>RS
+   r r r r r G y  26 P_B  B_S1_1   -> B_SO_1   B>J
+   r r r r r G y  27 P_B  B_S1_2   -> B_SO_2   B>J, B>RN
+   r r r r r G y  28 P_B  B_S1_2   -> B_ML_0   B>L
+   r r r r r G y  29 P_J  J_S1_0   -> J_NE_0   J>L, J>RN
+   r r r r r G y  30 P_J  J_S1_1   -> J_NE_1   J>L
+   r r r r r G y  31 P_J  J_S1_2   -> J_NE_2   J>RS
+   G y r r r r r  32 P_RN RN_S1_0  -> RN_NO_0  RN>L, RN>RS
+   G y r r r r r  33 P_RN RN_S1_1  -> RN_NO_1  RN>RS
+   G y r r r r r  34 P_RN RN_S1_2  -> RN_NO_2  RN>RS
+   r r G y r r r  35 P_RN RN_S1_3  -> RN_NE_0  RN>J
+   r r G y r r r  36 P_RN RN_S1_4  -> RN_NE_1  RN>J
+   G y r r r r r  37 P_RS RS_S1_0  -> RS_SE_0  RS>J, RS>RN
+   G y r r r r r  38 P_RS RS_S1_1  -> RS_SE_1  RS>RN
+   r r G y r r r  39 P_RS RS_S1_2  -> RS_SO_0  RS>L
+   r r G y r r r  40 P_RS RS_S1_3  -> RS_SO_1  RS>L
+   g g G G o o o  41 SE   RS_SE_0  -> SE_MJ_0  RS>J
+   g g G G o o o  42 SE   RS_SE_0  -> SE_NE_0  RS>RN
+   g g G G o o o  43 SE   RS_SE_1  -> SE_NE_1  RS>RN
+   G G o o o G G  44 SE   SO_SE_0  -> SE_MJ_0  B>J
+   G G o o o G G  45 SE   SO_SE_1  -> SE_MJ_1  B>J
+   G G o o o G G  46 SE   SO_SE_2  -> SE_MJ_2  B>J
+   G G o o o G G  47 SE   SO_SE_2  -> SE_NE_1  B>RN
+   o o g g O o o  48 SO   RS_SO_0  -> SO_ML_0  RS>L
+   o o g g O o o  49 SO   RS_SO_1  -> SO_ML_1  RS>L
+   G G o o o G G  50 SO   B_SO_0   -> S1_RS_0  B>RS
+   G G o o o G G  51 SO   B_SO_0   -> SO_SE_0  B>J
+   G G o o o G G  52 SO   B_SO_1   -> SO_SE_1  B>J
+   G G o o o G G  53 SO   B_SO_2   -> SO_SE_2  B>J, B>RN
+   g g G G o o o  54 SO   NO_SO_0  -> S1_RS_0  RN>RS
+   g g G G o o o  55 SO   NO_SO_1  -> S1_RS_1  RN>RS
+   g g G G o g g  56 SO   NO_SO_2  -> S1_RS_2  J>RS, RN>RS
+
+4. Carriles de cada entrada (DISPOSICION, armar_ovalo.py) y su camino carril a carril en la red armada: 13 movimientos
+   RN_S1 (5 carriles; el 0 es el de la derecha)
+      RN_S1_0 -> Larco          RN_NO_0 -> NO_ML_0 -> S1_L_0
+      RN_S1_0 -> Reducto sur    RN_NO_0 -> NO_SO_0 -> S1_RS_0
+      RN_S1_1 -> Reducto sur    RN_NO_1 -> NO_SO_1 -> S1_RS_1
+      RN_S1_2 -> Reducto sur    RN_NO_2 -> NO_SO_2 -> S1_RS_2
+      RN_S1_3 -> el puente      RN_NE_0 -> NE_MJ_0 -> S1_J_1
+      RN_S1_4 -> el puente      RN_NE_1 -> NE_MJ_1 -> S1_J_2
+   RS_S1 (4 carriles; el 0 es el de la derecha)
+      RS_S1_0 -> el puente      RS_SE_0 -> SE_MJ_0 -> S1_J_0
+      RS_S1_0 -> Reducto norte  RS_SE_0 -> SE_NE_0 -> S1_RN_0
+      RS_S1_1 -> Reducto norte  RS_SE_1 -> SE_NE_1 -> S1_RN_1
+      RS_S1_2 -> Larco          RS_SO_0 -> SO_ML_0 -> S1_L_0
+      RS_S1_3 -> Larco          RS_SO_1 -> SO_ML_1 -> S1_L_1
+   B_S1 (3 carriles; el 0 es el de la derecha)
+      B_S1_0 -> el puente      B_SO_0 -> SO_SE_0 -> SE_MJ_0 -> S1_J_0
+      B_S1_0 -> Reducto sur    B_SO_0 -> S1_RS_0
+      B_S1_1 -> el puente      B_SO_1 -> SO_SE_1 -> SE_MJ_1 -> S1_J_1
+      B_S1_2 -> el puente      B_SO_2 -> SO_SE_2 -> SE_MJ_2 -> S1_J_2
+      B_S1_2 -> Larco          B_ML_0 -> S1_L_1
+      B_S1_2 -> Reducto norte  B_SO_2 -> SO_SE_2 -> SE_NE_1 -> S1_RN_1
+   J_S1 (3 carriles; el 0 es el de la derecha)
+      J_S1_0 -> Larco          J_NE_0 -> NE_NO_0 -> NO_ML_0 -> S1_L_0
+      J_S1_0 -> Reducto norte  J_NE_0 -> S1_RN_0
+      J_S1_1 -> Larco          J_NE_1 -> NE_NO_1 -> NO_ML_1 -> S1_L_1
+      J_S1_2 -> Reducto sur    J_NE_2 -> NE_NO_2 -> NO_SO_2 -> S1_RS_2
+
+5. Comprobaciones (aristas y carriles, carril a carril, detectores, demanda, .sumocfg, semaforo, giros, plan actual y programa libre):
+   lima (publicada): 52 flujos de 13 movimientos, 15 detectores E2, 57 enlaces, 23 aristas
+   alta: 52 flujos de 13 movimientos, 15 detectores E2, 57 enlaces, 23 aristas
+   robustez\reducto: 52 flujos de 13 movimientos, 15 detectores E2, 57 enlaces, 23 aristas
+   robustez\transversal: 52 flujos de 13 movimientos, 15 detectores E2, 57 enlaces, 23 aristas
+   demanda (veh/h): publicada 4271.00, alta 5125.20, robustez/reducto 4271.00, robustez/transversal 4271.00; carriles de la regla = carriles de la red: si
+   todas bien

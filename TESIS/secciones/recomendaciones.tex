@@ -8,15 +8,16 @@
 
 Cada recomendación sale de un hallazgo del
 Capítulo~\ref{cap:resultados}: las tres primeras, sobre cómo evaluar; la
-cuarta, sobre dónde usar el modelo, y las cuatro últimas, sobre lo que
+cuarta, sobre dónde usar el modelo, y las cinco últimas, sobre lo que
 conviene probar después.
 
 \noindent\textbf{1. Comparar siempre con un plan fijo ajustado con
 cuidado y con el actuado ajustado.} La referencia decide el tamaño de la
-mejora. En el primer estudio, el resumen en un número pasó de $-6.83$ a
-$-0.03$\,\% al ajustar mejor el fijo y contar la espera para entrar a la
-red, y la mejora en la red con rotonda resultó ser la de un ciclo mínimo
-que el ajuste no había probado (Sección~\ref{sec:robustez}). Con
+mejora. En el primer estudio, el resumen en un número es de $-6.83$\,\%
+frente al fijo ajustado y de $-0.03$\,\% con la medición más estricta,
+que usa el retraso total y un fijo ajustado desde el verde mínimo, y la
+mejora en la red con rotonda con demanda nominal es la del ciclo mínimo,
+que el barrido del fijo no incluía (Sección~\ref{sec:robustez}). Con
 llegadas regulares, el modelo tiene menos retraso que el actuado por
 defecto en los seis casos y más que el actuado ajustado en tres.
 Conviene ajustar el fijo al segundo y también el actuado, para cada caso
@@ -28,14 +29,14 @@ y cada tráfico, y evaluar siempre el ciclo mínimo.
 % veredicto3.md, "Referencias al lado" (FALLA en P1, P3 y P5; MEJORA en P2; EMPATA en P4 y P6)
 
 \noindent\textbf{2. Evaluar con llegadas aleatorias, con el retraso
-total y con dos tandas de semillas.} Con llegadas regulares, un fijo
-bien ajustado es casi óptimo y el modelo empata con él ($-0.4$\,\%); con
-llegadas aleatorias lo supera en tres de los seis casos. Un retraso que
-no cuenta la espera para entrar a la red favorece al control que deja la
-cola fuera de la red: en el corredor con demanda alta, una reducción del
-23.3\,\% se volvió un aumento del 1.6\,\% al contarla. Y dos tandas
-independientes permiten citar solo lo que se repite: aquí coincidieron
-en los 19 casos del segundo estudio y en los cuatro de Lima.
+total y con dos tandas de semillas.} Con llegadas regulares el modelo
+empata con un fijo bien ajustado ($-0.4$\,\%), y con llegadas
+aleatorias lo supera en tres de los seis casos. Un retraso que no cuenta la espera para entrar a la red
+favorece al control que deja la cola fuera de la red: en el corredor
+con demanda alta, la reducción del 23.3\,\% en retraso es un aumento
+del 1.6\,\% en retraso total. Dos tandas independientes permiten citar
+solo lo que se repite: aquí coinciden en los 19 casos del segundo
+estudio y en los cuatro de Lima.
 % fuente: plan3/salidas/veredicto3.md (llegadas regulares -0.4 % en las dos tandas; H5 pasa en 3 de 6; 19 casos con
 % el mismo veredicto en las dos tandas); Lima: secciones/tablas/resultado_final.tex y capitulo5.tex,
 % sec:resultado-casos (el mismo veredicto en las dos tandas en los cuatro casos); plan2/veredicto.csv (P2
@@ -47,11 +48,11 @@ simulación a otra.} En los dos estudios y en Lima, cada calle recibe
 siempre la misma parte de la demanda (Sección~\ref{sec:escenarios}): es
 la condición más favorable para el fijo, que se ajusta conociendo ese
 reparto. En el nudo de Lima, otro reparto del mismo total, sin volver a
-ajustar, sube el retraso del fijo ajustado al segundo de 58 a entre 77 y
-88~s por vehículo, y el del modelo queda entre 54 y 56
+ajustar, sube el retraso del fijo ajustado al segundo de 84 a entre 97 y
+159~s por vehículo, y el del modelo queda entre 68 y 91
 (Sección~\ref{sec:lima-nudo}).
-% fuente: secciones/tablas/lima_robustez.tex (lima/robustez/: fijo ajustado 57.82 con el reparto supuesto, 88.01 y
-% 76.59 con los otros dos; modelo 55.28, 56.26 y 53.66)
+% fuente: secciones/tablas/ovalo_robustez_fijo.tex (nudo_ovalo_estudio2/demo_rl/lima/robustez/: fijo ajustado 84.11 con
+% el reparto supuesto, tanda 1, y 97.21 y 158.79 con los otros dos; modelo completo 76.40, 68.06 y 91.13)
 Conviene sortear el reparto en cada simulación, con el mismo total,
 ajustar el fijo y el actuado al reparto promedio y entrenar el modelo
 con repartos distintos, empezando por P1, donde el modelo funciona, y
@@ -60,14 +61,16 @@ por P3 y P5, donde ningún control supera al fijo.
 % (ninguna de las otras referencias supera al fijo ajustado al segundo en P3, P4 y P5; Tabla tab:plan3-margen)
 
 \noindent\textbf{4. Usar el control aprendido donde reaccionar al
-tráfico da margen.} El modelo supera al fijo ajustado al segundo en el
-corredor y en la malla con demanda alta, entre un 16 y un 27\,\%, y ahí
-también al actuado ajustado; no lo supera en la red con rotonda ni en la
-malla con demanda nominal, y en el nudo de Lima, un solo cruce, el
-actuado ajustado tiene menos retraso que el modelo. Una prueba de bajo
+tráfico da margen.} El modelo supera al fijo ajustado al segundo y al
+actuado ajustado en el corredor y en la malla con demanda alta; en el
+nudo de Lima, con un solo controlador, iguala al actuado ajustado con la
+demanda publicada y no supera al fijo con la alta. Una prueba de bajo
 costo antes de entrenar es comparar el actuado ajustado con el fijo
-ajustado al segundo: donde el actuado no mejoró al fijo, el modelo
-tampoco (Tabla~\ref{tab:plan3-margen}), y basta un buen plan fijo. Con
+ajustado al segundo: en el segundo estudio, donde el actuado no mejoró
+al fijo, el modelo tampoco (Tabla~\ref{tab:plan3-margen}), y basta un
+buen plan fijo. La excepción es un corredor cuyos cruces se coordinan
+con mensajes: en Benavides, con la demanda alta, el actuado no mejora
+al fijo y el modelo sí, un 8\,\% (Sección~\ref{sec:donde-gana}). Con
 lo medido, el orden es reajustar primero los planes fijos, usar el
 actuado donde mejora al fijo y reservar el modelo para los corredores y
 las mallas con demanda alta donde, en simulación, supere también al
@@ -76,8 +79,12 @@ actuado ajustado. Conviene empezar donde ya haya detectores y enlaces
 % fuente: plan3/salidas/veredicto3_celdas.csv (P1 -16.3 y -17.1; P2 -19.8 y -20.2; P6 -25.7 y -26.9) y
 % veredicto3_comparaciones.csv (tanda 1, actuado ajustado frente al fijo ajustado al segundo: P1 -13.5, P2 -1.0 y P6
 % -16.0; en P3, P4 y P5 la mejor de las otras referencias iguala al fijo: tablas/plan3_margen.tex); nudo de Lima:
-% secciones/tablas/resultado_final.tex (+3.4 y +3.6, y +4.3 y +3.3 frente al actuado ajustado); el orden de uso
-% cerraba antes la Seccion sec:costo-escala del Cap. V (detectores y enlaces: Tabla tab:costo-calle)
+% secciones/tablas/resultado_final.tex (modelo completo: frente al actuado ajustado 0.0 y +0.1 con la publicada, sin
+% diferencia significativa; frente al fijo +2.5 y +3.2 con la alta; el actuado ajustado, +7.3 y +11.9 frente al fijo
+% con la alta: nudo_ovalo_estudio2/salidas_ovalo/veredicto_ovalo.md); corredor de Benavides con la alta:
+% corredor_estudio2/demo_rl/lima/corredor/alta/salidas/veredicto_vecinos_completo_s4042.md (modelo frente al fijo -7.71
+% y -7.59) y eval_t*_actuadoaj.csv frente a eval_t*_fijo.csv (+0.32 [-0.28, +0.89] y +0.02 [-0.51, +0.57]); el orden de
+% uso cerraba antes la Seccion sec:costo-escala del Cap. V (detectores y enlaces: Tabla tab:costo-calle)
 
 \noindent\textbf{5. Dar al agente una acción de desfase o un reloj de
 decisión más fino.} En la red con rotonda, el mejor plan fijo es el
@@ -85,7 +92,7 @@ ciclo mínimo con uno o dos semáforos corridos 1~s, y en P3 ese segundo
 equivale al 1.6\,\% de retraso que el modelo tiene de más
 (Sección~\ref{sec:donde-gana}). El modelo decide cada 5~s (el modelo
 completo, cada 2~s) y no puede producir ese desfase. Decidir cada 2~s no
-mejoró en ninguno de los tres casos probados: conviene probar primero
+mejora en ninguno de los tres casos probados: conviene probar primero
 una acción que fije el desfase con los vecinos y, después, decidir cada
 segundo.
 % fuente: anexo_h_segundo_estudio.tex, "Por que no gana en la red con rotonda ni en la malla con demanda nominal"
@@ -94,21 +101,21 @@ segundo.
 
 \noindent\textbf{6. Calibrar los casos de Lima con datos de tráfico.}
 Los dos casos de Lima usan la geometría real y un total de vehículos
-publicado, pero el reparto de esa demanda entre calles es un supuesto y,
-en el corredor, también lo son los semáforos de hoy
-(Sección~\ref{sec:caso-lima}). Conviene contar los vehículos por
-movimiento en la hora punta, medir los semáforos del corredor, incluir
-en el nudo los dos semáforos del puente, cuya cola bloquea a veces el
-paso por la Av.~Reducto, y comprobar la simulación con tiempos de viaje
-medidos.
-% fuente: anexo_d_osm.tex ("lo que el escenario no reproduce", del nudo y del corredor); el efecto del reparto, con
-% su fuente, pasa a la recomendacion 3
+publicado, pero el reparto de esa demanda entre calles es un supuesto y
+el corredor usa un plan típico (Sección~\ref{sec:caso-lima}). Conviene contar los vehículos por
+movimiento en la hora punta, empezando en el nudo por los dos giros que
+cruzan el otro flujo dentro del óvalo, medir los semáforos del
+corredor, incluir en el nudo los dos semáforos del puente, cuya cola
+bloquea a veces el paso por la Av.~Reducto, y comprobar la simulación
+con tiempos de viaje medidos.
+% fuente: anexo_d_osm.tex ("lo que el escenario no reproduce", del nudo y del corredor: los dos giros que cruzan el
+% otro flujo tienen demanda supuesta); el efecto del reparto, con su fuente, pasa a la recomendacion 3
 
 \noindent\textbf{7. Entrenar y evaluar con un canal de mensajes
 imperfecto.} Los modelos se entrenaron con mensajes instantáneos y sin
 pérdida. Con latencia o pérdida, en la fase exploratoria el modelo
-quedó entre un 1.7 y un 7.0\,\% por encima del actuado en el corredor
-(Anexo~C), porque no se había entrenado con mensajes atrasados. Como la
+queda entre un 1.7 y un 7.0\,\% por encima del actuado en el corredor
+(Anexo~C), porque no se entrenó con mensajes atrasados. Como la
 edad del mensaje ya está en la observación, conviene entrenar con
 latencia y pérdida aleatorias.
 % fuente: fase exploratoria, evaluacion_corredor_resumen.csv (brazos ippo_vecinos_L5p0, L5p30 y L10p0 frente al
@@ -120,12 +127,35 @@ El modelo observa los vehículos de todo el acceso, hasta unos 590~m en
 las entradas del corredor de Benavides y 1~km en el nudo, y ningún
 detector común da esa observación (Sección~\ref{sec:costo-escala}).
 Conviene evaluarlo con la observación recortada a una zona de 75 a
-200~m junto a la línea de parada, y sin mensajes. Hay indicios de que la
+200~m junto a la línea de parada. Hay indicios de que parte de la
 mejora se conservaría: con llegadas aleatorias, ver los vehículos
-cercanos es la pieza que mejora al modelo en más casos, y en Benavides,
-sin mensajes, el modelo sigue entre un 7.5 y un 18\,\% por debajo del
-fijo ajustado al segundo. Si se conserva, el modelo podría operar con
-los mismos detectores que el actuado y sin enlaces entre cruces.
+cercanos es la pieza que mejora al modelo en más casos. Los mensajes,
+en cambio, conviene mantenerlos en un corredor, porque en Benavides,
+sin ellos, el modelo pierde su ventaja con las dos demandas. Si la
+mejora se conserva, el modelo podría operar con los
+mismos detectores que el actuado, más un enlace entre cruces vecinos.
 % fuente: capitulo5.tex, sec:costo-escala y tab:piezas (ver los vehiculos cercanos: 3 de 6 casos); "Que aportan
-% los mensajes" (canal cortado frente al fijo: -7.39 y -7.62 con la demanda publicada, -17.79 y -17.78 con la alta);
-% actuado ajustado: lima/**/salidas/actuado_ajustado.json (zona de 100 a 200 m en tres de los cuatro casos de Lima)
+% los mensajes" (corredor_estudio2/demo_rl/lima/corredor/salidas/ y alta/salidas/: con el canal cortado, el modelo
+% completo queda +0.79 y +0.47 % frente al fijo con la demanda publicada y +0.80 y +0.32 % con la alta)
+
+\noindent\textbf{9. Si se prueba una variante que elige el orden, darle
+un costo por cada cambio de luz y un verde máximo acorde con la
+demanda.} En el nudo de Lima, la variante del modelo que elige el orden
+de los estados no ayudó, porque cambia de luz más veces de lo que
+conviene con esa demanda (Sección~\ref{sec:lima-nudo}). Como cada cambio
+pierde tiempo, con más demanda conviene cambiar menos
+\citep{Wang2022_SwitchingLoss}, y el verde máximo se fija según la
+demanda: el manual de la FHWA lo pone entre 1.25 y 1.5 veces el verde
+del plan fijo de menor retraso \citep[p.~5-11]{Koonce2008_TSTM}. En el
+nudo, con la demanda alta, ese plan da 77~s de verde, y el modelo y el
+actuado no pueden pasar de 60~s. Conviene que una variante que elige el
+orden pague en su recompensa un costo por cada cambio de luz, que su
+verde máximo siga esa regla y que se evalúe con las mismas reglas.
+% fuente: por que la variante no ayudo: capitulo5.tex, sec:lima-nudo, y anexo_d_osm.tex, "El nudo: la variante de orden
+% libre" (revision_orden_libre_2026-11-19/ANALISIS.md, secciones 2 y 3b, comprobacion aparte con semillas de prueba);
+% Wang2022_SwitchingLoss, p. 2 ("the phase switching frequency should decrease with the increase of the traffic
+% demand"; revision_orden_libre_2026-11-19/literatura.md, seccion (c)); FHWA 2008, Koonce2008_TSTM, p. 5-11 ("The
+% minimum-delay green interval durations are multiplied by a factor ranging from 1.25 to 1.50 to obtain an estimate of
+% the maximum green setting"; literatura.md, seccion 5; la edicion vigente es el NCHRP 812, que no se consulto);
+% nudo_ovalo_estudio2/salidas_ovalo/veredicto_ovalo.md (limite de la alta: fijo ajustado [60, 25, 77]; verde maximo del
+% modelo y del actuado, 60 s)

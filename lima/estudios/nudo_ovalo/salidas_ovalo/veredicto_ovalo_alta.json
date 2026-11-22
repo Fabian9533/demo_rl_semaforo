@@ -1,0 +1,314 @@
+{
+ "alta": {
+  "modelos": {
+   "libre": {
+    "base": 2042,
+    "val_elegido": {
+     "42": 185.951,
+     "2042": 189.221,
+     "4042": 202.954
+    },
+    "estabilizado": false,
+    "tendencia": 7.070626068502717,
+    "estabilidad": 1.5379417750933233,
+    "brazo": "libre_s2042"
+   },
+   "completo": {
+    "base": 4042,
+    "val_elegido": {
+     "42": 128.734,
+     "2042": 126.641,
+     "4042": 128.048
+    },
+    "estabilizado": true,
+    "tendencia": 2.2025671087186645,
+    "estabilidad": 3.694921807134889,
+    "brazo": "completo_s4042"
+   }
+  },
+  "tandas": {
+   "1": {
+    "libre": {
+     "actual": {
+      "n": 100,
+      "media": 206.9433,
+      "media_ref": 270.875,
+      "delta": -23.601919704660823,
+      "ic": [
+       -25.17036348871371,
+       -22.113303151641425
+      ],
+      "p": 3.896559845095909e-18
+     },
+     "fijo": {
+      "n": 100,
+      "media": 206.9433,
+      "media_ref": 133.4961,
+      "delta": 55.01823648780749,
+      "ic": [
+       51.810313039667776,
+       58.183211247674905
+      ],
+      "p": 3.896559845095909e-18
+     },
+     "actuadoaj": {
+      "n": 100,
+      "media": 206.9433,
+      "media_ref": 143.221,
+      "delta": 44.49228814210206,
+      "ic": [
+       41.652036607713924,
+       47.32973246175472
+      ],
+      "p": 3.896340037647931e-18
+     },
+     "completo": {
+      "n": 100,
+      "media": 206.9433,
+      "media_ref": 136.7712,
+      "delta": 51.306196041271846,
+      "ic": [
+       48.680956386735154,
+       54.04561466911128
+      ],
+      "p": 3.896559845095909e-18
+     }
+    },
+    "completo": {
+     "fijo": {
+      "n": 100,
+      "media": 136.7712,
+      "media_ref": 133.4961,
+      "delta": 2.4533300972837258,
+      "ic": [
+       0.521898726119573,
+       4.279638345034538
+      ],
+      "p": 0.014361613672828942
+     },
+     "actuadoaj": {
+      "n": 100,
+      "media": 136.7712,
+      "media_ref": 143.221,
+      "delta": -4.503389866011276,
+      "ic": [
+       -6.179301105300478,
+       -2.93016043387221
+      ],
+      "p": 4.091299353451349e-07
+     },
+     "actual": {
+      "n": 100,
+      "media": 136.7712,
+      "media_ref": 270.875,
+      "delta": -49.50763267189664,
+      "ic": [
+       -50.66242521467779,
+       -48.3953999397421
+      ],
+      "p": 3.896559845095909e-18
+     }
+    },
+    "entrenamientos": {
+     "libre": null,
+     "completo": null
+    },
+    "veredictos": {
+     "nudo": "FALLA",
+     "orden": "FALLA",
+     "fijo_m": "FALLA"
+    },
+    "sin_terminar": {
+     "actual": [
+      0,
+      0
+     ],
+     "fijo": [
+      0,
+      0
+     ],
+     "actuadoaj": [
+      0,
+      0
+     ],
+     "libre_s2042": [
+      0,
+      0
+     ],
+     "completo_s4042": [
+      0,
+      0
+     ]
+    }
+   },
+   "2": {
+    "libre": {
+     "actual": {
+      "n": 100,
+      "media": 197.818,
+      "media_ref": 265.5024,
+      "delta": -25.49295222943371,
+      "ic": [
+       -26.801250830343225,
+       -24.098620554883798
+      ],
+      "p": 3.896340037647931e-18
+     },
+     "fijo": {
+      "n": 100,
+      "media": 197.818,
+      "media_ref": 127.5343,
+      "delta": 55.10964501314549,
+      "ic": [
+       52.165083313176645,
+       57.98035347283954
+      ],
+      "p": 3.896340037647931e-18
+     },
+     "actuadoaj": {
+      "n": 100,
+      "media": 197.818,
+      "media_ref": 142.7026,
+      "delta": 38.62256188744986,
+      "ic": [
+       33.633566704458985,
+       43.16394281028341
+      ],
+      "p": 1.4289118421331805e-16
+     },
+     "actuado": {
+      "n": 100,
+      "media": 197.818,
+      "media_ref": 1150.5288,
+      "delta": -82.80634087560433,
+      "ic": [
+       -83.19077297306438,
+       -82.42482920911199
+      ],
+      "p": 3.896559845095909e-18
+     },
+     "minimo": {
+      "n": 100,
+      "media": 197.818,
+      "media_ref": 1747.7742,
+      "delta": -88.68171872545092,
+      "ic": [
+       -88.94104647879755,
+       -88.4183420039825
+      ],
+      "p": 3.896559845095909e-18
+     },
+     "completo": {
+      "n": 100,
+      "media": 197.818,
+      "media_ref": 131.6382,
+      "delta": 50.274008608443445,
+      "ic": [
+       47.63112393552592,
+       52.90627648329503
+      ],
+      "p": 3.896559845095909e-18
+     }
+    },
+    "completo": {
+     "fijo": {
+      "n": 100,
+      "media": 131.6382,
+      "media_ref": 127.5343,
+      "delta": 3.2178794253781215,
+      "ic": [
+       1.8222451370197632,
+       4.623356801640788
+      ],
+      "p": 7.149194220827567e-05
+     },
+     "actuadoaj": {
+      "n": 100,
+      "media": 131.6382,
+      "media_ref": 142.7026,
+      "delta": -7.753467701359315,
+      "ic": [
+       -10.699181852098107,
+       -5.151343433425017
+      ],
+      "p": 1.1289362438609386e-10
+     },
+     "actual": {
+      "n": 100,
+      "media": 131.6382,
+      "media_ref": 265.5024,
+      "delta": -50.41920525012203,
+      "ic": [
+       -51.398253456328455,
+       -49.408081762922606
+      ],
+      "p": 3.896559845095909e-18
+     }
+    },
+    "entrenamientos": {
+     "libre": null,
+     "completo": null
+    },
+    "veredictos": {
+     "nudo": "FALLA",
+     "orden": "FALLA",
+     "fijo_m": "FALLA"
+    },
+    "sin_terminar": {
+     "actual": [
+      0,
+      0
+     ],
+     "fijo": [
+      0,
+      0
+     ],
+     "actuadoaj": [
+      0,
+      0
+     ],
+     "actuado": [
+      759.15,
+      100
+     ],
+     "minimo": [
+      1208.76,
+      100
+     ],
+     "libre_s2042": [
+      0,
+      0
+     ],
+     "completo_s4042": [
+      0,
+      0
+     ]
+    }
+   }
+  },
+  "citable": {
+   "nudo": "FALLA",
+   "orden": "FALLA",
+   "fijo_m": "FALLA"
+  },
+  "lectura_orden": "no se puede decir (faltan entrenamientos sin evaluar)",
+  "limites": [
+   "el fijo ajustado [60, 25, 77] da verdes de mas de 60 s, que el actuado ajustado y los modelos no pueden dar (su verde maximo es 60 s)",
+   "el actuado ajustado (por retraso, alcance 100 m, retraso minimo 5 s, maximos 60) queda otra vez en el borde (['minTimeLoss']); no se sigue: se dice como limite"
+  ]
+ },
+ "robustez": {
+  "reducto": null,
+  "transversal": null
+ },
+ "codigo": {
+  "demo_rl/rl_ippo.py": "c61b706c7a96baa07ca9737564a5124c50bea7da911e5c77805dd62b784e4bc7",
+  "demo_rl/lima/estudio.py": "5f08daaa8c1005962b70ef10d2fabe28a924f76cdb9790c4b54aa8c70b67bbf4",
+  "demo_rl/lima/programa_ovalo.py": "5d5f03cca511b296762be38e930150a5bd2975c1ee88579a65985b02dd2d34c2",
+  "demo_rl/lima/ovalo/plan_ovalo.py": "0829e80c105cc1bd46f71bef4d84ccd55f89de9356449006039b48378e31c940",
+  "entrenar.sh": "a9a95791138ded3ba283199c382a5fdf16bd422cffb7c3251961e8c7ec8d311e",
+  "referencias.sh": "474472c8a4ee8c7fa88f7dbfb343e9b9f5448c60ffacb80e28be3da651ac8f79",
+  "evaluar_ovalo.py": "4621671b9d0a38df20baac5c1da31d104d79f164aa46c11e9caf07489aebc836",
+  "comprobar_fases.py": "6e10f4c157622ced5058e48fcf424bf641b5b6b917c2319ac88a6fa2cd8ea20e"
+ }
+}

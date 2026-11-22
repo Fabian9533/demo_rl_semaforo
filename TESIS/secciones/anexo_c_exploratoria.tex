@@ -8,17 +8,19 @@
 \renewcommand{\thefigure}{C.\arabic{figure}}
 \renewcommand{\theHfigure}{C.\arabic{figure}}
 
-Antes del primer estudio hubo una fase exploratoria: se probaron
-Q-learning y las primeras variantes de IPPO en escenarios pequeños, con
-un protocolo más corto. Sus cifras no son resultados de la tesis; los
-dos estudios las reemplazan (Capítulo~\ref{cap:resultados}). Este anexo
-resume lo que dejó: cuatro reglas del método y una prueba que ningún
-estudio repitió, la del canal de mensajes imperfecto. Las reglas son
-ajustar bien el plan fijo antes de comparar, comparar también con el
-actuado, usar redes neuronales e información de los vecinos, y elegir
-por validación la versión que se evalúa.
+La fase exploratoria es la etapa previa al primer estudio
+(Tabla~\ref{tab:diseno-pasos}): prueba Q-learning y las primeras
+variantes de IPPO en escenarios pequeños, con un protocolo más corto.
+Sus cifras no son resultados de la tesis; los dos estudios las
+reemplazan (Capítulo~\ref{cap:resultados}). Se documentan porque
+sostienen cuatro decisiones del método (comparar también con el
+actuado, usar redes neuronales e información de los vecinos, ajustar el
+plan fijo antes de comparar y evaluar la versión elegida por
+validación) e incluyen la única prueba con un canal de mensajes
+imperfecto. Cada apartado da qué se probó, qué mostró y qué decisión
+sostiene.
 
-\subsection*{Qué se probó}
+\subsection*{Configuración}
 
 Se usaron cinco escenarios de una hora: un cruce aislado de dos fases;
 un cruce con giro protegido, de cuatro fases (cruce2 en las tablas); el
@@ -26,49 +28,53 @@ corredor de dos cruces y la red de tres cruces con rotonda, que son las
 redes de P1 y P3, y el corredor con el doble de demanda (corredor\_alta
 en las tablas), que es el caso P2 (Tabla~\ref{tab:plan2-casos}).
 
-Se entrenaron dos tipos de modelo. El primero es Q-learning, con un
-agente por semáforo, la recompensa de colas
-(Ecuación~\ref{eq:recompensa}) y un solo entrenamiento de 40 a 120
-episodios. El segundo es IPPO (Sección~\ref{sec:u4}) sin mensajes, con
-mensajes y con penalización de \textit{spillback}, con la recompensa de
-retraso (Ecuación~\ref{eq:recompensa-u4}) y tres entrenamientos de 200
-episodios, de los que se cita el mediano. Dos variantes se entrenaron
-una sola vez: la de penalización en el corredor y en la red (en la red
-su término no se activa y repite la política de IPPO con mensajes), y
-la variante sin mensajes en corredor\_alta.
+Q-learning se entrenó con un agente por semáforo, la recompensa de
+colas (Ecuación~\ref{eq:recompensa}) y un solo entrenamiento de 40 a
+120 episodios; IPPO (Sección~\ref{sec:u4}), sin mensajes, con mensajes
+y con penalización de \textit{spillback}, con la recompensa de retraso
+(Ecuación~\ref{eq:recompensa-u4}) y tres entrenamientos de 200
+episodios, de los que se cita el mediano. Tienen un solo entrenamiento
+la variante con penalización en el corredor y en la red (en la red su
+término no se activa y repite la política de IPPO con mensajes
+entrenado con la misma semilla) y la variante sin mensajes en
+corredor\_alta.
 % fuente: episodios y decaimiento de epsilon, columna epsilon de resultados_<esc>.csv de demo_rl
 % (cruce, corredor y corredor_alta: 40 episodios con 0.9; cruce2: 120 con 0.96; red: 100 con 0.95);
 % entrenamientos de IPPO: tablas/corredor_fragilidad.tex, red_fragilidad.tex y corredor_alta_fragilidad.tex
 % (red: IPPO con penalizacion s42 = IPPO con mensajes s42, 21.68 +/- 0.13 s; corredor_alta: IPPO sin mensajes con
 % un solo entrenamiento)
 
-La evaluación usaba diez semillas (1001 a 1010) y la política del
-último episodio; la métrica es el retraso.
+La evaluación usó diez semillas (1001 a 1010) y la política del último
+episodio; la métrica es el retraso.
 % fuente: evaluacion_<esc>_resumen.csv de demo_rl (fase exploratoria, timeloss_prom, n = 10)
 
-\subsection*{Q-learning: un agente tabular por semáforo no basta}
+\subsection*{Q-learning: un agente tabular por semáforo}
 
-La Tabla~\ref{tab:resumen-escenarios} resume los cuatro escenarios con
-demanda nominal; en ella, RL es Q-learning, y las dos últimas columnas
-dan su cambio en espera detenida y en paradas por vehículo. Solo reduce
-el retraso frente al fijo en el cruce de dos fases ($-6.4$\,\%). Lo
-aumenta un 15.3\,\% en la red, un 16.7\,\% en el cruce con giro
-protegido y un 60.1\,\% en el corredor. El actuado tiene menos retraso
-que Q-learning en los cuatro: de ahí la regla de comparar siempre
-también con él.
+En la Tabla~\ref{tab:resumen-escenarios}, con los cuatro escenarios de
+demanda nominal, RL es Q-learning; sus dos últimas columnas dan el
+cambio en espera detenida y en paradas. Q-learning solo reduce el
+retraso frente al fijo en el cruce de dos fases
+($-6.4$\,\%); lo aumenta un 16.7\,\% en el cruce con giro protegido, un
+60.1\,\% en el corredor y un 15.3\,\% en la red. De estos resultados
+salen dos decisiones del método.
+
+\noindent\textbf{Comparar también con el actuado.} El actuado tiene
+menos retraso que Q-learning en los cuatro escenarios; por eso los
+estudios comparan cada modelo con el fijo y con el actuado.
 % fuente: evaluacion_<esc>_resumen.csv de demo_rl, brazo rl, timeloss_prom (delta_pct -6.4, 16.7, 60.1 y 15.3) y
 % brazo actuado (media 15.46, 23.21, 20.91 y 21.42 s frente a 21.72, 32.15, 33.86 y 25.12 s de Q-learning);
 % columnas Espera y Paradas: delta_pct de espera_prom y paradas_prom del brazo rl (tablas_tex.py)
 
 \input{secciones/tablas/resumen_escenarios}
 
-Dos resultados explican el cambio de modelo. El primero es de tamaño.
-Con cuatro fases el agente tiene 1024 estados posibles y, tras 120
-episodios, solo había visitado 390 (Figura~\ref{fig:cruce2-qtable}).
-En los estados poco visitados decide con valores apenas actualizados,
-y en cinco de sus 24 evaluaciones intermedias se bloquea. Más episodios
-no lo resuelven. Es el motivo para usar redes neuronales, que
-generalizan entre estados parecidos (Sección~\ref{sec:dqn}).
+\noindent\textbf{Usar redes neuronales e información de los vecinos.}
+Dos resultados sostienen esta decisión. El primero es de tamaño: con cuatro fases,
+el agente del cruce con giro protegido tiene 1024 estados posibles y en
+120 episodios visita 390 (Figura~\ref{fig:cruce2-qtable}). En los
+estados poco visitados decide con valores apenas actualizados, y en
+cinco de sus 24 evaluaciones intermedias se bloquea; más episodios no lo
+resuelven. Las redes neuronales, en cambio, generalizan entre estados
+parecidos (Sección~\ref{sec:dqn}).
 % fuente: resultados_cruce2.csv de demo_rl (columna estados_q: 390 desde el episodio 95; columna eval_timeloss:
 % 24 evaluaciones intermedias, 14 por encima de los 27.5 s del fijo; episodios 5, 10, 60, 75 y 120 con 209.5,
 % 48.7, 47.4, 68.6 y 179.0 s)
@@ -80,70 +86,67 @@ generalizan entre estados parecidos (Sección~\ref{sec:dqn}).
   \label{fig:cruce2-qtable}
 \end{figure}
 
-El segundo es de coordinación. En la red, tres agentes independientes
-quedan un 15.3\,\% por encima de un plan fijo con desfases entre
-cruces: cada agente reacciona a su cola y rompe la progresión de la
-avenida, el paso de un cruce al siguiente sin detenerse. De ahí la
-coordinación entre semáforos (Sección~\ref{sec:u4}).
+El segundo es de coordinación: en la red, frente a un plan fijo con
+desfases entre cruces, cada uno de los tres agentes independientes
+reacciona a su cola y rompe la progresión de la avenida, el paso de un
+cruce al siguiente sin detenerse. De ahí la coordinación entre
+semáforos (Sección~\ref{sec:u4}).
 % fuente: evaluacion_red_resumen.csv de demo_rl (brazo rl: delta_pct 15.3 [13.9, 16.8]); fijo de la red: 25 s de
 % avenida, 15 s de transversal y desfases 0, 23 y 0 s (21.78 s en 1001-1010); no es falta de entrenamiento:
 % resultados_red.csv (eval_timeloss de los episodios 5 a 100: entre 23.77 y 25.49 s, sin tendencia a bajar)
 
-El primer estudio lo confirmó. Con la recompensa de retraso, Q-learning
-falla frente al fijo ajustado en P1 y P3 ($+9.2$ y $+12.4$\,\%), y con
-la de colas da casi lo mismo ($+10.6$ y $+9.6$\,\%): el límite no está
-en la recompensa (Tabla~\ref{tab:plan2-resumen}).
+En el primer estudio, frente al fijo ajustado, Q-learning recibe FALLA
+en P1 y P3 con la recompensa de retraso ($+9.2$ y $+12.4$\,\%) y con la
+de colas ($+10.6$ y $+9.6$\,\%): el límite no está en la recompensa
+(Tabla~\ref{tab:plan2-resumen}).
 % fuente: plan2/veredicto.csv, filas ql y ql_colas de P1 y P3 (delta_fijo 9.2 y 12.4; 10.6 y 9.6; FALLA)
 
-\subsection*{Primeras variantes de IPPO}
+\subsection*{IPPO sin mensajes y con mensajes}
 
-IPPO con mensajes fue el primer control aprendido que superó al actuado
-en un escenario de varios cruces (Tabla~\ref{tab:resumen-u4}). En el
-corredor baja el retraso un 6.2\,\% frente al fijo ajustado y un
-5.1\,\% frente al actuado; IPPO sin mensajes empata con el fijo
-($+0.6$\,\%). En la red, IPPO con mensajes empata con el fijo
-($+0.5$\,\%) y tiene un 2.2\,\% más de retraso que el actuado.
+En el corredor, IPPO con mensajes tiene un 6.2\,\% menos de retraso que
+el fijo ajustado y un 5.1\,\% menos que el actuado; IPPO sin mensajes
+empata con el fijo ($+0.6$\,\%). En la red, IPPO con mensajes empata con
+el fijo ($+0.5$\,\%) y tiene un 2.2\,\% más de retraso que el actuado
+(Tabla~\ref{tab:resumen-u4}).
 % fuente: evaluacion_corredor_resumen.csv y evaluacion_red_resumen.csv de demo_rl, timeloss_prom (corredor:
 % ippo_vecinos_s42 delta_pct -6.2 [-8.0, -4.6] y delta_pct_act -5.1 [-6.4, -3.9]; ippo_local_s2042 0.6 [-1.1, 2.2];
 % red: ippo_vecinos_s4042 0.5 [-0.3, 1.3], p 0.414, y delta_pct_act 2.2 [0.8, 3.5], p 0.0195)
 
 \input{secciones/tablas/resumen_u4}
 
-Con el doble de demanda, las tres variantes quedan entre un 20 y un
-21\,\% por debajo del fijo y empatan con el actuado. La medición más
-estricta mostró que, en ese caso (P2), parte de la mejora es cola
-desplazada fuera de la red: con el retraso total, IPPO con mensajes queda un
-1.6\,\% por encima del fijo (Sección~\ref{sec:robustez}).
+Con el doble de demanda (P2), las tres variantes quedan entre un 20 y
+un 21\,\% por debajo del fijo y empatan con el actuado. Parte de esa
+mejora es cola desplazada fuera de la red: con el retraso total de la
+medición más estricta, IPPO con mensajes queda un 1.6\,\% por encima
+del fijo (Sección~\ref{sec:robustez}).
 % fuente: evaluacion_corredor_alta_resumen.csv de demo_rl, timeloss_prom (delta_pct -20.7, -21.2 y -20.2; frente al
 % actuado -0.8 [-3.0, 1.6], -1.3 [-3.8, 1.4] y -0.2 [-3.2, 3.5]); plan2/robustez_veredicto.csv (P2, ippo_vecinos:
 % delta_fijo +1.6, FALLA) y plan2/evaluacion_corredor_alta_resumen.csv (retraso_insercion_prom: fijo 239.57,
 % ippo_vecinos_s2042 282.02)
 
-En el cruce aislado se hizo la prueba de humo de IPPO sin mensajes
-(Anexo~I), con un solo entrenamiento de 60 episodios. Da 15.05~s/veh:
-un 35.1\,\% menos que el fijo, un 2.6\,\% menos que el actuado y un
-30.7\,\% menos que Q-learning, del que difiere a la vez en el estado,
-la recompensa y el algoritmo. El cruce aislado no es un caso de los
-estudios.
+En el cruce aislado, que no es un caso de los estudios, la prueba de
+humo de IPPO sin mensajes (Anexo~I), con un solo entrenamiento de 60
+episodios, tiene un 30.7\,\% menos de retraso que Q-learning, del que
+difiere a la vez en el estado, la recompensa y el algoritmo.
 % fuente: evaluacion_cruce_resumen.csv de demo_rl, brazo ippo_local, timeloss_prom (media 15.051 +/- 0.208;
 % delta_pct -35.1 [-36.0, -34.2]; delta_pct_act -2.6 [-3.2, -2.0]; delta_pct_rl -30.7 [-33.0, -28.2]; semilla
 % base 42, 60 episodios; fijo 23.19, actuado 15.46 y Q-learning 21.72 s/veh)
 
-\subsection*{Ajustar el fijo y elegir por validación}
+\subsection*{Referencia fija y versión evaluada}
 
-\noindent\textbf{El plan fijo se ajusta antes de comparar.} El plan
-fijo de esta fase se ajustó dos veces: primero con un solo verde, común
-a la avenida y a las transversales, y con tres de las semillas de
-evaluación; después, también con el reparto del verde entre las calles
-y con semillas aparte. En el corredor, el retraso del fijo bajó de 31.9
-a 21.2~s/veh, y en la red, de 22.2 a 21.8~s/veh; el del cruce con giro
-protegido quedó con el primer ajuste. Con la referencia cambió la
-lectura del modelo: frente al fijo de verdes iguales del corredor, IPPO
-con mensajes mostraba una mejora del 38\,\%; frente al fijo ajustado,
-del 6.2\,\%. La diferencia mide el reparto del verde de la referencia,
-no lo que hace el modelo. Desde entonces el fijo se ajusta por barrido
-en cada caso (Sección~\ref{sec:referencias-fijas}), y el segundo
-estudio lo ajusta al segundo.
+\noindent\textbf{El plan fijo se ajusta antes de comparar.} La fase usó
+dos planes fijos. El de verdes iguales da un mismo verde a la avenida y
+a las transversales y se ajustó con tres de las semillas de evaluación;
+el fijo ajustado reparte además el verde entre las calles y se ajustó
+con semillas aparte (2001 a 2003). Con ese reparto, el retraso del fijo
+baja de 31.9 a 21.2~s/veh en el corredor y de 22.2 a 21.8~s/veh en la
+red; el cruce con giro protegido conserva el de verdes iguales. En el
+corredor, IPPO con mensajes tiene un 38\,\% menos de retraso que el fijo
+de verdes iguales y un 6.2\,\% menos que el fijo ajustado: la diferencia
+mide el reparto del verde de la referencia, no lo que hace el modelo.
+Por eso los estudios ajustan el fijo por barrido en cada caso
+(Sección~\ref{sec:referencias-fijas}), y el segundo estudio lo ajusta
+al segundo.
 % fuente: barrido_corredor.csv y barrido_red.csv de demo_rl (segundo ajuste, semillas 2001-2003) y
 % barrido_<esc>_simetrico_1001-1003.csv (primer ajuste); fijos del primer ajuste en
 % corredor_fijo_simetrico_25_25_off25.add.xml (31.86 s en 1001-1010) y red_fijo_simetrico_20_20_off23.add.xml
@@ -151,31 +154,30 @@ estudio lo ajusta al segundo.
 % (IPPO con mensajes en el corredor: -6.2 % frente al fijo ajustado, -38 % frente al de verdes iguales)
 
 \noindent\textbf{La versión evaluada se elige por validación.} En la
-red, la política del último episodio de IPPO con mensajes empataba con
-el fijo. En el primer estudio, sobre la misma red (P3) y con la versión
-elegida por validación, queda un 8.8\,\% por debajo de él. Con la
-medición más estricta esa ventaja se reduce al 0.5\,\%
-(Sección~\ref{sec:robustez}), pero la regla quedó: los estudios validan
-durante el entrenamiento con semillas aparte y evalúan la versión con
-menos retraso en la validación (Sección~\ref{sec:protocolo}).
+red, la política del último episodio de IPPO con mensajes empata con el
+fijo. En el primer estudio, en la misma red (P3), la versión elegida por
+validación queda un 8.8\,\% por debajo del fijo ajustado, y un 0.5\,\%
+con la medición más estricta (Sección~\ref{sec:robustez}). Los dos
+estudios validan cada entrenamiento con semillas aparte y evalúan la
+versión con menos retraso en la validación
+(Sección~\ref{sec:protocolo}).
 % fuente: plan2/veredicto_congelado_0355.csv (P3, ippo_vecinos: delta_fijo -8.8 [-9.3, -8.2], FUNCIONA);
 % plan2/robustez_veredicto.csv (P3, ippo_vecinos: delta_fijo -0.5 [-0.8, -0.1], p 0.0128, MEJORA (= trivial))
 
 \subsection*{Canal de mensajes imperfecto}
 
-Con latencia o pérdida de mensajes, la ventaja de IPPO con mensajes
-desaparece. Es la única prueba de la tesis con un canal imperfecto: en
-todas las demás los mensajes llegan al instante y sin pérdida. La
-política, entrenada con el canal perfecto, se evaluó sin reentrenar con
+La prueba mide si la ventaja de IPPO con mensajes resiste un canal con
+latencia o pérdidas; en el resto de la tesis los mensajes llegan al
+instante y sin pérdida. La política mediana, entrenada con el canal
+perfecto, se evaluó sin reentrenar con
 tres canales peores: latencia de 5~s, latencia de 5~s con un 30\,\% de
 mensajes perdidos y latencia de 10~s (Tablas~\ref{tab:corredor-s1}
 y~\ref{tab:red-s1}).
 
-En el corredor, el retraso sube 1.4, 2.2 y 2.5~s/veh con esos tres
-canales. Con el primero el modelo empata con el fijo ajustado
-($+0.6$\,\%); con los otros dos queda un 4.2 y un 5.8\,\% por encima.
-Frente al actuado queda por encima en los tres: $+1.7$, $+5.4$ y
-$+7.0$\,\%.
+En el corredor, con el primer canal el modelo empata con el fijo
+ajustado ($+0.6$\,\%), y con los otros dos queda un 4.2 y un 5.8\,\%
+por encima. Frente al actuado queda por encima con los tres: $+1.7$,
+$+5.4$ y $+7.0$\,\%.
 % fuente: evaluacion_corredor_resumen.csv de demo_rl, brazos ippo_vecinos_L5p0, _L5p30 y _L10p0
 % (timeloss_prom: delta_pct 0.6 [-1.0, 2.2], 4.2 y 5.8; delta_pct_act 1.7, 5.4 y 7.0)
 
@@ -183,20 +185,20 @@ $+7.0$\,\%.
 
 En la red, con el segundo y el tercer canal el modelo tiene un 4.2 y un
 10.4\,\% más de retraso que el fijo ajustado. Con el primero el retraso
-baja, a 21.19~s/veh, pero con más cambios de fase y menos
-progresión.
+baja, pero con más cambios de fase y menos progresión.
 % fuente: evaluacion_red_resumen.csv de demo_rl, brazos ippo_vecinos_L5p30, _L10p0 y _L5p0 (timeloss_prom:
 % delta_pct 4.2 [3.0, 5.5] y 10.4 [9.3, 11.4]; L5p0: media 21.186, delta_pct -2.7 [-3.9, -1.5])
 
 \input{secciones/tablas/red_s1}
 
-En los dos escenarios el canal imperfecto deshace la progresión. La
+En los dos escenarios, el canal imperfecto deshace la progresión: la
 fracción de vehículos de paso (los que recorren la avenida de extremo a
 extremo) que se detiene a lo sumo una vez baja de 0.985 a entre 0.54 y
 0.80 en la red, y de 0.95 a entre 0.65 y 0.85 en el corredor. La
 lectura es que el modelo usa el mensaje del vecino tal como llega: la
 edad del mensaje está en su observación (Tabla~\ref{tab:obs-u4}), pero
-en el entrenamiento todos los mensajes llegaron sin demora.
+en el entrenamiento todos los mensajes llegaron sin demora. Con latencia
+o pérdida, la ventaja de IPPO con mensajes desaparece.
 % fuente: tablas/red_s1.tex y tablas/corredor_s1.tex, columna "Paso con <= 1 parada" (red: 0.985, 0.795, 0.705 y
 % 0.542; corredor: 0.952, 0.853, 0.774 y 0.646); vehiculos de paso: los que recorren la avenida de extremo a
 % extremo (capitulo3.tex, sec:u3); con el fijo ajustado, el actuado y Q-learning la fraccion del corredor es 0.91,

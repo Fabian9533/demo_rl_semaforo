@@ -1,0 +1,6 @@
+netconvert --no-turnarounds --junctions.corner-detail 5 --tls.default-type static --junctions.endpoint-shape true --offset.disable-normalization true --offset.x 45.81 --offset.y 386.87 --node-files C:\Users\GAMER\Documents\demo_rl_semaforo\nudo_ovalo_estudio2\demo_rl\lima\ovalo\red\ovalo_estudio.nod.xml --edge-files C:\Users\GAMER\Documents\demo_rl_semaforo\nudo_ovalo_estudio2\demo_rl\lima\ovalo\red\ovalo_estudio.edg.xml --connection-files C:\Users\GAMER\Documents\demo_rl_semaforo\nudo_ovalo_estudio2\demo_rl\lima\ovalo\red\ovalo_estudio.con.xml --output-file C:\Users\GAMER\Documents\demo_rl_semaforo\nudo_ovalo_estudio2\demo_rl\lima\ovalo\red\ovalo_estudio.net.xml
+
+Success.
+
+armar_ovalo: 5 tramos internos llevados a 5.56 m/s (ovalo_estudio.giros.txt)
+armar_ovalo.ajustar_matriz: 74 cesiones agregadas a la matriz de las esquinas (0 las pide solo el orden libre)

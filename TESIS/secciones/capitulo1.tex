@@ -1,16 +1,16 @@
 \chapter{ESTADO DEL ARTE Y REVISIÓN CRÍTICA DE LA LITERATURA}
 \label{cap:estado-arte}
 
+Este capítulo sintetiza tres trabajos directamente relevantes para esta tesis (Uniandes 2023, Trinity 2022 y UAQ 2024), discute sus aportes, sus limitaciones y su pertinencia para Lima Metropolitana, y cierra con las decisiones de diseño que se derivan de ellos. De cada trabajo se dan su objetivo, sus métodos, sus métricas, sus resultados, sus limitaciones y lo que enseña a esta tesis. La comparación de los resultados de la tesis con un conjunto más amplio de obras está en la Sección~\ref{sec:comparacion-literatura} y en el Anexo~E.
+
 \section{Panorama general}
 
 El control adaptativo de semáforos con Aprendizaje por Refuerzo (RL) se ha consolidado como una alternativa a la semaforización fija y actuada, porque permite políticas que se adaptan en tiempo real a la variación de los flujos.
 
 La literatura estudia dos configuraciones. En la de agente único (\textit{single-agent}), un agente controla una sola intersección. En la multiagente, varios agentes, uno por intersección, actúan sobre la misma red. En ambas, el impacto se evalúa con métricas como el retraso promedio, las colas, el \textit{throughput} y las emisiones.
 
-En la configuración multiagente, cada agente puede aprender de forma independiente, solo con su propia observación, o apoyarse durante el entrenamiento en la información de los demás. El trabajo que presenta MAPPO (\textit{Multi-Agent PPO}) en juegos multiagente cooperativos \citep{Yu2021_MAPPO} lo compara con IPPO (\textit{Independent PPO}), en el que cada agente aplica PPO (\textit{Proximal Policy Optimization}) de forma independiente. MAPPO añade un crítico centralizado que, durante el entrenamiento, accede a la información de todos los agentes. Ambos algoritmos se describen en el Capítulo~\ref{cap:teoria} y son la base del módulo de coordinación de esta tesis.
+En la configuración multiagente, cada agente puede aprender de forma independiente, solo con su propia observación, como en IPPO (\textit{Independent PPO}), que aplica PPO (\textit{Proximal Policy Optimization}) en cada agente, o apoyarse durante el entrenamiento en la información de todos, como MAPPO (\textit{Multi-Agent PPO}), que añade un crítico centralizado; el trabajo que presenta MAPPO compara los dos en juegos multiagente cooperativos \citep{Yu2021_MAPPO}. Ambos algoritmos se describen en la Sección~\ref{sec:marl} y son la base del módulo de coordinación de esta tesis.
 % TODO(reestructura): el estado del arte no incluye trabajos de RL multiagente aplicados a semáforos (p. ej. CoLight, PressLight, MPLight o el banco de pruebas RESCO), que serían la comparación natural del módulo U4; requieren entradas nuevas en referencias.bib y leer las fuentes.
-
-Este capítulo sintetiza tres trabajos directamente relevantes para esta tesis (Uniandes 2023, Trinity 2022 y UAQ 2024), discute sus aportes, sus limitaciones y su pertinencia para Lima Metropolitana, y cierra con las decisiones de diseño que se derivan de ellos.
 
 \section{Trabajos estrechamente relacionados}
 \label{sec:relacionados}
@@ -19,13 +19,13 @@ Este capítulo sintetiza tres trabajos directamente relevantes para esta tesis (
 
 \noindent\textbf{Objetivo y configuración.} Estudia el desempeño de algoritmos de RL (Q-learning, SARSA, DQN y PPO) para reducir los tiempos de espera frente a un control de tiempo fijo, en un escenario simulado.
 
-\noindent\textbf{Métodos.} Implementa algoritmos tabulares (Q-learning y SARSA), con exploración $\varepsilon$-greedy, y algoritmos de aprendizaje por refuerzo profundo o \textit{Deep RL}: DQN (\textit{Deep Q-Network}) y PPO, este último con su objetivo recortado. La exploración $\varepsilon$-greedy y el objetivo recortado se definen en el Capítulo~\ref{cap:teoria}. La referencia de comparación es un control de tiempo fijo.
+\noindent\textbf{Métodos.} Implementa algoritmos tabulares (Q-learning y SARSA), con exploración $\varepsilon$-greedy, y algoritmos de aprendizaje por refuerzo profundo o \textit{Deep RL}: DQN (\textit{Deep Q-Network}) y PPO, este último con su objetivo recortado. La exploración $\varepsilon$-greedy y el objetivo recortado se definen en las Secciones~\ref{sec:rl} y~\ref{sec:ppo}.
 
 \noindent\textbf{Métricas.} Eficiencia relativa frente al tiempo fijo (reducción del tiempo de espera), número de vehículos en el sistema y estabilidad de la política.
 
 \noindent\textbf{Resultados.} Reporta eficiencias de 35.79\,\% (Q-learning), 51.63\,\% (SARSA), 63.40\,\% (PPO) y 63.49\,\% (DQN) frente al control fijo. DQN y PPO muestran mejor adaptación y menor tiempo de espera, con DQN muy ligeramente superior en el caso analizado.
 
-Esas eficiencias miden la reducción del \emph{tiempo de espera}, no la del retraso. La distinción importa al comparar con esta tesis, que fija el retraso como métrica primaria: las dos magnitudes no varían en la misma proporción (Capítulo~\ref{cap:resultados}).
+Esas eficiencias miden la reducción del \emph{tiempo de espera}, no la del retraso. La distinción importa al comparar con esta tesis, que fija el retraso como métrica primaria: las dos magnitudes no varían en la misma proporción (Sección~\ref{sec:comparacion-literatura} y Anexo~E).
 
 \noindent\textbf{Limitaciones.} Demanda y geometría sintéticas; no integra datos reales de conteos ni matrices origen--destino (OD), ni perturbaciones estocásticas complejas; no reporta intervalos de confianza ni pruebas de significancia.
 
@@ -64,16 +64,14 @@ Esas eficiencias miden la reducción del \emph{tiempo de espera}, no la del retr
 
 De la revisión se desprenden cinco vacíos. Para cada uno se indica qué hace esta tesis y qué queda abierto.
 
-\noindent\textbf{Modelado de la realidad.} Uniandes y Trinity validan con escenarios simulados; UAQ sí usa datos reales, pero sin RL. Esta tesis prueba el método en seis casos sintéticos (P1 a P6), con redes de dos a nueve semáforos, y en dos lugares de Miraflores con la geometría de OpenStreetMap; en el nudo, con su semáforo medido en el sitio (Sección~\ref{sec:caso-lima}). La demanda de Lima sale de volúmenes publicados, no de aforos propios, y no se calibró con datos de tráfico. El vacío de RL calibrado con datos reales queda abierto.
+\noindent\textbf{Modelado de la realidad.} Uniandes y Trinity validan con escenarios simulados; UAQ sí usa datos reales, pero sin RL. Esta tesis prueba el método en seis casos sintéticos (P1 a P6), con redes de dos a nueve semáforos, y en dos lugares de Miraflores con la geometría de OpenStreetMap; en el nudo, con su semáforo medido en el sitio (Sección~\ref{sec:caso-lima}; construcción en el Anexo~D). La demanda de Lima sale de volúmenes publicados, no de aforos propios, y no se calibró con datos de tráfico. El vacío de RL calibrado con datos reales queda abierto; el paso siguiente, calibrar esos casos con datos de tráfico, está en las Recomendaciones.
 % fuente: capitulo5.tex, sec:caso-lima; anexo_d_osm.tex; recomendaciones.tex (recomendacion 6); casos sinteticos:
 % capitulo3.tex, sec:escenarios
 
 \noindent\textbf{Comparación algorítmica.} Trinity muestra ventajas de PPO y A2C; Uniandes añade DQN con buen rendimiento. Esta tesis implementa dos algoritmos tabulares, Q-learning y SARSA, y tres con aproximación de funciones: PPO en su versión multiagente independiente (IPPO), un Double DQN con pesos compartidos entre semáforos y MAPPO, todos descritos en el Capítulo~\ref{cap:teoria}. A2C no se implementó.
 % TODO(reestructura): justificar por qué no se implementó A2C, que Trinity recomienda junto a PPO; el documento no da la razón.
 
-IPPO tiene tres variantes: IPPO sin mensajes; IPPO con mensajes entre semáforos vecinos; e IPPO con penalización de \textit{spillback}, que a IPPO con mensajes le suma en la recompensa un término que penaliza el \textit{spillback}, la cola que desborda el enlace y bloquea a la intersección vecina. MAPPO tiene la misma red del actor y la misma observación que IPPO con mensajes, pero entrena su propia política con un crítico centralizado; su ejecución sigue descentralizada.
-
-El diseño separa el efecto del algoritmo del de la información y la recompensa. IPPO con mensajes, DQN y MAPPO usan la misma observación, con mensajes entre vecinos. Todos los aprendices se entrenan con la misma recompensa de retraso, salvo dos excepciones: IPPO con penalización de \textit{spillback}, que le suma esa penalización, y la ablación Q-learning (colas), el mismo Q-learning entrenado con la recompensa de colas, que mide cuánto del resultado tabular se debe a la recompensa (Tabla~\ref{tab:plan2-modelos}).
+El diseño separa el efecto del algoritmo del de la información y la recompensa: cada modelo comparado difiere de otro en un solo elemento (Sección~\ref{sec:modelos} y Tabla~\ref{tab:plan2-modelos}). IPPO con mensajes, DQN y MAPPO usan la misma observación, con mensajes entre vecinos, y todos los aprendices se entrenan con la misma recompensa de retraso, salvo IPPO con penalización de \textit{spillback} y la ablación Q-learning (colas), que la modifican para medir su efecto. Las tres variantes de IPPO (sin mensajes, con mensajes y con penalización de \textit{spillback}) se definen en la Sección~\ref{sec:u4}.
 % fuente: plan2/ESPEC.md, seccion 2 (tabla de modelos y recompensa de entrenamiento); docstrings de rl_dqn.py y rl_mappo.py
 
 \noindent\textbf{Controles de referencia.} Los tres trabajos miden únicamente frente a control de tiempo fijo (Trinity añade un agente aleatorio). Ninguno compara contra la semaforización \textit{actuada}, que es el control adaptativo estándar y está disponible de fábrica en SUMO \citep{SUMO_TLS_Actuated}. Esta tesis la incorpora como segundo control de referencia, con las mismas restricciones de verde que los aprendices (de 10 a 60~s). El tiempo fijo, además, se ajusta por barrido en cada caso (fijo ajustado), porque un programa sin ajustar sobrestima cualquier mejora (Sección~\ref{sec:teoria-control}; el ejemplo de la fase exploratoria está en el Anexo~C).
@@ -90,14 +88,10 @@ La omisión no es menor: según el caso, la referencia más exigente es el actua
 % tabla del actuado: P5 +21.8 frente al fijo, FALLA; fijo de P5 con desfases en ajedrez (0 y 23 s, capitulo4.tex, tab:plan2-fijo): conclusion 3 de
 % conclusiones.tex (plan2/barrido_malla3.csv)
 
-\noindent\textbf{Rigor experimental.} Falta análisis de significancia y de sensibilidad. Esta tesis separa las semillas de cada etapa. Cada aprendiz se entrena con tres semillas base; la política final de cada entrenamiento se elige con dos semillas de validación propias (999 y 1999), y la evaluación final usa treinta semillas (1001 a 1030), disjuntas de las anteriores y comunes a todos los controles. La sensibilidad al entrenamiento se mide evaluando las tres semillas base de cada aprendiz, no solo la que lo representa en cada caso. La sensibilidad a la medición se trata con una medición más estricta, que repite la comparación con el retraso total y otro fijo de referencia (Sección~\ref{sec:robustez}), y con un segundo estudio, de reglas publicadas antes de entrenar y evaluación a ciegas, que usa llegadas aleatorias y dos tandas independientes de semillas (Sección~\ref{sec:diseno-segundo}).
-
-Frente al fijo y al actuado se reporta el cambio porcentual del retraso con su intervalo de confianza al 95\,\% por \textit{bootstrap} pareado por semilla (10\,000 remuestreos) y el valor $p$ de la prueba de Wilcoxon pareada. Una regla de veredicto fijada de antemano resume el resultado de cada modelo en cada caso (Sección~\ref{sec:plan2}).
+\noindent\textbf{Rigor experimental.} Falta análisis de significancia y de sensibilidad. Esta tesis separa las semillas de ajuste, entrenamiento, validación y evaluación, y evalúa todos los controles con las mismas semillas (Tabla~\ref{tab:plan2-semillas}). La sensibilidad al entrenamiento se mide evaluando todos los entrenamientos de cada aprendiz, no solo el que lo representa en cada caso. La sensibilidad a la medición se trata con una medición más estricta, que repite la comparación con el retraso total y otro fijo de referencia (Sección~\ref{sec:robustez}), y con un segundo estudio, de reglas publicadas antes de entrenar y evaluación a ciegas, que usa llegadas aleatorias y dos tandas independientes de semillas (Sección~\ref{sec:diseno-segundo}). Frente al fijo y al actuado se reporta el cambio porcentual del retraso con su intervalo de confianza al 95\,\% por \textit{bootstrap} pareado por semilla y el valor $p$ de la prueba de Wilcoxon pareada (Sección~\ref{sec:estadistica}), y una regla de veredicto fijada de antemano resume el resultado de cada modelo en cada caso (Sección~\ref{sec:veredicto}).
 % fuente: plan2/ESPEC.md, secciones 3, 6 y 7; consolidar.py (delta_ic95 y p_wilcoxon)
 
-\noindent\textbf{Transferencia a Lima.} Las restricciones operativas de un cruce real ya forman parte del método en los seis casos: ámbar de 3~s en todos los escenarios, verde de 10 a 60~s para los aprendices y el actuado, un agente por semáforo y, en U4, mensajes entre semáforos vecinos.
-
-La transferencia se probó en dos lugares de Miraflores: el nudo de la Av.\ Reducto con la Av.\ 28 de Julio, con su semáforo medido en el sitio, y un corredor de seis cruces en la Av.\ Benavides (Sección~\ref{sec:caso-lima}). La forma de las calles sale de OpenStreetMap y la demanda, de volúmenes publicados, no de aforos propios. Cómo se construyó cada escenario está en el Anexo~D, y el paso siguiente, calibrarlos con datos de tráfico, en las Recomendaciones.
+\noindent\textbf{Transferencia a Lima.} Las restricciones operativas de un cruce real ya forman parte del método en los seis casos: ámbar de 3~s en todos los escenarios, verde de 10 a 60~s para los aprendices y el actuado, un agente por semáforo y, en U4, mensajes entre semáforos vecinos. Con esas mismas restricciones, la transferencia se prueba en los dos casos de Lima: el nudo de la Av.~Reducto con la Av.~28 de Julio y un corredor de seis cruces de la Av.~Benavides (Sección~\ref{sec:caso-lima}).
 % fuente: capitulo5.tex, sec:caso-lima; anexo_d_osm.tex; recomendaciones.tex (recomendacion 6); ambar de 3 s y
 % verde de 10 a 60 s: Seccion sec:escenarios y Tabla tab:plan2-modelos (Capitulo III)
 
@@ -111,37 +105,39 @@ La Tabla~\ref{tab:relacionados} resume los tres trabajos y los contrasta con est
 \footnotesize
 \setlength{\tabcolsep}{4pt}
 \renewcommand{\arraystretch}{1.2}
-\begin{tabularx}{\textwidth}{@{} l l c l X X @{}}
+\begin{tabularx}{\textwidth}{@{} >{\raggedright\arraybackslash}p{2.0cm} >{\raggedright\arraybackslash}p{1.9cm} l >{\raggedright\arraybackslash}p{1.85cm} >{\raggedright\arraybackslash}p{2.4cm} >{\raggedright\arraybackslash}X @{}}
 \toprule
 \textbf{Trabajo} & \textbf{Datos} & \textbf{Simulador} & \textbf{Referencia} & \textbf{Algoritmos} & \textbf{Resultados clave} \\
 \midrule
 % TODO(reestructura): verificar simulador en la fuente (Chavez2023); el texto del capítulo solo dice "escenario simulado".
-\makecell[l]{Uniandes (2023)\\ \citep{Chavez2023}}
+Uniandes (2023) \citep{Chavez2023}
   & Sintéticos
   & SUMO
   & Fijo
   & Q-learning, SARSA, DQN, PPO
   & Reducción del tiempo de espera frente al fijo: Q-learning 35.79\,\%, SARSA 51.63\,\%, PPO 63.40\,\%, DQN 63.49\,\% \\
-\makecell[l]{Trinity (2022)\\ \citep{Chakrabarti2022}}
+\specialrule{0.25pt}{1.5pt}{1.5pt}
+Trinity (2022) \citep{Chakrabarti2022}
   & Sintéticos
   & SUMO
-  & \makecell[l]{Fijo,\\aleatorio}
+  & Fijo, aleatorio
   & DQN, A2C, PPO
   & Tiempo de espera, de mejor a peor: PPO, A2C, fijo y aleatorio, DQN \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 % TODO(reestructura): verificar simulador en la fuente (UAQ2024); el texto del capítulo solo dice "microsimulador".
-\makecell[l]{UAQ (2024)\\ \citep{UAQ2024}}
-  & \makecell[l]{Reales (7\\intersecciones)}
+UAQ (2024) \citep{UAQ2024}
+  & Reales (7 intersecciones)
   & SUMO
   & Fijo
   & AR, Kalman, RNN y optimización de ciclos
   & $R^2 \approx 0.95$ (horizontes corto y medio); tiempo de viaje hasta 36.34\,\% menor \\
 \midrule
 Esta tesis
-  & \makecell[l]{Sintéticos (P1 a P6)\\y dos casos de Lima}
+  & Sintéticos (P1 a P6) y dos casos de Lima
   & SUMO
-  & \makecell[l]{Fijo ajustado,\\actuado}
+  & Fijo ajustado, actuado
   & Q-learning, SARSA, Double DQN, IPPO y sus variantes, MAPPO
-  & Con llegadas al azar: menos retraso en 3 de 6 casos sintéticos ($-10.8$ y $-11.1$\,\% en conjunto) y en los dos casos de Lima. Con llegadas regulares, empata con un fijo bien ajustado ($-0.4$\,\%) \\
+  & Con llegadas aleatorias: menos retraso en 3 de 6 casos sintéticos ($-10.8$ y $-11.1$\,\% en conjunto), en el corredor de Lima y en el nudo con la demanda publicada. Con llegadas regulares, empata con un fijo bien ajustado ($-0.4$\,\%) \\
 \bottomrule
 \end{tabularx}
 \caption[Síntesis de los trabajos relacionados]{Síntesis de los trabajos relacionados y de esta tesis. Cada resultado se expresa en la métrica de su trabajo: tiempo de espera (Uniandes, Trinity), tiempo de viaje (UAQ) o retraso por vehículo (esta tesis), por lo que las cifras no son comparables entre filas.}
@@ -161,13 +157,9 @@ Esta tesis
 
 Del estado del arte se desprenden las decisiones de diseño que desarrolla el Capítulo~\ref{cap:metodologia}: un agente por semáforo sobre SUMO y TraCI; algoritmos tabulares y de \textit{Deep RL} comparados con el mismo protocolo; dos referencias, el fijo ajustado y el actuado, y una evaluación con semillas separadas, intervalos de confianza y pruebas pareadas, aplicada a seis casos sintéticos en dos estudios y después a dos casos de Lima (Sección~\ref{sec:plan2}).
 
-Las lecciones de Uniandes y de Trinity se atienden en parte en ese diseño. Los algoritmos de \textit{Deep RL}, con PPO dentro de IPPO y de MAPPO, se comparan con los tabulares. Todos los controles se miden con las mismas métricas: retraso, espera detenida, colas, \textit{throughput} y paradas. La significancia y la sensibilidad se tratan con el protocolo de semillas y las pruebas pareadas del plan de pruebas (Sección~\ref{sec:plan2}). Los casos con datos reales que recomienda Trinity se atienden en parte con los dos casos de Lima, que usan la geometría real y volúmenes publicados, pero no se calibraron con datos de tráfico; A2C queda fuera (Sección~\ref{sec:revision-critica}).
+Así se atienden en parte las lecciones de los tres trabajos. De Uniandes y de Trinity, PPO entra en el diseño dentro de IPPO y de MAPPO, todos los controles se miden con las mismas métricas (retraso, espera detenida, colas, \textit{throughput} y paradas) y los casos con datos reales que recomienda Trinity se cubren con los dos casos de Lima, de geometría real y volúmenes publicados, pero sin calibrar con datos de tráfico; A2C queda fuera. De UAQ, la primera lección se atiende en parte: los casos de Lima no usan aforos propios, matrices origen--destino ni predicción de demanda, y en los seis casos sintéticos la demanda se define con flujos declarados. La segunda se atiende con el retraso total, que incluye la espera para entrar a la red; el tiempo de viaje de los vehículos que recorren la avenida se registra en cada corrida (Sección~\ref{sec:u3}).
 
-La primera lección de UAQ también se atiende en parte: los casos de Lima usan volúmenes publicados, pero no aforos propios, matrices origen--destino ni predicción de demanda, y en los seis casos sintéticos la demanda se define con flujos declarados. La segunda se atiende con el retraso total, que incluye la espera para entrar a la red; el tiempo de viaje de los vehículos que recorren la avenida se registra en cada corrida (Sección~\ref{sec:u3}).
-
-\noindent\textbf{Aporte específico: coordinación distribuida (U4).} La lección de Trinity sobre los escenarios multiagente se atiende con un módulo de coordinación entre semáforos vecinos. El módulo añade mensajes entre vecinos, un estado extendido que incorpora esa información y, en IPPO con penalización de \textit{spillback}, un término de la recompensa que penaliza la cola que bloquea a la intersección vecina. Los agentes aprenden con IPPO o MAPPO, y el Double DQN usa la misma observación con mensajes. Con este módulo la tesis incorpora el tópico de Sistemas Distribuidos al marco de RL, y el esfuerzo computacional aumenta por el entrenamiento multiagente con estado ampliado.
-
-El aporte de la comunicación se mide con el par IPPO sin mensajes e IPPO con mensajes, que solo difieren en los mensajes (Sección~\ref{sec:u4}); el resultado de esa comparación, en los dos estudios y en el corredor de Lima, está en la Sección~\ref{sec:piezas}.
+\noindent\textbf{Aporte específico: coordinación distribuida (U4).} La lección de Trinity sobre los escenarios multiagente se atiende con un módulo de coordinación entre semáforos vecinos (Sección~\ref{sec:u4}): mensajes entre vecinos, un estado extendido que incorpora esa información y, en IPPO con penalización de \textit{spillback}, un término de la recompensa que penaliza la cola que bloquea a la intersección vecina. Con este módulo la tesis incorpora el tópico de Sistemas Distribuidos al marco de RL, y el esfuerzo computacional aumenta por el entrenamiento multiagente con estado ampliado. El aporte de la comunicación se mide con el par IPPO sin mensajes e IPPO con mensajes, que solo difieren en los mensajes; el resultado de esa comparación, en los dos estudios y en el corredor de Lima, está en la Sección~\ref{sec:piezas}.
 % fuente: plan2/evaluacion_<esc>_resumen.csv, timeloss_prom de ippo_vecinos_s* e ippo_local_s*: peor base de
 % vecinos frente a mejor base de local, P1 20.075 contra 20.8877; P2 119.0177 contra 119.272;
 % P3 21.696 contra 22.0927; P4 29.4727 contra 30.4787; P5 21.212 contra 25.195 s/veh;

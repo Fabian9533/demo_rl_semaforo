@@ -1,0 +1,62 @@
+Tramos internos de ovalo_estudio.net.xml (sumolib): velocidad (m/s) y largo (m), antes y despues de llevar a 5.56 m/s los giros mas lentos (atributo speed de su conexion).
+
+nodo  conexion                     dir  tramo interno  largo antes largo despues vel antes vel despues
+MJ    NE_MJ_0 -> S1_J_1            s    :MJ_3_0               5.90          5.90     13.89       13.89
+MJ    NE_MJ_1 -> S1_J_2            s    :MJ_3_1               5.90          5.90     13.74       13.74
+MJ    SE_MJ_0 -> S1_J_0            s    :MJ_0_0               5.93          5.93     11.57       11.57
+MJ    SE_MJ_1 -> S1_J_1            s    :MJ_0_1               5.93          5.93     13.27       13.27
+MJ    SE_MJ_2 -> S1_J_2            s    :MJ_0_2               5.93          5.93     13.89       13.89
+ML    B_ML_0 -> S1_L_1             s    :ML_4_0               5.75          5.75     10.70       10.70
+ML    NO_ML_0 -> S1_L_0            s    :ML_0_0               6.00          6.00     13.89       13.89
+ML    NO_ML_1 -> S1_L_1            s    :ML_0_1               6.00          6.00     13.89       13.89
+ML    SO_ML_0 -> S1_L_0            s    :ML_2_0               5.92          5.92     12.84       12.84
+ML    SO_ML_1 -> S1_L_1            s    :ML_2_1               5.92          5.92     11.27       11.27
+NE    J_NE_0 -> NE_NO_0            L    :NE_1_0              14.93         14.93     13.89       13.89
+NE    J_NE_1 -> NE_NO_1            L    :NE_1_1              13.18         13.18     13.89       13.89
+NE    J_NE_2 -> NE_NO_2            L    :NE_1_2              11.43         11.43     13.89       13.89
+NE    J_NE_0 -> S1_RN_0            s    :NE_0_0               8.63          8.63     13.89       13.89
+NE    RN_NE_0 -> NE_MJ_0           s    :NE_6_0              19.42         19.42     13.89       13.89
+NE    RN_NE_1 -> NE_MJ_1           s    :NE_6_1              19.42         19.42     13.89       13.89
+NE    SE_NE_0 -> S1_RN_0           s    :NE_4_0              16.64         16.64     13.89       13.89
+NE    SE_NE_1 -> S1_RN_1           s    :NE_4_1              16.64         16.64     13.89       13.89
+NO    NE_NO_0 -> NO_ML_0           s    :NO_0_0              10.19         10.19     13.89       13.89
+NO    NE_NO_1 -> NO_ML_1           s    :NO_0_1              10.19         10.19     13.89       13.89
+NO    NE_NO_2 -> NO_SO_2           l    :NO_2_0               1.14          1.14      2.89        5.56  <- subido
+NO    RN_NO_0 -> NO_ML_0           r    :NO_3_0               1.67          1.67      3.03        5.56  <- subido
+NO    RN_NO_0 -> NO_SO_0           s    :NO_4_0              10.57         10.57     13.89       13.89
+NO    RN_NO_1 -> NO_SO_1           s    :NO_4_1              10.57         10.57     13.89       13.89
+NO    RN_NO_2 -> NO_SO_2           s    :NO_4_2              10.57         10.57     13.89       13.89
+P_B   B_S1_2 -> B_ML_0             s    :P_B_3_0              0.65          0.65     13.89       13.89
+P_B   B_S1_0 -> B_SO_0             s    :P_B_0_0              0.65          0.65     13.89       13.89
+P_B   B_S1_1 -> B_SO_1             s    :P_B_0_1              0.65          0.65     13.89       13.89
+P_B   B_S1_2 -> B_SO_2             s    :P_B_0_2              0.65          0.65     13.89       13.89
+P_J   J_S1_0 -> J_NE_0             s    :P_J_0_0              0.20          0.20     13.89       13.89
+P_J   J_S1_1 -> J_NE_1             s    :P_J_0_1              0.20          0.20     13.89       13.89
+P_J   J_S1_2 -> J_NE_2             s    :P_J_0_2              0.20          0.20     13.89       13.89
+P_RN  RN_S1_3 -> RN_NE_0           L    :P_RN_3_0             2.56          2.56     13.89       13.89
+P_RN  RN_S1_4 -> RN_NE_1           L    :P_RN_3_1             1.53          1.53     11.54       11.54
+P_RN  RN_S1_0 -> RN_NO_0           s    :P_RN_0_0             2.01          2.01     13.89       13.89
+P_RN  RN_S1_1 -> RN_NO_1           s    :P_RN_0_1             2.01          2.01     13.89       13.89
+P_RN  RN_S1_2 -> RN_NO_2           s    :P_RN_0_2             2.01          2.01     13.89       13.89
+P_RS  RS_S1_0 -> RS_SE_0           s    :P_RS_0_0             2.11          2.11     13.89       13.89
+P_RS  RS_S1_1 -> RS_SE_1           s    :P_RS_0_1             2.11          2.11     13.89       13.89
+P_RS  RS_S1_2 -> RS_SO_0           L    :P_RS_2_0             2.73          2.73     11.73       11.73
+P_RS  RS_S1_3 -> RS_SO_1           L    :P_RS_2_1             1.52          1.52      8.87        8.87
+SE    RS_SE_0 -> SE_MJ_0           r    :SE_0_0               1.69          1.69      3.24        5.56  <- subido
+SE    RS_SE_0 -> SE_NE_0           s    :SE_1_0               9.69          9.69     13.89       13.89
+SE    RS_SE_1 -> SE_NE_1           s    :SE_1_1               9.69          9.69     13.89       13.89
+SE    SO_SE_0 -> SE_MJ_0           s    :SE_3_0               6.43          6.43     13.89       13.89
+SE    SO_SE_1 -> SE_MJ_1           s    :SE_3_1               6.43          6.43     13.89       13.89
+SE    SO_SE_2 -> SE_MJ_2           s    :SE_3_2               6.43          6.43     13.89       13.89
+SE    SO_SE_2 -> SE_NE_1           l    :SE_6_0               2.96          2.96      4.20        5.56  <- subido
+SO    B_SO_0 -> S1_RS_0            r    :SO_2_0               1.57          1.57      3.14        5.56  <- subido
+SO    B_SO_0 -> SO_SE_0            s    :SO_3_0              12.27         12.27     13.89       13.89
+SO    B_SO_1 -> SO_SE_1            s    :SO_3_1              12.27         12.27     13.89       13.89
+SO    B_SO_2 -> SO_SE_2            s    :SO_3_2              12.27         12.27     13.89       13.89
+SO    NO_SO_0 -> S1_RS_0           s    :SO_6_0              19.14         19.14     13.89       13.89
+SO    NO_SO_1 -> S1_RS_1           s    :SO_6_1              19.14         19.14     13.89       13.89
+SO    NO_SO_2 -> S1_RS_2           s    :SO_6_2              19.14         19.14     13.89       13.89
+SO    RS_SO_0 -> SO_ML_0           s    :SO_0_0              22.70         22.70     13.89       13.89
+SO    RS_SO_1 -> SO_ML_1           s    :SO_0_1              22.70         22.70     13.89       13.89
+
+Tramos internos: 57; con la velocidad subida: 5; mas lentos que 5.56 m/s despues: 0

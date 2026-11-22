@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Generado por armar_red.py. No editar a mano. -->
+<nodes>
+    <node id="S1" x="661.48" y="623.08" type="traffic_light" tl="semaforo_S1"/>
+    <node id="RNe" x="558.58" y="1638.56" type="priority"/>
+    <node id="RSe" x="747.69" y="-386.87" type="priority"/>
+    <node id="Be" x="-45.81" y="-111.35" type="priority"/>
+    <node id="Je" x="1616.16" y="263.38" type="priority"/>
+    <node id="Ls" x="476.31" y="704.41" type="priority"/>
+    <node id="RNs" x="618.82" y="823.43" type="priority"/>
+    <node id="RSs" x="674.22" y="423.98" type="priority"/>
+    <node id="Js" x="848.05" y="550.64" type="priority"/>
+</nodes>

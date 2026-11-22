@@ -1,0 +1,63 @@
+<additional>
+    <!-- Actuado ajustado del corredor (estudio_corredor.py): hueco 1.25 s, detector 2.0 s, umbral de atasco 30, maximos 60, coordinado con el fijo y fin fijo -->
+    <tlLogic id="semaforo_C1" type="actuated" programID="actuado_ajustado" offset="57">
+        <param key="max-gap" value="1.25"/>
+        <param key="jam-threshold" value="30"/>
+        <param key="coordinated" value="true"/>
+        <param key="cycleTime" value="84"/>
+        <phase duration="54" minDur="10" maxDur="84" state="rGGGrrrrrGGG" earliestEnd="81" latestEnd="81"/>
+        <phase duration="3" state="ryyyrrrrryyy"/>
+        <phase duration="24" minDur="17" maxDur="60" state="GrrrGGGGGrrr" latestEnd="24"/>
+        <phase duration="3" state="yrrryyyyyrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C2" type="actuated" programID="actuado_ajustado" offset="49">
+        <param key="max-gap" value="1.25"/>
+        <param key="jam-threshold" value="30"/>
+        <param key="coordinated" value="true"/>
+        <param key="cycleTime" value="84"/>
+        <phase duration="45" minDur="10" maxDur="84" state="rrrrGGGrGGGG" earliestEnd="81" latestEnd="81"/>
+        <phase duration="3" state="rrrryyyryyyy"/>
+        <phase duration="33" minDur="18" maxDur="60" state="GGGGrrrGrrrr" latestEnd="33"/>
+        <phase duration="3" state="yyyyrrryrrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C3" type="actuated" programID="actuado_ajustado" offset="52">
+        <param key="max-gap" value="1.25"/>
+        <param key="jam-threshold" value="30"/>
+        <param key="coordinated" value="true"/>
+        <param key="cycleTime" value="84"/>
+        <phase duration="49" minDur="10" maxDur="84" state="rGGGGrrrrGGG" earliestEnd="81" latestEnd="81"/>
+        <phase duration="3" state="ryyyyrrrryyy"/>
+        <phase duration="29" minDur="20" maxDur="60" state="GrrrrGGGGrrr" latestEnd="29"/>
+        <phase duration="3" state="yrrrryyyyrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C4" type="actuated" programID="actuado_ajustado" offset="11">
+        <param key="max-gap" value="1.25"/>
+        <param key="jam-threshold" value="30"/>
+        <param key="coordinated" value="true"/>
+        <param key="cycleTime" value="84"/>
+        <phase duration="51" minDur="12" maxDur="84" state="rrrGGGGrrrGGG" earliestEnd="81" latestEnd="81"/>
+        <phase duration="3" state="rrryyyyrrryyy"/>
+        <phase duration="27" minDur="19" maxDur="60" state="GGGrrrrGGGrrr" latestEnd="27"/>
+        <phase duration="3" state="yyyrrrryyyrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C5" type="actuated" programID="actuado_ajustado" offset="13">
+        <param key="max-gap" value="1.25"/>
+        <param key="jam-threshold" value="30"/>
+        <param key="coordinated" value="true"/>
+        <param key="cycleTime" value="84"/>
+        <phase duration="51" minDur="12" maxDur="84" state="rrGGGrGG" earliestEnd="81" latestEnd="81"/>
+        <phase duration="3" state="rryyyryy"/>
+        <phase duration="27" minDur="18" maxDur="60" state="GGrrrGrr" latestEnd="27"/>
+        <phase duration="3" state="yyrrryrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C6" type="actuated" programID="actuado_ajustado" offset="54">
+        <param key="max-gap" value="1.25"/>
+        <param key="jam-threshold" value="30"/>
+        <param key="coordinated" value="true"/>
+        <param key="cycleTime" value="84"/>
+        <phase duration="47" minDur="12" maxDur="84" state="rrrGGGrrrGGG" earliestEnd="81" latestEnd="81"/>
+        <phase duration="3" state="rrryyyrrryyy"/>
+        <phase duration="31" minDur="17" maxDur="60" state="GGGrrrGGGrrr" latestEnd="31"/>
+        <phase duration="3" state="yyyrrryyyrrr"/>
+    </tlLogic>
+</additional>

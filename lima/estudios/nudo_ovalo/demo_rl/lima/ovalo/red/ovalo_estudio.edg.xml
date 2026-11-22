@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Generado por armar_ovalo.py. No editar a mano. -->
+<edges>
+    <edge id="RN_S1" from="RNe" to="P_RN" numLanes="5" speed="13.89" spreadType="center" shape="556.92,1675.94 589.57,939.25 591.63,892.86 592.12,882.36 594.23,870.76 595.31,865.07 596.63,858.18 596.48,857.55 602.67,833.16 613.17,793.20 624.48,750.16 627.53,738.58 630.76,726.37 632.63,718.50 646.11,655.69"/>  <!-- 1027.5 m de trazado -->
+    <edge id="RS_S1" from="RSe" to="P_RS" numLanes="4" speed="13.89" spreadType="center" shape="750.09,-423.41 701.83,311.63 699.45,347.92 698.14,362.66 687.06,464.91 685.40,479.24 679.43,528.20 671.52,589.15"/>  <!-- 1015.9 m de trazado -->
+    <edge id="B_S1" from="Be" to="P_B" numLanes="3" speed="13.89" spreadType="center" shape="-72.20,-138.94 438.07,394.48 501.84,461.14 511.91,471.66 546.07,507.39 567.08,529.36 580.38,543.27 588.96,552.24 603.79,567.74 630.24,595.40 632.78,598.06"/>  <!-- 1019.9 m de trazado -->
+    <edge id="J_S1" from="Je" to="P_J" numLanes="3" speed="13.89" spreadType="center" shape="1635.24,256.11 961.96,512.44 957.62,513.70 909.04,532.59 884.57,542.38 840.32,560.83 813.18,572.09 787.03,582.64 753.49,596.01 726.30,606.73 682.83,623.40"/>  <!-- 1020.8 m de trazado -->
+    <edge id="J_NE" from="P_J" to="NE" numLanes="3" speed="13.89" spreadType="center" shape="681.90,623.76 679.10,625.03 670.94,631.39"/>  <!-- 13.4 m de trazado -->
+    <edge id="RN_NO" from="P_RN" to="NO" numLanes="3" speed="13.89" spreadType="center" shape="643.19,654.04 647.62,642.48"/>  <!-- 12.4 m de trazado -->
+    <edge id="RN_NE" from="P_RN" to="NE" numLanes="2" speed="13.89" spreadType="center" shape="651.01,655.71 654.97,649.08 660.07,640.17"/>  <!-- 18.0 m de trazado -->
+    <edge id="RS_SE" from="P_RS" to="SE" numLanes="2" speed="13.89" spreadType="center" shape="674.57,590.56 668.95,609.24"/>  <!-- 19.5 m de trazado -->
+    <edge id="RS_SO" from="P_RS" to="SO" numLanes="2" speed="13.89" spreadType="center" shape="668.22,589.73 657.89,608.49"/>  <!-- 21.4 m de trazado -->
+    <edge id="B_SO" from="P_B" to="SO" numLanes="3" speed="13.89" spreadType="center" shape="633.23,598.53 636.22,601.64 647.32,609.64"/>  <!-- 18.0 m de trazado -->
+    <edge id="NE_NO" from="NE" to="NO" numLanes="3" speed="13.89" spreadType="center" shape="659.07,635.48 654.53,636.32"/>  <!-- 4.6 m de trazado -->
+    <edge id="NO_SO" from="NO" to="SO" numLanes="3" speed="13.89" spreadType="center" shape="650.08,632.26 650.56,627.00"/>  <!-- 5.3 m de trazado -->
+    <edge id="SO_SE" from="SO" to="SE" numLanes="3" speed="13.89" spreadType="center" shape="658.72,613.36 664.35,613.74"/>  <!-- 5.6 m de trazado -->
+    <edge id="SE_NE" from="SE" to="NE" numLanes="2" speed="13.89" spreadType="center" shape="667.61,618.77 667.65,622.85"/>  <!-- 4.1 m de trazado -->
+    <edge id="NO_ML" from="NO" to="ML" numLanes="2" speed="13.89" spreadType="center" shape="644.69,638.51 635.31,640.95"/>  <!-- 9.7 m de trazado -->
+    <edge id="SE_MJ" from="SE" to="MJ" numLanes="3" speed="13.89" spreadType="center" shape="670.76,614.21 676.96,614.70"/>  <!-- 6.2 m de trazado -->
+    <edge id="NE_MJ" from="NE" to="MJ" numLanes="2" speed="13.89" spreadType="center" shape="670.86,624.15 677.84,617.08"/>  <!-- 9.9 m de trazado -->
+    <edge id="SO_ML" from="SO" to="ML" numLanes="2" speed="13.89" spreadType="center" shape="645.69,627.52 634.45,639.52"/>  <!-- 16.4 m de trazado -->
+    <edge id="B_ML" from="P_B" to="ML" numLanes="1" speed="13.89" spreadType="center" shape="630.91,600.74 641.89,613.91 642.98,617.80 643.17,621.14 642.68,625.02 641.33,628.88 638.18,634.80 634.33,639.41"/>  <!-- 45.2 m de trazado -->
+    <edge id="S1_L" from="ML" to="Ls" numLanes="2" speed="13.89" spreadType="center" shape="629.56,642.67 622.52,645.05 594.08,657.47 574.43,665.30 544.19,677.36 525.40,684.85 516.70,688.31 507.97,691.79 477.78,703.82 441.32,718.45"/>  <!-- 202.9 m de trazado -->
+    <edge id="S1_RN" from="NE" to="RNs" numLanes="2" speed="13.89" spreadType="center" shape="665.61,639.15 661.73,648.65 652.84,690.79 650.43,700.95 625.59,796.70 624.88,799.43 621.32,813.42 615.11,838.29"/>  <!-- 205.6 m de trazado -->
+    <edge id="S1_RS" from="SO" to="RSs" numLanes="3" speed="13.89" spreadType="center" shape="653.53,608.20 655.40,602.99 656.80,592.49 658.21,581.14 666.46,498.12 668.92,475.89 669.11,474.16 670.63,459.70 675.76,408.69"/>  <!-- 200.9 m de trazado -->
+    <edge id="S1_J" from="MJ" to="Js" numLanes="3" speed="13.89" spreadType="center" shape="682.74,613.84 686.75,612.27 723.35,599.12 750.75,588.89 784.47,575.92 810.71,565.68 869.55,541.98"/>  <!-- 200.2 m de trazado -->
+</edges>

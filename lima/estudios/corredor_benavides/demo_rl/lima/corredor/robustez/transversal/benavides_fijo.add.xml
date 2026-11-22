@@ -1,0 +1,39 @@
+<additional>
+    <!-- Fijo ajustado al segundo del corredor (estudio_corredor.py): ciclo 52 s, transversales [17, 18, 20, 20, 18, 18], desfases [0, 27, 26, 0, 51, 0] -->
+    <tlLogic id="semaforo_C1" type="static" programID="fijo_ajustado" offset="0">
+        <phase duration="29" state="rGGGrrrrrGGG"/>
+        <phase duration="3" state="ryyyrrrrryyy"/>
+        <phase duration="17" state="GrrrGGGGGrrr"/>
+        <phase duration="3" state="yrrryyyyyrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C2" type="static" programID="fijo_ajustado" offset="27">
+        <phase duration="28" state="rrrrGGGrGGGG"/>
+        <phase duration="3" state="rrrryyyryyyy"/>
+        <phase duration="18" state="GGGGrrrGrrrr"/>
+        <phase duration="3" state="yyyyrrryrrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C3" type="static" programID="fijo_ajustado" offset="26">
+        <phase duration="26" state="rGGGGrrrrGGG"/>
+        <phase duration="3" state="ryyyyrrrryyy"/>
+        <phase duration="20" state="GrrrrGGGGrrr"/>
+        <phase duration="3" state="yrrrryyyyrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C4" type="static" programID="fijo_ajustado" offset="0">
+        <phase duration="26" state="rrrGGGGrrrGGG"/>
+        <phase duration="3" state="rrryyyyrrryyy"/>
+        <phase duration="20" state="GGGrrrrGGGrrr"/>
+        <phase duration="3" state="yyyrrrryyyrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C5" type="static" programID="fijo_ajustado" offset="51">
+        <phase duration="28" state="rrGGGrGG"/>
+        <phase duration="3" state="rryyyryy"/>
+        <phase duration="18" state="GGrrrGrr"/>
+        <phase duration="3" state="yyrrryrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C6" type="static" programID="fijo_ajustado" offset="0">
+        <phase duration="28" state="rrrGGGrrrGGG"/>
+        <phase duration="3" state="rrryyyrrryyy"/>
+        <phase duration="18" state="GGGrrrGGGrrr"/>
+        <phase duration="3" state="yyyrrryyyrrr"/>
+    </tlLogic>
+</additional>

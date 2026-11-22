@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Generado por armar_red.py. No editar a mano. -->
+<connections>
+    <connection from="RN_S1" to="S1_J" fromLane="3" toLane="2"/>
+    <connection from="RN_S1" to="S1_RS" fromLane="0" toLane="0"/>
+    <connection from="RN_S1" to="S1_RS" fromLane="1" toLane="1"/>
+    <connection from="RN_S1" to="S1_RS" fromLane="2" toLane="2"/>
+    <connection from="RN_S1" to="S1_L" fromLane="0" toLane="0"/>
+    <connection from="RS_S1" to="S1_J" fromLane="0" toLane="0"/>
+    <connection from="RS_S1" to="S1_RN" fromLane="1" toLane="0"/>
+    <connection from="RS_S1" to="S1_RN" fromLane="2" toLane="1"/>
+    <connection from="RS_S1" to="S1_L" fromLane="3" toLane="0"/>
+    <connection from="RS_S1" to="S1_L" fromLane="4" toLane="1"/>
+    <connection from="B_S1" to="S1_RS" fromLane="0" toLane="0"/>
+    <connection from="B_S1" to="S1_J" fromLane="0" toLane="0"/>
+    <connection from="B_S1" to="S1_J" fromLane="1" toLane="1"/>
+    <connection from="B_S1" to="S1_J" fromLane="2" toLane="2"/>
+    <connection from="B_S1" to="S1_RN" fromLane="2" toLane="1"/>
+    <connection from="J_S1" to="S1_RN" fromLane="0" toLane="0"/>
+    <connection from="J_S1" to="S1_L" fromLane="0" toLane="0"/>
+    <connection from="J_S1" to="S1_L" fromLane="1" toLane="1"/>
+    <connection from="J_S1" to="S1_RS" fromLane="2" toLane="2"/>
+</connections>

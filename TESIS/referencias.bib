@@ -116,6 +116,19 @@
   note         = {Control actuado nativo con \texttt{minDur} y \texttt{maxDur}}
 }
 
+% Agregada el 20.11.2026 (asesoria: definir exactamente el retraso). Pagina consultada ese dia: timeLoss = "The time lost
+% due to driving below the ideal speed. (ideal speed includes the individual speedFactor; slowdowns due to intersections
+% etc. will incur timeLoss, scheduled stops do not count)"; departDelay = "The time the vehicle had to wait before it
+% could start his journey"
+@misc{SUMO_TripInfo,
+  key          = {SUMOTripInfo},
+  author       = {{SUMO Project}},
+  title        = {TripInfo --- {SUMO} Documentation},
+  howpublished = {\url{https://sumo.dlr.de/docs/Simulation/Output/TripInfo.html}},
+  year         = {2026},
+  note         = {Salida por veh{\'i}culo: \texttt{timeLoss}, \texttt{departDelay} y \texttt{waitingTime}}
+}
+
 @misc{SB3_Docs,
   key          = {StableBaselines3Docs},
   author       = {{Stable-Baselines3 Developers}},
@@ -149,6 +162,18 @@
   title     = {Highway Capacity Manual ({HCM})},
   publisher = {Transportation Research Board},
   year      = {2010}
+}
+
+% Agregada el 20.11.2026 para los verdes minimos de los peatones del corredor de Benavides (Anexo D): cap. 16,
+% ecuacion 16-2, Gp = 3.2 + L/Sp + 0.27 Nped, con Sp = 1.2 m/s. Copia del cap. 16 consultada:
+% https://pessoas.feb.unesp.br/barbara/files/2011/04/16-Signalized-Intersections.pdf
+@book{TRB2000_HCM,
+  author    = {{Transportation Research Board}},
+  key       = {HCM2000},
+  title     = {Highway Capacity Manual 2000},
+  publisher = {Transportation Research Board, National Research Council},
+  address   = {Washington, DC, EE.~UU.},
+  year      = {2000}
 }
 
 % ===== Entradas agregadas el 27.09.2026 (comparacion con otros trabajos y estadistica) =====
@@ -955,4 +980,116 @@
   howpublished = {\url{https://rno-its.piarc.org/en/its-basics-its-technologies-traffic-control/urban-traffic-control}},
   year         = {2026},
   note         = {Road Network Operations \& {ITS} Library; consultado el 15 de noviembre de 2026}
+}
+
+% --- Nudo de Lima en la red del Ovalo Vasco (borrador del 19.11.2026) -----------------
+% Fichas de revision_orden_libre_2026-11-19/literatura.md, seccion (d), "Verificadas en el texto completo".
+
+% ficha: Wang2022_SwitchingLoss (confirmado). Leido en el manuscrito aceptado
+% (https://par.nsf.gov/servlets/purl/10335268), p. 2: "due to the phase switching loss, the phase switching
+% frequency should decrease with the increase of the traffic demand".
+@article{Wang2022_SwitchingLoss,
+  author  = {Xingmin Wang and Yafeng Yin and Yiheng Feng and Henry X. Liu},
+  title   = {Learning the max pressure control for urban traffic networks considering the phase switching loss},
+  journal = {Transportation Research Part C: Emerging Technologies},
+  volume  = {140},
+  pages   = {103670},
+  year    = {2022},
+  doi     = {10.1016/j.trc.2022.103670},
+}
+
+% ficha: Ibrokhimov2022_BiasedPressure (confirmado). Texto completo en Europe PMC: el control no ciclico supera al
+% ciclico en todas las configuraciones sinteticas, con 3 s de ambar.
+@article{Ibrokhimov2022_BiasedPressure,
+  author  = {Bunyodbek Ibrokhimov and Young-Joo Kim and Sanggil Kang},
+  title   = {Biased Pressure: Cyclic Reinforcement Learning Model for Intelligent Traffic Signal Control},
+  journal = {Sensors},
+  volume  = {22},
+  number  = {7},
+  pages   = {2818},
+  year    = {2022},
+  doi     = {10.3390/s22072818},
+}
+
+% Anexo J, consideraciones eticas (anuncio de la Direccion de Computacion, 20.11.2026). Normas peruanas y licencias
+% verificadas en sus fuentes oficiales (gob.pe, ANPD, MTC, OSM, Google, ACM).
+@misc{ACM2018_Code,
+  author       = {{Association for Computing Machinery}},
+  title        = {{ACM Code of Ethics and Professional Conduct}},
+  howpublished = {\url{https://www.acm.org/code-of-ethics}},
+  year         = {2018}
+}
+@misc{Peru2011_Ley29733,
+  author       = {{Congreso de la Rep{\'u}blica del Per{\'u}}},
+  title        = {{Ley N.\textsuperscript{o} 29733, Ley de Protecci{\'o}n de Datos Personales}},
+  howpublished = {Diario Oficial El Peruano},
+  year         = {2011}
+}
+@misc{MINJUSDH2024_Reglamento,
+  author       = {{Ministerio de Justicia y Derechos Humanos}},
+  title        = {{Decreto Supremo N.\textsuperscript{o} 016-2024-JUS}, que aprueba el {Reglamento de la Ley N.\textsuperscript{o} 29733, Ley de Protecci{\'o}n de Datos Personales}},
+  howpublished = {Diario Oficial El Peruano},
+  year         = {2024}
+}
+@misc{ANPD2020_Videovigilancia,
+  author       = {{Autoridad Nacional de Protecci{\'o}n de Datos Personales}},
+  title        = {{Directiva para el Tratamiento de Datos Personales mediante Sistemas de Videovigilancia}, aprobada por la {Resoluci{\'o}n Directoral N.\textsuperscript{o} 02-2020-JUS/DGTAIPD}},
+  howpublished = {Diario Oficial El Peruano},
+  year         = {2020}
+}
+@misc{Peru1996_DL822,
+  author       = {{Poder Ejecutivo del Per{\'u}}},
+  title        = {{Decreto Legislativo N.\textsuperscript{o} 822, Ley sobre el Derecho de Autor}},
+  howpublished = {Diario Oficial El Peruano},
+  year         = {1996}
+}
+@misc{OSM_Copyright,
+  author       = {{OpenStreetMap Foundation}},
+  title        = {{Copyright and License}},
+  howpublished = {\url{https://www.openstreetmap.org/copyright}},
+  year         = {2026},
+  note         = {Licencia ODbL 1.0 de los datos de OpenStreetMap}
+}
+@misc{Google_GeoGuidelines,
+  author       = {Google},
+  title        = {{Google Maps, Google Earth and Street View: Geo Guidelines}},
+  howpublished = {\url{https://about.google/brand-resource-center/products-and-services/geo-guidelines/}},
+  year         = {2026},
+  note         = {Pautas de uso y de atribuci{\'o}n de las im{\'a}genes de Google Maps}
+}
+@misc{MTC2024_Manual,
+  author       = {{Ministerio de Transportes y Comunicaciones}},
+  title        = {{Manual de Dispositivos de Control de Tr{\'a}nsito Automotor}, aprobado por la {Resoluci{\'o}n Directoral N.\textsuperscript{o} 26-2024-MTC/18}},
+  howpublished = {Diario Oficial El Peruano},
+  year         = {2024}
+}
+@misc{JICA2013_Encuesta,
+  author       = {{Agencia de Cooperaci{\'o}n Internacional del Jap{\'o}n (JICA)} and {Nippon Koei Co., Ltd.} and {Nippon Koei Latin America}},
+  title        = {Encuesta de recolecci{\'o}n de informaci{\'o}n b{\'a}sica del transporte urbano en el {\'A}rea Metropolitana de {Lima} y {Callao}},
+  howpublished = {\url{https://openjicareport.jica.go.jp/pdf/12087532_01.pdf}},
+  year         = {2013},
+  note         = {Informe final. Tabla 2.16, tr{\'a}nsito diario por tipo de veh{\'i}culo en la l{\'i}nea cortina del r{\'i}o R{\'i}mac (15 puentes, 24~h), p.~2-21}
+}
+@misc{LimaComoVamos2022_Reporte2021,
+  author       = {{Lima C{\'o}mo Vamos}},
+  title        = {{\textquestiondown}C{\'o}mo vamos en {Lima} y {Callao}? Reporte urbano de indicadores de calidad de vida 2021},
+  howpublished = {\url{https://www.limacomovamos.org/wp-content/uploads/2022/11/ReporteIndicadoresLCV2021.pdf}},
+  year         = {2022},
+  note         = {Observatorio de calidad de vida urbana; 1.\textsuperscript{a} edici{\'o}n, noviembre de 2022. Flota de transporte p{\'u}blico regular en {Lima} y {Callao}, 2021 (fuente: {ATU}), p.~16}
+}
+@misc{UNFV2018_ImpactoVial,
+  author       = {Berm{\'u}dez Ramos, Omar},
+  title        = {Estudio de impacto vial, predio {Oquendo}},
+  howpublished = {\url{https://web.unfv.edu.pe/facultades/fopca/images/2022/Proyecto_de_Facultad_en_Oquendo/3.Estudio_de_Impacto_Vial.pdf}},
+  year         = {2018},
+  note         = {Estudio para la Universidad Nacional Federico Villarreal ({Callao}). Tabla N.\textsuperscript{o}~2, factores de equivalencia recomendados por el {INVERMET} para la conversi{\'o}n de veh{\'i}culos a {UCP}, p.~28}
+}
+
+% Cap. II, sec:dqn (revision final del 22.11.2026): la variante que implementa rl_dqn.py.
+@inproceedings{vanHasselt2016_DoubleDQN,
+  author    = {Hado van Hasselt and Arthur Guez and David Silver},
+  title     = {Deep Reinforcement Learning with Double {Q}-Learning},
+  booktitle = {Proceedings of the Thirtieth {AAAI} Conference on Artificial Intelligence},
+  pages     = {2094--2100},
+  year      = {2016}
 }

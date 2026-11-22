@@ -1,0 +1,84 @@
+<additional>
+    <inductionLoop id="nulo_B_ML_0" lane="B_ML_0" pos="22.62" vTypes="ninguno" period="100000" file="nul" friendlyPos="true"/>
+    <inductionLoop id="nulo_B_SO_0" lane="B_SO_0" pos="9.00" vTypes="ninguno" period="100000" file="nul" friendlyPos="true"/>
+    <inductionLoop id="nulo_B_SO_1" lane="B_SO_1" pos="9.00" vTypes="ninguno" period="100000" file="nul" friendlyPos="true"/>
+    <inductionLoop id="nulo_B_SO_2" lane="B_SO_2" pos="9.00" vTypes="ninguno" period="100000" file="nul" friendlyPos="true"/>
+    <inductionLoop id="nulo_J_NE_0" lane="J_NE_0" pos="6.72" vTypes="ninguno" period="100000" file="nul" friendlyPos="true"/>
+    <inductionLoop id="nulo_J_NE_1" lane="J_NE_1" pos="6.72" vTypes="ninguno" period="100000" file="nul" friendlyPos="true"/>
+    <inductionLoop id="nulo_J_NE_2" lane="J_NE_2" pos="6.72" vTypes="ninguno" period="100000" file="nul" friendlyPos="true"/>
+    <inductionLoop id="nulo_NE_MJ_0" lane="NE_MJ_0" pos="4.97" vTypes="ninguno" period="100000" file="nul" friendlyPos="true"/>
+    <inductionLoop id="nulo_NE_MJ_1" lane="NE_MJ_1" pos="4.97" vTypes="ninguno" period="100000" file="nul" friendlyPos="true"/>
+    <inductionLoop id="nulo_NE_NO_0" lane="NE_NO_0" pos="2.31" vTypes="ninguno" period="100000" file="nul" friendlyPos="true"/>
+    <inductionLoop id="nulo_NE_NO_1" lane="NE_NO_1" pos="2.31" vTypes="ninguno" period="100000" file="nul" friendlyPos="true"/>
+    <inductionLoop id="nulo_NE_NO_2" lane="NE_NO_2" pos="2.31" vTypes="ninguno" period="100000" file="nul" friendlyPos="true"/>
+    <inductionLoop id="nulo_NO_ML_0" lane="NO_ML_0" pos="4.84" vTypes="ninguno" period="100000" file="nul" friendlyPos="true"/>
+    <inductionLoop id="nulo_NO_ML_1" lane="NO_ML_1" pos="4.84" vTypes="ninguno" period="100000" file="nul" friendlyPos="true"/>
+    <inductionLoop id="nulo_NO_SO_0" lane="NO_SO_0" pos="2.64" vTypes="ninguno" period="100000" file="nul" friendlyPos="true"/>
+    <inductionLoop id="nulo_NO_SO_1" lane="NO_SO_1" pos="2.64" vTypes="ninguno" period="100000" file="nul" friendlyPos="true"/>
+    <inductionLoop id="nulo_NO_SO_2" lane="NO_SO_2" pos="2.64" vTypes="ninguno" period="100000" file="nul" friendlyPos="true"/>
+    <inductionLoop id="nulo_RN_NE_0" lane="RN_NE_0" pos="8.99" vTypes="ninguno" period="100000" file="nul" friendlyPos="true"/>
+    <inductionLoop id="nulo_RN_NE_1" lane="RN_NE_1" pos="8.99" vTypes="ninguno" period="100000" file="nul" friendlyPos="true"/>
+    <inductionLoop id="nulo_RN_NO_0" lane="RN_NO_0" pos="6.19" vTypes="ninguno" period="100000" file="nul" friendlyPos="true"/>
+    <inductionLoop id="nulo_RN_NO_1" lane="RN_NO_1" pos="6.19" vTypes="ninguno" period="100000" file="nul" friendlyPos="true"/>
+    <inductionLoop id="nulo_RN_NO_2" lane="RN_NO_2" pos="6.19" vTypes="ninguno" period="100000" file="nul" friendlyPos="true"/>
+    <inductionLoop id="nulo_RS_SE_0" lane="RS_SE_0" pos="9.76" vTypes="ninguno" period="100000" file="nul" friendlyPos="true"/>
+    <inductionLoop id="nulo_RS_SE_1" lane="RS_SE_1" pos="9.76" vTypes="ninguno" period="100000" file="nul" friendlyPos="true"/>
+    <inductionLoop id="nulo_RS_SO_0" lane="RS_SO_0" pos="10.71" vTypes="ninguno" period="100000" file="nul" friendlyPos="true"/>
+    <inductionLoop id="nulo_RS_SO_1" lane="RS_SO_1" pos="10.71" vTypes="ninguno" period="100000" file="nul" friendlyPos="true"/>
+    <inductionLoop id="nulo_SE_MJ_0" lane="SE_MJ_0" pos="3.11" vTypes="ninguno" period="100000" file="nul" friendlyPos="true"/>
+    <inductionLoop id="nulo_SE_MJ_1" lane="SE_MJ_1" pos="3.11" vTypes="ninguno" period="100000" file="nul" friendlyPos="true"/>
+    <inductionLoop id="nulo_SE_MJ_2" lane="SE_MJ_2" pos="3.11" vTypes="ninguno" period="100000" file="nul" friendlyPos="true"/>
+    <inductionLoop id="nulo_SE_NE_0" lane="SE_NE_0" pos="2.04" vTypes="ninguno" period="100000" file="nul" friendlyPos="true"/>
+    <inductionLoop id="nulo_SE_NE_1" lane="SE_NE_1" pos="2.04" vTypes="ninguno" period="100000" file="nul" friendlyPos="true"/>
+    <inductionLoop id="nulo_SO_ML_0" lane="SO_ML_0" pos="8.22" vTypes="ninguno" period="100000" file="nul" friendlyPos="true"/>
+    <inductionLoop id="nulo_SO_ML_1" lane="SO_ML_1" pos="8.22" vTypes="ninguno" period="100000" file="nul" friendlyPos="true"/>
+    <inductionLoop id="nulo_SO_SE_0" lane="SO_SE_0" pos="2.82" vTypes="ninguno" period="100000" file="nul" friendlyPos="true"/>
+    <inductionLoop id="nulo_SO_SE_1" lane="SO_SE_1" pos="2.82" vTypes="ninguno" period="100000" file="nul" friendlyPos="true"/>
+    <inductionLoop id="nulo_SO_SE_2" lane="SO_SE_2" pos="2.82" vTypes="ninguno" period="100000" file="nul" friendlyPos="true"/>
+    <!-- Actuado del caso Lima: control actuado de SUMO, verde maximo 60 s en cada estado -->
+    <tlLogic id="semaforo_S1" type="actuated" programID="actuado" offset="0">
+        <param key="B_ML_0" value="nulo_B_ML_0"/>
+        <param key="B_SO_0" value="nulo_B_SO_0"/>
+        <param key="B_SO_1" value="nulo_B_SO_1"/>
+        <param key="B_SO_2" value="nulo_B_SO_2"/>
+        <param key="J_NE_0" value="nulo_J_NE_0"/>
+        <param key="J_NE_1" value="nulo_J_NE_1"/>
+        <param key="J_NE_2" value="nulo_J_NE_2"/>
+        <param key="NE_MJ_0" value="nulo_NE_MJ_0"/>
+        <param key="NE_MJ_1" value="nulo_NE_MJ_1"/>
+        <param key="NE_NO_0" value="nulo_NE_NO_0"/>
+        <param key="NE_NO_1" value="nulo_NE_NO_1"/>
+        <param key="NE_NO_2" value="nulo_NE_NO_2"/>
+        <param key="NO_ML_0" value="nulo_NO_ML_0"/>
+        <param key="NO_ML_1" value="nulo_NO_ML_1"/>
+        <param key="NO_SO_0" value="nulo_NO_SO_0"/>
+        <param key="NO_SO_1" value="nulo_NO_SO_1"/>
+        <param key="NO_SO_2" value="nulo_NO_SO_2"/>
+        <param key="RN_NE_0" value="nulo_RN_NE_0"/>
+        <param key="RN_NE_1" value="nulo_RN_NE_1"/>
+        <param key="RN_NO_0" value="nulo_RN_NO_0"/>
+        <param key="RN_NO_1" value="nulo_RN_NO_1"/>
+        <param key="RN_NO_2" value="nulo_RN_NO_2"/>
+        <param key="RS_SE_0" value="nulo_RS_SE_0"/>
+        <param key="RS_SE_1" value="nulo_RS_SE_1"/>
+        <param key="RS_SO_0" value="nulo_RS_SO_0"/>
+        <param key="RS_SO_1" value="nulo_RS_SO_1"/>
+        <param key="SE_MJ_0" value="nulo_SE_MJ_0"/>
+        <param key="SE_MJ_1" value="nulo_SE_MJ_1"/>
+        <param key="SE_MJ_2" value="nulo_SE_MJ_2"/>
+        <param key="SE_NE_0" value="nulo_SE_NE_0"/>
+        <param key="SE_NE_1" value="nulo_SE_NE_1"/>
+        <param key="SO_ML_0" value="nulo_SO_ML_0"/>
+        <param key="SO_ML_1" value="nulo_SO_ML_1"/>
+        <param key="SO_SE_0" value="nulo_SO_SE_0"/>
+        <param key="SO_SE_1" value="nulo_SO_SE_1"/>
+        <param key="SO_SE_2" value="nulo_SO_SE_2"/>
+        <phase duration="10" minDur="10" maxDur="60" state="GGGooGGoogGGGGggooGGGggggrrrrrrrGGGrrGGrrgggGGGGooGGGGggg"/>  <!-- Reducto de frente, los dos sentidos -->
+        <phase duration="3" state="GGGooGGoogGGGGggooGGGggggrrrrrrryyyrryyrrgggGGGGooGGGGggg"/>  <!-- transicion -->
+        <phase duration="10" minDur="10" maxDur="60" state="GooggGoggoooooGGggoooGGGGrrrrrrrrrrGGrrGGGGGooooggooooGGG"/>  <!-- Giros a la izquierda de Reducto -->
+        <phase duration="3" state="GooggGoggoooooGGggoooGGGGrrrrrrrrrryyrryyGGGooooggooooGGG"/>  <!-- transicion -->
+        <phase duration="34" state="oooOOooOOoooooooOOooooooorrrrrrrrrrrrrrrroooooooOOooooooo"/>  <!-- todo en rojo -->
+        <phase duration="10" minDur="10" maxDur="60" state="GGGooGGoogGGGGogooGGGooooGGGGGGGrrrrrrrrroooGGGGooGGGGoog"/>  <!-- 28 de Julio desde el puente y Balboa -->
+        <phase duration="3" state="GGGooGGoogGGGGogooGGGooooyyyyyyyrrrrrrrrroooGGGGooGGGGoog"/>  <!-- transicion -->
+    </tlLogic>
+</additional>

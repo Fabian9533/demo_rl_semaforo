@@ -1,0 +1,367 @@
+{
+ "sistema": "lima/red/lima.nod.xml (conversion cruda sin desplazamiento final)",
+ "S1": [
+  661.48,
+  623.08
+ ],
+ "centroide_esquinas": [
+  659.199,
+  624.486
+ ],
+ "nodos": {
+  "NO": {
+   "osm": "10092527765",
+   "x": 650.018,
+   "y": 635.798,
+   "que": "esquina NO: Reducto hacia el sur x 28 de Julio hacia Larco",
+   "rel": [
+    -9.18,
+    11.31
+   ]
+  },
+  "NE": {
+   "osm": "10092527761",
+   "x": 665.313,
+   "y": 630.279,
+   "que": "esquina NE: Reducto hacia el norte x 28 de Julio desde el puente",
+   "rel": [
+    6.11,
+    5.79
+   ]
+  },
+  "SO": {
+   "osm": "10092527760",
+   "x": 653.867,
+   "y": 614.504,
+   "que": "esquina SO: Reducto hacia el sur x entrada de Balboa",
+   "rel": [
+    -5.33,
+    -9.98
+   ]
+  },
+  "SE": {
+   "osm": "10092527767",
+   "x": 667.597,
+   "y": 617.362,
+   "que": "esquina SE: Reducto hacia el norte x Balboa / 28 de Julio hacia el puente",
+   "rel": [
+    8.4,
+    -7.12
+   ]
+  },
+  "XN": {
+   "osm": "4337293915",
+   "x": 660.914,
+   "y": 631.774,
+   "que": "cruce del ramal del giro izquierdo de Reducto norte con 28 de Julio (lado norte)",
+   "rel": [
+    1.72,
+    7.29
+   ]
+  },
+  "XE": {
+   "osm": "4337293916",
+   "x": 666.493,
+   "y": 623.871,
+   "que": "cruce del mismo ramal con Reducto hacia el norte (lado este)",
+   "rel": [
+    7.29,
+    -0.62
+   ]
+  },
+  "XS": {
+   "osm": "4337295647",
+   "x": 657.091,
+   "y": 615.867,
+   "que": "cruce del ramal del giro izquierdo de Reducto sur con Balboa (lado sur)",
+   "rel": [
+    -2.11,
+    -8.62
+   ]
+  },
+  "XO": {
+   "osm": "4337295648",
+   "x": 652.114,
+   "y": 623.288,
+   "que": "cruce del mismo ramal con Reducto hacia el sur (lado oeste)",
+   "rel": [
+    -7.08,
+    -1.2
+   ]
+  },
+  "MJ": {
+   "osm": "5481252431",
+   "x": 679.951,
+   "y": 614.942,
+   "que": "union de la salida hacia el puente con el ramal de Reducto norte (cruce peatonal)",
+   "rel": [
+    20.75,
+    -9.54
+   ]
+  },
+  "ML": {
+   "osm": "4376564155",
+   "x": 632.402,
+   "y": 641.708,
+   "que": "union de la salida hacia Larco con el ramal de Reducto sur (cruce peatonal)",
+   "rel": [
+    -26.8,
+    17.22
+   ]
+  },
+  "PRN": {
+   "osm": "10092527768",
+   "x": 646.114,
+   "y": 655.686,
+   "que": "semaforo de Reducto desde el norte, calzada principal (3 carriles)",
+   "rel": [
+    -13.08,
+    31.2
+   ]
+  },
+  "PRNg": {
+   "osm": "4337293913",
+   "x": 653.809,
+   "y": 654.658,
+   "que": "semaforo del ramal de giro de Reducto desde el norte",
+   "rel": [
+    -5.39,
+    30.17
+   ]
+  },
+  "PRS": {
+   "osm": "10092527769",
+   "x": 671.606,
+   "y": 589.165,
+   "que": "semaforo de Reducto desde el sur, calzada principal",
+   "rel": [
+    12.41,
+    -35.32
+   ]
+  },
+  "PRSg": {
+   "osm": "5481252433",
+   "x": 665.686,
+   "y": 588.8,
+   "que": "semaforo del ramal de giro de Reducto desde el sur",
+   "rel": [
+    6.49,
+    -35.69
+   ]
+  },
+  "PJ": {
+   "osm": "4350145649",
+   "x": 682.826,
+   "y": 623.582,
+   "que": "semaforo de 28 de Julio desde el puente",
+   "rel": [
+    23.63,
+    -0.9
+   ]
+  },
+  "PB": {
+   "osm": "263618528",
+   "x": 632.543,
+   "y": 597.804,
+   "que": "semaforo de Balboa",
+   "rel": [
+    -26.66,
+    -26.68
+   ]
+  },
+  "E1": {
+   "osm": "263623489",
+   "x": 728.324,
+   "y": 597.243,
+   "que": "primer semaforo del puente, sobre la salida hacia el puente",
+   "rel": [
+    69.13,
+    -27.24
+   ]
+  },
+  "bRN": {
+   "osm": "3707025317",
+   "x": 631.713,
+   "y": 722.798,
+   "que": "donde se separa el ramal de giro de Reducto norte (a ~105 m)",
+   "rel": [
+    -27.49,
+    98.31
+   ]
+  },
+  "bRS": {
+   "osm": "3707030301",
+   "x": 679.128,
+   "y": 530.677,
+   "que": "donde se separa el ramal de giro de Reducto sur (a ~95 m)",
+   "rel": [
+    19.93,
+    -93.81
+   ]
+  },
+  "zB": {
+   "osm": "5667994611",
+   "x": 636.216,
+   "y": 601.638,
+   "que": "cruce peatonal de Balboa, donde sale el ramal de Balboa a Larco",
+   "rel": [
+    -22.98,
+    -22.85
+   ]
+  },
+  "zJ": {
+   "osm": "4372058043",
+   "x": 679.103,
+   "y": 625.026,
+   "que": "cruce peatonal de 28 de Julio desde el puente, antes de NE",
+   "rel": [
+    19.9,
+    0.54
+   ]
+  },
+  "zRN": {
+   "osm": "4372747033",
+   "x": 647.265,
+   "y": 650.35,
+   "que": "cruce peatonal de Reducto desde el norte, antes de NO",
+   "rel": [
+    -11.93,
+    25.86
+   ]
+  },
+  "zRNg": {
+   "osm": "4337293908",
+   "x": 654.971,
+   "y": 649.079,
+   "que": "cruce peatonal del ramal de Reducto norte",
+   "rel": [
+    -4.23,
+    24.59
+   ]
+  },
+  "zRS": {
+   "osm": "4350145651",
+   "x": 671.146,
+   "y": 592.536,
+   "que": "cruce peatonal de Reducto desde el sur",
+   "rel": [
+    11.95,
+    -31.95
+   ]
+  },
+  "zRSg": {
+   "osm": "3707030304",
+   "x": 665.245,
+   "y": 592.404,
+   "que": "cruce peatonal con semaforo del ramal de Reducto sur",
+   "rel": [
+    6.05,
+    -32.08
+   ]
+  },
+  "sRN": {
+   "osm": "5481252432",
+   "x": 661.883,
+   "y": 647.936,
+   "que": "cruce peatonal de la salida hacia Reducto norte",
+   "rel": [
+    2.68,
+    23.45
+   ]
+  },
+  "sRS": {
+   "osm": "3974039015",
+   "x": 656.796,
+   "y": 592.485,
+   "que": "cruce peatonal de la salida hacia Reducto sur",
+   "rel": [
+    -2.4,
+    -32.0
+   ]
+  },
+  "mRS": {
+   "osm": "5481227486",
+   "x": 668.752,
+   "y": 609.879,
+   "que": "nodo de Reducto desde el sur antes de SE",
+   "rel": [
+    9.55,
+    -14.61
+   ]
+  },
+  "jE": {
+   "osm": "3707025329",
+   "x": 686.753,
+   "y": 612.27,
+   "que": "nodo de la salida hacia el puente despues de MJ",
+   "rel": [
+    27.55,
+    -12.22
+   ]
+  }
+ },
+ "isla": [
+  [
+   657.025,
+   629.145
+  ],
+  [
+   655.069,
+   627.205
+  ],
+  [
+   657.504,
+   620.341
+  ],
+  [
+   659.817,
+   619.627
+  ],
+  [
+   664.365,
+   622.981
+  ],
+  [
+   660.885,
+   628.377
+  ],
+  [
+   657.025,
+   629.145
+  ]
+ ],
+ "isla_oeste": [
+  [
+   644.901,
+   624.031
+  ],
+  [
+   645.186,
+   617.914
+  ],
+  [
+   644.102,
+   614.388
+  ],
+  [
+   642.901,
+   611.956
+  ],
+  [
+   646.666,
+   613.721
+  ],
+  [
+   646.778,
+   614.695
+  ],
+  [
+   645.543,
+   624.147
+  ],
+  [
+   644.901,
+   624.031
+  ]
+ ]
+}

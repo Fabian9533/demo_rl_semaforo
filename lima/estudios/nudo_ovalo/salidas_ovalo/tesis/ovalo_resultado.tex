@@ -1,0 +1,21 @@
+% Generado por tablas_ovalo.py (nudo_ovalo_estudio2) a partir de demo_rl/lima/ y demo_rl/lima/alta/. No editar a mano.
+% Nudo en el ovalo: retraso total por vehiculo de cada control y de los dos modelos en las dos tandas (100
+% semillas cada una) y cambio del modelo de orden libre frente a cada uno, por nivel de demanda.
+% fuente: salidas/eval_t1_*.csv y eval_t2_*.csv de lima/ y lima/alta/; modelos: publicada: libre_s42 y completo_s2042, alta: libre_s2042 y completo_s4042.
+\begin{tabular}{>{\raggedright\arraybackslash}p{2.5cm}>{\raggedright\arraybackslash}p{3.7cm}>{\raggedright\arraybackslash}p{3.4cm}>{\raggedright\arraybackslash}p{4.0cm}}
+\toprule
+Demanda & Control & Retraso total, tandas 1 y 2 (s por vehículo) & Cambio del modelo de orden libre frente a este control, tandas 1 y 2 (\%) \\
+\midrule
+Publicada (4271~veh/h) & Plan actual & 99.5 y 100.6 & $-18.3$ y $-19.1$ \\
+ & Fijo ajustado al segundo & 84.1 y 84.5 & $-3.4$ y $-3.6$ \\
+ & Actuado ajustado & 76.4 y 76.5 & $+6.3$ y $+6.4$ \\
+ & Modelo de orden fijo & 76.4 y 76.6 & $+6.3$ y $+6.3$ \\
+ & Modelo de orden libre & 81.2 y 81.4 & --- \\
+\midrule
+Alta (5125~veh/h) & Plan actual & 270.9 y 265.5 & $-23.6$ y $-25.5$ \\
+ & Fijo ajustado al segundo & 133.5 y 127.5 & $+55.0$ y $+55.1$ \\
+ & Actuado ajustado & 143.2 y 142.7 & $+44.5$ y $+38.6$ \\
+ & Modelo de orden fijo & 136.8 y 131.6 & $+51.3$ y $+50.3$ \\
+ & Modelo de orden libre & 206.9 y 197.8 & --- \\
+\bottomrule
+\end{tabular}

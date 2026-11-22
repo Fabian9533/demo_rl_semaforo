@@ -11,3 +11,6 @@ plan3/cola/caidas.json -text
 plan3/cola/reemplazos.json -text
 plan3/referencias_congeladas.json -text
 plan3/listo/** -text
+# Copias de los estudios de Lima (22.11.2026): sus huellas sha256 se tomaron sobre los bytes de la copia de trabajo
+# (CRLF en unos archivos, LF en otros); sin conversion, un clon en cualquier sistema tiene los mismos bytes.
+lima/estudios/** -text

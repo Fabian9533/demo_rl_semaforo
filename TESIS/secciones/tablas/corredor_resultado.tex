@@ -1,19 +1,25 @@
-% Generado por lima/corredor/tablas_corredor.py a partir de lima/corredor/. No editar a mano.
+% Generado por corredor_estudio2/demo_rl/lima/corredor/tablas_corredor.py a partir de esa carpeta (estudio 2 del corredor). No editar a mano.
 % Corredor de la Av. Benavides: retraso total por vehiculo de cada control en las dos tandas de evaluacion
 % (100 semillas cada una) y cambio del modelo frente a cada control, por nivel de demanda.
-% fuente: salidas/eval_t1_*.csv y eval_t2_*.csv de lima/corredor/ y lima/corredor/alta/ (retraso_total_prom); modelo: publicada = vecinos_completo_s42, alta = vecinos_completo_s2042.
+% fuente: salidas/eval_t1_*.csv y eval_t2_*.csv de lima/corredor/ y lima/corredor/alta/ (retraso_total_prom); modelo: publicada = vecinos_completo_s42, alta = vecinos_completo_s4042.
 \begin{tabular}{>{\raggedright\arraybackslash}p{2.3cm}>{\raggedright\arraybackslash}p{4.1cm}>{\raggedright\arraybackslash}p{3.4cm}>{\raggedright\arraybackslash}p{3.8cm}}
 \toprule
 Demanda & Control & Retraso total, tandas 1 y 2 (s por vehículo) & Cambio del modelo frente a este control, tandas 1 y 2 (\%) \\
 \midrule
-Publicada (8706~veh/h) & Plan típico & 77.5 y 77.8 & $-58.8$ y $-59.0$ \\
- & Fijo ajustado al segundo & 35.0 y 35.0 & $-8.8$ y $-8.9$ \\
- & Actuado ajustado & 34.7 y 34.6 & $-8.1$ y $-7.9$ \\
- & Modelo completo & 31.9 y 31.9 & --- \\
+Publicada (7654~veh/h) & Plan típico & 68.0 y 68.1 & $-41.6$ y $-41.7$ \\
+\cmidrule[0.25pt]{2-4}
+ & Fijo ajustado al segundo & 41.3 y 41.2 & $-3.7$ y $-3.8$ \\
+\cmidrule[0.25pt]{2-4}
+ & Actuado ajustado & 41.0 y 41.0 & $-3.2$ y $-3.3$ \\
+\cmidrule[0.25pt]{2-4}
+ & Modelo completo & 39.7 y 39.7 & --- \\
 \midrule
-Alta (10\,447~veh/h) & Plan típico & 152.0 y 153.0 & $-72.1$ y $-72.3$ \\
- & Fijo ajustado al segundo & 53.0 y 52.8 & $-19.9$ y $-19.9$ \\
- & Actuado ajustado & 47.4 y 47.4 & $-10.4$ y $-10.6$ \\
- & Modelo completo & 42.5 y 42.3 & --- \\
+Alta (9185~veh/h) & Plan típico & 109.7 y 108.6 & $-48.9$ y $-48.6$ \\
+\cmidrule[0.25pt]{2-4}
+ & Fijo ajustado al segundo & 60.7 y 60.5 & $-7.7$ y $-7.6$ \\
+\cmidrule[0.25pt]{2-4}
+ & Actuado ajustado & 60.9 y 60.5 & $-8.0$ y $-7.6$ \\
+\cmidrule[0.25pt]{2-4}
+ & Modelo completo & 56.0 y 55.9 & --- \\
 \bottomrule
 \end{tabular}

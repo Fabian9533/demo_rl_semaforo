@@ -1,0 +1,39 @@
+<additional>
+    <!-- Ciclo minimo del corredor: ciclo comun de 37 s, transversales en su verde minimo de peatones y la avenida con el resto -->
+    <tlLogic id="semaforo_C1" type="static" programID="minimo" offset="0">
+        <phase duration="14" state="rGGGrrrrrGGG"/>
+        <phase duration="3" state="ryyyrrrrryyy"/>
+        <phase duration="17" state="GrrrGGGGGrrr"/>
+        <phase duration="3" state="yrrryyyyyrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C2" type="static" programID="minimo" offset="0">
+        <phase duration="13" state="rrrrGGGrGGGG"/>
+        <phase duration="3" state="rrrryyyryyyy"/>
+        <phase duration="18" state="GGGGrrrGrrrr"/>
+        <phase duration="3" state="yyyyrrryrrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C3" type="static" programID="minimo" offset="0">
+        <phase duration="11" state="rGGGGrrrrGGG"/>
+        <phase duration="3" state="ryyyyrrrryyy"/>
+        <phase duration="20" state="GrrrrGGGGrrr"/>
+        <phase duration="3" state="yrrrryyyyrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C4" type="static" programID="minimo" offset="0">
+        <phase duration="12" state="rrrGGGGrrrGGG"/>
+        <phase duration="3" state="rrryyyyrrryyy"/>
+        <phase duration="19" state="GGGrrrrGGGrrr"/>
+        <phase duration="3" state="yyyrrrryyyrrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C5" type="static" programID="minimo" offset="0">
+        <phase duration="13" state="rrGGGrGG"/>
+        <phase duration="3" state="rryyyryy"/>
+        <phase duration="18" state="GGrrrGrr"/>
+        <phase duration="3" state="yyrrryrr"/>
+    </tlLogic>
+    <tlLogic id="semaforo_C6" type="static" programID="minimo" offset="0">
+        <phase duration="14" state="rrrGGGrrrGGG"/>
+        <phase duration="3" state="rrryyyrrryyy"/>
+        <phase duration="17" state="GGGrrrGGGrrr"/>
+        <phase duration="3" state="yyyrrryyyrrr"/>
+    </tlLogic>
+</additional>

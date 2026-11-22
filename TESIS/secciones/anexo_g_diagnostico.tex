@@ -24,15 +24,15 @@
 % incluyen: sus cifras estan en las tablas escritas aqui. Sin etiqueta despues de los titulos con asterisco; tablas,
 % figuras y ecuaciones llevan su etiqueta despues del caption y numeran G.n.
 
-Este anexo explica de dónde sale IPPO con mensajes corregido (en
-adelante, el modelo corregido), el modelo base del segundo estudio
-(Sección~\ref{sec:segundo-estudio}). Reúne dos diagnósticos con llegadas
-regulares, decididos después del veredicto del primer estudio y que no
-cambian ninguno de sus veredictos. El primero busca por qué IPPO con
-mensajes no mejoraba la coordinación en P4 y P6, y si eso se corrige
-cambiando solo su entrenamiento; el segundo
-(Sección~\ref{sec:diag-corredor}), por qué en el corredor el resultado
-no sigue una tendencia con la demanda.
+Este anexo responde dos preguntas sobre el primer estudio, con llegadas
+regulares. La primera es por qué IPPO con mensajes no mejora la
+coordinación en P4 y P6 y si eso se corrige cambiando solo su
+entrenamiento (Sección~\ref{sec:entre-estudios}); de su respuesta sale
+IPPO con mensajes corregido, el modelo base del segundo estudio
+(Sección~\ref{sec:segundo-estudio}). La segunda es por qué en el
+corredor su resultado no sigue una tendencia con la demanda
+(Sección~\ref{sec:diag-corredor}). Los dos diagnósticos son posteriores
+al veredicto del primer estudio y no cambian ninguno de sus veredictos.
 
 % fuente: plan2/exploratorio_coord/conf_p6/salidas/juicio_conf_p6.txt (P6, 6001-6030: V2 -6.7 %; IPPO publicado
 % +1.3 %) y tanda1 y tanda2 (P4 y P1); plan2/diag_corredor/resultados.csv (V2 frente a fijo10, 1001-1030: -2.9, -2.3,
@@ -43,11 +43,18 @@ entrenamiento (Ecuación~\ref{eq:gae-smdp} y
 Tabla~\ref{tab:exploratorio}) y después el corredor
 (Tablas~\ref{tab:diag-corredor} y~\ref{tab:diag-2715} y
 Figura~\ref{fig:diag-corredor}). Un cambio negativo es menos retraso que
-la referencia.
+la referencia. Cada diagnóstico tiene su registro previo; los
+registros, el código y los resultados están en las carpetas
+\texttt{plan2/\allowbreak exploratorio\_coord/} y
+\texttt{plan2/\allowbreak diag\_corredor/} del repositorio (Anexo~B).
+% fuente: git ls-files de demo_rl (22.11.2026): plan2/exploratorio_coord/ (PRERREGISTRO.md, DESVIACIONES.md, codigo/,
+% verificar_hechos.py) y plan2/diag_corredor/ (PRERREGISTRO.md, analisis.py, analisis3.py, figura_resumen.py,
+% resultados.csv, pruebas.txt, pruebas3.txt, sumo.md, bloqueo.md, comportamiento.md); anexos.tex, Anexo B
+% (exploratorio_coord)
 
-\subsection*{Qué aprendía IPPO con mensajes y por qué}
+\subsection*{Qué aprende IPPO con mensajes y por qué}
 
-La versión evaluada de IPPO con mensajes no aprendía lo mismo en todos
+La versión evaluada de IPPO con mensajes no aprende lo mismo en todos
 los casos:
 \begin{itemize}
   \item \textbf{En P3 y P5, el ciclo mínimo}, sincronizado con los
@@ -60,17 +67,16 @@ los casos:
     de avenida tiene una mediana de 25~s y el ciclo, una de 46~s, y dos
     cruces vecinos están en la misma fase solo el 18.3\,\% de la hora.
 \end{itemize}
-El diagnóstico, hecho con semillas de validación, apunta a dos causas
-en el entrenamiento.
+Con semillas de validación, el diagnóstico apunta a dos causas en el
+entrenamiento.
 % fuente: plan2/exploratorio_coord/diagnostico/mejora_coord/a3_obs_sensibilidad.txt (sin mensajes, semillas 999 y
 % 1999: red +79.8, malla3 +70.1, red_alta -4.1); diagnostico/mejora_coord/SINTESIS.md (P4: 24-25/10, ciclo de 41 s);
 % sintesis/analizar_fases_p6.txt (semilla 999, ippo_s42: verde de avenida 25, ciclo 46, misma fase 18.3 %)
 
 \textbf{El descuento.} El estimador de la ventaja (GAE,
 Ecuación~\ref{eq:gae}) descuenta por decisión, y las decisiones no duran
-lo mismo: 5~s si se mantiene la fase y 8~s si se cambia, con el ámbar.
-Contado en decisiones, un verde largo parece más barato de lo que es en
-segundos. En P4, la versión evaluada tiene un retraso un 4.8\,\% mayor
+lo mismo: 5~s si se mantiene la fase y 8~s si se cambia, con el ámbar
+(Sección~\ref{sec:modelos}). En P4, la versión evaluada tiene un retraso un 4.8\,\% mayor
 que el del ciclo mínimo, pero su costo descontado por decisión es un
 1.5\,\% menor: el objetivo del entrenamiento prefiere el plan largo
 aunque el tráfico espere más. En P6 pasa lo mismo frente al fijo
@@ -90,11 +96,10 @@ dependen de la sincronía.
 
 \subsection*{Las dos correcciones}
 
-IPPO con mensajes corregido cambia esos dos puntos del entrenamiento y
-nada más. La observación, la máscara de acciones, la recompensa, los
-mensajes y los hiperparámetros son los de IPPO con mensajes. La
-evaluación tampoco cambia: ninguna corrección actúa fuera del
-entrenamiento.
+IPPO con mensajes corregido cambia solo esos dos puntos del
+entrenamiento: la observación, la máscara de acciones, la recompensa,
+los mensajes, los hiperparámetros y la evaluación son los de IPPO con
+mensajes.
 
 \textbf{El descuento cuenta los segundos entre decisiones.} Cada
 decisión guarda el segundo $t_k$ en que se tomó, y su intervalo dura
@@ -118,8 +123,8 @@ probabilidades parecidas, los semáforos se desvían juntos y el ciclo
 común se conserva. Es una heurística: con probabilidades distintas entre
 semáforos, el estimador del gradiente queda sesgado.
 
-Las dos correcciones se probaron siempre juntas, así que no se sabe cuál
-pesa más.
+Las dos correcciones se evaluaron siempre juntas: el diagnóstico no
+separa el aporte de cada una.
 % fuente: plan2/exploratorio_coord/codigo/smdp_crn.diff y rl_ippo_smdp_crn.py (gae con gamma^(dt/5): 5 s mantener,
 % 8 s cambiar; un numero u comun por segundo, de un generador propio; p_cambiar con la politica enmascarada);
 % HECHOS.md seccion 1 (solo cambia rl_ippo.py); sesgo del estimador: PRERREGISTRO.md (V2) y SINTESIS.md seccion 6;
@@ -128,21 +133,23 @@ pesa más.
 \subsection*{Efecto medido en P4, P6 y P1}
 
 \textbf{Diseño.} Las reglas se registraron antes de entrenar. En P4 se
-compararon un control, que es IPPO con mensajes sin cambios, el modelo
-corregido y cuatro variantes más; las dos mejores pasaron a P6 y la de
-menor retraso, a P1. Esa variante suma al modelo corregido dos añadidos:
-la observación normalizada y un actor que empieza en el ciclo mínimo.
-Cada modelo tiene tres entrenamientos con el protocolo del primer
-estudio (Sección~\ref{sec:protocolo}), y su versión guardada se elige
-con ocho semillas de validación en lugar de dos. La métrica es el
+comparan un control, que es IPPO con mensajes sin cambios, IPPO con
+mensajes corregido y cuatro variantes más; las dos mejores pasan a P6,
+y la de menor retraso, a P1. Esa variante suma a IPPO con mensajes
+corregido dos añadidos: la observación normalizada y un actor que
+empieza en el ciclo mínimo. Cada modelo tiene tres entrenamientos con
+el protocolo del primer estudio (Sección~\ref{sec:protocolo}), pero su
+versión guardada se elige con ocho semillas de validación en lugar de
+dos: 999, 1999, 2999, 3999, 4999, 7999, 8999 y 9999. La métrica es el
 retraso y la referencia, el fijo ajustado. La primera prueba usa las
 semillas 5001 a 5030 y se repite, sin reentrenar, con las 6001 a 6030;
 ninguna es del primer estudio. Solo la repetición confirma, porque la
-variante ganadora se eligió en la primera
+variante ganadora se elige en la primera
 (Tabla~\ref{tab:exploratorio}).
 % fuente: plan2/exploratorio_coord/PRERREGISTRO.md (seccion 2: bases 42, 2042 y 4042, 200 episodios, validacion con
 % ocho semillas; seccion 4: ganadora en 5001-5030 y repeticion en 6001-6030; seccion 6: las dos mejores a P6 y la
-% ganadora a P1; seccion 7: las semillas 1001-1030 no se usan) y prerregistro.sha256
+% ganadora a P1; seccion 7: las semillas 1001-1030 no se usan) y prerregistro.sha256; semillas de validacion: misma
+% seccion 2, fila "Validacion" ("8 semillas declaradas: 999, 1999, 2999, 3999, 4999, 7999, 8999, 9999", --val-seeds)
 
 % fuente: plan2/exploratorio_coord/tanda1/juicio_tanda1.txt (P4, 5001-5030), tanda2/juicio_tanda2.txt (P4 6001-6030,
 % P6 5001-5030 y P1) y conf_p6/salidas/juicio_conf_p6.txt (P6 6001-6030); cifras recalculadas desde los CSV por
@@ -179,22 +186,23 @@ Corregido, con dos añadidos & 19.73 & $-7.3$ [$-8.7$, $-6.0$] & $-0.6$ [$-1.5$,
 \end{table}
 
 \begin{itemize}
-  \item \textbf{P4: aprende el ciclo mínimo.} La versión evaluada del
-    modelo corregido da el mismo resultado que el ciclo mínimo en las 30
-    semillas. No lo supera, y el criterio registrado pedía superarlo
-    también a él: en la repetición, la variante con los dos añadidos
+  \item \textbf{P4: aprende el ciclo mínimo.} La versión evaluada de
+    IPPO con mensajes corregido da el mismo resultado que el ciclo
+    mínimo en las 30 semillas. No lo supera, y el criterio registrado
+    pide superarlo también a él: en la repetición, la variante con los
+    dos añadidos
     queda a $+0.0$\,\% del ciclo mínimo (IC95 de $-0.3$ a $+0.4$\,\%).
     Frente al fijo ajustado desde 10~s del Anexo~F, esa variante empata
     en la primera prueba ($+1.6$\,\%, de $-0.2$ a $+3.5$\,\%). La
     ganancia de P4 es pasar del plan largo al ciclo corto, algo que un
     fijo bien ajustado también logra.
-  \item \textbf{P6: una mejora real.} El modelo corregido baja el
-    retraso un 7.3\,\% frente al fijo ajustado en la primera prueba y un
-    6.7\,\% en la repetición, donde tiene menos retraso en 29 de las 30
-    semillas. En esas semillas, IPPO con mensajes empata con el fijo
+  \item \textbf{P6: una mejora real.} IPPO con mensajes corregido baja
+    el retraso un 7.3\,\% frente al fijo ajustado en la primera prueba y
+    un 6.7\,\% en la repetición, donde tiene menos retraso en 29 de las
+    30 semillas. En esas semillas, IPPO con mensajes empata con el fijo
     ($+1.3$\,\%). Con las 60 semillas el cambio es de $-7.0$\,\% (IC95
-    de $-9.0$ a $-5.1$\,\%). Hasta entonces, ningún control había
-    superado de forma consistente al fijo ajustado de P6.
+    de $-9.0$ a $-5.1$\,\%). En el primer estudio, ningún control supera
+    de forma consistente al fijo ajustado de P6.
   \item \textbf{P1: no empeora.} La variante con los dos añadidos queda
     en $-7.3$\,\% frente al fijo ajustado, e IPPO con mensajes, en
     $-6.7$\,\%. La diferencia entre los dos, $-0.6$\,\% con un límite
@@ -207,8 +215,8 @@ Corregido, con dos añadidos & 19.73 & $-7.3$ [$-8.7$, $-6.0$] & $-0.6$ [$-1.5$,
 % en verificar_hechos.txt); conf_p6/salidas/juicio_conf_p6.txt (6001-6030: V2 gana en 29 de 30, IPPO publicado
 % +1.3 %; 60 semillas: -7.0 % [-9.0, -5.1])
 
-Lo que el modelo corregido aprende en P6 no es el ciclo mínimo, que ahí
-bloquea la red (184.39~s/veh), ni el fijo. Parte del ciclo mínimo y extiende
+Lo que IPPO con mensajes corregido aprende en P6 no es el ciclo mínimo,
+que ahí bloquea la red (184.39~s/veh), ni el fijo. Parte del ciclo mínimo y extiende
 algunos verdes de avenida: el 72\,\% duran 10~s y el resto, entre 15 y
 35~s. Dos cruces vecinos están en la misma fase el 63.6\,\% de la hora,
 frente al 18.3\,\% de IPPO con mensajes. No se sabe a qué reacciona esa
@@ -226,24 +234,25 @@ correcciones: en P4 bajan el retraso un 3.2\,\% frente al control (IC95
 de $-4.8$ a $-1.6$\,\%, $p = 0.006$ con la corrección de Holm).
 Normalizar la observación, sola, no cambia nada ($0.0$\,\% frente al
 control, de $-1.7$ a $+1.6$\,\%). MAPPO con una recompensa de toda la
-red termina, como el modelo corregido, en el ciclo mínimo. Elegir la
+red termina, como IPPO con mensajes corregido, en el ciclo mínimo. Elegir la
 versión guardada con ocho semillas de validación en lugar de dos tampoco
 ayuda: el control queda a $+0.5$\,\% de IPPO con mensajes en P4 y a
 $+5.0$\,\% en P6, con intervalos que incluyen el cero. Y en P6 los dos
-añadidos no suman nada al modelo corregido ($+0.2$\,\% en la primera
-prueba y $-0.3$\,\% en la repetición).
+añadidos no suman nada a IPPO con mensajes corregido ($+0.2$\,\% en la
+primera prueba y $-0.3$\,\% en la repetición).
 % fuente: tanda1/juicio_tanda1.txt (contrastes frente a C0 con Holm: V2 -3.2 % [-4.8, -1.6], V1 0.0 % [-1.7, 1.6]; V4
 % igual al trivial; C0 frente a IPPO publicado +0.5 %); tanda2/juicio_tanda2.txt (C0 en P6 +5.0 % [-1.4, 11.8]; V5
 % frente a V2 +0.2 %); conf_p6/salidas/juicio_conf_p6.txt (V5 frente a V2 -0.3 %)
 
 \textbf{Límites.} El diagnóstico descansa en tres entrenamientos por
-modelo, y en P6 uno de los tres del modelo corregido no se estabiliza.
-La repetición de P6 no estaba registrada: se agregó después de ver la
-primera prueba. Con el retraso total, la mejora de P6 en la repetición
-baja de $-6.7$ a $-3.1$\,\% (IC95 de $-4.7$ a $-1.7$\,\%): la espera
-para entrar, de unos 45.5~s/veh, es la misma con el fijo y con el
-modelo, y diluye el cambio. P2, P3 y P5 no se probaron aquí; el segundo
-estudio evalúa el modelo corregido en los seis casos (Anexo~H).
+modelo, y en P6 uno de los tres de IPPO con mensajes corregido no se
+estabiliza. La repetición de P6 es posterior a la primera prueba y no
+figura en el registro previo. Con el retraso total, la mejora de P6 en
+la repetición baja de $-6.7$ a $-3.1$\,\% (IC95 de $-4.7$ a
+$-1.7$\,\%): la espera para entrar, de unos 45.5~s/veh, es la misma con
+el fijo y con el modelo, y diluye el cambio. P2, P3 y P5 no se prueban
+aquí; el segundo estudio evalúa IPPO con mensajes corregido en los seis
+casos (Anexo~H).
 % fuente: tanda2/juicio_tanda2.txt (convergencia por base: la 2042 de V2 no converge en P6);
 % conf_p6/salidas/juicio_conf_p6.txt (retraso total, 6001-6030: V2 -3.1 % [-4.7, -1.7]; retraso de insercion de
 % 45.49 a 45.65 s/veh salvo el trivial); conf_p6/juzgar_conf_p6.py (repeticion fuera del pre-registro); HECHOS.md
@@ -256,18 +265,17 @@ no sigue una tendencia con la demanda: $-5.6$, $+5.4$, $-6.8$, $+6.6$ y
 $-23.3$\,\% con 905, 1358, 1810, 2715 y 3620~veh/h
 (Figura~\ref{fig:efecto-demanda}). Este diagnóstico pregunta si eso es
 un problema del modelo, de la comparación o de SUMO, y si se corrige.
-No es un error de SUMO: cada nivel tiene una causa distinta
-(Tabla~\ref{tab:diag-corredor}), y el entrenamiento corregido deja al
-modelo con menos retraso total que el fijo en cuatro de los cinco
-niveles (Figura~\ref{fig:diag-corredor}).
+La Tabla~\ref{tab:diag-corredor} da la causa de cada nivel, y la
+Figura~\ref{fig:diag-corredor}, el cambio de IPPO con mensajes
+corregido.
 
 \textbf{Diseño.} Las hipótesis y sus criterios se registraron antes de
-entrenar. Se usa la medición más estricta del Anexo~F: el retraso total
-frente al fijo ajustado desde 10~s de cada nivel. El modelo corregido se
-entrena en cada nivel con el protocolo del primer estudio, y su versión
-evaluada se elige por el retraso total en la validación (la de IPPO con
-mensajes se había elegido por el retraso). La evaluación usa las
-semillas 1001 a 1030, las de esa curva, y se confirma con las 6001 a
+entrenar. La medición es la más estricta (Anexo~F): el retraso total
+frente al fijo ajustado desde 10~s de cada nivel. IPPO con mensajes
+corregido se entrena en cada nivel con el protocolo del primer estudio,
+y su versión evaluada se elige por el retraso total en la validación;
+la de IPPO con mensajes, por el retraso. La evaluación usa las
+semillas 1001 a 1030, las de la curva, y se confirma con las 6001 a
 6030.
 % fuente: plan2/diag_corredor/PRERREGISTRO.md (pregunta, hipotesis, criterio y diseno: evaluacion 1001-1030 y
 % confirmacion 6001-6030; Enmienda 1: version guardada y entrenamiento mediano por el retraso total en 999 y 1999) y
@@ -291,19 +299,23 @@ semillas 1001 a 1030, las de esa curva, y se confirma con las 6001 a
 \makecell[l]{Nivel\\(veh/h)} & \makecell[l]{Primer\\estudio} & Causa & \makecell[r]{IPPO con\\mensajes} & \makecell[r]{IPPO con\\mensajes\\corregido} \\
 \midrule
 905 & \makecell[l]{$-5.6$\,\%\\FUNCIONA} & La referencia: el primer barrido no probó el ciclo mínimo & \makecell[r]{$+0.1$\,\%\\EMPATA} & \makecell[r]{$-2.9$\,\%\\MEJORA} \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 1358 & \makecell[l]{$+5.4$\,\%\\FALLA} & El entrenamiento: verdes largos, casi un plan fijo & \makecell[r]{$+5.2$\,\%\\FALLA} & \makecell[r]{$-2.3$\,\%\\MEJORA} \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 1810 (P1) & \makecell[l]{$-6.8$\,\%\\FUNCIONA} & Una mejora real: la onda verde entre los cruces & \makecell[r]{$-6.7$\,\%\\FUNCIONA} & \makecell[r]{$-7.4$\,\%\\FUNCIONA} \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 2715 & \makecell[l]{$+6.6$\,\%\\FALLA} & En parte, los giros a la izquierda de la segunda media hora & \makecell[r]{$+32.9$\,\%\\FALLA} & \makecell[r]{$+33.6$\,\%\\FALLA} \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 3620 (P2) & \makecell[l]{$-23.3$\,\%\\FUNCIONA} & La métrica: el retraso no cuenta la espera para entrar & \makecell[r]{$+1.6$\,\%\\FALLA} & \makecell[r]{$-10.8$\,\%\\FUNCIONA} \\
 \bottomrule
 \end{tabular}
-\caption[Diagnóstico del corredor: causa y cambio por nivel]{Diagnóstico del corredor: causa del resultado de cada nivel. Primer estudio: cambio del retraso de IPPO con mensajes frente al fijo ajustado, y su veredicto. Medición más estricta: cambio del retraso total frente al fijo ajustado desde 10~s de cada nivel, sobre las semillas 1001 a 1030. Con las semillas 6001 a 6030, el modelo corregido recibe los mismos veredictos.}
+\caption[Diagnóstico del corredor: causa y cambio por nivel]{Diagnóstico del corredor: causa del resultado de cada nivel. Primer estudio: cambio del retraso de IPPO con mensajes frente al fijo ajustado, y su veredicto. Medición más estricta: cambio del retraso total frente al fijo ajustado desde 10~s de cada nivel, sobre las semillas 1001 a 1030. Con las semillas 6001 a 6030, IPPO con mensajes corregido recibe los mismos veredictos.}
 \label{tab:diag-corredor}
 \end{table}
 
 \begin{itemize}
   \item \textbf{905~veh/h: la referencia.} El fijo ajustado de ese
-    nivel salía de un barrido que empezaba en 12~s de verde. El fijo
+    nivel sale de un barrido que empieza en 12~s de verde. El fijo
     ajustado desde 10~s es ahí el ciclo mínimo, y frente a él IPPO con
     mensajes queda en $+0.1$\,\% (IC95 de $-0.8$ a $+1.0$\,\%).
   \item \textbf{1358~veh/h: el entrenamiento.} Hasta 1810~veh/h, IPPO
@@ -311,21 +323,21 @@ semillas 1001 a 1030, las de esa curva, y se confirma con las 6001 a
     transversal, 20 o 25~s de avenida y un ciclo de 41~s. Aquí el fijo
     es un ciclo corto, con 12~s de avenida: frente a él, el modelo
     reduce el retraso de la avenida (de 20.8 a 16.9~s por vehículo) y
-    aumenta el de la transversal (de 14.5 a 22.2~s). Con el entrenamiento corregido
-    cambia de fase 500 veces por corrida en vez de 373 (el fijo, 527),
-    y su retraso baja de 19.10 a 17.68~s/veh (el fijo, 18.12).
+    aumenta el de la transversal (de 14.5 a 22.2~s). IPPO con mensajes
+    corregido cambia de fase 500 veces por corrida, frente a 373 de IPPO
+    con mensajes y 527 del fijo, y su retraso es de 17.68~s/veh, frente
+    a 19.10 y 18.12.
   \item \textbf{1810~veh/h (P1): una mejora real.} Los desfases que
     aprende IPPO con mensajes, de 18 y 21~s, quedan cerca de los 22~s
     de viaje libre entre los cruces: es una onda verde en los dos
     sentidos. El fijo favorece un sentido a costa del otro.
-  \item \textbf{3620~veh/h (P2): la métrica.} La espera para entrar es
-    de 282.0~s/veh con IPPO con mensajes y de 239.6 con el fijo. Al
-    sumarla, el cambio pasa de $-23.3$ a $+1.6$\,\%. El modelo
-    corregido sí supera al fijo ($-10.8$\,\%).
-  \item \textbf{2715~veh/h: no se corrige.} La desventaja ya existía con
+  \item \textbf{3620~veh/h (P2): la métrica.} Al sumar la espera para
+    entrar, el cambio pasa de $-23.3$ a $+1.6$\,\% (Anexo~F). IPPO con
+    mensajes corregido sí supera al fijo ($-10.8$\,\%).
+  \item \textbf{2715~veh/h: no se corrige.} La desventaja ya existe con
     el retraso y crece con el retraso total: la espera para entrar es
-    de 18.4~s/veh con IPPO con mensajes y de 3.1 con el fijo. El
-    entrenamiento corregido no la cambia.
+    de 18.4~s/veh con IPPO con mensajes y de 3.1 con el fijo. IPPO con
+    mensajes corregido no la cambia.
 \end{itemize}
 % fuente: plan2/diag_corredor/descomposicion.txt (905: fijo desde 10 s = trivial; espera para entrar 18.39 y 3.05 con
 % 2715 y 282.02 y 239.57 en P2; retraso total +32.9 y +1.6 %); plan2/demanda2/resumen_demanda2.csv (905: fijo 20/10
@@ -344,19 +356,18 @@ semillas 1001 a 1030, las de esa curva, y se confirma con las 6001 a
 \begin{figure}[!tbp]
 \centering
 \includegraphics[width=0.9\textwidth]{fig_diag_resumen.pdf}
-\caption[Diagnóstico del corredor: cambio según la demanda]{Diagnóstico del corredor: cambio del retraso total frente al fijo ajustado desde 10~s (\%), según la demanda, de IPPO con mensajes (línea discontinua; en la leyenda, entrenamiento del plan) y del modelo corregido (línea continua; entrenamiento corregido), con las semillas 1001 a 1030 y su IC95 (barra vertical). Estrella: 2715~veh/h sin los giros a la izquierda, con el modelo corregido entrenado ahí frente a su fijo ajustado desde 10~s. Bandas y relleno: como en la Figura~\ref{fig:efecto-demanda}.}
+\caption[Diagnóstico del corredor: cambio según la demanda]{Diagnóstico del corredor: cambio del retraso total frente al fijo ajustado desde 10~s (\%), según la demanda, de IPPO con mensajes (línea discontinua; en la leyenda, entrenamiento del plan) y de IPPO con mensajes corregido (línea continua; entrenamiento corregido), con las semillas 1001 a 1030 y su IC95 (barra vertical). Estrella: 2715~veh/h sin los giros a la izquierda, con IPPO con mensajes corregido entrenado ahí frente a su fijo ajustado desde 10~s. Bandas y relleno: como en la Figura~\ref{fig:efecto-demanda}.}
 \label{fig:diag-corredor}
 \end{figure}
 
 \textbf{Por qué 2715~veh/h.} La espera para entrar crece en una sola
 entrada, la de la avenida por el este, y solo en la segunda media hora:
 89.7~s con IPPO con mensajes y 17.8~s con el fijo. Las dos medias horas
-difieren sobre todo en los cuatro giros: en la primera son a la derecha
-y en la segunda, a la izquierda, tres de ellos en el mismo cruce
-(Figura~\ref{fig:corredor-periodos}). El que gira a la izquierda no
-tiene prioridad y, como las calles tienen un carril, mientras espera un
-hueco detiene a los que vienen detrás
-(Figura~\ref{fig:giro-izquierda}). Hasta 1810~veh/h eso pesa poco: la
+difieren sobre todo en los cuatro giros, a la derecha en la primera y a
+la izquierda en la segunda, tres de ellos en el mismo cruce, y el que
+gira a la izquierda sin prioridad detiene a los que vienen detrás
+(Sección~\ref{sec:escenarios}, Figuras~\ref{fig:corredor-periodos}
+y~\ref{fig:giro-izquierda}). Hasta 1810~veh/h eso pesa poco: la
 segunda media hora tiene a lo sumo un 15\,\% más de retraso que la
 primera. Con 2715~veh/h, el retraso total pasa de 38.4 a 70.3~s/veh con
 el fijo, de 29.3 a 118.9 con IPPO con mensajes y de 28.6 a 272.2 con el
@@ -369,13 +380,13 @@ actuado.
 
 Para medir el peso de los giros se repitió el nivel con los giros de la
 segunda media hora a la derecha y el mismo volumen
-(Tabla~\ref{tab:diag-2715}). Sin volver a entrenar, el modelo corregido
-pasa de $+33.6$ a $-6.9$\,\% frente al mismo fijo. Pero
-ese fijo no es el mejor sin los giros: su propio barrido elige otro
+(Tabla~\ref{tab:diag-2715}). Sin volver a entrenar, IPPO con mensajes
+corregido pasa de $+33.6$ a $-6.9$\,\% frente al mismo fijo. Pero ese
+fijo no es el mejor sin los giros: su propio barrido elige otro
 programa, que baja el retraso total de 42.5 a 29.2~s/veh. Frente a ese
-fijo, el modelo corregido entrenado sin los giros queda un 1.3\,\% por
-encima (IC95 de $+0.5$ a $+2.0$\,\%), y sigue siendo FALLA, también con
-las semillas 6001 a 6030.
+fijo, IPPO con mensajes corregido entrenado sin los giros queda un
+1.3\,\% por encima (IC95 de $+0.5$ a $+2.0$\,\%), y sigue siendo FALLA,
+también con las semillas 6001 a 6030.
 
 % fuente: TESIS/secciones/tablas/diag_2715.tex, generada por plan2/diag_corredor/analisis3.py (eval3/ y las
 % evaluaciones de la primera ronda; semillas 1001-1030; cambio pareado frente al fijo de 2715 en cada escenario, con
@@ -394,25 +405,29 @@ las semillas 6001 a 6030.
 Control & \makecell[r]{Retraso total\\(s/veh)} & \makecell[r]{Frente al\\fijo (\%)} & \makecell[r]{Retraso total\\(s/veh)} & \makecell[r]{Frente al\\fijo (\%)} \\
 \midrule
 Fijo ajustado desde 10~s de 2715~veh/h (25/10~s) & 57.50 & -- & 42.54 & -- \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 Actuado & 151.43 & $+163.3$ & 28.75 & $-32.4$ \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 IPPO con mensajes & 76.43 & $+32.9$ & 34.61 & $-18.6$ \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 IPPO con mensajes corregido & 76.83 & $+33.6$ & 39.59 & $-6.9$ \\
-\addlinespace
+\midrule
 Fijo ajustado desde 10~s sin los giros (35/15~s) & -- & -- & 29.22 & $-31.3$ \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 IPPO con mensajes corregido, entrenado sin los giros & -- & -- & 29.59 & $-30.4$ \\
 \bottomrule
 \end{tabular}
-\caption[Diagnóstico del corredor: 2715~veh/h con y sin giros a la izquierda]{Nivel de 2715~veh/h con los giros a la izquierda de la segunda media hora y sin ellos (cambiados a la derecha): retraso total medio de cada control y su cambio frente al fijo ajustado desde 10~s de 2715~veh/h en cada escenario, sobre las semillas 1001 a 1030. En todos los cambios, el IC95 queda entero a un lado del cero. Las dos últimas filas existen solo sin los giros: el fijo ajustado desde 10~s de ese escenario y el modelo corregido entrenado en él; las demás no se vuelven a entrenar.}
+\caption[Diagnóstico del corredor: 2715~veh/h con y sin giros a la izquierda]{Nivel de 2715~veh/h con los giros a la izquierda de la segunda media hora y sin ellos (cambiados a la derecha): retraso total medio de cada control y su cambio frente al fijo ajustado desde 10~s de 2715~veh/h en cada escenario, sobre las semillas 1001 a 1030. En todos los cambios, el IC95 queda entero a un lado del cero. Las dos últimas filas existen solo sin los giros: el fijo ajustado desde 10~s de ese escenario e IPPO con mensajes corregido entrenado en él; las demás no se vuelven a entrenar.}
 \label{tab:diag-2715}
 \end{table}
 
-Los giros, entonces, pesan mucho, pero no bastan para explicar el
-nivel: la desventaja baja de $+33.6$ a $+1.3$\,\% y no desaparece.
-Además, en P2 los mismos giros llevan más vehículos y el modelo
-corregido supera al fijo. Los giros perjudican más a los controles que
-reaccionan al tráfico que al fijo: el actuado tiene el mayor retraso con
-ellos (151.4~s/veh) y el menor sin ellos (28.8). El mecanismo quedó
-medido solo en parte: mientras un vehículo espera dentro del cruce para
+Los giros pesan mucho, pero no bastan para explicar el nivel: la
+desventaja baja de $+33.6$ a $+1.3$\,\% y no desaparece. Además, en P2
+los mismos giros llevan más vehículos e IPPO con mensajes corregido
+supera al fijo. Los giros perjudican más a los controles que reaccionan
+al tráfico que al fijo: el actuado tiene el mayor retraso con ellos
+(151.4~s/veh) y el menor sin ellos (28.8). El mecanismo está medido
+solo en parte: mientras un vehículo espera dentro del cruce para
 girar a la izquierda, no cruza ningún otro de su acceso. El giro que más
 bloquea, el de este a sur del primer cruce, retiene la punta de la
 avenida unas tres veces más con los modelos que con el fijo, y no está
@@ -425,14 +440,14 @@ medido por qué.
 % del acceso en 10 806 s de verde con un giro a la izquierda esperando dentro del cruce; bloqueo del giro E->S1: 4 %
 % del verde con el fijo frente a 12-13 % con IPPO y V2)
 
-\textbf{Lo que no ayudó.} Tres cambios más no mejoraron al modelo
-corregido. Sumar a la recompensa los vehículos que esperan para entrar
+\textbf{Lo que no ayudó.} Tres cambios más no mejoran a IPPO con
+mensajes corregido. Sumar a la recompensa los vehículos que esperan para entrar
 a la red deja más retraso total que IPPO con mensajes con 2715~veh/h y
 en P2 ($+14.0$ y $+20.9$\,\%) y, junto con las correcciones, queda peor
 que el fijo en esos niveles ($+57.9$ y $+20.2$\,\%): el modelo no ve lo
 que se le cobra. Agregar esa espera también a la observación baja el
 retraso total un 13 y un 24\,\% frente a la variante anterior, pero en
-ningún nivel queda por debajo del modelo corregido de forma
+ningún nivel queda por debajo de IPPO con mensajes corregido de forma
 significativa, y con 2715~veh/h sigue un 36.7\,\% por encima del fijo.
 Un descuento que mira más lejos ($\gamma = 0.99$ en lugar de 0.95),
 probado con 2715~veh/h, sube el retraso total un 16.1\,\%, y su
@@ -470,14 +485,13 @@ $\pm 5$\,\% no debe generalizarse.
 % piso de unos 34 s/veh; 990 veh/h con 2715)
 
 \textbf{Límites.} El diagnóstico es posterior al veredicto, y cada
-prueba se decidió después de ver la anterior. Cada modelo tiene tres
+prueba se definió a la vista de la anterior, con una enmienda del
+registro previo escrita antes de correrla. Cada modelo tiene tres
 entrenamientos por nivel, y algunas versiones evaluadas de las pruebas
 que no ayudaron no se estabilizaron. Lo que hace cada control se midió
-con cinco semillas, y el escenario sin giros a la izquierda cambia
-también qué tramo lleva esos giros. Todo vale para llegadas
-regulares y un tiempo de reacción del conductor de 1~s. El segundo
-estudio parte de aquí: toma IPPO con mensajes corregido como modelo base
-y lo evalúa con llegadas aleatorias (Anexo~H).
+con cinco semillas (1001 a 1005), y el escenario sin giros a la
+izquierda cambia también qué tramo lleva esos giros. Todo vale para
+llegadas regulares y un tiempo de reacción del conductor de 1~s.
 % fuente: plan2/diag_corredor/PRERREGISTRO.md (enmiendas escritas despues de cada ronda y registradas antes de
 % correr la siguiente); comportamiento.md ("Datos y metodo": semillas 1001-1005 y una version evaluada por nivel);
 % sumo.md ("Que significa para el diagnostico"); anexo_h_segundo_estudio.tex (modelo base del segundo estudio)

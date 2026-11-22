@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Generado por armar_ovalo.py. No editar a mano. -->
+<nodes>
+    <node id="P_RN" x="646.11" y="655.69" type="traffic_light" tl="semaforo_S1"/>
+    <node id="RNe" x="556.92" y="1675.94" type="priority"/>
+    <node id="P_RS" x="671.52" y="589.15" type="traffic_light" tl="semaforo_S1"/>
+    <node id="RSe" x="750.09" y="-423.41" type="priority"/>
+    <node id="P_B" x="632.54" y="597.81" type="traffic_light" tl="semaforo_S1"/>
+    <node id="Be" x="-72.20" y="-138.94" type="priority"/>
+    <node id="P_J" x="682.83" y="623.40" type="traffic_light" tl="semaforo_S1"/>
+    <node id="Je" x="1635.24" y="256.11" type="priority"/>
+    <node id="NO" x="649.63" y="637.22" type="traffic_light" tl="semaforo_S1"/>
+    <node id="NE" x="667.76" y="633.87" type="traffic_light" tl="semaforo_S1"/>
+    <node id="SO" x="651.85" y="612.90" type="traffic_light" tl="semaforo_S1"/>
+    <node id="SE" x="667.55" y="613.95" type="traffic_light" tl="semaforo_S1"/>
+    <node id="MJ" x="679.95" y="614.94" type="traffic_light" tl="semaforo_S1"/>
+    <node id="ML" x="632.40" y="641.71" type="traffic_light" tl="semaforo_S1"/>
+    <node id="Ls" x="441.32" y="718.45" type="priority"/>
+    <node id="RNs" x="615.11" y="838.29" type="priority"/>
+    <node id="RSs" x="675.76" y="408.69" type="priority"/>
+    <node id="Js" x="869.55" y="541.98" type="priority"/>
+</nodes>

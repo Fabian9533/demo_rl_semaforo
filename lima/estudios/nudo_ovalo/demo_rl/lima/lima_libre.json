@@ -1,0 +1,123 @@
+{
+ "comentario": "Programa del orden libre del Ovalo Vasco (lima/programa_ovalo.py, escribir_libre): las fases que puede mostrar semaforo_S1 cuando el modelo elige el estado que sigue, con las reglas del plan (ovalo/plan_ovalo.py). rl_ippo.py --orden-libre lo instala si esta junto al .sumocfg.",
+ "tls": "semaforo_S1",
+ "estados": [
+  "Reducto de frente, los dos sentidos",
+  "Giros a la izquierda de Reducto",
+  "28 de Julio desde el puente y Balboa"
+ ],
+ "fases": [
+  [
+   "Reducto de frente, los dos sentidos (antes: 28 de Julio desde el puente y Balboa)",
+   "GGGooGGoogGGGGggooGGGggggrrrrrrrGGGrrGGrrgggGGGGooGGGGggg"
+  ],
+  [
+   "Giros a la izquierda de Reducto (antes: Reducto de frente, los dos sentidos)",
+   "GooggGoggoooooGGggoooGGGGrrrrrrrrrrGGrrGGGGGooooggooooGGG"
+  ],
+  [
+   "28 de Julio desde el puente y Balboa (antes: todo en rojo)",
+   "GGGooGGoogGGGGogooGGGooooGGGGGGGrrrrrrrrroooGGGGooGGGGoog"
+  ],
+  [
+   "Reducto de frente, los dos sentidos (antes: Giros a la izquierda de Reducto)",
+   "gooGGgoGGoooooggGGoooGGGGrrrrrrrGGGrrGGrrGGGooooGGooooggg"
+  ],
+  [
+   "Giros a la izquierda de Reducto (antes: 28 de Julio desde el puente y Balboa)",
+   "GGGggGGgggGGGGogggGGGoooorrrrrrrrrrGGrrGGoooGGGGggGGGGoog"
+  ],
+  [
+   "ambar tras Reducto de frente, los dos sentidos (antes: 28 de Julio desde el puente y Balboa)",
+   "GGGooGGoogGGGGggooGGGggggrrrrrrryyyrryyrrgggGGGGooGGGGggg"
+  ],
+  [
+   "ambar tras Giros a la izquierda de Reducto (antes: Reducto de frente, los dos sentidos)",
+   "GooggGoggoooooGGggoooGGGGrrrrrrrrrryyrryyGGGooooggooooGGG"
+  ],
+  [
+   "ambar tras 28 de Julio desde el puente y Balboa (antes: todo en rojo)",
+   "GGGooGGoogGGGGogooGGGooooyyyyyyyrrrrrrrrroooGGGGooGGGGoog"
+  ],
+  [
+   "ambar tras Reducto de frente, los dos sentidos (antes: Giros a la izquierda de Reducto)",
+   "gooGGgoGGoooooggGGoooGGGGrrrrrrryyyrryyrrGGGooooGGooooggg"
+  ],
+  [
+   "ambar tras Giros a la izquierda de Reducto (antes: 28 de Julio desde el puente y Balboa)",
+   "GGGggGGgggGGGGogggGGGoooorrrrrrrrrryyrryyoooGGGGggGGGGoog"
+  ],
+  [
+   "todo en rojo tras Reducto de frente, los dos sentidos",
+   "OooooOooooooooOOoooooOOOOrrrrrrrrrrrrrrrrOOOooooooooooOOO"
+  ],
+  [
+   "todo en rojo tras Giros a la izquierda de Reducto",
+   "oooOOooOOoooooooOOooooooorrrrrrrrrrrrrrrroooooooOOooooooo"
+  ]
+ ],
+ "verde": [
+  [
+   0,
+   2,
+   0
+  ],
+  [
+   1,
+   0,
+   1
+  ],
+  [
+   2,
+   "-",
+   2
+  ],
+  [
+   0,
+   1,
+   3
+  ],
+  [
+   1,
+   2,
+   4
+  ]
+ ],
+ "ambar": [
+  [
+   0,
+   2,
+   5
+  ],
+  [
+   1,
+   0,
+   6
+  ],
+  [
+   2,
+   "-",
+   7
+  ],
+  [
+   0,
+   1,
+   8
+  ],
+  [
+   1,
+   2,
+   9
+  ]
+ ],
+ "rojo": [
+  [
+   0,
+   10
+  ],
+  [
+   1,
+   11
+  ]
+ ]
+}

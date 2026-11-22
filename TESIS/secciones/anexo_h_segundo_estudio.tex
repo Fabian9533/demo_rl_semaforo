@@ -17,74 +17,140 @@
 % tablas_plan3.py. Nombres del glosario: "veredicto" (en el registro, "etiqueta"), "IPPO con mensajes corregido" (V2),
 % "fijo ajustado al segundo" (fijo fino), "llegadas regulares" y "llegadas aleatorias".
 
-Este anexo da el detalle del segundo estudio (paso 3), que la
-Sección~\ref{sec:resultado-central} resume. Responde lo que el primer
-estudio no permitía afirmar (Sección~\ref{sec:diseno-segundo}): que el
-resultado se sostenga con llegadas aleatorias y frente a un plan fijo
-ajustado con más cuidado.
+Este anexo da el detalle del segundo estudio (paso 3), con el que la
+Sección~\ref{sec:resultado-central} responde si el modelo reduce el
+retraso total con llegadas aleatorias y frente a un fijo ajustado al
+segundo. El diseño está en la Sección~\ref{sec:diseno-segundo}.
 
 % fuente: plan3/salidas/veredicto3.md ("Respuesta corta": numero unico -10.8 % [-11.4, -10.2] y -11.1 % [-12.0, -10.4]
 % con llegadas aleatorias; -0.4 % [-1.0, 0.1] y -0.4 % [-0.8, 0.1] con regulares; H5 pasa en 3 de 6: P1, P2 y P6) y
 % tabla "Referencias al lado" (P1, P2 y P6: MEJORA o FUNCIONA frente a todas); veredicto3_celdas.csv (P3 +1.6 y +1.6;
 % P4 -0.5 y 0.0; P5 +0.2 y +0.3)
 
-\textbf{Cómo se lee.} Primero se dice qué es el estudio y qué cambia
-frente al primer estudio (Tabla~\ref{tab:plan3-cambia}). Después va el
-resultado caso por caso, con llegadas aleatorias
-(Tabla~\ref{tab:plan3-aleatorias}) y con regulares
-(Tabla~\ref{tab:plan3-regulares}), el resumen en un número y la
-comparación con las otras referencias. Siguen el modelo que se cita en
-cada caso, las hipótesis registradas, la sensibilidad a la mezcla de
-vehículos y al perfil de demanda, y una lectura de por qué el modelo no
-supera al fijo en tres casos. El anexo cierra con lo que se esperaba y
-las enmiendas y desviaciones. En todas las tablas un cambio negativo es
-menos retraso que la referencia.
+\textbf{Cómo se lee.} Los apartados van en este orden: las reglas del
+registro previo y lo que cambia frente al primer estudio, el actuado
+ajustado de cada caso, el resultado con llegadas aleatorias y con
+regulares, el resumen en un número, las otras referencias, el modelo
+citado, las hipótesis, la sensibilidad, con la mezcla de vehículos de
+Lima, el margen de mejora de cada caso, lo esperado y las desviaciones. Un cambio negativo es menos retraso que la
+referencia. Las semillas de cada etapa están en la
+Tabla~\ref{tab:plan2-semillas}; el ajuste de las referencias, en la
+Sección~\ref{sec:referencias-segundo}; los modelos, en la
+Sección~\ref{sec:aprendices}, y los programas, en la
+Tabla~\ref{tab:programas-segundo}.
 
-\subsection*{Qué es y cuándo se decidió}
+\subsection*{Registro previo}
 
+El segundo estudio es posterior al primero y no cambia ninguno de sus
+resultados: tiene sus propias reglas, publicadas en el repositorio
+antes de entrenar. El registro previo fija los casos, los modelos, las
+referencias, las semillas, la regla de veredicto, las hipótesis y lo
+que se esperaba, y ningún criterio se cambió después de ver
+resultados. Lo completan tres resguardos y dos enmiendas:
 \begin{itemize}
-  \item \textbf{Es posterior al primer estudio.} Se decidió después del
-    veredicto del primer estudio y no cambia ninguno de sus
-    resultados: es un estudio aparte, con sus propias reglas.
-  \item \textbf{Se registró antes de entrenar.} El 5 de noviembre de
-    2026 se publicó en el repositorio un registro previo con los casos,
-    los modelos, las referencias, las semillas, la regla de veredicto,
-    las hipótesis y lo que se esperaba. Ningún criterio se cambió
-    después de ver resultados.
-  \item \textbf{Se evaluó a ciegas.} Los resultados de las tandas de
-    evaluación se guardaron sin abrir hasta el cierre, el 9 de
-    noviembre de 2026. Las referencias ajustadas se congelaron y se
-    publicaron antes de evaluar. El veredicto lo calculó un programa,
-    una sola vez.
-  \item \textbf{Dos enmiendas redujeron el alcance.} Las dos se
-    publicaron antes de evaluar ninguna tanda. Dejaron el estudio
-    centrado en las llegadas aleatorias; con llegadas regulares solo se
-    evalúa IPPO con mensajes corregido frente al fijo ajustado al
-    segundo.
+  \item \textbf{Referencias congeladas.} Las referencias ajustadas se
+    publicaron antes de evaluar.
+  \item \textbf{Evaluación a ciegas.} Los resultados de las tandas se
+    guardaron sin abrir hasta el cierre del estudio.
+  \item \textbf{Un solo cálculo del veredicto.} Lo calculó un programa,
+    una sola vez, al cierre.
+  \item \textbf{Enmienda 1.} El estudio se centra en las llegadas
+    aleatorias; con llegadas regulares se quitan casi todas las
+    variantes.
+  \item \textbf{Enmienda 2.} Con llegadas regulares queda solo IPPO con
+    mensajes corregido frente al fijo ajustado al segundo, con el
+    actuado ajustado, en P1 a P6; se quita la política única por red.
 \end{itemize}
+Las dos enmiendas reducen el alcance y se publicaron antes de evaluar
+ninguna tanda; las hipótesis que retiran se listan junto a la
+Tabla~\ref{tab:plan3-hipotesis}.
 % fuente: plan3/PRERREGISTRO.md §0 y §14; tags plan3-prerregistro-A (05.11.2026), plan3-enmienda-1 (06.11),
 % plan3-enmienda-2 y plan3-parte-B (07.11); cierre fc74335 (09.11.2026 17:56); plan3/cola/trabajos.jsonl (1944 trabajos;
 % 201 cadenas de entrenamiento, 44 160 episodios; 642 + 98 evaluaciones del examen) y cola/estado.json (1002 h-proceso)
+% fuente de las enmiendas: plan3/doc/enmienda_1.md y enmienda_2.md; plan3/doc/desviaciones.md, §4 y §5 (revision
+% final del 22.11.2026: las enmiendas pasan aqui, sin fechas, desde "Enmiendas y desviaciones")
 
 \subsection*{Qué cambia frente al primer estudio}
 
-La Tabla~\ref{tab:plan3-cambia}, en el Capítulo~\ref{cap:metodologia},
-compara los dos estudios. La red, la demanda de cada caso, la recompensa
-y el algoritmo son los del primero.
-
-IPPO con mensajes corregido y el modelo completo se definen en la
-Sección~\ref{sec:modelos} y se describen en la
-Sección~\ref{sec:aprendices}; el modelo citado, que representa a cada
-caso, en la Sección~\ref{sec:diseno-segundo} y en la
-Tabla~\ref{tab:plan3-promocion}.
+La Tabla~\ref{tab:plan3-cambia} compara los dos estudios. La red, la
+demanda media de cada calle, la recompensa y el algoritmo son los del
+primero. Con llegadas aleatorias cambia el instante en que llega cada
+vehículo; el fijo y el actuado se vuelven a ajustar con esas llegadas,
+y el modelo se entrena con ellas, siempre con semillas distintas de las
+de evaluación. El modelo citado de cada caso se elige con la regla de
+la Sección~\ref{sec:diseno-segundo} (Tabla~\ref{tab:plan3-promocion}).
 % fuente: plan3/PRERREGISTRO.md §0 (modelo base y modelo citado) y §12 (regla de promocion; el modelo completo lleva
 % la observacion nueva de 75 m, las tres limpiezas, 400 episodios con piso de la tasa y el reloj de 2 s);
 % plan3/generar_trabajos3.py, OP_COMPLETO; anexo_g_diagnostico.tex, "Las dos correcciones"
 
-Con llegadas aleatorias, la demanda media de cada calle es la del
-primer estudio; cambia el instante en que llega cada vehículo. El fijo y
-el actuado se ajustan otra vez con esas llegadas, y el modelo se entrena
-con ellas, siempre con semillas distintas de las de evaluación.
+\subsection*{El actuado ajustado de cada caso}
+
+El actuado ajustado parte del actuado del primer estudio, con los
+valores por defecto de SUMO, y prueba un parámetro a la vez, en este
+orden y con las semillas 2001 a 2003: el hueco máximo entre vehículos
+que sostiene el verde (1, 1.5, 2, 3 y 4~s), la distancia del detector,
+en segundos de viaje a la velocidad máxima (1, 2, 3 y 4~s), el umbral
+de atasco (ninguno, 10 y 30~s) y el verde máximo de la avenida (30, 45
+y 60~s) y de la transversal (20, 30 y 60~s). Cada paso parte del mejor
+de los anteriores. Después prueba la variante de SUMO que decide por el
+retraso de los vehículos, con un alcance del detector de 50, 100 o
+200~m y un retraso mínimo de 1 o 3~s, y las dos variantes coordinadas
+con el ciclo y los desfases del fijo ajustado al segundo. Al final, las
+tres mejores se vuelven a simular con las semillas 2001 a 2010 (con
+llegadas aleatorias, las diez mejores con las 2001 a 2030), y gana la
+de menor retraso total medio. La Tabla~\ref{tab:plan3-actuado} da la
+elegida en cada caso.
+% fuente: docstring de plan3/actuado.py (pasos 1 a 6 y final: rejillas 1/1.5/2/3*/4, 1/2*/3/4, -1*/10/30, 30/45/60*
+% y 20/30/60*; delay_based con detectorRange 50/100/200 x minTimeLoss 1*/3; coordinadas (a) y (b) "fin fijo"; final
+% con 2001-2010, o las 10 mejores con 2001-2030 con llegadas aleatorias; * = defecto de SUMO, el punto de partida);
+% semillas_pasos y semillas de cada plan3/barridos/<esc>/actuado_aj.json (22 variantes probadas en cada caso)
+
+% fuente: plan3/barridos/<esc>/actuado_aj.json, campo "variante" (tipo, max-gap, detector-gap, jam-threshold,
+% maxdur_av, maxdur_tr, coordinado y fin_fijo; delay_based: detectorRange y minTimeLoss), con <esc> = poi_<caso> para
+% llegadas aleatorias y <caso> para regulares (P6 con la entrada corregida: malla3_alta_e); el programa congelado es
+% plan3/<esc>_actuado_aj.add.xml (sha256 en plan3/referencias_congeladas.json). Los de la sensibilidad (mix_corredor,
+% mix_red, per_corredor y per_red) estan en los mismos archivos y no se tabulan
+\begin{table}[H]
+\setstretch{1}
+\centering
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{>{\raggedright\arraybackslash}p{2.6cm}lcccc>{\raggedright\arraybackslash}p{2.0cm}}
+\toprule
+Caso & Variante & \makecell{Hueco\\máximo (s)} & \makecell{Distancia del\\detector (s)} & \makecell{Umbral de\\atasco (s)} & \makecell{Verde máximo,\\avenida /\\transversal (s)} & Coordinado \\
+\midrule
+\multicolumn{7}{l}{\textit{Llegadas aleatorias}} \\
+P1 & por retraso & \multicolumn{3}{c}{alcance 200~m, retraso 1~s} & 60 / 20 & no \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
+P2 & actuado & 1.5 & 2 & ninguno & 60 / 60 & sí, con fin fijo \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
+P3 & actuado & 1.5 & 2 & ninguno & 60 / 60 & sí, con fin fijo \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
+P4 & actuado & 1.5 & 2 & ninguno & 60 / 60 & sí, con fin fijo \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
+P5 & actuado & 1.5 & 2 & ninguno & 60 / 60 & sí \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
+P6 & actuado & 1.5 & 2 & 30 & 60 / 60 & no \\
+\midrule
+\multicolumn{7}{l}{\textit{Llegadas regulares}} \\
+P1 & actuado & 3 & 3 & ninguno & 60 / 60 & sí \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
+P2 & actuado & 3 & 4 & 30 & 60 / 60 & sí, con fin fijo \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
+P3 & actuado & 2 & 2 & ninguno & 60 / 60 & sí, con fin fijo \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
+P4 & actuado & 1 & 2 & ninguno & 60 / 60 & sí, con fin fijo \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
+P5 & actuado & 1 & 2 & ninguno & 60 / 60 & sí \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
+P6 & actuado & 1 & 1 & 10 & 60 / 60 & sí, con fin fijo \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
+P6 con la entrada corregida & actuado & 1.5 & 2 & 10 & 30 / 60 & sí, con fin fijo \\
+\bottomrule
+\end{tabular}
+\caption[Segundo estudio: actuado ajustado de cada caso]{Actuado ajustado de cada caso: la variante elegida y sus parámetros. Actuado: el actuado de SUMO; por retraso: su variante que decide por el retraso de los vehículos que se acercan, con el alcance del detector y el retraso mínimo que cuenta. Coordinado: con el ciclo y los desfases del fijo ajustado al segundo (Tabla~\ref{tab:fijo-segundo}), y el verde de la avenida sin terminar antes que en el plan fijo; con fin fijo, además, la avenida termina siempre donde el plan fijo y la transversal nunca después. El verde mínimo es de 10~s.}
+\label{tab:plan3-actuado}
+\end{table}
 
 \subsection*{Resultado con llegadas aleatorias}
 
@@ -103,25 +169,15 @@ y P5.
 \label{tab:plan3-aleatorias}
 \end{table}
 
-La lectura de cada caso sigue las reglas del registro:
-\begin{itemize}
-  \item \textbf{P1 y P6: funciona.} El modelo completo baja el retraso
-    entre un 16 y un 27\,\%, en las dos tandas y en sus tres
-    entrenamientos. IPPO con mensajes corregido, sin los cambios del
-    modelo completo, recibe MEJORA en P1 ($-6.3$ y $-8.7$\,\%) y
-    FUNCIONA en P6 ($-18.4$ y $-20.2$\,\%).
-  \item \textbf{P2: funciona, sin estabilizar.} El cambio es de
-    $-19.8$ y $-20.2$\,\%; el entrenamiento de la versión evaluada no
-    se estabilizó. IPPO con mensajes corregido sí se estabilizó y
-    recibe FUNCIONA ($-5.7$ y $-5.8$\,\%).
-  \item \textbf{P3: falla por poco.} El modelo reproduce el ciclo
-    mínimo: da su mismo retraso. No supera a la regla simple, y el fijo
-    de verdes de 5 en 5 lo supera.
-  \item \textbf{P4 y P5: empata.} No supera a la regla simple, y el
-    fijo de verdes de 5 en 5 lo iguala o lo supera. En P4, IPPO con
-    mensajes corregido recibe FALLA ($+1.2$ y $+1.5$\,\%); el modelo
-    completo lo deja en empate.
-\end{itemize}
+La lectura de cada caso está en la Sección~\ref{sec:resultado-casos}.
+El registro pide además dos lecturas: en P3 el modelo reproduce el
+ciclo mínimo, con su mismo retraso, y en P3, P4 y P5 no supera a la
+regla simple, mientras que el fijo de verdes de 5 en 5 lo iguala o lo
+supera (Tabla~\ref{tab:plan3-referencias}). Sin los cambios del modelo
+completo, IPPO con mensajes corregido recibe MEJORA en P1 ($-6.3$ y
+$-8.7$\,\%), FUNCIONA en P2 ($-5.7$ y $-5.8$\,\%), con un entrenamiento
+que sí se estabilizó, y en P6 ($-18.4$ y $-20.2$\,\%), y FALLA en P4
+($+1.2$ y $+1.5$\,\%), donde el modelo completo empata.
 % fuente: plan3/salidas/veredicto3_celdas.csv (filas con llegadas aleatorias) y veredicto3.md, "Lecturas obligadas";
 % IPPO con mensajes corregido frente al fijo ajustado al segundo: veredicto3_comparaciones.csv, clave v2poi_version,
 % referencia "fijo fino" (P1 -6.32 y -8.70 MEJORA; P2 -5.65 y -5.78 FUNCIONA; P4 +1.24 y +1.48 FALLA; P6 -18.37 y
@@ -130,17 +186,17 @@ La lectura de cada caso sigue las reglas del registro:
 \subsection*{Resultado con llegadas regulares}
 
 Con llegadas regulares solo se evalúa IPPO con mensajes corregido
-(Tabla~\ref{tab:plan3-regulares}). Mejora un 2.8\,\% en P1, tiene un
-1.7\,\% más de retraso en P3 y empata en los demás casos. El fijo
-ajustado al segundo usa verdes que el modelo, al decidir cada 5~s, no
-puede dar. En P6 la mitad del retraso total es espera para entrar a la
-red, igual con todos los controles, y eso diluye el cambio; por eso se
-evalúa también P6 con la entrada corregida, donde el modelo tiene un
-10\,\% más de retraso. Frente al actuado ajustado, el modelo mejora en
-P2, empata en P4 y P6 y tiene más retraso en P1, P3 y P5. En P1, la
-versión evaluada del diagnóstico del corredor (Anexo~G) salía de otro
-entrenamiento; frente al fijo ajustado al segundo da $-2.7$\,\% en las
-dos tandas, también MEJORA.
+(Tabla~\ref{tab:plan3-regulares}; lectura en la
+Sección~\ref{sec:resultado-casos}). El fijo ajustado al segundo usa
+verdes que el modelo, al decidir cada 5~s, no puede dar. Frente al
+actuado ajustado, el modelo mejora en P2, empata en P4 y P6 y tiene más
+retraso en P1, P3 y P5. En P6 la mitad del retraso total es espera para
+entrar a la red, igual con todos los controles, y diluye el cambio; por
+eso P6 se evalúa también con la entrada corregida, en la que el modelo
+tiene un 10\,\% más de retraso. En P1, la versión evaluada de IPPO con
+mensajes corregido en el diagnóstico del corredor (Anexo~G), que sale de
+otro entrenamiento, da $-2.7$\,\% en las dos tandas frente al fijo
+ajustado al segundo, también MEJORA.
 
 \begin{table}[H]
 \setstretch{1}
@@ -159,8 +215,8 @@ dos tandas, también MEJORA.
 
 \subsection*{Resumen en un número}
 
-El resumen en un número se calcula como en el primer estudio
-(Sección~\ref{sec:resultado-principal}), sobre los seis casos:
+Se calcula como en el primer estudio
+(Ecuación~\ref{eq:media-geometrica}), sobre los seis casos:
 \begin{itemize}
   \item \textbf{Llegadas aleatorias, frente al fijo ajustado al
     segundo:} $-10.8$\,\% [$-11.4$, $-10.2$] en la tanda 1 y
@@ -182,9 +238,9 @@ El resumen en un número se calcula como en el primer estudio
 
 Además del fijo ajustado al segundo, cada caso tiene otras nueve
 referencias. La Tabla~\ref{tab:plan3-referencias} da, para cada una, los
-casos en que el modelo citado recibe cada veredicto. En P1, P2 y P6 el
-modelo tiene menos retraso que todas. En P3, P4 y P5 no supera al
-actuado ajustado, a la regla simple ni al ciclo mínimo.
+casos en que el modelo citado recibe cada veredicto: en P1, P2 y P6
+tiene menos retraso que todas, y en P3, P4 y P5 no supera al actuado
+ajustado, a la regla simple ni al ciclo mínimo.
 
 \begin{table}[H]
 \setstretch{1}
@@ -197,10 +253,8 @@ actuado ajustado, a la regla simple ni al ciclo mínimo.
 \end{table}
 
 La Tabla~\ref{tab:plan3-referencias-cifras} da las cifras frente a dos
-de ellas. Frente al actuado ajustado, el modelo baja el retraso un
-3\,\% en P1, un 19\,\% en P2 y entre un 11 y un 13\,\% en P6. Frente al
-fijo ajustado desde 10~s, la reducción es de un 18\,\% en P1, de un
-27\,\% en P2 y de entre un 32 y un 39\,\% en P6.
+de ellas, el actuado ajustado y el fijo ajustado desde 10~s, en cada
+caso y tanda.
 
 \begin{table}[H]
 \setstretch{1}
@@ -218,9 +272,9 @@ fijo ajustado desde 10~s, la reducción es de un 18\,\% en P1, de un
 
 El modelo citado se elige con una validación aparte, de 16 semillas que
 no se usan para nada más (Tabla~\ref{tab:plan3-promocion}). El modelo
-completo supera a IPPO con mensajes corregido por más de un 1\,\% en P1,
-P2, P4 y P6, y es el que se cita en esos casos. En P3 y P5 ninguna
-variante lo supera por ese margen.
+completo supera a IPPO con mensajes corregido por al menos un 1\,\% en
+P1, P2, P4 y P6, y es el citado en esos casos; en P3 y P5 ninguna
+variante llega a ese margen.
 
 \begin{table}[H]
 \setstretch{1}
@@ -250,13 +304,21 @@ entrenamientos.
 Hipótesis & Resultado \\
 \midrule
 Con llegadas aleatorias, IPPO con mensajes corregido mejora al fijo ajustado al segundo en al menos 3 de 6 casos & Pasa: 3 de 6 (P1, P2 y P6) \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 La ventaja frente al fijo es mayor con llegadas aleatorias que con regulares & Pasa en 2 de 6 casos (P2 y P6) \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 Los mensajes mejoran al modelo, con llegadas aleatorias & Pasa en 1 de 6 casos: P6 ($-5.2$ y $-5.3$\,\%). En P3 dan lo mismo \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 Ver los vehículos cercanos mejora a IPPO con mensajes corregido & Pasa en 3 de 6 casos: P1, P2 y P6 (entre $-5.9$ y $-9.7$\,\%) \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 Entrenar 400 episodios mejora la versión evaluada & Pasa en 1 de 6 casos: P6 ($-5.3$ y $-5.4$\,\%) \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 Decidir cada 2~s, en vez de cada 5~s, mejora al modelo & No pasa en ninguno de los 3 casos probados (P1, P2 y P6) \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 El modelo completo mejora a IPPO con mensajes corregido & Pasa en 4 de 6 casos: P1, P2, P4 y P6 (entre $-1.5$ y $-13.0$\,\%) \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 Con llegadas regulares, IPPO con mensajes corregido mejora al fijo ajustado al segundo en P6 & No pasa: EMPATA \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 Con llegadas aleatorias, algún control que reacciona mejora al fijo ajustado al segundo (descriptiva) & En 3 de 6 casos: P1, P2 y P6 \\
 \bottomrule
 \end{tabular}
@@ -268,8 +330,8 @@ Con llegadas aleatorias, algún control que reacciona mejora al fijo ajustado al
 % y -5.90; H9 P6 -5.30 y -5.41; H14 P1 +0.02 y +0.39, P2 +0.77 y +1.48, P6 +4.73 y +4.35; H15 P1 -8.80 y -9.94, P2
 % -13.00 y -12.97, P4 -1.76 y -1.48, P6 -8.94 y -8.34)
 
-Las dos enmiendas, publicadas antes de evaluar, retiraron del registro
-las hipótesis que solo usaban llegadas regulares: la comparación con el
+Las dos enmiendas retiran del registro las hipótesis que solo usaban
+llegadas regulares: la comparación con el
 entrenamiento del primer estudio, los mensajes, los vehículos cercanos,
 los ajustes del entrenamiento, los 400 episodios, la decisión cada 2~s
 y el modelo completo con esas llegadas, y una sola política para todos
@@ -278,17 +340,61 @@ los niveles de demanda de una red.
 
 \subsection*{Sensibilidad: mezcla de vehículos y perfil de demanda}
 
-El corredor y la red con demanda nominal se probaron además con dos
-cambios en el tráfico: una mezcla de vehículos como la de Lima (autos,
-motos, combis, microbuses y buses), con y sin un arranque más lento, y
-una demanda que sube y baja cada 10 minutos
-(Tabla~\ref{tab:plan3-sensibilidad}). En el corredor el modelo conserva
-la mejora frente al fijo; en la red sigue con menos de un 2\,\% más de
-retraso, como con el tráfico de un solo tipo de vehículo. Con la mezcla,
-sin embargo, en el corredor tiene un 7\,\% más de retraso que el actuado
-ajustado y no supera a la regla reactiva. Con el perfil de demanda
-empata con el actuado ajustado y supera, por un 12\,\%, a un plan fijo
-que cambia cada 10 minutos.
+El corredor y la red con demanda nominal se prueban además con dos
+cambios en el tráfico. El primero es una mezcla de vehículos como la de
+Lima (Tabla~\ref{tab:plan3-mezcla}): SUMO sortea el tipo de cada
+vehículo con esas proporciones, y las tasas de llegada se multiplican
+por 0.8378, el inverso de los 1.1936 vehículos equivalentes que vale en
+promedio un vehículo de la mezcla, de modo que la demanda del caso se
+conserva en vehículos equivalentes. La mezcla se evalúa también con un arranque más lento:
+cada vehículo tarda 0.5~s más en arrancar después de detenerse, solo al
+evaluar. El segundo cambio es una demanda que sube y baja: la del caso
+multiplicada por 2/3, 1, 4/3, 4/3, 1 y 2/3 en bloques de 10~minutos, con
+el mismo total en cada media hora. Los dos los escribe el programa de
+los escenarios del estudio (Tabla~\ref{tab:programas-segundo}).
+% fuente: plan3/demanda_estocastica.py (JICA_2013: auto 541 088, moto 29 919 y publico 114 537 veh/dia, la suma por
+% filas de la Tabla 2.16 sin camiones; ATU_2021: combi 6 420, micro 7 533 y bus 8 357; EQUIVALENTE; TIPOS y COMUNES;
+% composicion() = 0.789283, 0.043643, 0.048078, 0.056413 y 0.062584; equivalencia_media() = 1.193600; PERFIL =
+% (1.0, 1.5, 2.0, 2.0, 1.5, 1.0) / 1.5 en bloques de 600 s), igual en plan3/mix_corredor.rou.xml ("tasas x 0.837802 =
+% 1/1.193600") y plan3/mixa_corredor.rou.xml (startupDelay 0.5 en los cinco tipos); escenarios_plan3.RECETAS (mix_,
+% mixa_ con arranque 0.5 "solo para evaluar", y per_, en corredor y red). Fuentes revisadas en sus PDF el 22.11.2026:
+% JICA 2013, Tabla 2.16, p. 2-21 (la fila Total publicada, 27 574 / 518 553 / 107 011, omite el puente Huachipa); Lima
+% Como Vamos, reporte 2021, p. 16 (flota regular por antiguedad, 22 310 en total); UNFV, Tabla N.o 2, p. 28. Moto y
+% bus: valores de su clase en SUMO 1.25, medidos con TraCI segun el comentario del programa; combi y micro: supuestos
+% del programa. Casos de Lima: nudo_ovalo_estudio2/demo_rl/lima/demanda.py ("Las tasas son vehiculos reales por hora:
+% no se convierten a vehiculos equivalentes"; CONDUCTA vacia) y corredor_estudio2/demo_rl/lima/corredor/corredor.py
+% (TIPOS, COMUNES y composicion(), tasas sin escalar)
+\begin{table}[H]
+\setstretch{1}
+\centering
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lrrrrr}
+\toprule
+\makecell[l]{Tipo\\(clase de SUMO)} & \makecell[r]{Proporción\\(\%)} & \makecell[r]{Largo\\(m)} & \makecell[r]{Aceleración\\(m/s$^2$)} & \makecell[r]{Deceleración\\(m/s$^2$)} & \makecell[r]{Vehículos\\equivalentes} \\
+\midrule
+Auto (passenger) & 78.93 & 5 & 2.6 & 4.5 & 1.00 \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
+Moto (motorcycle) & 4.36 & 2.2 & 6 & 10 & 1.00 \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
+Combi (bus) & 4.81 & 6 & 2 & 4.5 & 1.25 \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
+Microbús (bus) & 5.64 & 8 & 1.5 & 4 & 2.00 \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
+Bus (bus) & 6.26 & 12 & 1.2 & 4 & 3.00 \\
+\bottomrule
+\end{tabular}
+\caption[Segundo estudio: mezcla de vehículos de Lima]{Mezcla de vehículos de Lima. Proporción: el tránsito diario por tipo en la línea cortina del río Rímac, sin camiones~\citep{JICA2013_Encuesta}, con el transporte público repartido entre combis, microbuses y buses como la flota regular de la ATU en 2021~\citep{LimaComoVamos2022_Reporte2021}. Largo, aceleración y deceleración: los del auto de los demás casos; para la moto y el bus, los de su clase en SUMO 1.25; para la combi y el microbús, supuestos. Vehículos equivalentes: factores del INVERMET para el auto, la camioneta rural (combi), el microbús y el ómnibus (bus)~\citep{UNFV2018_ImpactoVial}; la moto no tiene factor y se supone 1.00. Todos los tipos tienen $\sigma = 0.5$, 2.5~m de separación al detenerse y una velocidad máxima de 13.89~m/s (50~km/h); los demás parámetros son los de su clase en SUMO 1.25. Los casos de Lima usan la misma mezcla, con vehículos reales por hora, sin la conversión a vehículos equivalentes.}
+\label{tab:plan3-mezcla}
+\end{table}
+
+La Tabla~\ref{tab:plan3-sensibilidad} da el resultado; su lectura está
+en la Sección~\ref{sec:resultado-casos}. En la red, el modelo sigue con
+menos de un 2\,\% más de retraso que el fijo, como con el tráfico de un
+solo tipo de vehículo. Frente a las otras referencias, en el corredor
+con la mezcla tiene un 7\,\% más de retraso que el actuado ajustado y no
+supera a la regla reactiva; con el perfil empata con el actuado ajustado
+y supera, por un 12\,\%, a un plan fijo que cambia cada 10 minutos.
 
 \begin{table}[H]
 \setstretch{1}
@@ -308,8 +414,8 @@ que cambia cada 10 minutos.
 
 \subsection*{Por qué el modelo no supera al fijo en la red con rotonda ni en la malla con demanda nominal}
 
-Esta lectura se hizo después del cierre, con los datos del estudio. No
-cambia ningún veredicto.
+Esta lectura es posterior al cierre, con los datos del estudio, y no
+cambia ningún veredicto; la Sección~\ref{sec:donde-gana} la resume.
 
 \textbf{En esos tres casos ningún control supera al fijo ajustado al
 segundo.} La Tabla~\ref{tab:plan3-margen} compara, en cada caso, la
@@ -330,17 +436,15 @@ mejora más. En P3, P4 y P5 la mejor referencia solo iguala al fijo.
 % veredicto3_celdas.csv (cambio_T1)
 
 \textbf{En la red, la diferencia es un segundo de desfase.} El fijo
-ajustado al segundo de P3 da a cada fase los 10~s del verde mínimo,
-igual que el ciclo mínimo. Solo se diferencia en que el semáforo del
-medio va 1~s después que los otros dos. Ese segundo explica el
-1.6\,\% que separa al modelo del fijo en la evaluación. En el ajuste,
-el retraso baja de 22.31 a 22.01~s/veh al correrlo 1~s; con 2~s vuelve
-a 22.31, y con 1~s antes sube a 22.47. El modelo cambia de
-fase apenas se cumple el verde mínimo, como el ciclo mínimo, y los tres
-semáforos cambian a la vez. Decide cada 5~s, o cada 2~s en el modelo
-completo, así que no puede producir un desfase de 1~s. En P4 pasa lo
-mismo: el fijo ajustado al segundo es el ciclo mínimo con dos semáforos
-corridos 1~s.
+ajustado al segundo de P3 es el ciclo mínimo con el semáforo del medio
+1~s después que los otros dos, y ese segundo explica el 1.6\,\% que
+separa al modelo del fijo en la evaluación. En el ajuste, el retraso
+baja de 22.31 a 22.01~s/veh al correr ese semáforo 1~s; con 2~s vuelve
+a 22.31, y con 1~s antes sube a 22.47. El modelo cambia de fase apenas
+se cumple el verde mínimo, en los tres semáforos a la vez, y decide
+cada 5~s (cada 2~s el modelo completo): no puede producir un desfase de
+1~s. En P4, el fijo ajustado al segundo es el ciclo mínimo con dos
+semáforos corridos 1~s.
 
 \textbf{En la malla con demanda nominal, el retraso casi no depende del
 control.} El ciclo mínimo, el fijo ajustado desde 10~s y la regla
@@ -354,8 +458,8 @@ franja lo iguala, y el modelo queda a un 0.2 y un 0.3\,\%.
 
 \subsection*{Lo esperado y lo obtenido}
 
-El registro incluía lo que se esperaba, para contrastar el resultado
-(Tabla~\ref{tab:plan3-esperado}). Dos resultados no estaban previstos:
+El registro incluye lo que se esperaba, para contrastarlo con el
+resultado (Tabla~\ref{tab:plan3-esperado}). Dos resultados no estaban previstos:
 decidir cada 2~s no ayuda por sí solo, y el modelo completo, que no
 tenía predicción, es el que más mejora.
 
@@ -369,11 +473,17 @@ tenía predicción, es el que más mejora.
 Qué se esperaba & Qué se obtuvo \\
 \midrule
 Llegadas regulares: empate en P6 frente al fijo ajustado al segundo & EMPATA \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 Llegadas regulares: un resumen en un número más cerca de cero que frente al fijo ajustado desde 10~s & $-0.4$\,\% en las dos tandas \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 Llegadas aleatorias: P2 y P6, candidatos a FUNCIONA & FUNCIONA en P2 y P6 (en P2, sin estabilizar) \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 Llegadas aleatorias: en P1, MEJORA o menos, porque el actuado también mejora al fijo & IPPO con mensajes corregido, MEJORA; el modelo completo, FUNCIONA \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 Decidir cada 2~s ayudaría con llegadas aleatorias & No pasa en ninguno de los 3 casos \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 Entrenar 400 episodios mejoraría entre un 1 y un 3\,\% en el corredor & En el corredor no pasa; en P6 mejora un 5\,\% \\
+\specialrule{0.25pt}{1.5pt}{1.5pt}
 Modelo completo: sin predicción, con riesgo de romper la coordinación & Mejora a IPPO con mensajes corregido en 4 de 6 casos \\
 \bottomrule
 \end{tabular}
@@ -382,31 +492,31 @@ Modelo completo: sin predicción, con riesgo de romper la coordinación & Mejora
 \end{table}
 % fuente: plan3/PRERREGISTRO.md §15 (prediccion) y plan3/salidas/veredicto3.md (veredictos, hipotesis H9, H14 y H15)
 
-\subsection*{Enmiendas y desviaciones}
+\subsection*{Desviaciones del registro}
 
 \begin{itemize}
-  \item \textbf{Enmienda 1} (6 de noviembre): el estudio se centra en
-    las llegadas aleatorias; con llegadas regulares se quitan casi
-    todas las variantes.
-  \item \textbf{Enmienda 2} (7 de noviembre): con llegadas regulares
-    queda solo IPPO con mensajes corregido frente al fijo ajustado al
-    segundo, con el actuado ajustado, en P1 a P6. Se quita la política
-    única por red.
-  \item \textbf{Semillas de evaluación en una revisión.} El 5 de
-    noviembre, una revisión del código simuló por error tres semillas
-    de evaluación con llegadas regulares, con controles del primer
-    estudio. Ningún modelo del estudio existía todavía. Los archivos se
-    borraron sin abrir y desde entonces el código rechaza esas semillas
-    fuera de la evaluación a ciegas.
-  \item \textbf{Código de las referencias.} Después del registro se
-    corrigieron errores en los programas que ajustan las referencias,
-    antes de ajustar ninguna. La versión que corre quedó anotada al
-    congelarlas.
+  \item \textbf{Semillas de evaluación fuera de la evaluación a
+    ciegas.} Una revisión del código simuló por error tres semillas de
+    evaluación con llegadas regulares, con controles del primer estudio
+    y antes de que existiera ningún modelo del estudio. Esos archivos se
+    borraron sin abrir, y el código rechaza esas semillas fuera de la
+    evaluación a ciegas.
+  \item \textbf{Código de las referencias.} Los programas que ajustan
+    las referencias tienen correcciones posteriores al registro y
+    anteriores a todo ajuste; la versión usada quedó anotada al
+    congelar las referencias.
   \item \textbf{Entrenamientos sin estabilizar.} En P2 con llegadas
     aleatorias, en P5 con regulares y en el corredor con perfil de
     demanda, el entrenamiento de la versión evaluada no se estabilizó;
     su veredicto se calcula igual y lleva esa marca. Como en el primer
-    estudio, no se agregaron episodios.
+    estudio, no se agregaron episodios. Con llegadas aleatorias se
+    estabilizan 41 de los 48 entrenamientos de IPPO con mensajes
+    corregido y del modelo completo (cinco y tres por caso): 25 de 30 y
+    16 de 18.
+    % fuente: plan3/salidas/veredicto3_bases.csv, filas con llegadas aleatorias de las familias v2poi (IPPO con
+    % mensajes corregido, 5 bases x 6 casos) y p3completopoi (modelo completo, 3 x 6), columna convergio: 41 "si" de 48
+    % (25 de 30 y 16 de 18); sin estabilizar: P2 v2poi 2042, P2 completo 42 y 4042 (la version evaluada), P5 v2poi 42 y
+    % 14042, P6 v2poi 2042 y 16042
   \item \textbf{Vehículos sin entrar.} En P2 y P6, con el ciclo mínimo,
     quedan vehículos sin entrar a la red al cerrar la simulación: su
     retraso está subestimado y la ventaja del modelo frente a él es
